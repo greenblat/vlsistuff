@@ -1,0 +1,10 @@
+#! /bin/csh -f
+
+
+jtagseq2swav_v2.py jtag.seq swav.header
+swav2stil.py jtag.swav
+/bin/mv stam.stil sequence.stil
+
+
+
+

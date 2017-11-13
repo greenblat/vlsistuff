@@ -1,0 +1,19 @@
+NAME,ADDRESS,BITS,DEFAULT,FIELD NAME,DESCRIPTION,TYPE
+enables,0x0,[15:0],0,enables,,rw
+,,[31:16],0,RSRVD,,RO
+start0,0x4,[10:0],0,start0,,rw
+,,[31:11],0,RSRVD,,RO
+start1,0x8,[10:0],0,start1,,rw
+,,[31:11],0,RSRVD,,RO
+start2,0xc,[10:0],0,start2,,rw
+,,[31:11],0,RSRVD,,RO
+jump0,0x10,[10:0],0,jump0,,rw
+,,[31:11],0,RSRVD,,RO
+jump1,0x14,[10:0],0,jump1,,rw
+,,[31:11],0,RSRVD,,RO
+jump2,0x18,[10:0],0,jump2,,rw
+,,[31:11],0,RSRVD,,RO
+gain0,0x1c,[15:0],0,gain0,,rw
+,,[31:16],0,RSRVD,,RO
+gain1,0x24,[15:0],0,gain1,,rw
+,,[31:16],0,RSRVD,,RO

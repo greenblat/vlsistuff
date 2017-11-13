@@ -1,0 +1,19 @@
+NAME,ADDRESS,BITS,DEFAULT,FIELD NAME,DESCRIPTION,TYPE
+enables,0x0,[31:0],0,enables,,rw
+control_stream1,0x8,[31:0],0,control_stream1,,rw
+control_stream2,0x10,[31:0],0,control_stream2,,rw
+input_select,0x18,[31:0],0,input_select,,rw
+config0,0x20,[15:0],0x234,config0,,rw
+,,[31:16],0,RSRVD,,RO
+config1,0x28,[23:0],0xfff,config1,,rw
+,,[31:24],0,RSRVD,,RO
+config2,0x30,[7:0],0x55,config2,,rw
+,,[31:8],0,RSRVD,,RO
+port0,0x38,[2:0],0x4,num_octaves,,rw
+,,[8:3],0x10,pattern_scale,,rw
+,,[9],0x1,lens_invariant,,rw
+,,[31:10],0,RSRVD,,RO
+port1,0x40,[2:0],0x4,num_octaves,,rw
+,,[8:3],0x10,pattern_scale,,rw
+,,[9],0x1,lens_invariant,,rw
+,,[31:10],0,RSRVD,,RO

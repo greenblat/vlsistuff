@@ -1,0 +1,32 @@
+module none (
+     input    clk
+    ,input [5:0] paddr
+    ,input    psel
+    ,input [1:0] psize
+    ,input [31:0] pwdata
+    ,input    pwrite
+    ,input    rst_n
+    ,output reg [15:0] enables
+    ,output reg [15:0] gain0
+    ,output reg [15:0] gain1
+    ,output reg [10:0] jump0
+    ,output reg [10:0] jump1
+    ,output reg [10:0] jump2
+    ,output reg [31:0] prdata
+    ,output reg [10:0] start0
+    ,output reg [10:0] start1
+    ,output reg [10:0] start2
+);
+initial begin
+    enables = 0;
+    gain0 = 0;
+    gain1 = 0;
+    jump0 = 0;
+    jump1 = 0;
+    jump2 = 0;
+    prdata = 0;
+    start0 = 0;
+    start1 = 0;
+    start2 = 0;
+end
+endmodule

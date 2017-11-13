@@ -1,0 +1,8 @@
+info: fnames: ['rtl/generator.v']
+info: addmodule generator (['generator'])
+info: declared new bus, deduced from connections generator: wire [15:0] gain0;
+info: declared new bus, deduced from connections generator: wire [15:0] gain1;
+info: do line: dump_instance
+info: info: exiting.py has 0 errors and 0 warnings logged
+
+                                 time=Mon Nov 21 12:56:52 2016

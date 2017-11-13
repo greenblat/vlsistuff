@@ -1,0 +1,6 @@
+info: fnames: ['rtl/dbguart.v']
+info: addmodule dbguart (['dbguart'])
+info: do line: dump_instance
+info: info: exiting.py has 0 errors and 0 warnings logged
+
+                                 time=Thu Nov 24 10:14:55 2016

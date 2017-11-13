@@ -1,0 +1,30 @@
+
+wait 20
+apb 4  100
+apb 8  500
+apb 12 1000
+apb 16 10
+apb 20 4
+apb 24 17
+apb 28 0x100
+apb 32 0x200
+apb 36 0x300
+apb 0 1
+wait 100
+wait 100
+apb 36 0x350
+wait 300
+apb 8  300
+wait 300
+force tb.fir.bug 5
+wait 10
+force tb.fir.bug 0
+wait 100
+
+
+
+finish
+
+
+
+

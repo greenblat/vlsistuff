@@ -1,0 +1,21 @@
+@311: info: goods=0 bads=0 pattern_width=5 activeline=100 
+@711: info: goods=16 bads=0 pattern_width=5 activeline=200 
+@955: 1 vs 0: WRONG: fail0 jtdo exp=L act=1 vec=239 line=261 cycle=240 time=9540
+
+@959: 2 vs 0: WRONG: fail0 jtdo exp=L act=1 vec=240 line=262 cycle=241 time=9580
+
+@1019: 3 vs 0: WRONG: fail1 jtdo exp=H act=0 vec=255 line=277 cycle=256 time=10180
+
+@1023: 4 vs 0: WRONG: fail1 jtdo exp=H act=0 vec=256 line=278 cycle=257 time=10220
+
+@1111: info: goods=44 bads=8 pattern_width=5 activeline=300 
+@1511: info: goods=44 bads=8 pattern_width=5 activeline=400 
+@1911: info: goods=44 bads=8 pattern_width=5 activeline=500 
+@2311: info: goods=44 bads=8 pattern_width=5 activeline=600 
+@2711: info: goods=44 bads=8 pattern_width=5 activeline=700 
+@3111: info: goods=44 bads=8 pattern_width=5 activeline=800 
+@3511: info: goods=44 bads=8 pattern_width=5 activeline=900 
+@3911: info: goods=44 bads=8 pattern_width=5 activeline=1000 
+@4311: info: goods=44 bads=8 pattern_width=5 activeline=1100 
+@4711: info: goods=44 bads=8 pattern_width=5 activeline=1200 
+@5111: info: goods=44 bads=8 pattern_width=5 activeline=1300 

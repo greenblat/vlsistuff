@@ -1,0 +1,44 @@
+
+
+first read/browse the file "run.py"
+it explains what is inside.
+
+files  in here:
+run.py    ---- main script to run this demo and use as a base for real things.
+imortant_files  --- i put there the demo synopsys library.  in run.py You can point to any other place.
+
+syntmp/         --- holds .lib file for each cell (after splitting the big .lib files)
+                    splitting is a convinience. and it speeds up working on large files.
+
+descriptions/    --- holds python description per cell
+src/             --- holds C source files for synlib_lexer executable. it is the only C app here.
+llbin/           ---  holds all scripts and executables.
+cellsLibrary.py  --- is the outcome of running here. it has cells library description in python. read it.
+                     it doesnt have all the info from liberty, just what we need.
+
+
+
+to run type:   run.py
+
+in llbin, following scripts: (just so you know, because everything is spelled out in run.py)
+
+assemblyCellLibrary.py     :    concat descriptions into one python file. adds class header.
+compile_lexer              :    compile the only C program.
+synlib_lexer               : synlib lexer C app.
+
+python stuffs:
+logs.py*
+msgsim2c.py
+simplify_pickle.py*
+split_synlib.py*
+synlibMsg.py*
+synlib_functions.py
+synlib_yacc_table.py
+synlibyacc.py*
+
+
+
+and say Hi to Elhanan R. from me.
+
+
+

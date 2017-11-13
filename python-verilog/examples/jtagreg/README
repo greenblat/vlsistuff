@@ -1,0 +1,19 @@
+
+this example has jtag tap controller rtl that drives demo regfile.
+!!the regfile is just a demo, built from XLS file, dont take it as working thing.
+
+the testbench side reads STIL file (produced from jtag.seq file) and drives/checks the design.
+
+it is emulation of a production tester. the STIL file toggles jtag interface to read/write few registers in the
+design.
+
+(The stilPLayer.py plays virtual tester.  it has roots in old SWAV format, so you can see "swav" appears here and 
+there in the test).
+
+This example is not completely baked, but it works and demonstrates python versatility as testbench.)
+
+(by not baked, i mean that it was not completely cleaned from irrelevant baggage and stuff).
+
+
+Ilia +972-54-4927322
+

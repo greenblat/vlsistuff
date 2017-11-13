@@ -1,0 +1,7 @@
+#! /bin/csh -f
+#this is icarus compilation stage
+
+iverilog -otb.vpp rtl/sqrt_u40_5.v rtl/tb.v
+
+
+

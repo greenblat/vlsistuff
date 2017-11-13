@@ -1,0 +1,7 @@
+#! /bin/csh -f
+
+
+set FLAGS = '-O3'
+
+gcc src/synlib_tables.c src/nlexer.c -o llbin/synlib_lexer $FLAGS
+

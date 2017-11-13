@@ -1,0 +1,16 @@
+module generator (
+     input    clk
+    ,input [5:0] paddr
+    ,input    psel
+    ,input [1:0] psize
+    ,input [31:0] pwdata
+    ,input    pwrite
+    ,input    rst_n
+    ,output reg [15:0] outmix
+    ,output reg [31:0] prdata
+);
+initial begin
+    outmix = 0;
+    prdata = 0;
+end
+endmodule

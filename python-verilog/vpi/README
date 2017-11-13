@@ -1,0 +1,17 @@
+to compile, run 
+
+comp7_icarus
+or 
+comp7_linux
+
+in both cases, fix the pointers to libraries.
+
+here they are for my setup.
+
+IMPORTANT!! python installation must have libpython*.so files. 
+when installing python, it has an opion to include .so files!!!
+without it You cannot compile the python-verilog connection.
+
+
+
+

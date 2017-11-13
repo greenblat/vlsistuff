@@ -1,0 +1,127 @@
+
+IMPORTANT! in all scripts my path may appear, please change to whatever path is relevant.
+
+first go to vpi directory and compile the library. README is there.
+there is also vpi7_nc_27.so compiled already, it fits linux fedora and probably most of linux dists.
+!!!! recompile the .so if You can - it might be not the final version.
+
+this README can  help You to compile the library to icarus, vcs or ncverilog.
+
+in examples directory look for sqrt and uart examples/
+
+both are small examples of verilog-python connection.
+before runing the example, it is good idea to create the vpi library.
+examples are for icarus simulator, but any simulator can be used.
+
+SQRT:
+it has square root DUT and modest testbench (tb.v)
+"comp" script compiles it for icarus
+"run"  will run the icarus.
+
+
+UART:
+    two uarts in testbench (tb.v) 
+    one is real rtl, the other one modeled by python. this useful when some modules are not ready 
+    for integration before the others. You can prepare empty verilog module  will all inputs/outputs.
+    and write model n python to behave as the module. Later,when real rtl is ready, it can be run in "Aluka" mode, 
+    where instead of forcing the outputs, it compares values of the rtl outputs to those of python.
+
+the setup:
+    rtl-one sends characters to python-one, that one loops them back.
+    they are received by rtl-one and compared/checked for accuracy.
+    i played with difference in baudrates to see when wrong data begins.
+
+
+the generation and comparison is done using python. (verilog.py)
+python is kept simple. usually i dont like global variables. here they are used just for clarity.
+
+last minute jtag regfile example was added. it has it's own README file.
+
+
+example of NCVERILOG activation:
+   ncverilog +nc64bit rtl/tb.v -f test.files  +nospecify +no  \
+   timingcheck +access+rw+ +loadvpi="/home/igreenb1/software/vpi/vpi7_nc_27:vpit_Register    Tfs" \
+   +ncgateloopwarn +libext+.v+  
+
+example of VCS activation:
+
+vcs  \
+    -notice  -full64 -v2005 +v2k -debug_pp -debug_all   \   
+    +vpi -load /home/ilia/software/vpi/vpi7_nc_27.so:vpit_RegisterTfs  \
+    rtl/tb.v \
+   -f test.files \
+   -y ../../container/rtl \
+
+./simv
+
+
+example of CVC64 activation:
+cvc64 \
+    +acc  \
+    +loadvpi=/home/iliag/software/vpi/vpi7_nc_27.so:vpit_RegisterTfs \
+    rtl/tb.v \
+   -f test.files \
+    +libext+.v+ \
+    -y ../../vsrc -y ../../vsrc2 \
+
+./cvcsim
+
+
+
+
+
+
+
+common veri functions:
+
+veri.peek(Path) :
+   Path is something like "tb.dut.dma.state"
+   it returns string with length of wire or reg width. the string is made out of 0,1,x,z characters.
+   this is the current value of the variable. 
+   You are not allowed to write subbus path, like "state[3:0]".  
+   veri.peek returns always full string, and You can chop, substring it in python.
+
+
+veri.force(Path,Value)
+   Path is same as in veri.peek
+   Value is always string.
+   it can be one of three:
+    "12345"   - decimal string, it can be up to 32bits. no "-" allowed.
+    "0xabcd"  -  hex string. width same restrictions.
+    "0b01010101010xz" - binary string. unlimited length. can include x and z characters.
+
+    veri.force is not hard force, it is "deposit"
+    there is also hard_force in the library. it comes with release function.
+
+
+
+
+veri.stime()
+    return current simulation time. dont see much need for it.
+
+veri.finish()
+    finish and exit simulation.
+    sys.exit()  may also do the trick, alas without going through verilog simulator finishing stage (depends on simulator).
+
+veri.listing(Path,Depth,Filename):
+    like veri.listing("tb","1000","deep.list")
+    produce file calle "deep.list" with all current values of all variables, from Path to depth of Depth.
+    sorry "0" depth is just like one. i will fix it sometimes to indicated indefinet depth.
+
+
+less common:
+
+veri.peek_mem(Path,ind)
+    like in veri.peek("tb.mem","10")
+    returns value from two dimensional  array
+
+veri.force_mem(Path,ind,val)
+    forces value into two dimensional  array
+
+veri.peek_3d(Path,ind0,ind1)
+    like in veri.peek("tb.mem","10","20")
+    returns value from three dimensional  array
+
+veri.force_3d(Path,ind0,ind1,val)
+    forces value into three dimensional  array
+

@@ -1,0 +1,12 @@
+#! /bin/csh -f
+#this is icarus compilation stage
+
+iverilog -otb.vpp rtl/regfile.v rtl/tb.v rtl/jtag_control.v rtl/jtagreg.v
+
+
+
+
+
+
+
+

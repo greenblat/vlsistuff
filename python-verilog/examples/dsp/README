@@ -1,0 +1,13 @@
+
+
+
+
+some dsp stuff.
+there is generator of 3 sinus combined.
+it goes into fir rtl. (not synthesiable exactly, just for the example).
+
+fir.py implements python aluka golden model. it monitors the inputs and compares to expected outputs.
+
+
+
+

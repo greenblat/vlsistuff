@@ -1,0 +1,18 @@
+
+
+
+
+version state 0 3 0; 
+source "Generator";
+signal "jtck" input;
+signal "jtdi" bidir1;
+signal "jtms" bidir1;
+signal "jtdo" bidir1;
+signal "rst_n" bidir1;
+pattern "aaa";
+000x0
+100x0
+000x0
+000x1
+
+

@@ -1,0 +1,32 @@
+#! /bin/csh -f
+
+
+set MTI_HOME = /home/ilia/software/gplcver-2.12a.src/pli_incs
+set INC = /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/
+set INC = /usr/include/python2.7
+
+gcc  -c -I$MTI_HOME src/vpi7.c \
+     -Wall \
+     -I$INC \
+     -Isrc \
+     -fPIC \
+
+
+gcc  -c -I$MTI_HOME src/qq64.c \
+     -Wall \
+     -I$INC \
+     -Isrc \
+     -fPIC \
+
+
+
+
+
+ld  -o  vpi7_nc_27.so      vpi7.o qq64.o \
+    -L/usr/lib \
+    -L/usr/lib/python2.7 \
+    -G -shared -export-dynamic  \
+    -lpython2.7 \
+    -lc  -lpthread -lutil -L/usr/lib/python2.7/config
+
+

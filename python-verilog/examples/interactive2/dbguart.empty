@@ -1,0 +1,19 @@
+module dbguart (
+     input    clk
+    ,input [47:0] ram_rdata
+    ,input    resetn
+    ,input    rxd
+    ,output reg [13:0] ram_addr
+    ,output reg    ram_read
+    ,output reg [47:0] ram_wdata
+    ,output reg    ram_write
+    ,output reg    txd
+);
+initial begin
+    ram_addr = 0;
+    ram_read = 0;
+    ram_wdata = 0;
+    ram_write = 0;
+    txd = 0;
+end
+endmodule
