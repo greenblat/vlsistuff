@@ -1,0 +1,32 @@
+
+
+local script "run" should run the demo.
+python2.7 is expected here.  You can add "python" to the invocation line (inside run) if Your linux/mac is 
+not allowing "#! /usr/bin/python" invocation.
+
+
+the scripts reside in pybin/ directory.
+
+typing :   pybin/vcd_python.py  will print short help and example.
+
+vcd.py is the user written module called by "run".
+
+it defines two "must" functions: observer and set_var.
+vcd.py looks for clock going down and then, checks the AXI bus status.
+it counts number of bytes moving around and keeps score.
+
+
+this software used extensively on macs and linuxes :)
+if You try it on windows, i would appreciate a short explanation, that i can add.
+
+any feedback is positive.
+
+
+the example here is AXI master talking to AXI slave.
+
+Ilia 1Feb2018.
+greenblat@mac.com
+
+
+
+
