@@ -74,48 +74,58 @@ endmodule
 import os,sys,string
 
 
-Big='# -*- encoding: UTF8 -*-\nimport os,sys,string\n'
+BigHead='# -*- encoding: UTF8 -*-\nimport os,sys,string\n'
 
-def add(Str):
-    global Big
-    if Str[-1]=='\n':
-        Big=Big+Str
-    else:
-        Big=Big+Str+'\n'
 
 def main():
     if len(sys.argv)==1:
         print HelpString
         return
     Fname = sys.argv[1]
-    File = open(Fname)
-    lines = File.readlines()
-    File.close()
-    lines=extract_codelins(lines)
-    lines = expand_codelins(lines)
-    prepare1(lines)
-    add('Strings={}')
-    for X in Strings:
-        add("Strings['%s']='''"%X)
-        XX = Strings[X]
-        XX = rework_backs(XX)
-        add(XX)
-        add("'''")
-    add(Routines)
-    for X in Code0:
-        add(X)
-    Fout = open('execme.py','w')
-    Fout.write(Big)
-    Fout.close()
-    w1 = string.split(Fname,'/')
-    w2 = string.split(w1[-1],'.')
-    Top=w2[0]
     if len(sys.argv)>2:
         FnameOut = sys.argv[2]
     else:
+        w1 = string.split(Fname,'/')
+        w2 = string.split(w1[-1],'.')
+        Top=w2[0]
         FnameOut = '%s.v'%Top
-    Work = 'python execme.py %s > %s'%(string.join(sys.argv[3:],' '),FnameOut)
-    os.system('python execme.py %s > %s'%(string.join(sys.argv[3:],' '),FnameOut))
+    run(Fname,FnameOut,sys.argv[3:])
+
+
+
+def run(Fname,FnameOut,Args):
+    File = open(Fname)
+    lines = File.readlines()
+    File.close()
+    runFromLines(lines,FnameOut,Args)
+
+
+def runFromLines(lines,FnameOut,Args):
+    global Code0,Strings
+    Code0=[]
+    Strings={}
+    Big = [BigHead]
+    lines=extract_codelins(lines)
+    lines = expand_codelins(lines)
+    prepare1(lines)
+    Big.append('Strings={}')
+    for X in Strings:
+        Big.append("Strings['%s']='''"%X)
+        XX = Strings[X]
+        XX = rework_backs(XX)
+        Big.append(XX)
+        Big.append("'''")
+    Big.append(Routines)
+    for X in Code0:
+        Big.append(X)
+    Fout = open('execme.py','w')
+    for LL in Big:
+        if LL[-1]!='\n': LL += '\n'
+        Fout.write(LL)
+    Fout.close()
+    More = string.join(Args,' ')
+    Work = 'python execme.py %s > %s'%(Args,FnameOut)
+    os.system(Work)
 #    os.system('/bin/rm  execme.py')
 
 def rework_backs(Str):
@@ -190,7 +200,7 @@ def evalStuff(Str):
             wrds[II] = str(New)
         except:
             print '// failed eval of "%s"'%(wrds[II])
-    Str2 = string.join(wrds,' ')
+    Str2 = string.join(wrds,'')
     return Str2
 
 
@@ -242,8 +252,8 @@ def get_code(Str):
     Vars = get_code_vars(Header)
     update_code_vars(Vars,wrds)
     res=[]
-    print '>mlines>>>>',Mlines
-    print '>vars>>>>',Vars
+    print '// >mlines>>>>',Mlines
+    print '// >vars>>>>',Vars
     for line in Mlines:
         for Var in Vars:
             line = string.replace(line,Var,Vars[Var])
@@ -270,15 +280,15 @@ def update_code_vars(Vars,wrds):
 
 
 
-Code0=[]
-Strings={}
 
 def prepare1(lines):
-    global Indent
+    global Indent,Lnum
     state='idle'
     Str = ''
     Indent=''
+    Lnum=0
     for line in lines:
+        Lnum += 1
         if (state=='idle'):
             if (len(line)>3)and(line[0:3]=='###'):
                 state='longcode'
@@ -383,6 +393,9 @@ def seek_vars(line):
 
 def calc_indent(line):
     wrds = string.split(line)    
+    if len(wrds)==0:
+        print 'lnum=%d in file, fatal ident, aborting. '%(Lnum)
+        sys.exit()
     ind = line.index(wrds[0])
     if wrds[0] in ['for','if','else:','elif']:
         ind += 4
@@ -398,5 +411,4 @@ def strname():
     
 
 
-
-main()
+if (__name__ == '__main__'): main()
