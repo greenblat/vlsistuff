@@ -1,0 +1,31 @@
+
+#WID = 30
+##  this will become python comment for yourself
+module example (
+    input clk,input rst
+#for II in range(WID):
+    ,output [II:0] outII
+#
+#for II in range(WID):
+#    JJ = WID-II
+    ,input [JJ:0] inII
+#
+);
+
+#for II in range(WID):
+son sonII #(II,WID) (.in(inII),.out(outII),.clk(clk),.rst(rst));
+#
+
+
+#for II in range(10):
+wire [WID:0]  wwII = 0 
+#    for JJ in range(5):
+    + cucu[JJ]*cooef[II]
+#<
+    ;   
+#
+
+
+
+endmodule
+

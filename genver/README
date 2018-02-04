@@ -1,0 +1,63 @@
+
+genver.py is macro preprocessing script using python as macro language.
+
+mostly i use it to expand verilog files (spiced with special python commands).
+in many cases it is just to avoid using ugly "generate" constructs.
+
+to run example do:
+
+pybin/genver.py example/example.vvv
+
+or 
+
+pybin/genverm1.py example/m1.vvv
+
+this will produce example.v
+(pybin/genverm1.py  : it added some variable replacement. marked <>EXPR<> - the expression is replaced with it's eval.)
+
+check it out and see how it was derived from .vvv file.
+there is always execme.py temporary file created. You may delete it.
+
+some rules (they also appear in the pybin script itself):
+
+any line that starts with "#" is considered part of python
+any other line is treated as text to be modified and outputed.
+
+line like this:
+#AA = 6
+assigns the value to python variable AA. ( you should keep " = " surrounded by spaces, for my script to recognize variable
+text line (that has not # as first char)  like this:
+
+assign (weak0,weak1) cucuAA = 100-AA;
+
+will come out as:
+assign (weak0,weak1) cucu6 = 100-6;
+
+this is simple substitution of every AA to it's value. 
+this is the reason i give the python variables names that not appear anywhere by chance.
+
+python is very sensitivie to indentation. my script needs every indentation ro be of FOUR spaces.
+so for example:
+
+#WID = 5
+#for II in range(WID):
+#    LESS= WID-II
+##   ^
+##   |
+##   four spaces till here
+
+
+to reduce indentation (get out one level of loop within a loop)
+use line:
+#<
+
+#for II in range(10):
+assign wwII = 0
+#    for JJ in range(5):
+    + cucu[JJ]*cooef[II]
+#<
+    ;
+#
+
+notice that single # in line closes all indentations (loops and ifs).
+
