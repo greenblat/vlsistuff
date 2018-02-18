@@ -1,0 +1,45 @@
+
+
+local script "run" should run the demo.
+python2.7 is expected here.  You can add "python" to the invocation line (inside run) if Your linux/mac is 
+not allowing "#! /usr/bin/python" invocation.
+
+
+the scripts reside in pybin/ directory.
+
+typing :   pybin/vcd_python.py  will print short help and example.
+
+vcd.py is the user written module called by "run".
+
+
+new in this version:
+1. removed all complex to use functions. 
+2. You, the user, should define  
+
+Base = 'tb.dma.fifo...'   - path to interesting scope.
+def negedge(Time):        - function to be called when relevant clock falls.
+    this function (can be named whatever) is the main working part.
+Monitors = [('clk',negedge,Base)]
+the vcd_python.py script reads the Monitors list and calls all functions mentioned,
+when their clock falls.
+
+
+
+
+
+
+
+this software used extensively on macs and linuxes :)
+if You try it on windows, i would appreciate a short explanation, that i can add.
+
+any feedback is positive.
+
+
+the example here is AXI master talking to AXI slave.
+
+Ilia 18Feb2018.
+greenblat@mac.com
+
+
+
+
