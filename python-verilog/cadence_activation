@@ -1,0 +1,10 @@
+#! /bin/csh -f
+
+irun -64bit \
+    -access rwc \
+    -f all.files
+    +loadvpi=/home/ilia/github/vlsistuff/python-verilog/vpi/vpi7_ml.so:vpit_RegisterTfs \
+
+
+
+
