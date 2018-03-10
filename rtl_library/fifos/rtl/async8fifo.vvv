@@ -1,0 +1,81 @@
+// async fifo. has on clock for write and another for read.
+// reset is async and one for both clocks. 
+// greenblat@mac.com
+// use genver.py or genverm1.py (from git pybin) to generate the rtl.
+// III sets the depth of the fifo.
+//  greenblat@mac.com
+
+#III = 8
+#WWW = len(bin(III))-3
+module asyncIIIfifo #(parameter WID=32)(
+     input wclk
+    ,input rst_n
+    ,input rclk
+    ,input writex
+    ,output wfull
+    ,input [WID-1:0] wdata
+    ,output [WID-1:0] rdata
+    ,output rempty
+    ,input  readx
+);
+
+#for II in range(III):
+wire [WID-1:0] rdataII;
+wire wfullII,remptyII;
+#
+
+
+reg [WWW:0] wptr;
+always @(posedge wclk or negedge rst_n) begin
+    if (!rst_n) begin
+        wptr<=0;
+    end else if (writex && !wfull) begin
+        wptr<=wptr+1;
+    end
+end
+
+assign wfull = 0
+#for II in range(III):
+    ||((wptr==II)&&wfullII)
+#
+;
+#for II in range(III):
+wire writexII = writex && (wptr==II)&&!wfullII;
+#
+
+reg [WWW:0] rptr;
+always @(posedge rclk or negedge rst_n) begin
+    if (!rst_n) begin
+        rptr<=0;
+    end else if (readx && !rempty) begin
+        rptr<=rptr+1;
+    end
+end
+
+assign rdata = 
+#for II in range(III):
+    (rptr==II) ? rdataII :
+#
+    0;
+
+assign rempty = 
+#for II in range(III):
+    (rptr==II) ? remptyII :
+#
+    0;
+
+#for II in range(III):
+assign readxII = readx && (rptr==II);
+#
+
+
+#for II in range(III):
+async_stage #(WID) stageII (
+     .rclk(rclk) ,.rst_n(rst_n) ,.wclk(wclk)
+    ,.rdata(rdataII) ,.readx(readxII) ,.rempty(remptyII)
+    ,.wdata(wdata) ,.wfull(wfullII) ,.writex(writexII)
+);
+#
+endmodule
+
+

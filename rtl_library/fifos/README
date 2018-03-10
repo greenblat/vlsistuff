@@ -1,0 +1,8 @@
+
+3 kinds of fifos:
+syncfifo : flops hold the data
+syncramfifo : ram (external) holds the data.
+asyncfifo   : (has generation vvv expanded by genver.py)  wih fixed depth (fixed by script). has two clocks, one for read and another for write.
+
+
+

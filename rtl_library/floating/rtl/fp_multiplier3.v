@@ -1,0 +1,20 @@
+module fp_multiplier3 ( input [31:0] in0,input [31:0] in1, input [31:0] in2,  output [31:0] out);
+wire [31:0] ZERO = 32'b0;
+wire zeroes = (ZERO==in0)||(ZERO==in1)||(ZERO==in2);
+wire a_sign = in0[31];
+wire [7:0] a_exp = in0[30:23];
+wire [23:0] a_val = {1'b1,in0[22:0]};
+wire b_sign = in1[31];
+wire [7:0] b_exp = in1[30:23];
+wire [23:0] b_val = {1'b1,in1[22:0]};
+wire c_sign = in2[31];
+wire [7:0] c_exp = in2[30:23];
+wire [23:0] c_val = {1'b1,in2[22:0]};
+wire [74:0] product = {48'b0,a_val} * {48'b0,b_val} * {48'b0,c_val};
+wire is71 = product[71];
+wire z_sign = a_sign^b_sign^c_sign;
+wire [9:0]  exp0 = a_exp+ (b_exp-127)+(c_exp-127)+is71 ;
+wire [7:0]  z_exp = (exp0[9:8]!=0) ? 8'd255 : exp0[7:0] ;
+wire [22:0] z_mat = is71 ? product[70:48] : product[69:47];
+assign out = zeroes ? ZERO : {z_sign,z_exp,z_mat};
+endmodule
