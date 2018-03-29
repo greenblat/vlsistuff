@@ -1,0 +1,16 @@
+
+1. define messages format
+2. define address assignment procedure
+3. define mamnagement functions: address , routing table filling, 
+4. define optional error correction
+5. define routing tables security.
+6. implement 64,128,256 nifs (network interfaces embedded into modules).
+7. implement connected ram modules.
+8. implement power switch, clock switch, width switch
+9. implement serializer / deserialzer to 1 / 2 / 4 / 8 bits.
+
+10. study performance problems.
+11. study 
+10. demos:  
+    ??????
+    
