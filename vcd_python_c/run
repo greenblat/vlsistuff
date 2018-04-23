@@ -1,0 +1,8 @@
+#! /bin/csh -f
+
+
+
+vcd_python example.vcd vcd.py 
+
+
+

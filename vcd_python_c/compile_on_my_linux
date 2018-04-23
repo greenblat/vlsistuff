@@ -1,0 +1,20 @@
+#! /bin/csh -f
+
+
+# You can see here, that python is installed privately. Sometimes it is the only way in
+# place of work, where You cannot touch the system.
+
+set INC = /home/ilia/local/include/python2.7
+set LIB = /home/ilia/local/lib/
+
+gcc -g \
+    -o vcd_python \
+    src/vcd_python.c  src/qq64.c \
+    -I$INC \
+    -L$LIB/  \
+    -L$LIB/python2.7/  \
+    -L$LIB/python2.7/config \
+    -lpython2.7  \
+    -lm -lc  -lpthread  -lutil -ldl \
+
+

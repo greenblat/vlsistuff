@@ -1,0 +1,11 @@
+#! /bin/csh -f
+
+# this is how i compile on my macbook Pro.
+
+gcc -O3 src/vcd_python.c  src/qq64.c  -o vcd_python \
+  -I/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/ \
+  -lpython2.7 -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib \
+
+
+
+
