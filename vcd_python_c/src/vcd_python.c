@@ -42,6 +42,8 @@ void do_var();
 void do_upscope();
 void do_enddefinitions();
 void start_python();
+void sigs2pvalue();
+void narrowValue();
 
 double start_time=0.0;
 double end_time=0.0;
@@ -60,9 +62,11 @@ int psig=1;
 typedef struct SIG {
     long name;
     long value;
+    long knowns;
     int code;
     long path;
     long fpath;
+    int wide;
 } change_sig;
 
  change_sig sigs[maxsig];
@@ -146,9 +150,10 @@ int main(argc, argv)
         }
     }
     if (fname2[0]==0) strcpy(fname2,"verilog.py");
-    long xxx = qqai("x");
     for (i=0;i<maxsig;i++) {
-        sigs[i].value = xxx;
+        sigs[i].value = 0;
+        sigs[i].knowns = 0;
+        sigs[i].wide = 0;
     }
         
 
@@ -430,8 +435,18 @@ int psensetive=0;
 void drive_value(char *Val,char *Code) {
     int P = intcode(Code);
     char Bus[1000];
+    long value,knowns;
     strcpy(Bus,qqia(sigs[P].name));
-    sigs[P].value = qqai(Val);
+    sigs[P].wide = strlen(Val);
+    if (strlen(Val)>64) {
+        sigs[P].value = qqai(Val);
+    } else {
+        narrowValue(Val,&value,&knowns);
+        sigs[P].value = value;
+        sigs[P].knowns = knowns;
+//        printf(">> %s %s v=%lx k=%lx\n",Bus,Val,sigs[P].value,sigs[P].knowns);
+    }
+
 //    printf("code=%d sig=%s val=%s time=%f\n",P,qqia(sigs[P].fpath),Val,run_time);
     for (int ii=0;ii<psensetive;ii++) {
 //        printf("sense ii=%d P=%u S=%lu       %c %c\n",ii,P,sensitives[ii],sensitive_value[ii],Val[0]);
@@ -557,11 +572,45 @@ veri_peek(PyObject *self,PyObject *args) {
         printf("\npython: cannot find sig %s for peek\n",pathstring);
         return Py_BuildValue("s", "q");
     }
-    strcpy(pvalue,qqia(sigs[Psig].value));
+//    strcpy(pvalue,qqia(sigs[Psig].value));
+    sigs2pvalue(sigs[Psig].value,sigs[Psig].knowns,sigs[Psig].wide,&(pvalue[0]));
     return Py_BuildValue("s", pvalue);
 }
 
+void narrowValue(char *Val, long *value, long *knowns) {
+    int ii,aa;
+    long vv=0,kk=0;
+    int Len = strlen(Val);
+    for (ii=0;Val[ii];ii++) {
+        char Chr = Val[ii];
+        if (Chr=='1') {
+           vv |= (1L<<(Len-1-ii));
+        } else if (Chr=='0') {
+            aa=0;
+        } else {
+           kk |= (1L<<(Len-1-ii));
+        }
+    }
+    *value = vv;
+    *knowns = kk;
+}
 
+void sigs2pvalue(long value,long knowns,int wide,char *pvalue) {
+    if (wide>64) { strcpy(pvalue,qqia(value)); return; }
+    int ii;
+    pvalue[wide]=0;
+    for (ii=0;ii<wide;ii++) {
+        char V = ((value>>ii)&1) + '0';
+        char K = (knowns>>ii)&1;
+        if (K) {
+            pvalue[wide-ii-1]='x';
+        } else {
+            pvalue[wide-ii-1]=V;
+        }
+//        printf(">>>> ii=%d  %d (%c) wid=%d %d %d |%s|\n",ii,V,V,wide,pvalue[0],pvalue[1],pvalue);
+    }
+//    printf(">> (%c) wid=%d %d %d |%s|\n",pvalue[0],wide,pvalue[0],pvalue[1],pvalue);
+}
 
 
 static PyObject*

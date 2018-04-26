@@ -64,7 +64,6 @@ def main():
      
 #        exec('global observer; from %s import observer,setVar'%Module)
         exec('global %s; import %s;   addMons(%s. Monitors); %s.peek=peek'%(Module,Module,Module,Module))
-    File = open(Fname)
 
     Dump =  '-dump' in Args
     if Dump:
@@ -76,6 +75,8 @@ def main():
         mainPaths = Args['-path']
     else:
         mainPaths = False
+
+    File = open(Fname)
     read_headers(File,mainPaths,Dump)
     logs.log_info('loaded %d nets and regs'%(len(Codes.keys())))
     if '-print' in Args:
@@ -163,9 +164,9 @@ def workDump(File,startTime,endTime,Dump):
                 news += 1
 
 
-
+metTime = 0
 def work(File,startTime,endTime):
-    global Time,linenum
+    global Time,linenum,metTime
     while 1:
         line=File.readline()
         linenum +=1
@@ -182,6 +183,9 @@ def work(File,startTime,endTime):
             pass
         elif (wrds[0][0]=='#'):
             Time = int(wrds[0][1:])
+            metTime += 1
+        elif (Time<startTime)and(metTime>5):
+            pass
         elif (len(wrds)==2)and(wrds[0][0]=='b'):
             Str = wrds[0][1:]
             Code = wrds[1]
@@ -307,7 +311,7 @@ def observer(Sig,Str,Time):
                 Func(Time)
             if ind==0: 
                 cycles += 1
-                if (cycles % 10000)==0: logs.log_info('cycles %d'%cycles)
+                if (cycles % 100000)==0: logs.log_info('cycles %d   time=%dns'%(cycles,Time/1000000))
             CLKS[Clkname] = Clk
     if (argv['endTime']>0)and (Time>=argv['endTime']):
         logs.log_info('exiting on time=%d because of endTime=%d'%(Time,argv['endTime']))
