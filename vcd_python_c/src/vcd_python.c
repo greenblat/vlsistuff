@@ -42,8 +42,7 @@ void do_var();
 void do_upscope();
 void do_enddefinitions();
 void start_python();
-void sigs2pvalue();
-void narrowValue();
+void drive_value();
 
 double start_time=0.0;
 double end_time=0.0;
@@ -61,12 +60,12 @@ int debug;
 int psig=1;
 typedef struct SIG {
     long name;
-    long value;
-    long knowns;
     int code;
     long path;
     long fpath;
     int wide;
+    char *allocated;
+    char value[9];
 } change_sig;
 
  change_sig sigs[maxsig];
@@ -128,7 +127,7 @@ int main(argc, argv)
     fname1[0]=0;
     fname2[0]=0;
 /* update hash table maxsize, if wanted */
-    for (i=0;i<maxsig;i++) { sigs[i].code=-1;} 
+    for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].allocated=0;} 
     if (argc <= 1) do_help();
     if (argc > 1) {
         for (k = 2; k <= argc; k++) {
@@ -151,9 +150,7 @@ int main(argc, argv)
     }
     if (fname2[0]==0) strcpy(fname2,"verilog.py");
     for (i=0;i<maxsig;i++) {
-        sigs[i].value = 0;
-        sigs[i].knowns = 0;
-        sigs[i].wide = 0;
+        sigs[i].allocated = 0;
     }
         
 
@@ -263,12 +260,14 @@ void pushtok(char *s,int ind) {
         else if (n==qqai("$enddefinitions")) state=Enddef;
         else if (n==qqai("$timescale")) state = Timescale;
         else if (n==qqai("$comment")) state = Timescale;
+        else if (n==qqai("$date")) state = Timescale;
+        else if (n==qqai("$version")) state = Timescale;
         else if (n==qqai("$dumpvars")) { 
             state=Dumpvars;
             search=1;
         } else if (s[0]=='#') {
             state=Values;
-            do_value(s);
+            run_time=atof(&(s[1]));
         } else { 
             printf("idle token state=%d line=%d %s\n",state,linenum,s);
         }
@@ -309,6 +308,7 @@ void do_enddefinitions(char *s) {
 long code,bus;
 char temp[1000];
 char temp2[1000];
+int widthx;
 
 void do_var(long n) {
     switch (instate) {
@@ -330,16 +330,17 @@ void do_var(long n) {
             ) break;
             shouldbe("wire",n); break;
         case 2:
+            widthx = atoi(qqia(n));
             break;
         case 3:
             code=n; break;
         case 4:
             bus=n; break;
         case 5:
-            if (n==qqai("$end")) { state=Idle;record(code,bus);}
+            if (n==qqai("$end")) { state=Idle;record(code,bus,widthx);}
             else {
                 if (n==qqai("[-1]")) {
-                    record(code,bus);
+                    record(code,bus,widthx);
                 } else {
                     strcpy(temp,qqia(n));
                     if (temp[0]=='[') {
@@ -347,13 +348,13 @@ void do_var(long n) {
                         for (j=1;(temp[j]&&(temp[j]!=':'));j++);
                         if (temp[j-1]==']') {
                             sprintf(temp,"%s%s",qqia(bus),qqia(n));
-                            record(code,qqai(temp));
+                            record(code,qqai(temp),widthx);
                         } else if (temp[j]==':') {
                             strcpy(temp2,&(temp[1]));
                             temp2[j-1]=0;
                             strcpy(temp2,&(temp[j+1]));
                             temp2[strlen(temp2)-1]=0;
-                            record(code,bus);
+                            record(code,bus,widthx);
                         }
                     }
                 }
@@ -406,9 +407,7 @@ void search_time(start_time) int start_time;
                 return;
             }
         } else {
-            sig = intcode(&(line[1]));
-            if ((sig>0)&&(sig<=maxsig))
-                sigs[sig].value=line[0];
+            do_value(line);
         }
     }
 }
@@ -430,26 +429,42 @@ int intcode(char *st) {
 long sensitives[100];
 char sensitive_value[100];
 long sensitive_command[100];
-int psensetive=0;
+int psensitive=0;
+
+#define BIG 1000000
+char bigbig[BIG];
+int unsigned bigptr=0;
+
+char *allocateString__(int Len) {
+    char *Ptr;
+    int ii;
+    Ptr = &(bigbig[bigptr]);
+    for (ii=0;ii<(Len-1); ii++) bigbig[bigptr+ii]='x';
+    bigbig[bigptr+ii]=0;
+    bigptr += Len;
+    if (bigptr>=BIG) { printf("overflow\n"); }
+    else { printf("len=%d ptr=%d\n",Len,bigptr); }
+    return Ptr;
+}
+
+char *allocateString(int Len) {
+    char *Ptr;
+    Ptr = malloc(Len+2);
+    return Ptr;
+}
 
 void drive_value(char *Val,char *Code) {
     int P = intcode(Code);
     char Bus[1000];
-    long value,knowns;
     strcpy(Bus,qqia(sigs[P].name));
-    sigs[P].wide = strlen(Val);
-    if (strlen(Val)>64) {
-        sigs[P].value = qqai(Val);
+    int Width = sigs[P].wide; 
+    if (Width<=8) {
+        strcpy(sigs[P].value,Val);
     } else {
-        narrowValue(Val,&value,&knowns);
-        sigs[P].value = value;
-        sigs[P].knowns = knowns;
-//        printf(">> %s %s v=%lx k=%lx\n",Bus,Val,sigs[P].value,sigs[P].knowns);
+        strcpy(sigs[P].allocated,Val);
     }
-
-//    printf("code=%d sig=%s val=%s time=%f\n",P,qqia(sigs[P].fpath),Val,run_time);
-    for (int ii=0;ii<psensetive;ii++) {
-//        printf("sense ii=%d P=%u S=%lu       %c %c\n",ii,P,sensitives[ii],sensitive_value[ii],Val[0]);
+//    printf(">>> bus=%s code=%s val=%s wide=%d P=%d    %s \n",Bus,Code,Val,sigs[P].wide,P,sigs[P].allocated);
+    for (int ii=0;ii<psensitive;ii++) {
         if ((sensitives[ii]==P)&&(sensitive_value[ii]==Val[0])) {
             PyRun_SimpleString(qqia(sensitive_command[ii]));
             return;
@@ -479,7 +494,7 @@ void do_value(char *strx) {
 }
 
 
-void record(long code,long bus) {
+void record(long code,long bus,int width) {
     char temp[1000];
     char fullname[1000];
     int ind,i,pcode;
@@ -497,6 +512,11 @@ void record(long code,long bus) {
         sigs[psig].code=code;
         sigs[psig].path=scopes[pscope-1];
         sigs[psig].fpath=FullName;
+        sigs[psig].wide=width;
+        if (width>8)
+            sigs[psig].allocated = allocateString(width+1);
+        else
+            strcpy(sigs[psig].value,"x");
     }
     qqsa(FullName,psig);
     fprintf(Frecords,"record psig=%d sig=%s code=%s full=%s\n",psig,qqia(bus),qqia(code),fullname);
@@ -545,14 +565,14 @@ veri_sensitive(PyObject *self,PyObject *args) {
         return NULL;
 
     long Psig =  qqas(qqai(pathstring));
-    printf("install ptr=%d psig=%lu sensitive %s %s %s\n",psensetive,Psig,pathstring,val,function);
-    sensitives[psensetive] =Psig; 
-    sensitive_command[psensetive] = qqai(function);
-    sensitive_value[psensetive] = val[0];
-    psensetive++;
+    printf("install ptr=%d psig=%lu sensitive %s %s %s\n",psensitive,Psig,pathstring,val,function);
+    sensitives[psensitive] =Psig; 
+    sensitive_command[psensitive] = qqai(function);
+    sensitive_value[psensitive] = val[0];
+    psensitive++;
 
     if (Psig==0) {
-        printf("\npython: cannot find sig %s for peek\n",pathstring);
+        printf("\npython: cannot find sig %s for sensitive\n",pathstring);
         return Py_BuildValue("s", "q");
     }
     return Py_BuildValue("s", Str);
@@ -572,45 +592,17 @@ veri_peek(PyObject *self,PyObject *args) {
         printf("\npython: cannot find sig %s for peek\n",pathstring);
         return Py_BuildValue("s", "q");
     }
-//    strcpy(pvalue,qqia(sigs[Psig].value));
-    sigs2pvalue(sigs[Psig].value,sigs[Psig].knowns,sigs[Psig].wide,&(pvalue[0]));
+    if (sigs[Psig].wide<=8) {
+        strcpy(pvalue,sigs[Psig].value);
+    } else if (!sigs[Psig].allocated) {
+        strcpy(pvalue,"x");
+    } else {
+        strcpy(pvalue,sigs[Psig].allocated);
+    }
     return Py_BuildValue("s", pvalue);
 }
 
-void narrowValue(char *Val, long *value, long *knowns) {
-    int ii,aa;
-    long vv=0,kk=0;
-    int Len = strlen(Val);
-    for (ii=0;Val[ii];ii++) {
-        char Chr = Val[ii];
-        if (Chr=='1') {
-           vv |= (1L<<(Len-1-ii));
-        } else if (Chr=='0') {
-            aa=0;
-        } else {
-           kk |= (1L<<(Len-1-ii));
-        }
-    }
-    *value = vv;
-    *knowns = kk;
-}
 
-void sigs2pvalue(long value,long knowns,int wide,char *pvalue) {
-    if (wide>64) { strcpy(pvalue,qqia(value)); return; }
-    int ii;
-    pvalue[wide]=0;
-    for (ii=0;ii<wide;ii++) {
-        char V = ((value>>ii)&1) + '0';
-        char K = (knowns>>ii)&1;
-        if (K) {
-            pvalue[wide-ii-1]='x';
-        } else {
-            pvalue[wide-ii-1]=V;
-        }
-//        printf(">>>> ii=%d  %d (%c) wid=%d %d %d |%s|\n",ii,V,V,wide,pvalue[0],pvalue[1],pvalue);
-    }
-//    printf(">> (%c) wid=%d %d %d |%s|\n",pvalue[0],wide,pvalue[0],pvalue[1],pvalue);
-}
 
 
 static PyObject*
