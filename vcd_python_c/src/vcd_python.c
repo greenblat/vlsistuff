@@ -22,10 +22,58 @@
 
 #define maxsig 500000
 
+
+char helpstring[] = "\
+import os,sys,string\n\
+import veri\n\
+\n\
+New = os.path.expanduser('~/pybin')\n\
+sys.path.append(New)\n\
+import logs\n\
+\n\
+LASTTIME = 4.60717e+08\n\
+\n\
+BASE = 'tb.dut.dma'\n\
+CLK = BASE + '.clk'\n\
+BASE2 = BASE + '.dma_operator'\n\
+\n\
+def peekbin(Sig,Base=BASE):\n\
+    X = veri.peek('%s.%s'%(Base,Sig))\n\
+    return X\n\
+\n\
+def peek(Sig,Base=BASE):\n\
+    return logs.intx(peekbin(Sig,Base))\n\
+\n\
+\n\
+def valid(Sig,Base=BASE):\n\
+    X = peekbin(Sig,Base)\n\
+    return X=='1'\n\
+\n\
+\n\
+\n\
+def negedge():\n\
+    if veri.stime()>LASTTIME:\n\
+        veri.finish()\n\
+        sys.exit()\n\
+    work()\n\
+\n\
+veri.sensitive(CLK,'0','negedge()')\n\
+\n\
+def work():\n\
+    if valid('validin') and valid('takenin'):\n\
+        data = peek('datain')\n\
+        logs.log_info('data valid = %x'%data)\n\
+";
+
+
+
+
+
+
 FILE *inf;
 FILE *Frecords;
 int intcode();
-void do_help() { exit(0); }
+void do_help() { printf("PROTOTYPE:\n %s\n",helpstring); exit(0); }
 void check_x(int i) { return; }
 void do_dumpvars(char *s) { return; }
 
