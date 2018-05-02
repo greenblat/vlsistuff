@@ -78,6 +78,7 @@ Anode *a1_get_node() {
     (temp[p1_a_alloc_at_once-1]).nextp = 0;
     p1_clear_anode(temp); 
     if (!minimal_valid) minimal_valid = (long unsigned) temp;
+    else if (minimal_valid>((long unsigned) temp)) minimal_valid = (long unsigned) temp;
     return temp;
 }
 
