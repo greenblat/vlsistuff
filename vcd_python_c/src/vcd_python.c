@@ -626,6 +626,10 @@ veri_sensitive(PyObject *self,PyObject *args) {
     return Py_BuildValue("s", Str);
 }
 
+static PyObject*
+veri_force(PyObject *self,PyObject *args) {
+    return Py_BuildValue("i", 0);
+}
 
 static PyObject*
 veri_peek(PyObject *self,PyObject *args) {
@@ -682,6 +686,7 @@ veri_finish(PyObject *self,PyObject *args) {
 static PyMethodDef VeriMethods[] = {
     {"exists", veri_exists, METH_VARARGS, "Return the number of arguments received by the process."},
     {"peek", veri_peek, METH_VARARGS, "Return the number of arguments received by the process."},
+    {"force", veri_force, METH_VARARGS, "Just placeholder."},
     {"stime", veri_stime, METH_VARARGS, "Return the number of arguments received by the process."},
     {"listing", veri_listing, METH_VARARGS, "Return the number of arguments received by the process."},
     {"sensitive", veri_sensitive, METH_VARARGS,"add to watch list"},
