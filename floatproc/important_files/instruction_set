@@ -1,0 +1,185 @@
+opcode_width=32 ;
+
+instruction=div coding=BX,src1[5:0],src0[5:0],dst[4:0]
+ flag=use_src1  flag=write_dst8 flag=use_src0 flag=will_write_dst
+oneliner=divide
+;
+
+instruction=sin coding=BX,src0[5:0],dst[4:0]
+ flag=write_dst7 flag=use_src0 flag=will_write_dst
+oneliner=sinus of the angle in degrees
+;
+instruction=cos coding=BX,src0[5:0],dst[4:0]
+ flag=write_dst7 flag=use_src0 flag=will_write_dst
+oneliner=cosinus of the angle in degrees
+;
+instruction=arccos coding=BX,src0[5:0],dst[4:0]
+ flag=write_dst3 flag=use_src0 flag=will_write_dst
+oneliner=arccosinus of the angle in degrees
+;
+instruction=arcsin coding=BX,src0[5:0],dst[4:0]
+ flag=write_dst3 flag=use_src0 flag=will_write_dst
+oneliner=arcsinus of the angle in degrees
+;
+instruction=arctan coding=BX,src0[5:0],dst[4:0]
+ flag=write_dst7 flag=use_src0 flag=will_write_dst
+oneliner=arctangent of the angle in degrees
+;
+
+instruction=normpi coding=BX,src0[5:0],dst[4:0]
+ flag=write_dst2 flag=use_src0 flag=will_write_dst
+oneliner=normalize angle to 2*pi 
+;
+
+
+instruction=mod coding=BX,src1[5:0],src0[5:0],dst[4:0]
+ flag=use_src1  flag=write_dst8 flag=use_src0 flag=will_write_dst
+oneliner=modulo
+;
+
+instruction=mul coding=BX,src1[5:0],src0[5:0],dst[4:0]
+ flag=use_src1  flag=write_dst1 flag=use_src0 flag=will_write_dst
+oneliner=multiply
+;
+
+instruction=add coding=BX,src1[5:0],src0[5:0],dst[4:0]
+ flag=use_src1  flag=write_dst1 flag=use_src0 flag=will_write_dst
+oneliner=add
+;
+
+instruction=sub coding=BX,src1[5:0],src0[5:0],dst[4:0]
+ flag=use_src1  flag=write_dst1 flag=use_src0 flag=will_write_dst
+oneliner=subtract
+;
+
+
+instruction=div_lit coding=BX,src1[5:0],src0[5:0],dst[4:0]
+ flag=write_dst8 flag=use_src0 flag=will_write_dst flag=src1_literal
+oneliner=divide_by_literal
+;
+
+instruction=mul_lit coding=BX,src1[5:0],src0[5:0],dst[4:0]
+ flag=write_dst1 flag=use_src0 flag=will_write_dst flag=src1_literal
+oneliner=multiply_by_literal
+;
+
+instruction=add_lit coding=BX,src1[5:0],src0[5:0],dst[4:0]
+ flag=write_dst1 flag=use_src0 flag=will_write_dst flag=src1_literal
+oneliner=add
+;
+
+instruction=sub_lit coding=BX,src1[5:0],src0[5:0],dst[4:0]
+ flag=write_dst1 flag=use_src0 flag=will_write_dst flag=src1_literal
+oneliner=subtract
+;
+
+
+
+
+
+instruction=sqrt coding=BX,src0[5:0],dst[4:0]
+flag=write_dst6  flag=use_src0 flag=will_write_dst
+oneliner=square root
+;
+instruction=abs coding=BX,src0[5:0],dst[4:0]
+flag=write_dst1  flag=use_src0
+oneliner=absolute
+;
+instruction=neg coding=BX,src0[5:0],dst[4:0]
+flag=write_dst1  flag=use_src0
+oneliner=negate
+;
+
+instruction=imm coding=BX,sign,exp[7:0],mant[15:0],dst[4:0]
+flag=use_constants  flag=write_dst0  
+oneliner=load reg from literal .
+;
+
+instruction=load coding=BX,loffset[5:0],src1[5:0],src0[5:0],dst[4:0]
+flag=write_dst2  flag=use_src0   flag=will_write_dst
+oneliner=load from external table. address is src0+offset
+;
+instruction=store coding=BX,loffset[5:0],src1[5:0],src0[5:0],dst[4:0]
+flag=use_src0 flag=use_src1 
+oneliner=store to external table. address is src0+offset. data src1. dst is not used.
+;
+
+
+instruction=distance coding=BX,src2[5:0],src1[5:0],src0[5:0],dst[4:0]
+flag=use_src1  flag=use_src2  flag=write_dst6 flag=use_src0 flag=will_write_dst
+oneliner=distance of 3
+;
+
+instruction=sqsum coding=BX,src1[5:0],src0[5:0],dst[4:0]
+flag=use_src1   flag=write_dst1 flag=use_src0 flag=will_write_dst
+oneliner=sum of squares of 2
+;
+
+instruction=max coding=BX,src1[5:0],src0[5:0],dst[4:0]
+flag=use_src1   flag=write_dst1 flag=use_src0 flag=will_write_dst
+oneliner=put max to dst
+;
+
+instruction=min coding=BX,src1[5:0],src0[5:0],dst[4:0]
+flag=use_src1   flag=write_dst1 flag=use_src0 flag=will_write_dst
+oneliner=put min to dst
+;
+
+
+
+instruction=and coding=BX,src1[5:0],src0[5:0],dst[4:0]
+flag=write_bits0  
+oneliner=logical and src0 and src1 into bits dst
+;
+
+instruction=or coding=BX,src1[5:0],src0[5:0],dst[4:0]
+flag=write_bits0  
+oneliner=logical or src0 and src1 into bits dst
+;
+
+instruction=toint coding=BX,src1[5:0],src0[5:0],dst[4:0]
+flag=write_dst1 flag=use_src0 flag=will_write_dst 
+oneliner=treat src0 as floating and convert it to fixed point integer. src1 is used is twoscomplement shift
+;
+instruction=tofloat coding=BX,src1[5:0],src0[5:0],dst[4:0]
+flag=write_dst1 flag=use_src0 flag=will_write_dst 
+oneliner=treat src0 as integer and convert it to floaitng in dst reg. src1 is used is twoscomplement shift
+;
+
+instruction=round coding=BX,src1[5:0],src0[5:0],dst[4:0]
+flag=write_dst1 flag=use_src0 flag=will_write_dst 
+oneliner=src0 floating is made integer with rounding.
+;
+
+instruction=select coding=BX,condreg[5:0],src1[5:0],src0[5:0],dst[4:0]
+flag=use_src1 flag=write_dst1 flag=use_src0
+oneliner=move src1 or src0 to dst, based on conditions
+;
+
+instruction=selectbit coding=BX,condreg[5:0],src1[5:0],src0[5:0],dst[4:0]
+flag=write_bits0  
+oneliner=move bitarray src1 or src0 to dst, based on condition bit
+;
+
+instruction=compare coding=BX,condreg[5:0],src1[5:0],src0[5:0],dst[4:0]
+flag=use_src1 flag=use_src0 flag=write_bits1
+oneliner=compare src1 and src0 and based on condreg write 1 or 0 to dst bitreg.
+;
+
+instruction=jump_comp coding=BX,offset2[5:0],bit[3:0],src1[5:0],src0[5:0],offset[4:0]
+flag=use_src1 flag=use_src0 
+oneliner=compare src0 and src1 and based on condition in bit jump to offset. 
+;
+
+instruction=jump coding=BX,pol,condreg[5:0],bit[3:0],offset[11:0]
+flag=use_polarity
+oneliner=jump on condition valid by offset. 
+;
+
+instruction=nop coding=BX
+oneliner=nop  
+;
+instruction=finish coding=BX
+oneliner=computation done
+;
+
