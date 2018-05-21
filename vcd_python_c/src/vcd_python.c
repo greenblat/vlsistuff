@@ -22,6 +22,131 @@
 
 #define maxsig 500000
 
+char EXAMPLE[] = "\
+import string\n\
+import veri\n\
+\n\
+New = os.path.expanduser('~/pybin')\n\
+sys.path.append(New)\n\
+import logs\n\
+Monitors=[]\n\
+\n\
+BASE = 'ml_dma_tb.ifast_dma_top.iaxi_cpu_dma.axi_dma_128'\n\
+CLK = BASE + '.clk'\n\
+BASE2 = BASE + '.dma_operator'\n\
+\n\
+def peekbin(Sig,Base=BASE):\n\
+    X = veri.peek('%s.%s'%(Base,Sig))\n\
+    return X\n\
+\n\
+def peek(Sig,Base=BASE):\n\
+    return logs.intx(peekbin(Sig,Base))\n\
+\n\
+\n\
+def valid(Sig,Base=BASE):\n\
+    X = peekbin(Sig,Base)\n\
+    return X=='1'\n\
+\n\
+\n\
+\n\
+\n\
+cycles = 0\n\
+def negedge():\n\
+    global cycles\n\
+    if veri.stime()>4.60717e+08:\n\
+        logs.log_info('finishing on last time')\n\
+        veri.finish()\n\
+        sys.exit()\n\
+    logs.Cycles = cycles\n\
+    for Mon in Monitors: Mon.run()\n\
+    cycles += 1\n\
+\n\
+veri.sensitive(CLK,'0',\"negedge()\")\n\
+\n\
+class monitorAxiClass:\n\
+    def __init__(self,Path,Monitors):\n\
+        self.Path = Path\n\
+        self.RID = {}\n\
+        self.Add = ''\n\
+        self.Qin = []\n\
+        self.Q1 = []\n\
+        self.Raddr= -1\n\
+        self.Rsize= -1\n\
+        Monitors.append(self)\n\
+\n\
+    def peek(self,Sig):\n\
+        return logs.peek('%s%s.%s'%(self.Path,self.Add,Sig))\n\
+    def valid(self,Sig):\n\
+        return self.peek(Sig)==1\n\
+\n\
+    def run(self):\n\
+        self.joiner()\n\
+        self.entrance()\n\
+#        self.reads()\n\
+\n\
+\n\
+    def entrance(self):\n\
+        if self.valid('arvalid')and self.valid('arready'):\n\
+            arid = self.peek('arid')\n\
+            addr = self.peek('araddr')\n\
+            arsize = self.peek('arsize')\n\
+            arburst = self.peek('arburst')\n\
+            if arid not in self.RID:\n\
+                self.RID[arid] = []\n\
+            self.RID[arid].append((addr,arsize))\n\
+            logs.log_info('addarid arid=%d addr=%x size=%x len=%d'%(arid,addr,arsize,len(self.RID[arid])))\n\
+\n\
+        if self.valid('rvalid')and self.valid('rready'):\n\
+            rdata = self.peek('rdata')\n\
+            rid = self.peek('rid')\n\
+            rlast = self.valid('rlast')\n\
+            if rid not in self.RID:\n\
+                logs.log_error('rid %s not in RID %s'%(rid,self.RID.keys()))\n\
+                return\n\
+            if self.Raddr<0:\n\
+                self.Raddr,self.Rsize = self.RID[rid].pop(0)\n\
+                logs.log_info('start raddr=%x rsize=%x last=%d rid=%d len=%d'%(self.Raddr,self.Rsize,rlast,rid,len(self.RID[rid])))\n\
+            Off = self.Raddr & 0xf\n\
+            rdata0 = rdata>>(8*Off)\n\
+            Mask = maskit(self.Rsize)\n\
+            rdata1 = Mask & rdata0\n\
+            self.Qin.append((rdata1,self.Rsize,self.Raddr))\n\
+            logs.log_info('qin rdata=%x addr=%x size=%x mask=%x Off=%x'%(rdata1,self.Raddr,self.Rsize,Mask,Off))\n\
+            self.Raddr += (1<<self.Rsize)\n\
+            if rlast:\n\
+                self.Raddr = -1\n\
+\n\
+    def joiner(self):\n\
+        if self.valid('local_wr') and not self.valid('joiner_full'):\n\
+            wstrb = self.peek('local_wstrb')\n\
+            if wstrb == 0xffff:\n\
+                wdata = self.peek('local_wr_data')\n\
+                Rdata,Rsize,Addr = self.Qin.pop(0)\n\
+                logs.log_info('joiner %x  %x %x'%(Addr,Rdata,wdata))\n\
+                self.Q1.append((wdata,Rdata,Addr))\n\
+            else:\n\
+                wdata = self.peek('local_wr_data')\n\
+                Rdata,Rsize,Addr = self.Qin.pop(0)\n\
+                self.Q1.append((wdata,Rdata,Addr))\n\
+                logs.log_info('joiner wstrb=%x %x  %x %x'%(wstrb,Addr,Rdata,wdata))\n\
+\n\
+\n\
+    def reads(self):\n\
+        if self.valid('local_rd'):\n\
+            data = self.peek('local_rd_data_wire')\n\
+            wdata,rdata,addr = self.Q1.pop(0)\n\
+            logs.log_info('local_rd %x %x %x %x'%(addr,rdata,wdata,data))\n\
+\n\
+monitorAxiClass(BASE,Monitors)\n\
+\n\
+def maskit(Size):\n\
+    if Size==0: return 0xff\n\
+    if Size==1: return 0xffff\n\
+    if Size==2: return 0xffffffff\n\
+    if Size==3: return 0xffffffffffffffff\n\
+    if Size==4: return 0xffffffffffffffffffffffffffffffff\n\
+\n\
+";
 
 char helpstring[] = "\
 import os,sys,string\n\
@@ -73,7 +198,10 @@ def work():\n\
 FILE *inf;
 FILE *Frecords;
 int intcode();
-void do_help() { printf("PROTOTYPE:\n %s\n",helpstring); exit(0); }
+void do_help() { 
+    printf("activation:  vcd_python <vcd_file> <python file> \nPROTOTYPE of python file:\n %s\n",helpstring); 
+    printf("\n\n\nBIGGER EXAMPLE:\n %s\n",EXAMPLE); 
+    exit(0); }
 void check_x(int i) { return; }
 void do_dumpvars(char *s) { return; }
 
