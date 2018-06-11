@@ -360,12 +360,11 @@ void readfile(fname) char *fname; {
     j = (char *) 1;
     while ((j != NULL)&&((end_time<=0)||(run_time<=end_time))&&(inf!=NULL)) {
         j = fgets(line, 4999, inf);
+        if (j==0) exit(0);
         linenum++;
         guard++;
         if (guard>999999) { guard=0;printf("%d lines %g %d max=%d\n",linenum,run_time,0,maxusedsig);}
-        if (j == NULL) {
-            return;
-        }
+        if (j == NULL) { return; }
         i=sscanf(line,"%s %s %s %s %s %s %s",s1,s2,s3,s4,s5,s6,s7);
         switch (i) {
         case 7:
@@ -632,7 +631,7 @@ char *allocateString(int Len) {
 void drive_value(char *Val,char *Code) {
     int P = intcode(Code);
     char Bus[1000];
-    strcpy(Bus,qqia(sigs[P].name));
+//    strcpy(Bus,qqia(sigs[P].name));
     int Width = sigs[P].wide; 
     if (Width<=8) {
         strcpy(sigs[P].value,Val);
@@ -762,6 +761,7 @@ veri_force(PyObject *self,PyObject *args) {
 static PyObject*
 veri_peek(PyObject *self,PyObject *args) {
     char pvalue[10000];
+    char pvalue2[10000];
     char *pathstring;
     if (!PyArg_ParseTuple(args, "s",&pathstring))
         return NULL;
@@ -779,7 +779,16 @@ veri_peek(PyObject *self,PyObject *args) {
     } else {
         strcpy(pvalue,sigs[Psig].allocated);
     }
-    return Py_BuildValue("s", pvalue);
+    int Len  = strlen(pvalue);
+    if (Len<sigs[Psig].wide) {
+        int ii;
+        int diff = sigs[Psig].wide-Len;
+        for (ii=0;ii<diff;ii++) pvalue2[ii]='0';
+        pvalue2[ii]=0;
+        strcat(pvalue2,pvalue);
+        return Py_BuildValue("s", pvalue2);
+    } else 
+        return Py_BuildValue("s", pvalue);
 }
 
 
