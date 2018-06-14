@@ -21,6 +21,7 @@
 #define Timescale 8
 
 #define maxsig 500000
+#define longestVal  200000
 
 char EXAMPLE[] = "\
 import string\n\
@@ -94,7 +95,7 @@ class monitorAxiClass:\n\
             if arid not in self.RID:\n\
                 self.RID[arid] = []\n\
             self.RID[arid].append((addr,arsize))\n\
-            logs.log_info('addarid arid=%d addr=%x size=%x len=%d'%(arid,addr,arsize,len(self.RID[arid])))\n\
+//            logs.log_info('addarid arid=%d addr=%x size=%x len=%d'%(arid,addr,arsize,len(self.RID[arid])))\n\
 \n\
         if self.valid('rvalid')and self.valid('rready'):\n\
             rdata = self.peek('rdata')\n\
@@ -280,7 +281,7 @@ else:\n\
 
 
 
-char Valex[16000];
+char Valex[longestVal];
 
 
 
@@ -341,11 +342,11 @@ int main(argc, argv)
 
 void readfile(fname) char *fname; {
     char *j;
-    char line[1000];
+    char line[longestVal];
     int i;
     int guard=0;
-    char s1[10000];
-    char s2[10000];
+    char s1[longestVal];
+    char s2[longestVal];
     char s3[10000];
     char s4[10000];
     char s5[10000];
@@ -359,13 +360,24 @@ void readfile(fname) char *fname; {
     }
     j = (char *) 1;
     while ((j != NULL)&&((end_time<=0)||(run_time<=end_time))&&(inf!=NULL)) {
-        j = fgets(line, 4999, inf);
-        if (j==0) exit(0);
+        j = fgets(line, longestVal, inf);
         linenum++;
         guard++;
+
+        if (j==0) exit(0);
+//        printf(">>> %d %d %d\n",strlen(line),linenum,j);
+
         if (guard>999999) { guard=0;printf("%d lines %g %d max=%d\n",linenum,run_time,0,maxusedsig);}
-        if (j == NULL) { return; }
+        if (j == NULL) {
+            exit(0);
+        }
         i=sscanf(line,"%s %s %s %s %s %s %s",s1,s2,s3,s4,s5,s6,s7);
+        int Len = strlen(line);
+        if (Len>(longestVal-1000)) {
+            printf("wow! vcd line is way too long (%d) we support up to %d\n\n",Len,longestVal-1000);
+            exit(1);
+        }
+//        printf("line %d len=%d  i=%d %d %d\n",linenum,strlen(line),i,strlen(s1),strlen(s2));
         switch (i) {
         case 7:
             pushtok(s1,1);
@@ -411,6 +423,7 @@ void readfile(fname) char *fname; {
             break;
         }
     }
+    printf("readfile end\n");
 }
 int instate;
 void pushtok(char *s,int ind) {
@@ -424,7 +437,7 @@ void pushtok(char *s,int ind) {
         return;
     }
     instate++;
-//    printf("state=%d str=%s\n",state,s);
+//    printf("dbg state=%d str=%s\n",state,s);
     switch (state) {
     case Idle:
         n = qqai(s);
@@ -456,7 +469,6 @@ void pushtok(char *s,int ind) {
     case Enddef: do_enddefinitions(s);check_x(6);break;            
     case Dumpvars: do_dumpvars(s);check_x(7);break;            
     }
-
 }
 
 void do_scope(long n) {
@@ -501,6 +513,7 @@ void do_var(long n) {
                 ||(n==qqai("supply0"))
                 ||(n==qqai("real"))
                 ||(n==qqai("integer"))
+                ||(n==qqai("time"))
                 ||(n==qqai("event"))
             ) break;
             shouldbe("wire",n); break;
@@ -629,23 +642,26 @@ char *allocateString(int Len) {
 }
 
 void drive_value(char *Val,char *Code) {
-    int P = intcode(Code);
     char Bus[1000];
-//    strcpy(Bus,qqia(sigs[P].name));
+    int P = intcode(Code);
     int Width = sigs[P].wide; 
     if (Width<=8) {
         strcpy(sigs[P].value,Val);
     } else {
         strcpy(sigs[P].allocated,Val);
     }
-//    printf(">>> bus=%s code=%s val=%s wide=%d P=%d    %s \n",Bus,Code,Val,sigs[P].wide,P,sigs[P].allocated);
+//    strcpy(Bus,qqia(sigs[P].name));
+//    printf(">>> bus=%s code=%s val=%s wide=%d P=%d    %s psen=%d \n",Bus,Code,Val,sigs[P].wide,P,sigs[P].allocated,psensitive);
     for (int ii=0;ii<psensitive;ii++) {
-        if ((sensitives[ii]==P)&&(sensitive_value[ii]==Val[0])) {
+        int AA = (sensitives[ii]==P);
+        int BB = (sensitive_value[ii]==Val[0]);
+        int Cond = AA && BB;
+        if (Cond) {
             PyRun_SimpleString(qqia(sensitive_command[ii]));
             return;
         }
     }     
-
+    return;
 }
 
 
@@ -772,6 +788,8 @@ veri_peek(PyObject *self,PyObject *args) {
         printf("\npython: cannot find sig %s for peek\n",pathstring);
         return Py_BuildValue("s", "q");
     }
+
+
     if (sigs[Psig].wide<=8) {
         strcpy(pvalue,sigs[Psig].value);
     } else if (!sigs[Psig].allocated) {
