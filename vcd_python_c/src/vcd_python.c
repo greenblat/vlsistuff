@@ -206,6 +206,7 @@ void do_help() {
 void check_x(int i) { return; }
 void do_dumpvars(char *s) { return; }
 
+void conclusions();
 void record();
 void shouldbe();
 void readfile();
@@ -257,6 +258,9 @@ sys.path=sys.path+['./']\n\
 import veri\n\
 print 'python starting'\n\
 \n\
+def conclusions():\n\
+    print 'no conclusions() defined. add def conclusions(): to python code to print info at the end of the run'\n\
+    print 'cheers, ilia     greenblat@mac.com' \n\
 if os.path.exists(INITFILE):\n\
     try:\n\
         print 'verilog.py (%s) found'%INITFILE\n\
@@ -282,7 +286,6 @@ else:\n\
 
 
 char Valex[longestVal];
-
 
 
 
@@ -332,10 +335,15 @@ int main(argc, argv)
         
 
     readfile(fname1);
+    conclusions();
     exit(0);
 }
 
 
+void conclusions() {
+    PyRun_SimpleString("conclusions()");
+
+}
 
 
 
@@ -364,7 +372,10 @@ void readfile(fname) char *fname; {
         linenum++;
         guard++;
 
-        if (j==0) exit(0);
+        if (j==0) {
+            conclusions();
+            exit(0);
+        }
 //        printf(">>> %d %d %d\n",strlen(line),linenum,j);
 
         if (guard>999999) { guard=0;printf("%d lines %g %d max=%d\n",linenum,run_time,0,maxusedsig);}
