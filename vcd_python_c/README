@@ -31,3 +31,21 @@ vcd_python (C version) demands slightly different setup file from all python imp
 try it and the see the speed.
 
 
+addition:   veri.trace and veri.force
+the intention is to enable to write out vcd file of chosen signals.
+
+first use veri.trace(Sig,Width)   to mark signals for tracing.
+Sig maybe either existing net in the design or new net.
+New net requires width specified (as string).
+existing nets dont look at width parameter (but it still must be be there (put zero))
+
+
+Exisiting nets will be dumped to vcd file if they are traced. Simply by copying them from the VCD file.
+Invented nets need veri.force(Sig,Val) command to change their value in the created vcd file.
+
+
+
+
+
+
+

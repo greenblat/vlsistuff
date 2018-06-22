@@ -22,6 +22,7 @@
 
 #define maxsig 500000
 #define longestVal  200000
+#define SENSITIVES 100
 
 char EXAMPLE[] = "\
 import string\n\
@@ -192,12 +193,26 @@ def work():\n\
 ";
 
 
+char vcdHEADER0[] = "\
+$timescale\n\
+ 1ps\n\
+$end\n\
+$scope module vcdpython $end\n\
+";
 
+char vcdHEADER1[] = "\
+$upscope $end\n\
+$enddefinitions $end\n\
+#0\n\
+";
 
 
 
 FILE *inf;
 FILE *Frecords;
+FILE *vcdF0 = NULL;
+FILE *vcdF1 = NULL;
+int vcdCode = 1;
 int intcode();
 void do_help() { 
     printf("activation:  vcd_python <vcd_file> <python file> \nPROTOTYPE of python file:\n %s\n",helpstring); 
@@ -206,6 +221,9 @@ void do_help() {
 void check_x(int i) { return; }
 void do_dumpvars(char *s) { return; }
 
+char *int2bin(int AA,int Wid,char *tmp);
+void useTriggers();
+void armTriggers();
 void conclusions();
 void record();
 void shouldbe();
@@ -233,6 +251,11 @@ int search=0;
 int maxusedsig;
 int debug;
 
+// activate by time steps.
+float startTime = -1;
+float deltaTime = -1;
+float nextTriggerTime = -1.0;
+char functionTime[1000];
 
 
 int psig=1;
@@ -244,6 +267,7 @@ typedef struct SIG {
     int wide;
     char *allocated;
     char value[9];
+    char traceable;
 } change_sig;
 
  change_sig sigs[maxsig];
@@ -287,6 +311,7 @@ else:\n\
 
 char Valex[longestVal];
 
+int armed[SENSITIVES];
 
 
 char option[200],fname1[1000],fname2[1000];
@@ -307,7 +332,8 @@ int main(argc, argv)
     fname1[0]=0;
     fname2[0]=0;
 /* update hash table maxsize, if wanted */
-    for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].allocated=0;} 
+    for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].allocated=0; sigs[i].traceable=0;} 
+    for (i=0;i<SENSITIVES;i++) armed[i]=0;
     if (argc <= 1) do_help();
     if (argc > 1) {
         for (k = 2; k <= argc; k++) {
@@ -376,7 +402,6 @@ void readfile(fname) char *fname; {
             conclusions();
             exit(0);
         }
-//        printf(">>> %d %d %d\n",strlen(line),linenum,j);
 
         if (guard>999999) { guard=0;printf("%d lines %g %d max=%d\n",linenum,run_time,0,maxusedsig);}
         if (j == NULL) {
@@ -437,6 +462,7 @@ void readfile(fname) char *fname; {
     printf("readfile end\n");
 }
 int instate;
+float lastTraceTime = 0.0;
 void pushtok(char *s,int ind) {
     int pr;
     long n;
@@ -444,6 +470,13 @@ void pushtok(char *s,int ind) {
         run_time=atof(&(s[1]));
         LASTCHANGE++;
         if ((run_time>=0)&&(run_time<start_time)&&(search)) search_time(start_time);
+//        useTriggers();
+//        printf("next=%f run=%f cond=%d\n",nextTriggerTime,run_time,((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)));
+//        if (vcdF0) { fprintf(vcdF1,"%s\n",s);}
+        if ((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)) {
+            nextTriggerTime += deltaTime; 
+            PyRun_SimpleString(functionTime);
+         }
         state=Values;
         return;
     }
@@ -605,17 +638,40 @@ void search_time(start_time) int start_time;
                 state=Values;
                 return;
             }
+//            useTriggers();
+            printf("next=%f run=%f cond=%d\n",nextTriggerTime,run_time,((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)));
+            if ((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)) {
+                nextTriggerTime += deltaTime; 
+                PyRun_SimpleString(functionTime);
+             }
+
         } else {
             do_value(line);
         }
     }
 }
 
+char codeintstr[30];
+void codeint(int Ind) {
+    int pp;
+    int pos = 1;
+    int xx = Ind % 94;
+    Ind = Ind / 94;
+    codeintstr[0] = xx + '!';
+    codeintstr[1] = 0;
+    while (Ind!=0) {
+        xx = Ind % 94;
+        Ind = Ind / 94;
+        codeintstr[pos] = xx + '!';
+        pos++;
+        codeintstr[pos] = 0;
+    }
+}
 
 int intcode(char *st) {
     int cur,i,res=0,machpil=1,more;
     for (i=0;(st[i]!=0)&&(st[i]!='\n');i++) {
-        cur = (1+st[i]-'!');
+        cur = (st[i]-'!');
         if ((cur>=0)&&(cur<=94)) {
             more = cur*machpil;
             res += more;
@@ -625,10 +681,11 @@ int intcode(char *st) {
     return res;
 }
 
-long sensitives[100];
-char sensitive_value[100];
-long sensitive_command[100];
+long sensitives[SENSITIVES];
+char sensitive_value[SENSITIVES];
+long sensitive_command[SENSITIVES];
 int psensitive=0;
+
 
 #define BIG 1000000
 char bigbig[BIG];
@@ -651,7 +708,6 @@ char *allocateString(int Len) {
     Ptr = malloc(Len+2);
     return Ptr;
 }
-
 void drive_value(char *Val,char *Code) {
     char Bus[1000];
     int P = intcode(Code);
@@ -661,18 +717,38 @@ void drive_value(char *Val,char *Code) {
     } else {
         strcpy(sigs[P].allocated,Val);
     }
-//    strcpy(Bus,qqia(sigs[P].name));
-//    printf(">>> bus=%s code=%s val=%s wide=%d P=%d    %s psen=%d \n",Bus,Code,Val,sigs[P].wide,P,sigs[P].allocated,psensitive);
+    if (sigs[P].traceable) {
+        if (lastTraceTime<run_time) {
+            fprintf(vcdF1,"#%ld\n",(long) run_time);
+            lastTraceTime = run_time;
+        }
+        if (Val[0]=='b')
+            fprintf(vcdF1,"%s %s\n",Val,Code);
+        else
+            fprintf(vcdF1,"%s%s\n",Val,Code);
+    }
+    armTriggers(P,Val);
+    useTriggers();
+}
+
+void armTriggers(int P,char *Val) {
     for (int ii=0;ii<psensitive;ii++) {
         int AA = (sensitives[ii]==P);
         int BB = (sensitive_value[ii]==Val[0]);
         int Cond = AA && BB;
         if (Cond) {
-            PyRun_SimpleString(qqia(sensitive_command[ii]));
-            return;
+            armed[ii]=1;
         }
-    }     
-    return;
+    }
+}
+
+void useTriggers() {
+    for (int ii=0;ii<psensitive;ii++) {
+        if (armed[ii]) {
+            PyRun_SimpleString(qqia(sensitive_command[ii]));
+            armed[ii]=0;
+        }
+    }
 }
 
 
@@ -708,6 +784,7 @@ void record(long code,long bus,int width) {
     if (psig>maxusedsig)
         maxusedsig = psig;
     sprintf(fullname,"%s.%s",qqia(getscope(temp)),qqia(bus));
+    printf("fullname %s code=%s  %d\n",fullname,qqia(code),psig);
     long FullName = qqai(fullname);
     if (sigs[psig].code== -1) {
         sigs[psig].name=bus;
@@ -766,6 +843,15 @@ veri_sensitive(PyObject *self,PyObject *args) {
     if (!PyArg_ParseTuple(args, "sss",&pathstring,&val,&function))
         return NULL;
 
+    if ((pathstring[0]<='9')&&(pathstring[0]>='0')) {
+        startTime = atoi(pathstring);
+        nextTriggerTime = atof(pathstring);
+        deltaTime = atof(val);
+        strcpy(functionTime,function);
+        printf("install time based triggers start=%f delta=%f\n",nextTriggerTime,deltaTime);
+        return Py_BuildValue("s", Str);
+    }
+
     long Psig =  qqas(qqai(pathstring));
     printf("install ptr=%d psig=%lu sensitive %s %s %s\n",psensitive,Psig,pathstring,val,function);
     sensitives[psensitive] =Psig; 
@@ -780,8 +866,86 @@ veri_sensitive(PyObject *self,PyObject *args) {
     return Py_BuildValue("s", Str);
 }
 
+
+int trace_widths[1000];
+
+static PyObject*
+veri_trace(PyObject *self,PyObject *args) {
+    char *pathstring;
+    char *wstr;
+    if (!PyArg_ParseTuple(args, "ss",&pathstring,&wstr))
+        return NULL;
+
+    if (!vcdF0) {
+        vcdF0  = fopen("more0.vcd","w");
+        fprintf(vcdF0,"%s\n",vcdHEADER0);
+        vcdF1  = fopen("more1.vcd","w");
+        fprintf(vcdF1,"%s\n",vcdHEADER1);
+        fprintf(vcdF1,"#%ld\n",(long) run_time);
+    }
+
+    long pp = qqai(pathstring);
+    long was = qqas(pp);
+    if (was) {
+        sigs[was].traceable = 1;
+        codeint(was);
+        printf("traceable now %s   %ld     |%s|   name=%s full=%s \n",pathstring,was,codeintstr,qqia(sigs[was].name),qqia(sigs[was].fpath));
+        if (sigs[was].wide>1)
+            fprintf(vcdF0,"$var reg %d %s %s [%d:0] $end\n",sigs[was].wide,codeintstr,pathstring,sigs[was].wide-1);
+        else
+            fprintf(vcdF0,"$var reg %d %s %s $end\n",sigs[was].wide,codeintstr,pathstring);
+        return Py_BuildValue("s", 0);
+    }
+    qqsa(pp,vcdCode);
+    codeint(vcdCode);
+    trace_widths[vcdCode]=atoi(wstr);
+    if (trace_widths[vcdCode]>1)
+        fprintf(vcdF0,"$var reg %s %s %s [%d:0] $end\n",wstr,codeintstr,pathstring,trace_widths[vcdCode]-1);
+    else
+        fprintf(vcdF0,"$var reg %s %s %s $end\n",wstr,codeintstr,pathstring);
+    vcdCode += 1;
+    return Py_BuildValue("i", 0);
+}
+
 static PyObject*
 veri_force(PyObject *self,PyObject *args) {
+    char *pathstring;
+    char *vstr;
+    if (!PyArg_ParseTuple(args, "ss",&pathstring,&vstr))
+        return NULL;
+    if (!vcdF0) {
+        vcdF0  = fopen("more0.vcd","w");
+        fprintf(vcdF0,"%s\n",vcdHEADER0);
+        vcdF1  = fopen("more1.vcd","w");
+        fprintf(vcdF1,"%s\n",vcdHEADER1);
+        fprintf(vcdF1,"#%ld\n",(long) run_time);
+    }
+    long pp = qqai(pathstring);
+    int this;
+    if (!qqas(pp)) {
+        qqsa(pp,vcdCode);
+        codeint(vcdCode);
+        fprintf(vcdF0,"$var reg 1 %s %s $end\n",codeintstr,pathstring);
+        this = vcdCode;
+        vcdCode += 1;
+    }  else {
+        this = qqas(pp);
+        codeint(this);
+    }
+//    printf(">>>> %s %s %d %d\n",pathstring,vstr,pp,this);
+    int XX = atoi(vstr);
+    char tmp[100];
+    int Wid = trace_widths[this];
+    int2bin(XX,Wid,tmp);
+    if (lastTraceTime<run_time) {
+        fprintf(vcdF1,"#%ld\n",(long) run_time);
+        lastTraceTime = run_time;
+    }
+    if (Wid>1) 
+        fprintf(vcdF1,"b%s %s\n",tmp,codeintstr);
+    else
+        fprintf(vcdF1,"%c%s\n",tmp[0],codeintstr);
+
     return Py_BuildValue("i", 0);
 }
 
@@ -852,7 +1016,8 @@ veri_finish(PyObject *self,PyObject *args) {
 static PyMethodDef VeriMethods[] = {
     {"exists", veri_exists, METH_VARARGS, "Return the number of arguments received by the process."},
     {"peek", veri_peek, METH_VARARGS, "Return the number of arguments received by the process."},
-    {"force", veri_force, METH_VARARGS, "Just placeholder."},
+    {"force", veri_force, METH_VARARGS, "tracing of new signals."},
+    {"trace", veri_trace, METH_VARARGS, "tracing of new signals."},
     {"stime", veri_stime, METH_VARARGS, "Return the number of arguments received by the process."},
     {"listing", veri_listing, METH_VARARGS, "Return the number of arguments received by the process."},
     {"sensitive", veri_sensitive, METH_VARARGS,"add to watch list"},
@@ -875,5 +1040,19 @@ void start_python() {
     PyDict_SetItemString(globals, "__builtins__", PyEval_GetBuiltins());
     locals = Py_BuildValue("{}");
 }
+
+char *int2bin(int AA,int Wid,char *tmp) {
+    int i;
+    for (i=0;i<Wid;i++) {
+        if (AA & (1<<i)) {
+            tmp[Wid-1-i]='1';  
+        } else {   
+            tmp[Wid-1-i]='0';  
+        }
+    }   
+    tmp[Wid]=0;
+    return tmp;
+}
+
 
 
