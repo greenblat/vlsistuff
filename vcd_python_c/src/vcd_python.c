@@ -651,35 +651,45 @@ void search_time(start_time) int start_time;
     }
 }
 
+
+
+
+
+
 char codeintstr[30];
 void codeint(int Ind) {
-    int pp;
+    int pp; 
     int pos = 1;
-    int xx = Ind % 94;
-    Ind = Ind / 94;
+    int xx = (Ind % 94);
+    Ind = Ind / 94; 
     codeintstr[0] = xx + '!';
     codeintstr[1] = 0;
     while (Ind!=0) {
-        xx = Ind % 94;
-        Ind = Ind / 94;
+        xx = (Ind % 94)-1;
+        Ind = Ind / 94; 
         codeintstr[pos] = xx + '!';
         pos++;
-        codeintstr[pos] = 0;
-    }
+    }   
+    codeintstr[pos] = 0;
 }
 
 int intcode(char *st) {
     int cur,i,res=0,machpil=1,more;
     for (i=0;(st[i]!=0)&&(st[i]!='\n');i++) {
-        cur = (st[i]-'!');
+        cur = (st[i]-' '); 
         if ((cur>=0)&&(cur<=94)) {
             more = cur*machpil;
             res += more;
-            machpil *= 94;
-        }
-    }
-    return res;
+            machpil *= 94; 
+        }   
+    }   
+    return res-1;
 }
+
+
+
+
+
 
 long sensitives[SENSITIVES];
 char sensitive_value[SENSITIVES];
@@ -712,6 +722,10 @@ void drive_value(char *Val,char *Code) {
     char Bus[1000];
     int P = intcode(Code);
     int Width = sigs[P].wide; 
+    if (strlen(Val)>Width) {
+        printf("FATAL internal error. net=%s code=%s (P=%d)has different width declared=%d actual=%ld in linenum %d\n",qqia(sigs[P].fpath),Code,P,Width,strlen(Val),linenum);
+        exit(2);
+    }
     if (Width<=8) {
         strcpy(sigs[P].value,Val);
     } else {
@@ -784,7 +798,7 @@ void record(long code,long bus,int width) {
     if (psig>maxusedsig)
         maxusedsig = psig;
     sprintf(fullname,"%s.%s",qqia(getscope(temp)),qqia(bus));
-    printf("fullname %s code=%s  %d\n",fullname,qqia(code),psig);
+//    printf("fullname %s code=%s  %d\n",fullname,qqia(code),psig);
     long FullName = qqai(fullname);
     if (sigs[psig].code== -1) {
         sigs[psig].name=bus;
@@ -932,7 +946,6 @@ veri_force(PyObject *self,PyObject *args) {
         this = qqas(pp);
         codeint(this);
     }
-//    printf(">>>> %s %s %d %d\n",pathstring,vstr,pp,this);
     int XX = atoi(vstr);
     char tmp[100];
     int Wid = trace_widths[this];

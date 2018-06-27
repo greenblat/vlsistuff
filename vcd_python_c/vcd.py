@@ -11,16 +11,16 @@ def peeklocal(Sig,Base=BASE):
     return logs.peek('%s.%s'%(Base,Sig))
 
 Totals = {'aw':0,'ar':0,'dw':0,'dr':0}
-veri.trace('aaa',5)
-veri.trace('bbb',8)
-veri.trace(CLK,0)
+veri.trace('aaa','5')
+veri.trace('bbb','8')
+veri.trace(CLK,'0')
 def negedge():
     Time = veri.stime()
     awvalid = peeklocal('awvalid')
     awready = peeklocal('awready')
     if (awvalid==1)and(awready==1):
-        veri.force('aaa',str(Time & 0x1f)
-        veri.force('bbb',str(~Time & 0x1f)
+        veri.force('aaa',str(Time & 0x1f))
+        veri.force('bbb',str(~Time & 0x1f))
         awaddr = peeklocal('awaddr')
         awsize = peeklocal('awsize')
         awlen = peeklocal('awlen')
