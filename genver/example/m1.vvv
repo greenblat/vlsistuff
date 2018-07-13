@@ -25,6 +25,20 @@ wire [WID:0]  wwII = 0
     ;   
 #
 
+#import math
+## this example of more complex replacements:
+#MANY = 256
+#ONE  = 16
+#COMA = ' '
+wire [<>MANY*ONE-1<>:0] tablex =  {
+#for II in range(MANY):
+#    DD =  int(4096*math.sin(0.5*math.pi*II/MANY))
+    COMAONE'dDD
+#    COMA = ','
+#
+};
+
+
 
 
 endmodule

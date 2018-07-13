@@ -123,7 +123,7 @@ def runFromLines(lines,FnameOut,Args):
     More = string.join(Args,' ')
     Work = 'python execme.py %s > %s'%(Args,FnameOut)
     os.system(Work)
-    os.system('/bin/rm  execme.py')
+#    os.system('/bin/rm  execme.py')
 
 def rework_backs(Str):
     Str1 = string.replace(Str,'\\n','\\\\n')
@@ -198,7 +198,7 @@ def evalStuff(Str):
         except:
             try:
                 exec("NxiX = %s"%wrds[II])
-                wrds[II] = NxiX
+                wrds[II] = str(NxiX)
             except:
                 print '// failed eval of "%s"'%(wrds[II])
     Str2 = string.join(wrds,'')

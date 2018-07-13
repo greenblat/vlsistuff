@@ -2,7 +2,7 @@
 genver.py is macro preprocessing script using python as macro language.
 
 mostly i use it to expand verilog files (spiced with special python commands).
-in many cases it is just to avoid using ugly "generate" constructs.
+in many cases it is just to avoid using complex "generate" constructs.
 
 to run example do:
 
@@ -13,7 +13,6 @@ or
 pybin/genverm1.py example/m1.vvv
 
 this will produce example.v
-(pybin/genverm1.py  : it added some variable replacement. marked <>EXPR<> - the expression is replaced with it's eval.)
 
 check it out and see how it was derived from .vvv file.
 there is always execme.py temporary file created. You may delete it.
@@ -36,7 +35,7 @@ assign (weak0,weak1) cucu6 = 100-6;
 this is simple substitution of every AA to it's value. 
 this is the reason i give the python variables names that not appear anywhere by chance.
 
-python is very sensitivie to indentation. my script needs every indentation ro be of FOUR spaces.
+python is very sensitivie to indentation. my script needs every indentation to be of FOUR spaces.
 so for example:
 
 #WID = 5
@@ -60,4 +59,15 @@ assign wwII = 0
 #
 
 notice that single # in line closes all indentations (loops and ifs).
+
+
+computation:
+sometimes You want activate a function or computation and put in text the result.
+for this use <>EXPR<>    <> - this tells the script to do computation (actually an eval).
+then all of it is replaced with result of the expression.
+
+#AA = 34
+#BB = 768
+assign net3 = <>len(bin(AA*BB))-2<>'d<>AA*2+int(sqrt(AA*BB))<>;
+#
 
