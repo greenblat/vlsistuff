@@ -91,14 +91,11 @@ def main():
         FnameOut = '%s.v'%Top
     run(Fname,FnameOut,sys.argv[3:])
 
-
-
 def run(Fname,FnameOut,Args):
     File = open(Fname)
     lines = File.readlines()
     File.close()
     runFromLines(lines,FnameOut,Args)
-
 
 def runFromLines(lines,FnameOut,Args):
     global Code0,Strings
@@ -126,7 +123,7 @@ def runFromLines(lines,FnameOut,Args):
     More = string.join(Args,' ')
     Work = 'python execme.py %s > %s'%(Args,FnameOut)
     os.system(Work)
-#    os.system('/bin/rm  execme.py')
+    os.system('/bin/rm  execme.py')
 
 def rework_backs(Str):
     Str1 = string.replace(Str,'\\n','\\\\n')
@@ -199,7 +196,11 @@ def evalStuff(Str):
             New = eval(wrds[II],{},Varsi)
             wrds[II] = str(New)
         except:
-            print '// failed eval of "%s"'%(wrds[II])
+            try:
+                exec("NxiX = %s"%wrds[II])
+                wrds[II] = NxiX
+            except:
+                print '// failed eval of "%s"'%(wrds[II])
     Str2 = string.join(wrds,'')
     return Str2
 
@@ -389,13 +390,17 @@ def seek_vars(line):
     elif wrds[1]=='=':
         if ',' not in wrds[0]:
             Code0.append('%sVars["%s"]=str(%s)\n'%(Indent,wrds[0],wrds[0]))    
-        
+        else:        
+            ww = string.split(wrds[0],',')
+            for ww0 in ww:
+                Code0.append('%sVars["%s"]=str(%s)\n'%(Indent,ww0,ww0))    
 
 def calc_indent(line):
     wrds = string.split(line)    
     if len(wrds)==0:
         print 'lnum=%d in file, fatal ident, aborting. '%(Lnum)
         sys.exit()
+        
     ind = line.index(wrds[0])
     if wrds[0] in ['for','if','else:','elif']:
         ind += 4
