@@ -184,6 +184,7 @@ def replace_setenvs(line):
     for Key in Keys:
         if '$%s'%Key in line:
             line = string.replace(line,'$%s'%Key,os.environ[Key])
+            line = string.replace(line,'//','/')
     return line
 
 
@@ -233,6 +234,12 @@ def main():
         for err in s.err:
             print >> sys.stderr, err
     
+def run(Fname,outFname): 
+    s = scanClass(Fname,outFname ,False)
+    if len(s.err) > 0:
+        print >> sys.stderr,"\n\n*** Errors encountered:"
+        for err in s.err:
+            print >> sys.stderr, err
 
 if (__name__ == '__main__'):
     main()

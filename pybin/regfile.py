@@ -9,6 +9,11 @@ except:
 import csvPageClass
 import logs
 
+mustParams = {}
+listedParams = {}
+mustParams['reg'] = string.split('access wid')
+listedParams['reg'] = mustParams['reg'] + string.split('desc latch reset')
+
 helpSTRING = '''
     regfile.py ny.xlsx> | <reg.csv> | <test1.regfile> 
     accepts either xls or csv or text format.
@@ -408,7 +413,7 @@ def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
         hasFields[Reg]=True
     File = open('%s.axiv'%Csv.Module,'w')
     W1 = len(bin(Csv.runAddr))-2
-    print '>>>',Csv.runAddr,Csv.runAddr,bin(Csv.runAddr),len(bin(Csv.runAddr))
+#    print '>>>',Csv.runAddr,Csv.runAddr,bin(Csv.runAddr),len(bin(Csv.runAddr))
 
     File.write(string.replace(AXISTRING,"MODULE",Csv.Module))
     LL = writeInputsOutputsAndWires(Csv,File)
@@ -690,41 +695,8 @@ def dumpRamVerilog(FFF,Addrs,Csv,Reset):
                 File.write('assign %s[%s] = %s;\n'%(Reg,Pos,Field))
 
     
-    File.write('always @(posedge clk %s) begin\n    if (!rst_n) begin\n'%Reset)
-    for Add,Reg in LL:
-        ST = Csv.regs[Reg]
-        Wid = int(ST[1])
-        Acc = ST[0]
-        if type(ST[2])==types.IntType:
-           Def = ST[2]
-        else:
-           Def = eval(ST[2])
-        if writable(Acc):
-            File.write('        %s <= %d\'h%x;\n'%(Reg,Wid,Def))
-    File.write('    end else if (rwrite && rsel)  begin\n')
-    for Add,Reg in LL:
-        ST = Csv.regs[Reg]
-        Wid = int(ST[1])
-        Acc = ST[0]
-        Addr = int(ST[3])& 0xfffc
-        if writable(Acc):
-            if (Wid<2):
-                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= wdata[0];\n'%(W1,Addr,Reg))
-            elif (Wid<=8):
-                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= wdata[7:0];\n'%(W1,Addr,Reg))
-            elif (Wid<=32):
-                Wdata = '(%s[%d:0] & ~mask[%d:0]) | (wdata &mask)'%(Reg,Wid-1,Wid-1) 
-                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= %s;\n'%(W1,Addr,Reg,Wdata))
-            else:
-
-                Many,Add = Wid/32,Wid%32
-                Many += (Add>0)
-                for X in range(Many):
-                    Wdata = '(%s[%d:%d] & ~mask[31:0]) | (wdata &mask)'%(Reg,X*32+31,X*32) 
-                    File.write('        if (mpaddr[%d:0]==\'h%x) %s[%d:%d] <= %s;\n'%(W1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
-
-    File.write('    end \n')
-    File.write('end \n')
+    writeLatches(File,Reset,LL,Csv,W1)
+    writeFlops(File,Reset,LL,Csv,W1)
 
 
     for Add,Reg in LL:
@@ -761,6 +733,81 @@ def dumpRamVerilog(FFF,Addrs,Csv,Reset):
 
     File.write('endmodule\n')
 
+def writeFlops(File,Reset,LL,Csv,W1):
+    File.write('always @(posedge clk %s) begin\n    if (!rst_n) begin\n'%Reset)
+    for Add,Reg in LL:
+        ST = Csv.regs[Reg]
+        
+        Wid = int(ST[1])
+        Acc = ST[0]
+        if type(ST[2])==types.IntType:
+           Def = ST[2]
+        else:
+           Def = eval(ST[2])
+        if writable(Acc) and (ST[5]=='false'):
+            File.write('        %s <= %d\'h%x;\n'%(Reg,Wid,Def))
+    File.write('    end else if (rwrite && rsel)  begin\n')
+    for Add,Reg in LL:
+        ST = Csv.regs[Reg]
+        Wid = int(ST[1])
+        Acc = ST[0]
+        Addr = int(ST[3])& 0xfffc
+        if writable(Acc) and  (ST[5]=='false'):
+            if (Wid<2):
+                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= wdata[0];\n'%(W1,Addr,Reg))
+            elif (Wid<=8):
+                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= wdata[7:0];\n'%(W1,Addr,Reg))
+            elif (Wid<=32):
+                Wdata = '(%s[%d:0] & ~mask[%d:0]) | (wdata &mask)'%(Reg,Wid-1,Wid-1) 
+                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= %s;\n'%(W1,Addr,Reg,Wdata))
+            else:
+
+                Many,Add = Wid/32,Wid%32
+                Many += (Add>0)
+                for X in range(Many):
+                    Wdata = '(%s[%d:%d] & ~mask[31:0]) | (wdata &mask)'%(Reg,X*32+31,X*32) 
+                    File.write('        if (mpaddr[%d:0]==\'h%x) %s[%d:%d] <= %s;\n'%(W1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
+
+    File.write('    end \n')
+    File.write('end \n')
+
+def writeLatches(File,Reset,LL,Csv,W1):    
+    File.write('always @(*) begin\n    if (!rst_n) begin\n')
+    for Add,Reg in LL:
+        ST = Csv.regs[Reg]
+        
+        Wid = int(ST[1])
+        Acc = ST[0]
+        if type(ST[2])==types.IntType:
+           Def = ST[2]
+        else:
+           Def = eval(ST[2])
+        if writable(Acc) and (ST[5]=='true'):
+            File.write('        %s = %d\'h%x;\n'%(Reg,Wid,Def))
+    File.write('    end else if (rwrite && rsel)  begin\n')
+    for Add,Reg in LL:
+        ST = Csv.regs[Reg]
+        Wid = int(ST[1])
+        Acc = ST[0]
+        Addr = int(ST[3])& 0xfffc
+        if writable(Acc) and  (ST[5]=='true'):
+            if (Wid<2):
+                File.write('        if (mpaddr[%d:0]==\'h%x) %s = wdata[0];\n'%(W1,Addr,Reg))
+            elif (Wid<=8):
+                File.write('        if (mpaddr[%d:0]==\'h%x) %s = wdata[7:0];\n'%(W1,Addr,Reg))
+            elif (Wid<=32):
+                Wdata = '(%s[%d:0] & ~mask[%d:0]) | (wdata &mask)'%(Reg,Wid-1,Wid-1) 
+                File.write('        if (mpaddr[%d:0]==\'h%x) %s = %s;\n'%(W1,Addr,Reg,Wdata))
+            else:
+
+                Many,Add = Wid/32,Wid%32
+                Many += (Add>0)
+                for X in range(Many):
+                    Wdata = '(%s[%d:%d] & ~mask[31:0]) | (wdata &mask)'%(Reg,X*32+31,X*32) 
+                    File.write('        if (mpaddr[%d:0]==\'h%x) %s[%d:%d] = %s;\n'%(W1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
+
+    File.write('    end \n')
+    File.write('end \n')
 
 
 
@@ -932,6 +979,8 @@ class itemClass:
             self.Params['reset']='0'
         if 'desc' not in Params:
             self.Params['desc']=' '
+        if 'latch' not in Params:
+            self.Params['latch']='false'
         self.addr=0
     def getParam(self,Param):
         if Param in self.Params: return self.Params[Param]
@@ -939,7 +988,8 @@ class itemClass:
         return '0'
     def csv(self,Fout):
         if self.Kind=='reg':
-            Fout.write('reg,%s,,%s,,%s,%s,,"%s"\n'%(self.Name,self.Params['access'],self.getParam('wid'),self.Params['reset'],self.Params['desc']))
+            self.checkParams()
+            Fout.write('reg,%s,,%s,,%s,%s,,"%s",%s\n'%(self.Name,self.Params['access'],self.getParam('wid'),self.Params['reset'],self.Params['desc'],self.Params['latch']))
         elif self.Kind=='field':
             Fout.write(',,%s,%s,,%s,%s,,"%s"\n'%(self.Name,'',self.Params['wid'],self.Params['reset'],self.Params['desc']))
         elif self.Kind=='ram':
@@ -948,6 +998,19 @@ class itemClass:
             Fout.write('array,%s,%s,,,%s,,%s"%s"\n'%(self.Name,'',self.Params['wid'],self.Params['amount'],self.Params['desc']))
         else:
             logs.log_error('untreated kind "%s"'%self.Kind)
+
+    def checkParams(self):
+        if (self.Kind not in mustParams)or(self.Kind not in listedParams):
+            logs.log_error('untreated kind "%s"'%self.Kind)
+            return
+            
+        for Prm in mustParams[self.Kind]:
+            if Prm not in self.Params: 
+                logs.log_error('missing param "%s" in  "%s" %s '%(Prm,self.Name,self.Kind))
+        for Prm in self.Params:
+            if Prm not in listedParams[self.Kind]:
+                logs.log_error('extra param "%s" in  "%s" %s '%(Prm,self.Name,self.Kind))
+
     def dump(self):
         logs.log_info('item %s addr=%x %s %s'%(self.Name,self.addr,self.Kind,self.Params))
     def nextAddr(self):

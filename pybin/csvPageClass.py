@@ -150,11 +150,12 @@ class csvPageClass:
 
     def useWords(self,lnum,Kind,LL):
         if Kind=='reg':
-            print '>>>>',LL
+#            print '>>>>',LL
             Name = LL[1]
             Access = LL[3]
             Width = int(LL[5])
             Desc = LL[8]
+            Latch = LL[9]
             if LL[6]=='':
                 Def=0
             else:
@@ -167,7 +168,7 @@ class csvPageClass:
                 self.runAddr += 4*X
             else:
                 self.runAddr += 4
-            self.regs[Name]=[Access,Width,Def,Addr,Desc]
+            self.regs[Name]=[Access,Width,Def,Addr,Desc,Latch]
             self.lastReg=Name
             self.fields[self.lastReg]=[]
         elif (Kind=='empty')and(LL[2]!=''):

@@ -374,13 +374,16 @@ def gatherPanicNets(deepListFname):
                         List.append('%s.%s'%(Path,Net))
                         
 
-def getValues(Path,Str,Hex=True):
+def getValues(Path,Str,Hex=True,Signed=False):
     wrds = string.split(string.replace(Str,',',' ')) 
     res = ''
     resi = []
     resd = {}
     for wrd in wrds:
-        Val = peek('%s.%s'%(Path,wrd))
+        if Signed:
+            Val = peeksigned('%s.%s'%(Path,wrd))
+        else:
+            Val = peek('%s.%s'%(Path,wrd))
         resi.append(Val)
         resd[wrd]=Val
         if Hex=='float':
