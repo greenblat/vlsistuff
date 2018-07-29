@@ -1,0 +1,20 @@
+
+
+all pyhton scripts assume python 2.7 .
+
+if You adopt them to python 3 - please  add them to git.
+
+run_example0 is script to run first example.
+before that, You need to compile the lexer. 
+goto lexer directory and there is "compile" script.
+the result of that script (it just runs gcc) is executable "verilog_lexer".
+this executable should be copied to Your local bin in one of the $PATH specified directories.
+
+
+all temp files in lexer are en-gitted, so if something goes wrong, You can start from later stage.
+
+enjoy.
+
+more examples will be coming.
+
+
