@@ -1,0 +1,1013 @@
+rule 216 ('Statements', ['Statements', 'Statement'])
+rule 217 ('Statements', ['Statement'])
+rule 214 ('Exprs', ['Exprs', "','", 'Expr'])
+rule 215 ('Exprs', ['Expr'])
+rule 212 ('Default', ['default', "':'", 'Statement'])
+rule 213 ('Default', ['default', "':'", "';'"])
+rule 210 ('Case', ['Exprs', "':'", 'Statement'])
+rule 211 ('Case', ['Exprs', "':'", "';'"])
+rule 165 ('Statement', ['begin', 'end'])
+rule 264 ('Expr', ['Dotted'])
+rule 265 ('Expr', ['number'])
+rule 218 ('LSH', ['token'])
+rule 219 ('LSH', ['token', 'Width'])
+rule 133 ('InstParams', ["'#'", "'('", "')'"])
+rule 132 ('InstParams', ["'#'", "'('", 'Prms_list', "')'"])
+rule 131 ('InstParams', ["'#'", 'token'])
+rule 130 ('InstParams', ["'#'", 'number'])
+rule 137 ('GenStatements', ['GenStatements', 'GenStatement'])
+rule 136 ('Generate', ['generate', 'GenStatements', 'endgenerate'])
+rule 135 ('Always', ['always', 'When', 'Statement'])
+rule 134 ('Always', ['always', 'Statement'])
+rule 139 ('GenStatement', ['begin', 'GenStatements', 'end'])
+rule 138 ('GenStatements', ['GenStatement'])
+rule 166 ('Statement', ['forever', 'Statement'])
+rule 24 ('Mstuff', ['Instance'])
+rule 25 ('Mstuff', ['Always'])
+rule 26 ('Mstuff', ['Generate'])
+rule 27 ('Mstuff', ['Parameter'])
+rule 20 ('Module_stuffs', ['Mstuff', 'Module_stuffs'])
+rule 21 ('Module_stuffs', [])
+rule 22 ('Mstuff', ['Definition'])
+rule 23 ('Mstuff', ['Assign'])
+rule 160 ('When_items', ['When_item'])
+rule 28 ('Mstuff', ['Localparam'])
+rule 29 ('Mstuff', ['Defparam'])
+rule 161 ('When_item', ['posedge', 'Expr'])
+rule 289 ('Expr', ['Expr', "'<'", 'Expr'])
+rule 0 ('$accept', ['Main', '$end'])
+rule 4 ('MainItem', ['Module'])
+rule 281 ('Expr', ['Expr', "'+'", 'Expr'])
+rule 8 ('Hparams', ["'#'", "'('", "')'"])
+rule 283 ('Expr', ['Expr', "'-'", 'Expr'])
+rule 163 ('When_item', ['Expr'])
+rule 285 ('Expr', ['Expr', "'%'", 'Expr'])
+rule 284 ('Expr', ['Expr', "'/'", 'Expr'])
+rule 287 ('Expr', ['Expr', "'|'", 'Expr'])
+rule 286 ('Expr', ['Expr', "'^'", 'Expr'])
+rule 119 ('Connection', ["'.'", 'token', "'('", 'Expr', "')'"])
+rule 271 ('Expr', ['hex'])
+rule 258 ('Dotted', ['token', "'.'", 'Dotted'])
+rule 120 ('Connection', ["'.'", 'token', "'('", "')'"])
+rule 121 ('AssignParams', ["'#'", "'('", 'Exprs', "')'"])
+rule 122 ('AssignParams', ["'#'", 'number'])
+rule 123 ('AssignParams', ["'#'", 'token'])
+rule 124 ('AssignParams', ["'#'", 'floating'])
+rule 125 ('Prms_list', ['Prms_list', "','", 'PrmAssign'])
+rule 126 ('Prms_list', ['PrmAssign'])
+rule 127 ('PrmAssign', ["'.'", 'token', "'('", 'Expr', "')'"])
+rule 128 ('PrmAssign', ["'.'", 'token'])
+rule 129 ('InstParams', ["'#'", "'('", 'Exprs', "')'"])
+rule 269 ('Expr', ['define', "'('", 'Expr', "')'"])
+rule 268 ('Expr', ['define'])
+rule 167 ('Statement', ['begin', "':'", 'token', 'Statements', 'end'])
+rule 118 ('Connection', ["'.'", "'*'"])
+rule 59 ('Strength', ['strong0'])
+rule 58 ('Strength', ['strong1'])
+rule 55 ('Assign', ['assign', 'StrengthDef', 'AssignParams', 'LSH', "'='", 'Expr', "';'"])
+rule 54 ('Assign', ['assign', 'AssignParams', 'LSH', "'='", 'Expr', "';'"])
+rule 57 ('StrengthDef', ["'('", 'Strength', "','", 'Strength', "')'"])
+rule 56 ('Assign', ['assign', 'StrengthDef', 'LSH', "'='", 'Expr', "';'"])
+rule 51 ('Definition', ['IntDir', 'InstParams', 'Tokens_list', "';'"])
+rule 50 ('Definition', ['IntDir', 'token', 'Width', "';'"])
+rule 53 ('Assign', ['assign', 'LSH', "'='", 'Expr', "';'"])
+rule 52 ('Definition', ['token', 'domino', 'token', 'token', "';'"])
+rule 259 ('Dotted', ['token', "'.'", 'token'])
+rule 312 ('Expr', ["'^'", 'Expr'])
+rule 298 ('Expr', ['Expr', 'eq3', 'Expr'])
+rule 299 ('Expr', ['Expr', 'not_eq', 'Expr'])
+rule 296 ('Expr', ['Expr', 'nor', 'Expr'])
+rule 297 ('Expr', ['Expr', 'eq_eq', 'Expr'])
+rule 294 ('Expr', ['Expr', 'xnor', 'Expr'])
+rule 295 ('Expr', ['Expr', 'nand', 'Expr'])
+rule 292 ('Expr', ['Expr', 'and_and', 'Expr'])
+rule 293 ('Expr', ['Expr', 'or_or', 'Expr'])
+rule 290 ('Expr', ['Expr', "'>'", 'Expr'])
+rule 291 ('Expr', ['Expr', 'power', 'Expr'])
+rule 164 ('Statement', ['begin', 'Statements', 'end'])
+rule 201 ('Statement', ['assign', 'LSH', "'='", 'Expr', "';'"])
+rule 199 ('Statement', ['Dotted', "';'"])
+rule 179 ('Statement', ['release', 'Expr', "';'"])
+rule 200 ('Statement', ['pragma'])
+rule 195 ('Statement', ['token', "';'"])
+rule 194 ('Statement', ["'#'", 'Expr', 'Statement'])
+rule 197 ('Statement', ['Repeat_statement'])
+rule 178 ('Statement', ['reg', 'Width', 'Tokens_list', "';'"])
+rule 191 ('Statement', ['casex', "'('", 'Expr', "')'", 'Cases', 'endcase'])
+rule 190 ('Statement', ['casez', "'('", 'Expr', "')'", 'Cases', 'Default', 'endcase'])
+rule 193 ('Statement', ["'#'", 'Expr', "';'"])
+rule 192 ('Statement', ['casex', "'('", 'Expr', "')'", 'Cases', 'Default', 'endcase'])
+rule 115 ('Instance', ['token', 'token', 'Width', "'('", 'Conns_list', "')'", "';'"])
+rule 114 ('Instance', ['token', 'InstParams', 'token', 'Width', "'('", 'Conns_list', "')'", "';'"])
+rule 88 ('Mem_def', ['input', 'Tokens_list', 'Width', "';'"])
+rule 89 ('Mem_def', ['input', 'Width', 'Tokens_list', "';'"])
+rule 111 ('Instance', ['token', 'token', "'('", 'Conns_list', "')'", "';'"])
+rule 110 ('Instance', ['or', "'('", 'Exprs', "')'", "';'"])
+rule 113 ('Instance', ['token', 'InstParams', 'token', "'('", 'Conns_list', "')'", "';'"])
+rule 112 ('Instance', ['token', 'token', "'('", 'Exprs', "')'", "';'"])
+rule 82 ('Mem_def', ['reg', 'Tokens_list', "';'"])
+rule 83 ('Mem_def', ['real', 'Tokens_list', "';'"])
+rule 80 ('Mem_defs', ['Mem_defs', 'Mem_def'])
+rule 81 ('Mem_defs', ['Mem_def'])
+rule 86 ('Mem_def', ['reg', 'Width', 'token', 'Width', "';'"])
+rule 87 ('Mem_def', ['input', 'Tokens_list', "';'"])
+rule 84 ('Mem_def', ['wreal', 'Tokens_list', "';'"])
+rule 85 ('Mem_def', ['reg', 'Width', 'Tokens_list', "';'"])
+rule 251 ('IntDir', ['tri0'])
+rule 304 ('Expr', ['Expr', 'shift_right', 'Expr'])
+rule 198 ('Statement', ['While_statement'])
+rule 256 ('CurlyItem', ['Expr', 'CurlyList'])
+rule 206 ('Soft_assigns', ['Soft_assign'])
+rule 226 ('Tokens_list', ['token'])
+rule 257 ('CurlyItem', ['Expr'])
+rule 3 ('Mains', ['MainItem'])
+rule 177 ('Statement', ['reg', 'Tokens_list', "';'"])
+rule 254 ('CurlyItems', ['CurlyItems', "','", 'CurlyItem'])
+rule 7 ('Hparams', ["'#'", "'('", 'head_params', "')'"])
+rule 247 ('IntDir', ['wire', 'signed'])
+rule 273 ('Expr', ['ubin'])
+rule 255 ('CurlyItems', ['CurlyItem'])
+rule 308 ('Expr', ['CurlyList'])
+rule 309 ('Expr', ["'-'", 'Expr'])
+rule 300 ('Expr', ['Expr', 'noteqeq', 'Expr'])
+rule 301 ('Expr', ['Expr', 'gr_eq', 'Expr'])
+rule 302 ('Expr', ['Expr', 'sm_eq', 'Expr'])
+rule 303 ('Expr', ['Expr', 'shift_left', 'Expr'])
+rule 225 ('Tokens_list', ['token', "','", 'Tokens_list'])
+rule 305 ('Expr', ['Expr', 'arith_shift_right', 'Expr'])
+rule 306 ('Expr', ['token', "'('", 'Exprs', "')'"])
+rule 307 ('Expr', ["'('", 'Expr', "')'"])
+rule 245 ('IntDir', ['real'])
+rule 244 ('IntDir', ['integer'])
+rule 108 ('Instance', ['token', 'InstParams', 'token', "'('", "')'", "';'"])
+rule 109 ('Instance', ['token', 'token', "';'"])
+rule 241 ('IntDir', ['reg'])
+rule 240 ('ExtDir', ['output', 'reg', 'signed'])
+rule 243 ('IntDir', ['signed'])
+rule 242 ('IntDir', ['wire'])
+rule 102 ('Pair', ['token', "'='", 'Expr'])
+rule 103 ('head_params', ['head_params', "','", 'head_param'])
+rule 100 ('Pairs', ['Pairs', "','", 'Pair'])
+rule 101 ('Pairs', ['Pair'])
+rule 106 ('head_param', ['token', "'='", 'Expr'])
+rule 107 ('Instance', ['token', 'token', "'('", "')'", "';'"])
+rule 104 ('head_params', ['head_param'])
+rule 105 ('head_param', ['parameter', 'token', "'='", 'Expr'])
+rule 39 ('Define', ['define', 'number', 'token', "'/'", 'number', 'token'])
+rule 38 ('Define', ['define', 'token', 'Expr'])
+rule 33 ('Mstuff', ['Define'])
+rule 32 ('Mstuff', ['Task'])
+rule 31 ('Mstuff', ['Function'])
+rule 30 ('Mstuff', ['Initial'])
+rule 37 ('Define', ['define', 'token'])
+rule 36 ('Define', ['define', 'string'])
+rule 35 ('Mstuff', ['newver'])
+rule 34 ('Mstuff', ['pragma'])
+rule 246 ('IntDir', ['reg', 'signed'])
+rule 310 ('Expr', ["'|'", 'Expr'])
+rule 282 ('Expr', ['Expr', "'*'", 'Expr'])
+rule 252 ('IntDir', ['tri1'])
+rule 205 ('Soft_assigns', ['Soft_assigns', "','", 'Soft_assign'])
+rule 223 ('LSH', ['Dotted'])
+rule 176 ('Statement', ['integer', 'Tokens_list', "';'"])
+rule 60 ('Strength', ['pull1'])
+rule 61 ('Strength', ['pull0'])
+rule 62 ('Strength', ['weak1'])
+rule 63 ('Strength', ['weak0'])
+rule 64 ('Strength', ['highz1'])
+rule 65 ('Strength', ['highz0'])
+rule 66 ('WidthInt', ['Width'])
+rule 67 ('WidthInt', ['integer'])
+rule 68 ('Function', ['function', 'token', "';'", 'Mem_defs', 'Statements', 'endfunction'])
+rule 69 ('Function', ['function', 'token', "';'", 'Statements', 'endfunction'])
+rule 175 ('Statement', ['wait', 'Expr', "';'"])
+rule 174 ('Statement', ['if', "'('", 'Expr', "')'", 'Statement', 'else', 'Statement'])
+rule 173 ('Statement', ['if', "'('", 'Expr', "')'", 'Statement'])
+rule 172 ('Statement', ['LSH', 'sm_eq', 'AssignParams', 'Expr', "';'"])
+rule 171 ('Statement', ['LSH', 'sm_eq', 'Expr', "';'"])
+rule 170 ('Statement', ['LSH', "'='", 'AssignParams', 'Expr', "';'"])
+rule 203 ('Repeat_statement', ['repeat', "'('", 'Expr', "')'", 'Statement'])
+rule 222 ('LSH', ['token', 'BusBit'])
+rule 288 ('Expr', ['Expr', "'&'", 'Expr'])
+rule 181 ('Statement', ['When', "';'"])
+rule 253 ('CurlyList', ["'{'", 'CurlyItems', "'}'"])
+rule 248 ('IntDir', ['genvar'])
+rule 182 ('Statement', ['emit', 'token', "';'"])
+rule 183 ('Statement', ['disable', 'token', "';'"])
+rule 180 ('Statement', ['force', 'Expr', "'='", 'Expr', "';'"])
+rule 2 ('Mains', ['Mains', 'MainItem'])
+rule 162 ('When_item', ['negedge', 'Expr'])
+rule 187 ('Statement', ['case', "'('", 'Expr', "')'", 'Cases', 'Default', 'endcase'])
+rule 184 ('Statement', ['token', "'('", "')'", "';'"])
+rule 6 ('Module', ['module', 'token', 'Hparams', 'Header', 'Module_stuffs', 'endmodule'])
+rule 220 ('LSH', ['token', 'BusBit', 'Width'])
+rule 186 ('Statement', ['case', "'('", 'Expr', "')'", 'Cases', 'endcase'])
+rule 188 ('Statement', ['case', "'('", 'Expr', "')'", 'Default', 'endcase'])
+rule 189 ('Statement', ['casez', "'('", 'Expr', "')'", 'Cases', 'endcase'])
+rule 311 ('Expr', ["'&'", 'Expr'])
+rule 202 ('For_statement', ['for', "'('", 'Soft_assigns', "';'", 'Expr', "';'", 'Soft_assigns', "')'", 'Statement'])
+rule 313 ('Expr', ['xnor', 'Expr'])
+rule 196 ('Statement', ['For_statement'])
+rule 221 ('LSH', ['token', 'BusBit', 'BusBit'])
+rule 185 ('Statement', ['token', "'('", 'Exprs', "')'", "';'"])
+rule 315 ('Expr', ["'!'", 'Expr'])
+rule 316 ('Expr', ["'~'", 'Expr'])
+rule 99 ('Defparam', ['defparam', 'Dotted', "'='", 'Expr', "';'"])
+rule 98 ('Localparam', ['localparam', 'Width', 'Pairs', "';'"])
+rule 168 ('Statement', ['fork', 'Statements', 'join'])
+rule 169 ('Statement', ['LSH', "'='", 'Expr', "';'"])
+rule 229 ('Width', ["'['", 'Expr', 'minus_range', 'Expr', "']'"])
+rule 228 ('Width', ["'['", 'Expr', 'plus_range', 'Expr', "']'"])
+rule 91 ('Mem_def', ['integer', 'Tokens_list', "';'"])
+rule 90 ('Mem_def', ['input', 'integer', 'Tokens_list', "';'"])
+rule 93 ('Parameter', ['parameter', 'Pairs', "';'"])
+rule 92 ('Mem_def', ['integer', 'Tokens_list', 'Width', "';'"])
+rule 95 ('Parameter', ['parameter', 'Width', 'Pairs', "';'"])
+rule 94 ('Parameter', ['parameter', 'signed', 'Pairs', "';'"])
+rule 97 ('Localparam', ['localparam', 'Pairs', "';'"])
+rule 96 ('Parameter', ['parameter', 'signed', 'Width', 'Pairs', "';'"])
+rule 11 ('Header', ["'('", 'Header_list', "')'", "';'"])
+rule 10 ('Header', ["';'"])
+rule 13 ('Header_list', ['Header_list', "','", 'Header_item'])
+rule 12 ('Header', ["'('", "')'", "';'"])
+rule 15 ('Header_item', ['ExtDir', 'token'])
+rule 14 ('Header_list', ['Header_item'])
+rule 17 ('Header_item', ['ExtDir', 'integer', 'token'])
+rule 16 ('Header_item', ['ExtDir', 'Width', 'token'])
+rule 19 ('Header_item', ['token'])
+rule 18 ('Header_item', ['ExtDir', 'Width', 'token', 'Width'])
+rule 314 ('Expr', ['nor', 'Expr'])
+rule 117 ('Conns_list', ['Connection'])
+rule 250 ('IntDir', ['supply1'])
+rule 116 ('Conns_list', ['Conns_list', "','", 'Connection'])
+rule 274 ('Expr', ['uhex'])
+rule 204 ('While_statement', ['while', "'('", 'Expr', "')'", 'Statement'])
+rule 275 ('Expr', ['udig'])
+rule 151 ('GenStatement', ['if', "'('", 'Expr', "')'", 'GenStatement', 'else', 'GenStatement'])
+rule 150 ('GenStatement', ['if', "'('", 'Expr', "')'", 'GenStatement'])
+rule 153 ('When', ["'@'", "'*'"])
+rule 152 ('GenFor_statement', ['for', "'('", 'Soft_assigns', "';'", 'Expr', "';'", 'Soft_assigns', "')'", 'GenStatement'])
+rule 155 ('When', ["'@'", 'token'])
+rule 154 ('When', ["'@'", 'star'])
+rule 157 ('Or_coma', ['or'])
+rule 156 ('When', ["'@'", "'('", 'When_items', "')'"])
+rule 159 ('When_items', ['When_items', 'Or_coma', 'When_item'])
+rule 158 ('Or_coma', ["','"])
+rule 277 ('Expr', ['token', 'BusBit', 'Width'])
+rule 234 ('ExtDir', ['output', 'reg'])
+rule 238 ('ExtDir', ['input', 'signed'])
+rule 239 ('ExtDir', ['output', 'signed'])
+rule 279 ('Expr', ['token', 'BusBit'])
+rule 207 ('Soft_assign', ['LSH', "'='", 'Expr'])
+rule 235 ('ExtDir', ['input', 'wire'])
+rule 236 ('ExtDir', ['output', 'wire'])
+rule 237 ('ExtDir', ['inout', 'wire'])
+rule 230 ('BusBit', ["'['", 'Expr', "']'"])
+rule 231 ('ExtDir', ['input'])
+rule 232 ('ExtDir', ['output'])
+rule 233 ('ExtDir', ['inout'])
+rule 224 ('LSH', ['CurlyList'])
+rule 280 ('Expr', ['Expr', "'?'", 'Expr', "':'", 'Expr'])
+rule 48 ('Definition', ['IntDir', 'Width', 'Tokens_list', "'='", 'Expr', "';'"])
+rule 49 ('Definition', ['IntDir', 'Width', 'token', 'Width', "';'"])
+rule 46 ('Definition', ['ExtDir', 'Width', 'Tokens_list', 'Width', "';'"])
+rule 47 ('Definition', ['IntDir', 'Width', 'Tokens_list', "';'"])
+rule 44 ('Definition', ['IntDir', 'Tokens_list', "'='", 'Expr', "';'"])
+rule 45 ('Definition', ['ExtDir', 'Width', 'Tokens_list', "';'"])
+rule 42 ('Definition', ['event', 'Tokens_list', "';'"])
+rule 43 ('Definition', ['IntDir', 'Tokens_list', "';'"])
+rule 40 ('Initial', ['initial', 'Statement'])
+rule 41 ('Definition', ['ExtDir', 'Tokens_list', "';'"])
+rule 1 ('Main', ['Mains'])
+rule 5 ('MainItem', ['Define'])
+rule 9 ('Hparams', [])
+rule 272 ('Expr', ['dig'])
+rule 146 ('GenStatement', ['Instance'])
+rule 147 ('GenStatement', ['GenFor_statement'])
+rule 144 ('GenStatement', ['Parameter'])
+rule 145 ('GenStatement', ['Defparam'])
+rule 142 ('GenStatement', ['Definition'])
+rule 143 ('GenStatement', ['Assign'])
+rule 140 ('GenStatement', ['begin', "':'", 'token', 'GenStatements', 'end'])
+rule 141 ('GenStatement', ['genvar', 'token', "';'"])
+rule 209 ('Cases', ['Case'])
+rule 208 ('Cases', ['Cases', 'Case'])
+rule 148 ('GenStatement', ['Always'])
+rule 149 ('GenStatement', ['Initial'])
+rule 77 ('Task', ['task', 'token', "';'", 'Statement', 'endtask'])
+rule 76 ('Task', ['task', 'token', "';'", 'Mem_defs', 'Statement', 'endtask'])
+rule 75 ('Function', ['function', 'WidthInt', 'token', "'('", 'Header_list', "')'", "';'", 'Mem_defs', 'Statement', 'endfunction'])
+rule 74 ('Function', ['function', 'WidthInt', 'token', "'('", 'Header_list', "')'", "';'", 'Statement', 'endfunction'])
+rule 73 ('Function', ['function', 'token', "'('", 'Header_list', "')'", "';'", 'Mem_defs', 'Statement', 'endfunction'])
+rule 72 ('Function', ['function', 'token', "'('", 'Header_list', "')'", "';'", 'Statement', 'endfunction'])
+rule 71 ('Function', ['function', 'WidthInt', 'token', "';'", 'Statement', 'endfunction'])
+rule 70 ('Function', ['function', 'WidthInt', 'token', "';'", 'Mem_defs', 'Statement', 'endfunction'])
+rule 278 ('Expr', ['token', 'BusBit', 'BusBit'])
+rule 79 ('Task', ['task', 'token', "'('", 'Header_list', "')'", "';'", 'Mem_defs', 'Statement', 'endtask'])
+rule 78 ('Task', ['task', 'token', "'('", 'Header_list', "')'", "';'", 'Statement', 'endtask'])
+rule 263 ('Expr', ['token'])
+rule 249 ('IntDir', ['supply0'])
+rule 262 ('Dotted', ['token', "'.'", 'token', "'('", 'Expr', "')'"])
+rule 227 ('Width', ["'['", 'Expr', "':'", 'Expr', "']'"])
+rule 261 ('Dotted', ['token', "'.'", 'token', 'BusBit'])
+rule 270 ('Expr', ['bin'])
+rule 260 ('Dotted', ['token', "'.'", 'token', 'Width'])
+rule 276 ('Expr', ['token', 'Width'])
+rule 267 ('Expr', ['string'])
+rule 266 ('Expr', ['floating'])
+state 344 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '438')]
+state 0 [('shift', 'module', '1'), ('shift', 'define', '2'), ('goto', 'Main', '3'), ('goto', 'Mains', '4'), ('goto', 'MainItem', '5'), ('goto', 'Module', '6'), ('goto', 'Define', '7')]
+state 346 [('shift', ';', '440')]
+state 347 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '441')]
+state 340 [('reduce', '$default', '165')]
+state 341 [('shift', 'token', '435')]
+state 342 [('reduce', '$default', '217')]
+state 343 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'end', '436'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '437'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 348 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '442')]
+state 349 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '443')]
+state 595 [('shift', ':', '641')]
+state 606 [('reduce', '$default', '180')]
+state 594 [('shift', 'else', '640'), ('reduce', '$default', '173')]
+state 619 [('reduce', 'token', '91'), ('reduce', 'assign', '91'), ('reduce', 'reg', '91'), ('reduce', 'integer', '91'), ('reduce', 'begin', '91'), ('reduce', 'if', '91'), ('reduce', 'wait', '91'), ('reduce', 'emit', '91'), ('reduce', 'case', '91'), ('reduce', 'casez', '91'), ('reduce', 'casex', '91'), ('reduce', 'forever', '91'), ('reduce', 'endfunction', '176'), ('reduce', 'endtask', '176'), ('reduce', 'for', '91'), ('reduce', 'while', '91'), ('reduce', 'fork', '91'), ('reduce', 'disable', '91'), ('reduce', 'pragma', '91'), ('reduce', 'force', '91'), ('reduce', 'release', '91'), ('reduce', 'repeat', '91'), ('reduce', "'#'", '91'), ('reduce', "'@'", '91'), ('reduce', "'{'", '91'), ('reduce', '$default', '91')]
+state 298 [('reduce', '$default', '103')]
+state 299 [('reduce', '$default', '240')]
+state 296 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '106')]
+state 297 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '404')]
+state 294 [('reduce', '$default', '254')]
+state 295 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '403')]
+state 292 [('reduce', '$default', '230')]
+state 293 [('reduce', '$default', '269')]
+state 290 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '401')]
+state 291 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '402')]
+state 591 [('reduce', '$default', '185')]
+state 590 [('reduce', '$default', '54')]
+state 593 [('reduce', '$default', '167')]
+state 592 [('reduce', '$default', '201')]
+state 199 [('shift', '(', '305'), ('shift', ';', '306'), ('shift', '[', '197'), ('goto', 'Width', '307')]
+state 198 [('shift', 'token', '304')]
+state 597 [('reduce', '$default', '209')]
+state 596 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'endcase', '642'), ('shift', 'default', '595'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'Case', '643'), ('goto', 'Default', '644'), ('goto', 'Exprs', '599'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '145')]
+state 195 [('reduce', '$default', '15')]
+state 194 [('shift', 'token', '95'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('goto', 'Header_item', '301'), ('goto', 'ExtDir', '102')]
+state 197 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '303')]
+state 196 [('shift', 'token', '302')]
+state 191 [('reduce', '$default', '237')]
+state 190 [('reduce', '$default', '239')]
+state 193 [('shift', ';', '300')]
+state 192 [('reduce', '$default', '12')]
+state 270 [('reduce', '$default', '146')]
+state 271 [('reduce', '$default', '148')]
+state 272 [('shift', 'token', '103'), ('shift', 'assign', '104'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('shift', 'reg', '105'), ('shift', 'wire', '106'), ('shift', 'tri0', '107'), ('shift', 'tri1', '108'), ('shift', 'signed', '109'), ('shift', 'event', '110'), ('shift', 'integer', '111'), ('shift', 'real', '112'), ('shift', 'always', '113'), ('shift', 'begin', '261'), ('shift', 'if', '262'), ('shift', 'or', '114'), ('shift', 'defparam', '115'), ('shift', 'parameter', '116'), ('shift', 'initial', '118'), ('shift', 'for', '263'), ('shift', 'endgenerate', '388'), ('shift', 'genvar', '264'), ('shift', 'supply0', '124'), ('shift', 'supply1', '125'), ('goto', 'Initial', '265'), ('goto', 'Definition', '266'), ('goto', 'Assign', '267'), ('goto', 'Parameter', '268'), ('goto', 'Defparam', '269'), ('goto', 'Instance', '270'), ('goto', 'Always', '271'), ('goto', 'GenStatement', '389'), ('goto', 'GenFor_statement', '274'), ('goto', 'ExtDir', '141'), ('goto', 'IntDir', '142')]
+state 273 [('reduce', '$default', '138')]
+state 274 [('reduce', '$default', '147')]
+state 275 [('reduce', '$default', '6')]
+state 276 [('reduce', '$default', '20')]
+state 277 [('shift', ';', '390')]
+state 278 [('shift', 'token', '213'), ('goto', 'Tokens_list', '391')]
+state 279 [('shift', ',', '332'), ('shift', '[', '197'), ('goto', 'Width', '392'), ('reduce', '$default', '226')]
+state 524 [('reduce', '$default', '184')]
+state 525 [('shift', ';', '591')]
+state 526 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '592')]
+state 527 [('reduce', '$default', '178')]
+state 520 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '588')]
+state 521 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '589')]
+state 522 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '590')]
+state 523 [('reduce', '$default', '53')]
+state 599 [('shift', ':', '646'), ('shift', ',', '285')]
+state 528 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'end', '593'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '437'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 529 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '594'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 449 [('reduce', '$default', '183')]
+state 448 [('reduce', '$default', '168')]
+state 443 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ')', '532')]
+state 442 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ')', '531')]
+state 441 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ')', '530')]
+state 440 [('reduce', '$default', '182')]
+state 447 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ')', '536')]
+state 446 [('shift', '=', '535')]
+state 445 [('reduce', '$default', '206')]
+state 444 [('shift', ';', '533'), ('shift', ',', '534')]
+state 108 [('reduce', '$default', '252')]
+state 109 [('reduce', '$default', '243')]
+state 102 [('shift', 'token', '195'), ('shift', 'integer', '196'), ('shift', '[', '197'), ('goto', 'Width', '198')]
+state 103 [('shift', 'token', '199'), ('shift', 'domino', '200'), ('shift', '#', '201'), ('goto', 'InstParams', '202')]
+state 100 [('shift', ')', '193'), ('shift', ',', '194')]
+state 101 [('reduce', '$default', '14')]
+state 106 [('shift', 'signed', '212'), ('reduce', '$default', '242')]
+state 107 [('reduce', '$default', '251')]
+state 104 [('shift', 'token', '203'), ('shift', '#', '204'), ('shift', '(', '205'), ('shift', '{', '35'), ('goto', 'StrengthDef', '206'), ('goto', 'AssignParams', '207'), ('goto', 'LSH', '208'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '210')]
+state 105 [('shift', 'signed', '211'), ('reduce', '$default', '241')]
+state 39 [('reduce', '$default', '264')]
+state 38 [('reduce', '$default', '308')]
+state 33 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '57')]
+state 32 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '56')]
+state 31 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '55')]
+state 30 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '54')]
+state 37 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '63')]
+state 36 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '62')]
+state 35 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'CurlyItems', '59'), ('goto', 'CurlyItem', '60'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '61')]
+state 34 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '58')]
+state 641 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', ';', '670'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '671'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 640 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '669'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 643 [('reduce', '$default', '208')]
+state 642 [('reduce', '$default', '186')]
+state 645 [('reduce', '$default', '188')]
+state 644 [('shift', 'endcase', '672')]
+state 438 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ')', '529')]
+state 439 [('reduce', '$default', '175')]
+state 436 [('reduce', '$default', '164')]
+state 437 [('reduce', '$default', '216')]
+state 434 [('reduce', '$default', '176')]
+state 435 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '342'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'Statements', '528'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 432 [('reduce', '$default', '177')]
+state 433 [('shift', ';', '527')]
+state 430 [('shift', ')', '525'), ('shift', ',', '285')]
+state 431 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '526')]
+state 339 [('shift', ';', '434')]
+state 338 [('shift', 'token', '213'), ('goto', 'Tokens_list', '433')]
+state 335 [('reduce', '$default', '195')]
+state 334 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', ')', '429'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'Exprs', '430'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '145')]
+state 337 [('shift', ';', '432')]
+state 336 [('shift', '=', '431')]
+state 331 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '427')]
+state 330 [('shift', '=', '426')]
+state 333 [('reduce', '$default', '42')]
+state 332 [('shift', 'token', '213'), ('goto', 'Tokens_list', '428')]
+state 345 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '439')]
+state 6 [('reduce', '$default', '4')]
+state 99 [('shift', ';', '192')]
+state 98 [('shift', 'wire', '191'), ('reduce', '$default', '233')]
+state 91 [('shift', 'token', '183')]
+state 90 [('shift', '=', '182')]
+state 93 [('shift', ')', '184'), ('shift', ',', '185')]
+state 92 [('reduce', '$default', '8')]
+state 95 [('reduce', '$default', '19')]
+state 94 [('reduce', '$default', '104')]
+state 97 [('shift', 'reg', '188'), ('shift', 'wire', '189'), ('shift', 'signed', '190'), ('reduce', '$default', '232')]
+state 96 [('shift', 'wire', '186'), ('shift', 'signed', '187'), ('reduce', '$default', '231')]
+state 559 [('shift', ';', '621')]
+state 558 [('shift', ';', '619'), ('shift', '[', '197'), ('goto', 'Width', '620')]
+state 555 [('shift', 'token', '213'), ('goto', 'Tokens_list', '615')]
+state 554 [('shift', ';', '613'), ('shift', '[', '197'), ('goto', 'Width', '614')]
+state 557 [('shift', 'token', '617'), ('goto', 'Tokens_list', '618')]
+state 556 [('shift', ';', '616')]
+state 551 [('reduce', '$default', '96')]
+state 550 [('reduce', '$default', '99')]
+state 553 [('shift', 'token', '213'), ('goto', 'Tokens_list', '612')]
+state 552 [('shift', ';', '611')]
+state 238 [('reduce', '$default', '134')]
+state 239 [('reduce', '$default', '196')]
+state 234 [('shift', '(', '357')]
+state 235 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '358')]
+state 236 [('shift', 'token', '359'), ('shift', 'star', '360'), ('shift', '*', '361'), ('shift', '(', '362')]
+state 237 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', ';', '363'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '364'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 230 [('shift', 'token', '354')]
+state 231 [('reduce', '$default', '200')]
+state 232 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '355')]
+state 233 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '356')]
+state 1 [('shift', 'token', '8')]
+state 614 [('shift', ';', '655')]
+state 146 [('shift', '(', '286'), ('shift', '.', '47'), ('shift', '[', '48'), ('goto', 'Width', '287'), ('goto', 'BusBit', '288'), ('reduce', '$default', '259')]
+state 147 [('reduce', '$default', '258')]
+state 144 [('shift', ')', '284'), ('shift', ',', '285')]
+state 145 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '215')]
+state 142 [('shift', 'token', '279'), ('shift', '#', '201'), ('shift', '[', '197'), ('goto', 'InstParams', '280'), ('goto', 'Tokens_list', '281'), ('goto', 'Width', '282')]
+state 143 [('shift', 'token', '283')]
+state 140 [('reduce', '$default', '26')]
+state 141 [('shift', 'token', '213'), ('shift', '[', '197'), ('goto', 'Tokens_list', '277'), ('goto', 'Width', '278')]
+state 612 [('shift', ';', '654')]
+state 613 [('reduce', '$default', '87')]
+state 610 [('reduce', '$default', '170')]
+state 611 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'input', '473'), ('shift', 'reg', '474'), ('shift', 'integer', '475'), ('shift', 'real', '476'), ('shift', 'wreal', '477'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'Mem_defs', '652'), ('goto', 'Mem_def', '479'), ('goto', 'When', '254'), ('goto', 'Statement', '653'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 616 [('reduce', 'token', '82'), ('reduce', 'assign', '82'), ('reduce', 'reg', '82'), ('reduce', 'integer', '82'), ('reduce', 'begin', '82'), ('reduce', 'if', '82'), ('reduce', 'wait', '82'), ('reduce', 'emit', '82'), ('reduce', 'case', '82'), ('reduce', 'casez', '82'), ('reduce', 'casex', '82'), ('reduce', 'forever', '82'), ('reduce', 'endfunction', '177'), ('reduce', 'endtask', '177'), ('reduce', 'for', '82'), ('reduce', 'while', '82'), ('reduce', 'fork', '82'), ('reduce', 'disable', '82'), ('reduce', 'pragma', '82'), ('reduce', 'force', '82'), ('reduce', 'release', '82'), ('reduce', 'repeat', '82'), ('reduce', "'#'", '82'), ('reduce', "'@'", '82'), ('reduce', "'{'", '82'), ('reduce', '$default', '82')]
+state 617 [('shift', ',', '332'), ('shift', '[', '197'), ('goto', 'Width', '657'), ('reduce', '$default', '226')]
+state 148 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'plus_range', '289'), ('shift', 'minus_range', '290'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', ':', '291'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ']', '292')]
+state 149 [('reduce', '$default', '277')]
+state 689 [('shift', 'endfunction', '694')]
+state 688 [('reduce', '$default', '73')]
+state 685 [('reduce', '$default', '151')]
+state 684 [('reduce', '$default', '78')]
+state 687 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '693'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 686 [('shift', ')', '692'), ('shift', ',', '534')]
+state 681 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'input', '473'), ('shift', 'reg', '474'), ('shift', 'integer', '475'), ('shift', 'real', '476'), ('shift', 'wreal', '477'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'Mem_def', '561'), ('goto', 'When', '254'), ('goto', 'Statement', '689'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 680 [('reduce', '$default', '86')]
+state 683 [('shift', 'endtask', '691')]
+state 682 [('shift', 'endfunction', '690')]
+state 623 [('reduce', '$default', '68')]
+state 622 [('reduce', '$default', '84')]
+state 133 [('reduce', '$default', '31')]
+state 132 [('reduce', '$default', '23')]
+state 131 [('reduce', '$default', '22')]
+state 130 [('reduce', '$default', '30')]
+state 137 [('reduce', '$default', '29')]
+state 136 [('reduce', '$default', '28')]
+state 135 [('reduce', '$default', '27')]
+state 134 [('reduce', '$default', '32')]
+state 494 [('reduce', '$default', '51')]
+state 495 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '574')]
+state 139 [('reduce', '$default', '25')]
+state 138 [('reduce', '$default', '24')]
+state 490 [('reduce', '$default', '141')]
+state 491 [('reduce', '$default', '45')]
+state 492 [('shift', ';', '573')]
+state 493 [('reduce', '$default', '50')]
+state 24 [('reduce', '$default', '275')]
+state 25 [('reduce', '$default', '267')]
+state 26 [('shift', '(', '51'), ('reduce', '$default', '268')]
+state 27 [('reduce', '$default', '266')]
+state 20 [('reduce', '$default', '271')]
+state 21 [('reduce', '$default', '272')]
+state 22 [('reduce', '$default', '273')]
+state 23 [('reduce', '$default', '274')]
+state 28 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '52')]
+state 29 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '53')]
+state 407 [('shift', 'token', '504'), ('shift', '*', '505')]
+state 406 [('shift', ';', '503')]
+state 405 [('reduce', '$default', '18')]
+state 404 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '105')]
+state 403 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '280')]
+state 402 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ']', '502')]
+state 401 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ']', '501')]
+state 400 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ']', '500')]
+state 629 [('reduce', '$default', '140')]
+state 409 [('reduce', '$default', '117')]
+state 408 [('shift', ')', '506'), ('shift', ',', '507')]
+state 628 [('reduce', '$default', '76')]
+state 379 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'input', '473'), ('shift', 'reg', '474'), ('shift', 'integer', '475'), ('shift', 'real', '476'), ('shift', 'wreal', '477'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'Mem_defs', '478'), ('goto', 'Mem_def', '479'), ('goto', 'When', '254'), ('goto', 'Statement', '342'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'Statements', '480'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 378 [('shift', 'token', '95'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('goto', 'Header_list', '472'), ('goto', 'Header_item', '101'), ('goto', 'ExtDir', '102')]
+state 371 [('shift', ';', '467'), ('shift', ',', '374')]
+state 370 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '466')]
+state 373 [('reduce', '$default', '93')]
+state 372 [('shift', 'token', '247'), ('goto', 'Pairs', '468'), ('goto', 'Pair', '250')]
+state 375 [('shift', ';', '470'), ('shift', ',', '374')]
+state 374 [('shift', 'token', '247'), ('goto', 'Pair', '469')]
+state 377 [('shift', ';', '471'), ('shift', ',', '374')]
+state 376 [('reduce', '$default', '97')]
+state 618 [('shift', ';', '658')]
+state 393 [('shift', ';', '494')]
+state 392 [('shift', ';', '493')]
+state 88 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '180')]
+state 89 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '181')]
+state 397 [('shift', ';', '497'), ('shift', '=', '498')]
+state 396 [('shift', ',', '332'), ('shift', '[', '197'), ('goto', 'Width', '496'), ('reduce', '$default', '226')]
+state 395 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '495')]
+state 394 [('reduce', '$default', '43')]
+state 82 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '174')]
+state 83 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '175')]
+state 80 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '172')]
+state 81 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '173')]
+state 86 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '178')]
+state 87 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '179')]
+state 84 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '176')]
+state 85 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '177')]
+state 7 [('reduce', '$default', '5')]
+state 601 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'endcase', '649'), ('shift', 'default', '595'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'Case', '643'), ('goto', 'Default', '650'), ('goto', 'Exprs', '599'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '145')]
+state 607 [('reduce', '$default', '203')]
+state 586 [('shift', ')', '638'), ('shift', ',', '507')]
+state 587 [('reduce', '$default', '57')]
+state 584 [('reduce', '$default', '108')]
+state 585 [('shift', ';', '637')]
+state 582 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '636')]
+state 583 [('reduce', '$default', '125')]
+state 580 [('reduce', '$default', '112')]
+state 581 [('shift', ';', '635')]
+state 588 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '639')]
+state 589 [('reduce', '$default', '56')]
+state 245 [('shift', '.', '47')]
+state 244 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'Exprs', '368'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '145')]
+state 247 [('shift', '=', '370')]
+state 246 [('shift', '=', '369')]
+state 241 [('reduce', '$default', '198')]
+state 240 [('reduce', '$default', '197')]
+state 243 [('shift', ';', '367'), ('reduce', '$default', '223')]
+state 242 [('shift', 'sm_eq', '365'), ('shift', '=', '366')]
+state 615 [('shift', ';', '656')]
+state 249 [('shift', ';', '373'), ('shift', ',', '374')]
+state 248 [('shift', 'token', '247'), ('shift', '[', '197'), ('goto', 'Pairs', '371'), ('goto', 'Pair', '250'), ('goto', 'Width', '372')]
+state 519 [('shift', ')', '587')]
+state 518 [('reduce', '$default', '121')]
+state 511 [('shift', '(', '582'), ('reduce', '$default', '128')]
+state 510 [('reduce', '$default', '52')]
+state 513 [('shift', '.', '414'), ('goto', 'PrmAssign', '583')]
+state 512 [('reduce', '$default', '132')]
+state 515 [('shift', ';', '584')]
+state 514 [('reduce', '$default', '129')]
+state 517 [('shift', '.', '407'), ('goto', 'Conns_list', '586'), ('goto', 'Connection', '409')]
+state 516 [('shift', ')', '585'), ('shift', ',', '507')]
+state 458 [('reduce', '$default', '160')]
+state 459 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '163')]
+state 621 [('reduce', '$default', '83')]
+state 620 [('shift', ';', '659')]
+state 627 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'input', '473'), ('shift', 'reg', '474'), ('shift', 'integer', '475'), ('shift', 'real', '476'), ('shift', 'wreal', '477'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'Mem_defs', '662'), ('goto', 'Mem_def', '479'), ('goto', 'When', '254'), ('goto', 'Statement', '663'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 626 [('reduce', '$default', '71')]
+state 625 [('shift', 'endfunction', '661')]
+state 624 [('shift', ';', '660')]
+state 450 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '537')]
+state 451 [('reduce', '$default', '179')]
+state 452 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ')', '538')]
+state 453 [('reduce', '$default', '193')]
+state 454 [('reduce', '$default', '194')]
+state 455 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '539')]
+state 456 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '540')]
+state 457 [('shift', 'or', '541'), ('shift', ')', '542'), ('shift', ',', '543'), ('goto', 'Or_coma', '544')]
+state 179 [('reduce', '$default', '282')]
+state 178 [('shift', 'power', '71'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '300')]
+state 177 [('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'power', '71'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '283')]
+state 176 [('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'power', '71'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '281')]
+state 175 [('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'power', '71'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '290')]
+state 174 [('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'power', '71'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '289')]
+state 173 [('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '303')]
+state 172 [('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '304')]
+state 171 [('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '305')]
+state 170 [('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '288')]
+state 656 [('reduce', '$default', '89')]
+state 657 [('shift', ';', '680')]
+state 654 [('reduce', '$default', '90')]
+state 253 [('shift', 'token', '247'), ('goto', 'Pairs', '377'), ('goto', 'Pair', '250')]
+state 182 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '296')]
+state 183 [('shift', '=', '297')]
+state 180 [('reduce', '$default', '284')]
+state 181 [('reduce', '$default', '285')]
+state 186 [('reduce', '$default', '235')]
+state 187 [('reduce', '$default', '238')]
+state 184 [('reduce', '$default', '7')]
+state 185 [('shift', 'token', '90'), ('shift', 'parameter', '91'), ('goto', 'head_param', '298')]
+state 652 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'input', '473'), ('shift', 'reg', '474'), ('shift', 'integer', '475'), ('shift', 'real', '476'), ('shift', 'wreal', '477'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'Mem_def', '561'), ('goto', 'When', '254'), ('goto', 'Statement', '678'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 188 [('shift', 'signed', '299'), ('reduce', '$default', '234')]
+state 189 [('reduce', '$default', '236')]
+state 658 [('reduce', 'token', '85'), ('reduce', 'assign', '85'), ('reduce', 'reg', '85'), ('reduce', 'integer', '85'), ('reduce', 'begin', '85'), ('reduce', 'if', '85'), ('reduce', 'wait', '85'), ('reduce', 'emit', '85'), ('reduce', 'case', '85'), ('reduce', 'casez', '85'), ('reduce', 'casex', '85'), ('reduce', 'forever', '85'), ('reduce', 'endfunction', '178'), ('reduce', 'endtask', '178'), ('reduce', 'for', '85'), ('reduce', 'while', '85'), ('reduce', 'fork', '85'), ('reduce', 'disable', '85'), ('reduce', 'pragma', '85'), ('reduce', 'force', '85'), ('reduce', 'release', '85'), ('reduce', 'repeat', '85'), ('reduce', "'#'", '85'), ('reduce', "'@'", '85'), ('reduce', "'{'", '85'), ('reduce', '$default', '85')]
+state 653 [('shift', 'endfunction', '679')]
+state 650 [('shift', 'endcase', '676')]
+state 651 [('shift', 'token', '203'), ('shift', '{', '35'), ('goto', 'Soft_assigns', '677'), ('goto', 'Soft_assign', '445'), ('goto', 'LSH', '446'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '210')]
+state 11 [('reduce', '$default', '36')]
+state 10 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '40'), ('reduce', '$default', '37')]
+state 13 [('reduce', '$default', '2')]
+state 12 [('accept', '$default', 0)]
+state 15 [('shift', '(', '42'), ('shift', ';', '43'), ('goto', 'Header', '44')]
+state 14 [('shift', '(', '41')]
+state 17 [('reduce', '$default', '265')]
+state 16 [('shift', '/', '45')]
+state 19 [('reduce', '$default', '270')]
+state 18 [('shift', '(', '46'), ('shift', '.', '47'), ('shift', '[', '48'), ('goto', 'Width', '49'), ('goto', 'BusBit', '50'), ('reduce', '$default', '263')]
+state 659 [('reduce', '$default', '92')]
+state 62 [('reduce', '$default', '315')]
+state 322 [('reduce', '$default', '61')]
+state 323 [('reduce', '$default', '62')]
+state 320 [('reduce', '$default', '59')]
+state 321 [('reduce', '$default', '60')]
+state 326 [('reduce', '$default', '65')]
+state 327 [('shift', ',', '423')]
+state 324 [('reduce', '$default', '63')]
+state 325 [('reduce', '$default', '64')]
+state 328 [('shift', 'token', '203'), ('shift', '{', '35'), ('goto', 'LSH', '424'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '210')]
+state 329 [('shift', '=', '425')]
+state 201 [('shift', 'number', '309'), ('shift', 'token', '310'), ('shift', '(', '311')]
+state 200 [('shift', 'token', '308')]
+state 203 [('shift', '.', '47'), ('shift', '[', '48'), ('goto', 'Width', '313'), ('goto', 'BusBit', '314'), ('reduce', '$default', '218')]
+state 202 [('shift', 'token', '312')]
+state 205 [('shift', 'strong1', '319'), ('shift', 'strong0', '320'), ('shift', 'pull1', '321'), ('shift', 'pull0', '322'), ('shift', 'weak1', '323'), ('shift', 'weak0', '324'), ('shift', 'highz1', '325'), ('shift', 'highz0', '326'), ('goto', 'Strength', '327')]
+state 204 [('shift', 'number', '315'), ('shift', 'token', '316'), ('shift', 'floating', '317'), ('shift', '(', '318')]
+state 207 [('shift', 'token', '203'), ('shift', '{', '35'), ('goto', 'LSH', '330'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '210')]
+state 206 [('shift', 'token', '203'), ('shift', '#', '204'), ('shift', '{', '35'), ('goto', 'AssignParams', '328'), ('goto', 'LSH', '329'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '210')]
+state 209 [('reduce', '$default', '224')]
+state 208 [('shift', '=', '331')]
+state 77 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '169')]
+state 76 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '168')]
+state 75 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '167')]
+state 74 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '166')]
+state 73 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '165')]
+state 72 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '164')]
+state 71 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '163')]
+state 70 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '162')]
+state 655 [('reduce', '$default', '88')]
+state 79 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '171')]
+state 78 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '170')]
+state 2 [('shift', 'number', '9'), ('shift', 'token', '10'), ('shift', 'string', '11')]
+state 669 [('reduce', '$default', '174')]
+state 668 [('reduce', '$default', '114')]
+state 667 [('reduce', '$default', '127')]
+state 666 [('reduce', '$default', '119')]
+state 665 [('shift', 'token', '203'), ('shift', '{', '35'), ('goto', 'Soft_assigns', '686'), ('goto', 'Soft_assign', '445'), ('goto', 'LSH', '446'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '210')]
+state 664 [('shift', 'token', '103'), ('shift', 'assign', '104'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('shift', 'reg', '105'), ('shift', 'wire', '106'), ('shift', 'tri0', '107'), ('shift', 'tri1', '108'), ('shift', 'signed', '109'), ('shift', 'event', '110'), ('shift', 'integer', '111'), ('shift', 'real', '112'), ('shift', 'always', '113'), ('shift', 'begin', '261'), ('shift', 'if', '262'), ('shift', 'or', '114'), ('shift', 'defparam', '115'), ('shift', 'parameter', '116'), ('shift', 'initial', '118'), ('shift', 'for', '263'), ('shift', 'genvar', '264'), ('shift', 'supply0', '124'), ('shift', 'supply1', '125'), ('goto', 'Initial', '265'), ('goto', 'Definition', '266'), ('goto', 'Assign', '267'), ('goto', 'Parameter', '268'), ('goto', 'Defparam', '269'), ('goto', 'Instance', '270'), ('goto', 'Always', '271'), ('goto', 'GenStatement', '685'), ('goto', 'GenFor_statement', '274'), ('goto', 'ExtDir', '141'), ('goto', 'IntDir', '142')]
+state 663 [('shift', 'endtask', '684')]
+state 662 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'input', '473'), ('shift', 'reg', '474'), ('shift', 'integer', '475'), ('shift', 'real', '476'), ('shift', 'wreal', '477'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'Mem_def', '561'), ('goto', 'When', '254'), ('goto', 'Statement', '683'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 661 [('reduce', '$default', '70')]
+state 660 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'input', '473'), ('shift', 'reg', '474'), ('shift', 'integer', '475'), ('shift', 'real', '476'), ('shift', 'wreal', '477'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'Mem_defs', '681'), ('goto', 'Mem_def', '479'), ('goto', 'When', '254'), ('goto', 'Statement', '682'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 692 [('shift', 'token', '103'), ('shift', 'assign', '104'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('shift', 'reg', '105'), ('shift', 'wire', '106'), ('shift', 'tri0', '107'), ('shift', 'tri1', '108'), ('shift', 'signed', '109'), ('shift', 'event', '110'), ('shift', 'integer', '111'), ('shift', 'real', '112'), ('shift', 'always', '113'), ('shift', 'begin', '261'), ('shift', 'if', '262'), ('shift', 'or', '114'), ('shift', 'defparam', '115'), ('shift', 'parameter', '116'), ('shift', 'initial', '118'), ('shift', 'for', '263'), ('shift', 'genvar', '264'), ('shift', 'supply0', '124'), ('shift', 'supply1', '125'), ('goto', 'Initial', '265'), ('goto', 'Definition', '266'), ('goto', 'Assign', '267'), ('goto', 'Parameter', '268'), ('goto', 'Defparam', '269'), ('goto', 'Instance', '270'), ('goto', 'Always', '271'), ('goto', 'GenStatement', '695'), ('goto', 'GenFor_statement', '274'), ('goto', 'ExtDir', '141'), ('goto', 'IntDir', '142')]
+state 693 [('reduce', '$default', '202')]
+state 690 [('reduce', '$default', '74')]
+state 691 [('reduce', '$default', '79')]
+state 694 [('reduce', '$default', '75')]
+state 695 [('reduce', '$default', '152')]
+state 542 [('reduce', '$default', '156')]
+state 543 [('reduce', '$default', '158')]
+state 540 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '162')]
+state 541 [('reduce', '$default', '157')]
+state 546 [('reduce', '$default', '171')]
+state 547 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '610')]
+state 544 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'posedge', '455'), ('shift', 'negedge', '456'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'When_item', '608'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '459')]
+state 545 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '609')]
+state 8 [('shift', '#', '14'), ('goto', 'Hparams', '15'), ('reduce', '$default', '9')]
+state 548 [('reduce', '$default', '169')]
+state 549 [('reduce', '$default', '110')]
+state 68 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '160')]
+state 598 [('shift', 'endcase', '645')]
+state 120 [('shift', 'token', '260')]
+state 121 [('reduce', '$default', '34')]
+state 122 [('shift', 'token', '103'), ('shift', 'assign', '104'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('shift', 'reg', '105'), ('shift', 'wire', '106'), ('shift', 'tri0', '107'), ('shift', 'tri1', '108'), ('shift', 'signed', '109'), ('shift', 'event', '110'), ('shift', 'integer', '111'), ('shift', 'real', '112'), ('shift', 'always', '113'), ('shift', 'begin', '261'), ('shift', 'if', '262'), ('shift', 'or', '114'), ('shift', 'defparam', '115'), ('shift', 'parameter', '116'), ('shift', 'initial', '118'), ('shift', 'for', '263'), ('shift', 'genvar', '264'), ('shift', 'supply0', '124'), ('shift', 'supply1', '125'), ('goto', 'Initial', '265'), ('goto', 'Definition', '266'), ('goto', 'Assign', '267'), ('goto', 'Parameter', '268'), ('goto', 'Defparam', '269'), ('goto', 'Instance', '270'), ('goto', 'Always', '271'), ('goto', 'GenStatements', '272'), ('goto', 'GenStatement', '273'), ('goto', 'GenFor_statement', '274'), ('goto', 'ExtDir', '141'), ('goto', 'IntDir', '142')]
+state 123 [('reduce', '$default', '248')]
+state 124 [('reduce', '$default', '249')]
+state 125 [('reduce', '$default', '250')]
+state 126 [('reduce', '$default', '35')]
+state 127 [('shift', 'endmodule', '275')]
+state 128 [('shift', 'token', '103'), ('shift', 'assign', '104'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('shift', 'reg', '105'), ('shift', 'wire', '106'), ('shift', 'tri0', '107'), ('shift', 'tri1', '108'), ('shift', 'signed', '109'), ('shift', 'event', '110'), ('shift', 'integer', '111'), ('shift', 'real', '112'), ('shift', 'always', '113'), ('shift', 'or', '114'), ('shift', 'defparam', '115'), ('shift', 'parameter', '116'), ('shift', 'localparam', '117'), ('shift', 'initial', '118'), ('shift', 'function', '119'), ('shift', 'task', '120'), ('shift', 'define', '2'), ('shift', 'pragma', '121'), ('shift', 'generate', '122'), ('shift', 'genvar', '123'), ('shift', 'supply0', '124'), ('shift', 'supply1', '125'), ('shift', 'newver', '126'), ('goto', 'Module_stuffs', '276'), ('goto', 'Mstuff', '128'), ('goto', 'Define', '129'), ('goto', 'Initial', '130'), ('goto', 'Definition', '131'), ('goto', 'Assign', '132'), ('goto', 'Function', '133'), ('goto', 'Task', '134'), ('goto', 'Parameter', '135'), ('goto', 'Localparam', '136'), ('goto', 'Defparam', '137'), ('goto', 'Instance', '138'), ('goto', 'Always', '139'), ('goto', 'Generate', '140'), ('goto', 'ExtDir', '141'), ('goto', 'IntDir', '142'), ('reduce', '$default', '21')]
+state 129 [('reduce', '$default', '33')]
+state 414 [('shift', 'token', '511')]
+state 415 [('shift', ')', '512'), ('shift', ',', '513')]
+state 416 [('reduce', '$default', '126')]
+state 417 [('shift', ')', '514'), ('shift', ',', '285')]
+state 410 [('shift', ')', '508'), ('shift', ',', '285')]
+state 411 [('shift', '.', '407'), ('goto', 'Conns_list', '509'), ('goto', 'Connection', '409')]
+state 412 [('shift', ';', '510')]
+state 413 [('reduce', '$default', '133')]
+state 498 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '576')]
+state 418 [('shift', ')', '515'), ('shift', '.', '407'), ('goto', 'Conns_list', '516'), ('goto', 'Connection', '409')]
+state 419 [('shift', '(', '517')]
+state 499 [('reduce', '$default', '262')]
+state 319 [('reduce', '$default', '58')]
+state 318 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'Exprs', '422'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '145')]
+state 313 [('reduce', '$default', '219')]
+state 312 [('shift', '(', '418'), ('shift', '[', '197'), ('goto', 'Width', '419')]
+state 311 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', ')', '413'), ('shift', '.', '414'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'Prms_list', '415'), ('goto', 'PrmAssign', '416'), ('goto', 'Exprs', '417'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '145')]
+state 310 [('reduce', '$default', '131')]
+state 317 [('reduce', '$default', '124')]
+state 316 [('reduce', '$default', '123')]
+state 315 [('reduce', '$default', '122')]
+state 314 [('shift', '[', '48'), ('goto', 'Width', '420'), ('goto', 'BusBit', '421'), ('reduce', '$default', '222')]
+state 496 [('shift', ';', '575')]
+state 497 [('reduce', '$default', '47')]
+state 3 [('shift', '$end', '12')]
+state 368 [('shift', ')', '464'), ('shift', ',', '285')]
+state 369 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '465')]
+state 366 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '#', '204'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'AssignParams', '462'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '463')]
+state 367 [('reduce', '$default', '199')]
+state 364 [('reduce', '$default', '135')]
+state 365 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '#', '204'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'AssignParams', '460'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '461')]
+state 362 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'posedge', '455'), ('shift', 'negedge', '456'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'When_items', '457'), ('goto', 'When_item', '458'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '459')]
+state 363 [('reduce', '$default', '181')]
+state 360 [('reduce', '$default', '154')]
+state 361 [('reduce', '$default', '153')]
+state 380 [('shift', '(', '481'), ('shift', ';', '482')]
+state 381 [('shift', 'token', '95'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('goto', 'Header_list', '483'), ('goto', 'Header_item', '101'), ('goto', 'ExtDir', '102')]
+state 382 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'input', '473'), ('shift', 'reg', '474'), ('shift', 'integer', '475'), ('shift', 'real', '476'), ('shift', 'wreal', '477'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'Mem_defs', '484'), ('goto', 'Mem_def', '479'), ('goto', 'When', '254'), ('goto', 'Statement', '485'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 383 [('shift', 'token', '486')]
+state 384 [('shift', 'token', '103'), ('shift', 'assign', '104'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('shift', 'reg', '105'), ('shift', 'wire', '106'), ('shift', 'tri0', '107'), ('shift', 'tri1', '108'), ('shift', 'signed', '109'), ('shift', 'event', '110'), ('shift', 'integer', '111'), ('shift', 'real', '112'), ('shift', 'always', '113'), ('shift', 'begin', '261'), ('shift', 'end', '487'), ('shift', 'if', '262'), ('shift', 'or', '114'), ('shift', 'defparam', '115'), ('shift', 'parameter', '116'), ('shift', 'initial', '118'), ('shift', 'for', '263'), ('shift', 'genvar', '264'), ('shift', 'supply0', '124'), ('shift', 'supply1', '125'), ('goto', 'Initial', '265'), ('goto', 'Definition', '266'), ('goto', 'Assign', '267'), ('goto', 'Parameter', '268'), ('goto', 'Defparam', '269'), ('goto', 'Instance', '270'), ('goto', 'Always', '271'), ('goto', 'GenStatement', '389'), ('goto', 'GenFor_statement', '274'), ('goto', 'ExtDir', '141'), ('goto', 'IntDir', '142')]
+state 385 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '488')]
+state 386 [('shift', 'token', '203'), ('shift', '{', '35'), ('goto', 'Soft_assigns', '489'), ('goto', 'Soft_assign', '445'), ('goto', 'LSH', '446'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '210')]
+state 387 [('shift', ';', '490')]
+state 388 [('reduce', '$default', '136')]
+state 389 [('reduce', '$default', '137')]
+state 605 [('reduce', '$default', '204')]
+state 579 [('reduce', '$default', '116')]
+state 578 [('reduce', '$default', '111')]
+state 604 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '207')]
+state 573 [('reduce', '$default', '46')]
+state 572 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '631')]
+state 571 [('shift', 'token', '103'), ('shift', 'assign', '104'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('shift', 'reg', '105'), ('shift', 'wire', '106'), ('shift', 'tri0', '107'), ('shift', 'tri1', '108'), ('shift', 'signed', '109'), ('shift', 'event', '110'), ('shift', 'integer', '111'), ('shift', 'real', '112'), ('shift', 'always', '113'), ('shift', 'begin', '261'), ('shift', 'if', '262'), ('shift', 'or', '114'), ('shift', 'defparam', '115'), ('shift', 'parameter', '116'), ('shift', 'initial', '118'), ('shift', 'for', '263'), ('shift', 'genvar', '264'), ('shift', 'supply0', '124'), ('shift', 'supply1', '125'), ('goto', 'Initial', '265'), ('goto', 'Definition', '266'), ('goto', 'Assign', '267'), ('goto', 'Parameter', '268'), ('goto', 'Defparam', '269'), ('goto', 'Instance', '270'), ('goto', 'Always', '271'), ('goto', 'GenStatement', '630'), ('goto', 'GenFor_statement', '274'), ('goto', 'ExtDir', '141'), ('goto', 'IntDir', '142')]
+state 570 [('shift', 'token', '103'), ('shift', 'assign', '104'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('shift', 'reg', '105'), ('shift', 'wire', '106'), ('shift', 'tri0', '107'), ('shift', 'tri1', '108'), ('shift', 'signed', '109'), ('shift', 'event', '110'), ('shift', 'integer', '111'), ('shift', 'real', '112'), ('shift', 'always', '113'), ('shift', 'begin', '261'), ('shift', 'end', '629'), ('shift', 'if', '262'), ('shift', 'or', '114'), ('shift', 'defparam', '115'), ('shift', 'parameter', '116'), ('shift', 'initial', '118'), ('shift', 'for', '263'), ('shift', 'genvar', '264'), ('shift', 'supply0', '124'), ('shift', 'supply1', '125'), ('goto', 'Initial', '265'), ('goto', 'Definition', '266'), ('goto', 'Assign', '267'), ('goto', 'Parameter', '268'), ('goto', 'Defparam', '269'), ('goto', 'Instance', '270'), ('goto', 'Always', '271'), ('goto', 'GenStatement', '389'), ('goto', 'GenFor_statement', '274'), ('goto', 'ExtDir', '141'), ('goto', 'IntDir', '142')]
+state 577 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', ')', '633'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '634')]
+state 576 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '632')]
+state 575 [('reduce', '$default', '49')]
+state 574 [('reduce', '$default', '44')]
+state 60 [('reduce', '$default', '255')]
+state 61 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', '{', '35'), ('goto', 'CurlyList', '155'), ('reduce', '$default', '257')]
+state 258 [('shift', 'token', '380')]
+state 259 [('reduce', '$default', '66')]
+state 64 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '156')]
+state 65 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '157')]
+state 66 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '158')]
+state 67 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '159')]
+state 252 [('shift', ';', '376'), ('shift', ',', '374')]
+state 69 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '161')]
+state 250 [('reduce', '$default', '101')]
+state 251 [('shift', 'token', '247'), ('goto', 'Pairs', '375'), ('goto', 'Pair', '250')]
+state 256 [('shift', '(', '378'), ('shift', ';', '379')]
+state 257 [('reduce', '$default', '67')]
+state 254 [('shift', ';', '363')]
+state 255 [('reduce', '$default', '40')]
+state 603 [('reduce', '$default', '205')]
+state 602 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '651')]
+state 508 [('shift', ';', '580')]
+state 509 [('shift', ')', '581'), ('shift', ',', '507')]
+state 506 [('shift', ';', '578')]
+state 507 [('shift', '.', '407'), ('goto', 'Connection', '579')]
+state 504 [('shift', '(', '577')]
+state 505 [('reduce', '$default', '118')]
+state 502 [('reduce', '$default', '227')]
+state 503 [('reduce', '$default', '107')]
+state 500 [('reduce', '$default', '228')]
+state 501 [('reduce', '$default', '229')]
+state 630 [('shift', 'else', '664'), ('reduce', '$default', '150')]
+state 631 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '665')]
+state 632 [('reduce', '$default', '48')]
+state 633 [('reduce', '$default', '120')]
+state 469 [('reduce', '$default', '100')]
+state 468 [('shift', ';', '551'), ('shift', ',', '374')]
+state 636 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ')', '667')]
+state 637 [('reduce', '$default', '113')]
+state 465 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '550')]
+state 464 [('shift', ';', '549')]
+state 467 [('reduce', '$default', '94')]
+state 466 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '102')]
+state 461 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '546')]
+state 460 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '545')]
+state 463 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '548')]
+state 462 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '547')]
+state 168 [('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '287')]
+state 169 [('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '286')]
+state 164 [('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '294')]
+state 165 [('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '295')]
+state 166 [('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '296')]
+state 167 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', ':', '295'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89')]
+state 160 [('shift', 'power', '71'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '299')]
+state 161 [('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'power', '71'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '301')]
+state 162 [('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'power', '71'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '302')]
+state 163 [('reduce', '$default', '291')]
+state 600 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'endcase', '647'), ('shift', 'default', '595'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'Case', '643'), ('goto', 'Default', '648'), ('goto', 'Exprs', '599'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '145')]
+state 9 [('shift', 'token', '16')]
+state 647 [('reduce', '$default', '189')]
+state 646 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', ';', '673'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '674'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 649 [('reduce', '$default', '191')]
+state 648 [('shift', 'endcase', '675')]
+state 357 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '452')]
+state 356 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '451')]
+state 355 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', '=', '450')]
+state 354 [('shift', ';', '449')]
+state 353 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'join', '448'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '437'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 352 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '447')]
+state 351 [('shift', 'token', '203'), ('shift', '{', '35'), ('goto', 'Soft_assigns', '444'), ('goto', 'Soft_assign', '445'), ('goto', 'LSH', '446'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '210')]
+state 350 [('reduce', '$default', '166')]
+state 359 [('reduce', '$default', '155')]
+state 358 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'power', '71'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', 'repeat', '234'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', '#', '235'), ('shift', ';', '453'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '454'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 216 [('shift', 'token', '203'), ('shift', '{', '35'), ('goto', 'LSH', '336'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '210')]
+state 217 [('shift', 'token', '213'), ('shift', '[', '197'), ('goto', 'Tokens_list', '337'), ('goto', 'Width', '338')]
+state 214 [('shift', ';', '333')]
+state 215 [('shift', '(', '334'), ('shift', ';', '335'), ('shift', '.', '47'), ('shift', '[', '48'), ('goto', 'Width', '313'), ('goto', 'BusBit', '314'), ('reduce', '$default', '218')]
+state 212 [('reduce', '$default', '247')]
+state 213 [('shift', ',', '332'), ('reduce', '$default', '226')]
+state 210 [('reduce', '$default', '223')]
+state 211 [('reduce', '$default', '246')]
+state 218 [('shift', 'token', '213'), ('goto', 'Tokens_list', '339')]
+state 219 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'end', '340'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', ':', '341'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '342'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'Statements', '343'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 289 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '400')]
+state 288 [('reduce', '$default', '261')]
+state 4 [('shift', 'module', '1'), ('shift', 'define', '2'), ('goto', 'MainItem', '13'), ('goto', 'Module', '6'), ('goto', 'Define', '7'), ('reduce', '$default', '1')]
+state 281 [('shift', ';', '394'), ('shift', '=', '395')]
+state 280 [('shift', 'token', '213'), ('goto', 'Tokens_list', '393')]
+state 283 [('reduce', '$default', '39')]
+state 282 [('shift', 'token', '396'), ('goto', 'Tokens_list', '397')]
+state 285 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '398')]
+state 284 [('reduce', '$default', '306')]
+state 287 [('reduce', '$default', '260')]
+state 286 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '399')]
+state 678 [('shift', 'endfunction', '688')]
+state 679 [('reduce', '$default', '72')]
+state 674 [('reduce', '$default', '210')]
+state 675 [('reduce', '$default', '190')]
+state 676 [('reduce', '$default', '192')]
+state 677 [('shift', ')', '687'), ('shift', ',', '534')]
+state 670 [('reduce', '$default', '213')]
+state 671 [('reduce', '$default', '212')]
+state 672 [('reduce', '$default', '187')]
+state 673 [('reduce', '$default', '211')]
+state 263 [('shift', '(', '386')]
+state 262 [('shift', '(', '385')]
+state 261 [('shift', 'token', '103'), ('shift', 'assign', '104'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('shift', 'reg', '105'), ('shift', 'wire', '106'), ('shift', 'tri0', '107'), ('shift', 'tri1', '108'), ('shift', 'signed', '109'), ('shift', 'event', '110'), ('shift', 'integer', '111'), ('shift', 'real', '112'), ('shift', 'always', '113'), ('shift', 'begin', '261'), ('shift', 'if', '262'), ('shift', 'or', '114'), ('shift', 'defparam', '115'), ('shift', 'parameter', '116'), ('shift', 'initial', '118'), ('shift', 'for', '263'), ('shift', 'genvar', '264'), ('shift', 'supply0', '124'), ('shift', 'supply1', '125'), ('shift', ':', '383'), ('goto', 'Initial', '265'), ('goto', 'Definition', '266'), ('goto', 'Assign', '267'), ('goto', 'Parameter', '268'), ('goto', 'Defparam', '269'), ('goto', 'Instance', '270'), ('goto', 'Always', '271'), ('goto', 'GenStatements', '384'), ('goto', 'GenStatement', '273'), ('goto', 'GenFor_statement', '274'), ('goto', 'ExtDir', '141'), ('goto', 'IntDir', '142')]
+state 260 [('shift', '(', '381'), ('shift', ';', '382')]
+state 267 [('reduce', '$default', '143')]
+state 266 [('reduce', '$default', '142')]
+state 265 [('reduce', '$default', '149')]
+state 264 [('shift', 'token', '387'), ('reduce', '$default', '248')]
+state 269 [('reduce', '$default', '145')]
+state 268 [('reduce', '$default', '144')]
+state 59 [('shift', ',', '153'), ('shift', '}', '154')]
+state 58 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ')', '152')]
+state 55 [('reduce', '$default', '312')]
+state 54 [('reduce', '$default', '310')]
+state 57 [('reduce', '$default', '309')]
+state 56 [('reduce', '$default', '311')]
+state 51 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '151')]
+state 50 [('shift', '[', '48'), ('goto', 'Width', '149'), ('goto', 'BusBit', '150'), ('reduce', '$default', '279')]
+state 53 [('reduce', '$default', '314')]
+state 52 [('reduce', '$default', '313')]
+state 537 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '606')]
+state 536 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '605'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 535 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '604')]
+state 63 [('reduce', '$default', '316')]
+state 533 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '602')]
+state 532 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'Cases', '601'), ('goto', 'Case', '597'), ('goto', 'Exprs', '599'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '145')]
+state 531 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'Cases', '600'), ('goto', 'Case', '597'), ('goto', 'Exprs', '599'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '145')]
+state 530 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'default', '595'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'Cases', '596'), ('goto', 'Case', '597'), ('goto', 'Default', '598'), ('goto', 'Exprs', '599'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '145')]
+state 539 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '161')]
+state 538 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '607'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 115 [('shift', 'token', '245'), ('goto', 'Dotted', '246')]
+state 114 [('shift', '(', '244')]
+state 117 [('shift', 'token', '247'), ('shift', '[', '197'), ('goto', 'Pairs', '252'), ('goto', 'Pair', '250'), ('goto', 'Width', '253')]
+state 116 [('shift', 'token', '247'), ('shift', 'signed', '248'), ('shift', '[', '197'), ('goto', 'Pairs', '249'), ('goto', 'Pair', '250'), ('goto', 'Width', '251')]
+state 111 [('reduce', '$default', '244')]
+state 110 [('shift', 'token', '213'), ('goto', 'Tokens_list', '214')]
+state 113 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '237'), ('goto', 'Statement', '238'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 112 [('reduce', '$default', '245')]
+state 119 [('shift', 'token', '256'), ('shift', 'integer', '257'), ('shift', '[', '197'), ('goto', 'WidthInt', '258'), ('goto', 'Width', '259')]
+state 118 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '255'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 429 [('shift', ';', '524')]
+state 428 [('reduce', '$default', '225')]
+state 534 [('shift', 'token', '203'), ('shift', '{', '35'), ('goto', 'Soft_assign', '603'), ('goto', 'LSH', '446'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '210')]
+state 421 [('reduce', '$default', '221')]
+state 420 [('reduce', '$default', '220')]
+state 423 [('shift', 'strong1', '319'), ('shift', 'strong0', '320'), ('shift', 'pull1', '321'), ('shift', 'pull0', '322'), ('shift', 'weak1', '323'), ('shift', 'weak0', '324'), ('shift', 'highz1', '325'), ('shift', 'highz0', '326'), ('goto', 'Strength', '519')]
+state 422 [('shift', ')', '518'), ('shift', ',', '285')]
+state 425 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '521')]
+state 424 [('shift', '=', '520')]
+state 427 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ';', '523')]
+state 426 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '522')]
+state 308 [('shift', 'token', '412')]
+state 309 [('reduce', '$default', '130')]
+state 300 [('reduce', '$default', '11')]
+state 301 [('reduce', '$default', '13')]
+state 302 [('reduce', '$default', '17')]
+state 303 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'plus_range', '289'), ('shift', 'minus_range', '290'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', ':', '291'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89')]
+state 304 [('shift', '[', '197'), ('goto', 'Width', '405'), ('reduce', '$default', '16')]
+state 305 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', ')', '406'), ('shift', '.', '407'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'Conns_list', '408'), ('goto', 'Connection', '409'), ('goto', 'Exprs', '410'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '145')]
+state 306 [('reduce', '$default', '109')]
+state 307 [('shift', '(', '411')]
+state 568 [('shift', 'endtask', '628')]
+state 569 [('reduce', '$default', '77')]
+state 560 [('shift', ';', '622')]
+state 561 [('reduce', '$default', '80')]
+state 562 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'endfunction', '623'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '437'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 563 [('reduce', '$default', '69')]
+state 564 [('shift', ')', '624'), ('shift', ',', '194')]
+state 565 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'input', '473'), ('shift', 'reg', '474'), ('shift', 'integer', '475'), ('shift', 'real', '476'), ('shift', 'wreal', '477'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'Mem_def', '561'), ('goto', 'When', '254'), ('goto', 'Statement', '625'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 566 [('shift', 'endfunction', '626')]
+state 567 [('shift', ';', '627')]
+state 229 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '342'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'Statements', '353'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 228 [('shift', '(', '352')]
+state 227 [('shift', '(', '351')]
+state 226 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '350'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 225 [('shift', '(', '349')]
+state 224 [('shift', '(', '348')]
+state 223 [('shift', '(', '347')]
+state 222 [('shift', 'token', '346')]
+state 221 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '345')]
+state 220 [('shift', '(', '344')]
+state 391 [('shift', ';', '491'), ('shift', '[', '197'), ('goto', 'Width', '492')]
+state 390 [('reduce', '$default', '41')]
+state 151 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ')', '293')]
+state 150 [('reduce', '$default', '278')]
+state 153 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'CurlyItem', '294'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '61')]
+state 152 [('reduce', '$default', '307')]
+state 155 [('reduce', '$default', '256')]
+state 154 [('reduce', '$default', '253')]
+state 157 [('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '293')]
+state 156 [('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '292')]
+state 159 [('shift', 'power', '71'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '297')]
+state 158 [('shift', 'power', '71'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '298')]
+state 609 [('reduce', '$default', '172')]
+state 608 [('reduce', '$default', '159')]
+state 634 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ')', '666')]
+state 399 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ')', '499')]
+state 635 [('reduce', '$default', '115')]
+state 398 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '214')]
+state 48 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '148')]
+state 49 [('reduce', '$default', '276')]
+state 46 [('shift', 'number', '17'), ('shift', 'token', '18'), ('shift', 'bin', '19'), ('shift', 'hex', '20'), ('shift', 'dig', '21'), ('shift', 'ubin', '22'), ('shift', 'uhex', '23'), ('shift', 'udig', '24'), ('shift', 'string', '25'), ('shift', 'define', '26'), ('shift', 'floating', '27'), ('shift', 'xnor', '28'), ('shift', 'nor', '29'), ('shift', '|', '30'), ('shift', '^', '31'), ('shift', '&', '32'), ('shift', '-', '33'), ('shift', '(', '34'), ('shift', '{', '35'), ('shift', '!', '36'), ('shift', '~', '37'), ('goto', 'Exprs', '144'), ('goto', 'CurlyList', '38'), ('goto', 'Dotted', '39'), ('goto', 'Expr', '145')]
+state 47 [('shift', 'token', '146'), ('goto', 'Dotted', '147')]
+state 44 [('shift', 'token', '103'), ('shift', 'assign', '104'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('shift', 'reg', '105'), ('shift', 'wire', '106'), ('shift', 'tri0', '107'), ('shift', 'tri1', '108'), ('shift', 'signed', '109'), ('shift', 'event', '110'), ('shift', 'integer', '111'), ('shift', 'real', '112'), ('shift', 'always', '113'), ('shift', 'or', '114'), ('shift', 'defparam', '115'), ('shift', 'parameter', '116'), ('shift', 'localparam', '117'), ('shift', 'initial', '118'), ('shift', 'function', '119'), ('shift', 'task', '120'), ('shift', 'define', '2'), ('shift', 'pragma', '121'), ('shift', 'generate', '122'), ('shift', 'genvar', '123'), ('shift', 'supply0', '124'), ('shift', 'supply1', '125'), ('shift', 'newver', '126'), ('goto', 'Module_stuffs', '127'), ('goto', 'Mstuff', '128'), ('goto', 'Define', '129'), ('goto', 'Initial', '130'), ('goto', 'Definition', '131'), ('goto', 'Assign', '132'), ('goto', 'Function', '133'), ('goto', 'Task', '134'), ('goto', 'Parameter', '135'), ('goto', 'Localparam', '136'), ('goto', 'Defparam', '137'), ('goto', 'Instance', '138'), ('goto', 'Always', '139'), ('goto', 'Generate', '140'), ('goto', 'ExtDir', '141'), ('goto', 'IntDir', '142'), ('reduce', '$default', '21')]
+state 45 [('shift', 'number', '143')]
+state 42 [('shift', 'token', '95'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('shift', ')', '99'), ('goto', 'Header_list', '100'), ('goto', 'Header_item', '101'), ('goto', 'ExtDir', '102')]
+state 43 [('reduce', '$default', '10')]
+state 40 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('reduce', '$default', '38')]
+state 41 [('shift', 'token', '90'), ('shift', 'parameter', '91'), ('shift', ')', '92'), ('goto', 'head_params', '93'), ('goto', 'head_param', '94')]
+state 638 [('shift', ';', '668')]
+state 5 [('reduce', '$default', '3')]
+state 639 [('reduce', '$default', '55')]
+state 489 [('shift', ';', '572'), ('shift', ',', '534')]
+state 488 [('shift', 'and_and', '64'), ('shift', 'or_or', '65'), ('shift', 'eq3', '66'), ('shift', 'eq_eq', '67'), ('shift', 'not_eq', '68'), ('shift', 'gr_eq', '69'), ('shift', 'sm_eq', '70'), ('shift', 'power', '71'), ('shift', 'xnor', '72'), ('shift', 'nand', '73'), ('shift', 'nor', '74'), ('shift', '?', '75'), ('shift', '|', '76'), ('shift', '^', '77'), ('shift', '&', '78'), ('shift', 'arith_shift_right', '79'), ('shift', 'shift_right', '80'), ('shift', 'shift_left', '81'), ('shift', '<', '82'), ('shift', '>', '83'), ('shift', '+', '84'), ('shift', '-', '85'), ('shift', 'noteqeq', '86'), ('shift', '*', '87'), ('shift', '/', '88'), ('shift', '%', '89'), ('shift', ')', '571')]
+state 487 [('reduce', '$default', '139')]
+state 486 [('shift', 'token', '103'), ('shift', 'assign', '104'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('shift', 'reg', '105'), ('shift', 'wire', '106'), ('shift', 'tri0', '107'), ('shift', 'tri1', '108'), ('shift', 'signed', '109'), ('shift', 'event', '110'), ('shift', 'integer', '111'), ('shift', 'real', '112'), ('shift', 'always', '113'), ('shift', 'begin', '261'), ('shift', 'if', '262'), ('shift', 'or', '114'), ('shift', 'defparam', '115'), ('shift', 'parameter', '116'), ('shift', 'initial', '118'), ('shift', 'for', '263'), ('shift', 'genvar', '264'), ('shift', 'supply0', '124'), ('shift', 'supply1', '125'), ('goto', 'Initial', '265'), ('goto', 'Definition', '266'), ('goto', 'Assign', '267'), ('goto', 'Parameter', '268'), ('goto', 'Defparam', '269'), ('goto', 'Instance', '270'), ('goto', 'Always', '271'), ('goto', 'GenStatements', '570'), ('goto', 'GenStatement', '273'), ('goto', 'GenFor_statement', '274'), ('goto', 'ExtDir', '141'), ('goto', 'IntDir', '142')]
+state 485 [('shift', 'endtask', '569')]
+state 484 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'input', '473'), ('shift', 'reg', '474'), ('shift', 'integer', '475'), ('shift', 'real', '476'), ('shift', 'wreal', '477'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'Mem_def', '561'), ('goto', 'When', '254'), ('goto', 'Statement', '568'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 483 [('shift', ')', '567'), ('shift', ',', '194')]
+state 482 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'input', '473'), ('shift', 'reg', '474'), ('shift', 'integer', '475'), ('shift', 'real', '476'), ('shift', 'wreal', '477'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'Mem_defs', '565'), ('goto', 'Mem_def', '479'), ('goto', 'When', '254'), ('goto', 'Statement', '566'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 481 [('shift', 'token', '95'), ('shift', 'input', '96'), ('shift', 'output', '97'), ('shift', 'inout', '98'), ('goto', 'Header_list', '564'), ('goto', 'Header_item', '101'), ('goto', 'ExtDir', '102')]
+state 480 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'reg', '217'), ('shift', 'integer', '218'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'endfunction', '563'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'When', '254'), ('goto', 'Statement', '437'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 472 [('shift', ')', '552'), ('shift', ',', '194')]
+state 473 [('shift', 'token', '213'), ('shift', 'integer', '553'), ('shift', '[', '197'), ('goto', 'Tokens_list', '554'), ('goto', 'Width', '555')]
+state 470 [('reduce', '$default', '95')]
+state 471 [('reduce', '$default', '98')]
+state 476 [('shift', 'token', '213'), ('goto', 'Tokens_list', '559')]
+state 477 [('shift', 'token', '213'), ('goto', 'Tokens_list', '560')]
+state 474 [('shift', 'token', '213'), ('shift', '[', '197'), ('goto', 'Tokens_list', '556'), ('goto', 'Width', '557')]
+state 475 [('shift', 'token', '213'), ('goto', 'Tokens_list', '558')]
+state 478 [('shift', 'token', '215'), ('shift', 'assign', '216'), ('shift', 'input', '473'), ('shift', 'reg', '474'), ('shift', 'integer', '475'), ('shift', 'real', '476'), ('shift', 'wreal', '477'), ('shift', 'begin', '219'), ('shift', 'if', '220'), ('shift', 'wait', '221'), ('shift', 'emit', '222'), ('shift', 'case', '223'), ('shift', 'casez', '224'), ('shift', 'casex', '225'), ('shift', 'forever', '226'), ('shift', 'for', '227'), ('shift', 'while', '228'), ('shift', 'fork', '229'), ('shift', 'disable', '230'), ('shift', 'pragma', '231'), ('shift', 'force', '232'), ('shift', 'release', '233'), ('shift', 'repeat', '234'), ('shift', '#', '235'), ('shift', '@', '236'), ('shift', '{', '35'), ('goto', 'Mem_def', '561'), ('goto', 'When', '254'), ('goto', 'Statement', '342'), ('goto', 'For_statement', '239'), ('goto', 'Repeat_statement', '240'), ('goto', 'While_statement', '241'), ('goto', 'Statements', '562'), ('goto', 'LSH', '242'), ('goto', 'CurlyList', '209'), ('goto', 'Dotted', '243')]
+state 479 [('reduce', '$default', '81')]

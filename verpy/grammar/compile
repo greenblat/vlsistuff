@@ -1,0 +1,11 @@
+#! /bin/csh -f
+
+
+
+llbin/read_y_output.py yaccs/verilog.yacc
+/bin/mv yacc.pickle verilog.pickle
+/bin/mv mysave.py verilog_yacc_table.py
+
+
+
+

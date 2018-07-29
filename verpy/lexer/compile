@@ -1,0 +1,13 @@
+#! /bin/csh -f
+
+llbin/table2c.py verilog_tables
+/bin/cp tables.c src/verilog_tables.c
+
+set FLAGS = '-O3'
+set FLAGS = '-g'
+gcc src/verilog_tables.c src/nlexer.c -o verilog_lexer $FLAGS
+
+# copy verilog_lexer executable to Your bin (anywhere in $PATH)
+# /bin/cp verilog_lexer ~/bin/
+
+

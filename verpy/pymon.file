@@ -1,0 +1,28 @@
+info: fnames: ['example0.v']
+info: addmodule example0 (['example0'])
+info: do line: report_support
+info: mid0 <- ['inx']
+info: mid1 <- ['inx', 'outx']
+info: net rst_n  --- dir=input wid=0
+info: net res1  --- dir=wire wid=0
+info: net inx  --- dir=input wid=(7, 0)
+info: net clk  --- dir=input wid=0
+info: net outx  --- dir=output reg wid=(7, 0)
+info: net res3  --- dir=wire wid=0
+info: net res0  --- dir=wire wid=0
+info: net ram  --- dir=wire wid=('double', (15, 0), (0, 100))
+info: net res2  --- dir=wire wid=0
+info: net mid0  --- dir=wire wid=(7, 0)
+info: net mid1  --- dir=wire wid=(7, 0)
+info: always (['list', ['edge', 'posedge', 'clk'], ['edge', 'negedge', 'rst_n']], ['list', ['ifelse', ['!', 'rst_n'], ['list', ['<=', 'outx', 0]], ['list', ['<=', 'outx', ['~', 'inx']]]]], 'always')
+info: inst=i_son2 kind=son2 pins=['res', 'clk']
+info: inst=i_son3 kind=son3 pins=['res', 'clk']
+info: inst=i_son0 kind=son0 pins=['res', 'clk']
+info: inst=i_son1 kind=son1 pins=['res', 'clk']
+info: no functions defined
+info: no tasks defined
+info: no generates defined
+info: do line: clean
+info: info: exiting.py has 0 errors and 0 warnings logged
+
+                                 time=Sun Jul 29 10:10:26 2018

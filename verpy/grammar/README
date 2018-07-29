@@ -1,0 +1,14 @@
+generation of verilog parsing tables from yacc syntax description.
+the script "compile" runs yacc (should be in your $PATH) and then translates the listing 
+file to python parsing state machine.
+
+
+
+the end result verilog_yacc_table.py  should be moved to ../pybin/  
+every time the yacc file changes.
+
+
+
+
+
+

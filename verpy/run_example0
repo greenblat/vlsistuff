@@ -1,0 +1,9 @@
+#! /bin/csh -f
+
+# most of what is printed on screen, also recorded in "pymon.file" log file.
+
+# since pyver.py is in pybin, so report_support.py is also there and no need to specify the path.
+# -do clean : is built in command that removes temp files.
+
+pybin/pyver.py example0.v -do report_support -do clean
+
