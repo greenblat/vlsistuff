@@ -1,0 +1,11 @@
+
+
+chip dbguart_rgf sync
+reg uart_control wid=8 access=rw reset=0x14
+reg baudrate wid=16 access=rw reset=0x100
+reg control wid=32 access=ro
+reg base_address wid=32 access=ro
+
+
+end chip
+

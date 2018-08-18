@@ -1,0 +1,6 @@
+kind,name,field,access,addr,wid,reset,amount,description,
+module,dbguart_rgf,,,,,,
+reg,uart_control,,rw,,8,0,," ",false
+reg,baudrate,,rw,,16,0,," ",false
+reg,control,,ro,,32,0,," ",false
+reg,base_address,,ro,,32,0,," ",false
