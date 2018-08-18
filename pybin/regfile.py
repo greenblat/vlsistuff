@@ -84,7 +84,6 @@ def main():
         Chip = txt.Chip
         dumpRdl(txt)
         Reset = txt.Reset
-        print 'reset',Reset
     else:
         logs.log_error('need eother xls or csv or regfile extension file')
 
@@ -111,9 +110,9 @@ def main():
                     Pos += Widf
         if Wid=='':
            Csv.regs[Reg][1]=Pos 
+    dumpRamVerilog(FFF,Addrs,Csv,Reset)
     dumpAdaCsv(FFF,Addrs,Csv,Chip)
     dumpApbVerilog(FFF,Addrs,Csv,Reset)
-    dumpRamVerilog(FFF,Addrs,Csv,Reset)
     dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset)
 
 def dumpApbVerilog(FFF,Addrs,Csv,Reset):
@@ -413,7 +412,6 @@ def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
         hasFields[Reg]=True
     File = open('%s.axiv'%Csv.Module,'w')
     W1 = len(bin(Csv.runAddr))-2
-#    print '>>>',Csv.runAddr,Csv.runAddr,bin(Csv.runAddr),len(bin(Csv.runAddr))
 
     File.write(string.replace(AXISTRING,"MODULE",Csv.Module))
     LL = writeInputsOutputsAndWires(Csv,File)
@@ -586,7 +584,7 @@ def dumpRamVerilog(FFF,Addrs,Csv,Reset):
         hasFields[Reg]=True
     File = open('%s.vram'%Csv.Module,'w')
     W1 = len(bin(Csv.runAddr))-3
-    File.write('module %s (input clk,input rst_n,input rwrite, input rsel, input [1:0] rsize, input [31:0] wdata, output [31:0] rdata, input [%d:0] addr ,output reg [%d:0] waddr\n'%(Csv.Module,W1,W1))
+    File.write('module %s (input clk,input rst_n,input rwrite, input rsel, input [1:0] rsize, input [31:0] wrdata, output [31:0] rdata, input [%d:0] addr\n'%(Csv.Module,W1))
     LL = []
     for Reg in Csv.regs:
         ST = Csv.regs[Reg]
@@ -638,7 +636,7 @@ def dumpRamVerilog(FFF,Addrs,Csv,Reset):
     File.write(');\n')
     File.write(Wires)
     File.write('wire [31:0] mask = (rsize==1) ? 32\'hff : (rsize==2) ? 32\'hffff :  32\'hffffffff;\n')
-    File.write('wire [31:0] wdata = (rsize==1) ? {4{wdata[7:0]}} : (rsize==2) ? {2{wdata[15:0]}} :  wdata;\n')
+    File.write('wire [31:0] wdata = (rsize==1) ? {4{wrdata[7:0]}} : (rsize==2) ? {2{wrdata[15:0]}} :  wrdata;\n')
 
     X = (1<<(W1+1))-1
     X = X & 0xfffffffc
@@ -772,6 +770,14 @@ def writeFlops(File,Reset,LL,Csv,W1):
     File.write('end \n')
 
 def writeLatches(File,Reset,LL,Csv,W1):    
+    Latches = False
+    for Add,Reg in LL:
+        ST = Csv.regs[Reg]
+        if ST[5]=='true': Latches = True
+
+    if not Latches: return
+
+
     File.write('always @(*) begin\n    if (!rst_n) begin\n')
     for Add,Reg in LL:
         ST = Csv.regs[Reg]
@@ -974,7 +980,9 @@ class itemClass:
     def __init__(self,Name,Kind,Params):
         self.Name=Name
         self.Kind=Kind
-        self.Params=Params
+        self.Params = {}
+        for Key in Params:
+            self.Params[Key]=Params[Key]
         if 'reset' not in Params:
             self.Params['reset']='0'
         if 'desc' not in Params:
@@ -1043,11 +1051,7 @@ class txtRegClass:
         Wid=0
         Reset = 0
         for Item in self.items:
-#            print '>>>',curReg,Item.Kind,Item.Params
-#            if (Item.Kind=='reg')and('wid' not in Item.Params):
-#                if curReg: logs.log_error('widthless register %s'%curReg.Name)
-#                curReg = Item
-#                print '>>xxxx>',curReg,Item.Kind,Item.Params
+            Reset = Item.Params['reset']
             if (Item.Kind=='reg')and('wid' in Item.Params):
                 curReg = Item
                 Wid = curReg.Params['wid']
@@ -1063,9 +1067,6 @@ class txtRegClass:
                 else:
                     Rst = 0
                 Incr = Item.Params['wid']
-#                print 'reset %x wid=%d rst=%x  %s'%(Reset,Wid,Rst,type(Rst))
-#                Reset = Reset + (eval(Rst)<<Wid)
-#                print 'reset2 %x wid=%d rst=%x  %s'%(Reset,Wid,Rst,type(Rst))
                 Wid += Incr
 
 
@@ -1074,7 +1075,6 @@ class txtRegClass:
             curReg.Params['reset']=Reset
 
     def createCsvFile(self):
-#        print 'len',len(self.items)
         Fout = open('temp_%s.csv'%self.Chip,'w')
         Fout.write('kind,name,field,access,addr,wid,reset,amount,description,\n')
         Fout.write('module,%s,,,,,,\n'%self.Chip)

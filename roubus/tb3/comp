@@ -1,0 +1,40 @@
+#! /bin/csh -f
+
+regfile.py ../rtl/dbguart_rgf.regfile
+/bin/mv dbguart_rgf.vram ../rtl/dbguart_rgf.v
+/bin/rm dbguart_rgf.axiv dbguart_rgf.defines dbguart_rgf.fields dbguart_rgf.h dbguart_rgf.rdl dbguart_rgf.v dbguart_rgf.vh 
+#    dbguart_rgf.csv 
+#    temp_dbguart_rgf.csv
+
+
+../llbin/buildNoc.py  ../setups/test3.net
+
+mvlg.py tb.mvlg all.files
+
+iverilog -o tb.vvp \
+    -f all.files \
+    tb.v \
+    noc3.v \
+    ../rtl/ant.v \
+    ../rtl/ant_operator.v \
+    ../rtl/cpu.v \
+    ../rtl/cpu_operator.v \
+    ../rtl/ram.v \
+    ../rtl/ram_operator.v \
+    ../rtl/rou_admin.v \
+    ../rtl/rou_switch2.v \
+    ../rtl/bridge2_manager.v \
+    ../rtl/rou_changeclk.v \
+    ../rtl/async4fifo.v \
+    ../rtl/async_stage.v \
+    ../rtl/rou_dbguart.v \
+    ../rtl/uartx2.v \
+    ../rtl/dbguart_operator.v \
+    ../rtl/dbguart_rgf.v \
+
+
+
+
+
+
+
