@@ -1,0 +1,36 @@
+
+# instance name kind params.....
+
+default clk clk ;
+default rst_n rst_n ;
+default DWID 128 ;
+default module noc0;
+instance ant1 ant    wid=128 type=rx0;
+instance ant2 ant    wid=128 type=tx2;
+instance admin admin  wid=128 type=tx3;
+instance switch0 switch3 wid=128 ;
+
+# directed link 
+ant1 -> ant2 name=cucu;
+admin -> ant1 ;
+ant2 -> switch0:0 ;
+switch0:0 -> admin ;
+
+
+instance ant3 ant    ;
+instance ant4 ant    ;
+instance ant5 ant    ;
+instance ant6 ant    ;
+
+switch0:1 -> ant3 -> ant4 -> ant5 -> ant6 -> switch0:1;
+
+instance ant7 ant    wid=128 type=ddr;
+instance ant8 ant    wid=128 type=cpu0;
+instance ant9 ant    wid=128 type=cpu1;
+instance ant10 ram    wid=128 depth=0x1000;
+
+switch0:2 -> ant7 -> ant8 -> ant9 -> ant10 -> switch0:2;
+
+
+
+

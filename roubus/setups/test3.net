@@ -1,0 +1,33 @@
+
+# instance name kind params.....
+# adding axi slave ant
+
+default clk clk ;
+default rst_n rst_n ;
+default DWID 128 ;
+default module noc3;
+instance ant1 ant    wid=128 type=ant pages=10 id=0x3456 ;
+instance ant2 ant    wid=128 type=ant pages=32 id=0x7766 clk=clka;
+instance ant3 ant    wid=128 type=ram pages=55 id=0x7767 clk=clka;
+instance ant4 ant    wid=128 type=ant pages=30 id=0x7768 ;
+instance cpu0 cpu    wid=128 type=ant pages=0x100 id=0x5567 ;
+instance admin admin  wid=128 pages=16 id=0x0011 ;
+
+
+instance swtch switch2 wid=128 clk=clk;
+
+instance ant7 ant    wid=128 type=ant pages=10 id=0x9451 ;
+instance ant8 ant    wid=128 type=ant pages=32 id=0x9762 ;
+instance ant9 ant    wid=128 type=ram pages=55 id=0x9763 ;
+instance axi0 rou_axi_slave    wid=128 pages=55 id=0x9765 ;
+instance dbg0 rou_dbguart    wid=128 type=rou_dbguart ;
+
+# directed link 
+admin -> ant1 -> ant2 -> ant3 -> ant4 -> cpu0 -> swtch:0 -> admin ;
+
+swtch:1 -> ant7 -> dbg0 -> axi0 -> ant8 -> ant9 -> swtch:1 ;
+
+
+
+
+
