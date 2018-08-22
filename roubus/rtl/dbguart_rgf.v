@@ -15,8 +15,8 @@ assign rdata =
     32'b0;
 always @(posedge clk ) begin
     if (!rst_n) begin
-        uart_control <= 8'h14;
-        baudrate <= 16'h100;
+        uart_control <= 8'h50;
+        baudrate <= 16'h6;
     end else if (rwrite && rsel)  begin
         if (mpaddr[4:0]=='h0) uart_control <= wdata[7:0];
         if (mpaddr[4:0]=='h4) baudrate <= (baudrate[15:0] & ~mask[15:0]) | (wdata &mask);

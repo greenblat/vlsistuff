@@ -157,8 +157,8 @@ wire use0free = writemsg_0_0 || writemsg_0_1 ;
 
 wire [WBUFS-1:0] zeroes = 0;
 wire [BUFS-1:0] clear_occupied = 
-    ((msgout0index==NOTLEGAL) ? zeroes : msgout0index) 
-    |((msgout1index==NOTLEGAL) ? zeroes : msgout1index) 
+    ((msgout0index==NOTLEGAL) ? zeroes : (1<<msgout0index))
+    |((msgout1index==NOTLEGAL) ? zeroes : (1<<msgout1index))
     ;   
 
 always @(posedge clk or negedge rst_n) begin
@@ -173,6 +173,8 @@ always @(posedge clk or negedge rst_n) begin
             ;   
     end 
 end
+
+wire panic0 = (clear_occupied!=0) & ((occupied&clear_occupied)==0);
 
 wire use1free = writemsg_1_0 || writemsg_1_1;
 always @(posedge clk) begin

@@ -1,4 +1,3 @@
-
 module rou_axi_slave #(
      parameter DWID = 128 
     ,parameter AWID = 32
@@ -25,8 +24,6 @@ module rou_axi_slave #(
     ,input [7:0] awlen
     ,input [2:0] awsize
     ,input [1:0] awburst
-    ,input [3:0] awcache
-    ,input [2:0] awprot
     ,input awvalid
     ,output awready
  // axi write data channel
@@ -46,8 +43,6 @@ module rou_axi_slave #(
     ,input [7:0] arlen
     ,input [2:0] arsize
     ,input [1:0] arburst
-    ,input [3:0] arcache
-    ,input [2:0] arprot
     ,input arvalid
     ,output arready
  // axi read data channel
@@ -107,10 +102,10 @@ assign rresp = 0;
 axi_write_slave  #(.IDWID(IDWID))  axi_write_slave (
      .awaddr(awaddr[31:0])
     ,.awburst(awburst[1:0])
-    ,.awcache(awcache[3:0])
+    ,.awcache(4'b0)
     ,.awid(awid)
     ,.awlen(awlen[7:0])
-    ,.awprot(awprot[2:0])
+    ,.awprot(3'b0)
     ,.awready(awready)
     ,.awsize(awsize[2:0])
     ,.awvalid(awvalid)
@@ -174,7 +169,7 @@ assign bvalid =  !bfifo_empty;
 
 wire [15:0] rd_bytes =(1+arlen)*(1<<arsize);
 wire rdfull;
-assign arready = !rdfull;
+assign arready = !rdfull && depot_taken && !no_place;
 
 wire [15:0] xrbytes;
 wire [31:0] xraddr;
@@ -209,7 +204,72 @@ syncfifo #(DWID+BWID+IDWID,4) rd_data_fifo (.clk(clk),.rst_n(rst_n),.softreset(1
 );
 
 assign rvalid = !rd_fifo_empty;
-assign rlast  = 1'b0; // ILIA DOIT!!!
+
+wire [4-1:0] actives,rlasts,takens,depot_arvalid,matches;
+wire [IDWID-1:0] activeid0,activeid1,activeid2,activeid3;
+
+
+
+assign no_place = arvalid && (depot_arvalid==0);
+
+wire ok0 = !actives[0];
+wire ok1 = actives[1:0] == 2'b01;
+wire ok2 = actives[2:0] == 3'b011;
+wire ok3 = actives[3:0] == 4'b0111;
+
+read_axi_depot depot0 (
+    .clk(clk) ,.rst_n(rst_n)
+    ,.active(actives[0]) ,.activeid(activeid0)
+    ,.arbytes(rd_bytes) ,.arid(arid) ,.arvalid(depot_arvalid[0])
+    ,.backbytes(rd_fifo_empty? {BWID{1'b0}} : backbytes) ,.rid(rid) ,.rready(rready) ,.rvalid(rvalid)
+    ,.rlast(rlasts[0]) ,.taken(takens[0])
+);
+assign matches[0] = arvalid && actives[0] && (activeid0==arid);
+assign depot_arvalid[0] =  (takens[0] && matches[0]) || (arvalid && (matches==0) && ok0);
+
+read_axi_depot depot1 (
+    .clk(clk) ,.rst_n(rst_n)
+    ,.active(actives[1]) ,.activeid(activeid1)
+    ,.arbytes(rd_bytes) ,.arid(arid) ,.arvalid(depot_arvalid[1])
+    ,.backbytes(rd_fifo_empty? {BWID{1'b0}} : backbytes) ,.rid(rid) ,.rready(rready) ,.rvalid(rvalid)
+    ,.rlast(rlasts[1]) ,.taken(takens[1])
+);
+assign matches[1] = arvalid && actives[1] && (activeid1==arid);
+assign depot_arvalid[1] =  (takens[1] && matches[1]) || (arvalid && (matches==0) && ok1);
+
+read_axi_depot depot2 (
+    .clk(clk) ,.rst_n(rst_n)
+    ,.active(actives[2]) ,.activeid(activeid2)
+    ,.arbytes(rd_bytes) ,.arid(arid) ,.arvalid(depot_arvalid[2])
+    ,.backbytes(rd_fifo_empty? {BWID{1'b0}} : backbytes) ,.rid(rid) ,.rready(rready) ,.rvalid(rvalid)
+    ,.rlast(rlasts[2]) ,.taken(takens[2])
+);
+assign matches[2] = arvalid && actives[2] && (activeid2==arid);
+assign depot_arvalid[2] =  (takens[2] && matches[2]) || (arvalid && (matches==0) && ok2);
+
+read_axi_depot depot3 (
+    .clk(clk) ,.rst_n(rst_n)
+    ,.active(actives[3]) ,.activeid(activeid3)
+    ,.arbytes(rd_bytes) ,.arid(arid) ,.arvalid(depot_arvalid[3])
+    ,.backbytes(rd_fifo_empty? {BWID{1'b0}} : backbytes) ,.rid(rid) ,.rready(rready) ,.rvalid(rvalid)
+    ,.rlast(rlasts[3]) ,.taken(takens[3])
+);
+assign matches[3] = arvalid && actives[3] && (activeid3==arid);
+assign depot_arvalid[3] =  (takens[3] && matches[3]) || (arvalid && (matches==0) && ok3);
+
+
+assign depot_taken = |takens;
+
+
+assign rlast  = 
+       (actives[0] && (activeid0==rid) && rlasts[0])
+    || (actives[1] && (activeid1==rid) && rlasts[1])
+    || (actives[2] && (activeid2==rid) && rlasts[2])
+    || (actives[3] && (activeid3==rid) && rlasts[3])
+    ;
+
+
+
 
 endmodule
 
