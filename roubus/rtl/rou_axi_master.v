@@ -168,7 +168,7 @@ always @(posedge clk or negedge rst_n) begin
             if (!rd_fifo_empty && arready) begin
                 rdstate<= 1;
                 return_addr <= rd_return;
-                increment_return <= rd_tags[1];
+                increment_return <= rd_tags[0];
             end
         end else if (rdstate==1) begin
             if (rvalid && rlast && rready) begin
@@ -180,7 +180,7 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 assign arvalid = (rdstate==0)&&!rd_fifo_empty;
-assign arburst = rd_tags[0];  // NEEDS VALIDATION, ILIA. Look at read message.
+assign arburst = {1'b0,!rd_tags[1]};  // NEEDS VALIDATION, ILIA. Look at read message.
 assign araddr = rd_raddr;
 assign arlen = (rd_bytes>>4)+(rd_bytes[3:0]!=0)-1;   // NEEDS SPLITTER logic. ILIA
 assign arsize = 4;

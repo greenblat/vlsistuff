@@ -153,7 +153,7 @@ wire [31:0] mod_wr_addr =  local_wr_addr + modify_wr_address;
 wire [127:0] mod_wr_data = local_wr_data >> (modify_wr_address*8);
 
 wire [WID-1:0] msg_wr_out,msg_rd_out;
-rou_msg_build  msg_out_build  (.msg(msg_wr_out),.data(mod_wr_data),.addr(mod_wr_addr),.tags(5'd0) ,.bytes(modify_bytes) ,.cmd(local_wr ? 2'd2 : 2'd0));
+rou_msg_build  msg_out_build  (.msg(msg_wr_out),.data(mod_wr_data),.addr(mod_wr_addr),.tags(5'b00011) ,.bytes(modify_bytes) ,.cmd(local_wr ? 2'd2 : 2'd0));
 
 assign local_wr_ok =  msg_out_ack && (msg_rd_out[1:0]==2'b00);
 assign bresp = 2'b0;
