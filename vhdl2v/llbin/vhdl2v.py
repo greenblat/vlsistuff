@@ -267,7 +267,7 @@ def getList_new(Item,Adb):
     TRACE.pop(-1)
     return Res
 
-CHECKGOODS = string.split('signal_list else case wait input output port_map std_logic_vector integer unsigned port boolean')
+CHECKGOODS = string.split('enumlit generic_map if signal_list else case wait input output port_map std_logic_vector integer unsigned port boolean')
 def checkList(Res):
     if (type(Res)==types.TupleType):
         if len(Res)==4:
@@ -498,6 +498,17 @@ def getList_new__(Item,Adb):
     if Vars:
         LL = getList_new(Adb[Vars[0]],Adb)
         return [('signal_list',LL)]
+
+    Vars = matches(Item,'LeftParen ? !...enumeration_literal.. RightParen')
+    if Vars:
+        AA = getExpr(Vars[0],Adb)
+        BB = getList_new(Adb[Vars[1]],Adb)
+        return [('enumlit',[AA]+BB)]
+    Vars = matches(Item,'!...enumeration_literal.. ?')
+    if Vars:
+        AA = getExpr(Vars[1],Adb)
+        BB = getList_new(Adb[Vars[0]],Adb)
+        return [('enumlit',BB+[AA])]
 
     Vars = matches(Item,'LeftParen ? RightParen')
     if Vars:
@@ -789,12 +800,18 @@ def makeVerilog(Adb):
     makeVerilogEntities()
     makeVerilogArchs(Adb)
 
+def unfoldList(Item):
+    if (type(Item)==types.ListType)and(len(Item)==1):
+        return Item[0]
+    return Item
+    
 
 def makeVerilogEntities():
     for Module in ENTITIES:
         mod.addModule(Module)
         Glist,Plist = ENTITIES[Module]
         for Item in Glist:
+            Item = unfoldList(Item)
             mod.addModuleParam(Item[1],0)
         for Item in Plist:
             if len(Item)==1: Item = Item[0]
@@ -873,6 +890,11 @@ def treatBody(L2,Module):
                     addAlways(Newvars,['list']+Sense,Flow)
                 else:
                     logs.log_error('process "%s" body has %d len'%(Label,len(Body)))
+        elif Item[0]=='generate':
+            Label = Item[1]
+            Cond = Item[2][0][1]
+            Body = Item[2][0][2]
+            info('generate %s cond=%s body=%s'%(Label,Cond,Body))
         else:
             logs.log_error('treatBody failed on "%s"'%(str(Item)))
 
@@ -918,9 +940,15 @@ def treatSignals(L1,Module,Adb):
     for Item in L1:
         if len(Item)==1: Item=Item[0]
         if Item[0]=='signal':
-            Net = string.lower(Item[1])
+            Sigs = Item[1]
             Wid = Item[2]
-            addWire(Net,Wid)
+            if type(Sigs)==types.ListType:
+                for Sig in Sigs:
+                    Net = string.lower(Sig)
+                    addWire(Net,Wid)
+            else:
+                Net = string.lower(Sigs)
+                addWire(Net,Wid)
         elif Item[0]=='constant':
             Net = string.lower(Item[1])
             Wid = Item[2]
@@ -1049,8 +1077,30 @@ def getExpr__(Root,Adb):
     if (len(Root)==3)and(Root[0][0] == 'LeftParen')and(Root[2][0] == 'RightParen'):
         return getExpr(Root[1],Adb)
 
+
     if (len(Root)==2)and(type(Root)==types.TupleType)and(Root in Adb):
+        LL = Adb[Root]
+        if bothIdentifiers(LL):
+            return [LL[0][0],LL[1][0]]
         return getExpr(Adb[Root],Adb)
+
+
+
+
+
+    Vars = matches(Root,'? !...identifier..')
+    if Vars:
+        AA = getExpr(Vars[0],Adb)
+        if Vars[1] in Adb:
+            LL = Adb[Vars[1]]
+            if (len(LL)==2)and(LL[1][1]=='Identifier'):
+                BB = [LL[0][0],LL[1][0]]
+            else:
+                BB =  getExpr(Adb[Vars[1]],Adb)
+            return [AA]+BB
+        return [AA,Vars[1][0]]
+
+
     if (len(Root)==2)and(type(Root)==types.ListType)and(len(Root[0])==4)and(len(Root[1])==2)and(Root[1] in Adb):
         Root2 = level1up(Root,Adb)
         XX= getExpr(Root2,Adb)
@@ -1288,6 +1338,17 @@ def __reworkWHENELSE(Expr):
                     print 'new',New
     print 'reowrk failed',len(Expr),Expr
     return Expr
+
+
+def bothIdentifiers(LL):
+    if not listtuple(LL): return False
+    for Item in LL:
+        if Item[1]!='Identifier': return False
+    return True
+def listtuple(AA):
+    return  type(AA) in [types.ListType, types.TupleType]
+
+
 
 
 

@@ -225,7 +225,6 @@ def reworkExpr(Expr):
 
         if Expr[0]=='ifelse':
             After = reworkIf(Expr)
-#            print 'elsif %s'%str(After)
             return After
 
         if Expr[0]=='case':
@@ -237,7 +236,6 @@ def reworkExpr(Expr):
                     if len(Item)==3:
                         if listtuple(Item[1]) and (len(Item[1])==1): Item[1]=Item[1][0]
                         if Item[1]=='others': Item[1]='default'
-                        print 'item1',Item[1]
                         Res.append([Item[1],reworkExpr(Item[2])])
                     elif len(Item)==2:
                         if Item[1]=='default':
@@ -250,7 +248,6 @@ def reworkExpr(Expr):
                     Res.append(['default',reworkExpr(Item[1])])
                 else:
                     logs.log_error('case rework got %s'%(str(Item)))
-            print 'return',Cond,Res
             return ['case',Cond,Res]
 
     logs.log_error('reworkExpr %d %s %s'%(len(Expr),type(Expr),str(Expr)))
