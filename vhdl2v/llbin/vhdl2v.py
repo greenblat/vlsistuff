@@ -350,7 +350,8 @@ def getList_new__(Item,Adb):
     if Vars:
         AA = getList_new(Adb[Vars[0]],Adb)
         BB = getList_new(Adb[Vars[1]],Adb)
-        return [AA]+BB
+        CC = mergeToList([AA],BB)
+        return CC
 
     Vars = matches(Item,'!..process_declarative_item.. !process_declarative_item')
     if Vars:
@@ -367,7 +368,8 @@ def getList_new__(Item,Adb):
     if Vars:
         AA = getList_new(Adb[Vars[1]],Adb) 
         Label = getLabel(Adb[Vars[0]],Adb)
-        return [('process',Label,AA)]
+        if len(AA)==1: AA=AA[0]
+        return [('process',Label,AA[1],AA[2],AA[3])]
 
 
     Vars = matches(Item,'!a_label !unlabeled_generate_statement')
@@ -534,14 +536,16 @@ def getList_new__(Item,Adb):
         Cond = getExpr(Adb[Vars[0]],Adb)
         LL0 = getList_new(Adb[Vars[1]],Adb)
         LL1 = getList_new(Adb[Vars[2]],Adb)
-        return [('case',Cond,LL0+LL1)]
+        CC = mergeToList(LL0,LL1)
+        return [('case',Cond,CC)]
 
     Vars = matches(Item,'CASE ? IS !case_statement_alternative  !..case_statement_alternative.. END CASE')
     if Vars:
         Cond = getExpr(Vars[0],Adb)
         LL0 = getList_new(Adb[Vars[1]],Adb)
         LL1 = getList_new(Adb[Vars[2]],Adb)
-        return [('case',Cond,LL0+LL1)]
+        CC = mergeToList(LL0,LL1)
+        return [('case',Cond,CC)]
 
 
     Vars = matches(Item,'IF !condition')
@@ -583,7 +587,7 @@ def getList_new__(Item,Adb):
     if Vars:
         Cond = getExpr(Vars[0],Adb)
         LL0 = getList_new(Adb[Vars[1]],Adb)
-        return [['case',Cond,['list']+LL0]]
+        return [['case',Cond,LL0]]
     Vars = matches(Item,'? := ?')
     if Vars:
         Dst = getExpr(Vars[0],Adb)
@@ -641,7 +645,7 @@ def getList_new__(Item,Adb):
     if Vars:
         Sense = getList_new(Adb[Vars[0]],Adb)
         Stats = getList_new(Adb[Vars[1]],Adb)
-        return [('process',[],Sense,['list']+Stats)]
+        return [('process',[],Sense,Stats)]
 
     Vars = matches(Item,'PROCESS !.sensitivity_list. BEGIN_ !sequence_of_statements END PROCESS ?')
     if Vars:
@@ -678,7 +682,7 @@ def getList_new__(Item,Adb):
     if Vars:
         Index = getConstraint(Adb[Vars[0]],Adb)
         Subtype = getSubtype(Adb[Vars[1]],Adb)
-        print 'subtype',Subtype
+        logs.log_info('subtype %s'%(str(Subtype)))
         return [('array',Index,Subtype)]
 
     Vars = matches(Item,'!.iteration_scheme. LOOP !sequence_of_statements END LOOP')
@@ -873,11 +877,20 @@ def treatBody(L2,Module):
                 else:
                     logs.log_error('add_conn failed on "%s"'%(str(PV)))
         elif Item[0]=='process':
-            Label = Item[1]
             Stop=False
             if len(Item)==4:
+                Label = ''
+                Variables = getVarsList('',Item[1])
                 Sense = getSenseList(Item[2])
                 Flow = getProcessBody(Item[3])
+                addAlways([],['list']+Sense,Flow)
+                Stop=True
+            elif len(Item)==5:
+                Label = Item[1]
+                Variables = getVarsList('',Item[2])
+                Sense = getSenseList(Item[3])
+                Flow = getProcessBody(Item[4])
+                Flow = useRenames(Variables,Flow)
                 addAlways([],['list']+Sense,Flow)
                 Stop=True
             elif len(Item)==3:
@@ -926,6 +939,17 @@ def getNewVars(List):
     return res
     logs.log_error('getNewVars %s'%str(List))
     return []
+
+def getVarsList(Label,List):
+    LL = []
+    for Item in List:
+        if (Item[0]=='variable'):
+            addWire(Label+Item[1],Item[2])
+            if Label!='':
+                LL.append((Item[1],Label+'_'+Item[1]))
+        else:
+            logs.log_error('getVarsList item=%s'%str(Item))
+    return LL
 
 def getSenseList(List):
     LL = []
@@ -992,7 +1016,8 @@ def addWire(Net,Wid):
         Lo = Wid[3]
         mod.addWire(Net,'wire',(Hi,Lo))
     elif Wid in TYPES:
-        info('USING TYPE %s %s'%(Wid,Net))
+        info('USING TYPE %s %s %s'%(Wid,Net,TYPES[Wid]))
+        mod.addWire(Net,'reg',TYPES[Wid])
     else:
         logs.log_error('adding signal failed net=%s wid=%s '%(Net,Wid))
         info('defined TYPES are %s'%(str(TYPES.keys())))
@@ -1213,6 +1238,9 @@ def getExpr__(Root,Adb):
     Vars = matches(Root,'? LeftParen ? RightParen')
     if Vars:
         LL = getExpr(Vars[1],Adb)
+        Name = string.lower(Vars[0][0])
+        if Name == 'conv_integer':
+            return LL
         return ('subbit',string.lower(Vars[0][0]),LL)
 
     Vars = matches(Root,'!..waveform__WHEN__condition__ELSE.. ? WHEN ? ELSE')
@@ -1343,8 +1371,8 @@ def __reworkWHENELSE(Expr):
                     return Ret
                 elif Expr[1][1][0]=='question0':
                     New = reworkWHENELSE(Expr)
-                    print 'new',New
-    print 'reowrk failed',len(Expr),Expr
+                    logs.log_error('new %s'%(str(New)))
+    logs.log_error('rework failed %s %s'%(len(Expr),Expr))
     return Expr
 
 
@@ -1357,7 +1385,20 @@ def listtuple(AA):
     return  type(AA) in [types.ListType, types.TupleType]
 
 
+def mergeToList(AA,BB):
+    if type(BB)==types.ListType:
+        if BB[0]=='list': BB=BB[1:]
+    if type(AA)==types.ListType:
+        if AA[0]=='list': AA=AA[1:]
 
+    Res = ['list']+AA+BB
+    return  Res
+
+
+def useRenames(Variables,Flow):
+    if Variables==[]: return Flow
+# placeholder ILIA
+    return Flow
 
 
 main()

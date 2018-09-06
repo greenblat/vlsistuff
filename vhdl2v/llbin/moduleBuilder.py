@@ -6,6 +6,7 @@ sys.path.append('%s/pybin3'%NewName)
 import module_class
 import logs
 import pacifierVerilog
+import matches
 
 MODULES={}
 Current = False
@@ -27,6 +28,17 @@ def addModuleParam(Name,Val):
 def addWire(Name,Dir,From=0,To=0):
     Dir = verilogDir[Dir]
     Name = string.lower(Name)
+
+    if (type(From)==types.ListType)and(len(From)==1):
+        From=From[0]
+
+    Vars = matches.matches(From,('array', ('range', '?', '?'), ('std_logic_vector', ('?', '?'))))
+    if Vars:
+        Wid = ('double', (Vars[2], Vars[3]), (Vars[0], Vars[1]))
+        Current.nets[Name] = (Dir,Wid)
+        return
+        
+
     if From==0:
         Current.nets[Name] = (Dir,0)
         return
@@ -161,6 +173,7 @@ def rework_process(List):
 
 verilogDir = {'IN':'input','OUT':'output','INOUT':'inout','BUFFER':'output','wire':'wire'
     ,'input':'input','output':'output','wire':'wire'
+    ,'reg':'reg'
 }
 KNOWNOPS = string.split('& && | || ! ~ - + != question > < >= <= * / ')
 def reworkExpr(Expr):
@@ -233,8 +246,13 @@ def reworkExpr(Expr):
         if Expr[0]=='case':
             Cond = Expr[1]
             Res = []
-            for Item in Expr[2]:
+            Expr2 = Expr[2]
+            if Expr2[0]=='list':
+                Expr2 = Expr2[1:]
+            for Item in Expr2:
                 if len(Item)==1: Item = Item[0]
+                if Item[0]=='list':
+                    Item = Item[1:]
                 if  Item[0]=='case':
                     if len(Item)==3:
                         if listtuple(Item[1]) and (len(Item[1])==1): Item[1]=Item[1][0]
@@ -251,7 +269,7 @@ def reworkExpr(Expr):
                 elif  Item[0]=='others':
                     Res.append(['default',reworkExpr(Item[1])])
                 else:
-                    logs.log_error('case rework got %s'%(str(Item)))
+                    logs.log_error('case rework got %s %s'%(Item,str(Expr)))
             return ['case',Cond,Res]
 
     logs.log_error('reworkExpr %d %s %s'%(len(Expr),type(Expr),str(Expr)))
