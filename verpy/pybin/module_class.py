@@ -64,6 +64,8 @@ class module_class:
         self.includes.append(Expr)
     def add_define(self,Name,Expr):
         self.defines[Name]=Expr
+    def add_net(self,Name,Dir,Wid):
+        self.add_sig(Name,Dir,Wid)
     def add_sig(self,Name,Dir,Wid):
         if (type(Name)==types.StringType)and('[' in Name):
             Name = Name[:Name.index('[')]
@@ -153,7 +155,7 @@ class module_class:
 
     def checkDefined(self,List):
         for Net in List:
-            if (Net not in self.nets)and(Net not in self.parameters):
+            if (Net not in self.nets)and(Net not in self.parameters)and(Net[0] not in '0123456789'):
                 logs.log_err('net %s used before defined'%Net)
 
     def duplicate_inst(self,Inst,Inst2):
@@ -187,25 +189,30 @@ class module_class:
     def add_function(self,Name,Wid,Defs,Statement):
         self.functions[Name]=(Wid,Defs,Statement)
 
-    def dump(self):
-        print 'module',self.Module    
+    def dump(self,Fname = '?'):
+        if Fname == '?':
+            Fname = '%s.dump'%self.Module
+        File = open(Fname,'w') 
+        
+        File.write('module %s\n'%(self.Module))
         for Def in self.defines:
-            print '    define %s %s'%(Def,self.defines[Def])
+            File.write('    define %s %s\n'%(Def,self.defines[Def]))
         for Prm in self.parameters:
-            print '    parameter %s %s'%(Prm,self.parameters[Prm])
+            File.write('    parameter %s %s\n'%(Prm,self.parameters[Prm]))
         for Sig in self.nets:
-            print '    net %s %s'%(Sig,self.nets[Sig])
+            File.write('    net %s %s\n'%(Sig,self.nets[Sig]))
         for HAS in self.hard_assigns:
-            print '    assign %s'%(str(HAS))
+            File.write('    assign %s\n'%(str(HAS)))
         for Func in self.functions:
-            print '    function %s %s'%(Func,self.functions[Func])
+            File.write('    function %s %s\n'%(Func,self.functions[Func]))
         for Func in self.tasks:
-            print '    task %s'%(Func,self.tasks[Func])
+            File.write('    task %s\n'%(Func,self.tasks[Func]))
         for Alw in self.alwayses:
-            print '    always %s'%(str(Alw))
+            File.write('    always %s\n'%(str(Alw)))
         for Inst in self.insts:
-            self.insts[Inst].dump()
-        print 'endmodule'
+            self.insts[Inst].dump(File)
+        File.write('endmodule\n')
+        File.close()
 
     def dump_new_style_header(self,Fout):
         Fout.write('%s %s'%(self.Kind,pr_expr(self.Module)))
@@ -752,7 +759,7 @@ class module_class:
 
 
 
-OPS =  ['=','>=','=>','*','/','<','>','+','-','~','!','&','&&','<=','>>','>>>','<<','||','==','!=','|']
+OPS =  ['^','=','>=','=>','*','/','<','>','+','-','~','!','&','&&','<=','>>','>>>','<<','||','==','!=','|']
 KEYWORDS = string.split('if for ifelse edge posedge negedge list case default')
 
 def support_set(Sig,Bussed=True):
@@ -816,6 +823,7 @@ def support_set__(Sig,Bussed):
             return support_set__(Sig[1:],Bussed)
     
         if Sig[0]=='question':
+            while len(Sig)<4:  Sig.append('err')
             return support_set__(Sig[1],Bussed)+support_set__(Sig[2],Bussed)+support_set__(Sig[3],Bussed)
 
         res=[]
@@ -845,6 +853,7 @@ class instance_class:
         self.Name=Name
         self.conns={}
         self.params={}
+        self.specials={}
 
     def add_conn(self,Pin,Sig):
         if Pin in self.conns:
@@ -853,10 +862,10 @@ class instance_class:
         self.conns[Pin]=Sig
     def add_param(self,Prm,Val):
         self.params[Prm]=Val
-    def dump(self):
-        print 'instance %s %s '%(self.Type,self.Name)
+    def dump(self,File):
+        File.write('instance %s %s\n'%(self.Type,self.Name))
         for Pin in self.conns:
-            print '      conn pin=%s sig=%s'%(Pin,self.conns[Pin])
+            File.write('      conn pin=%s sig=%s\n'%(Pin,self.conns[Pin]))
 
 
     def dump_verilog(self,Fout):
@@ -928,6 +937,11 @@ def pr_stmt(List,Pref='',Begin=False):
         return str(List)
     if (List==[]):
         return 'begin /* empty */ end '
+    if (type(List)==types.ListType)and(len(List)==1):
+        return pr_stmt(List[0],Pref,Begin)
+    if (type(List)==types.ListType)and(len(List)>2)and(List[0]=='list')and(List[1]=='list'):
+        logs.log_warning('ilia double list def')
+        return pr_stmt(List[2],Pref,Begin)
     if (type(List)==types.ListType)and(List[0]=='list'):
         if len(List)==2:
             return pr_stmt(List[1],Pref,Begin)
@@ -945,6 +959,9 @@ def pr_stmt(List,Pref='',Begin=False):
         else:
             return Res+'%send\n'%Pref
     elif  type(List)==types.ListType:
+        if List[0]=='list':
+            logs.log_warning('ilia double list def')
+            List = List[1:]
         if List[0] in ['genvar','integer']:
             Kind = List[0]
             LL = pr_expr(List[1])
@@ -979,7 +996,10 @@ def pr_stmt(List,Pref='',Begin=False):
                 logs.log_err('ifelse structure has too many items %d > %d %s'%(len(List),4,str(List)))
             Cond = clean_br(pr_expr(List[1]))
             Yes = pr_stmt(List[2],Pref+'    ',True)
-            if List[3]==[]:
+            if len(List)<4:
+                logs.log_err('illegal ifelse len=%d'%len(List))
+                return '<><><><>'
+            elif List[3]==[]:
                 return '<><><>'
             elif not List[3]:
                 return '<>fls<><>'
@@ -1102,6 +1122,8 @@ def pr_stmt(List,Pref='',Begin=False):
                 
     if List in ['ILIA_FALSE','ILIA_TRUE']: return List                
 
+    if type(List)==types.TupleType:
+        return pr_stmt(list(List))
     logs.log_err('untreated for prnt stmt %s %s'%(Pref,List))
     return '[error %s]'%str(List)
 
@@ -1120,7 +1142,6 @@ def pr_assign_list(List):
         Src = clean_br(pr_expr(List[2]))
         return '%s=%s'%(Dst,Src)
         
-#    print 'list',List
     for Item in List:
         Res = pr_assign_list(Item)
         res.append(Res)
@@ -1159,7 +1180,7 @@ def pr_dir(Dir):
 
 def pr_wid(Wid):
     if Wid==None:
-        print 'wid is none error'
+        logs.log_err('wid is none error')
         traceback.print_stack()
         return 'wid is none error!!'
     if Wid==0:
@@ -1396,7 +1417,7 @@ def compute1(Item):
             try:
                 return eval(X)
             except:
-                print 'failed compute of "%s"'%X
+                logs.log_err('failed compute of "%s"'%str(X))
                 return 1
         if Item[0] in ['dig']:
             return compute1(Item[2])

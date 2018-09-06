@@ -30,6 +30,11 @@ def dump_instance(Mod,Simple=False):
         Fout.write('reg [31:0] panics;   initial panics=0;\n')
         Fout.write('reg [31:0] corrects; initial corrects=0;\n')
         Fout.write('reg [31:0] marker;   initial marker=0;\n')
+
+    for Param in Mod.parameters:
+        Val = Mod.parameters[Param]
+        Fout.write('parameter %s = %s;\n'%(Param,pr_expr(Val)))
+
     Regs=''
     Sigs = Mod.nets.keys()
     Sigs.sort()
