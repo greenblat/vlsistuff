@@ -5,6 +5,7 @@ sys.path.append('%s/pybin3'%NewName)
 
 import module_class
 import logs
+import pacifierVerilog
 
 MODULES={}
 Current = False
@@ -106,9 +107,11 @@ def addAlways(Always):
     Current.alwayses.append([A0,A2,Always[2]])
 
 
+
 def dumpVerilog(Fname='modulevhd'):
     Fout = open('%s.v'%Fname,'w')
     for Mod in MODULES:
+        pacifierVerilog.pacifier(MODULES[Mod])
         MODULES[Mod].dump()
         MODULES[Mod].dump_verilog(Fout)
     Fout.close()
@@ -236,7 +239,8 @@ def reworkExpr(Expr):
                     if len(Item)==3:
                         if listtuple(Item[1]) and (len(Item[1])==1): Item[1]=Item[1][0]
                         if Item[1]=='others': Item[1]='default'
-                        Res.append([Item[1],reworkExpr(Item[2])])
+                        Case = reworkCaseCond(Item[1])
+                        Res.append([Case,reworkExpr(Item[2])])
                     elif len(Item)==2:
                         if Item[1]=='default':
                             Res.append(['default',[]])
@@ -399,5 +403,15 @@ def flattenIFELSE(LL):
 def listtuple(AA):
     return  type(AA) in [types.ListType, types.TupleType]
 
+def reworkCaseCond(Item):
+    if listtuple(Item):
+        if Item[0]=='|':
+            res = []
+            for QQ in Item[1:]:
+                RR = reworkCaseCond(QQ)
+                for XX in RR:
+                    res.append(XX)
+            return res
+    return [Item]
 
 

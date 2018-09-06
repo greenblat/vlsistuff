@@ -1,5 +1,12 @@
 #! /usr/bin/python
 
+TODO = '''
+1. make regs
+2. recognize always
+3. variables in process
+'''
+
+
 import os,sys,string,types
 import pickle
 import traceback
@@ -25,6 +32,7 @@ def main():
         os.system('pybin/reworkMyLex.py lex.out lex2.out')
         os.system('pybin/vyaccer2.py lex2.out')
 
+    info('starting vhdl2v by IliaG 4.sep.2018')
     File = open('db0.pickle')
     Adb = pickle.load(File)
     cleanComas(Adb)
@@ -443,7 +451,8 @@ def getList_new__(Item,Adb):
         return [('signal',Signal,Subtype)]
     Vars = matches(Item,'SIGNAL ? Colon ?')
     if Vars:
-        return [('signal',Vars[0][0],Vars[1][0])]
+        Signal = getExpr(Vars[0],Adb)
+        return [('signal',Signal,Vars[1][0])]
 
 
     Vars = matches(Item,'Constant ? Colon ? !.VarAsgn__expression.')
@@ -1287,7 +1296,6 @@ def reworkWHENELSE(Expr):
                 Deep.pop(-1)
                 Deep.append(X)
 
-            info('deep %s'%str(Deep))
             return Deep
     logs.log_error('0>>> %s'%str(Expr))
     return '0'
