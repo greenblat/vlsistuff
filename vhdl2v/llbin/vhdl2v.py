@@ -28,7 +28,7 @@ def main():
     if len(sys.argv)>1:
         Fname = sys.argv[1]
         os.system('llbin/cleanVhdl.py %s'%Fname)
-        os.system('vhdllexer.py cleaned.vhd')
+        os.system('llbin/vhdllexer.py cleaned.vhd')
         os.system('pybin/reworkMyLex.py lex.out lex2.out')
         os.system('pybin/vyaccer2.py lex2.out')
 
