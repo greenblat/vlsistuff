@@ -943,6 +943,7 @@ def getNewVars(List):
 def getVarsList(Label,List):
     LL = []
     for Item in List:
+        if (type(Item)==types.ListType)and(len(Item)==1): Item=Item[0]
         if (Item[0]=='variable'):
             addWire(Label+Item[1],Item[2])
             if Label!='':

@@ -8,10 +8,16 @@ def pacifier(Mod):
     for Always in Mod.alwayses:
         Sense = Always[0]
         declareRegs(Mod,Always[1])
-        if (len(Always[1])==2)and(Always[1][0]=='list'):
+        if (len(Always[1])==3)and(Always[1][0]=='if'):
+            ClkRst = extractClkRst(Always[1][1])
+            Always[0]= ClkRst[0]
+            Always[1] = Always[1][2]
+
+        elif (len(Always[1])==2)and(Always[1][0]=='list'):
             Top = Always[1][1]
             if Top[0]=='ifelse':
                 ClkRst = extractClkRst(Top)
+                print 'clkrst',ClkRst
                 if type(ClkRst)==types.TupleType:
                     Clk,Rst = ClkRst
                     Always[0] = ['list',Clk,Rst]
@@ -38,7 +44,7 @@ def extractClkRst(Top):
         else: 
             return False
         if Top[3][0]=='if':
-            Vars =  matches(Top[3][1],['&', ['functioncall', 'edge', ['?']], ['==', '?', '?']])
+            Vars =  matches.matches(Top[3][1],['&', ['functioncall', 'edge', ['?']], ['==', '?', '?']])
             if Vars and (len(Vars)==3) and (Vars[0]==Vars[1]):
                 Clk = Vars[0]
                 if notZeroValue(Vars[2]):
@@ -48,9 +54,22 @@ def extractClkRst(Top):
                 return  CC,RR
             else:
                return False
+        logs.log_error('extractClkRst len==4 %s %s %s %s'%(Top[0],Top[1],Top[3][0],Top[3][1]))
+        return False
+    if len(Top)==3:
+        Vars =  matches.matches(Top,['&', ['functioncall', 'edge', ['?']], ['==', '?', '?']])
+        if Vars and (len(Vars)==3) and (Vars[0]==Vars[1]):
+            Clk = Vars[0]
+            if notZeroValue(Vars[2]):
+                CC = ('edge','posedge',Clk)
+            else:
+                CC = ('edge','negedge',Clk)
+            return  CC,False
+        else:
+            return False
 
-            
-    logs.log_info('extractClkRst %s %s %s %s'%(Top[0],Top[1],Top[3][0],Top[3][1]))
+
+    logs.log_error('extractClkRst len=%d %s'%(len(Top),str(Top)))
     return False
 
 
