@@ -1,6 +1,0 @@
-#! /bin/csh -f
-
-pybin/read_y_output.py yaccs/extended_vhdlgrammar
-mv mysave.py pybin/vhdl_yacc_table.py
-
-
