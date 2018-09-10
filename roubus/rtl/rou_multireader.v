@@ -8,7 +8,6 @@ module rou_multireader (
     ,input [31:0] start_addr
     ,input [2:0]  memsize
     ,input [19:0] bytes
-    ,input [4:0] multi_self
     ,input incr_addr
     ,input valid
     ,output busy
@@ -16,7 +15,6 @@ module rou_multireader (
 //
     ,output [127:0] odata
     ,output [4:0] obytes
-    ,output [4:0] oselfi
     ,output ovalid
     ,output pulse_last
     ,input otaken
@@ -58,7 +56,6 @@ assign local_rd = int_local_rd; // &&  local_rd_addr_ok;
 
 reg [3:0] local_offset;
 reg local_incr;
-reg [4:0] selfi;
 always @(posedge clk ) begin
     if (!rst_n) begin
         active0 <= 0; active1 <= 0;
@@ -66,7 +63,6 @@ always @(posedge clk ) begin
         local_bytes <= 0;
         local_incr <= 0;
         local_offset <= 0;
-        selfi <= 0;
         local_rd_roffset<=0;
     end else begin
         if (!busy &&  valid) begin
@@ -77,7 +73,6 @@ always @(posedge clk ) begin
             local_bytes <= bytes;
             local_incr  <= incr_addr;
             local_offset <= (start_addr & mask1); 
-            selfi <= multi_self;
         end else if (int_local_rd && local_rd_addr_ok) begin
             local_offset <= 0;
             if (local_bytes<=bytesInOneAccess) begin
@@ -95,16 +90,15 @@ end
 wire [4:0] use_bytes;
 wire [3:0] use_offset;
 wire use_last;
-wire [4:0] use_selfi;
 
 wire fw_empty;
 wire read_fw_fifo  = !fw_empty &&  local_rd_data_ok;
 wire [2:0] fw_count;
 wire write_fw_fifo = int_local_rd && local_rd_addr_ok;
-syncfifo #(5+5+4+1,4) forward_fifo (.clk(clk),.rst_n(rst_n),.softreset(1'b0)
-    ,.validin(write_fw_fifo),.datain({selfi,sent_bytes,local_offset,1'b0})
+syncfifo #(5+4+1,4) forward_fifo (.clk(clk),.rst_n(rst_n),.softreset(1'b0)
+    ,.validin(write_fw_fifo),.datain({sent_bytes,local_offset,1'b0})
     ,.full(fw_full),.empty(fw_empty),.overflow(),.count(fw_count)
-    ,.readout(read_fw_fifo),.dataout({use_selfi,use_bytes,use_offset,use_last})
+    ,.readout(read_fw_fifo),.dataout({use_bytes,use_offset,use_last})
 );
 
 
@@ -113,11 +107,11 @@ wire [127:0] use_data = (local_rd_data>>{use_offset,3'b000});
 
 
 
-parameter BACKWID = 128 + 1 + 5 + 5;
+parameter BACKWID = 128 + 1 + 5;
 
 
 
-wire [BACKWID-1:0] back_indata = {use_selfi,use_last,use_bytes,use_data};
+wire [BACKWID-1:0] back_indata = {use_last,use_bytes,use_data};
 
 wire [BACKWID-1:0] back_outdata;
 wire bw_empty;
@@ -130,7 +124,7 @@ syncfifo #(BACKWID,6) back_fifo (.clk(clk),.rst_n(rst_n),.softreset(1'b0)
 assign bhasplace = bw_count<4;
 
 assign ovalid = !bw_empty;
-assign {oselfi,pulse_last,obytes,odata} = bw_empty ? {BACKWID{1'b0}} : back_outdata;
+assign {pulse_last,obytes,odata} = bw_empty ? {BACKWID{1'b0}} : back_outdata;
 
 wire early_fw_empty = (fw_count==1) && read_fw_fifo;
 assign busy = active0 || !fw_empty && !early_fw_empty;

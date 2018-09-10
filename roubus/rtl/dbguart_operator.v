@@ -36,16 +36,12 @@ module dbguart_operator #(
 
 );
 
-wire [4:0] addr;
+wire [7:0] addr;
 wire rsel,rwrite;
 wire [31:0] wrdata,rddata;
 wire [1:0] rsize = 2;
 
 
-assign addr=0;
-assign rsel=0;
-assign rwrite=0;
-assign wrdata = 0;
 dbguart_rgf dbguart_rgf (
      .clk(clk) ,.rst_n(rst_n)
     ,.addr(addr[4:0])
@@ -201,6 +197,16 @@ wire send_mn_msg = rxmsg[0]==LET_m;
 wire send_msg = (send_wr_msg||send_rd_msg||send_mn_msg) &&  start_rx_analysis;
 
 
+// rgf access
+assign  rwrite = make_wr_rgf && start_rx_analysis;
+assign  rsel = (make_wr_rgf || make_rd_rgf) && start_rx_analysis;
+assign addr = hexvalue(rxmsg[1],rxmsg[2]);
+assign wrdata[7:0]  = hexvalue(rxmsg[3],rxmsg[4]);
+assign wrdata[15:8]  = hexvalue(rxmsg[5],rxmsg[6]);
+assign wrdata[23:16]  = hexvalue(rxmsg[7],rxmsg[8]);
+assign wrdata[31:24]  = hexvalue(rxmsg[9],rxmsg[10]);
+
+
 wire [7:0] send_tags = hexvalue(rxmsg[1],rxmsg[2]);
 wire [7:0] send_bytes = hexvalue(8'h0,rxmsg[3]);
 wire [31:0] send_addr_raw;
@@ -306,6 +312,17 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 reg [5:0] gen_ptr;
+wire [63:0] hexrdata;
+assign generated_txdata = (gen_ptr==8) ? 8'ha : (hexrdata >> (gen_ptr*8));
+hexdigits #(4,1) rdt0 (.infield(rrdata[3:0]),.outchar(hexrdata[63:56]));
+hexdigits #(4,1) rdt1 (.infield(rrdata[7:4]),.outchar(hexrdata[55:48]));
+hexdigits #(4,1) rdt2 (.infield(rrdata[11:8]),.outchar(hexrdata[47:40]));
+hexdigits #(4,1) rdt3 (.infield(rrdata[15:12]),.outchar(hexrdata[39:32]));
+hexdigits #(4,1) rdt4 (.infield(rrdata[19:16]),.outchar(hexrdata[31:24]));
+hexdigits #(4,1) rdt5 (.infield(rrdata[23:20]),.outchar(hexrdata[23:16]));
+hexdigits #(4,1) rdt6 (.infield(rrdata[27:24]),.outchar(hexrdata[15:8]));
+hexdigits #(4,1) rdt7 (.infield(rrdata[31:28]),.outchar(hexrdata[7:0]));
+
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         generated_active <= 1'b0;
@@ -316,7 +333,12 @@ always @(posedge clk or negedge rst_n) begin
             gen_ptr <= 0;
         end else if (generated_active) begin
             if (!tx_fifo_full) begin
-                gen_ptr <= gen_ptr+1;
+                if (gen_ptr==8)  begin
+                   generated_active <= 1'b0; 
+                   gen_ptr <= 0;
+                end else begin
+                    gen_ptr <= gen_ptr+1;
+                end
             end                    
         end
     end
