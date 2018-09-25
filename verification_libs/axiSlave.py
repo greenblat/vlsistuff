@@ -8,7 +8,7 @@ import random
 
 
 class axiSlaveClass:
-    def __init__(self,Path,Monitors):
+    def __init__(self,Path,Monitors,Prefix=''):
         self.Path = Path
         Monitors.append(self)
         self.arqueue=[]
@@ -19,8 +19,8 @@ class axiSlaveClass:
         self.bqueue=[]
         self.waitread=0
         self.bwaiting=0
-        self.bytex=1
-        self.Prefix = ''
+        self.bytex=0x30
+        self.Prefix = Prefix
         self.Translates = {}
         self.Ram = {}
         self.wready = 0
@@ -61,7 +61,7 @@ class axiSlaveClass:
         (rlast,rid,rdata) = self.rqueue.pop(0)
         if rlast=='wait':
             self.waitread=rid
-            logs.log_info('waitread %s'%rid)
+            logs.log_info('axiSlave waitread %s'%rid)
             self.idleread()
             return
 
@@ -105,7 +105,7 @@ class axiSlaveClass:
             Addr = ii*Incr + addr
         Addr1 = Addr & Mask 
         if Addr1!=Addr:
-            logs.log_warning('read address is not aligned size=%d addrin=%08x'%(arsize,Addr))
+            logs.log_warning('axiSlave read address is not aligned size=%d addrin=%08x'%(arsize,Addr))
         rdata = ''
         takenram = 0
         for ii in range(16):
@@ -113,15 +113,15 @@ class axiSlaveClass:
             if Add in self.Ram:
                 AA = '%02x'%(self.Ram[Add])
                 takenram += 1
-#                logs.log_info('addr in ram %x '%(Add))
+#                logs.log_info('axiSlave addr in ram %x '%(Add))
             else:
 #                AA = '%02x'%(0xff)
                 AA = '%02x'%(self.bytex)
                 self.bytex += 1
-#                logs.log_info('addr not in ram %x '%(Add))
+#                logs.log_info('axiSlave addr not in ram %x '%(Add))
             rdata = AA + rdata
         self.rqueue.append((rlast,rid,rdata))
-        logs.log_info('taken from ram %d bytes  rdata=%s addr=%08x'%(takenram,rdata,Addr))
+        logs.log_info('axiSlave taken from ram %d bytes  rdata=%s addr=%08x'%(takenram,rdata,Addr))
 
 
 
@@ -155,7 +155,7 @@ class axiSlaveClass:
             awburst=self.peek('awburst')
             awsize=self.peek('awsize')
             self.awqueue.append((awburst,awaddr,awlen,awid,awsize))
-#            logs.log_info('>>>awvalid %x %x %x %x %x'%(awburst,awaddr,awlen,awid,awsize))
+            logs.log_info('axiSlave >>>awvalid %x %x %x %x %x'%(awburst,awaddr,awlen,awid,awsize))
 
         if self.wready>0:
             self.wready -= 1
@@ -165,28 +165,28 @@ class axiSlaveClass:
             self.force('wready',1)
             
         if (self.peek('wvalid')==1)and((self.wready==5)):
-            logs.log_info('<<<<< wready=%d awlen=%d '%(self.wready,self.awlen))
+            logs.log_info('axiSlave <<<<< wready=%d awlen=%d '%(self.wready,self.awlen))
             veri.force('tb.marker','0x77')
             if self.awlen<0:
                 if len(self.awqueue)==0:
-                    logs.log_error('awqueue empty and wvalid is on')
+                    logs.log_error('axiSlave awqueue empty and wvalid is on')
                 else:
                     self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = self.awqueue.pop(0)
             wstrb = self.peek('wstrb')
             wlast = self.peek('wlast')
             wdata = self.peek('wdata')
-            logs.log_info('write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=%x'%(wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata))
+            logs.log_info('axiSlave write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=%x'%(wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata))
 
             for ii in range(16):
                 if ((wstrb>>ii)&1)==1:
                     Byte = (wdata>>(ii*8))& 0xff
                     self.Ram[self.awaddr+ii]=Byte
-#                    logs.log_info('write to  ram %x '%(self.awaddr+ii))
+#                    logs.log_info('axiSlave write to  ram %x '%(self.awaddr+ii))
             self.awaddr += 1<<self.awsize
             if self.awlen==0:
                 self.awlen = -1
                 if wlast!=1:
-                    logs.log_error('no last')
+                    logs.log_error('axislave %s: %s   no last'%(self.Path,self.Prefix))
             else:
                 self.awlen -= 1
 
