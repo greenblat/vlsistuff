@@ -123,57 +123,7 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
     W1 = len(bin(Csv.runAddr))-3
     File.write('module %s (input clk,input rst_n,input pwrite, input psel, input penable, input [1:0] psize, input [31:0] pwdata, output reg [31:0] prdata, input [%d:0] paddr ,output reg [%d:0] waddr\n'%(Csv.Module,W1,W1))
     LL = writeInputsOutputsAndWires(Csv,File)
-#    LL = []
-#    for Reg in Csv.regs:
-#        ST = Csv.regs[Reg]
-#        LL.append((int(ST[3]),Reg))
-#    LL.sort()
-#    Wires = ''
-#    for Add,Reg in LL:
-#        ST = Csv.regs[Reg]
-#        Wid = int(ST[1])
-#        Acc = ST[0]
-#        if writable(Acc):
-#            Dir = 'output reg'
-#        else:
-#            Dir = 'input    '
-#        if Wid>1:
-#            WW = '[%2d:0]'%(Wid-1)
-#        else:
-#            WW = '       '
-#        if Acc in ['ram']:
-#            File.write('   ,input %s %s_rdata\n'%(WW,Reg))
-#        elif  writable(Acc)or (Reg not in hasFields):
-#            File.write('   ,%s %s %s\n'%(Dir,WW,Reg))
-#        elif  not writable(Acc)and (Reg in hasFields):
-#            Wires += 'wire %s %s;\n'%(WW,Reg)
-#
-#        if 'pulse' in Acc:
-#            File.write('   ,output %s_pulse\n'%(Reg))
-#        if Acc in ['external','ram']:
-#            File.write('   ,output %s_wr_pulse\n'%(Reg))
-#            File.write('   ,output %s_rd_pulse\n'%(Reg))
-#            if (Wid>32)or(Acc=='ram'):
-#                File.write('   ,output reg [15:0] %s_addr\n'%(Reg))
-#            
-#
-##    for (Reg,Field) in FFF:
-##        Pos = FFF[(Reg,Field)]
-##        ST = Csv.regs[Reg]
-##        Acc = ST[0]
-##        if writable(Acc):
-##            Dir = 'output '
-##        else:
-##            Dir = 'input  '
-##        if type(Pos)==types.TupleType:
-##            (H,L) = Pos
-##            WW = int(H)-int(L)
-##            File.write('   ,%s [%d:0] %s\n'%(Dir,WW,Field))
-##        else:
-##            File.write('   ,%s        %s\n'%(Dir,Field))
-#
-#    File.write(');\n')
-#    File.write(Wires)
+
     X = (1<<(W1+1))-1
     X = X & 0xfffffffc
     File.write('wire [%d:0] mpaddr = paddr[%d:0] & %d\'h%x;\n'%(W1,W1,W1+1,X))
@@ -196,9 +146,14 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
                 File.write('    (mpaddr[%d:0]==\'h%x) ? %s :\n'%(W1,Addr,RR))
         else:
             Many,Add = Wid/32,Wid%32
-            Many += (Add>0)
             for X in range(Many):
                 File.write('    (mpaddr[%d:0]==\'h%x) ? %s[%d:%d] :\n'%(W1,Addr+4*X,Reg,31+32*X,32*X))
+            X += 1
+            if (Add==1):
+                File.write('    (mpaddr[%d:0]==\'h%x) ? {31\'b0,%s[%d]} :\n'%(W1,Addr+4*X,Reg,32*X))
+            elif (Add>1):
+                File.write('    (mpaddr[%d:0]==\'h%x) ? {%d\'b0,%s[%d:%d]} :\n'%(W1,Addr+4*X,32-Add,Reg,Add-1+32*X,32*X))
+                
     File.write("    32'b0;\n")
 
     
@@ -207,27 +162,6 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
 
     File.write('always @(posedge clk) prdata <= rdata_wire;\n')
 
-#    for (Reg,Field) in FFF:
-#        Pos = FFF[(Reg,Field)]
-#        ST = Csv.regs[Reg]
-#        Acc = ST[0]
-#        if writable(Acc):
-#            Dir = 'output '
-#        else:
-#            Dir = 'input  '
-#        Pos = FFF[(Reg,Field)]
-#        if 'output' in Dir:
-#            if type(Pos)==types.TupleType:
-#                (H,L) = Pos
-#                File.write('assign %s = %s[%s:%s];\n'%(Field,Reg,H,L))
-#            else:
-#                File.write('assign %s = %s[%s];\n'%(Field,Reg,Pos))
-#        else:
-#            if type(Pos)==types.TupleType:
-#                (H,L) = Pos
-#                File.write('assign %s[%s:%s] = %s;\n'%(Reg,H,L,Field))
-#            else:
-#                File.write('assign %s[%s] = %s;\n'%(Reg,Pos,Field))
 
     Str = string.replace(STRING0,'W1',str(W1))
     Str = string.replace(Str,'or negedge rst_n',Reset)
@@ -251,20 +185,31 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
         Acc = ST[0]
         Addr = int(ST[3])& 0xfffc
         if writable(Acc):
-            if (Wid<2):
-                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= wdata[0];\n'%(W1,Addr,Reg))
-            elif (Wid<=8):
-                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= wdata[7:0];\n'%(W1,Addr,Reg))
-            elif (Wid<=32):
-                Wdata = '(%s[%d:0] & ~mask[%d:0]) | (wdata[%d:0] &mask[%d:0])'%(Reg,Wid-1,Wid-1,Wid-1,Wid-1) 
-                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= %s;\n'%(W1,Addr,Reg,Wdata))
-            else:
+             writeReg(W1,Reg,Wid,Addr,File)
+#            if (Wid<2):
+#                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= wdata[0];\n'%(W1,Addr,Reg))
+#            elif (Wid<=8):
+#                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= wdata[7:0];\n'%(W1,Addr,Reg))
+#            elif (Wid<=32):
+#                Wdata = '(%s[%d:0] & ~mask[%d:0]) | (wdata[%d:0] &mask[%d:0])'%(Reg,Wid-1,Wid-1,Wid-1,Wid-1) 
+#                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= %s;\n'%(W1,Addr,Reg,Wdata))
+#            else:
+#                X = 0
+#                while Wid>0:
+#                    if (Wid>=32):
+#                        Wdata = '(%s[%d:%d] & ~mask[31:0]) | (wdata &mask)'%(Reg,X*32+31,X*32) 
+#                        File.write('        if (mpaddr[%d:0]==\'h%x) %s[%d:%d] <= %s;\n'%(W1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
+#                        Wid -= 32
+#                    elif (Wid==1):
+#                        Wdata = '(%s[%d] & ~mask[0]) | (wdata[0] &mask[0])'%(Reg,X*32) 
+#                        File.write('        if (mpaddr[%d:0]==\'h%x) %s[%d] <= %s;\n'%(W1,Addr+4*X,Reg,X*32,Wdata))
+#                        Wid -= 1
+#                    else:
+#                        Wdata = '(%s[%d:%d] & ~mask[%d:0]) | (wdata[%d:0] &mask[%d:0])'%(Reg,X*32+Wid-1,X*32,Wid-1,Wid-1,Wid-1) 
+#                        File.write('        if (mpaddr[%d:0]==\'h%x) %s[%d:%d] <= %s;\n'%(W1,Addr+4*X,Reg,X*32+Wid-1,X*32,Wdata))
+#                        Wid = 0
+#                    X += 1
 
-                Many,Add = Wid/32,Wid%32
-                Many += (Add>0)
-                for X in range(Many):
-                    Wdata = '(%s[%d:%d] & ~mask[31:0]) | (wdata &mask)'%(Reg,X*32+31,X*32) 
-                    File.write('        if (mpaddr[%d:0]==\'h%x) %s[%d:%d] <= %s;\n'%(W1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
 
     File.write('    end \n')
     File.write('end \n')
@@ -365,7 +310,7 @@ assign bresp = 2'b0;
 wire [WW-1:0] iwaddr,iraddr;
 wire do_write = !adempty && !daempty;
 syncfifo #(WW,2) adfifo(.clk(clk),.rst_n(rst_n)
-    ,.validin(awvalid),.datain(awaddr[WW-1:0])
+    ,.validin(awvalid),.datain(awaddr[WW-1:0] & MASK)
     ,.readout(do_write),.dataout(iwaddr[WW-1:0])
     ,.full(adfull),.empty(adempty),.count(),.overflow(),.softreset(1'b0)
 );
@@ -391,7 +336,7 @@ always @(posedge clk) begin
     end
 end
 syncfifo #(WW,2) arfifo(.clk(clk),.rst_n(rst_n)
-    ,.validin(arvalid),.datain(araddr[WW-1:0])
+    ,.validin(arvalid),.datain(araddr[WW-1:0] & MASK)
     ,.readout(do_read),.dataout(iraddr[WW-1:0])
     ,.full(arfull),.empty(arempty),.count(),.overflow(),.softreset(1'b0)
 );
@@ -416,7 +361,11 @@ def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
     File.write(string.replace(AXISTRING,"MODULE",Csv.Module))
     LL = writeInputsOutputsAndWires(Csv,File)
 
-    File.write(string.replace(AXISTRING2,"WW",str(W1)))
+    MASK = "%d'b%s00"%(W1,'1'*(W1-2))
+    AXI = string.replace(AXISTRING2,"WW-1",str(W1-1))
+    AXI = string.replace(AXI,"WW",str(W1))
+    AXI = string.replace(AXI,"MASK",MASK)
+    File.write(AXI)
 
     X = (1<<(W1+1))-1
     X = X & 0xfffffffc
@@ -442,9 +391,11 @@ def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
 #            Many += (Add>0)
             for X in range(Many):
                 File.write('    (iraddr[%d:0]==\'h%x) ? %s[%d:%d] :\n'%(W1-1,Addr+4*X,Reg,31+32*X,32*X))
-            if Add>0:
-                X += 1
-                File.write('    (iraddr[%d:0]==\'h%x) ? {%d\'b0,%s[%d:%d]} :\n'%(W1-1,Addr+4*X,32-Add,Reg,Add+32*X-1,32*X))
+            X += 1
+            if (Add==1):
+                File.write('    (iraddr[%d:0]==\'h%x) ? {31\'b0,%s[%d]} :\n'%(W1-1,Addr+4*X,Reg,32*X))
+            elif (Add>1):
+                File.write('    (iraddr[%d:0]==\'h%x) ? {%d\'b0,%s[%d:%d]} :\n'%(W1-1,Addr+4*X,32-Add,Reg,Add-1+32*X,32*X))
 
     File.write("    32'b0;\n")
 
@@ -471,20 +422,7 @@ def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
         Acc = ST[0]
         Addr = int(ST[3])& 0xfffc
         if writable(Acc):
-            if (Wid<2):
-                File.write('        if (iwaddr[%d:0]==\'h%x) %s <= iwdata[0];\n'%(W1-1,Addr,Reg))
-            elif (Wid<=8):
-                File.write('        if (iwaddr[%d:0]==\'h%x) %s <= iwdata[7:0];\n'%(W1-1,Addr,Reg))
-            elif (Wid<=32):
-                Wdata = '(%s[%d:0] & ~mask[%d:0]) | (iwdata &mask)'%(Reg,Wid-1,Wid-1) 
-                File.write('        if (iwaddr[%d:0]==\'h%x) %s <= %s;\n'%(W1-1,Addr,Reg,Wdata))
-            else:
-
-                Many,Add = Wid/32,Wid%32
-                Many += (Add>0)
-                for X in range(Many):
-                    Wdata = '(%s[%d:%d] & ~mask[31:0]) | (iwdata &mask)'%(Reg,X*32+31,X*32) 
-                    File.write('        if (iwaddr[%d:0]==\'h%x) %s[%d:%d] <= %s;\n'%(W1-1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
+            writeReg(W1-1,Reg,Wid,Addr,File,'<=','iw')
 
     File.write('    end \n')
     File.write('end \n')
@@ -656,14 +594,18 @@ def dumpRamVerilog(FFF,Addrs,Csv,Reset):
                 RR = Reg 
             if ST[0]=='ram':
                 lastAddr = Addr + ST[2] * bytesPerWord(ST[1])
-                File.write('    ((mpaddr[%d:0]>=\'h%x) && (mpaddr[%d:0]<\'h%x)) : %s :\n'%(W1,Addr,W1,lastAddr,RR))
+                File.write('    ((mpaddr[%d:0]>=\'h%x) && (mpaddr[%d:0]<\'h%x)) ? %s :\n'%(W1,Addr,W1,lastAddr,RR))
             else:
                 File.write('    (mpaddr[%d:0]==\'h%x) ? %s :\n'%(W1,Addr,RR))
         else:
             Many,Add = Wid/32,Wid%32
-            Many += (Add>0)
             for X in range(Many):
                 File.write('    (mpaddr[%d:0]==\'h%x) ? %s[%d:%d] :\n'%(W1,Addr+4*X,Reg,31+32*X,32*X))
+            X += 1
+            if (Add==1):
+                File.write('    (mpaddr[%d:0]==\'h%x) ? {31\'b0,%s[%d]} :\n'%(W1,Addr+4*X,Reg,32*X))
+            elif (Add>1):
+                File.write('    (mpaddr[%d:0]==\'h%x) ? {%d\'b0,%s[%d:%d]} :\n'%(W1,Addr+4*X,32-Add,Reg,Add-1+32*X,32*X))
     File.write("    32'b0;\n")
 
     
@@ -707,7 +649,7 @@ def dumpRamVerilog(FFF,Addrs,Csv,Reset):
             File.write('wire %s_ram_sel = rsel &&  (mpaddr[%d:0]>=\'h%x) && (mpaddr[%d:0]<\'h%x);\n'%(Reg,W1,Addr,W1,lastAddr))
             File.write('reg %s_wr_pulse_reg; always @(posedge clk)  %s_wr_pulse_reg <= rwrite &&  %s_ram_sel;\n'%(Reg,Reg,Reg))
             File.write('assign %s_wr_pulse = %s_wr_pulse_reg;\n'%(Reg,Reg))
-            File.write('assign %s_rd_pulse = !write &&  %s_ram_sel;\n'%(Reg,Reg))
+            File.write('assign %s_rd_pulse = !rwrite &&  %s_ram_sel;\n'%(Reg,Reg))
             File.write('always @(posedge clk)  %s_addr <= mpaddr-\'h%x;\n'%(Reg,Addr))
         if 'external' in Acc:
             lastAddr = Addr + Wid/8
@@ -751,20 +693,7 @@ def writeFlops(File,Reset,LL,Csv,W1):
         Acc = ST[0]
         Addr = int(ST[3])& 0xfffc
         if writable(Acc) and  (ST[5]=='false'):
-            if (Wid<2):
-                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= wdata[0];\n'%(W1,Addr,Reg))
-            elif (Wid<=8):
-                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= wdata[7:0];\n'%(W1,Addr,Reg))
-            elif (Wid<=32):
-                Wdata = '(%s[%d:0] & ~mask[%d:0]) | (wdata &mask)'%(Reg,Wid-1,Wid-1) 
-                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= %s;\n'%(W1,Addr,Reg,Wdata))
-            else:
-
-                Many,Add = Wid/32,Wid%32
-                Many += (Add>0)
-                for X in range(Many):
-                    Wdata = '(%s[%d:%d] & ~mask[31:0]) | (wdata &mask)'%(Reg,X*32+31,X*32) 
-                    File.write('        if (mpaddr[%d:0]==\'h%x) %s[%d:%d] <= %s;\n'%(W1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
+            writeReg(W1,Reg,Wid,Addr,File)
 
     File.write('    end \n')
     File.write('end \n')
@@ -773,7 +702,7 @@ def writeLatches(File,Reset,LL,Csv,W1):
     Latches = False
     for Add,Reg in LL:
         ST = Csv.regs[Reg]
-        if ST[5]=='true': Latches = True
+        if (len(ST)>=6)and (ST[5]=='true'): Latches = True
 
     if not Latches: return
 
@@ -797,20 +726,7 @@ def writeLatches(File,Reset,LL,Csv,W1):
         Acc = ST[0]
         Addr = int(ST[3])& 0xfffc
         if writable(Acc) and  (ST[5]=='true'):
-            if (Wid<2):
-                File.write('        if (mpaddr[%d:0]==\'h%x) %s = wdata[0];\n'%(W1,Addr,Reg))
-            elif (Wid<=8):
-                File.write('        if (mpaddr[%d:0]==\'h%x) %s = wdata[7:0];\n'%(W1,Addr,Reg))
-            elif (Wid<=32):
-                Wdata = '(%s[%d:0] & ~mask[%d:0]) | (wdata &mask)'%(Reg,Wid-1,Wid-1) 
-                File.write('        if (mpaddr[%d:0]==\'h%x) %s = %s;\n'%(W1,Addr,Reg,Wdata))
-            else:
-
-                Many,Add = Wid/32,Wid%32
-                Many += (Add>0)
-                for X in range(Many):
-                    Wdata = '(%s[%d:%d] & ~mask[31:0]) | (wdata &mask)'%(Reg,X*32+31,X*32) 
-                    File.write('        if (mpaddr[%d:0]==\'h%x) %s[%d:%d] = %s;\n'%(W1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
+            writeReg(W1,Reg,Wid,Addr,File,'=')
 
     File.write('    end \n')
     File.write('end \n')
@@ -1234,6 +1150,23 @@ def bytesPerWord(Bits):
     if Bits<=8: return 1
     if Bits<=16: return 2
     if Bits<=32: return 4
+
+def writeReg(W1,Reg,Wid,Addr,File,Assign='<=',ADD='mp'):
+    X = 0
+    while Wid>0:
+        if (Wid>=32):
+            Wdata = Assign + ' (%s[%d:%d] & ~mask[31:0]) | (wdata &mask)'%(Reg,X*32+31,X*32) 
+            File.write('        if (%saddr[%d:0]==\'h%x) %s[%d:%d] %s;\n'%(ADD,W1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
+            Wid -= 32
+        elif (Wid==1):
+            Wdata = Assign+' (%s[%d] & ~mask[0]) | (wdata[0] &mask[0])'%(Reg,X*32) 
+            File.write('        if (%saddr[%d:0]==\'h%x) %s[%d] %s;\n'%(ADD,W1,Addr+4*X,Reg,X*32,Wdata))
+            Wid -= 1
+        else:
+            Wdata = Assign+' (%s[%d:%d] & ~mask[%d:0]) | (wdata[%d:0] &mask[%d:0])'%(Reg,X*32+Wid-1,X*32,Wid-1,Wid-1,Wid-1) 
+            File.write('        if (%saddr[%d:0]==\'h%x) %s[%d:%d] %s;\n'%(ADD,W1,Addr+4*X,Reg,X*32+Wid-1,X*32,Wdata))
+            Wid = 0
+        X += 1
 
 main()
 
