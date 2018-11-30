@@ -121,17 +121,19 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
         hasFields[Reg]=True
     File = open('%s.v'%Csv.Module,'w')
     W1 = len(bin(Csv.runAddr))-3
-    File.write('module %s (input clk,input rst_n,input pwrite, input psel, input penable, input [1:0] psize, input [31:0] pwdata, output reg [31:0] prdata, input [%d:0] paddr ,output reg [%d:0] waddr\n'%(Csv.Module,W1,W1))
+    File.write('module %s (input clk,input rst_n,input pwrite, input psel, input penable, input [1:0] psize, input [31:0] pwdata, output [31:0] prdata, input [%d:0] paddr ,output reg [%d:0] waddr\n'%(Csv.Module,W1,W1))
     LL = writeInputsOutputsAndWires(Csv,File)
 
     X = (1<<(W1+1))-1
     X = X & 0xfffffffc
     File.write('wire [%d:0] mpaddr = paddr[%d:0] & %d\'h%x;\n'%(W1,W1,W1+1,X))
-    File.write('wire [31:0] rdata_wire = \n')
+
+    Selects = []
+    File.write('wire [31:0] prdata_wire = \n')
     for Add,Reg in LL:
         ST = Csv.regs[Reg]
-        if ST[0]=='ram':
-            Reg = '%s_rdata'%Reg
+#        if ST[0]=='ram':
+#            Reg = '%s_rdata'%Reg
         Wid = int(ST[1])
         Addr = int(ST[3])& 0xfffc
         if (Wid<=32):
@@ -141,7 +143,7 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
                 RR = Reg
             if ST[0]=='ram':
                 lastAddr = Addr + ST[2] * bytesPerWord(ST[1])
-                File.write('    ((mpaddr[%d:0]>=\'h%x) && (mpaddr[%d:0]<\'h%x)) ? %s :\n'%(W1,Addr,W1,lastAddr,RR))
+                Selects.append('wire ram_%s_read_selected = ((mpaddr[%d:0]>=\'h%x) && (mpaddr[%d:0]<\'h%x));\n'%(Reg,W1,Addr,W1,lastAddr))
             else:
                 File.write('    (mpaddr[%d:0]==\'h%x) ? %s :\n'%(W1,Addr,RR))
         else:
@@ -155,12 +157,25 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
                 File.write('    (mpaddr[%d:0]==\'h%x) ? {%d\'b0,%s[%d:%d]} :\n'%(W1,Addr+4*X,32-Add,Reg,Add-1+32*X,32*X))
                 
     File.write("    32'b0;\n")
-
+    for Line in Selects:
+        File.write(Line)
+    for Add,Reg in LL:
+        ST = Csv.regs[Reg]
+        if ST[0]=='ram':
+#            Reg = '%s_rdata'%Reg
+            File.write('reg ram_%s_read_take; always @(posedge clk) ram_%s_read_take <= ram_%s_read_selected;\n'%(Reg,Reg,Reg))
     
     createFieldAssigns(FFF,Csv)
 
 
-    File.write('always @(posedge clk) prdata <= rdata_wire;\n')
+    File.write('reg [31:0] prdata_reg;\n')
+    File.write('always @(posedge clk) prdata_reg <=  prdata_wire;\n')
+    File.write('assign prdata =  \n')
+    for Add,Reg in LL:
+        ST = Csv.regs[Reg]
+        if ST[0]=='ram':
+            File.write('    (ram_%s_read_take) ? %s_rdata :\n'%(Reg,Reg)) 
+    File.write('   prdata_reg;\n')
 
 
     Str = string.replace(STRING0,'W1',str(W1))
