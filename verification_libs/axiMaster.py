@@ -22,9 +22,14 @@ class axiMasterClass:
         self.wQueue=[]
         self.Rid = 1
         self.waiting=0
+#        rdata = veri.peek('tb.rdata')
+#        self.datawidth = len(rdata)
+        self.datawidth = 0
 
     def peek(self,Sig):
         return logs.peek('%s.%s'%(self.Path,Sig))
+    def bpeek(self,Sig):
+        return veri.peek('%s.%s'%(self.Path,Sig))
     def force(self,Sig,Val):
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
@@ -38,14 +43,14 @@ class axiMasterClass:
         self.Rid += 1
         for ii in range(Len):
             if len(Wdatas)==0:
-                Wdata = '0x%08x%08x%08x%08x'%(self.Rid,self.Rid,self.Rid,self.Rid)
+                Wdata = '0x%08x%08x%08x%08x'%(self.Rid+0x1000*ii,0x100+self.Rid+0x1000*ii,0x200+self.Rid+0x1000*ii,0x300+self.Rid+0x1000*ii)
             else:
                 Wdata = hex(Wdatas.pop(0))
             if ii==(Len-1):
                 Wlast=1
             else:
                 Wlast = 0
-            self.Queue.append(('w','force wvalid=1 wdata=%s wstrb=0xffff wlast=%d'%(Wdata,Wlast)))
+            self.Queue.append(('w','force wvalid=1 wdata=%s wstrb=0x00ff wlast=%d'%(Wdata,Wlast)))
 
         self.Queue.append(('w','force wvalid=0 wdata=0 wstrb=0 wlast=0'))
             
@@ -56,7 +61,7 @@ class axiMasterClass:
         self.Queue.append(('this','finish'))
 
     def run(self):
-        logs.log_info('runn lenaw=%d lenar=%d lenq=%d lenw=%d'%(len(self.awQueue),len(self.arQueue),len(self.Queue),len(self.wQueue)))
+#        logs.log_info('runn lenaw=%d lenar=%d lenq=%d lenw=%d'%(len(self.awQueue),len(self.arQueue),len(self.Queue),len(self.wQueue)))
         self.runResponce()
         self.runAw()
         self.runAr()
@@ -70,9 +75,15 @@ class axiMasterClass:
         if self.peek('rvalid')==1:
             self.force('rready',1)
             rdata = self.peek('rdata')
+            if self.datawidth==0:
+                rrr = self.bpeek('rdata')
+                self.datawidth = len(rrr)
             rid = self.peek('rid')
             rlast = self.peek('rlast')
-            logs.log_info('axi responce rid=%x rlast=%d rdata=%032x     %s'%(rid,rlast,rdata,self.Path))
+            rdatax  = '%032x'%rdata 
+            msb  = (self.datawidth/4) 
+            rdatax = rdatax[-msb:]
+            logs.log_info('axi responce rid=%x rlast=%d rdata=%s     %s'%(rid,rlast,rdatax,self.Path))
         else:
             self.force('rready',0)
 

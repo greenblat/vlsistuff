@@ -48,7 +48,7 @@ class apbDriver:
         if type(Addr)==types.StringType:
             Addr = self.translate(Addr)
         self.queue1.append(('read',Addr,expData))
-        self.queue1.append(('wait',100))
+        self.queue1.append(('wait',10))
 
 
 
@@ -58,6 +58,7 @@ class apbDriver:
         self.queue0.append(('write',Addr,Data))
     def wait(self,Data):
         self.queue0.append(('wait',Data))
+        self.queue1.append(('wait',Data))
     def waitUntil(self,Data,Timeout):
         self.queue0.append(('until',Data,Timeout))
         
@@ -153,7 +154,7 @@ class apbDriver:
                     if type(Exp)==types.FunctionType:
                         Exp(X)
                     else: 
-                        logs.log_info('apb %s read %x expected %s who=%s'%(self.Name,X,Exp,self.rename(Who)))
+                        logs.log_info('apb %s read act=%x exp=%s who=%s'%(self.Name,X,Exp,self.rename(Who)))
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 else:
@@ -235,7 +236,7 @@ class apbDriver:
                     if type(Exp)==types.FunctionType:
                         Exp(X)
                     else: 
-                        logs.log_info('apb %s read %x (%s) expected %s who=%s'%(self.Name,X,chr(X),Exp,self.rename(Who)))
+                        logs.log_info('apb %s read act=%x (%s) exp=%s who=%s'%(self.Name,X,chr(X & 0xff),Exp,self.rename(Who)))
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 else:
