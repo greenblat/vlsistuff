@@ -50,7 +50,8 @@ class axiMasterClass:
                 Wlast=1
             else:
                 Wlast = 0
-            self.Queue.append(('w','force wvalid=1 wdata=%s wstrb=0x00ff wlast=%d'%(Wdata,Wlast)))
+            Wstrb = (1<<(1<<Size))-1
+            self.Queue.append(('w','force wvalid=1 wdata=%s wstrb=0x%x wlast=%d'%(Wdata,Wstrb,Wlast)))
 
         self.Queue.append(('w','force wvalid=0 wdata=0 wstrb=0 wlast=0'))
             
