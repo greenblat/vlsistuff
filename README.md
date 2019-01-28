@@ -20,4 +20,10 @@ simulation with python driving and monitoring the simulation. replacement of SV-
 #**pybin** 
 just copy of python scripts from all previous. 
 
+#**waveformer** 
+write waveforms in a text file and get svg or png drawing.
+
+#**verification_libs** 
+python helpers for verification with python-verilog connection. logs.py helps with logging and data converts. 
+there are apb axi ad other helpers.
 
