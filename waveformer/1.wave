@@ -1,0 +1,37 @@
+
+sig clk (repeat 20 (3 0) (3 1))
+sig clk2 (repeat 20 (5 0) (2 1))
+
+sig amb0 (10 1) (color red) (15 0) (color black) (10 1)
+sig amb1 (11 1) (13 0) (11 1)
+sig amb2 (12 1) (11 0) (20 1)
+
+sig aaa    (3 0) (3 1) (3 0) break (5 "idle") (3 "work") (3 "idle") (4 z) (5 0) (5 x)
+vgrid 0 2
+sig vvv (delay 5 aaa)
+sig xxx (invert aaa)
+
+sig ccc xxx (mark x0) (invert xxx)
+sig ddd (delay 5 xxx)  (mark x1) (invert xxx)
+
+vmark stop (mark x0)
+
+sig zzzzzzzzzzz (3 0) (2 up) (4 1) (2 down) (5 0)
+
+
+sig andx (and amb0 clk)
+sig orx (or amb0 clk)
+sig andy (and (not amb0) (not clk))
+
+range 0 (len amb2)
+
+
+arrow (mark x0) (mark x1) 
+
+color vmark 0.5 0.5 0.5
+color sig 0 0 0
+color arrow 0.6 0 0
+
+
+display clk2 clk andx andy orx amb0 amb1 amb2 aaa vvv * xxx ccc ddd *
+
