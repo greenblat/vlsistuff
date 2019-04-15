@@ -1,7 +1,7 @@
 
 
 
-import sys,string
+import sys,string,os
 import datetime
 
 def record():
