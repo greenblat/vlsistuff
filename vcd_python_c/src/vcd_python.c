@@ -45,6 +45,13 @@ def peek(Sig,Base=BASE):\n\
     return logs.intx(peekbin(Sig,Base))\n\
 \n\
 \n\
+def peek_float(Sig,Base=BASE): \n\
+    A = logs.intx(peekbin(Sig,Base)) \n\
+    return logs.binary2float(A) \n\
+def peek_signed(Sig,Base=BASE): \n\
+    return logs.intxsigned(peekbin(Sig,Base)) \n\
+\n\
+\n\
 def valid(Sig,Base=BASE):\n\
     X = peekbin(Sig,Base)\n\
     return X=='1'\n\
