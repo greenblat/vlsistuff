@@ -1,5 +1,6 @@
 #! /bin/csh -f
 
+#   !! change the paths below to relevant to your system
 
 set MTI_HOME = /home/ilia/software/gplcver-2.12a.src/pli_incs
 set INC = /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/
