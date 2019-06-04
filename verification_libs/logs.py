@@ -571,6 +571,12 @@ def keepSimulationAlive():
         log_info('keepSimulationAlive decided to end this simulation (%s)'%Blame)
         veri.finish()
         
+def fnameCell(Fname):
+    wrds = string.split(Fname,'/')
+    wrds0 = wrds[-1]
+    wrds = string.split(wrds0,'.')
+    X = string.join(wrds[:-1],'.')
+    return X
 
 
 

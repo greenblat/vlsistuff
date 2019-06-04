@@ -35,6 +35,13 @@ class apbDriver:
         self.finishes=False
         Monitors.append(self)
 
+    def busy(self):
+        if len(self.queue0)!=0: return True
+        if len(self.seq0)!=0: return True
+        if len(self.queue1)!=0: return True
+        if len(self.seq1)!=0: return True
+        return False
+
     def translate(self,Addr):
         if Addr in self.translations:
             return self.translations[Addr][0]
@@ -55,6 +62,8 @@ class apbDriver:
     def write(self,Addr,Data):
         if type(Addr)==types.StringType:
             Addr = self.translate(Addr)
+        if type(Data)==types.FloatType:
+            Data = logs.float2binary(Data)
         self.queue0.append(('write',Addr,Data))
     def wait(self,Data):
         self.queue0.append(('wait',Data))
