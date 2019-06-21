@@ -20,7 +20,7 @@
 #define Enddef 7
 #define Timescale 8
 
-#define maxsig 500000
+#define maxsig 5000000
 #define longestVal  200000
 #define SENSITIVES 100
 
@@ -59,6 +59,10 @@ def valid(Sig,Base=BASE):\n\
 \n\
 \n\
 \n\
+def conclusions():\n\
+     # print here end of run things \n\
+     print 'signing off'\n\
+     return \n\
 cycles = 0\n\
 def negedge():\n\
     global cycles\n\
@@ -275,6 +279,7 @@ typedef struct SIG {
     char *allocated;
     char value[9];
     char traceable;
+    int toggles;
 } change_sig;
 
  change_sig sigs[maxsig];
@@ -339,7 +344,7 @@ int main(argc, argv)
     fname1[0]=0;
     fname2[0]=0;
 /* update hash table maxsize, if wanted */
-    for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].allocated=0; sigs[i].traceable=0;} 
+    for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].allocated=0; sigs[i].traceable=0; sigs[i].toggles=0;} 
     for (i=0;i<SENSITIVES;i++) armed[i]=0;
     if (argc <= 1) do_help();
     if (argc > 1) {
@@ -728,10 +733,18 @@ char *allocateString(int Len) {
 void drive_value(char *Val,char *Code) {
     char Bus[1000];
     int P = intcode(Code);
+    if (P<0) {
+        printf("bad ERROR code=%s got us negative\n",Code);
+        return;
+    }
+    if (P>=maxsig) {
+        printf("bad ERROR code=%s got us too big\n",Code);
+        return;
+    }
     int Width = sigs[P].wide; 
     if (strlen(Val)>Width) {
         printf("FATAL internal error. net=%s code=%s (P=%d)has different width declared=%d actual=%ld in linenum %d\n",qqia(sigs[P].fpath),Code,P,Width,strlen(Val),linenum);
-        exit(2);
+        return;
     }
     if (Width<=8) {
         strcpy(sigs[P].value,Val);
@@ -748,6 +761,7 @@ void drive_value(char *Val,char *Code) {
         else
             fprintf(vcdF1,"%s%s\n",Val,Code);
     }
+    sigs[P].toggles += 1;
     armTriggers(P,Val);
     useTriggers();
 }
@@ -1030,6 +1044,17 @@ veri_finish(PyObject *self,PyObject *args) {
     return Py_BuildValue("i", 1);
 }
 
+static PyObject*
+veri_toggles(PyObject *self,PyObject *args) {
+    if (!PyArg_ParseTuple(args, ""))
+        return NULL;
+    int ii;
+    for (ii=0; ii<maxsig; ii++) {
+        if (sigs[ii].toggles>0)
+            printf("%d = %8d    %s\n",ii,sigs[ii].toggles,qqia(sigs[ii].fpath));
+    }
+    return Py_BuildValue("i", 1);
+}
 
 
 
@@ -1041,8 +1066,8 @@ static PyMethodDef VeriMethods[] = {
     {"stime", veri_stime, METH_VARARGS, "Return the number of arguments received by the process."},
     {"listing", veri_listing, METH_VARARGS, "Return the number of arguments received by the process."},
     {"sensitive", veri_sensitive, METH_VARARGS,"add to watch list"},
-    {"finish", veri_finish, METH_VARARGS,
-     "Return the number of arguments received by the process."},
+    {"finish", veri_finish, METH_VARARGS, "Return the number of arguments received by the process."},
+    {"toggles", veri_toggles, METH_VARARGS, "Return the number of arguments received by the process."},
     {NULL, NULL, 0, NULL}
 };
 
