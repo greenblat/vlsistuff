@@ -1,7 +1,12 @@
 #! /usr/bin/python
 
+Verbose = False
 import os,sys,string
 import pickle
+NewName = os.path.expanduser('~')
+sys.path.append('%s/verification_libs'%NewName)
+
+import logs
 print 'mmmmmmmmmmmmmmmmmmmmmmmmmmm '
 from verilog_yacc_table import *
 def main():
@@ -15,7 +20,7 @@ def main():
     elif len(sys.argv)==3:
         FlexName = sys.argv[1]
         YaccTableName =  sys.argv[2]
-    run_yacc(YaccTableName,FlexName,'.')
+    run_yacc(YaccTableName,FlexName,'.','aaa.vhdl')
 
 def run_yacc(YaccTableName,Flexname,RunDir,Fname):
     global DataBase
@@ -35,13 +40,13 @@ def run_yacc(YaccTableName,Flexname,RunDir,Fname):
 
     if YaccTableName:
         load_yacc_table(YaccTableName)
-    print 'yacc step0'
+    logs.log_info('yacc step0')
     readlexfile(Flexname)
-    print 'yacc step1'
+    logs.log_info('yacc step1')
     run_machine()
-    print 'yacc step2'
+    logs.log_info('yacc step2')
     reportDb(RunDir)
-    print 'yacc step3'
+    logs.log_info('yacc step3')
     Fout.close()
 
 def readlexfile(Flexname):
@@ -54,7 +59,9 @@ def readlexfile(Flexname):
             Flex.close()
             return
         wrds = string.split(line)
-        if len(wrds)==4:
+        if len(wrds)==0:
+            pass
+        elif len(wrds)==4:
             if wrds[1]=='single':
                 wrds[1]=wrds[0]
             elif wrds[1]=='double':
@@ -74,18 +81,17 @@ def readlexfile(Flexname):
             wrd0=string.join(wrds1,' ')
             Lex.append(tuple([wrd0]+wrds2))
 
-Verbose=False
 def run_machine():
     state='0'
     Steps =0
     while (state!=0):
         Steps += 1
-        if (Steps % 100000)==0: print '%dK steps'%(Steps/1000)
+        if (Steps % 100000)==0: logs.log_info('%dK steps'%(Steps/1000))
         if (Verbose):
-            print 'stepit state=%s tok=%s stack=%s'%(state,Lex[0],Stack)
+            logs.log_info('stepit state=%s tok=%s stack=%s\n\n\n\n'%(state,Lex[0],Stack))
         nextstate = step_machine(state)
         state=nextstate
-    print 'exit state',state,len(Lex)
+    logs.log_info('exit state %s %s'%(state,len(Lex)))
 
 def uniq(What):
     if (What not in Uniques):
@@ -99,40 +105,54 @@ def uniq(What):
 def step_machine(state):
     List = States[state]
     (Tok,Kind,Lnum,Pos)=Lex[0]
-#    print  'yacc',Tok,Kind,Lnum,Pos,state
+    if Verbose: logs.log_info('yacc %s %s %s %s %s'%(Tok,Kind,Lnum,Pos,state))
+#    logs.log_info('    LIST = %s'%str(List))
     for (Act,Param,Next) in List:
-#        print 'try',Act,Param,Next
+        if Verbose:
+            logs.log_info('try tok=%s %s act=%s param=%s next=%s match=%s'%(Tok,Kind,Act,Param,Next,matches_ok(Tok,Kind,Act,Param)))
         if (Act=='shift'):
             if (matches_ok(Tok,Kind,Act,Param)):
                 Stack.append((Tok,Kind,Lnum,Pos,state))
                 Lex.pop(0)
                 return Next
         elif Act=='reduce':
-            Rule=Next
-            Name,Wrds = Rules[Rule]
-            Wrds=Wrds[:]
-#            print 'reduce action rule=%s name=%s wrds=%s'%(Rule,Name,Wrds)
-            Id = uniq(Name)
-#            Fout.write('reduce %s %d %s\n'%(Name,Id,Stack[-len(Wrds):]))
-            if len(Wrds)==0:
-                addToDb(Name,Id,[])
-            else:
-                addToDb(Name,Id,Stack[-len(Wrds):])
-            NST=state
-            while Wrds!=[]:
-#                print 'work reduce wrds=%s stack=%s %s %s %s %s %s'%(Wrds,Stack,Lnum,Pos,Rule,Name,Wrds)
-                TT,KK,Lnum1,Pos1,NST = Stack.pop(-1)
-                Wrds.pop(0)
-            Lex.insert(0,(Name,Name,Id,-1))
-            return NST
+#            print matches_ok(Tok,Kind,Act,Param),Tok,Kind,Act,Param
+            if compatibleGoto(Param,Kind) or (Param=='$default') or matches_ok(Tok,Kind,Act,Param):
+                Rule=Next
+                Name,Wrds = Rules[Rule]
+                Wrds=Wrds[:]
+#                print 'reduce action rule=%s name=%s wrds=%s'%(Rule,Name,Wrds)
+                Id = uniq(Name)
+    #            Fout.write('reduce %s %d %s\n'%(Name,Id,Stack[-len(Wrds):]))
+                if len(Wrds)==0:
+                    addToDb(Name,Id,[])
+                else:
+                    addToDb(Name,Id,Stack[-len(Wrds):])
+                NST=state
+                while Wrds!=[]:
+    #                print 'work reduce wrds=%s stack=%s %s %s %s %s %s'%(Wrds,Stack,Lnum,Pos,Rule,Name,Wrds)
+                    TT,KK,Lnum1,Pos1,NST = Stack.pop(-1)
+                    Wrds.pop(0)
+                Lex.insert(0,(Name,Name,Id,-1))
+                return NST
         elif Act=='goto':
-            if (Param==Kind):
+#            print 'goto param=%s kind=%s %s'%(Param,Kind,Next)
+            if compatibleGoto(Param,Kind):
                 Lex.pop(0)
                 Stack.append((Tok,Kind,Lnum,Pos,state))
                 return Next
         elif Act=='accept':
             return 0
-    print 'error! yaccer: no valid operation act=%s tok=%s kind=%s lnum=%s pos=%s state=%s fname=%s'%(Act,Tok,Kind,Lnum,Pos,state,origFname)
+        else:
+            logs.log_error('shouldnt be here %s'%Act)
+    logs.log_error('yaccer: no valid operation act=%s tok=%s kind=%s lnum=%s pos=%s state=%s fname=%s'%(Act,Tok,Kind,Lnum,Pos,state,origFname))
+    return False
+
+def compatibleGoto(Param,Kind):
+    if Param==Kind: return True
+    if (Kind=='END')and(Param=='END_ERR'): return True
+    if (Kind=='END')and(Param=='END_'): return True
+    if (Kind=='BEGIN')and(Param=='BEGIN_'): return True
     return False
 
 def addToDb(Name,Id,List):

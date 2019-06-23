@@ -6,6 +6,7 @@ import module_class
 
 import new_flattens
 import fixingModule
+import interactive
 
 def select_current(Env):
     if (Env.Current==None):
@@ -47,11 +48,14 @@ def execute_line(Line,Env):
             wrds[i] =word
         i += 1
 
+    if (wrds[0]=='interactive'):
+        interactive.runInteractive(Env)
+        return
     if (wrds[0]=='skeleton'):
         print Skeleton
         return
     if (wrds[0]=='clean'):
-        os.system('/bin/rm yacc.log lex.out db0.pickle')
+        os.system('/bin/rm yacc.log lex.out db0.pickle database.dump')
         return
     if (wrds[0]=='set'):
         params[wrds[1]]=wrds[2]
@@ -686,6 +690,9 @@ def undefinedWires(Mod):
         print Bus,Founds[Bus]
 
 
+def runInteractive(Env):
+    print Env.Current.Module,'interactive'
+    return
 
 
 Skeleton = """
@@ -746,4 +753,5 @@ load load_module load_verilog load_verilog_file quit
 remove_buffers remove_notused_signals rename rename_module rep_con
 repcon retype retype_stance root set
 skeleton top undefedWires write_all_verilog write_verilog
+interactive
 '''

@@ -18,6 +18,37 @@ def help_main(Env):
         cleanParameters(Mod)
     dump_instance(Mod,'-simple' in Env.params)
     dump_empty_module(Mod)
+    if '-tb' in Env.params:
+        prepare_tb(Mod)
+
+def prepare_tb(Mod):
+    Name = Mod.Module
+    print 'prepare tb %s'%Name
+    STR = string.replace(PREPARE_STRING,'MOD',Name)
+    os.system(STR)
+    Fcomp = open('comp','w')
+    Fcomp.write(' #! /bin/csh -f\n')
+    Fcomp.write(' \n\n')
+    Fcomp.write('iverilog -o tb.vvp tb.v \\\n')
+    Fcomp.write('    ../rtl/%s.v  \\\n\n\n\n'%Name)
+    Fcomp.close()
+    os.system('chmod +x comp')
+
+
+PREPARE_STRING = '''
+    /bin/rm pymon.file
+    /bin/rm *.empty
+    /bin/mv MOD.inst tb.v
+    /bin/mv MOD.inst.py verilog.py
+
+    /bin/rm lex.out
+    /bin/rm db0.pickle
+    /bin/rm yacc.log
+    /bin/rm database.dump
+
+'''
+
+
 
 def dump_instance(Mod,Simple=False):
     Name = Mod.Module
@@ -45,7 +76,7 @@ def dump_instance(Mod,Simple=False):
             Fout.write('wire %s %s;\n'%(wids(DirHL[1]),Sig))
         elif ('input' in Dir1):
             Fout.write('reg %s %s;\n'%(wids(DirHL[1]),Sig))
-            Regs +='    %s%s = 0;\n'%(Sig,wids(DirHL[1]))
+            Regs +='    %s = 0;\n'%(Sig)
         elif ('output' in Dir1):
             Fout.write('wire %s %s;\n'%(wids(DirHL[1]),Sig))
         elif ('inout' in Dir1):
@@ -60,7 +91,9 @@ def dump_instance(Mod,Simple=False):
         DirHL = Mod.nets[Sig]
         Dir1 = string.split(DirHL[0])[0]
         if (Dir1=='output')or(Dir1=='inout')or(Dir1=='input'):
-            Fout.write('    %s.%s(%s%s)\n'%(Pref,Sig,Sig,wids(DirHL[1])))
+            Wids = wids(DirHL[1])
+            if '][' in Wids: Wids=''
+            Fout.write('    %s.%s(%s%s)\n'%(Pref,Sig,Sig,Wids))
             Pref=','
     Fout.write(');\n')
     if not Simple:
@@ -87,7 +120,14 @@ def dump_instance(Mod,Simple=False):
 def dump_empty_module(Mod):
     Name = Mod.Module
     Fout = open('%s.empty'%(Name),'w')
-    Fout.write('module %s (\n'%Name)
+    Prms = []
+    for Prm in Mod.parameters:
+        This = 'parameter %s = %s\n'%(Prm,pr_expr(Mod.parameters[Prm]))
+        Prms.append(This)
+    if Prms!=[]:
+        Fout.write('module %s #(\n  %s)\n(\n'%(Name,string.join(Prms,' ,')))
+    else:
+        Fout.write('module %s (\n'%Name)
     Ins=[]
     Outs=[]
     Sigs = Mod.nets.keys()
@@ -107,7 +147,7 @@ def dump_empty_module(Mod):
         if HL==0:
             Fout.write('    %s%s %s %s\n'%(Pref,Dir,'  ',In))
         else:
-            Fout.write('    %s%s [%s:%s] %s\n'%(Pref,Dir,pr_expr(HL[0]),pr_expr(HL[1]),In))
+            Fout.write('    %s%s %s %s\n'%(Pref,Dir,wids(HL),In))
         Pref = ',' 
     for Out,Dir,HL in Outs:
         if 'reg' not in Dir:
@@ -115,7 +155,7 @@ def dump_empty_module(Mod):
         if HL==0:
             Fout.write('    %s%s %s %s\n'%(Pref,Dir,'  ',Out))
         else:
-            Fout.write('    %s%s [%s:%s] %s\n'%(Pref,Dir,HL[0],HL[1],Out))
+            Fout.write('    %s%s %s %s\n'%(Pref,Dir,wids(HL),Out))
         Pref = ',' 
     Fout.write(');\n')
     Fout.write('initial begin\n')
@@ -170,7 +210,7 @@ class driverMonitor:
             return
 
 
-driverMonitor('tb',Monitors)
+# driverMonitor('tb',Monitors)
 
 
 
@@ -190,17 +230,56 @@ def negedge():
         for Mon in Monitors: Mon.run()
 
 """
+def is_double_def(Wid):
+    if type(Wid)not in [types.TupleType,types.ListType]:
+        return False
+    if (len(Wid)==3)and(Wid[0] in ['packed','double']):
+        return True
+    if len(Wid)!=2:
+        logs.log_err('bad width definition, ilia!  %s '%(str(Wid)))
+        traceback.print_stack(None,None,logs.Flog)
+        return False
+    return False
 
 
-def wids(HL):
-    if HL==0:
+
+def wids(Wid):
+    if is_double_def(Wid):
+        if (Wid[0]=='packed'):
+                return '%s%s'%(pr_wid(Wid[1]),pr_wid(Wid[2]))
+
+    if Wid==0:
         return ''
-    H=HL[0]
-    L=HL[1]
+    H=Wid[0]
+    L=Wid[1]
     if (H==-1):
         return ''
     else:
         return '[%s:%s]'%(pr_expr(H),pr_expr(L))
+
+def pr_wid(Wid):
+    if Wid==None:
+        logs.log_err('wid is none error')
+        traceback.print_stack(None,None,logs.Flog)
+        return 'wid is none error!!'
+    if Wid==0:
+        return ''
+    if type(Wid)==types.IntType:
+        return '[%s:0]'%(pr_expr(Wid))
+    if (len(Wid)==3)and(Wid[0]=='double'):
+        return '%s%s'%(pr_wid(Wid[1]),pr_wid(Wid[2]))
+     
+    if (len(Wid)==3)and(Wid[0]=='packed'):
+        return pr_wid(Wid[1])+pr_wid(Wid[2])
+    if len(Wid)==3:
+        logs.log_err('pr_wid %s'%(str(Wid)))
+        traceback.print_stack(None,None,logs.Flog)
+        return str(Wid)
+    return '[%s:%s]'%(pr_expr(Wid[0]),pr_expr(Wid[1]))
+
+
+
+
 
 def widsx(HL):
     if HL==0:

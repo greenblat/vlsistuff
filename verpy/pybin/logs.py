@@ -47,7 +47,7 @@ def log_err(Text,Trace=False):
     Flog.write(Str)
     Errors +=1  
     if (Trace):
-        traceback.print_stack()
+        traceback.print_stack(None,None,Flog)
 
 Warnings = 0   
 def log_warning(Text):
@@ -207,4 +207,8 @@ def gatherBraces(Lex,St='(',En=')'):
             ind += 1
     return Lex 
 
+def pStack(Txt=''):
+    if Txt!='': log_error(Txt)
+    traceback.print_stack(None,None,Flog)
+    Flog.write('\n\n\n')
 

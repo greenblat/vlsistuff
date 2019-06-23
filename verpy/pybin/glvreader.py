@@ -23,7 +23,7 @@ def glv_readfile(File):
         wrds = string.split(line)
         if len(wrds)==4:
             use_wrds(wrds)
-        if ((lnum%10000)==0): print 'wrds %d %s %s'%(lnum,wrds,Db.state)
+        if ((lnum%100000)==0): print 'wrds %d %s %s'%(lnum,wrds,Db.state)
 
 class Db_class:
     def __init__(self):
@@ -37,6 +37,15 @@ class Db_class:
         self.right_assign=''
 
 Db=Db_class()
+
+
+def debug():
+    try:
+        return str(Db.Current.nets)
+    except:
+        return '..'
+
+
 def use_wrds(wrds):
     Db.used+=1
     Key=(Db.state,wrds[1])
@@ -44,7 +53,7 @@ def use_wrds(wrds):
        pass    
     elif Key in Table:
         (Nstate,Actions)=Table[Key]
-#        print 'state=%s wrds="%s" next=%s actions=%s curly=%s'%(Db.state,wrds,Nstate,Actions,Db.Curly)
+#        print 'state=%s wrds="%s" next=%s actions=%s curly=%s   %s'%(Db.state,wrds,Nstate,Actions,Db.Curly,debug())
         for Action in Actions:
             if Action!='none':
 #                Str = '%s(%s,%s,%s,%s)'%(Action,wrds[0],wrds[1],wrds[2],wrds[3])
@@ -168,15 +177,15 @@ def finish_conn_empty(wrds):
 def finish_conn(wrds):
     if Db.Curly!=['curly']:
         Conn = Db.Curly
-        print '<<<<<<',Db.Curly,Conn
     elif Db.WidthL:
         Conn = ['subbus',Db.Conn,[Db.WidthH,Db.WidthL]]
     elif Db.WidthH:
         Conn = ['subbit',Db.Conn,Db.WidthH]
     else:
         Conn = Db.Conn
-    print '>>>>>',Db.Pin,Conn
+
     Db.Current.add_conn(Db.Inst,Db.Pin,Conn)
+
 
 def add_wire(wrds):
     add_net(wrds[0],Db.Dir,Db.WidthH,Db.WidthL)
