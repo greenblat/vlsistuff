@@ -44,7 +44,7 @@ def use_wrds(wrds):
        pass    
     elif Key in Table:
         (Nstate,Actions)=Table[Key]
-#        print Db.state,'wrds',wrds,Nstate,Actions,Db.Curly
+#        print 'state=%s wrds="%s" next=%s actions=%s curly=%s'%(Db.state,wrds,Nstate,Actions,Db.Curly)
         for Action in Actions:
             if Action!='none':
 #                Str = '%s(%s,%s,%s,%s)'%(Action,wrds[0],wrds[1],wrds[2],wrds[3])
@@ -147,7 +147,7 @@ def set_conn_none(wrds):
 def add_curly(wrds):
     Db.Curly.append(wrds[0])
 
-def check_curly_bus(wrds):
+def check_curly_bus0(wrds):
     if Db.WidthL!=None:
         Was=Db.Curly[-1]
         New = ['subbus',Was,(int(Db.WidthH),int(Db.WidthL))]
@@ -156,23 +156,26 @@ def check_curly_bus(wrds):
         Was=Db.Curly[-1]
         New = ['subbit',Was,int(Db.WidthH)]
         Db.Curly[-1]=New
-#    print '>>>>>',Db.Curly
-    Db.right_assign=Db.Curly[:]
-    Db.Curly=['curly']
     Db.WidthH=None
     Db.WidthL=None
+def check_curly_bus(wrds):
+    check_curly_bus0(wrds)
+    Db.right_assign=Db.Curly[:]
+#    Db.Curly=['curly']
 
 def finish_conn_empty(wrds):
     Db.Current.add_conn(Db.Inst,Db.Pin,None)
 def finish_conn(wrds):
     if Db.Curly!=['curly']:
         Conn = Db.Curly
+        print '<<<<<<',Db.Curly,Conn
     elif Db.WidthL:
         Conn = ['subbus',Db.Conn,[Db.WidthH,Db.WidthL]]
     elif Db.WidthH:
         Conn = ['subbit',Db.Conn,Db.WidthH]
     else:
         Conn = Db.Conn
+    print '>>>>>',Db.Pin,Conn
     Db.Current.add_conn(Db.Inst,Db.Pin,Conn)
 
 def add_wire(wrds):
@@ -251,7 +254,7 @@ curly0   bin         curly1 add_curly
 curly0   hex         curly1 add_curly
 curly0   dig         curly1 add_curly
 curly0   }           pop check_curly_bus
-curly1   ,           curly0 none
+curly1   ,           curly0 check_curly_bus0
 curly1   }           pop check_curly_bus
 curly1   [           width0 push
 
@@ -264,7 +267,8 @@ assign1  [           width0  push
 assign1  =           assign2  set_left_assign
 assign2  bin         assign3  remember_assign
 assign2  ubin        assign3  remember_assign
-assign2  dig        assign3  remember_assign
+assign2  dig         assign3  remember_assign
+assign2  uhex        assign3  remember_assign
 assign2  token       assign3  remember_assign
 assign2  {           curly0   set_state_assign3 push
 assign3  [           width0   push
