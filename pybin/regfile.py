@@ -14,6 +14,10 @@ listedParams = {}
 mustParams['reg'] = string.split('access wid')
 listedParams['reg'] = mustParams['reg'] + string.split('desc latch reset')
 
+aliasParams = {}
+aliasParams['width'] = 'wid'
+aliasParams['depth'] = 'amount'
+
 helpSTRING = '''
     regfile.py ny.xlsx> | <reg.csv> | <test1.regfile> 
     accepts either xls or csv or text format.
@@ -122,6 +126,7 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
     File = open('%s.v'%Csv.Module,'w')
     W1 = len(bin(Csv.runAddr))-3
     File.write('module %s (input clk,input rst_n,input pwrite, input psel, input penable, input [1:0] psize, input [31:0] pwdata, output [31:0] prdata, input [%d:0] paddr ,output reg [%d:0] waddr\n'%(Csv.Module,W1,W1))
+    createApbInstance(Csv)
     LL = writeInputsOutputsAndWires(Csv,File)
 
     X = (1<<(W1+1))-1
@@ -200,30 +205,7 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
         Acc = ST[0]
         Addr = int(ST[3])& 0xfffc
         if writable(Acc):
-             writeReg(W1,Reg,Wid,Addr,File)
-#            if (Wid<2):
-#                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= wdata[0];\n'%(W1,Addr,Reg))
-#            elif (Wid<=8):
-#                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= wdata[7:0];\n'%(W1,Addr,Reg))
-#            elif (Wid<=32):
-#                Wdata = '(%s[%d:0] & ~mask[%d:0]) | (wdata[%d:0] &mask[%d:0])'%(Reg,Wid-1,Wid-1,Wid-1,Wid-1) 
-#                File.write('        if (mpaddr[%d:0]==\'h%x) %s <= %s;\n'%(W1,Addr,Reg,Wdata))
-#            else:
-#                X = 0
-#                while Wid>0:
-#                    if (Wid>=32):
-#                        Wdata = '(%s[%d:%d] & ~mask[31:0]) | (wdata &mask)'%(Reg,X*32+31,X*32) 
-#                        File.write('        if (mpaddr[%d:0]==\'h%x) %s[%d:%d] <= %s;\n'%(W1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
-#                        Wid -= 32
-#                    elif (Wid==1):
-#                        Wdata = '(%s[%d] & ~mask[0]) | (wdata[0] &mask[0])'%(Reg,X*32) 
-#                        File.write('        if (mpaddr[%d:0]==\'h%x) %s[%d] <= %s;\n'%(W1,Addr+4*X,Reg,X*32,Wdata))
-#                        Wid -= 1
-#                    else:
-#                        Wdata = '(%s[%d:%d] & ~mask[%d:0]) | (wdata[%d:0] &mask[%d:0])'%(Reg,X*32+Wid-1,X*32,Wid-1,Wid-1,Wid-1) 
-#                        File.write('        if (mpaddr[%d:0]==\'h%x) %s[%d:%d] <= %s;\n'%(W1,Addr+4*X,Reg,X*32+Wid-1,X*32,Wdata))
-#                        Wid = 0
-#                    X += 1
+             writeReg(W1,Reg,Wid,Addr,File,'<=','w')
 
 
     File.write('    end \n')
@@ -277,6 +259,35 @@ module MODULE (input clk, input rst_n
     ,input arvalid, output arready, input [31:0] araddr
     ,output rvalid, input rready, output [31:0] rdata, output [1:0] rresp
 '''
+
+
+
+def createApbInstance(Csv):
+    File = open('%s.inst'%Csv.Module,'w')
+    for Reg in Csv.regs:
+        LL = Csv.regs[Reg]
+        if LL[0] in ['rw','wr','rw_pulse','ro_pulse','ro']:
+            Wid = LL[1]
+            Desc = string.replace(LL[4],'.',' ')
+            Desc = string.replace(Desc,'_',' ')
+            Desc = string.replace(Desc,'"',' ')
+            if Wid<2:
+                File.write('wire %s;            // %s\n'%(Reg,LL[4]))
+            else:
+                File.write('wire [%d:0]  %s;     // %s\n'%(Wid-1,Reg,LL[4]))
+        
+    File.write('%s %s(.clk(clk),.rst_n(rst_n)\n'%(Csv.Module,Csv.Module))
+    File.write('   ,.paddr(paddr),.psel(psel),.pwrite(pwrite),.penable(penable),.pwdata(pwdata),.prdata(prdata)\n')
+    for Reg in Csv.regs:
+        File.write('   ,.%s(%s)\n'%(Reg,Reg))
+        if (Csv.regs[Reg][0]=='ram'):
+            for Ext in ('rdata','wr_pulse','rd_pulse','addr'):
+                File.write('    ,.%s_%s(%s_%s)\n'%(Reg,Ext,Reg,Ext))
+
+    File.write(");\n")
+    File.close()
+
+
 
 def writeInputsOutputsAndWires(Csv,File):
     LL = []
@@ -932,9 +943,9 @@ class itemClass:
         elif self.Kind=='field':
             Fout.write(',,%s,%s,,%s,%s,,"%s"\n'%(self.Name,'',self.Params['wid'],self.Params['reset'],self.Params['desc']))
         elif self.Kind=='ram':
-            Fout.write('ram,%s,%s,,,%s,,%s"%s"\n'%(self.Name,'',self.Params['wid'],self.Params['amount'],self.Params['desc']))
+            Fout.write('ram,%s,%s,,,%s,,%s,"%s"\n'%(self.Name,'',self.Params['wid'],self.Params['amount'],self.Params['desc']))
         elif self.Kind=='array':
-            Fout.write('array,%s,%s,,,%s,,%s"%s"\n'%(self.Name,'',self.Params['wid'],self.Params['amount'],self.Params['desc']))
+            Fout.write('array,%s,%s,,,%s,,%s,"%s"\n'%(self.Name,'',self.Params['wid'],self.Params['amount'],self.Params['desc']))
         else:
             logs.log_error('untreated kind "%s"'%self.Kind)
 
@@ -943,6 +954,13 @@ class itemClass:
             logs.log_error('untreated kind "%s"'%self.Kind)
             return
             
+        for Prm in self.Params:
+            if Prm in aliasParams:
+                Alias = aliasParams[Prm]
+                self.Params[Alias] = self.Params[Prm]
+                self.Params.pop(Prm)
+
+
         for Prm in mustParams[self.Kind]:
             if Prm not in self.Params: 
                 logs.log_error('missing param "%s" in  "%s" %s '%(Prm,self.Name,self.Kind))
@@ -1133,7 +1151,7 @@ def dumpRdl(txt):
         elif Item.Kind=='field':
             pass
         elif Item.Kind=='array':
-            pass
+            logs.log_error('ARRAY not treated in rdl yet item (%s)'%(Item.Name))
         else:
             logs.log_error('strange item %s %s'%(Item.Name,Item.Kind))
 
@@ -1146,7 +1164,7 @@ def dumpRdl(txt):
 
 def specials(Params):
     if ('w' in Params['access']) and('pulse' in Params['access']): return 'singlepulse;'
-    if 'pulse' in Params['access']: return 'software_access;'
+    if 'pulse' in Params['access']: return 'swrd;'
     return ''
 
 def swAcc(Params):
@@ -1170,15 +1188,15 @@ def writeReg(W1,Reg,Wid,Addr,File,Assign='<=',ADD='mp'):
     X = 0
     while Wid>0:
         if (Wid>=32):
-            Wdata = Assign + ' (%s[%d:%d] & ~mask[31:0]) | (wdata &mask)'%(Reg,X*32+31,X*32) 
+            Wdata = Assign + ' (%s[%d:%d] & ~mask[31:0]) | (%sdata &mask)'%(Reg,X*32+31,X*32,ADD) 
             File.write('        if (%saddr[%d:0]==\'h%x) %s[%d:%d] %s;\n'%(ADD,W1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
             Wid -= 32
-        elif (Wid==1):
-            Wdata = Assign+' (%s[%d] & ~mask[0]) | (wdata[0] &mask[0])'%(Reg,X*32) 
-            File.write('        if (%saddr[%d:0]==\'h%x) %s[%d] %s;\n'%(ADD,W1,Addr+4*X,Reg,X*32,Wdata))
+        elif (Wid<2):
+            Wdata = Assign+' (%s & ~mask[0]) | (%sdata[0] &mask[0])'%(Reg,ADD) 
+            File.write('        if (%saddr[%d:0]==\'h%x) %s %s;\n'%(ADD,W1,Addr+4*X,Reg,Wdata))
             Wid -= 1
         else:
-            Wdata = Assign+' (%s[%d:%d] & ~mask[%d:0]) | (wdata[%d:0] &mask[%d:0])'%(Reg,X*32+Wid-1,X*32,Wid-1,Wid-1,Wid-1) 
+            Wdata = Assign+' (%s[%d:%d] & ~mask[%d:0]) | (%sdata[%d:0] &mask[%d:0])'%(Reg,X*32+Wid-1,X*32,Wid-1,ADD,Wid-1,Wid-1) 
             File.write('        if (%saddr[%d:0]==\'h%x) %s[%d:%d] %s;\n'%(ADD,W1,Addr+4*X,Reg,X*32+Wid-1,X*32,Wdata))
             Wid = 0
         X += 1
