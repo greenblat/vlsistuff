@@ -8,6 +8,7 @@ except:
     XLS_PRESENT = False
 import csvPageClass
 import logs
+import xml_regfile_create
 
 mustParams = {}
 listedParams = {}
@@ -117,7 +118,8 @@ def main():
     dumpRamVerilog(FFF,Addrs,Csv,Reset)
     dumpAdaCsv(FFF,Addrs,Csv,Chip)
     dumpApbVerilog(FFF,Addrs,Csv,Reset)
-    dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset)
+    lastAddress = dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset)
+    xml_regfile_create.createXml(FFF,Addrs,Csv,Reset,lastAddress)
 
 def dumpApbVerilog(FFF,Addrs,Csv,Reset):
     hasFields={}
@@ -453,7 +455,7 @@ def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
     File.write('    end \n')
     File.write('end \n')
 
-
+    lastAddr = 0
     for Add,Reg in LL:
         ST = Csv.regs[Reg]
         Wid = int(ST[1])
@@ -490,7 +492,7 @@ def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
                 File.write('assign %s_pulse = %s_rd_pulse_reg;\n'%(Reg,Reg))
 
     File.write('endmodule\n')
-
+    return lastAddr
 
 
 

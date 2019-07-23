@@ -15,7 +15,7 @@ import logs
 
 class apbDriver:
     bus_locked=False
-    def __init__(self,Path,Monitors,Name='optiona'):
+    def __init__(self,Path,Monitors,Name='optional'):
         self.Path = Path
         self.Name = Name
 
@@ -33,13 +33,29 @@ class apbDriver:
         self.renames={}
         self.markers={}
         self.finishes=False
+        self.hexMode = False
         Monitors.append(self)
 
+
+    def load_renames_file(self,Fname):
+        '''define wd_load_value 0x0'''
+        File = open(Fname)
+        while 1:
+            line = File.readline()
+            if line=='': return
+            wrds = string.split(line)
+            if (len(wrds)==3) and (wrds[0]=='define'):
+                Name = wrds[1]
+                Addr = eval(wrds[2])
+                self.renames[Name]=Addr
+
+
+
     def busy(self):
-        if len(self.queue0)!=0: return True
-        if len(self.seq0)!=0: return True
-        if len(self.queue1)!=0: return True
-        if len(self.seq1)!=0: return True
+        if self.queue1!=[]: return True
+        if self.queue0!=[]: return True
+        if self.seq0!=[]: return True
+        if self.seq1!=[]: return True
         return False
 
     def translate(self,Addr):
@@ -54,20 +70,22 @@ class apbDriver:
     def read(self,Addr,expData='none'):
         if type(Addr)==types.StringType:
             Addr = self.translate(Addr)
-        self.queue1.append(('read',Addr,expData))
-        self.queue1.append(('wait',10))
+        self.queue0.append(('read',Addr,expData))
+        self.queue0.append(('wait',10))
 
 
 
     def write(self,Addr,Data):
         if type(Addr)==types.StringType:
+#            logs.log_info('translate address in=%s out=%x'%(Addr,self.translate(Addr)))
             Addr = self.translate(Addr)
         if type(Data)==types.FloatType:
             Data = logs.float2binary(Data)
+#        logs.log_info('apb write  address=%x  data=%x'%(Addr,Data))
         self.queue0.append(('write',Addr,Data))
     def wait(self,Data):
         self.queue0.append(('wait',Data))
-        self.queue1.append(('wait',Data))
+#        self.queue1.append(('wait',Data))
     def waitUntil(self,Data,Timeout):
         self.queue0.append(('until',Data,Timeout))
         
@@ -78,9 +96,19 @@ class apbDriver:
         if Sig in self.renames: 
             return self.renames[Sig]
         return Sig
+    def peek(self,Sig):
+        if self.Path=='':
+            Full = self.rename(Sig)
+        else:
+            Full = '%s.%s'%(self.Path,self.rename(Sig))
+        return logs.peek(Full)
     def force(self,Sig,Val):
-#        logs.log_info('forcing %s %s <- %s'%(self.Name,Sig,Val))
-        veri.force('%s.%s'%(self.Path,Sig),str(Val))
+#        logs.log_info('forcing %s %s <- %x'%(self.Name,Sig,Val))
+        if self.hexMode: Val = hex(Val)
+        if self.Path=='':
+            veri.force(Sig,str(Val))
+        else:
+            veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
     def installUntil(self,Val,Which):
         Expr,Timeout = Val
@@ -114,9 +142,11 @@ class apbDriver:
         
     def run(self):
         self.run0()
-        self.run1()
+#        self.run1()
 
     def run0(self):
+#        if (len(self.queue0),len(self.seq0)) != (0,0):
+#            logs.log_info('run0 wait0=%d until0=%s queue0=%d seq0=%d'%(self.waiting0,self.wait_until0,len(self.queue0),len(self.seq0)))
         if self.waiting0>0:
             self.waiting0 -= 1
             return
@@ -138,8 +168,15 @@ class apbDriver:
                 if (apbDriver.bus_locked) and (apbDriver.bus_locked!=self):  return
         
         if self.seq0!=[]:
+            AA0 = self.seq0[0][0]
+            if (len(AA0)==3)and(AA0[0]=='conditional'):
+                Who = AA0[1]
+                What = AA0[2]
+                Val = self.peek(Who)
+                if What!=Val:return
             List = self.seq0.pop(0)
-#            logs.log_info('apb popping %s'%str(List))
+            if (len(List[0])==3): List.pop(0)
+#            logs.log_info('DBG0 %s'%str(List))
             for (Sig,Val) in List:
                 if Sig=='lock':
                     if Val==1: apbDriver.bus_locked=self
@@ -159,7 +196,7 @@ class apbDriver:
                     self.waiting0=int(Val)
                 elif Sig=='catch':
                     Who,Exp = Val
-                    X = logs.peek('%s.%s'%(self.Path,self.rename(Who)))
+                    X = self.peek(self.rename(Who))
                     if type(Exp)==types.FunctionType:
                         Exp(X)
                     else: 
@@ -169,21 +206,22 @@ class apbDriver:
                 else:
                     self.force(self.rename(Sig),Val)
             return
-        if veri.peek('%s.%s'%(self.Path,self.rename('pready')))=='0':
+        if self.peek('pready')=='0':
             self.waiting0 = 10
             return
         if self.queue0!=[]:
             What = self.queue0.pop(0)
             if What[0]=='write':
+#                logs.log_info('write apb queue0 seq0 %s'%(str(What)))
                 self.seq0.append([('lock',1),('psel',1),('paddr',What[1]),('pwdata',What[2]),('pwrite',1)])
                 self.seq0.append([('penable',1)])
-                self.seq0.append([('psel',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0)])
+                self.seq0.append([('conditional','pready',1),('psel',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0)])
                 self.seq0.append([('lock',0),('wait',5)])
 
             elif What[0]=='read':
                 self.seq0.append([('lock','1'),('psel',1),('paddr',What[1]),('pwrite',0)])
                 self.seq0.append([('penable',1)])
-                self.seq0.append([('catch',('prdata',What[2])),('psel',0),('paddr',0),('pwrite',0),('penable',0)])
+                self.seq0.append([('conditional','pready',1),('catch',('prdata',What[2])),('psel',0),('paddr',0),('pwrite',0),('penable',0)])
                 self.seq0.append([('lock','0'),('wait',5)])
             elif What[0]=='wait':
                 self.seq0.append([('wait',What[1])])
@@ -199,6 +237,8 @@ class apbDriver:
 
 
     def run1(self):
+#        if (len(self.queue1),len(self.seq1)) != (0,0):
+#            logs.log_info('run1 wait1=%d until1=%s queue1=%d seq1=%d'%(self.waiting1,self.wait_until1,len(self.queue1),len(self.seq1)))
         if self.waiting1>0:
             self.waiting1 -= 1
             return
@@ -218,10 +258,16 @@ class apbDriver:
             List = self.seq1[0]
             if List[0][0]=='lock':
                 if (apbDriver.bus_locked) and (apbDriver.bus_locked!=self):  return
-        
+         
         if self.seq1!=[]:
+            AA0 = self.seq1[0][0]
+            if (len(AA0)==3)and(AA0[0]=='conditional'):
+                Who = AA0[1]
+                What = AA0[2]
+                Val = self.peek(Who)
+                if Val!=What:return
             List = self.seq1.pop(0)
-#            logs.log_info('apb popping %s'%str(List))
+            if (len(List[0])==3):  List.pop(0)
             for (Sig,Val) in List:
                 if Sig=='lock':
                     if Val==1: apbDriver.bus_locked=self
@@ -241,17 +287,17 @@ class apbDriver:
                     self.waiting1=int(Val)
                 elif Sig=='catch':
                     Who,Exp = Val
-                    X = logs.peek('%s.%s'%(self.Path,self.rename(Who)))
+                    X = self.peek(self.rename(Who))
                     if type(Exp)==types.FunctionType:
                         Exp(X)
                     else: 
-                        logs.log_info('apb %s read act=%x (%s) exp=%s who=%s'%(self.Name,X,chr(X & 0xff),Exp,self.rename(Who)))
+                        logs.log_info('apb %s read act=%x exp=%s who=%s'%(self.Name,X,Exp,self.rename(Who)))
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 else:
                     self.force(self.rename(Sig),Val)
             return
-        if veri.peek('%s.%s'%(self.Path,self.rename('pready')))=='0':
+        if self.peek(self.rename('pready'))=='0':
             self.waiting1 = 10
             return
         if self.queue1!=[]:
@@ -259,13 +305,13 @@ class apbDriver:
             if What[0]=='write':
                 self.seq1.append([('lock',1),('psel',1),('paddr',What[1]),('pwdata',What[2]),('pwrite',1)])
                 self.seq1.append([('penable',1)])
-                self.seq1.append([('psel',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0)])
+                self.seq1.append([('conditional','pready',1),('psel',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0)])
                 self.seq1.append([('lock',0),('wait',5)])
 
             elif What[0]=='read':
                 self.seq1.append([('lock','1'),('psel',1),('paddr',What[1]),('pwrite',0)])
                 self.seq1.append([('penable',1)])
-                self.seq1.append([('catch',('prdata',What[2])),('psel',0),('paddr',0),('pwrite',0),('penable',0)])
+                self.seq1.append([('conditional','pready',1),('catch',('prdata',What[2])),('psel',0),('paddr',0),('pwrite',0),('penable',0)])
                 self.seq1.append([('lock','0'),('wait',5)])
             elif What[0]=='wait':
                 self.seq1.append([('wait',What[1])])
