@@ -183,7 +183,6 @@ def finish_conn(wrds):
         Conn = ['subbit',Db.Conn,Db.WidthH]
     else:
         Conn = Db.Conn
-
     Db.Current.add_conn(Db.Inst,Db.Pin,Conn)
 
 

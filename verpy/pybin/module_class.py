@@ -549,8 +549,8 @@ class module_class:
                         logs.log_warning('packed: do something about it net=%s ww=%s'%(Net,WW))
                         return
                     (H,L)=WW
-                    H = max(H,Ind0)
-                    L = min(L,Ind1)
+                    H = max(evalz(H),evalz(Ind0))
+                    L = min(evalz(L),evalz(Ind1))
                     self.nets[Name]=(Dir,(H,L))
                 else:
                     logs.log_warning('check net def got width  name=%s dir=%s ww=%s'%(Name,Dir,WW))
@@ -1669,4 +1669,9 @@ def is_external_dir(Dir):
 def myExtras(Token):
     return Token in string.split('$high $signed empty_begin_end unique_case')
 
+def evalz(What):
+    try:
+        return eval(What)
+    except:
+        return What
 
