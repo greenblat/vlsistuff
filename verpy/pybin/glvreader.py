@@ -185,9 +185,14 @@ def finish_conn(wrds):
         Conn = Db.Conn
     Db.Current.add_conn(Db.Inst,Db.Pin,Conn)
 
+def add_wire_assign(wrds):
+    Db.Current.add_hard_assign(Db.current_wire,wrds[0])
 
 def add_wire(wrds):
+    Db.current_wire = wrds[0]
     add_net(wrds[0],Db.Dir,Db.WidthH,Db.WidthL)
+
+
 
 def add_net(Name,Dir,WidthH,WidthL):
     if WidthH:
@@ -226,7 +231,10 @@ body0    endmodule   idle   none
 wire0    [           width0 push
 wire0    token       wire1 add_wire
 wire1    ,           wire0 none
+wire1    =           wire2 none
 wire1    ;           body0 none
+wire2    ubin        wire3 add_wire_assign
+wire3    ;           body0 none
 width0   token       width1 add_width_h
 width0   number      width1 add_width_h
 width0   -           width0 add_width_h
