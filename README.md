@@ -27,3 +27,5 @@ write waveforms in a text file and get svg or png drawing.
 python helpers for verification with python-verilog connection. logs.py helps with logging and data converts. 
 there are apb axi ad other helpers.
 
+#**zDraw**
+rewrite of zDraw using pygame (as openGL became obsolete on my MacBook).
