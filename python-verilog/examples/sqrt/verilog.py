@@ -7,7 +7,6 @@ import logs
 
 cycles=0
 state='idle'
-logs.log_info('start')
 def negedge():
     global cycles,idle,Ain,state,Max
     cycles += 1
@@ -15,6 +14,9 @@ def negedge():
     if (cycles>1000):
         veri.listing('tb','1000','cucu.list')
         veri.finish()
+        return
+    veri.force('tb.en','1')
+
     rst_n = veri.peek('tb.rst_n')
     if (rst_n!='1'):
         ain = veri.peek('tb.ain')
@@ -22,7 +24,6 @@ def negedge():
         Max = 1<<Len
         return
 
-    veri.force('tb.en','1')
 
     if state=='idle':
         Ain = random.randint(0,Max)

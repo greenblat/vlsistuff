@@ -1,0 +1,14 @@
+
+chip axi_firewall_rgf async  base=0
+
+
+reg enable access=wr wid=1 desc=enable.filtering 
+reg rd_caught_data access=ro_pulse wid=20 
+reg wr_caught_data access=ro_pulse wid=20 
+
+reg addresses access=rw wid=512 
+
+
+
+end
+

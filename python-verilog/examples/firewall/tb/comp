@@ -1,0 +1,37 @@
+#! /bin/csh -f
+
+
+cd ../ ; genver.py rtl/axi_firewall.vvv
+/bin/mv axi_firewall.v rtl/
+
+
+regfile.py rtl/axi_firewall_rgf.regfile
+
+/bin/mv axi_firewall_rgf.v rtl/
+
+
+cd tb/
+iverilog -o tb.vvp tb.v \
+    ../rtl/axi_firewall.v  \
+    ../rtl/axi_firewall_rgf.v  \
+    ../rtl/axi_firewall_rule.v  \
+    ../rtl/syncfifo.v  \
+
+
+
+
+/bin/rm ../temp_axi*
+
+/bin/rm ../axi_firewall_rgf.rdl
+/bin/rm ../axi_firewall_rgf.vram
+/bin/rm ../axi_firewall_rgf.csv
+/bin/rm ../axi_firewall_rgf.defines
+/bin/rm ../axi_firewall_rgf.vh
+/bin/rm ../axi_firewall_rgf.h
+/bin/rm ../axi_firewall_rgf.inst
+/bin/rm ../axi_firewall_rgf.fields
+/bin/rm ../axi_firewall_rgf.axiv
+/bin/rm ../axi_firewall_rgf.xml
+/bin/rm ../axi_firewall_rgf.range
+/bin/rm ../execme.py ../pymon.log
+

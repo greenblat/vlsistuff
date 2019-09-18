@@ -1,5 +1,6 @@
 
-import sys,types,string,sys
+import sys,types,string,os
+import traceback
 Errors = 0   
 Corrects = 0   
 Wrongs = 0   
@@ -8,6 +9,9 @@ print_debug_messages=0
 MAXWRONGS = 2000
 MAXERRORS = 2000
 PYMONLOG = 'pymon.log'
+
+WHERE = ''
+
 
 import time
 printed_already={}
@@ -52,18 +56,22 @@ def log_time(Why):
     log_info('info: %s                                 time=%s'%(Why,time.ctime()))
 
 def log_fatal(Text):
-    print 'FATAL error!! %s'%(Text)
-    log_ending('from fatal')
+#    print 'FATAL error!! %s'%(Text)
+#    log_ending('from fatal')
+    log_error('FATAL! %s'%Text,False,True)
     sys.exit()
 
-def log_error(Text,Tb=True):
-    log_err(Text,Tb)
-def log_err(Text,Tb=True):
+def log_error(Text,Tb=True,Pstack=False):
+    log_err(Text,Tb,Pstack)
+def log_err(Text,Tb=True,Pstack=False):
     global Errors,printed_already,Flog
     if (not Flog):
         Flog=open(PYMONLOG,'w')
     Errors +=1  
-    Flog.write('@%d: %d ERROR: %s\n'%(get_cycles(),Errors,Text))
+    Flog.write('@%d: %s %d ERROR: %s\n'%(get_cycles(),WHERE,Errors,Text))
+    if Pstack:
+        traceback.print_stack(file=Flog)
+        
     if Tb:
         veri.force('%s.errors'%TB,str(Errors))
 
@@ -76,7 +84,7 @@ def log_err(Text,Tb=True):
     if (Text in printed_already):
         return
     printed_already[Text]=1
-    print '@%d: %d: ERROR: %s'%(get_cycles(),Errors,Text)
+    print '@%d: %s %d: ERROR: %s'%(get_cycles(),WHERE,Errors,Text)
 
 def log_correct(Text,Print=True):
     global Corrects,Flog
@@ -140,6 +148,8 @@ def log_info(Text):
     print '@%d: info: %s'%(get_cycles(),Text)
     Flog.write('@%d: info: %s\n'%(get_cycles(),Text))
 
+def log_finfo(Text,File):
+    File.write('@%d: info: %s\n'%(get_cycles(),Text))
 
 def log_info2(Text):
     global Flog2
@@ -232,7 +242,10 @@ def intx(Val):
     if 'z' in Val: return -1
     if 'q' in Val: return -1
     if '-' in Val: return -1
-    return int(Val,2)
+    try:
+        return int(Val,2)
+    except:
+        return int(Val)
 
 def peek(Sig):
     V  = intx(veri.peek(Sig))
@@ -573,10 +586,28 @@ def keepSimulationAlive():
         
 def fnameCell(Fname):
     wrds = string.split(Fname,'/')
-    wrds0 = wrds[-1]
-    wrds = string.split(wrds0,'.')
+    wrd0 = wrds[-1]
+    wrds = string.split(wrd0,'.')
     X = string.join(wrds[:-1],'.')
     return X
+
+RemovesLater=[]
+def remove_later(Fname):
+    RemovesLater.append(Fname)
+
+def use_remove_laters():
+    for Fname in RemovesLater:
+        os.remove(Fname)
+
+def ensure_dir(Dir):
+    if not os.path.exists(Dir):
+        os.system('mkdir %s'%Dir)
+
+def extract_base_name(Fname):
+    ww = string.split(Fname,'/')
+    Fname1 = ww[-1]
+    ww = string.split(Fname1,'.')
+    return ww[0]
 
 
 
