@@ -13,7 +13,7 @@ import xml_regfile_create
 mustParams = {}
 listedParams = {}
 mustParams['reg'] = string.split('access wid')
-listedParams['reg'] = mustParams['reg'] + string.split('desc latch reset')
+listedParams['reg'] = mustParams['reg'] + string.split('desc latch reset flags')
 
 aliasParams = {}
 aliasParams['width'] = 'wid'
@@ -24,14 +24,14 @@ helpSTRING = '''
     accepts either xls or csv or text format.
 
 
-regfile newone
+chip newone  sync base=0x100
 
 reg control access=rw  
     field interpolate_G wid=1
     field use_external wid=1
     field use_pattern wid=2
 
-reg thres access=rw wid=16
+reg thres access=rw wid=16  flags=extmask flags=something   // extmask adds external write enable
 reg extern_std access=rw wid=32
 
 reg max_sat access=ro wid=32
@@ -41,6 +41,7 @@ array cucu access=ro wid=20 amount=128 desc="what the world"
 
 ram holder access=rw wid=32 amount=2048
 
+// access: ro rw ro_pulse rw_pulse external
 
 
 
@@ -87,15 +88,16 @@ def main():
         txt.createCsvFile()
         Csv = csvPageClass.csvPageClass([(txt.csvFileName,txt.csvFileName)],produce_csv_from_xls)
         Chip = txt.Chip
+        Csv.Module = Chip
         dumpRdl(txt)
         Reset = txt.Reset
     else:
         logs.log_error('need eother xls or csv or regfile extension file')
-
 #    if txt:
 #        txt.dump()
 #        return
 
+    Csv.Keys = txt.Keys
 
     FFF = {}
     Addrs = []
@@ -119,7 +121,12 @@ def main():
     dumpAdaCsv(FFF,Addrs,Csv,Chip)
     dumpApbVerilog(FFF,Addrs,Csv,Reset)
     lastAddress = dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset)
+    Range  = Csv.runAddr
     xml_regfile_create.createXml(FFF,Addrs,Csv,Reset,lastAddress)
+    Frng = open('%s.range'%Csv.Module,'w')
+    Frng.write('range %s 0x%x\n'%(Csv.Module,Range))
+    Frng.close()
+
 
 def dumpApbVerilog(FFF,Addrs,Csv,Reset):
     hasFields={}
@@ -127,13 +134,16 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
         hasFields[Reg]=True
     File = open('%s.v'%Csv.Module,'w')
     W1 = len(bin(Csv.runAddr))-3
-    File.write('module %s (input clk,input rst_n,input pwrite, input psel, input penable, input [1:0] psize, input [31:0] pwdata, output [31:0] prdata, input [%d:0] paddr ,output reg [%d:0] waddr\n'%(Csv.Module,W1,W1))
+    File.write('module %s (input clk,input rst_n,input pwrite, input psel, input [3:0] pstrb, output pready,input penable, output pslverr, input [1:0] psize, input [31:0] pwdata, output [31:0] prdata, input [%d:0] paddr ,output reg [%d:0] waddr,output reg [31:0] last_wdata\n'%(Csv.Module,W1,W1))
     createApbInstance(Csv)
-    LL = writeInputsOutputsAndWires(Csv,File)
+    LL,ExtMask = writeInputsOutputsAndWires(Csv,File)
 
+    File.write('assign pslverr = 0;\n')
     X = (1<<(W1+1))-1
     X = X & 0xfffffffc
+
     File.write('wire [%d:0] mpaddr = paddr[%d:0] & %d\'h%x;\n'%(W1,W1,W1+1,X))
+    File.write('assign pready = 1;\n')
 
     Selects = []
     File.write('wire [31:0] prdata_wire = \n')
@@ -207,11 +217,12 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
         Acc = ST[0]
         Addr = int(ST[3])& 0xfffc
         if writable(Acc):
-             writeReg(W1,Reg,Wid,Addr,File,'<=','w')
+             writeReg(W1,Reg,Wid,Addr,File,'<=','w',Reg in ExtMask)
 
 
     File.write('    end \n')
     File.write('end \n')
+    File.write('always @(posedge clk) if (apb_write && penable) last_wdata <= pwdata; \n')
 
 
     for Add,Reg in LL:
@@ -242,9 +253,13 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
                 File.write('always @(posedge clk)  %s_addr <= mpaddr-\'h%x;\n'%(Reg,Addr))
         if 'pulse' in Acc:
             if writable(Acc):
+                if Reg in ExtMask:
+                    ExtEn = ' && %s_wr_ok'%Reg
+                else:
+                    ExtEn = ''
                 File.write('reg %s_wr_pulse_reg; always @(posedge clk)  %s_wr_pulse_reg <= pwrite && psel &&  (mpaddr[%d:0]==\'h%x);\n'%(Reg,Reg,W1,Addr))
                 File.write('reg %s_pulse_reg; always @(posedge clk) %s_pulse_reg <=  penable && %s_wr_pulse_reg ;\n'%(Reg,Reg,Reg))
-                File.write('assign %s_pulse = %s_pulse_reg ;\n'%(Reg,Reg))
+                File.write('assign %s_pulse = %s_pulse_reg %s ;\n'%(Reg,Reg,ExtEn))
             else:    
                 File.write('reg %s_rd_pulse_reg; always @(posedge clk)  %s_rd_pulse_reg <= !pwrite && psel &&  (mpaddr[%d:0]==\'h%x);\n'%(Reg,Reg,W1,Addr))
                 File.write('assign %s_pulse =  penable && %s_rd_pulse_reg ;\n'%(Reg,Reg))
@@ -266,10 +281,12 @@ module MODULE (input clk, input rst_n
 
 def createApbInstance(Csv):
     File = open('%s.inst'%Csv.Module,'w')
+    ExtMask = []
     for Reg in Csv.regs:
         LL = Csv.regs[Reg]
         if LL[0] in ['rw','wr','rw_pulse','ro_pulse','ro']:
             Wid = LL[1]
+            Flags = LL[6]
             Desc = string.replace(LL[4],'.',' ')
             Desc = string.replace(Desc,'_',' ')
             Desc = string.replace(Desc,'"',' ')
@@ -277,14 +294,21 @@ def createApbInstance(Csv):
                 File.write('wire %s;            // %s\n'%(Reg,LL[4]))
             else:
                 File.write('wire [%d:0]  %s;     // %s\n'%(Wid-1,Reg,LL[4]))
+            if 'extmask' in Flags:
+                ExtMask.append(Reg)
+                File.write('wire %s_wr_ok;            \n'%(Reg))
         
     File.write('%s %s(.clk(clk),.rst_n(rst_n)\n'%(Csv.Module,Csv.Module))
-    File.write('   ,.paddr(paddr),.psel(psel),.pwrite(pwrite),.penable(penable),.pwdata(pwdata),.prdata(prdata)\n')
+    File.write('   ,.paddr(paddr),.psel(psel),.pwrite(pwrite),.penable(penable),.pwdata(pwdata),.prdata(prdata),.wdata(wdata)\n')
     for Reg in Csv.regs:
         File.write('   ,.%s(%s)\n'%(Reg,Reg))
         if (Csv.regs[Reg][0]=='ram'):
             for Ext in ('rdata','wr_pulse','rd_pulse','addr'):
                 File.write('    ,.%s_%s(%s_%s)\n'%(Reg,Ext,Reg,Ext))
+        elif (Csv.regs[Reg][0]=='reg'):
+            if Reg in ExtMask:
+                File.write('   ,.%s_wr_ok(%s_wr_ok)\n'%(Reg,Reg))
+                
 
     File.write(");\n")
     File.close()
@@ -293,10 +317,14 @@ def createApbInstance(Csv):
 
 def writeInputsOutputsAndWires(Csv,File):
     LL = []
+    ExtMask = []
     for Reg in Csv.regs:
         ST = Csv.regs[Reg]
         LL.append((int(ST[3]),Reg))
+        if (len(ST)>=7)and('extmask' in ST[6]):
+            ExtMask.append(Reg)
     LL.sort()
+
     Wires = ''
     for Add,Reg in LL:
         ST = Csv.regs[Reg]
@@ -315,6 +343,9 @@ def writeInputsOutputsAndWires(Csv,File):
         else:
             File.write('   ,%s %s %s\n'%(Dir,WW,Reg))
 
+        if (Reg in ExtMask):
+            File.write('   ,input %s_wr_ok\n'%(Reg))
+
         if 'pulse' in Acc:
             File.write('   ,output %s_pulse\n'%(Reg))
         if Acc in ['external','ram']:
@@ -324,7 +355,7 @@ def writeInputsOutputsAndWires(Csv,File):
                 File.write('   ,output reg [15:0] %s_addr\n'%(Reg))
     File.write(');\n')
     File.write(Wires)
-    return LL
+    return LL,ExtMask
 
 AXISTRING2 = '''
 wire adfull,adempty,dafull,daempty;
@@ -380,6 +411,7 @@ wire [31:0] mask = {  {8{iwstrb[3]}},{8{iwstrb[2]}},{8{iwstrb[1]}},{8{iwstrb[0]}
     
 
 def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
+    lastAddrMax = 0
     hasFields={}
     for (Reg,_) in FFF:
         hasFields[Reg]=True
@@ -387,7 +419,7 @@ def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
     W1 = len(bin(Csv.runAddr))-2
 
     File.write(string.replace(AXISTRING,"MODULE",Csv.Module))
-    LL = writeInputsOutputsAndWires(Csv,File)
+    LL,ExtMask = writeInputsOutputsAndWires(Csv,File)
 
     MASK = "%d'b%s00"%(W1,'1'*(W1-2))
     AXI = string.replace(AXISTRING2,"WW-1",str(W1-1))
@@ -402,6 +434,8 @@ def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
         ST = Csv.regs[Reg]
         if ST[0]=='ram':
             Reg = '%s_rdata'%Reg
+        if ST[0]=='gap':
+            print '>>>>>>>>>>GAP',ST,lastAddrMax
         Wid = int(ST[1])
         Addr = int(ST[3])& 0xfffc
         if (Wid<=32):
@@ -409,14 +443,17 @@ def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
                 RR = "{%d'b0,%s}"%(32-Wid,Reg)
             else:
                 RR = Reg
+            lastAddrMax = max(lastAddrMax,Addr+4)
             if ST[0]=='ram':
                 lastAddr = Addr + ST[2] * bytesPerWord(ST[1])
-                File.write('    ((iraddr[%d:0]>=\'h%x) && (iraddr[%d:0]<\'h%x)) ? %s :\n'%(W1-1,Addr,W1-1,lastAddr,RR))
+                lastAddrMax = max(lastAddrMax,lastAddr)
+                File.write('    ((iraddr[%d:0]>=\'h%x) && (iraddr[%d:0]<\'h%s)) ? %s :\n'%(W1-1,Addr,W1-1,lastAddr,RR))
             else:
                 File.write('    (iraddr[%d:0]==\'h%x) ? %s :\n'%(W1-1,Addr,RR))
         else:
             Many,Add = Wid/32,Wid%32
 #            Many += (Add>0)
+            lastAddrMax = max(lastAddrMax,Addr+Many*4+4)
             for X in range(Many):
                 File.write('    (iraddr[%d:0]==\'h%x) ? %s[%d:%d] :\n'%(W1-1,Addr+4*X,Reg,31+32*X,32*X))
             X += 1
@@ -469,7 +506,7 @@ def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
             File.write('assign %s_wr_pulse = %s_wr_pulse_reg;\n'%(Reg,Reg))
             File.write('assign %s_rd_pulse = %s_rd_ram_sel;\n'%(Reg,Reg))
             File.write('always @(posedge clk)  %s_addr <= (do_write ? iwaddr :iraddr)-\'h%x;\n'%(Reg,Addr))
-        if 'external' in Acc:
+        elif 'external' in Acc:
             lastAddr = Addr + Wid/8
             if Wid>32:
                 File.write('wire %s_wr_sel = do_write &&  (iwaddr[%d:0]>=\'h%x) && (iwaddr[%d:0]<\'h%x);\n'%(Reg,W1-1,Addr,W1-1,lastAddr))
@@ -492,7 +529,7 @@ def dumpAxi4LiteVerilog(FFF,Addrs,Csv,Reset):
                 File.write('assign %s_pulse = %s_rd_pulse_reg;\n'%(Reg,Reg))
 
     File.write('endmodule\n')
-    return lastAddr
+    return lastAddrMax
 
 
 
@@ -798,14 +835,19 @@ def dumpAdaCsv(FFF,Addrs,Csv,Chip='result'):
     Fdef = open('%s.defines'%Chip,'w')
     Fincv = open('%s.vh'%Chip,'w')
     Fccc = open('%s.h'%Chip,'w')
-    Fout.write('NAME,ADDRESS,BITS,DEFAULT,FIELD NAME,,ACCESS,DESCRIPTION\n')
+    Fout.write('NAME,ADDRESS,BITS,DEFAULT,FIELD NAME,,ACCESS,DESCRIPTION,FLAGS\n')
     Addrs.sort()
+    try:
+        Base = Csv.Keys['base']
+    except:
+        logs.log_warning('base is not defined, assumed 0')
+        Base = 0
     for Addr,Reg in Addrs:
         Acc = Csv.regs[Reg][0]
-        Fout.write('%s,%s'%(Reg,hex(Addr)))
-        Fdef.write('define %s 0x%x\n'%(Reg,Addr))
-        Fincv.write('parameter %s  = \'h%x;\n'%(Reg,Addr))
-        Fccc.write('#define  ADDR_%s  0x%x\n'%(string.upper(Reg),Addr))
+        Fout.write('%s,%s'%(Reg,hex(Addr+Base)))
+        Fdef.write('define %s 0x%x\n'%(Reg,Addr+Base))
+        Fincv.write('parameter %s  = \'h%x;\n'%(Reg,Addr+Base))
+        Fccc.write('#define  ADDR_%s  0x%x\n'%(string.upper(Reg),Addr+Base))
         if Csv.fields[Reg]==[]:
             Wid = int(Csv.regs[Reg][1])
             Def = Csv.regs[Reg][2]
@@ -813,7 +855,8 @@ def dumpAdaCsv(FFF,Addrs,Csv,Chip='result'):
                 Desc = Csv.regs[Reg][4]
             else:
                 Desc = ''
-            Fout.write(',%s,%s,%s,,%s,"%s"\n'%(widi(Wid-1,0),defi(Def),Reg,Acc,string.replace(string.replace(Desc,'.',' '),'"','')))
+            Sp = special_modes(Reg,Csv.regs[Reg])
+            Fout.write(',%s,%s,%s,,%s,"%s","%s"\n'%(widi(Wid-1,0),defi(Def),Reg,Acc,string.replace(string.replace(Desc,'.',' '),'"',''),Sp))
             if Wid<32:
                 Fout.write(',,%s,%s,%s,,RO\n'%(widi(31,Wid),0,'RSRVD'))
         else:
@@ -837,6 +880,15 @@ def dumpAdaCsv(FFF,Addrs,Csv,Chip='result'):
     Fdef.close()
     Fincv.close()
 
+def special_modes(Reg,Data):
+    if Data[0]=='ram': return ''
+    try:
+        Flags = Data[6]
+        return string.join(Flags,' ')
+    except:
+        logs.log_error('special modes failed %s %s'%(Reg,Data))
+        return ''
+        
 
 def widi(Wid,From):
     if Wid==1:
@@ -899,6 +951,8 @@ def buildRegfile(txt,Regfile):
             txt.addArray(wrds[1:])
         elif wrds[0]=='ram':
             txt.addRam(wrds[1:])
+        elif wrds[0]=='gap':
+            txt.addGap(wrds[1])
         elif wrds[0]=='end':
             pass
         elif wrds[0]=='chip':
@@ -911,7 +965,16 @@ def buildRegfile(txt,Regfile):
                 txt.Reset = 'or negedge rst_n'
             else:
                 txt.Reset = ''
-                
+            for wrd in wrds[3:]:
+                if '=' in wrd:
+                    ww = string.split(wrd,'=')
+                    Key = ww[0]
+                    try:
+                        Val = eval(ww[1])
+                    except:
+                        Val = ww[1]
+                    txt.Keys[Key]=Val
+
 
         elif wrds[0][0]=='#':
             pass
@@ -929,10 +992,9 @@ class itemClass:
             self.Params[Key]=Params[Key]
         if 'reset' not in Params:
             self.Params['reset']='0'
-        if 'desc' not in Params:
-            self.Params['desc']=' '
-        if 'latch' not in Params:
-            self.Params['latch']='false'
+        if 'desc' not in Params: self.Params['desc']=' '
+        if 'latch' not in Params: self.Params['latch']='false'
+        if 'flags' not in Params: self.Params['flags']=''
         self.addr=0
     def getParam(self,Param):
         if Param in self.Params: return self.Params[Param]
@@ -941,20 +1003,23 @@ class itemClass:
     def csv(self,Fout):
         if self.Kind=='reg':
             self.checkParams()
-            Fout.write('reg,%s,,%s,,%s,%s,,"%s",%s\n'%(self.Name,self.Params['access'],self.getParam('wid'),self.Params['reset'],self.Params['desc'],self.Params['latch']))
+            Fout.write('reg,%s,,%s,,%s,%s,,"%s",%s,"%s"\n'%(self.Name,self.Params['access'],self.getParam('wid'),self.Params['reset'],self.Params['desc'],self.Params['latch'],self.Params['flags']))
         elif self.Kind=='field':
             Fout.write(',,%s,%s,,%s,%s,,"%s"\n'%(self.Name,'',self.Params['wid'],self.Params['reset'],self.Params['desc']))
         elif self.Kind=='ram':
             Fout.write('ram,%s,%s,,,%s,,%s,"%s"\n'%(self.Name,'',self.Params['wid'],self.Params['amount'],self.Params['desc']))
         elif self.Kind=='array':
             Fout.write('array,%s,%s,,,%s,,%s,"%s"\n'%(self.Name,'',self.Params['wid'],self.Params['amount'],self.Params['desc']))
+        elif self.Kind=='gap':
+            Fout.write('gap,%s,%s,,,%s,,%s,"%s"\n'%('','',32,self.Name,'gap'))
         else:
             logs.log_error('untreated kind "%s"'%self.Kind)
 
     def checkParams(self):
+        Bad = False
         if (self.Kind not in mustParams)or(self.Kind not in listedParams):
             logs.log_error('untreated kind "%s"'%self.Kind)
-            return
+            sys.exit()
             
         for Prm in self.Params:
             if Prm in aliasParams:
@@ -966,9 +1031,14 @@ class itemClass:
         for Prm in mustParams[self.Kind]:
             if Prm not in self.Params: 
                 logs.log_error('missing param "%s" in  "%s" %s '%(Prm,self.Name,self.Kind))
+                Bad = True
+
         for Prm in self.Params:
             if Prm not in listedParams[self.Kind]:
                 logs.log_error('extra param "%s" in  "%s" %s '%(Prm,self.Name,self.Kind))
+                Bad = True
+        if Bad:
+            sys.exit()
 
     def dump(self):
         logs.log_info('item %s addr=%x %s %s'%(self.Name,self.addr,self.Kind,self.Params))
@@ -996,6 +1066,7 @@ class txtRegClass:
         self.items=[]
         self.Chip = 'regfile'
         self.ResetMode = 'async'
+        self.Keys={}
 
     def assignRegWidByFields(self):
         curReg = False
@@ -1027,8 +1098,12 @@ class txtRegClass:
 
     def createCsvFile(self):
         Fout = open('temp_%s.csv'%self.Chip,'w')
-        Fout.write('kind,name,field,access,addr,wid,reset,amount,description,\n')
-        Fout.write('module,%s,,,,,,\n'%self.Chip)
+        Fout.write('kind,name,field,access,addr,wid,reset,amount,description,flags\n')
+        Fout.write('module,%s,%s'%(self.Chip,self.ResetMode))
+        for Key in self.Keys:
+            Tok = ',%s=%s'%(Key,self.Keys[Key])
+            Fout.write(Tok)
+        Fout.write('\n')
         for Item in self.items:
             Item.csv(Fout)
         Fout.close()
@@ -1064,6 +1139,10 @@ class txtRegClass:
         item = itemClass(wrds[0],'ram',Params)
         self.items.append(item)
 
+    def addGap(self,Extent):
+        item = itemClass(Extent,'gap',{'extent':Extent})
+        self.items.append(item)
+
     def addArray(self,wrds):
         Name = wrds[0]
         Params = getParams(wrds[1:])
@@ -1087,7 +1166,13 @@ def getParams(wrds):
                 Val = eval(ww[1])
             except:
                 Val = ww[1]
-            Params[Var]=Val
+            if Var=='flags': 
+                if 'flags' not in Params:
+                    Params[Var] = Val
+                else:
+                    Params[Var] += ' '+Val
+            else:
+                Params[Var]=Val
         else:
             logs.log_error('strange param "%s"'%(wrd))
     return Params
@@ -1106,7 +1191,9 @@ def dumpRdl(txt):
             Fields[Curreg].append(Item)
             
     for Item in txt.items:
-        if Item.Kind=='ram':
+        if Item.Kind=='gap':
+            pass
+        elif Item.Kind=='ram':
             File.write('reg %s_ram {\n'%Item.Name)
             File.write('    name = "%s ram ";\n'%Item.Name)
             File.write('    desc = "%s   %s x %d ";\n'%(getPrm(Item.Params,'desc','---'),getPrm(Item.Params,'wid',32),getPrm(Item.Params,'amount',32)))
@@ -1186,22 +1273,35 @@ def bytesPerWord(Bits):
     if Bits<=16: return 2
     if Bits<=32: return 4
 
-def writeReg(W1,Reg,Wid,Addr,File,Assign='<=',ADD='mp'):
+def writeReg(W1,Reg,Wid,Addr,File,Assign='<=',ADD='mp',ExtMask=''):
     X = 0
     while Wid>0:
         if (Wid>=32):
             Wdata = Assign + ' (%s[%d:%d] & ~mask[31:0]) | (%sdata &mask)'%(Reg,X*32+31,X*32,ADD) 
-            File.write('        if (%saddr[%d:0]==\'h%x) %s[%d:%d] %s;\n'%(ADD,W1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
+            writeRegAct(File,ADD,W1,Addr+4*X,Reg,X*32+31,X*32,Wdata,ExtMask)
+#            File.write('        if (%saddr[%d:0]==\'h%x) %s[%d:%d] %s;\n'%(ADD,W1,Addr+4*X,Reg,X*32+31,X*32,Wdata))
             Wid -= 32
         elif (Wid<2):
             Wdata = Assign+' (%s & ~mask[0]) | (%sdata[0] &mask[0])'%(Reg,ADD) 
-            File.write('        if (%saddr[%d:0]==\'h%x) %s %s;\n'%(ADD,W1,Addr+4*X,Reg,Wdata))
+            if ExtMask:
+                File.write('        if (%s_wr_ok && (%saddr[%d:0]==\'h%x)) %s %s;\n'%(Reg,ADD,W1,Addr+4*X,Reg,Wdata))
+            else:
+                File.write('        if (%saddr[%d:0]==\'h%x) %s %s;\n'%(ADD,W1,Addr+4*X,Reg,Wdata))
             Wid -= 1
         else:
             Wdata = Assign+' (%s[%d:%d] & ~mask[%d:0]) | (%sdata[%d:0] &mask[%d:0])'%(Reg,X*32+Wid-1,X*32,Wid-1,ADD,Wid-1,Wid-1) 
-            File.write('        if (%saddr[%d:0]==\'h%x) %s[%d:%d] %s;\n'%(ADD,W1,Addr+4*X,Reg,X*32+Wid-1,X*32,Wdata))
+            writeRegAct(File,ADD,W1,Addr+4*X,Reg,X*32+Wid-1,X*32,Wdata,ExtMask)
+#            File.write('        if (%saddr[%d:0]==\'h%x) %s[%d:%d] %s;\n'%(ADD,W1,Addr+4*X,Reg,X*32+Wid-1,X*32,Wdata))
             Wid = 0
         X += 1
+
+
+def writeRegAct(File,ADD,W1,Addr,Reg,Xhi,Xlo,Wdata,ExtMask):
+    if (not ExtMask):
+        File.write('        if (%saddr[%d:0]==\'h%x) %s[%d:%d] %s;\n'%(ADD,W1,Addr,Reg,Xhi,Xlo,Wdata))
+    else:
+        File.write('        if (%s_wr_ok && (%saddr[%d:0]==\'h%x)) %s[%d:%d] %s;\n'%(Reg,ADD,W1,Addr,Reg,Xhi,Xlo,Wdata))
+
 
 main()
 

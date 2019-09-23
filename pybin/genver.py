@@ -76,6 +76,13 @@ import os,sys,string
 
 BigHead='# -*- encoding: UTF8 -*-\nimport os,sys,string\n'
 
+INCLUDE = '''
+def include(Fname):
+    lines = open(Fname).read()
+    print lines
+'''
+    
+BigHead += INCLUDE
 
 def main():
     if len(sys.argv)==1:

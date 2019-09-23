@@ -142,20 +142,29 @@ class csvPageClass:
                     Kind = 'array'
                 elif (cnum==0)and(Word=='ram'):
                     Kind = 'ram'
+                elif (cnum==0)and(Word=='gap'):
+                    Kind = 'gap'
                 elif (cnum==0)and(Word=='module'):
                     Kind = 'module'
-                LL.append(Word)
+                elif (cnum==0)and(Word=='kind'):
+                    Kind = 'none'
+                elif (cnum==0):
+                    print 'error 150 cnum=%s word=%s'%(cnum,Word)
+                    Kind = 'none'
+                if Kind!='none':
+                    LL.append(Word)
                 cnum += 1
             self.useWords(lnum,Kind,LL)
 
     def useWords(self,lnum,Kind,LL):
         if Kind=='reg':
-#            print '>>>>',LL
             Name = LL[1]
             Access = LL[3]
             Width = int(LL[5])
             Desc = LL[8]
             Latch = LL[9]
+            Flags = string.split(string.replace(LL[10],'"',''))
+            
             if LL[6]=='':
                 Def=0
             else:
@@ -168,7 +177,7 @@ class csvPageClass:
                 self.runAddr += 4*X
             else:
                 self.runAddr += 4
-            self.regs[Name]=[Access,Width,Def,Addr,Desc,Latch]
+            self.regs[Name]=[Access,Width,Def,Addr,Desc,Latch,Flags]
             self.lastReg=Name
             self.fields[self.lastReg]=[]
         elif (Kind=='empty')and(LL[2]!=''):
@@ -179,6 +188,11 @@ class csvPageClass:
             self.fields[self.lastReg].append([Width,Def,Field,Desc])
         elif (Kind=='module'):
             self.Module = LL[1]
+            self.Reset = LL[2]
+            self.Base = 0
+            for Wrd in LL[3:]:
+                if 'base=' in Wrd:
+                    self.Base = eval(Wrd[5:])
         elif (Kind=='ram'):
             Name = LL[1]
             Width = int(LL[5])
@@ -195,7 +209,11 @@ class csvPageClass:
             self.regs[Name]=['ram',Width,Amount,Addr]
             self.fields[Name]=[]
 
-
+        elif (Kind=='gap'):
+            Amount = eval(LL[7])
+            self.runAddr += Amount
+        else:
+            print 'error! csvPageClass %s'%(Kind)
 
 
     def __scan2(self):
@@ -437,6 +455,7 @@ def count_chars(Str,Char):
 def main():
     Fname=sys.argv[1:]
     Board = csvPageClass(Fname)
+    print Board.Base
 if __name__ == '__main__':
     main()
 

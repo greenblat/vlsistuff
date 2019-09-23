@@ -1,5 +1,6 @@
 
-import sys,types,string
+import sys,types,string,os
+import traceback
 Errors = 0   
 Corrects = 0   
 Wrongs = 0   
@@ -9,6 +10,9 @@ MAXWRONGS = 2000
 MAXERRORS = 2000
 PYMONLOG = 'pymon.log'
 
+WHERE = ''
+
+
 import time
 printed_already={}
 
@@ -16,7 +20,7 @@ Flog = False
 Flog2 = False
 Flog3 = False
 Flog4 = False
-
+TB = 'tb'
 try:
     import veri
 except:
@@ -24,12 +28,24 @@ except:
 
 finishCycles = 0
 
+
+noCycles=False
+Cycles=0
 def get_cycles():
-    Now =  peek('tb.cycles')
+    global noCycles
+    if noCycles:
+        return veri.stime()
+    else:
+        Now =  peek('%s.cycles'%TB)
+        if Now<0: noCycles=True
     if (finishCycles>0)and(finishCycles<=Now):
+        print '>>>>>>',Now
         veri.finish()
+        sys.exit()
 
     return Now
+
+
 
 
 def please_print_debugs():
@@ -40,20 +56,24 @@ def log_time(Why):
     log_info('info: %s                                 time=%s'%(Why,time.ctime()))
 
 def log_fatal(Text):
-    print 'FATAL error!! %s'%(Text)
-    log_ending('from fatal')
+#    print 'FATAL error!! %s'%(Text)
+#    log_ending('from fatal')
+    log_error('FATAL! %s'%Text,False,True)
     sys.exit()
 
-def log_error(Text,Tb=True):
-    log_err(Text,Tb)
-def log_err(Text,Tb=True):
+def log_error(Text,Tb=True,Pstack=False):
+    log_err(Text,Tb,Pstack)
+def log_err(Text,Tb=True,Pstack=False):
     global Errors,printed_already,Flog
     if (not Flog):
         Flog=open(PYMONLOG,'w')
     Errors +=1  
-    Flog.write('@%d: %d ERROR: %s\n'%(get_cycles(),Errors,Text))
+    Flog.write('@%d: %s %d ERROR: %s\n'%(get_cycles(),WHERE,Errors,Text))
+    if Pstack:
+        traceback.print_stack(file=Flog)
+        
     if Tb:
-        veri.force('tb.errors',str(Errors))
+        veri.force('%s.errors'%TB,str(Errors))
 
 
     if (Errors>MAXERRORS):
@@ -64,14 +84,14 @@ def log_err(Text,Tb=True):
     if (Text in printed_already):
         return
     printed_already[Text]=1
-    print '@%d: %d: ERROR: %s'%(get_cycles(),Errors,Text)
+    print '@%d: %s %d: ERROR: %s'%(get_cycles(),WHERE,Errors,Text)
 
 def log_correct(Text,Print=True):
     global Corrects,Flog
     if (not Flog):
         Flog=open(PYMONLOG,'w')
     Corrects += 1
-    veri.force('tb.corrects',str(Corrects))
+    veri.force('%s.corrects'%TB,str(Corrects))
     if Print:
         print '@%d: %d vs %d (err=%d) CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text)
     Flog.write('@%d: %d vs %d (err=%d) CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
@@ -85,7 +105,7 @@ def log_ensure(Cond,Text):
 def log_wrong(Text):
     global Wrongs,Flog
     Wrongs += 1
-    veri.force('tb.wrongs',str(Wrongs))
+    veri.force('%s.wrongs'%TB,str(Wrongs))
     if (not Flog):
         Flog=open(PYMONLOG,'w')
     print '@%d: %d vs %d (err=%d): WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text)
@@ -95,9 +115,17 @@ def log_wrong(Text):
         veri.finish()
         sys.exit()   # in icarus, sometimes finish doesnt catch
 
-def finish(Text='.'):
-    print '@%d: wrongs=%d vs corrects=%d errors=%d warnings=%d: FINISHING on %s'%(get_cycles(),Wrongs,Corrects,Errors,Warnings,Text)
-    Flog.write('@%d: wrongs=%d vs corrects=%d errors=%d warnings=%d: FINISHING on %s'%(get_cycles(),Wrongs,Corrects,Errors,Warnings,Text))
+def finish_now(Text='.'):
+    global Flog
+    if (not Flog):
+        Flog=open(PYMONLOG,'w')
+    Now = veri.stime()
+    if (Wrongs==0)and(Errors==0)and(Warnings==0):
+        Text =  '@%d: @%d: corrects=%d FINISHING on all good %s'%(get_cycles(),Now,Corrects,Text)
+    else:        
+        Text =  '@%d: @%d: wrongs=%d vs corrects=%d errors=%d warnings=%d: FINISHING on %s'%(get_cycles(),Now,Wrongs,Corrects,Errors,Warnings,Text)
+    print Text
+    Flog.write(Text+'\n')
     veri.finish()
     
 
@@ -120,6 +148,8 @@ def log_info(Text):
     print '@%d: info: %s'%(get_cycles(),Text)
     Flog.write('@%d: info: %s\n'%(get_cycles(),Text))
 
+def log_finfo(Text,File):
+    File.write('@%d: info: %s\n'%(get_cycles(),Text))
 
 def log_info2(Text):
     global Flog2
@@ -139,6 +169,13 @@ def log_info4(Text):
         Flog4=open(PYMONLOG+'4','w')
     Flog4.write('@%d:     %s\n'%(get_cycles(),Text))
 
+INFOX = {}
+def log_infox(Text,Where,Print=False):
+    if Where not in INFOX:
+        INFOX[Where]=open('pymon.logx%s'%str(Where),'w')
+    INFOX[Where].write('@%d:     %s\n'%(get_cycles(),Text))
+    if Print:
+        print '@%d:     %s\n'%(get_cycles(),Text)
 
 
 def log_dbg(Text):
@@ -185,6 +222,11 @@ def parse_args():
     params['fnames']=fnames 
     return params
 
+def endsWith(Long,Short):
+    if type(Long)!=types.StringType: return False
+    if Short not in Long: return False
+    return  Long.index(Short)==(len(Long)-len(Short)) 
+
 
 def startsWith(Long,Short):
     if type(Long)!=types.StringType: return False
@@ -199,14 +241,27 @@ def intx(Val):
     if 'x' in Val: return -1
     if 'z' in Val: return -1
     if 'q' in Val: return -1
-    return int(Val,2)
+    if '-' in Val: return -1
+    try:
+        return int(Val,2)
+    except:
+        return int(Val)
 
 def peek(Sig):
     V  = intx(veri.peek(Sig))
     return V
+def valid(Sig):
+    V  = intx(veri.peek(Sig))
+    return V==1
+
+
+
 
 def peeksigned(Sig):
     Str = veri.peek(Sig)
+    return intxsigned(Str)
+
+def intxsigned(Str):
     X = intx(Str)
     if 'x' in Str: return 9999
     if 'z' in Str: return 9999
@@ -220,11 +275,12 @@ def make_str(Int):
     Y = bin(Int)
     return Y
 
-def bin8(Int):  
+def binx(Int,Wid=8):  
     X = bin(Int)[2:]
-    while len(X)<8:
-        X = '0'+X
-    return X
+    Pref = '0'*Wid
+    Y = Pref + X
+    Z = Y[-Wid:]
+    return Z
 
 def asciiForce(Sig,Str):
     res = '0b'
@@ -259,6 +315,11 @@ def float2int(Float):
         Int = -Int
     return Int 
 
+
+
+def peek_float(Sig):
+    Bin = peek(Sig)
+    return binary2float(Bin)
 
 
 def binary2float(Float):
@@ -327,9 +388,11 @@ def panicFinish(Reason,ContinueFor=20):
 
 
       
-def finishing(Txt='"not given"'):
+def finishing(Txt='"not given"',ContinueFor=20):
+    global finishCycles
+    if finishCycles>0: return
     log_info('finishing on %s'%Txt)
-    veri.finish()
+    finishCycles = get_cycles()+ContinueFor
 
 Vars = {}
 def incr(Who,By=1):
@@ -449,6 +512,104 @@ def bin2str(Bin):
         Chr = chr(Int)
         res = Chr + res
     return res
+
+def clog2(Num):
+    return len(bin(Num))-2
+
+def bothOnes(Int):
+    if Int==0: return -1,-1
+    Bin = bin(Int)[2:]
+    Max = len(Bin)-1
+    Lbin = list(Bin)
+    Lbin.reverse()
+    Min = Lbin.index('1')
+    return Max,Min
+
+FINISHES = {}
+def finish(Tag,Count):
+    if Tag not in FINISHES:
+        FINISHES[Tag]= Count
+    else:
+        FINISHES[Tag] += Count
+    
+ALIVES=[]
+class aliveHolderClass:
+    def __init__(self,Sig,Wait):
+        self.Sig = Sig
+        self.Wait = Wait
+        self.Val = 'x'
+        self.finishTime = 100
+    def run(self):
+        if self.Sig=='timeout':
+            if self.Wait<=get_cycles():
+                log_info('keepSimulationAlive decided to end this simulation, on timeout')
+                veri.finish()
+            return 0,'timeout'
+
+        Now = veri.peek(self.Sig)
+        if Now != self.Val:
+            self.Val = Now
+            self.finishTime = get_cycles() + self.Wait
+#            log_info('advance time %s to %d'%(self.Sig,self.finishTime))
+        return self.finishTime,self.Sig
+            
+
+
+
+def setupKeepSimulationAlive(KEEP_ALIVE):
+    Lines = string.split(KEEP_ALIVE,'\n')
+    for line in Lines:
+        ww = string.split(line)
+        if len(ww)==0:
+            pass
+        elif len(ww)!=2:
+            log_error('lines in keep alive should have two items:  sig waittime "%s"'%line)
+        else:
+            Sig = ww[0]
+            Wait = int(ww[1])
+            ALIVES.append(aliveHolderClass(Sig,Wait))
+
+
+def keepSimulationAlive():
+    if ALIVES==[]: return
+    When = 0
+    Blame = ''
+    for Obj in ALIVES:
+        This,Who = Obj.run()
+        if This>When: Blame=Who
+        When = max(When,This)
+#    log_info('max when %d cycles %d by %s'%(When,get_cycles(),Blame))
+    if When==0: return        
+    if When<(get_cycles()-20):
+        log_info('keepSimulationAlive decided to end this simulation (%s)'%Blame)
+        veri.finish()
+        
+def fnameCell(Fname):
+    wrds = string.split(Fname,'/')
+    wrd0 = wrds[-1]
+    wrds = string.split(wrd0,'.')
+    X = string.join(wrds[:-1],'.')
+    return X
+
+RemovesLater=[]
+def remove_later(Fname):
+    RemovesLater.append(Fname)
+
+def use_remove_laters():
+    for Fname in RemovesLater:
+        os.remove(Fname)
+
+def ensure_dir(Dir):
+    if not os.path.exists(Dir):
+        os.system('mkdir %s'%Dir)
+
+def extract_base_name(Fname):
+    ww = string.split(Fname,'/')
+    Fname1 = ww[-1]
+    ww = string.split(Fname1,'.')
+    return ww[0]
+
+
 
 print '>>>verification_logs loaded'
 

@@ -108,7 +108,7 @@ def run_main(Params):
 #        linex = compute_constants(line)
         linex = line
         Lines3[i]=linex
-        print line,linex
+#        print line,linex
         dones += 1
         if (dones % 10000)==0:
             print '%d lines'%dones
