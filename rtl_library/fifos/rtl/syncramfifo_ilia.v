@@ -93,9 +93,10 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 
-assign write_from_fifoin = (count==0) && (countin>0) && (!fullout) && !write_from_ram;
-assign write_to_ram = (countin>=2) && (fullout||(count>0)) && !read_from_ram;
-assign read_from_ram = (count!=0) && (countout<3) && !write_from_ram;
+wire [15:0] count_ram;
+assign write_from_fifoin = (count_ram==0) && (countin>0) && (!fullout) && !write_from_ram;
+assign write_to_ram = (countin>=2) && (fullout||(count_ram>0)) && !read_from_ram;
+assign read_from_ram = (count_ram!=0) && (countout<3) && !write_from_ram;
 
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
@@ -109,7 +110,7 @@ wire [WCOUNT:0] wcapacity = (capacity>>1)+capacity[0];
 wire panic0 = validin && fullin;
 wire panic1 = (countout>2) && write_from_ram;
 wire panic2 = write_from_ram && write_from_fifoin;
-wire panic3 = count>=wcapacity;
+wire panic3 = count_ram>=wcapacity;
 wire panic4;
 wire panic5 = write_from_fifoin && write_to_ram;
 assign panic = panic0 || panic1 || panic2 || panic3 || panic4 || panic5;
@@ -117,12 +118,12 @@ assign panic = panic0 || panic1 || panic2 || panic3 || panic4 || panic5;
 
 reg [WCOUNT:0] wptr,rptr;
 reg whalf,rhalf;
-assign   count = 
+assign   count_ram = 
     (whalf==rhalf) ? (wptr - rptr) :
     (whalf && !rhalf) ? (wcapacity - rptr + wptr) :
     (wcapacity-rptr+wptr);
-wire   ram_empty = count == 0;
-wire   ram_full = count >= wcapacity;
+wire   ram_empty = count_ram == 0;
+wire   ram_full = count_ram >= wcapacity;
 
 
 always @(posedge clk or negedge rst_n) begin
@@ -150,6 +151,7 @@ assign wdata =  {second,first};
 assign full = ram_full || fullin;
 assign addr = write_to_ram ? wptr : rptr;
 
+assign count = (count_ram*2)+countin+countout;
 
 // debug
 reg [19:0] dbgwr,dbgrd;

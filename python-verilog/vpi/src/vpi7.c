@@ -64,7 +64,7 @@ Month = 1+months.index(ww[1])\n\
 Day = int(ww[2])\n\
 Year = int(ww[4])\n\
 Exit=True\n\
-if Year<2020: Exit=False\n\
+if Year<2030: Exit=False\n\
 elif (Month < 10): Exit=False\n\
 elif (Day<15): Exit=False\n\
 if Exit:\n\
