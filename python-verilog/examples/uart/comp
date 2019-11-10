@@ -1,7 +1,7 @@
 #! /bin/csh -f
 #this is icarus compilation stage
 
-iverilog -otb.vpp rtl/uartx2.v rtl/tb.v rtl/py_uartx.v
+iverilog -otb.vvp rtl/uartx2.v rtl/tb.v rtl/py_uartx.v
 
 
 

@@ -21,6 +21,16 @@ and "###" to end the sectio,
 #< is used in de-indent  pure verilog.
 
 
+#AAA = sys.argv[1]   <<< this code will assign to variable AAA the third param in invocation.
+first param is the executable name (usually execme.py)
+second param is the is the first user param.
+noice that full ivocation line would be:
+genver.py inputfile outputfile firstUserParam secondUserParam ....
+if You use the above mechbism, in it is a good idea to append the module name with key parameter vars.
+and also modify the output file name accordingly.
+
+
+ kinda primitive macro definition:
 #defcode CUCU  AAA BBB
 wire AAA = !BBB;
 #enddef
@@ -128,7 +138,7 @@ def runFromLines(lines,FnameOut,Args):
         Fout.write(LL)
     Fout.close()
     More = string.join(Args,' ')
-    Work = 'python execme.py %s > %s'%(Args,FnameOut)
+    Work = 'python execme.py "%s" > %s'%(More,FnameOut)
     os.system(Work)
     #    os.system('/bin/rm  execme.py')
 

@@ -1,5 +1,5 @@
 
-import sys,types,string,os
+import sys,types,string,sys
 import traceback
 Errors = 0   
 Corrects = 0   
@@ -500,6 +500,9 @@ def fixedp(Int,Shift):
     Res = 1.0 * Int /X
     return Res
 
+def bin2string(Bin):
+    return bin2str(Bin)
+
 def bin2str(Bin):
     res =''
     while len(Bin)>=8:
@@ -603,11 +606,20 @@ def ensure_dir(Dir):
     if not os.path.exists(Dir):
         os.system('mkdir %s'%Dir)
 
-def extract_base_name(Fname):
-    ww = string.split(Fname,'/')
-    Fname1 = ww[-1]
-    ww = string.split(Fname1,'.')
-    return ww[0]
+varValues = {}
+def setVar(Var,Val):
+    varValues[Var] = Val
+    
+def getVar(Var):
+    if Var in varValues: return varValues[Var]
+    return 0
+def incrVar(Var):
+    A = getVar(Var)
+    setVar(Var,A+1)
+    return A
+
+
+
 
 
 
