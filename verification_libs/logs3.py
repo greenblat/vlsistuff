@@ -1,5 +1,5 @@
 
-import sys,types,string,os
+import sys,string,sys
 import traceback
 Errors = 0   
 Corrects = 0   
@@ -222,20 +222,19 @@ def parse_args():
     return params
 
 def endsWith(Long,Short):
-    if type(Long)!=types.StringType: return False
+    if Long is not string: return False
     if Short not in Long: return False
     return  Long.index(Short)==(len(Long)-len(Short)) 
 
 
 def startsWith(Long,Short):
-    if type(Long)!=types.StringType: return False
+    if Long is not string: return False
     if Short not in Long: return False
     return  Long.index(Short)==0 
 
 def intx(Val):
-    if type(Val)==types.IntType: return Val
-    if type(Val)==types.LongType: return Val
-    if type(Val)==types.FloatType: return Val
+    if Val is int: return Val
+    if Val is float: return Val
     if Val=='-999': return -1
     if 'x' in Val: return -1
     if 'z' in Val: return -1
@@ -617,9 +616,7 @@ def incrVar(Var):
     setVar(Var,A+1)
     return A
 
-def mkdir(Dir):
-    if os.path.exists(Dir): return
-    os.mkdir(Dir)
+
 
 
 

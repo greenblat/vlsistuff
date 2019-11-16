@@ -41,11 +41,11 @@ class axiLiteMasterClass:
         if Queue==1:
             self.Queue.append('force arvalid=1 araddr=%s'%(Address))
             self.Queue.append('force arvalid=0 araddr=0 rready=1')
-            self.Comments.append(Address)
+            self.Comments.append('addr=%x'%Address)
         elif Queue==2:
             self.Queue2.append('force arvalid=1 araddr=%s'%(Address))
             self.Queue2.append('force arvalid=0 araddr=0 rready=1')
-            self.Comments.append(Address)
+            self.Comments.append('addr=%x'%Address)
 
     def wait(self,Many):
         self.Queue.append('wait %s'%Many)

@@ -8,7 +8,7 @@ import random
 
 
 class axiSlaveClass:
-    def __init__(self,Path,Monitors,Prefix=''):
+    def __init__(self,Path,Monitors,Prefix='',Suffix=''):
         self.Path = Path
         Monitors.append(self)
         self.arqueue=[]
@@ -21,18 +21,22 @@ class axiSlaveClass:
         self.bwaiting=0
         self.bytex=0x30
         self.Prefix = Prefix
+        self.Suffix = Suffix
         self.Translates = {}
         self.Ram = {}
         self.wready = 0
         self.bvalid_armed = False
+        self.WAITREAD = 4
 
     def peek(self,Sig):
         if self.Prefix!='': Sig = '%s%s'%(self.Prefix,Sig)
+        if self.Suffix!='': Sig = '%s%s'%(Sig,self.Suffix)
         if Sig in self.Translates: Sig = self.Translates[Sig]
         return logs.peek('%s.%s'%(self.Path,Sig))
 
     def force(self,Sig,Val):
         if self.Prefix!='': Sig = '%s%s'%(self.Prefix,Sig)
+        if self.Suffix!='': Sig = '%s%s'%(Sig,self.Suffix)
         if Sig in self.Translates: Sig = self.Translates[Sig]
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
@@ -89,7 +93,7 @@ class axiSlaveClass:
             arburst=self.peek('arburst')
             arsize=self.peek('arsize')
             self.arqueue.append((arburst,araddr,arlen,arburst,arsize))
-            self.rqueue.append(('wait',50,0))
+            self.rqueue.append(('wait',self.WAITREAD,0))
             for ii in range(arlen):
                 self.readQueue(ii,arburst,arsize,araddr,arid,0)
             self.readQueue(arlen,arburst,arsize,araddr,arid,1)

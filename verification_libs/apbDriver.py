@@ -31,6 +31,7 @@ class apbDriver:
 
         self.translations={}
         self.renames={}
+        self.prefix = ''
         self.markers={}
         self.finishes=False
         self.hexMode = False
@@ -59,19 +60,46 @@ class apbDriver:
         return False
 
     def translate(self,Addr):
+        if ('[' in Addr):
+            Bus,Ind = string.split(Addr,'[')
+            Ind = eval(Ind[:-1])
+            Base = self.translate(Bus)
+            return Base + 4*Ind
+
+        Addr = self.rename(Addr)
+        if type(Addr)==types.IntType: return Addr
         if Addr in self.translations:
             return self.translations[Addr][0]
-        logs.log_error('apb %s cannot determine "%s" address'%(self.Name,Addr))
-        return 0
+        try:
+            Add = eval(Addr,self.renames)
+            return Add
+        except:
+            logs.log_error('apb %s cannot determine "%s" address'%(self.Name,Addr))
+            return 0
 
     def marker(self,Which):
         self.queue0.append(('marker',Which))
+
+
+    def action(self,Cmd):
+        wrds = string.split(Cmd)
+        if wrds[0]=='read':
+            if len(wrds)==2:
+                self.read(wrds[1])
+            else:
+                self.read(wrds[1],wrds[2])
+        elif wrds[0]=='write':
+            self.write(wrds[1],wrds[2])
+        elif wrds[0]=='wait':
+            self.wait(wrds[1])
+        else:
+            logs.log_error('action not recogninzed "%s"'%Cmd)
 
     def read(self,Addr,expData='none'):
         if type(Addr)==types.StringType:
             Addr = self.translate(Addr)
         self.queue0.append(('read',Addr,expData))
-        self.queue0.append(('wait',10))
+        self.queue0.append(('wait',2))
 
 
 
@@ -82,6 +110,8 @@ class apbDriver:
         if type(Data)==types.FloatType:
             Data = logs.float2binary(Data)
 #        logs.log_info('apb write  address=%x  data=%x'%(Addr,Data))
+        if type(Data)==types.StringType:
+            Data = eval(Data,self.renames)
         self.queue0.append(('write',Addr,Data))
     def wait(self,Data):
         self.queue0.append(('wait',Data))
@@ -93,8 +123,12 @@ class apbDriver:
         self.queue0.append(('wait',Data))
         self.queue0.append(('finish',0))
     def rename(self,Sig):
+        if Sig[0] in '0123456789':
+            return Sig
+        if self.prefix!='':
+            Sig = '%s%s'%(self.prefix,Sig)
         if Sig in self.renames: 
-            return self.renames[Sig]
+            return self.rename(self.renames[Sig])
         return Sig
     def peek(self,Sig):
         if self.Path=='':
@@ -200,7 +234,8 @@ class apbDriver:
                     if type(Exp)==types.FunctionType:
                         Exp(X)
                     else: 
-                        logs.log_info('apb %s read act=%x exp=%s who=%s'%(self.Name,X,Exp,self.rename(Who)))
+                        Exp0 = eval(Exp,self.renames)
+                        logs.log_info('apb %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(self.Name,X,Exp,Exp0,Exp0,self.rename(Who)))
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 else:
@@ -291,7 +326,8 @@ class apbDriver:
                     if type(Exp)==types.FunctionType:
                         Exp(X)
                     else: 
-                        logs.log_info('apb %s read act=%x exp=%s who=%s'%(self.Name,X,Exp,self.rename(Who)))
+                        Exp0 = eval(Exp,self.renames)
+                        logs.log_info('apb %s read act=%x exp=%s (%x) (0d%d)   who=%s'%(self.Name,X,Exp,Exp0,Exp0,self.rename(Who)))
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 else:

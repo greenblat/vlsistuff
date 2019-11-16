@@ -1,6 +1,8 @@
 
 import sys
 
+def stime():
+    return 0
 
 
 def peek(Sig):

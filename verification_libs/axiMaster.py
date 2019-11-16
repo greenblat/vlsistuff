@@ -8,7 +8,7 @@ axi.wait(100)
 '''
 
 
-import os,sys,string
+import os,sys,string,types
 import logs
 import veri
 
@@ -22,28 +22,77 @@ class axiMasterClass:
         self.wQueue=[]
         self.Rid = 1
         self.waiting=0
-#        rdata = veri.peek('tb.rdata')
-#        self.datawidth = len(rdata)
         self.datawidth = 0
+        self.readAction = False
+        self.READS=[]
+        self.rreadyCount = 0
+        self.rreadyOnes = 3
+        self.rreadyDenay = 0
+        self.rreadyDenays = 10
+        self.renames={}
+        self.prefix=''
+        self.suffix=''
+
+    def rename(self,Sig):
+        if Sig in self.renames:
+            return self.renames[Sig]
+
+        if self.prefix:
+            Sig = self.prefix + Sig
+        if self.suffix:
+            Sig = Sig + self.suffix 
+        return Sig
 
     def peek(self,Sig):
+        Sig = self.rename(Sig)
         return logs.peek('%s.%s'%(self.Path,Sig))
     def bpeek(self,Sig):
+        Sig = self.rename(Sig)
         return veri.peek('%s.%s'%(self.Path,Sig))
     def force(self,Sig,Val):
+        Sig = self.rename(Sig)
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
     def makeRead(self,Burst,Len,Address,Size=4):
         self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
+        if self.readAction:
+            self.READS.append((Len,Address,self.Rid))
         self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
         self.Rid += 1
-    def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
+
+    def makeWriteWstrb(self,Burst,Len,Address,Size=4,Wstrb='auto',Wdatas=[]):
+        if Wstrb == 'auto':
+            self.makeWrite(Burst,Len,Address,Size,Wdatas)
+            return
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
         self.Rid += 1
         for ii in range(Len):
             if len(Wdatas)==0:
                 Wdata = '0x%08x%08x%08x%08x'%(self.Rid+0x1000*ii,0x100+self.Rid+0x1000*ii,0x200+self.Rid+0x1000*ii,0x300+self.Rid+0x1000*ii)
+            else:
+                Wdata = Wdatas.pop(0)
+                if type(Wdata)!=types.StringType:
+                    Wdata = hex(Wdatas.pop(0))
+            if ii==(Len-1):
+                Wlast=1
+            else:
+                Wlast = 0
+            self.Queue.append(('w','force wvalid=1 wdata=%s wstrb=0x%x wlast=%d'%(Wdata,Wstrb,Wlast)))
+
+        self.Queue.append(('w','force wvalid=0 wdata=0 wstrb=0 wlast=0'))
+
+
+    def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
+        self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
+        self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
+        logs.log_info('makeWrite >>>>> %x size=%s'%(Address,Size))
+        self.Rid += 1
+        for ii in range(Len):
+            if len(Wdatas)==0:
+                Wdata = '0x%08x%08x%08x%08x'%(self.Rid+0x1000*ii,0x100+self.Rid+0x1000*ii,0x200+self.Rid+0x1000*ii,0x300+self.Rid+0x1000*ii)
+            elif (type(Wdatas[0])==types.StringType):
+                Wdata = Wdatas.pop(0)
             else:
                 Wdata = hex(Wdatas.pop(0))
             if ii==(Len-1):
@@ -72,9 +121,30 @@ class axiMasterClass:
             return
         self.runQueue()
 
+    def manageRready(self,What):
+        if What==1:
+            print '>>>',What,self.rreadyCount,self.rreadyDenay,self.peek('rvalid')
+        if What==0:
+            self.force('rready',0)
+            self.rreadyCount=0
+            return
+        if self.rreadyDenay>0:
+            self.force('rready',0)
+            self.rreadyDenay += 1
+            if self.rreadyDenay > self.rreadyDenays:
+                self.rreadyDenay=0
+                self.rreadyCount=0
+        elif self.rreadyCount==self.rreadyOnes:
+            self.force('rready',0)
+            self.rreadyDenay = 1
+            self.rreadyCount=0
+        else:
+            self.force('rready',1)
+            self.rreadyCount += 1
+
     def runResponce(self):
         if self.peek('rvalid')==1:
-            self.force('rready',1)
+            self.manageRready(1)
             rdata = self.peek('rdata')
             if self.datawidth==0:
                 rrr = self.bpeek('rdata')
@@ -85,8 +155,10 @@ class axiMasterClass:
             msb  = (self.datawidth/4) 
             rdatax = rdatax[-msb:]
             logs.log_info('axi responce rid=%x rlast=%d rdata=%s     %s'%(rid,rlast,rdatax,self.Path))
+            if self.readAction:
+                self.readAction(rid,rlast,rdatax)
         else:
-            self.force('rready',0)
+            self.manageRready(0)
 
 
 
