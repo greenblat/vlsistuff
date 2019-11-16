@@ -1,0 +1,47 @@
+
+
+
+
+
+
+
+idle w -> waddr0  echo  clear
+waddr0 HEX -> waddr1   echo pusha
+waddr1 HEX -> wdata0   echo pusha
+wdata0 HEX -> wdata1   echo pushd
+wdata1 HEX -> wdata2   echo pushd
+wdata2 HEX -> wdata3   echo pushd
+wdata3 HEX -> wdata4   echo pushd
+wdata4 HEX -> wdata5   echo pushd
+wdata5 HEX -> wdata6   echo pushd
+wdata6 HEX -> wdata7   echo pushd
+wdata7 HEX -> idle   echo pushd write
+
+
+waddr0 * -> idle echo 
+waddr1 !HEX -> idle echo write
+wdata0 !HEX -> idle echo write
+wdata1 !HEX -> idle echo write
+wdata2 !HEX -> idle echo write
+wdata3 !HEX -> idle echo write
+wdata4 !HEX -> idle echo write
+wdata5 !HEX -> idle echo write
+wdata6 !HEX -> idle echo write
+wdata7 !HEX -> idle echo write
+
+
+idle   r   -> raddr0  echo 
+raddr0 HEX -> raddr1  echo pusha
+raddr1 HEX -> idle    echo pusha read
+
+
+raddr0 * -> idle echo  
+raddr1 !HEX -> idle echo read
+raddr2 !HEX -> idle echo read
+
+
+
+idle *  -> idle echo clear
+
+
+

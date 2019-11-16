@@ -1,0 +1,19 @@
+#! /bin/csh -f
+
+
+
+ram_gen.py -width 16 -depth 512 -name ram_16_512 -wr '~wen' -cs '~cen'
+ram_gen.py -width 16 -depth 128 -name ram_16_128 -wr '~wen' -cs '~cen'
+ram_gen.py -width 78 -depth 32 -name ram_78_32 -wr '~wen' -cs '~cen'
+ram_gen.py -width 64 -depth 32 -name ram_64_32 -wr '~wen' -cs '~cen'
+
+
+/bin/mv ram_*.v 1rtl/
+
+
+
+regfile.py 1rtl/debugaxirgf.regfile
+
+/bin/mv debugaxirgf.vram 1rtl/debugaxirgf.v
+
+/bin/mv debugaxirgf.defines 1tb/

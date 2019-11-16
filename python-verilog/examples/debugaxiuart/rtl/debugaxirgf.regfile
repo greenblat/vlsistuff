@@ -1,0 +1,33 @@
+chip debugaxirgf async
+reg uart_baudrate wid=16 access=rw  reset=5
+reg uart_control  wid=8  access=rw reset=0x50
+reg uart_status   wid=8  access=ro
+
+reg rd_valid wid=1  access=rw_pulse
+reg rd_id    wid=4  access=rw
+reg rd_size  wid=3  access=rw reset=2
+reg rd_addr  wid=32 access=rw reset=0
+reg rd_burst wid=2  access=rw reset=1
+reg rd_len   wid=8  access=rw reset=0
+reg rready   wid=1  access=rw reset=1
+reg bready   wid=1  access=rw reset=1
+
+reg wr_valid wid=1  access=rw_pulse
+reg wr_id    wid=4 access=rw
+reg wr_size  wid=3  access=rw reset=2
+reg wr_addr  wid=32 access=rw reset=0
+reg wr_burst wid=2  access=rw reset=1
+reg wr_len   wid=8  access=rw reset=0
+
+
+reg wr_wstrb wid=4  access=rw reset=15
+reg wdata_mode wid=4 access=rw
+
+
+reg bresp_bid wid=7 access=ro_pulse
+
+
+reg push_wdata wid=32 access=rw_pulse
+
+end
+

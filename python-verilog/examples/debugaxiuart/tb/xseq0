@@ -1,0 +1,52 @@
+
+
+from debugaxirgf import *
+
+def action():
+    control.action('uart w uart_baudrate  6')
+
+include debugaxirgf.defines
+
+control uart w uart_baudrate  6
+
+control uart w push_wdata 0x12340001
+control uart w push_wdata 0x12345672
+control uart w push_wdata 0x12345673
+control uart w push_wdata 0x12345674
+control uart w push_wdata 0x12345675
+control uart w push_wdata 0x12345676
+control uart w push_wdata 0x12345677
+control uart w push_wdata 0x12345678
+control uart w wdata_mode 1
+
+control uart w wr_id 4
+control uart w wr_size  2
+control uart w wr_addr  0x2000
+control uart w wr_burst  1
+control uart w wr_len  6
+control uart w wr_valid 1
+
+control uart w rd_id  3
+control uart w rd_size  2
+control uart w rd_addr  0x1000
+control uart w rd_burst  1
+control uart w rd_len  7
+control uart w rd_valid 1
+
+# uart tx w1401234567\n
+
+wait 30000
+
+finish
+
+
+control tx jackie+ilia
+
+control rgf wr wr_valid 1
+control rgf wr rd_valid 1
+
+wait 1000
+
+finish
+
+

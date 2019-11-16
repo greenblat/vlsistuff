@@ -1,0 +1,18 @@
+ #! /bin/csh -f
+ 
+mvlg.py ../rtl/debugaxiuart.mvlg all.files
+
+
+pushd ..
+llbin/prepare
+popd
+
+/bin/rm tb.vvp
+
+iverilog -o tb.vvp -f all.files tb.v \
+    
+
+simv +SEQ=seq0
+
+
+

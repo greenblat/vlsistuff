@@ -1,0 +1,14 @@
+debugaxiuart.v
+syncramfifo.v
+uartx2.v
+syncfifo.v
+debugaxirgf.v
+debugcontroller.v
+axi_master_32.v
+state_machine.v
+
+ram_16_512.v
+ram_16_128.v
+ram_78_32.v
+ram_64_32.v
+

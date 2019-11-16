@@ -1,0 +1,12 @@
+/Users/ilia/github/vlsistuff/python-verilog/examples/debugaxiuart/1rtl/debugaxiuart.v
+/Users/ilia/github/vlsistuff/python-verilog/examples/debugaxiuart/1rtl/syncramfifo.v
+/Users/ilia/github/vlsistuff/python-verilog/examples/debugaxiuart/1rtl/uartx2.v
+/Users/ilia/github/vlsistuff/python-verilog/examples/debugaxiuart/1rtl/syncfifo.v
+/Users/ilia/github/vlsistuff/python-verilog/examples/debugaxiuart/1rtl/debugaxirgf.v
+/Users/ilia/github/vlsistuff/python-verilog/examples/debugaxiuart/1rtl/debugcontroller.v
+/Users/ilia/github/vlsistuff/python-verilog/examples/debugaxiuart/1rtl/axi_master_32.v
+/Users/ilia/github/vlsistuff/python-verilog/examples/debugaxiuart/1rtl/state_machine.v
+/Users/ilia/github/vlsistuff/python-verilog/examples/debugaxiuart/1rtl/ram_16_512.v
+/Users/ilia/github/vlsistuff/python-verilog/examples/debugaxiuart/1rtl/ram_16_128.v
+/Users/ilia/github/vlsistuff/python-verilog/examples/debugaxiuart/1rtl/ram_78_32.v
+/Users/ilia/github/vlsistuff/python-verilog/examples/debugaxiuart/1rtl/ram_64_32.v
