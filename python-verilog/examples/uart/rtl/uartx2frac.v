@@ -134,7 +134,8 @@ always @(posedge clk  or negedge rst_n) begin
         rxaddition <= 
             negedge_rxd ? 0 : 
             !rx_active ? 0 :
-            0 + rxaddition[7:0]  + fractional;
+            (rxinbit<effectiverxbaudrate) ?  rxaddition :
+            (0 + rxaddition[7:0]  + fractional);
 
 
         rxinbit <= 
@@ -194,12 +195,6 @@ wire byte_is_acceptable =
 // this byte is ok by address filter,we check control[2] is equal to the ninth bit
 wire filtered_ok_byte = 
     (!control[5]) || (control[1:0]!=2'b11) ||(rx_bufa[8]==control[2]);
-
-
-wire previous_is_zero = (rx_bufa==0) && rxstatusa[1];
-wire now_is_bad_zero_also = rxsr[9:1]==0)&&rx_framing_error;
-wire enough_with_bad_guys = previous_is_zero && now_is_bad_zero_also;
-
 always @(posedge clk  or negedge rst_n) begin
     if (!rst_n) begin
         rx_bufa <= 9'b0;
@@ -213,6 +208,9 @@ always @(posedge clk  or negedge rst_n) begin
             rx_bufb <= rx_bufa[7:0];
             rxstatusb <= {rx_bufa[8],rxstatusa[2],rx_parity_error,rxstatusa[1:0]};
             rx_bufb_valid <= filtered_ok_byte && byte_is_acceptable;
+            // synthesis translate_off
+//            if (!(filtered_ok_byte && byte_is_acceptable)) $display(">>byte rejected %b ",rx_bufa,$stime,"  %b",rxstatusa,rx_parity_error);
+            // synthesis translate_on
             rx_bufa_valid <= 1'b0;
         end
         if (read_rx) 
@@ -221,7 +219,7 @@ always @(posedge clk  or negedge rst_n) begin
         if (rxnewdata) begin
             rx_bufa <= rxsr[9:1];
             rxstatusa <= {rx_overrun,rx_framing_error,rx_noise};
-            rx_bufa_valid <= !enough_with_bad_guys;
+            rx_bufa_valid <= 1'b1;
         end
     end
 end

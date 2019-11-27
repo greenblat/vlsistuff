@@ -21,7 +21,8 @@ and "###" to end the sectio,
 #< is used in de-indent  pure verilog.
 
 
-#AAA = sys.argv[1]   <<< this code will assign to variable AAA the third param in invocation.
+#AAA = argv(0)   <<< this code will assign to variable AAA the third param in invocation.
+#BBB = argv(1)   <<< this code will assign to variable AAA the third param in invocation.
 first param is the executable name (usually execme.py)
 second param is the is the first user param.
 noice that full ivocation line would be:
@@ -170,6 +171,14 @@ def extract_codelins(lines):
 
 
 Routines = '''
+
+def argv(Ind):
+    WW = string.split(sys.argv[1])
+    if Ind<len(WW):
+        return WW[Ind]
+    return ''
+
+
 def clog2(In):
     return len(bin(In))-2
 
