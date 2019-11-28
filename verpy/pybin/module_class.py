@@ -77,7 +77,7 @@ class module_class:
             self.inventedNets += 1
             self.add_sig(Name,Dir,Wid)
             return Name
-        if Dir not in ['input wire','output wire','wire','reg','input','output','output reg','integer','inout','tri0','tri1','output reg signed','wire signed','signed wire','reg signed','output signed','input logic','output logic','logic','genvar','output signed','input signed','wire signed']:
+        if Dir not in ['input wire','output wire','wire','reg','input','output','output reg','integer','inout','tri0','tri1','output reg signed','wire signed','signed wire','reg signed','output signed','input logic','output logic','logic','genvar','output signed','input signed','wire signed','inout wire']:
             logs.log_error('add_sig got of %s dir="%s"'%(Name,Dir))
             
         if Dir=='genvar':
@@ -710,6 +710,8 @@ class module_class:
                     self.netsTable[Sigx]=After
                     
 
+    def build_connections_table(self):
+        self.create_connections_table()
     def create_connections_table(self):
         self.netsTable={}
         for Inst in self.insts:
@@ -768,6 +770,43 @@ class module_class:
                     self.usedRtlNets[Item] = ['rtl','hard']
                 else:
                     self.usedRtlNets[Item] = ['hard']
+    def is_output(self,Net):
+        if Net not in self.nets: return False
+        Dir,Wid = self.nets[Net]
+        return 'output' in Dir
+
+    def is_input(self,Net):
+        if Net not in self.nets: return False
+        Dir,Wid = self.nets[Net]
+        return 'input' in Dir
+
+    def is_inout(self,Net):
+        if Net not in self.nets: return False
+        Dir,Wid = self.nets[Net]
+        return 'inout' in Dir
+
+    def is_external(self,Net):
+        if Net not in self.nets: return False
+        Dir,Wid = self.nets[Net]
+        if 'output' in Dir: return True
+        if 'input' in Dir: return True
+        if 'inout' in Dir: return True
+        return False
+        
+
+    def computeWidth(self,Wid):
+        if Wid in ['0',0]: return 1
+        if type(Wid)==types.IntType: return Wid
+        if type(Wid)==types.TupleType:
+            if len(Wid)==2:
+                Hi = self.compute_int(Wid[0])
+                Lo = self.compute_int(Wid[1])
+                if (type(Hi)==types.IntType)and(type(Lo)==types.IntType):
+                    WW = Hi-Lo+1
+                    return WW
+        logs.log_error('computeWidth got "%s"'%(str(Wid)))
+        return 1
+
 
 
 def dump_always(Always,Fout):
@@ -927,7 +966,7 @@ class instance_class:
             Fout.write(';\n')
             return
         Fout.write('(')
-        Pref=' '
+        Pref='    '
         res=[]
         if ('pin0' in self.conns)and('pin1' in self.conns):
             Pins = self.conns.keys()
@@ -951,7 +990,6 @@ class instance_class:
 
 
             
-
 def pr_width_param(Dir):
     if 'inst_width' not in Dir.keys(): return ''
     return '#(%s)'%pr_expr(Dir['inst_width'])
@@ -1674,4 +1712,3 @@ def evalz(What):
         return eval(What)
     except:
         return What
-

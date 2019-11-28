@@ -1223,7 +1223,36 @@ def invent_inst(Base,Current):
             return Inst
     
 
+
+
 def add_hard_assign(List):
+    Vars = matches.matches(List,'!Soft_assign',False)
+    if Vars:
+        Item = DataBase[Vars[0]]
+        add_hard_assign(Item)
+        return
+        
+    Vars = matches.matches(List,'!LSH = !Expr',False)
+    if Vars:
+        Dst = get_expr(Vars[0])
+        Src = get_expr(Vars[1])
+        Current.add_hard_assign(Dst,Src)
+        return
+
+    Vars = matches.matches(List,'!Soft_assigns , !Soft_assign',False)
+    if Vars:
+        add_hard_assign(DataBase[Vars[0]])
+        add_hard_assign(DataBase[Vars[1]])
+        return
+
+    Vars = matches.matches(List,'assign !Soft_assigns ;',False)
+    if Vars:
+        Item = Vars[0]
+        add_hard_assign(DataBase[Item])
+        return
+
+
+
     if (len(List)==5):
         Dst = get_expr(List[1])
         Src = get_expr(List[3])

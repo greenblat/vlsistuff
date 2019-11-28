@@ -97,6 +97,7 @@ def dump_instance(Mod,Simple=False):
             Pref=','
     Fout.write(');\n')
     if not Simple:
+        Fout.write(PLUSARG)
         Fout.write('endmodule\n')
     Fout.close()
     Fout = open('%s.inst.py'%(Name),'w')
@@ -115,6 +116,20 @@ def dump_instance(Mod,Simple=False):
             Fout.write("    %s = logs.peek('tb.%s')\n"%(Sig,Sig))
     Fout.close()
     
+PLUSARG = '''
+reg [1023:0] testname;
+initial begin
+    if ($value$plusargs("SEQ=%s",testname)) begin 
+         $display(" Running SEQ= %s.",testname); 
+    end else begin
+        testname = 0;
+        $display(" default test");
+    end 
+    #10;
+    if (testname!=0) $python("sequence()",testname);
+end 
+'''
+
 
    
 def dump_empty_module(Mod):
