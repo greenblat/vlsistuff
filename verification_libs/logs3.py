@@ -8,7 +8,7 @@ Warnings = 0
 print_debug_messages=0
 MAXWRONGS = 2000
 MAXERRORS = 2000
-PYMONLOG = 'pymon.log'
+PYMONLOG = 'pymon.log3'
 
 WHERE = ''
 
@@ -147,8 +147,11 @@ def log_info(Text):
     print('@%d: info: %s'%(get_cycles(),Text))
     Flog.write('@%d: info: %s\n'%(get_cycles(),Text))
 
-def log_finfo(Text,File):
-    File.write('@%d: info: %s\n'%(get_cycles(),Text))
+def log_finfo(Text):
+    global Flog
+    if (not Flog):
+        Flog=open(PYMONLOG,'w')
+    Flog.write('@%d: info: %s\n'%(get_cycles(),Text))
 
 def log_info2(Text):
     global Flog2
