@@ -222,7 +222,7 @@ def parse_args():
     return params
 
 def endsWith(Long,Short):
-    if Long is not string: return False
+    if not isinstance(Long,str): return False
     if Short not in Long: return False
     return  Long.index(Short)==(len(Long)-len(Short)) 
 
@@ -622,4 +622,5 @@ def incrVar(Var):
 
 
 print('>>>verification_logs loaded')
+
 
