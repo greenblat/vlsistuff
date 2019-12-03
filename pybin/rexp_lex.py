@@ -108,7 +108,7 @@ def loadFile(File):
             Rec = (wrds[0],wrds[1],int(wrds[2]),int(wrds[3]))
             Tokens.append(Rec)
         elif(len(wrds)>4):
-            Str = string.join(wrds[:-3])
+            Str = ' '.join(wrds[:-3])
             Rec = (Str,wrds[-3],int(wrds[-2]),int(wrds[-1]))
             Tokens.append(Rec)
 
