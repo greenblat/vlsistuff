@@ -21,6 +21,7 @@ Flog2 = False
 Flog3 = False
 Flog4 = False
 TB = 'tb'
+
 try:
     import veri
 except:
@@ -222,7 +223,7 @@ def parse_args():
     return params
 
 def endsWith(Long,Short):
-    if not isinstance(Long,str): return False
+    if not isinstance(Long,str) : return False
     if Short not in Long: return False
     return  Long.index(Short)==(len(Long)-len(Short)) 
 
@@ -622,5 +623,4 @@ def incrVar(Var):
 
 
 print('>>>verification_logs loaded')
-
 

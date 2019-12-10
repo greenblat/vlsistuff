@@ -621,8 +621,11 @@ def mkdir(Dir):
     if os.path.exists(Dir): return
     os.mkdir(Dir)
 
-
-
+def extract_base_name(Fname):
+    AA = string.split(Fname,'/')
+    BB = AA[-1]
+    CC = string.split(BB,'.')
+    return CC[0]
 
 print('>>>verification_logs loaded')
 

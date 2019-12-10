@@ -50,11 +50,13 @@ def main():
     Fname = sys.argv[1]
     Pattern = sys.argv[2]
     print(Pattern,logs.endsWith(Pattern,'.py'))
-    sys.exit()
+#    sys.exit()
     if logs.endsWith(Pattern,'.py'):
         Pattern = Pattern[:-3]
 #    exec('import %s as Ptr'%Pattern)
     Ptr = importlib.__import__(Pattern)
+    Ptr.dumpToFile = dumpToFile
+    Ptr.Tokens = Tokens
     File = open(Fname)
     logs.setVar('fname',Fname)
     loadFile(File)    
@@ -86,7 +88,7 @@ def run(Pattern,Tokens):
             indpat += 1
             if Len>0:
                 indpat = Limitpat + 10
-                Action(Vars,Mode)
+                Action(Vars,Mode,indtok)
                 indtok += Len  
         if (indpat==Limitpat):
             indtok += 1
@@ -240,6 +242,25 @@ def adddouble(Str):
 PATTERNS = []
 def addpat(Str,Action,Mode=False,Verbose=False):
     PATTERNS.append((Str.lower().split(),Action,Mode,Verbose))
+
+
+def dumpToFile(Fname):
+    File = open(Fname,'w')
+    Tok0,Kind0,Lnum0,_ = Tokens.pop(0)
+    Str = Tok0
+    for Tok,Kind,Lnum,Pos in Tokens:
+        if Lnum>Lnum0:
+            File.write(Str+'\n')
+            Pos = Pos - len(Tok)
+            if Pos<0: Pos=0
+            Str = ' '*Pos+Tok
+            Lnum0 = Lnum
+        else:
+            Str = Str + ' ' + Tok
+    
+    if Str!='': 
+        File.write('%s\n'%(Str))
+    File.close()
 
 
 

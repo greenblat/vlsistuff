@@ -39,7 +39,6 @@ def get_cycles():
         Now =  peek('%s.cycles'%TB)
         if Now<0: noCycles=True
     if (finishCycles>0)and(finishCycles<=Now):
-        print '>>>>>>',Now
         veri.finish()
         sys.exit()
 
@@ -84,7 +83,7 @@ def log_err(Text,Tb=True,Pstack=False):
     if (Text in printed_already):
         return
     printed_already[Text]=1
-    print '@%d: %s %d: ERROR: %s'%(get_cycles(),WHERE,Errors,Text)
+    print('@%d: %s %d: ERROR: %s'%(get_cycles(),WHERE,Errors,Text))
 
 def log_correct(Text,Print=True):
     global Corrects,Flog
@@ -93,7 +92,7 @@ def log_correct(Text,Print=True):
     Corrects += 1
     veri.force('%s.corrects'%TB,str(Corrects))
     if Print:
-        print '@%d: %d vs %d (err=%d) CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text)
+        print('@%d: %d vs %d (err=%d) CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text))
     Flog.write('@%d: %d vs %d (err=%d) CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
 
 def log_ensure(Cond,Text):
@@ -108,7 +107,7 @@ def log_wrong(Text):
     veri.force('%s.wrongs'%TB,str(Wrongs))
     if (not Flog):
         Flog=open(PYMONLOG,'w')
-    print '@%d: %d vs %d (err=%d): WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text)
+    print('@%d: %d vs %d (err=%d): WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     Flog.write('@%d: %d vs %d (err=%d): WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     if Wrongs >= MAXWRONGS:
         log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS))
@@ -124,7 +123,7 @@ def finish_now(Text='.'):
         Text =  '@%d: @%d: corrects=%d FINISHING on all good %s'%(get_cycles(),Now,Corrects,Text)
     else:        
         Text =  '@%d: @%d: wrongs=%d vs corrects=%d errors=%d warnings=%d: FINISHING on %s'%(get_cycles(),Now,Wrongs,Corrects,Errors,Warnings,Text)
-    print Text
+    print(Text)
     Flog.write(Text+'\n')
     veri.finish()
     
@@ -136,7 +135,7 @@ def log_warning(Text):
         return
     if (not Flog):
         Flog=open(PYMONLOG,'w')
-    print '%d: warning: %s'%(Warnings,Text)
+    print('%d: warning: %s'%(Warnings,Text))
     Flog.write('%d: warning: %s\n'%(Warnings,Text))
     printed_already[Text]=1
     Warnings +=1  
@@ -145,7 +144,7 @@ def log_info(Text):
     global Flog
     if (not Flog):
         Flog=open(PYMONLOG,'w')
-    print '@%d: info: %s'%(get_cycles(),Text)
+    print('@%d: info: %s'%(get_cycles(),Text))
     Flog.write('@%d: info: %s\n'%(get_cycles(),Text))
 
 def log_finfo(Text,File):
@@ -175,12 +174,12 @@ def log_infox(Text,Where,Print=False):
         INFOX[Where]=open('pymon.logx%s'%str(Where),'w')
     INFOX[Where].write('@%d:     %s\n'%(get_cycles(),Text))
     if Print:
-        print '@%d:     %s\n'%(get_cycles(),Text)
+        print('@%d:     %s\n'%(get_cycles(),Text))
 
 
 def log_dbg(Text):
     if (print_debug_messages):
-        print 'dbg: ',Text
+        print('dbg: ',Text)
 
 def log_ending(Who):
     log_time('%s.py has %d errors, %d wrongs,  %d corrects and %d warnings logged\n\n'%(Who,Errors,Wrongs,Corrects, Warnings))
@@ -500,6 +499,9 @@ def fixedp(Int,Shift):
     Res = 1.0 * Int /X
     return Res
 
+def bin2string(Bin):
+    return bin2str(Bin)
+
 def bin2str(Bin):
     res =''
     while len(Bin)>=8:
@@ -603,13 +605,27 @@ def ensure_dir(Dir):
     if not os.path.exists(Dir):
         os.system('mkdir %s'%Dir)
 
+varValues = {}
+def setVar(Var,Val):
+    varValues[Var] = Val
+    
+def getVar(Var):
+    if Var in varValues: return varValues[Var]
+    return 0
+def incrVar(Var):
+    A = getVar(Var)
+    setVar(Var,A+1)
+    return A
+
+def mkdir(Dir):
+    if os.path.exists(Dir): return
+    os.mkdir(Dir)
+
 def extract_base_name(Fname):
-    ww = string.split(Fname,'/')
-    Fname1 = ww[-1]
-    ww = string.split(Fname1,'.')
-    return ww[0]
+    AA = string.split(Fname,'/')
+    BB = AA[-1]
+    CC = string.split(BB,'.')
+    return CC[0]
 
-
-
-print '>>>verification_logs loaded'
+print('>>>verification_logs loaded')
 

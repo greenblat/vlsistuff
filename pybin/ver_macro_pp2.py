@@ -35,6 +35,7 @@ def work_on_lines(lines,filename):
     total = len(lines)
     sofar=0
     guard=0
+    Off = False
     Tempname = 'ver_macro_pp.temp'+str(Tempindex)
     Tempindex=Tempindex+1
     Temp = open(Tempname,'write')
@@ -49,7 +50,13 @@ def work_on_lines(lines,filename):
         words = string.split(line) 
         Fx.write('%s\n'%(str(words)))
         if (len(words)>0):
-            if (words[0]=='`include'):
+            if ('synopsys' in words)and('translate_off' in words):
+                Off = True
+            elif ('synopsys' in words)and('translate_off' in words):
+                Off = False
+            elif (Off):
+                pass
+            elif (words[0]=='`include'):
                 Temp.write('//+++ '+line)
                 if (ok(ifdefstate)):
                     print 'including ',words[1]

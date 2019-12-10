@@ -614,7 +614,7 @@ def dumpRamVerilog(FFF,Addrs,Csv,Reset):
             Wires += 'wire %s %s;\n'%(WW,Reg)
 
         if 'pulse' in Acc:
-            File.write('   ,output %s_pulse\n'%(Reg))
+            File.write('   ,output reg %s_pulse\n'%(Reg))
         if Acc in ['external','ram']:
             File.write('   ,output %s_wr_pulse\n'%(Reg))
             File.write('   ,output %s_rd_pulse\n'%(Reg))
@@ -638,8 +638,8 @@ def dumpRamVerilog(FFF,Addrs,Csv,Reset):
             File.write('   ,%s        %s\n'%(Dir,Field))
     File.write(');\n')
     File.write(Wires)
-    File.write('wire [31:0] mask = (rsize==1) ? 32\'hff : (rsize==2) ? 32\'hffff :  32\'hffffffff;\n')
-    File.write('wire [31:0] wdata = (rsize==1) ? {4{wrdata[7:0]}} : (rsize==2) ? {2{wrdata[15:0]}} :  wrdata;\n')
+    File.write('wire [31:0] mask = (rsize==0) ? 32\'hff : (rsize==1) ? 32\'hffff :  32\'hffffffff;\n')
+    File.write('wire [31:0] mpdata = (rsize==0) ? {4{wrdata[7:0]}} : (rsize==1) ? {2{wrdata[15:0]}} :  wrdata;\n')
 
     X = (1<<(W1+1))-1
     X = X & 0xfffffffc
@@ -712,8 +712,7 @@ def dumpRamVerilog(FFF,Addrs,Csv,Reset):
         if 'ram' in Acc:
             lastAddr = Addr + ST[2] * bytesPerWord(ST[1])
             File.write('wire %s_ram_sel = rsel &&  (mpaddr[%d:0]>=\'h%x) && (mpaddr[%d:0]<\'h%x);\n'%(Reg,W1,Addr,W1,lastAddr))
-            File.write('reg %s_wr_pulse_reg; always @(posedge clk)  %s_wr_pulse_reg <= rwrite &&  %s_ram_sel;\n'%(Reg,Reg,Reg))
-            File.write('assign %s_wr_pulse = %s_wr_pulse_reg;\n'%(Reg,Reg))
+            File.write('always @(posedge clk)  %s_wr_pulse <= rwrite &&  %s_ram_sel;\n'%(Reg,Reg))
             File.write('assign %s_rd_pulse = !rwrite &&  %s_ram_sel;\n'%(Reg,Reg))
             File.write('always @(posedge clk)  %s_addr <= mpaddr-\'h%x;\n'%(Reg,Addr))
         if 'external' in Acc:
@@ -728,13 +727,9 @@ def dumpRamVerilog(FFF,Addrs,Csv,Reset):
                 File.write('always @(posedge clk)  %s_addr <= mpaddr-\'h%x;\n'%(Reg,Addr))
         if 'pulse' in Acc:
             if writable(Acc):
-                File.write('reg %s_wr_pulse_reg; always @(posedge clk)  %s_wr_pulse_reg <= rwrite && rsel &&  (mpaddr[%d:0]==\'h%x);\n'%(Reg,Reg,W1,Addr))
-                File.write('reg %s_pulse_reg; always @(posedge clk) %s_pulse_reg <=  %s_wr_pulse_reg ;\n'%(Reg,Reg,Reg))
-                File.write('assign %s_pulse = %s_pulse_reg ;\n'%(Reg,Reg))
+                File.write('always @(posedge clk)  %s_pulse <= rwrite && rsel &&  (mpaddr[%d:0]==\'h%x);\n'%(Reg,W1,Addr))
             else:    
-                File.write('reg %s_rd_pulse_reg; always @(posedge clk)  %s_rd_pulse_reg <= !rwrite && rsel &&  (mpaddr[%d:0]==\'h%x);\n'%(Reg,Reg,W1,Addr))
-                File.write('assign %s_pulse =  penable && %s_rd_pulse_reg ;\n'%(Reg,Reg))
-#                File.write('assign %s_pulse = !pwrite &&  psel &&  (mpaddr[%d:0]==\'h%x);\n'%(Reg,W1,Addr))
+                File.write('always @(posedge clk)  %s_pulse <= !rwrite && rsel &&  (mpaddr[%d:0]==\'h%x);\n'%(Reg,W1,Addr))
 
     File.write('endmodule\n')
 

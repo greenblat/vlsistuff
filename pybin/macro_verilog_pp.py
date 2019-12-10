@@ -73,6 +73,9 @@ def run_main(Params):
         File = open(Fname)
         Lines.extend(readfile(File))
         File.close()
+    if (Synopsys):
+        print 'removing translates'
+        Lines= remove_synopsys_on_off(Lines)
 
     scan0(Lines)
     File2 = open('filex0.v','w')
@@ -86,10 +89,6 @@ def run_main(Params):
         File2.write(line)
     File2.close()
 
-    if (Synopsys):
-        print 'removing translates'
-        Lines2= remove_synopsys_on_off(Lines2)
-        Lines3= remove_synopsys_on_off(Lines3)
 
     File2 = open('file2.v','w')
     for line in Lines2:

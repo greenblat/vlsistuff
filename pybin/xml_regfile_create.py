@@ -24,12 +24,14 @@ def createXml(FFF,Addrs,Csv,Reset,lastAddress):
         ST = Csv.regs[Reg]
         Wid = int(ST[1])
         Acc = ST[0]
+        Reset = ST[2]
 
         if writable(Acc)and ('pulse' in Acc):
             Str = string.replace(REG_USER_LOGIC_TEMPLATE,'NAME',Reg)
             Str = string.replace(Str,'ADDRESS','%x'%Addr)
             Str = string.replace(Str,'WIDTH','\'h%x'%Wid)
             Str = string.replace(Str,'VOLATILE','true')
+            Str = string.replace(Str,'RESET',Reset)
             Desc = string.replace(ST[4],'.',' ')
             Desc = string.replace(Desc,'"','')
             Str = string.replace(Str,'DESCRIPTION',Desc)
@@ -38,6 +40,7 @@ def createXml(FFF,Addrs,Csv,Reset,lastAddress):
             Str = string.replace(REG_TEMPLATE,'NAME',Reg)
             Str = string.replace(Str,'ADDRESS','%x'%Addr)
             Str = string.replace(Str,'WIDTH','\'h%x'%Wid)
+            Str = string.replace(Str,'RESET',Reset)
             Desc = string.replace(ST[4],'.',' ')
             Desc = string.replace(Desc,'"','')
             Str = string.replace(Str,'DESCRIPTION','"%s"'%Desc)
@@ -48,6 +51,7 @@ def createXml(FFF,Addrs,Csv,Reset,lastAddress):
             Str = string.replace(REG_TEMPLATE,'NAME',Reg)
             Str = string.replace(Str,'ADDRESS','%x'%Addr)
             Str = string.replace(Str,'WIDTH','\'h%x'%Wid)
+            Str = string.replace(Str,'RESET',Reset)
             Desc = string.replace(ST[4],'.',' ')
             Desc = string.replace(Desc,'"','')
             Str = string.replace(Str,'DESCRIPTION','"%s"'%Desc)
@@ -61,6 +65,7 @@ def createXml(FFF,Addrs,Csv,Reset,lastAddress):
             Str = string.replace(Str,'ADDRESS','%x'%Addr)
             Str = string.replace(Str,'WIDTH','\'h%x'%Wid)
             Str = string.replace(Str,'VOLATILE','true')
+            Str = string.replace(Str,'RESET',Reset)
             Desc = string.replace(ST[4],'.',' ')
             Desc = string.replace(Desc,'"','')
             Str = string.replace(Str,'DESCRIPTION',Desc)
@@ -135,7 +140,7 @@ ARRAY_TEMPLATE = '''
                     <ipxact:isPresent>true</ipxact:isPresent>
                     <ipxact:dim>AMOUNT</ipxact:dim>
                     <ipxact:addressOffset>'hADDRESS</ipxact:addressOffset>
-                    <ipxact:size>WIDTH</ipxact:size>
+                    <ipxact:size>32</ipxact:size>
                     <ipxact:volatile>VOLATILE</ipxact:volatile>
                     <ipxact:access>read-write</ipxact:access>
                     <ipxact:field>
@@ -145,6 +150,7 @@ ARRAY_TEMPLATE = '''
                         <ipxact:bitOffset>0</ipxact:bitOffset>
                         <ipxact:bitWidth>WIDTH</ipxact:bitWidth>
                         <ipxact:volatile>VOLATILE</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>RESET</ipxact:value> </ipxact:reset> </ipxact:resets>
                         <ipxact:vendorExtensions>
                             <userLogic>USERLOGIC</userLogic>
                         </ipxact:vendorExtensions>
@@ -162,7 +168,7 @@ REG_USER_LOGIC_TEMPLATE = '''
                     <ipxact:description>DESCRIPTION</ipxact:description>
                     <ipxact:isPresent>true</ipxact:isPresent>
                     <ipxact:addressOffset>'hADDRESS</ipxact:addressOffset>
-                    <ipxact:size>WIDTH</ipxact:size>
+                    <ipxact:size>32</ipxact:size>
                     <ipxact:volatile>VOLATILE</ipxact:volatile>
                     <ipxact:access>read-write</ipxact:access>
                     <ipxact:field>
@@ -174,6 +180,7 @@ REG_USER_LOGIC_TEMPLATE = '''
                         <ipxact:bitWidth>WIDTH</ipxact:bitWidth>
                         <ipxact:volatile>VOLATILE</ipxact:volatile>
                         <ipxact:access>read-write</ipxact:access>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>RESET</ipxact:value> </ipxact:reset> </ipxact:resets>
                         <ipxact:vendorExtensions>
                             <userLogic>true</userLogic>
                         </ipxact:vendorExtensions>
@@ -189,7 +196,7 @@ REG_TEMPLATE = '''
                     <ipxact:isPresent>true</ipxact:isPresent>
                     <ipxact:addressOffset>'hADDRESS</ipxact:addressOffset>
                     <ipxact:description>DESCRIPTION</ipxact:description>
-                    <ipxact:size>WIDTH</ipxact:size>
+                    <ipxact:size>32</ipxact:size>
                     <ipxact:volatile>VOLATILE</ipxact:volatile>
                     <ipxact:access>read-write</ipxact:access>
                     <ipxact:field>
@@ -198,6 +205,7 @@ REG_TEMPLATE = '''
                         <ipxact:bitOffset>0</ipxact:bitOffset>
                         <ipxact:bitWidth>WIDTH</ipxact:bitWidth>
                         <ipxact:volatile>VOLATILE</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>RESET</ipxact:value> </ipxact:reset> </ipxact:resets>
                         <ipxact:vendorExtensions>
                             <userLogic>USERLOGIC</userLogic>
                         </ipxact:vendorExtensions>
