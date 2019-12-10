@@ -60,7 +60,7 @@ def main():
     Frenames={}
     Args = sys.argv[1:]
     if len(Args)==0:
-        help_string()
+        helpString()
     for Ind,Fname in enumerate(Args):
         if '.xls' in Fname:
             if not os.path.exists(Fname):
@@ -75,7 +75,7 @@ def main():
         elif '.regfile' in Fname:
             Regfiles.append(Fname)
         if '-h' in Fname:
-            help_string()
+            helpString()
     Reset = 'async'
     if Csvs!=[]:
         Csv = csvPageClass.csvPageClass(Csvs,produce_csv_from_xls)
@@ -93,6 +93,7 @@ def main():
         Reset = txt.Reset
     else:
         logs.log_error('need eother xls or csv or regfile extension file')
+        return
 #    if txt:
 #        txt.dump()
 #        return
