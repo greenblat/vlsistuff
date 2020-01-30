@@ -627,5 +627,16 @@ def extract_base_name(Fname):
     CC = string.split(BB,'.')
     return CC[0]
 
+def mustKey(Dir,Key,Msg=''):
+    if type(Key) is [list,tuple]:
+        for Ak in Key:
+            mustKey(Dir,Ak,Msg)
+    elif Key in Dir: return
+    log_error('mustKey %s %s failed.  %s '%(Key,Msg,Dir.keys()))
+
+def neededBits(Int):
+    Bin = bin(Int)[2:]
+    return len(Bin)
+
 print('>>>verification_logs loaded')
 
