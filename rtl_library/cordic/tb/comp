@@ -1,0 +1,12 @@
+ #! /bin/csh -f
+ 
+
+iverilog -o tb.vvp tb.v \
+    ../rtl/cordic_generic.v  \
+    ../study/cordic_lut.v \
+
+
+
+
+
+
