@@ -67,6 +67,9 @@ def execute_line(Line,Env):
     if (wrds[0]=='libdir')or(wrds[0]=='dir'):
         Env.SearchDirs.extend(wrds[1:])
         return
+    if (wrds[0]=='pre_dir'):
+        Env.SearchDirs = wrds[1:]+Env.SearchDirs
+        return
     if (wrds[0]=='dont_flatten_from_file'):
         Fix = open(wrds[1])
         ok=True
@@ -121,7 +124,7 @@ def execute_line(Line,Env):
             Fname = '%s.dumpv'%Root
         check_directory_exists(Fname)
         Fout = open(Fname,'w')
-        Env.Current.dump_verilog(Fout)
+        Env.Current.dump_verilog(Fout,True)
         Fout.close()
         return
 

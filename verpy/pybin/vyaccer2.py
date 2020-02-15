@@ -30,7 +30,7 @@ def run_yacc(YaccTableName,Flexname,RunDir,Fname):
     global Uniques
     global origFname
     origFname=Fname
-
+    logs.setCurrentModule('yaccer')
     Lex=[]
     Stack=[]
     DataBase={}
@@ -145,7 +145,7 @@ def step_machine(state):
             return 0
         else:
             logs.log_error('shouldnt be here %s'%Act)
-    logs.log_error('yaccer: no valid operation act=%s tok=%s kind=%s lnum=%s pos=%s state=%s fname=%s'%(Act,Tok,Kind,Lnum,Pos,state,origFname))
+    logs.log_error('yaccer ERROR: no valid operation act=%s tok=%s kind=%s lnum=%s pos=%s state=%s fname=%s'%(Act,Tok,Kind,Lnum,Pos,state,origFname))
     return False
 
 def compatibleGoto(Param,Kind):

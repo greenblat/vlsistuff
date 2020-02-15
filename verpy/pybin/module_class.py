@@ -148,6 +148,7 @@ class module_class:
     def add_parameter(self,Name,Expr):
         self.parameters[Name]=Expr
     def add_localparam(self,Name,Expr):
+#        logs.log_info('localparam %s %s'%(Name,Expr))
         self.localparams[Name]=Expr
     def add_hard_assign(self,Dst,Src,Strength='',Delay=''):
         if (Dst =='')or(Dst==False):
@@ -164,6 +165,7 @@ class module_class:
                 Net = Net[:Net.index('[')]
             if (not myExtras(Net))and(Net not in self.nets)and(Net not in self.parameters)and(Net[0] not in '0123456789')and(Net not in self.localparams)and(Net not in self.genvars):
                 logs.log_err('net %s used before defined'%Net)
+                logs.log_err('localparams %s %s '%(str(self.localparams),self.parameters))
 
     def duplicate_inst(self,Inst,Inst2):
         Obj = self.insts[Inst]
@@ -304,23 +306,27 @@ class module_class:
                 Fout.write('%s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
         return NOIOS,[]
 
-    def dump_verilog(self,Fout,Style='new'):
+    def dump_verilog(self,Fout,MergeHards=False,Style='new'):
+        logs.setCurrentModule('dump_verilog')
         if Style=='new':
             NOIOS,NOIFS=self.dump_new_style_header(Fout)
         else:
             NOIOS,NOIFS=self.dump_old_style_header(Fout)
 
+        Hards,Ordered = [],[]
+        if MergeHards: 
+            Hards,Ordered = self.prepareForMerges()
         for Prm in self.includes:
             Fout.write('`include "%s"\n'%(Prm))
         for Prm in self.localparams:
-            Fout.write('localparam %s = %s;\n'%(pr_expr(Prm),pr_expr(self.localparams[Prm])))
+            Fout.write('localparam %s = %s;  //   %s \n'%(pr_expr(Prm),pr_expr(self.localparams[Prm]),self.localparams[Prm]))
         for (Name,Dir,Wid) in NOIOS:
             if is_double_def(Wid):
                 if Wid[0]=='packed':
                     Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid[1]),pr_wid(Wid[2]),pr_expr(Name)))
                 else:
                     Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid[1]),pr_expr(Name),pr_wid(Wid[2])))
-            else:
+            elif (Name not in Ordered):
                 Fout.write('%s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
         for (Name,Def) in NOIFS:
             Type=Def[1]
@@ -363,6 +369,13 @@ class module_class:
                 logs.log_err('!!!typedef enum { %s } %s\n'%(self.enums[Name],Name))
         for Name,List in self.typedefs:
             Fout.write('typedef struct packed { %s } %s\n'%(self.typedefs[Name],Name))
+        for (Dir,Wid,(Dst,Src,A,B)) in Hards:
+            Src0 = clean_br(pr_expr(Src))
+            Dst0 = pr_expr(Dst)
+            if 'output' in Dir:
+                Fout.write('assign  %s = %s;\n'%(Dst0,Src0))
+            else:
+                Fout.write('%s %s %s = %s;\n'%(Dir,pr_wid(Wid),Dst0,Src0))
         for (Dst,Src,Strength,Dly) in self.hard_assigns:
             if (Dst=='//'):
                 Fout.write('// %s\n'%Src)
@@ -399,6 +412,50 @@ class module_class:
     
         Fout.write('end%s\n\n'%self.Kind)
         
+    def prepareForMerges(self):
+        Readies = []
+        for Net in self.nets:
+            Dir,_ = self.nets[Net]
+            if ('input' in Dir)or('reg' in Dir):
+                Readies.append(Net)
+        for Param in self.parameters:
+            Readies.append(Param)
+    
+        logs.log_info('readies %s'%str(Readies))
+        Ordered = []
+        Hards = []
+        dones = 1
+        while dones>0:
+            dones = self.merge_round(Readies,Ordered,Hards)
+            logs.log_info('dones=%d'%dones)
+        logs.log_info('merged %d'%len(Hards))
+        logs.log_info('left %d'%len(self.hard_assigns))
+        return Hards,Ordered
+    
+    
+    def merge_round(self,Readies,Ordered,Hards):
+        Ind = 0
+        dones = 0
+        while Ind<len(self.hard_assigns):
+            Dst,Src,A,B = self.hard_assigns[Ind]
+            Set = support_set(Src,False)
+            Dset = support_set(Dst)
+            Ok = goodToGo(Set,Readies,Ordered)
+            if not Ok:
+                logs.log_info('failed %s net=%s ok=%s dset=%s   set=%s'%(Failed,Dst,Ok,Dset,Set))
+            if Ok and (len(Dset)==1)and(Dset[0]==Dst):
+                logs.log_info('ok net=%s'%(Dst))
+                Dir,Wid = self.nets[Dst]
+                self.nets.pop(Dst)
+                Hards.append((Dir,Wid,(Dst,Src,A,B)))
+                Ordered.append(Dst)
+                self.hard_assigns.pop(Ind)
+                dones =+ 1
+            else:
+                Ind += 1
+        return dones
+          
+    
     def dump_function(self,Func,Fout):
         X = self.functions[Func]
         Fout.write('function %s %s;\n'%(pr_wid(X[0]),Func))
@@ -495,7 +552,8 @@ class module_class:
             if Sig1!=Net:
                 self.check_net_def(Sig1)
                 return
-            if Net not in self.nets:
+            if (Net not in self.nets)and(Net not in self.parameters)and(Net not in self.localparams):
+                logs.log_info('adding %s'%Net)
                 self.add_sig(Net,'wire',0)
             return
         if type(Net)==types.TupleType:
@@ -749,6 +807,11 @@ class module_class:
                 return eval('%s%s%s'%(A,Item[0],B))
             if Item[0] in ['dig']:
                 return self.compute_int(Item[2])
+            if Item[0] in ['functioncall']:
+                if Item[1]=='$clog2':
+                    Val = self.compute_int(Item[2][0])
+                    Wid = len(bin(Val+1))-2
+                    return Wid
     
         logs.log_err('compute_int failed on "%s" %s'%(str(Item),self.Module),False)
         return 0
@@ -807,7 +870,7 @@ class module_class:
         logs.log_error('computeWidth got "%s"'%(str(Wid)))
         return 1
 
-
+        
 
 def dump_always(Always,Fout):
     if len(Always)==3:
@@ -859,6 +922,7 @@ def support_set__(Sig,Bussed):
     if (Sig=='')or not Sig:             return []
     if (Sig=='$unconnected'):           return []
     if (Sig=='$unsigned'):              return []
+    if (Sig=='$signed'):              return []
     if type(Sig) in [types.IntType]:    return []
     if type(Sig) in [types.StringType]: 
         if Sig[0]=='`': return []
@@ -990,6 +1054,10 @@ class instance_class:
 
 
             
+
+
+
+
 def pr_width_param(Dir):
     if 'inst_width' not in Dir.keys(): return ''
     return '#(%s)'%pr_expr(Dir['inst_width'])
@@ -1219,6 +1287,22 @@ def pr_stmt(List,Pref='',Begin=False):
             Str = dump_always([List[1],List[2],List[0]],False)
             return Str
 
+        if List[0]=='assigns':
+            L1 = List[1]
+            if L1[0]=='list':
+                res=''
+                for Stmnt in L1[1:]:
+                    if Stmnt[0]=='=':
+                        Dst = pr_expr(Stmnt[1])
+                        Src = pr_expr(Stmnt[2])
+                        res += '%sassign %s = %s;\n'%(Pref,Dst,Src)
+                    else:
+                        logs.log_error('assigns got L1=%s  List=%s'%(L1,List))
+                return res    
+            else:
+                logs.log_error('assigns got L1=%s  List=%s'%(L1,List))
+
+
         Vars = matches.matches(List,'declare ? ? ?')
         if Vars:
             if Vars[2]==0: Vars[2]=''
@@ -1231,6 +1315,9 @@ def pr_stmt(List,Pref='',Begin=False):
             Vars = matches.matches(List,'declare wire ? ?')
             if Vars:
                 return 'wire %s;\n'%Vars[0]
+            Vars = matches.matches(List,'declare reg ? ?')
+            if Vars:
+                return 'reg %s;\n'%Vars[0]
         if List[0]=='assigns':
             Vars =  matches.matches(List[1],'= ? ?',False)
             if Vars:
@@ -1705,10 +1792,26 @@ def is_external_dir(Dir):
 
 
 def myExtras(Token):
-    return Token in string.split('$high $signed empty_begin_end unique_case')
+    return Token in string.split('$high $signed empty_begin_end unique_case $display')
 
 def evalz(What):
     try:
         return eval(What)
     except:
         return What
+
+
+
+
+
+
+
+def goodToGo(Set,Readies,Ordered):
+    global Failed
+    for Net in Set:
+        if (Net not in Readies) and (Net not in Ordered): 
+            Failed = Net
+            return False
+    return True
+
+

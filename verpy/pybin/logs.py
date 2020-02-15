@@ -212,3 +212,22 @@ def pStack(Txt=''):
     traceback.print_stack(None,None,Flog)
     Flog.write('\n\n\n')
 
+def endsWith(Long,Short):
+    if type(Long)!=types.StringType: return False
+    if Short not in Long: return False
+    return  Long.index(Short)==(len(Long)-len(Short))
+
+
+def startsWith(Long,Short):
+    if type(Long)!=types.StringType: return False
+    if Short not in Long: return False
+    return  Long.index(Short)==0
+
+def extract_base_name(Fname):
+    AA = string.split(Fname,'/')
+    BB = AA[-1]
+    CC = string.split(BB,'.')
+    return CC[0]
+
+
+

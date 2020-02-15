@@ -34,6 +34,17 @@ def prepare_tb(Mod):
     Fcomp.close()
     os.system('chmod +x comp')
 
+INOUT_DRIVER = '''
+
+module inout_driver ( inout io , input dflt );
+
+reg val; initial val=0;
+reg drive; initial drive=0;
+assign io = drive ? val : 1'bz;
+assign (pull1,pull0) io = dflt;
+
+endmodule
+'''
 
 PREPARE_STRING = '''
     /bin/rm pymon.file
@@ -99,6 +110,7 @@ def dump_instance(Mod,Simple=False):
     if not Simple:
         Fout.write(PLUSARG)
         Fout.write('endmodule\n')
+        Fout.write(INOUT_DRIVER))
     Fout.close()
     Fout = open('%s.inst.py'%(Name),'w')
     Fout.write(String2)
@@ -210,17 +222,28 @@ class driverMonitor:
     def __init__(self,Path,Monitors):
         Monitors.append(self)
         self.Path = Path
+        self.state='idle'
 
     def force(self,Sig,Val):
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
     def peek(self,Sig):
         return logs.peek('%s.%s'%(self.Path,Sig))
+    def peeksigned(self,Sig):
+        return logs.peeksigned('%s.%s'%(self.Path,Sig))
 
     def valid(self,Sig):
         return self.peek(Sig)==1
 
     def run(self):
+        if self.state=='idle':
+            self.state='work0'
+        elif self.state=='work0':
+            self.state='work1'
+        elif self.state=='work1':
+            self.state='idle'
+
+
         if self.valid('validin')and self.valid('takenin'):
             return
 

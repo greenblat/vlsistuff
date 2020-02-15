@@ -28,6 +28,13 @@ def matches(List,Seq,Verbose=False):
 
         if Iseq == '?': 
             Vars.append(List[ind])
+        elif Iseq[0] == '?': 
+            Kind = Iseq[1:]
+            if Lind[1]!=Kind:
+                return False
+            else:
+                Vars.append(Lind)
+           
         elif Iseq[0] == '!': 
             if Iseq in Transtable:
                 Options = Transtable[Iseq]
@@ -57,7 +64,7 @@ def matches(List,Seq,Verbose=False):
 
 def listMatches(List,Seq,Verbose):
     X0 = listMatches__(List,Seq,Verbose)
-    if Verbose: logs.log_info('listMatches x0=%s %s %s'%(X0,List,Seq))
+    if Verbose: logs.log_info('listMatches match(x0)=%s %s %s'%(X0,List,Seq))
     return X0
 
 def listMatches__(List,Seq,Verbose):

@@ -49,6 +49,7 @@ def load_parsed(Rundir):
     global Global,Modules
     Modules={}
     Global = mcl.module_class('global_module')
+    logs.setCurrentModule('load_parsed db0')
     try:
         load_db0('%s/db0.pickle'%Rundir)
         Key = 'Main',1
@@ -270,7 +271,6 @@ def add_module_header(List0):
                     Net = Vars2[1]
                     if notUsualDir(Dir):
                         Usual,Type = notUsualDir(Dir)
-                        print '>>>>>>>>>>>>>>>>>>>>>',Dir,Usual,Type
                         Wid = getTypeDefWid(Type)
                         Current.add_sig(Net,Usual,Wid) 
                         record_original_typedef(Net,Type)
@@ -399,6 +399,10 @@ def get_exprs(Item1):
 def get_soft_assigns(Item1):
     List = DataBase[Item1]
     res=['list']
+    Vars = matches.matches(List,'assign !Soft_assigns ;')
+    if Vars:
+        Res = get_soft_assigns(Vars[0])
+        return Res
     Vars = matches.matches(List,'assign ? = !Expr ;')
     if Vars:
         Dst = get_expr(Vars[0])
@@ -439,7 +443,9 @@ def get_soft_assigns(Item1):
                 res.append(['=',Dst,['+',Dst,1]])
                 done=True
             if not done:
-                logs.log_err('get_soft_assigns got %s'%str(List2))
+                logs.log_err('get_soft_assigns not done got %s'%str(List2))
+        elif Item[0]=='assign':
+            List2 = DataBase[Item]
         else:
             logs.log_err('get_soft_assigns got %s'%str(Item))
     return res
@@ -462,6 +468,13 @@ def get_statement(Item):
         When = get_when(Vars[1])
         Stats = get_statement(Vars[2])
         return [Always,When,Stats]
+
+    Vars = matches.matches(List,'always !When !Statement')
+    if Vars:
+        When = get_when(Vars[0])
+        Stats = get_statement(Vars[1])
+        return ['always',When,Stats]
+
         
     Vars = matches.matches(List,'!IntDir !Tokens_list ;')
     if Vars:
@@ -517,6 +530,7 @@ def get_statement(Item):
             List = DataBase[List[0]]
             return instance_statement(List)
         if List[0][0] in ['Assign']:
+            List2 = DataBase[List[0]]
             Assigns = get_soft_assigns(List[0])
             return ['assigns',Assigns]
             
@@ -984,7 +998,7 @@ def add_module_item(Item):
         elif Item[0]=='Parameter':
             add_parameter(List[-2])
         elif Item[0]=='Localparam':
-            add_localparam(List[1])
+            add_localparam(List)
         elif Item[0]=='Assign':
             add_hard_assign(List)
         elif Item[0]=='Instance':
@@ -1535,7 +1549,35 @@ def add_parameter(Ptr):
                 Current.add_parameter(Name,Expr)
             else:
                 add_parameter(Item)
-def add_localparam(Ptr):
+
+def add_localparam(List0):
+    Vars = matches.matches(List0,'localparam !Pairs ;',False)
+    if Vars:
+        List1 = DataBase[Vars[0]]
+        for Item in List1:
+            List2 = DataBase[Item]
+            Vars2 = matches.matches(List2,'?token = !Expr',False)
+#            print('MMMMM',Vars2,List2)
+            if Vars2:
+                Name = Vars2[0][0]
+                Expr = get_expr(Vars2[1])
+                Current.add_localparam(Name,Expr)
+        return
+
+    Vars = matches.matches(List0,'localparam !Width !Pairs ;',False)
+    if Vars:
+        List1 = DataBase[Vars[1]]
+        for Item in List1:
+            List2 = DataBase[Item]
+            Vars2 = matches.matches(List2,'?token = !Expr',False)
+#            print('MMMMM',Vars2,List2)
+            if Vars2:
+                Name = Vars2[0][0]
+                Expr = get_expr(Vars2[1])
+                Current.add_localparam(Name,Expr)
+        return
+    logs.log_error('localparam failed in %s'%(str(List0)))
+    return
     List2 = DataBase[Ptr]
     for Item in List2:
         if len(Item)==2:    
@@ -1546,6 +1588,8 @@ def add_localparam(Ptr):
                 Current.add_localparam(Name,Expr)
             else:
                 add_localparam(Item)
+        else:
+            logs.log_error('add_localparam failed on %s %s %s'%(Ptr,Item,List2))
 
 def flattenList(Ptr):
     Key = Ptr[0]
@@ -1713,9 +1757,15 @@ def get_expr(Item):
                 X1 = string.split(X)
                 return ['bin',X1[0],X1[1]]
             if List[0][1]=='dig':    
-                X = string.replace(List[0][0],"'d",' ')
+                if "'sd" in List[0][0]:
+                    X = string.replace(List[0][0],"'sd",' ')
+                else:
+                    X = string.replace(List[0][0],"'d",' ')
                 X1 = string.split(X)
-                return ['dig',X1[0],X1[1]]
+                if len(X1)==1:
+                    return ['dig',0,X1]
+                else:
+                    return ['dig',X1[0],X1[1]]
             if List[0][1]=='hex':    
                 X = string.replace(List[0][0],"'h",' ')
                 X1 = string.split(X)
@@ -1901,7 +1951,7 @@ def infoOf(Key):
             return 'line=%s pos=%s'%(X[2],X[3])
     return 'location unknown'
     
-usualDirs = string.split('input output inout wire reg logic signed unsigned genvar')
+usualDirs = string.split('input output inout wire reg logic signed unsigned genvar integer')
 def notUsualDir(Dir):
     if Dir in  usualDirs: return False
     ww = string.split(Dir)
