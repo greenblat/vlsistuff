@@ -106,6 +106,10 @@ class GlobalsClass:
             if os.path.exists(Fname):
                 dbase.load_dbase_file(Fname)
                 return True
+        Fname = '%s.zpic'%(Pic)
+        if os.path.exists(Fname):
+            dbase.load_dbase_file(Fname)
+            return True
         return False
 
     def loadable_pictures(self):                

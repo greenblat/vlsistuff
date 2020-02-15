@@ -152,6 +152,7 @@ Instance :
     | token InstParams token '(' ')' ';' 
     | token token ';' 
     | or '(' Exprs ')' ';' 
+    | or token '(' Conns_list ')' ';' 
     | token token '(' Conns_list ')' ';' 
     | token token '(' Exprs ')' ';' 
     | token InstParams token '(' Conns_list ')' ';' 

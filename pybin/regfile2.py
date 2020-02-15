@@ -34,16 +34,23 @@ def readFile(File):
             Item = itemClass(wrds)
             Db['items'].append(Item)
 
+SYNONYMS = {'wid':'width'}
 
 class itemClass:
     def __init__(self,Wrds):
         self.Kind = Wrds[0]
         self.Params = getParams(Wrds[1:])
+        self.Synonyms()
         self.Addr = -1
         self.RAMS = ''
     def dump(self):
         print('%s : (%d 0x%x) %s'%(self.Kind,self.Addr,self.Addr,self.Params))
-
+    def Synonyms(self):
+        for Key in SYNONYMS:
+            if Key in self.Params:
+                Val = SYNONYMS[Key]
+                if Val not in self.Params:
+                    self.Params[Val] = self.Params[Key]
 
 def expandBits(Name,Wid,Bits):
     if Wid==Bits: return Name
@@ -294,10 +301,13 @@ def treatReg(Reg):
         else:
             Wid1 = Wid
             Ad = Reg.Addr
+            Hi,Lo = 31,0
             while Wid1>0:
-                Line = '    (mpaddr == \'h%x) ? %s :'%(Ad,expandBits(Name,min(Wid1,32),32))
+                Line = '    (mpaddr == \'h%x) ? %s[%d:%d] :'%(Ad,expandBits(Name,min(Wid1,32),32),Hi,Lo)
                 Wid1 -= 32
                 Ad += 4
+                Lo += 32
+                Hi = min(Wid-1,Hi+32)
                 LINES[1].append(Line)
 
             
@@ -325,9 +335,10 @@ def treatReg(Reg):
                 LINES[1].append(Line)
                 Lo = Ind*32
                 Hi = min(Lo+31,Wid-1)
-                Line = '        if (waddr == \'h%x) %s[%d:%d] <= (%s[%d:%d] & ~mask) | (wdata & mask);'%(Reg.Addr,Name,Hi,Lo,Name,Hi,Lo)
+                Line = '        if (waddr == \'h%x) %s[%d:%d] <= (%s[%d:%d] & ~mask) | (wdata & mask);'%(Ad,Name,Hi,Lo,Name,Hi,Lo)
                 LINES[3].append(Line)
                 Ad += 4
+                Ind += 1
 
 
         Line = '        %s <= %d\'h%x;'%(Name,Wid,Reset)
