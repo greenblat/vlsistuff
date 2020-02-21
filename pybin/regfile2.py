@@ -266,12 +266,18 @@ reg REG_wr_pulse_reg; always @(posedge clk)  REG_wr_pulse_reg <= REG_wr_sel;
 assign REG_pulse = REG_wr_pulse_reg  && penable;
 '''
 
+RAM_ROPULSE_RANGE = '''
+wire REG_rd_pulse = !pwrite && psel &&  (mpaddr>='hLADDR) && (mpaddr < 'hHADDR);
+reg REG_rd_pulse_dly; always @(posedge clk)  REG_rd_pulse_dly <= REG_rd_pulse;
+assign REG_rd_data_valid = REG_rd_pulse_dly && penable;
+'''
 
 ROPULSE_RANGE = '''
 wire REG_rd_sel = !pwrite && psel &&  (mpaddr>='hLADDR) && (mpaddr < 'hHADDR);
 reg REG_rd_pulse_reg; always @(posedge clk)  REG_rd_pulse_reg <= REG_rd_sel;
 assign REG_rd_pulse = REG_rd_pulse_reg  && penable;
 '''
+
 RWPULSE_RANGE = '''
 wire REG_wr_sel = pwrite && psel &&  (mpaddr>='hLADDR) && (mpaddr < 'hHADDR);
 reg REG_wr_pulse_reg; always @(posedge clk)  REG_wr_pulse_reg <= REG_wr_sel;
@@ -420,14 +426,10 @@ def treatRam(Reg):
     LINES[0].append(Line)
     Line = '    ,output %s_wr_pulse'%(Name)
     LINES[0].append(Line)
-    Line = '    ,output %s_select'%(Name)
-    LINES[0].append(Line)
 
     Line = 'assign %s_addr = (mpaddr - \'h%x)>>2;'%(Name,Reg.Addr)
     LINES[4].append(Line)
-    Line = 'assign %s_select = !pwrite && psel &&  (mpaddr>=\'h%x) && (mpaddr < \'h%x);'%(Name,Reg.Addr,Reg.HADDR)
-    LINES[4].append(Line)
-    Str = string.replace(ROPULSE_RANGE,'REG',Name)
+    Str = string.replace(RAM_ROPULSE_RANGE,'REG',Name)
     Str = string.replace(Str,'LADDR',hex(Reg.Addr)[2:])
     Str = string.replace(Str,'HADDR',hex(Reg.HADDR)[2:])
     LINES[4].append(Str)
@@ -436,7 +438,7 @@ def treatRam(Reg):
     Str = string.replace(Str,'HADDR',hex(Reg.HADDR)[2:])
     LINES[4].append(Str)
 
-    Line = '%s_rd_pulse ? %s_rdata :'%(Name,Name)
+    Line = '%s_rd_data_valid ? %s_rdata :'%(Name,Name)
     Db['chip'].RAMS += Line
 
 

@@ -5,12 +5,14 @@ import logs
 
 PMOS =  ['pdmos_tran']
 NMOS =  ['ndmos_tran']
+VDDRENAMES = [('vdd30_to_dm','vdd'),('vdd33','vdd'),('vdd30','vdd'),('dvss','vss'),('dvddh','vdd'),('dvdd','vdd'),('avddh','vdd'),('avss','vss')]
 
 LOGICALS = string.split('and or nand nor inv xor xnor')
 def help_main(Env):
     Mod = Env.Current
-    useTranslations([('vdd30_to_dm','vdd'),('vdd33','vdd'),('vdd30','vdd'),('dvss','vss'),('dvddh','vdd'),('dvdd','vdd'),('avddh','vdd'),('avss','vss')],Mod,True)
     writeOut(Mod,'stp0')
+    useTranslations(VDDRENAMES,Mod,True)
+    writeOut(Mod,'stp1')
     Ok = 1
     while (Ok>0):
         Ok = scanDesignForPattern(Mod)
@@ -18,33 +20,33 @@ def help_main(Env):
     while (Ok>0):
         Ok = scanDesignForPattern(Mod)
     removeOrphans(Mod)
-    writeOut(Mod,'stp1x')
+    writeOut(Mod,'stp2')
     gateMerges(Mod)
-    writeOut(Mod,'stp1y')
+    writeOut(Mod,'stp3')
     orphanWires(Mod)
-    writeOut(Mod,'stp1')
+    writeOut(Mod,'stp4')
     recognizeSRlatch(Mod)
     extractCmosMux(Mod)
-    writeOut(Mod,'stp2')
+    writeOut(Mod,'stp5')
     recognizePattern2(XOR_pattern,Mod)
     gateMerges(Mod)
     removeOrphans(Mod)
 
     recognizePattern2(Dlatch_pattern,Mod)
-    writeOut(Mod,'stp3')
+    writeOut(Mod,'stp6')
     recognizePattern2(Dlatch2_pattern,Mod)
     recognizePattern2(Dlatch3_pattern,Mod)
-    writeOut(Mod,'stp4')
+    writeOut(Mod,'stp7')
     recognizePattern2(Dff_pattern,Mod)
-    writeOut(Mod,'stp5')
+    writeOut(Mod,'stp8')
     scanGates(Mod,True)
     orphanWires(Mod)
     ncInverters(Mod)
-    writeOut(Mod,'stp6')
+    writeOut(Mod,'stp9')
     consecutiveInverters(Mod)
     removeOrphans(Mod)
-    writeOut(Mod,'stp7')
-
+    writeOut(Mod,'stp10')
+    renameBackToOriginalVdd(Mod)
     turnGatesToAssigns(Mod)
     writeOut(Mod,'newv')
 
@@ -945,5 +947,15 @@ def travelBack(OO,InvsO,Deep):
     _,II = InvsO[OO]
     if II not in InvsO: return Deep+1,II
     return travelBack(II,InvsO,Deep+1)
+
+
+def renameBackToOriginalVdd(Mod):
+    for From,To in VDDRENAMES:
+        VDDS[From]=To
+    print('renameBackToOriginalVdd')
+    for Net in Mod.nets:
+        if Net in VDDS:
+            print('>renameBack>>>',Net,VDDS[From])
+
 
 
