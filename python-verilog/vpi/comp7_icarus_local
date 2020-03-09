@@ -1,0 +1,15 @@
+#! /bin/csh -f
+
+set IDIR = /usr/include/python2.7/
+set ILIB = /usr/lib64/
+
+iverilog-vpi src/vpi7.c src/qq64.c \
+    -I$IDIR \
+    -lpython2.7 -L$ILIB \
+
+
+
+
+
+
+
