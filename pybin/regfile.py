@@ -253,12 +253,13 @@ def dumpApbVerilog(FFF,Addrs,Csv,Reset):
             if Wid>32:
                 File.write('always @(posedge clk)  %s_addr <= mpaddr-\'h%x;\n'%(Reg,Addr))
         if 'pulse' in Acc:
+            lastAddr = Addr + Wid/8
             if writable(Acc):
                 if Reg in ExtMask:
                     ExtEn = ' && %s_wr_ok'%Reg
                 else:
                     ExtEn = ''
-                File.write('reg %s_wr_pulse_reg; always @(posedge clk)  %s_wr_pulse_reg <= pwrite && psel &&  (mpaddr[%d:0]==\'h%x);\n'%(Reg,Reg,W1,Addr))
+                File.write('reg %s_wr_pulse_reg; always @(posedge clk)  %s_wr_pulse_reg <= pwrite && psel &&  (mpaddr[%d:0]==\'h%x);\n'%(Reg,Reg,W1,lastAddr))
                 File.write('reg %s_pulse_reg; always @(posedge clk) %s_pulse_reg <=  penable && %s_wr_pulse_reg ;\n'%(Reg,Reg,Reg))
                 File.write('assign %s_pulse = %s_pulse_reg %s ;\n'%(Reg,Reg,ExtEn))
             else:    

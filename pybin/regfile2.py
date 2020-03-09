@@ -295,10 +295,15 @@ def treatReg(Reg):
         Line = '    ,input [%d:0] %s'%(Wid-1,Name)
         LINES[0].append(Line)
         if 'pulse' in Access:
+            lastAddr = Reg.Addr
+            Wid2 = Wid
+            while Wid2>32:
+                lastAddr += 4
+                Wid2 -= 32
             Line = '    ,output %s_pulse'%(Name)
             LINES[0].append(Line)
             Str = string.replace(ROPULSE,'REG',Name)
-            Str = string.replace(Str,'ADDR',hex(Reg.Addr)[2:])
+            Str = string.replace(Str,'ADDR',hex(lastAddr)[2:])
             LINES[4].append(Str)
 
         if (Wid<32):
@@ -320,11 +325,16 @@ def treatReg(Reg):
     elif 'rw' in Access:
         Line = '    ,output reg [%d:0] %s'%(Wid-1,Name)
         LINES[0].append(Line)
+        lastAddr = Reg.Addr
+        Wid2 = Wid
+        while Wid2>32:
+            lastAddr += 4
+            Wid2 -= 32
         if 'pulse' in Access:
             Line = '    ,output %s_pulse'%(Name)
             LINES[0].append(Line)
             Str = string.replace(RWPULSE,'REG',Name)
-            Str = string.replace(Str,'ADDR',hex(Reg.Addr)[2:])
+            Str = string.replace(Str,'ADDR',hex(lastAddr)[2:])
             LINES[4].append(Str)
         if Wid<=32:
             Line = '    (mpaddr == \'h%x) ? %s :'%(Reg.Addr,expandBits(Name,Wid,32))
