@@ -62,9 +62,9 @@ class jtagClass:
                 (Cmd,Val,Len) = self.commands.pop(0)
                 RR = logs.intx(self.responce)
                 try:
-                    logs.log_info('jtag 0x%x %s %x %s %x %s lastir=(%x)'%(RR,self.responce,logs.intx(self.responce),Cmd,Val,Len[0],Len[1]))
+                    logs.log_info('jtag RES 0x%x %s %x %s %x %s lastir=(%x)'%(RR,self.responce,logs.intx(self.responce),Cmd,Val,Len[0],Len[1]))
                 except:
-                    logs.log_info('jtag 0x%x %s %s %s (x) %s lastir=(%s)'%(RR,self.responce,Cmd,Val,Len,Len))
+                    logs.log_info('jtag RES 0x%x %s %s %s (x) %s lastir=(%s)'%(RR,self.responce,Cmd,Val,Len,Len))
                 if self.callback:
                     self.callback(logs.intx(self.responce),Cmd,Val,Len)
                 self.responce=''
@@ -75,7 +75,7 @@ class jtagClass:
     def sendLabel(self,Text,Fout):
         self.queue.append(('label',Text,Fout))
             
-    def sendFinish(self,Txt,Fout):
+    def sendFinish(self,Txt,Fout=False):
         self.queue.append(('finish',Txt,Fout))
 
     def force1(self,Whome,What):
@@ -86,7 +86,7 @@ class jtagClass:
         for ii in range(Many):
             self.queue.append((Tms,0,0))
 
-    def sendIr1(self,Ir,irLen):
+    def sendIr1(self,Ir,irLen=8):
         self.queue.extend([(0,0,0),(1,0,0),(1,0,0),(0,0,0),(0,0,0)])
         irString = make_bin_i(Ir,irLen)
         for Bit in irString[:-1]:
@@ -97,7 +97,7 @@ class jtagClass:
         self.commands.append(('ir',Ir,(irLen,0x20)))
         self.lastIr = (Ir,irLen)
 
-    def sendIr(self,Ir,irLen):
+    def sendIr(self,Ir,irLen=8):
         self.queue.extend([(0,0,0),(1,0,0),(1,0,0),(0,0,0),(0,0,0)])
         irString = make_bin_i(Ir,irLen)
         print 'irString',irString
@@ -109,7 +109,7 @@ class jtagClass:
         self.commands.append(('ir',Ir,irLen))
         self.lastIr = (Ir,irLen)
 
-    def sendDr1(self,Dr,drLen,Label=''):
+    def sendDr1(self,Dr,drLen=32,Label=''):
         self.queue.extend([(0,0,0),(1,0,0),(0,0,0),(0,0,0)])
         drString = make_bin_i(Dr,drLen)
         Ind=0
@@ -125,7 +125,7 @@ class jtagClass:
         self.queue.extend([(0,0,0)])
         self.commands.append(('dr',Dr,(drLen,self.lastIr[0])))
 
-    def sendDr1Check(self,Dr,drLen,Label=''):
+    def sendDr1Check(self,Dr,drLen=32,Label=''):
         self.queue.extend([(0,0,0),(1,0,0),(0,0,0),(0,0,0)])
         drString = make_bin_i(Dr,drLen)
         Ind=0
@@ -141,7 +141,7 @@ class jtagClass:
         self.queue.extend([(0,0,0)])
         self.commands.append(('dr',Dr,(drLen,self.lastIr[0])))
 
-    def sendDr(self,Dr,drLen):
+    def sendDr(self,Dr,drLen=32):
         self.queue.extend([(0,0,0),(1,0,0),(0,0,0),(0,0,0)])
         drString = make_bin_i(Dr,drLen)
         for Bit in drString[:-1]:

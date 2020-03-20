@@ -12,6 +12,9 @@ PYMONLOG = 'pymon.log'
 
 WHERE = ''
 
+    
+Flogs = [False,False,False,False]
+
 
 import time
 printed_already={}
@@ -27,6 +30,12 @@ except:
     import fakeVeri as veri
 
 finishCycles = 0
+
+def pymonFileName(logFileName):
+    global Flog
+    if Flog:
+        Flog.close()
+    Flog = open(logFileName,'w')
 
 
 noCycles=False
@@ -51,23 +60,22 @@ def please_print_debugs():
     global print_debug_messages
     print_debug_messages=1
 
-def log_time(Why):
-    log_info('info: %s                                 time=%s'%(Why,time.ctime()))
+def log_time(Why,Which=0):
+    log_info('info: %s                                 time=%s'%(Why,time.ctime()),Which)
 
-def log_fatal(Text):
-#    print 'FATAL error!! %s'%(Text)
-#    log_ending('from fatal')
-    log_error('FATAL! %s'%Text,False,True)
+def log_fatal(Text,Which=0):
+    log_ending('from fatal',Which)
+    log_error('FATAL! %s'%Text,Which,False,True)
     sys.exit()
 
-def log_error(Text,Tb=True,Pstack=False):
-    log_err(Text,Tb,Pstack)
-def log_err(Text,Tb=True,Pstack=False):
-    global Errors,printed_already,Flog
-    if (not Flog):
-        Flog=open(PYMONLOG,'w')
+def log_error(Text,Which=0,Tb=True,Pstack=False):
+    log_err(Text,Which,Tb,Pstack)
+def log_err(Text,Which=0,Tb=True,Pstack=False):
+    global Errors,printed_already
+    if (not Flogs[Which]):
+        Flogs[Which]=open(PYMONLOG+Which,'w')
     Errors +=1  
-    Flog.write('@%d: %s %d ERROR: %s\n'%(get_cycles(),WHERE,Errors,Text))
+    Flogs[Which].write('@%d: %s %d ERROR: %s\n'%(get_cycles(),WHERE,Errors,Text))
     if Pstack:
         traceback.print_stack(file=Flog)
         
@@ -76,7 +84,7 @@ def log_err(Text,Tb=True,Pstack=False):
 
 
     if (Errors>MAXERRORS):
-        log_info('max errors reached (%d). bailing out. (MAXERRORS==%d)'%(Errors,MAXERRORS))
+        log_info('max errors reached (%d). bailing out. (MAXERRORS==%d)'%(Errors,MAXERRORS),Which)
         veri.finish()
         sys.exit()   # in icarus, sometimes finish doesnt catch
 
@@ -85,32 +93,32 @@ def log_err(Text,Tb=True,Pstack=False):
     printed_already[Text]=1
     print('@%d: %s %d: ERROR: %s'%(get_cycles(),WHERE,Errors,Text))
 
-def log_correct(Text,Print=True):
-    global Corrects,Flog
-    if (not Flog):
-        Flog=open(PYMONLOG,'w')
+def log_correct(Text,Which=0,Print=True):
+    global Corrects
+    if (not Flogs[Which]):
+        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Corrects += 1
     veri.force('%s.corrects'%TB,str(Corrects))
     if Print:
         print('@%d: %d vs %d (err=%d) CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text))
-    Flog.write('@%d: %d vs %d (err=%d) CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
+    Flogs[Which].write('@%d: %d vs %d (err=%d) CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
 
-def log_ensure(Cond,Text):
+def log_ensure(Cond,Text,Which=0):
     if Cond:
-        log_correct(Text)
+        log_correct(Text,Which)
     else:
-        log_wrong(Text)
+        log_wrong(Text,Which)
     
-def log_wrong(Text):
-    global Wrongs,Flog
+def log_wrong(Text,Which=0):
+    global Wrongs
     Wrongs += 1
     veri.force('%s.wrongs'%TB,str(Wrongs))
-    if (not Flog):
-        Flog=open(PYMONLOG,'w')
+    if (not Flogs[Which]):
+        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: %d vs %d (err=%d): WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text))
-    Flog.write('@%d: %d vs %d (err=%d): WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
+    Flogs[Which].write('@%d: %d vs %d (err=%d): WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     if Wrongs >= MAXWRONGS:
-        log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS))
+        log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS),Which)
         veri.finish()
         sys.exit()   # in icarus, sometimes finish doesnt catch
 
@@ -140,12 +148,11 @@ def log_warning(Text):
     printed_already[Text]=1
     Warnings +=1  
 
-def log_info(Text):
-    global Flog
-    if (not Flog):
-        Flog=open(PYMONLOG,'w')
+def log_info(Text,Which=0):
+    if (not Flogs[Which]):
+        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: info: %s'%(get_cycles(),Text))
-    Flog.write('@%d: info: %s\n'%(get_cycles(),Text))
+    Flogs[Which].write('@%d: info: %s\n'%(get_cycles(),Text))
 
 def log_finfo(Text,File):
     File.write('@%d: info: %s\n'%(get_cycles(),Text))
@@ -181,10 +188,8 @@ def log_dbg(Text):
     if (print_debug_messages):
         print('dbg: ',Text)
 
-def log_ending(Who):
-    log_time('%s.py has %d errors, %d wrongs,  %d corrects and %d warnings logged\n\n'%(Who,Errors,Wrongs,Corrects, Warnings))
-    if (Flog):
-        Flog.close()
+def log_ending(Who,Which=0):
+    log_time('%s.py has %d errors, %d wrongs,  %d corrects and %d warnings logged\n\n'%(Who,Errors,Wrongs,Corrects, Warnings),Which)
     return Errors
 
 
@@ -626,6 +631,17 @@ def extract_base_name(Fname):
     BB = AA[-1]
     CC = string.split(BB,'.')
     return CC[0]
+
+def mustKey(Dir,Key,Msg=''):
+    if type(Key) is [list,tuple]:
+        for Ak in Key:
+            mustKey(Dir,Ak,Msg)
+    elif Key in Dir: return
+    log_error('mustKey %s %s failed.  %s '%(Key,Msg,Dir.keys()))
+
+def neededBits(Int):
+    Bin = bin(Int)[2:]
+    return len(Bin)
 
 print('>>>verification_logs loaded')
 

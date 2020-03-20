@@ -38,6 +38,8 @@ class apbDriver:
         Monitors.append(self)
 
 
+    def setName(self,Name):
+        self.queue0.append(('name',Name))
     def load_renames_file(self,Fname):
         '''define wd_load_value 0x0'''
         File = open(Fname)
@@ -99,9 +101,10 @@ class apbDriver:
         if type(Addr)==types.StringType:
             Addr = self.translate(Addr)
         self.queue0.append(('read',Addr,expData))
-        self.queue0.append(('wait',2))
+        self.queue0.append(('wait',1))
 
-
+    def forcenet(self,Net,Val):
+        self.queue0.append(('force',Net,Val))
 
     def write(self,Addr,Data):
         if type(Addr)==types.StringType:
@@ -118,6 +121,10 @@ class apbDriver:
 #        self.queue1.append(('wait',Data))
     def waitUntil(self,Data,Timeout):
         self.queue0.append(('until',Data,Timeout))
+    def waitNotBusy(self,Data,Timeout):
+        self.queue0.append(('notbusy',0))
+#        logs.log_info('enable waiting for not busy')
+
         
     def finish(self,Data=10):
         self.queue0.append(('wait',Data))
@@ -208,6 +215,13 @@ class apbDriver:
                 What = AA0[2]
                 Val = self.peek(Who)
                 if What!=Val:return
+            if AA0=='notbusy':
+#                logs.log_info('seq0 %s %s'%(AA0,self.busy()))
+#                if self.busy(): return 
+                self.seq0.pop(0)
+                return
+
+
             List = self.seq0.pop(0)
             if (len(List[0])==3): List.pop(0)
 #            logs.log_info('DBG0 %s'%str(List))
@@ -215,6 +229,8 @@ class apbDriver:
                 if Sig=='lock':
                     if Val==1: apbDriver.bus_locked=self
                     elif Val==0: apbDriver.bus_locked=False
+                elif Sig=='name':
+                    self.Name = Val
                 elif Sig=='marker':
                     logs.log_info('marker from APB %s'%self.Name)
                     if Val[0] in self.markers:
@@ -222,7 +238,8 @@ class apbDriver:
                     else:
                         logs.log_error('marker %s from APB %s is not defined'%(Val,self.Name))
                 elif Sig=='finish':
-                    logs.log_info('finishing from APB %s'%self.Name)
+                    logs.log_info('finishing from APB %s'%self.Name,2)
+                    logs.log_ending('scores',2)
                     if self.finishes: self.finishes()
                     veri.finish()
                     sys.exit()
@@ -231,11 +248,15 @@ class apbDriver:
                 elif Sig=='catch':
                     Who,Exp = Val
                     X = self.peek(self.rename(Who))
-                    if type(Exp)==types.FunctionType:
+                    if Exp=='none':
+                        pass
+                    elif type(Exp)==types.FunctionType:
                         Exp(X)
+                    elif type(Exp)==types.IntType:
+                        logs.log_ensure((Exp==X),'apb %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(self.Name,X,Exp,Exp,Exp,self.rename(Who)),2)
                     else: 
                         Exp0 = eval(Exp,self.renames)
-                        logs.log_info('apb %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(self.Name,X,Exp,Exp0,Exp0,self.rename(Who)))
+                        logs.log_info2('apb %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(self.Name,X,Exp,Exp0,Exp0,self.rename(Who)))
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 else:
@@ -247,7 +268,7 @@ class apbDriver:
         if self.queue0!=[]:
             What = self.queue0.pop(0)
             if What[0]=='write':
-#                logs.log_info('write apb queue0 seq0 %s'%(str(What)))
+#                logs.log_info('write apb queue0 seq0 %s %s %s'%(What[0],hex(What[1]),hex(What[2])))
                 self.seq0.append([('lock',1),('psel',1),('paddr',What[1]),('pwdata',What[2]),('pwrite',1)])
                 self.seq0.append([('penable',1)])
                 self.seq0.append([('conditional','pready',1),('psel',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0)])
@@ -264,8 +285,14 @@ class apbDriver:
                 self.seq0.append([('finish',0)])
             elif What[0]=='marker':
                 self.seq0.append([('marker',What[1])])
+            elif What[0]=='name':
+                self.seq0.append([('name',What[1])])
             elif What[0]=='until':
                 self.seq0.append([('until',(What[1],What[2]))])
+            elif What[0]=='force':
+                self.seq0.append([(What[1],What[2])])
+            elif What[0]=='notbusy':
+                self.seq0.append(('notbusy',0))
             else:
                 logs.log_error('apb %s: unrecognized ilia command %s'%(self.Name,str(What)))
 
@@ -323,11 +350,12 @@ class apbDriver:
                 elif Sig=='catch':
                     Who,Exp = Val
                     X = self.peek(self.rename(Who))
+                    logs.log_info2('catch %s %s'%(Who,Exp))
                     if type(Exp)==types.FunctionType:
                         Exp(X)
                     else: 
                         Exp0 = eval(Exp,self.renames)
-                        logs.log_info('apb %s read act=%x exp=%s (%x) (0d%d)   who=%s'%(self.Name,X,Exp,Exp0,Exp0,self.rename(Who)))
+                        logs.log_info2('apb %s read act=%x exp=%s (%x) (0d%d)   who=%s'%(self.Name,X,Exp,Exp0,Exp0,self.rename(Who)))
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 else:

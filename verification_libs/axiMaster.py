@@ -27,8 +27,8 @@ class axiMasterClass:
         self.READS=[]
         self.rreadyCount = 0
         self.rreadyOnes = 3
-        self.rreadyDenay = 0
-        self.rreadyDenays = 10
+        self.rreadyDeny = 0
+        self.rreadyDenys = 10
         self.renames={}
         self.prefix=''
         self.suffix=''
@@ -123,20 +123,20 @@ class axiMasterClass:
 
     def manageRready(self,What):
         if What==1:
-            print '>>>',What,self.rreadyCount,self.rreadyDenay,self.peek('rvalid')
+            print '>>>',What,self.rreadyCount,self.rreadyDeny,self.peek('rvalid')
         if What==0:
             self.force('rready',0)
             self.rreadyCount=0
             return
-        if self.rreadyDenay>0:
+        if self.rreadyDeny>0:
             self.force('rready',0)
-            self.rreadyDenay += 1
-            if self.rreadyDenay > self.rreadyDenays:
-                self.rreadyDenay=0
+            self.rreadyDeny += 1
+            if self.rreadyDeny > self.rreadyDenys:
+                self.rreadyDeny=0
                 self.rreadyCount=0
         elif self.rreadyCount==self.rreadyOnes:
             self.force('rready',0)
-            self.rreadyDenay = 1
+            self.rreadyDeny = 1
             self.rreadyCount=0
         else:
             self.force('rready',1)
