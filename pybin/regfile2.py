@@ -9,6 +9,7 @@ sys.path.append('%s/verification_libs'%NewName)
 import logs
 
 
+import xml_regfile2_create
 def main():
     Fname = sys.argv[1]
     File = open(Fname)
@@ -16,6 +17,7 @@ def main():
     assignAddresses()
     dumpApb()
     dumpDefines()
+    runXml()
 #    report()
 
 Db = {'items':[]}
@@ -115,7 +117,7 @@ def getPrm(Obj,Name,Default):
 def assignAddresses():
     Chip = Db['chip']
     Addr = getPrm(Chip,'base',0)
-    Addr = 0
+    Addr,HADDR = 0,0
     for Reg in Db['regs']:
         Reg.Addr = Addr
         if Reg.Kind in ['reg','array','ram']:
@@ -124,6 +126,7 @@ def assignAddresses():
         Addr += advanceAddr(Reg)
         Reg.HADDR = Addr
     Chip.Addr = Addr
+    Chip.HADDR = Addr
 
 
 def computeWid(Obj):
@@ -460,6 +463,9 @@ def dumpDefines():
     File.close()
     
 
+def runXml():
+    Module = Db['chip'].Params['names'][0]
+    xml_regfile2_create.createXml(Module,Db)
 
 if __name__ == '__main__': main()
 
