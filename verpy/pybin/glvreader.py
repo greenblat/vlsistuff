@@ -256,6 +256,7 @@ conn2    token       conn3 set_conn0
 conn2    bin         conn3 set_conn0
 conn2    ubin        conn3 set_conn0
 conn2    hex         conn3 set_conn0
+conn2    uhex        conn3 set_conn0
 conn2    dig         conn3 set_conn0
 conn2    )           inst3 finish_conn_empty
 conn2    {           curly0 set_state_conn3 push
@@ -268,6 +269,7 @@ curly0   token       curly1 add_curly
 curly0   ubin         curly1 add_curly
 curly0   bin         curly1 add_curly
 curly0   hex         curly1 add_curly
+curly0   uhex        curly1 add_curly
 curly0   dig         curly1 add_curly
 curly0   }           pop check_curly_bus
 curly1   ,           curly0 check_curly_bus0
@@ -285,6 +287,7 @@ assign2  bin         assign3  remember_assign
 assign2  ubin        assign3  remember_assign
 assign2  dig         assign3  remember_assign
 assign2  uhex        assign3  remember_assign
+assign2  hex         assign3  remember_assign
 assign2  token       assign3  remember_assign
 assign2  {           curly0   set_state_assign3 push
 assign3  [           width0   push

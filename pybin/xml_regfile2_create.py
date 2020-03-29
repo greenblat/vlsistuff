@@ -15,7 +15,7 @@ def createXml(Module,Db):
     Fout.write(Str)
 
     for Item in Items:
-        print(Item.Kind,Item.Params)
+#        print(Item.Kind,Item.Params)
         if Item.Kind=='ram':
             Acc = 'ram'
             Amount = Item.Params['depth']
@@ -24,7 +24,11 @@ def createXml(Module,Db):
             Amount = 0
         Wid = Item.Params['width']
         Reg = Item.Params['names'][0]
-        Desc = Item.Params['desc']
+        if 'desc' not in Item.Params:
+            Desc = 'DESC NOT GIVEN'
+            logs.log_warning('description of %s not given'%Reg)
+        else:
+            Desc = Item.Params['desc']
         if 'reset' not in Item.Params:
             Reset = 0
         else:

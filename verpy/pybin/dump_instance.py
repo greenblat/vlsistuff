@@ -110,7 +110,7 @@ def dump_instance(Mod,Simple=False):
     if not Simple:
         Fout.write(PLUSARG)
         Fout.write('endmodule\n')
-        Fout.write(INOUT_DRIVER))
+        Fout.write(INOUT_DRIVER)
     Fout.close()
     Fout = open('%s.inst.py'%(Name),'w')
     Fout.write(String2)

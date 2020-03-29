@@ -32,7 +32,7 @@ class module_class:
         self.interfaces={}
         self.version = 102
         self.stat_types={}
-        self.deepInstNames = False
+        self.deepInstNames = True
         self.inventedNets = 0
     def cleanZeroNets(self):
         return
