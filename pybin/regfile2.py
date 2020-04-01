@@ -12,6 +12,9 @@ import logs
 import xml_regfile2_create
 def main():
     Fname = sys.argv[1]
+    run(Fname)
+
+def run(Fname):
     File = open(Fname)
     readFile(File)
     assignAddresses()
@@ -19,6 +22,7 @@ def main():
     dumpDefines()
     runXml()
 #    report()
+    return Db['module']
 
 Db = {'items':[]}
 def readFile(File):
@@ -208,6 +212,7 @@ def dumpApb():
     Str = string.replace(HEADER,'MODULE',Module)
     File = open('%s.v'%Module,'w')
     File.write(Str)
+    Db['module']=Module
 
     for Reg in Db['regs']:
         if Reg.Kind=='reg':
