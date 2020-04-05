@@ -49,6 +49,7 @@ class itemClass:
         self.Synonyms()
         self.Addr = -1
         self.RAMS = ''
+        self.RAMS_WIRES = ''
     def dump(self):
         print('%s : (%d 0x%x) %s'%(self.Kind,self.Addr,self.Addr,self.Params))
     def Synonyms(self):
@@ -180,7 +181,7 @@ assign pready = 1;
 wire [31:0] prdata_wire =
 '''
 
-STRING1 = '''    32'hx;
+STRING1 = '''
 
 reg [31:0] prdata_reg;
 always @(posedge clk) prdata_reg <=  prdata_wire;
@@ -238,8 +239,8 @@ def dumpApb():
 
     for Line in LINES[1]:
         File.write('%s\n'%Line)
-
-    Str = string.replace(STRING1,'RAMS',Db['chip'].RAMS)
+    File.write("    32'hx;\n")
+    Str = Db['chip'].RAMS_WIRES + '\n' + string.replace(STRING1,'RAMS',Db['chip'].RAMS)
     RST = getPrm(Db['chip'],'reset','async')
     if RST=='async':
         Str = string.replace(Str,'ASYNCRST','or negedge rst_n')
@@ -275,7 +276,7 @@ assign REG_pulse = REG_wr_pulse_reg  && penable;
 '''
 
 RAM_ROPULSE_RANGE = '''
-wire REG_rd_pulse = !pwrite && psel &&  (mpaddr>='hLADDR) && (mpaddr < 'hHADDR);
+assign REG_rd_pulse = !pwrite && psel &&  (mpaddr>='hLADDR) && (mpaddr < 'hHADDR);
 reg REG_rd_pulse_dly; always @(posedge clk)  REG_rd_pulse_dly <= REG_rd_pulse;
 assign REG_rd_data_valid = REG_rd_pulse_dly && penable;
 '''
@@ -458,6 +459,7 @@ def treatRam(Reg):
 
     Line = '%s_rd_data_valid ? %s_rdata :'%(Name,Name)
     Db['chip'].RAMS += Line
+    Db['chip'].RAMS_WIRES += 'wire %s_rd_data_valid;'%Name
 
 
 def dumpDefines():
@@ -473,4 +475,5 @@ def runXml():
     xml_regfile2_create.createXml(Module,Db)
 
 if __name__ == '__main__': main()
+
 

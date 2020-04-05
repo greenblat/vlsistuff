@@ -144,7 +144,7 @@ def endsWith(Txt,Ending):
 def justPath(Path):
     ww = string.split(Path,'/')
     if len(ww)==1: return '.',ww[0]
-    Base = string.join(Path[:-1],'/')
+    Base = string.join(ww[:-1],'/')
     return Base,ww[-1]
 
 if __name__ == '__main__': main()

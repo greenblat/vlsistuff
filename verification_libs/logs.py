@@ -70,7 +70,8 @@ def log_time(Why,Which=0):
 def log_fatal(Text,Which=0):
     log_ending('from fatal',Which)
     log_error('FATAL! %s'%Text,Which,False,True)
-    finishReason('FATAL! %s'%Text,Errors+1,Wrongs,Corrects)
+    if finishReason:
+        finishReason('FATAL! %s'%Text,Errors+1,Wrongs,Corrects)
     sys.exit()
 
 def log_error(Text,Which=0,Tb=True,Pstack=False):
@@ -90,7 +91,8 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
 
     if (Errors>MAXERRORS):
         log_info('max errors reached (%d). bailing out. (MAXERRORS==%d)'%(Errors,MAXERRORS),Which)
-        finishReason('too many errors',Errors+1,Wrongs,Corrects)
+        if finishReason:
+            finishReason('too many errors',Errors+1,Wrongs,Corrects)
         veri.finish()
         sys.exit()   # in icarus, sometimes finish doesnt catch
 
@@ -125,7 +127,8 @@ def log_wrong(Text,Which=0):
     Flogs[Which].write('@%d: %d vs %d (err=%d): WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     if Wrongs >= MAXWRONGS:
         log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS),Which)
-        finishReason('too many wrongs',Errors,Wrongs+1,Corrects)
+        if finishReason:
+            finishReason('too many wrongs',Errors,Wrongs+1,Corrects)
         veri.finish()
         sys.exit()   # in icarus, sometimes finish doesnt catch
 
@@ -140,7 +143,8 @@ def finish_now(Text='.'):
         Text =  '@%d: @%d: wrongs=%d vs corrects=%d errors=%d warnings=%d: FINISHING on %s'%(get_cycles(),Now,Wrongs,Corrects,Errors,Warnings,Text)
     print(Text)
     Flog.write(Text+'\n')
-    finishReason('finish now',Errors,Wrongs,Corrects)
+    if finishReason:
+        finishReason('finish now',Errors,Wrongs,Corrects)
     veri.finish()
     
 
@@ -402,7 +406,8 @@ def panicFinish(Reason,ContinueFor=20):
     global finishCycles
     finishCycles = get_cycles()+ContinueFor
     log_error('finishCycle activated because of "%s"'%(Reason))
-    finishReason(Reason,Errors,Wrongs,Corrects)
+    if finishReason:
+        finishReason(Reason,Errors,Wrongs,Corrects)
 
 
       
@@ -410,7 +415,8 @@ def finishing(Txt='"not given"',ContinueFor=20):
     global finishCycles
     if finishCycles>0: return
     log_info('finishing on %s'%Txt)
-    finishReason(Txt,Errors,Wrongs,Corrects)
+    if finishReason:
+        finishReason(Txt,Errors,Wrongs,Corrects)
     finishCycles = get_cycles()+ContinueFor
 
 Vars = {}
@@ -566,7 +572,8 @@ class aliveHolderClass:
             if self.Wait<=get_cycles():
                 Txt = 'keepSimulationAlive decided to end this simulation, on timeout'
                 log_info(Txt)
-                finishReason(Txt,Errors,Wrongs,Corrects)
+                if finishReason:
+                    finishReason(Txt,Errors,Wrongs,Corrects)
                 veri.finish()
             return 0,'timeout'
 
