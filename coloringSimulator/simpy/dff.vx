@@ -1,0 +1,15 @@
+
+inst dffr dff1 rb<rst_n clk<clk d<dd q>qq ;
+inst inv inv1 a<qq o>dd ;
+// inst dff dff2 clk<clk d<dx q>qx ;
+
+clock clk 10 10
+force rst_n 1 15 0 100 1
+// force dx  1 25 0 45 1
+vcd aa.vcd
+script verilog.py 
+
+run 1000
+
+
+

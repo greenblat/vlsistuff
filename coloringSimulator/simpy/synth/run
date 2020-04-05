@@ -1,0 +1,7 @@
+#! /bin/csh -f
+
+pyver.py uartx2.flat -glv -do v2simpy.py
+
+
+
+

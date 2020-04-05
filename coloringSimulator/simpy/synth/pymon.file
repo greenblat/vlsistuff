@@ -1,0 +1,6 @@
+info: fnames: ['uartx2.flat']
+info: gatelevel readfile uartx2.flat
+info: do line: v2simpy.py
+info: info: exiting.py has 0 errors and 0 warnings logged
+
+                                 time=Sun Apr  5 00:17:45 2020

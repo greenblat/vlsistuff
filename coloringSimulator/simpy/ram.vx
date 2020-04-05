@@ -1,0 +1,15 @@
+
+
+
+inst ram ram0 clk<clk a<addr[7:0] d<din[31:0] cs<ramcs we<wr q>dout[31:0] | depth=330 ;
+inst python drv0 clk<clk | func=ramdrv ;
+
+clock clk 10 10
+force rst_n 1 15 0 100 1
+vcd aa.vcd
+script verilog.py 
+
+run 1000
+
+
+

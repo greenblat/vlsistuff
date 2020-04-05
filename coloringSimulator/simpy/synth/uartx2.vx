@@ -1,0 +1,958 @@
+net txdata | width=8 ;
+net rxsr | width=11 ;
+net _0013_ | width=5 ;
+net _0003_ | width=9 ;
+net tx_bufb | width=9 ;
+net txinbit | width=16 ;
+net txsr | width=11 ;
+net control | width=8 ;
+net rxdata | width=8 ;
+net _0010_ | width=16 ;
+net tx_bufa | width=8 ;
+net _0019_ | width=16 ;
+net baudrate | width=16 ;
+net _0015_ | width=8 ;
+net _0020_ | width=11 ;
+net _0005_ | width=8 ;
+net _0011_ | width=11 ;
+net rxinbit | width=16 ;
+net status | width=7 ;
+net _0012_ | width=3 ;
+net rx_bufb | width=8 ;
+net rx_bufa | width=9 ;
+net rxstatusa | width=3 ;
+net rxstatusb | width=5 ;
+net _0017_ | width=9 ;
+inst dff _1137_ clk<clk q>rxstatusb_0_ d<_0013__0_ 
+inst nand3 _0618_ a<rst_n o>_0020__9_ c<_0119_ b<_0116_ 
+inst nand3 _0602_ a<rst_n o>_0020__6_ c<_0106_ b<_0105_ 
+inst dff _1127_ clk<clk q>tx_bufb_2_ d<_0017__2_ 
+inst nand2 _0674_ a<_0162_ o>_0174_ b<_0173_ 
+inst xnor3 _0918_ a<baudrate_4_ o>_0356_ c<_0290_ b<rxinbit_3_ 
+inst nand3 _0751_ a<_0209_ o>_0226_ c<_0225_ b<_0224_ 
+inst dff _1139_ clk<clk q>rxstatusb_2_ d<_0013__2_ 
+inst dff _1206_ clk<clk q>txsr_7_ d<_0020__7_ 
+inst mux2 _0962_ a<rxsr_3_ sel<_0383_ b<rxsr_2_ o>_0396_ 
+inst and3 _1059_ a<_0455_ o>_0010__8_ c<_0475_ b<_0459_ 
+inst and3 _0564_ a<tx_bufb_valid o>_0076_ c<_0075_ b<_0027_ 
+inst nand2 _0572_ a<rst_n o>_0020__0_ b<_0082_ 
+inst nand3 _1008_ a<_0430_ o>_0433_ c<_0432_ b<_0431_ 
+inst xnor2 _1078_ a<_0058_ o>_0488_ b<_0486_ 
+inst nor2 _0913_ a<_0346_ o>_0351_ b<_0350_ 
+inst nand2 _0991_ a<_0033_ o>_0416_ b<rxinbit_7_ 
+inst and2 _0786_ a<rst_n o>_0005__0_ b<_0247_ 
+inst nand2 _0659_ a<_0155_ o>_0159_ b<_0158_ 
+inst mux2 _0960_ a<rxsr_2_ sel<_0383_ b<rxsr_1_ o>_0395_ 
+inst xnor2 _1052_ a<_0051_ o>_0471_ b<_0468_ 
+inst and3 _0673_ a<_0168_ o>_0173_ c<_0172_ b<_0169_ 
+inst dff _1103_ clk<clk q>txinbit_3_ d<_0019__3_ 
+inst inv _0513_ a<tx_bufa_valid o>status_1_ 
+inst dff _1201_ clk<clk q>txsr_2_ d<_0020__2_ 
+inst nand2 _0663_ a<txinbit_15_ o>_0163_ b<_0045_ 
+inst or2 _0969_ a<_0388_ o>_0011__5_ b<_0399_ 
+inst nor3 _0948_ a<last_rxd o>_0386_ c<rx_active b<rxd_raw 
+inst nor3 _0550_ a<txsr_2_ o>_0064_ c<_0063_ b<txsr_3_ 
+inst nand3 _0950_ a<rst_n o>_0388_ c<_0387_ b<_0239_ 
+inst xnor2 _0866_ a<baudrate_14_ o>_0304_ b<_0300_ 
+inst and3 _0936_ a<_0370_ o>_0374_ c<_0373_ b<_0371_ 
+inst mux2 _0730_ a<tx_bufb_1_ sel<_0210_ b<tx_bufa_1_ o>_0212_ 
+inst nand2 _0921_ a<baudrate_2_ o>_0359_ b<_0047_ 
+inst nand3 _0996_ a<baudrate_0_ o>_0421_ c<_0419_ b<_0046_ 
+inst and2 _0626_ a<_0123_ o>_0126_ b<_0125_ 
+inst inv _0543_ a<rxinbit_13_ o>_0057_ 
+inst and2 _1084_ a<rst_n o>_0008_ b<_0491_ 
+inst and2 _0861_ a<baudrate_12_ o>_0299_ b<_0298_ 
+inst nand2 _1027_ a<baudrate_12_ o>_0452_ b<_0056_ 
+inst xor2 _1037_ a<rxinbit_0_ o>_0461_ b<rxinbit_1_ 
+inst and3 _0858_ a<baudrate_9_ o>_0296_ c<_0294_ b<baudrate_8_ 
+inst dff _1120_ clk<clk q>tx_bufa_3_ d<_0015__3_ 
+inst mux2 _0815_ a<rxsr_8_ sel<_0238_ b<rx_bufa_7_ o>_0262_ 
+inst dff _1156_ clk<clk q>rx_bufb_5_ d<_0005__5_ 
+inst inv _0531_ a<baudrate_15_ o>_0045_ 
+inst and2 _0952_ a<first o>_0389_ b<rxd_filt 
+inst and2 _0680_ a<txinbit_1_ o>_0179_ b<txinbit_0_ 
+inst and2 _0764_ a<rst_n o>_0015__4_ b<_0233_ 
+inst and2 _0776_ a<rst_n o>_0012__0_ b<_0240_ 
+inst and3 _0833_ a<rst_n o>_0013__2_ c<_0275_ b<_0274_ 
+inst nand3 _0844_ a<_0245_ o>_0284_ c<_0283_ b<_0280_ 
+inst nand3 _0619_ a<_0077_ o>_0120_ c<_0115_ b<_0080_ 
+inst nand3 _0636_ a<_0133_ o>_0136_ c<_0135_ b<_0134_ 
+inst xnor2 _0872_ a<_0032_ o>_0310_ b<_0292_ 
+inst dff _1130_ clk<clk q>tx_bufb_5_ d<_0017__5_ 
+inst nand2 _0843_ a<_0281_ o>_0283_ b<_0282_ 
+inst or2 _0892_ a<_0319_ o>_0330_ b<_0329_ 
+inst nand3 _0585_ a<_0077_ o>_0093_ c<_0092_ b<_0091_ 
+inst and2 _0716_ a<txinbit_13_ o>_0203_ b<_0201_ 
+inst dff _1112_ clk<clk q>txinbit_12_ d<_0019__12_ 
+inst nand3 _0884_ a<_0306_ o>_0322_ c<_0320_ b<_0307_ 
+inst nand2 _0591_ a<tx_bufb_3_ o>_0098_ b<_0076_ 
+inst or2 _0724_ a<tx_bufb_valid o>_0208_ b<tx_bufa_valid 
+inst dff _1176_ clk<clk q>rxinbit_1_ d<_0010__1_ 
+inst and3 _1071_ a<_0455_ o>_0010__12_ c<_0483_ b<_0459_ 
+inst dff _1160_ clk<clk q>rxstatusa_1_ d<_0012__1_ 
+inst dff _1190_ clk<clk q>rxinbit_15_ d<_0010__15_ 
+inst dff _1199_ clk<clk q>txsr_0_ d<_0020__0_ 
+inst and2 _0804_ a<rst_n o>_0003__1_ b<_0256_ 
+inst nand2 _0982_ a<_0042_ o>_0407_ b<rxinbit_11_ 
+inst nand2 _1001_ a<_0418_ o>_0426_ b<_0425_ 
+inst nand2 _0998_ a<_0038_ o>_0423_ b<rxinbit_4_ 
+inst mux2 _0734_ a<tx_bufb_3_ sel<_0210_ b<tx_bufa_3_ o>_0214_ 
+inst nand3 _1015_ a<_0410_ o>_0440_ c<_0437_ b<_0412_ 
+inst dff _1183_ clk<clk q>rxinbit_8_ d<_0010__8_ 
+inst and2 _0656_ a<_0151_ o>_0156_ b<_0152_ 
+inst or2 _0629_ a<txinbit_1_ o>_0129_ b<_0037_ 
+inst nand2 _0644_ a<txinbit_5_ o>_0144_ b<_0041_ 
+inst and2 _0758_ a<rst_n o>_0015__1_ b<_0230_ 
+inst or2 _0620_ a<control_0_ o>_0121_ b<control_1_ 
+inst dff _1191_ clk<clk q>rx_active d<_0002_ 
+inst nand3 _0616_ a<_0023_ o>_0118_ c<_0075_ b<tx_active 
+inst nand2 _1085_ a<_0024_ o>_0001_ b<rst_n 
+inst and3 _0689_ a<txinbit_3_ o>_0185_ c<_0181_ b<txinbit_4_ 
+inst dff _1151_ clk<clk q>rx_bufb_0_ d<_0005__0_ 
+inst dff _1119_ clk<clk q>tx_bufa_2_ d<_0015__2_ 
+inst and3 _1041_ a<_0455_ o>_0010__2_ c<_0463_ b<_0459_ 
+inst nand2 _0606_ a<tx_bufb_6_ o>_0110_ b<_0076_ 
+inst dff _1123_ clk<clk q>tx_bufa_6_ d<_0015__6_ 
+inst dff _1185_ clk<clk q>rxinbit_10_ d<_0010__10_ 
+inst dff _1194_ clk<clk q>rxd_filt d<_0009_ 
+inst nand2 _0670_ a<txinbit_12_ o>_0170_ b<_0043_ 
+inst inv _0516_ a<rxsr_0_ o>_0030_ 
+inst or2 _0666_ a<txinbit_13_ o>_0166_ b<_0036_ 
+inst and2 _1082_ a<rst_n o>_0002_ b<_0490_ 
+inst dff _1142_ clk<clk q>rx_bufa_0_ d<_0003__0_ 
+inst dff _1117_ clk<clk q>tx_bufa_0_ d<_0015__0_ 
+inst and3 _1088_ a<rx_active o>_0494_ c<_0493_ b<_0363_ 
+inst dff _1178_ clk<clk q>rxinbit_3_ d<_0010__3_ 
+inst mux2 _0970_ a<rxsr_7_ sel<_0383_ b<rxsr_6_ o>_0400_ 
+inst or2 _0925_ a<_0361_ o>_0363_ b<_0362_ 
+inst or2 _0967_ a<_0388_ o>_0011__4_ b<_0398_ 
+inst inv _0540_ a<rxinbit_9_ o>_0054_ 
+inst nand2 _0989_ a<_0039_ o>_0414_ b<rxinbit_8_ 
+inst and3 _1074_ a<_0455_ o>_0010__13_ c<_0485_ b<_0459_ 
+inst nor2 _0679_ a<txinbit_0_ o>_0019__0_ b<_0178_ 
+inst mux2 _0977_ a<_0403_ sel<_0383_ b<rxsr_9_ o>_0404_ 
+inst or2 _0995_ a<_0037_ o>_0420_ b<rxinbit_1_ 
+inst inv _0544_ a<rxinbit_15_ o>_0058_ 
+inst and3 _0938_ a<_0344_ o>_0376_ c<_0375_ b<_0345_ 
+inst and3 _1094_ a<_0328_ o>_0500_ c<_0499_ b<_0378_ 
+inst and2 _0794_ a<rst_n o>_0005__4_ b<_0251_ 
+inst nand2 _1020_ a<_0045_ o>_0445_ b<rxinbit_15_ 
+inst xnor2 _1061_ a<_0054_ o>_0477_ b<_0474_ 
+inst dff _1133_ clk<clk q>tx_bufb_8_ d<_0017__8_ 
+inst nand2 _0649_ a<_0127_ o>_0149_ b<_0148_ 
+inst dff _1211_ clk<clk q>txinbit_1_ d<_0019__1_ 
+inst and2 _0979_ a<_0028_ o>_0405_ b<rxd_filt 
+inst or3 _0598_ a<txsr_6_ o>_0103_ c<_0075_ b<_0027_ 
+inst nor2 _0694_ a<_0178_ o>_0019__5_ b<_0188_ 
+inst xnor2 _0941_ a<_0323_ o>_0379_ b<_0378_ 
+inst dff _1107_ clk<clk q>txinbit_7_ d<_0019__7_ 
+inst or2 _0554_ a<_0027_ o>_0066_ b<_0065_ 
+inst and2 _0790_ a<rst_n o>_0005__2_ b<_0249_ 
+inst xnor3 _0900_ a<baudrate_9_ o>_0338_ c<_0295_ b<rxinbit_8_ 
+inst inv _0526_ a<baudrate_3_ o>_0040_ 
+inst and2 _0853_ a<baudrate_4_ o>_0291_ b<_0290_ 
+inst inv _0538_ a<rxinbit_7_ o>_0052_ 
+inst mux2 _0803_ a<rxsr_2_ sel<_0238_ b<rx_bufa_1_ o>_0256_ 
+inst nand3 _1033_ a<rx_active o>_0458_ c<_0445_ b<rst_n 
+inst nand3 _0865_ a<baudrate_14_ o>_0303_ c<_0300_ b<baudrate_15_ 
+inst xnor3 _0931_ a<baudrate_8_ o>_0369_ c<_0294_ b<rxinbit_7_ 
+inst and3 _0701_ a<txinbit_7_ o>_0193_ c<_0189_ b<txinbit_8_ 
+inst xnor2 _0909_ a<_0041_ o>_0347_ b<_0291_ 
+inst nand3 _0582_ a<rst_n o>_0020__2_ c<_0090_ b<_0089_ 
+inst and3 _1056_ a<_0455_ o>_0010__7_ c<_0473_ b<_0459_ 
+inst dff _1180_ clk<clk q>rxinbit_5_ d<_0010__5_ 
+inst xnor2 _0684_ a<txinbit_2_ o>_0182_ b<_0179_ 
+inst and2 _0768_ a<rst_n o>_0015__6_ b<_0235_ 
+inst and3 _0987_ a<_0407_ o>_0412_ c<_0411_ b<_0408_ 
+inst and2 _0733_ a<rst_n o>_0017__2_ b<_0213_ 
+inst and3 _0772_ a<rst_n o>_0016_ c<_0237_ b<_0210_ 
+inst mux2 _0958_ a<rxsr_1_ sel<_0383_ b<rxsr_0_ o>_0394_ 
+inst and2 _0837_ a<rst_n o>_0013__4_ b<_0277_ 
+inst nand2 _1006_ a<_0041_ o>_0431_ b<rxinbit_5_ 
+inst mux2 _0728_ a<tx_bufb_0_ sel<_0210_ b<tx_bufa_0_ o>_0211_ 
+inst xnor3 _0827_ a<_0266_ o>_0270_ c<_0269_ b<_0268_ 
+inst mux2 _1083_ a<rx_bufa_valid sel<_0238_ b<rx_overrun o>_0491_ 
+inst or2 _0653_ a<txinbit_9_ o>_0153_ b<_0034_ 
+inst or2 _0624_ a<txinbit_11_ o>_0124_ b<_0042_ 
+inst nand3 _0633_ a<_0128_ o>_0133_ c<_0132_ b<_0131_ 
+inst xnor2 _0877_ a<baudrate_8_ o>_0315_ b<_0294_ 
+inst nand3 _0880_ a<_0306_ o>_0318_ c<_0317_ b<_0307_ 
+inst nand2 _0623_ a<txinbit_11_ o>_0123_ b<_0042_ 
+inst mux2 _0732_ a<tx_bufb_2_ sel<_0210_ b<tx_bufa_2_ o>_0213_ 
+inst dff _1138_ clk<clk q>rxstatusb_1_ d<_0013__1_ 
+inst dff _1164_ clk<clk q>rxsr_2_ d<_0011__2_ 
+inst nand3 _1017_ a<_0435_ o>_0442_ c<_0441_ b<_0436_ 
+inst dff _1152_ clk<clk q>rx_bufb_1_ d<_0005__1_ 
+inst nor2 _1029_ a<_0450_ o>_0454_ b<_0453_ 
+inst mux2 _0793_ a<rx_bufb_4_ sel<_0246_ b<rx_bufa_4_ o>_0251_ 
+inst mux2 _0742_ a<tx_bufb_7_ sel<_0210_ b<tx_bufa_7_ o>_0218_ 
+inst dff _1108_ clk<clk q>txinbit_8_ d<_0019__8_ 
+inst and2 _0754_ a<status_1_ o>_0228_ b<write_tx 
+inst dff _1134_ clk<clk q>tx_bufb_valid d<_0018_ 
+inst xnor2 _1093_ a<_0058_ o>_0499_ b<_0303_ 
+inst and3 _1062_ a<_0455_ o>_0010__9_ c<_0477_ b<_0459_ 
+inst nand2 _0601_ a<tx_bufb_5_ o>_0106_ b<_0076_ 
+inst or2 _0640_ a<txinbit_5_ o>_0140_ b<_0041_ 
+inst nand2 _0917_ a<_0346_ o>_0355_ b<_0348_ 
+inst nand3 _0612_ a<rst_n o>_0020__8_ c<_0114_ b<_0113_ 
+inst or3 _0608_ a<txsr_8_ o>_0111_ c<_0075_ b<_0027_ 
+inst and2 _0783_ a<rx_bufa_valid o>_0245_ b<_0025_ 
+inst nand2 _1011_ a<baudrate_8_ o>_0436_ b<_0053_ 
+inst xnor3 _0898_ a<baudrate_10_ o>_0336_ c<_0296_ b<rxinbit_9_ 
+inst inv _0508_ a<txsr_10_ o>_0023_ 
+inst inv _0512_ a<tx_active o>_0027_ 
+inst nand3 _0662_ a<_0126_ o>_0162_ c<_0161_ b<_0159_ 
+inst xnor2 _0869_ a<_0042_ o>_0307_ b<_0297_ 
+inst xnor2 _0935_ a<_0312_ o>_0373_ b<_0372_ 
+inst and2 _0553_ a<status_1_ o>tx_empty b<control_6_ 
+inst xnor3 _0905_ a<baudrate_11_ o>_0343_ c<_0297_ b<rxinbit_10_ 
+inst nand2 _1024_ a<_0043_ o>_0449_ b<rxinbit_12_ 
+inst or2 _0973_ a<_0388_ o>_0011__7_ b<_0401_ 
+inst xnor3 _0922_ a<baudrate_2_ o>_0360_ c<rxinbit_2_ b<baudrate_3_ 
+inst and2 _1036_ a<rxinbit_0_ o>_0460_ b<rxinbit_1_ 
+inst and3 _0860_ a<baudrate_10_ o>_0298_ c<_0296_ b<baudrate_11_ 
+inst nand2 _0911_ a<rxinbit_4_ o>_0349_ b<_0348_ 
+inst and2 _0859_ a<baudrate_10_ o>_0297_ b<_0296_ 
+inst nand2 _0650_ a<txinbit_8_ o>_0150_ b<_0039_ 
+inst and3 _1045_ a<rxinbit_3_ o>_0466_ c<_0462_ b<rxinbit_4_ 
+inst mux2 _0974_ a<rxsr_9_ sel<_0383_ b<rxsr_8_ o>_0402_ 
+inst inv _0522_ a<baudrate_13_ o>_0036_ 
+inst nor2 _0945_ a<_0331_ o>_0383_ b<_0382_ 
+inst inv _0534_ a<rxinbit_3_ o>_0048_ 
+inst and2 _0818_ a<rst_n o>_0003__8_ b<_0263_ 
+inst mux2 _0761_ a<txdata_3_ sel<_0228_ b<tx_bufa_3_ o>_0232_ 
+inst and2 _0857_ a<baudrate_8_ o>_0295_ b<_0294_ 
+inst mux2 _0775_ a<rx_noise sel<_0238_ b<rxstatusa_0_ o>_0240_ 
+inst xnor2 _0720_ a<txinbit_14_ o>_0206_ b<_0203_ 
+inst and2 _0847_ a<rx_bufa_valid o>_0286_ b<rx_bufb_valid 
+inst mux2 _0829_ a<_0270_ sel<control_1_ b<control_0_ o>_0272_ 
+inst and2 _0850_ a<baudrate_2_ o>_0288_ b<baudrate_1_ 
+inst dff _1128_ clk<clk q>tx_bufb_3_ d<_0017__3_ 
+inst mux2 _0811_ a<rxsr_6_ sel<_0238_ b<rx_bufa_5_ o>_0260_ 
+inst xnor2 _0897_ a<_0321_ o>_0335_ b<_0334_ 
+inst nand2 _0586_ a<tx_bufb_2_ o>_0094_ b<_0076_ 
+inst mux2 _0805_ a<rxsr_3_ sel<_0238_ b<rx_bufa_2_ o>_0257_ 
+inst nand2 _0887_ a<_0302_ o>_0325_ b<_0324_ 
+inst or2 _0594_ a<txsr_6_ o>_0100_ b<_0080_ 
+inst xnor2 _0690_ a<txinbit_4_ o>_0186_ b<_0183_ 
+inst dff _1209_ clk<clk q>txsr_10_ d<_0020__10_ 
+inst dff _1173_ clk<clk q>rx_noise d<_0007_ 
+inst nand3 _0577_ a<rst_n o>_0020__1_ c<_0086_ b<_0085_ 
+inst and3 _1014_ a<_0407_ o>_0439_ c<_0438_ b<_0409_ 
+inst and3 _0780_ a<rst_n o>_0012__1_ c<_0243_ b<_0242_ 
+inst xor3 _0823_ a<rx_bufa_2_ o>_0266_ c<rx_bufa_8_ b<rx_bufa_3_ 
+inst nand2 _0983_ a<baudrate_11_ o>_0408_ b<_0055_ 
+inst dff _1167_ clk<clk q>rxsr_5_ d<_0011__5_ 
+inst nand2 _0628_ a<txinbit_2_ o>_0128_ b<_0031_ 
+inst dff _1141_ clk<clk q>rxstatusb_4_ d<_0013__4_ 
+inst mux2 _0757_ a<txdata_1_ sel<_0228_ b<tx_bufa_1_ o>_0230_ 
+inst xnor2 _0657_ a<txinbit_10_ o>_0157_ b<baudrate_10_ 
+inst or2 _0647_ a<txinbit_6_ o>_0147_ b<_0032_ 
+inst mux2 _0801_ a<rxsr_1_ sel<_0238_ b<rx_bufa_0_ o>_0255_ 
+inst xnor2 _0748_ a<_0220_ o>_0223_ b<_0222_ 
+inst nand3 _0617_ a<_0077_ o>_0119_ c<_0118_ b<_0117_ 
+inst nor2 _0688_ a<_0178_ o>_0019__3_ b<_0184_ 
+inst nand2 _1002_ a<_0423_ o>_0427_ b<_0426_ 
+inst mux2 _0750_ a<control_1_ sel<_0223_ b<control_0_ o>_0225_ 
+inst and3 _1039_ a<rxinbit_0_ o>_0462_ c<rxinbit_2_ b<rxinbit_1_ 
+inst dff _1126_ clk<clk q>tx_bufb_1_ d<_0017__1_ 
+inst nand3 _0605_ a<_0077_ o>_0109_ c<_0108_ b<_0107_ 
+inst xnor2 _1058_ a<_0053_ o>_0475_ b<_0472_ 
+inst nand2 _0675_ a<_0168_ o>_0175_ b<_0171_ 
+inst inv _0515_ a<read_rx o>_0029_ 
+inst dff _1207_ clk<clk q>txsr_8_ d<_0020__8_ 
+inst nand2 _0669_ a<txinbit_13_ o>_0169_ b<_0036_ 
+inst or2 _0963_ a<_0388_ o>_0011__2_ b<_0396_ 
+inst xnor3 _0912_ a<_0041_ o>_0350_ c<_0291_ b<rxinbit_4_ 
+inst and3 _1077_ a<_0455_ o>_0010__14_ c<_0487_ b<_0459_ 
+inst nand3 _0565_ a<tx_bufb_valid o>_0077_ c<_0075_ b<_0027_ 
+inst or3 _0568_ a<txsr_0_ o>_0079_ c<_0075_ b<_0027_ 
+inst mux2 _0964_ a<rxsr_4_ sel<_0383_ b<rxsr_3_ o>_0397_ 
+inst nand2 _1009_ a<_0417_ o>_0434_ b<_0433_ 
+inst nand3 _0571_ a<_0077_ o>_0082_ c<_0081_ b<_0079_ 
+inst nand2 _0990_ a<_0413_ o>_0415_ b<_0414_ 
+inst mux2 _0787_ a<rx_bufb_1_ sel<_0246_ b<rx_bufa_1_ o>_0248_ 
+inst nand3 _0560_ a<_0067_ o>_0072_ c<_0071_ b<_0068_ 
+inst dff _1146_ clk<clk q>rx_bufa_4_ d<_0003__4_ 
+inst mux2 _0797_ a<rx_bufb_6_ sel<_0246_ b<rx_bufa_6_ o>_0253_ 
+inst dff _1170_ clk<clk q>rxsr_8_ d<_0011__8_ 
+inst dff _1210_ clk<clk q>txinbit_0_ d<_0019__0_ 
+inst nor2 _0557_ a<txinbit_13_ o>_0069_ b<txinbit_14_ 
+inst or2 _0978_ a<_0388_ o>_0011__9_ b<_0404_ 
+inst inv _0527_ a<baudrate_5_ o>_0041_ 
+inst dff _1147_ clk<clk q>rx_bufa_5_ d<_0003__5_ 
+inst nor2 _0946_ a<_0028_ o>_0384_ b<_0383_ 
+inst inv _0537_ a<rxinbit_6_ o>_0051_ 
+inst nor2 _0709_ a<_0178_ o>_0019__10_ b<_0198_ 
+inst and2 _0901_ a<_0336_ o>_0339_ b<_0338_ 
+inst and2 _0762_ a<rst_n o>_0015__3_ b<_0232_ 
+inst nor2 _0715_ a<_0178_ o>_0019__12_ b<_0202_ 
+inst and3 _0854_ a<baudrate_4_ o>_0292_ c<_0290_ b<baudrate_5_ 
+inst xor2 _0906_ a<_0317_ o>_0344_ b<_0343_ 
+inst and3 _1032_ a<_0044_ o>_0457_ c<_0444_ b<rxinbit_14_ 
+inst inv _0528_ a<baudrate_11_ o>_0042_ 
+inst or2 _0864_ a<baudrate_15_ o>_0302_ b<_0301_ 
+inst xnor2 _0714_ a<txinbit_12_ o>_0202_ b<_0199_ 
+inst dff _1113_ clk<clk q>txinbit_13_ d<_0019__13_ 
+inst xnor2 _0702_ a<txinbit_8_ o>_0194_ b<_0191_ 
+inst xnor3 _0894_ a<baudrate_13_ o>_0332_ c<_0299_ b<rxinbit_12_ 
+inst or3 _0583_ a<txsr_3_ o>_0091_ c<_0075_ b<_0027_ 
+inst xnor2 _1055_ a<_0052_ o>_0473_ b<_0470_ 
+inst and3 _0695_ a<txinbit_5_ o>_0189_ c<_0185_ b<txinbit_6_ 
+inst xnor2 _1070_ a<_0056_ o>_0483_ b<_0480_ 
+inst and2 _0849_ a<rst_n o>_0004_ b<_0287_ 
+inst nor2 _0703_ a<_0178_ o>_0019__8_ b<_0194_ 
+inst dff _1157_ clk<clk q>rx_bufb_6_ d<_0005__6_ 
+inst inv _0530_ a<baudrate_14_ o>_0044_ 
+inst mux2 _0765_ a<txdata_5_ sel<_0228_ b<tx_bufa_5_ o>_0234_ 
+inst and3 _0683_ a<txinbit_1_ o>_0181_ c<txinbit_0_ b<txinbit_2_ 
+inst and3 _1065_ a<_0455_ o>_0010__10_ c<_0479_ b<_0459_ 
+inst or2 _0771_ a<tx_bufa_valid o>_0237_ b<write_tx 
+inst nand2 _0830_ a<_0271_ o>_0273_ b<_0272_ 
+inst mux2 _0789_ a<rx_bufb_2_ sel<_0246_ b<rx_bufa_2_ o>_0249_ 
+inst nand2 _0637_ a<txinbit_3_ o>_0137_ b<_0040_ 
+inst nor3 _0873_ a<baudrate_1_ o>_0311_ c<_0289_ b<_0038_ 
+inst and3 _0725_ a<rst_n o>_0018_ c<_0208_ b<_0077_ 
+inst and3 _0842_ a<control_0_ o>_0282_ c<control_5_ b<control_1_ 
+inst nand2 _0893_ a<_0327_ o>_0331_ b<_0330_ 
+inst and2 _0739_ a<rst_n o>_0017__5_ b<_0216_ 
+inst nor3 _0878_ a<_0312_ o>_0316_ c<_0315_ b<_0313_ 
+inst nand2 _0883_ a<_0307_ o>_0321_ b<_0320_ 
+inst nand3 _0590_ a<_0077_ o>_0097_ c<_0096_ b<_0095_ 
+inst dff _1177_ clk<clk q>rxinbit_2_ d<_0010__2_ 
+inst mux2 _0807_ a<rxsr_4_ sel<_0238_ b<rx_bufa_3_ o>_0258_ 
+inst or3 _0561_ a<txinbit_10_ o>_0073_ c<_0072_ b<txinbit_11_ 
+inst dff _1196_ clk<clk q>rxd1 d<rxd 
+inst and2 _0792_ a<rst_n o>_0005__3_ b<_0250_ 
+inst and2 _0743_ a<rst_n o>_0017__7_ b<_0218_ 
+inst dff _1145_ clk<clk q>rx_bufa_3_ d<_0003__3_ 
+inst dff _1135_ clk<clk q>rx_bufa_valid d<_0004_ 
+inst nand2 _0643_ a<txinbit_6_ o>_0143_ b<_0032_ 
+inst and3 _0753_ a<rst_n o>_0017__8_ c<_0227_ b<_0226_ 
+inst nand3 _0600_ a<_0077_ o>_0105_ c<_0104_ b<_0103_ 
+inst and2 _0788_ a<rst_n o>_0005__1_ b<_0248_ 
+inst dff _1192_ clk<clk q>rx_overrun d<_0008_ 
+inst nand3 _0575_ a<_0077_ o>_0085_ c<_0084_ b<_0083_ 
+inst nand3 _0916_ a<_0311_ o>_0354_ c<_0353_ b<_0349_ 
+inst dff _1184_ clk<clk q>rxinbit_9_ d<_0010__9_ 
+inst nand2 _0613_ a<_0023_ o>_0115_ b<tx_active 
+inst and3 _0668_ a<_0165_ o>_0168_ c<_0167_ b<_0166_ 
+inst and2 _0731_ a<rst_n o>_0017__1_ b<_0212_ 
+inst or3 _0562_ a<txinbit_9_ o>_0074_ c<_0070_ b<txinbit_12_ 
+inst or3 _0578_ a<txsr_2_ o>_0087_ c<_0075_ b<_0027_ 
+inst nor2 _0928_ a<_0363_ o>_0366_ b<_0365_ 
+inst nand2 _1010_ a<_0416_ o>_0435_ b<_0434_ 
+inst nand2 _0784_ a<rx_bufa_valid o>_0246_ b<_0025_ 
+inst nand2 _1099_ a<_0385_ o>_0505_ b<_0501_ 
+inst and2 _1042_ a<rxinbit_3_ o>_0464_ b<_0462_ 
+inst dff _1110_ clk<clk q>txinbit_10_ d<_0019__10_ 
+inst dff _1195_ clk<clk q>was_bit_noise d<_0021_ 
+inst nand2 _0671_ a<_0169_ o>_0171_ b<_0170_ 
+inst or3 _0588_ a<txsr_4_ o>_0095_ c<_0075_ b<_0027_ 
+inst and2 _0698_ a<txinbit_7_ o>_0191_ b<_0189_ 
+inst nand2 _0926_ a<_0037_ o>_0364_ b<rxinbit_0_ 
+inst inv _0511_ a<tx_bufb_valid o>_0026_ 
+inst dff _1203_ clk<clk q>txsr_4_ d<_0020__4_ 
+inst xnor2 _0665_ a<txinbit_15_ o>_0165_ b<baudrate_15_ 
+inst and3 _0930_ a<_0354_ o>_0368_ c<_0367_ b<_0355_ 
+inst dff _1115_ clk<clk q>txinbit_15_ d<_0019__15_ 
+inst dff _1179_ clk<clk q>rxinbit_4_ d<_0010__4_ 
+inst xnor2 _1073_ a<_0057_ o>_0485_ b<_0482_ 
+inst inv _0545_ a<txinbit_0_ o>_0059_ 
+inst nand2 _1019_ a<baudrate_15_ o>_0444_ b<_0058_ 
+inst and2 _0802_ a<rst_n o>_0003__0_ b<_0255_ 
+inst and2 _1097_ a<rst_n o>_0503_ b<_0502_ 
+inst xnor2 _1021_ a<baudrate_14_ o>_0446_ b<rxinbit_14_ 
+inst nor3 _0559_ a<txinbit_1_ o>_0071_ c<txinbit_3_ b<txinbit_2_ 
+inst mux2 _0976_ a<rxsr_10_ sel<_0121_ b<rxd_filt o>_0403_ 
+inst dff _1189_ clk<clk q>rxinbit_14_ d<_0010__14_ 
+inst dff _1188_ clk<clk q>rxinbit_13_ d<_0010__13_ 
+inst nand2 _0994_ a<_0037_ o>_0419_ b<rxinbit_1_ 
+inst inv _0519_ a<baudrate_7_ o>_0033_ 
+inst and3 _1035_ a<_0046_ o>_0010__0_ c<_0459_ b<_0455_ 
+inst nand3 _0648_ a<_0145_ o>_0148_ c<_0147_ b<_0146_ 
+inst dff _1162_ clk<clk q>rxsr_0_ d<_0011__0_ 
+inst inv _0523_ a<baudrate_1_ o>_0037_ 
+inst dff _1197_ clk<clk q>rxd_raw d<rxd1 
+inst dff _1158_ clk<clk q>rx_bufb_7_ d<_0005__7_ 
+inst inv _0533_ a<rxinbit_2_ o>_0047_ 
+inst mux2 _0819_ a<rxstatusb_0_ sel<_0246_ b<rxstatusa_0_ o>_0264_ 
+inst nand2 _1101_ a<rxd_filt o>_0506_ b<_0505_ 
+inst and2 _0766_ a<rst_n o>_0015__5_ b<_0234_ 
+inst nand3 _0719_ a<txinbit_13_ o>_0205_ c<_0201_ b<txinbit_14_ 
+inst and2 _0729_ a<rst_n o>_0017__0_ b<_0211_ 
+inst inv _0774_ a<_0238_ o>_0239_ 
+inst nor3 _0838_ a<rxstatusb_2_ o>_0278_ c<rxstatusa_0_ b<rxstatusa_1_ 
+inst nor2 _0721_ a<_0178_ o>_0019__14_ b<_0206_ 
+inst and3 _0846_ a<rst_n o>_0006_ c<_0285_ b<_0029_ 
+inst and2 _0710_ a<txinbit_11_ o>_0199_ b<_0197_ 
+inst nand2 _0851_ a<baudrate_2_ o>_0289_ b<baudrate_3_ 
+inst dff _1149_ clk<clk q>rx_bufa_7_ d<_0003__7_ 
+inst and2 _0726_ a<_0026_ o>_0209_ b<tx_bufa_valid 
+inst and3 _1051_ a<rxinbit_5_ o>_0470_ c<_0466_ b<rxinbit_6_ 
+inst xnor3 _0890_ a<baudrate_15_ o>_0328_ c<_0301_ b<rxinbit_14_ 
+inst nand3 _0587_ a<rst_n o>_0020__3_ c<_0094_ b<_0093_ 
+inst and3 _1044_ a<_0455_ o>_0010__3_ c<_0465_ b<_0459_ 
+inst nand2 _1087_ a<_0362_ o>_0493_ b<_0364_ 
+inst nor3 _0886_ a<_0304_ o>_0324_ c<_0322_ b<_0305_ 
+inst nor2 _0691_ a<_0178_ o>_0019__4_ b<_0186_ 
+inst nand3 _0597_ a<rst_n o>_0020__5_ c<_0102_ b<_0101_ 
+inst dff _1187_ clk<clk q>rxinbit_12_ d<_0010__12_ 
+inst dff _1174_ clk<clk q>first d<_0000_ 
+inst nand2 _1007_ a<_0032_ o>_0432_ b<rxinbit_6_ 
+inst nand2 _0839_ a<_0273_ o>_0279_ b<_0278_ 
+inst mux2 _0834_ a<rxstatusb_3_ sel<_0246_ b<rxstatusa_2_ o>_0276_ 
+inst xnor2 _0826_ a<rx_bufa_0_ o>_0269_ b<rx_bufa_1_ 
+inst xnor2 _0699_ a<txinbit_7_ o>_0192_ b<_0189_ 
+inst and2 _0816_ a<rst_n o>_0003__7_ b<_0262_ 
+inst mux2 _0821_ a<rxstatusb_1_ sel<_0246_ b<rxstatusa_1_ o>_0265_ 
+inst xor2 _0744_ a<tx_bufa_4_ o>_0219_ b<tx_bufa_5_ 
+inst and3 _1092_ a<_0332_ o>_0498_ c<_0343_ b<_0339_ 
+inst mux2 _0799_ a<rx_bufb_7_ sel<_0246_ b<rx_bufa_7_ o>_0254_ 
+inst and2 _0798_ a<rst_n o>_0005__6_ b<_0253_ 
+inst or2 _0634_ a<txinbit_3_ o>_0134_ b<_0040_ 
+inst nand3 _0874_ a<baudrate_5_ o>_0312_ c<_0311_ b<_0310_ 
+inst nand3 _0622_ a<rst_n o>_0020__10_ c<_0122_ b<_0120_ 
+inst nand2 _0630_ a<baudrate_0_ o>_0130_ b<_0059_ 
+inst mux2 _0769_ a<txdata_7_ sel<_0228_ b<tx_bufa_7_ o>_0236_ 
+inst xnor2 _0687_ a<txinbit_3_ o>_0184_ b<_0181_ 
+inst dff _1153_ clk<clk q>rx_bufb_2_ d<_0005__2_ 
+inst and3 _1090_ a<_0369_ o>_0496_ c<_0495_ b<_0372_ 
+inst and3 _1038_ a<_0455_ o>_0010__1_ c<_0461_ b<_0459_ 
+inst and2 _1066_ a<rxinbit_11_ o>_0480_ b<_0478_ 
+inst or2 _0604_ a<txsr_8_ o>_0108_ b<_0080_ 
+inst dff _1125_ clk<clk q>tx_bufb_0_ d<_0017__0_ 
+inst nor3 _0548_ a<txsr_6_ o>_0062_ c<_0061_ b<txsr_7_ 
+inst and3 _1100_ a<_0503_ o>_0021_ c<_0505_ b<_0504_ 
+inst or2 _0579_ a<txsr_3_ o>_0088_ b<_0080_ 
+inst and2 _0923_ a<baudrate_1_ o>_0361_ b<_0046_ 
+inst inv _0514_ a<first o>_0028_ 
+inst mux2 _0966_ a<rxsr_5_ sel<_0383_ b<rxsr_4_ o>_0398_ 
+inst inv _0541_ a<rxinbit_11_ o>_0055_ 
+inst dff _1204_ clk<clk q>txsr_5_ d<_0020__5_ 
+inst or2 _0570_ a<txsr_1_ o>_0081_ b<_0080_ 
+inst mux2 _0759_ a<txdata_2_ sel<_0228_ b<tx_bufa_2_ o>_0231_ 
+inst nand3 _0915_ a<_0049_ o>_0353_ c<_0347_ b<_0346_ 
+inst nor3 _0546_ a<txsr_8_ o>_0060_ c<txsr_10_ b<txsr_9_ 
+inst or2 _0965_ a<_0388_ o>_0011__3_ b<_0397_ 
+inst dff _1148_ clk<clk q>rx_bufa_6_ d<_0003__6_ 
+inst and3 _1022_ a<_0444_ o>_0447_ c<_0446_ b<_0445_ 
+inst nand2 _0993_ a<baudrate_3_ o>_0418_ b<_0048_ 
+inst and2 _0796_ a<rst_n o>_0005__5_ b<_0252_ 
+inst xnor2 _0696_ a<txinbit_6_ o>_0190_ b<_0187_ 
+inst nand3 _0661_ a<_0149_ o>_0161_ c<_0160_ b<_0156_ 
+inst nand2 _0899_ a<rxinbit_8_ o>_0337_ b<_0309_ 
+inst or2 _0552_ a<txsr_0_ o>txd b<_0065_ 
+inst inv _0524_ a<baudrate_4_ o>_0038_ 
+inst xnor2 _0868_ a<_0043_ o>_0306_ b<_0298_ 
+inst xnor3 _0934_ a<baudrate_7_ o>_0372_ c<_0293_ b<rxinbit_6_ 
+inst and2 _0820_ a<rst_n o>_0013__0_ b<_0264_ 
+inst or2 _0959_ a<_0388_ o>_0011__0_ b<_0394_ 
+inst nor2 _0706_ a<_0178_ o>_0019__9_ b<_0196_ 
+inst or3 _0902_ a<rxinbit_8_ o>_0340_ c<_0336_ b<_0309_ 
+inst dff _1169_ clk<clk q>rxsr_7_ d<_0011__7_ 
+inst nand2 _0933_ a<_0314_ o>_0371_ b<_0369_ 
+inst nand2 _1025_ a<_0448_ o>_0450_ b<_0449_ 
+inst nand2 _0828_ a<control_0_ o>_0271_ b<_0270_ 
+inst mux2 _0972_ a<rxsr_8_ sel<_0383_ b<rxsr_7_ o>_0401_ 
+inst and2 _0943_ a<_0379_ o>_0381_ b<_0380_ 
+inst and2 _0863_ a<baudrate_14_ o>_0301_ b<_0300_ 
+inst xnor2 _1046_ a<_0049_ o>_0467_ b<_0464_ 
+inst inv _0509_ a<rxd_raw o>_0024_ 
+inst nor2 _0682_ a<_0178_ o>_0019__1_ b<_0180_ 
+inst mux2 _0809_ a<rxsr_5_ sel<_0238_ b<rx_bufa_4_ o>_0259_ 
+inst dff _1154_ clk<clk q>rx_bufb_3_ d<_0005__3_ 
+inst nand2 _0831_ a<_0245_ o>_0274_ b<_0273_ 
+inst nand2 _1004_ a<baudrate_5_ o>_0429_ b<_0050_ 
+inst xor2 _0746_ a<tx_bufa_0_ o>_0221_ b<tx_bufa_1_ 
+inst nand2 _0638_ a<txinbit_4_ o>_0138_ b<_0038_ 
+inst xnor2 _0870_ a<_0034_ o>_0308_ b<_0295_ 
+inst and2 _0770_ a<rst_n o>_0015__7_ b<_0236_ 
+inst or3 _0593_ a<txsr_5_ o>_0099_ c<_0075_ b<_0027_ 
+inst and2 _0722_ a<_0022_ o>_0207_ b<_0205_ 
+inst xor2 _0841_ a<rx_bufa_8_ o>_0281_ b<control_2_ 
+inst nand2 _0611_ a<tx_bufb_7_ o>_0114_ b<_0076_ 
+inst mux2 _0738_ a<tx_bufb_5_ sel<_0210_ b<tx_bufa_5_ o>_0216_ 
+inst and3 _0879_ a<baudrate_10_ o>_0317_ c<_0316_ b<_0308_ 
+inst and3 _0882_ a<baudrate_10_ o>_0320_ c<_0316_ b<_0308_ 
+inst or2 _1098_ a<was_bit_noise o>_0504_ b<_0501_ 
+inst dff _1166_ clk<clk q>rxsr_4_ d<_0011__4_ 
+inst mux2 _0781_ a<rx_overrun sel<_0238_ b<rxstatusa_2_ o>_0244_ 
+inst mux2 _0736_ a<tx_bufb_4_ sel<_0210_ b<tx_bufa_4_ o>_0215_ 
+inst nand3 _1013_ a<_0410_ o>_0438_ c<_0415_ b<_0412_ 
+inst and3 _1063_ a<rxinbit_9_ o>_0478_ c<_0474_ b<rxinbit_10_ 
+inst dff _1140_ clk<clk q>rxstatusb_3_ d<_0013__3_ 
+inst nand3 _0654_ a<txinbit_8_ o>_0154_ c<_0153_ b<_0039_ 
+inst mux2 _0740_ a<tx_bufb_6_ sel<_0210_ b<tx_bufa_6_ o>_0217_ 
+inst or2 _0646_ a<txinbit_7_ o>_0146_ b<_0033_ 
+inst and2 _0756_ a<rst_n o>_0015__0_ b<_0229_ 
+inst and2 _1048_ a<rxinbit_5_ o>_0468_ b<_0466_ 
+inst nand2 _0566_ a<_0066_ o>_0078_ b<_0077_ 
+inst nand3 _0749_ a<control_0_ o>_0224_ c<control_7_ b<control_1_ 
+inst xnor2 _1076_ a<rxinbit_14_ o>_0487_ b<_0484_ 
+inst nand2 _0569_ a<tx_active o>_0080_ b<_0075_ 
+inst nand2 _0614_ a<tx_bufb_8_ o>_0116_ b<_0076_ 
+inst mux2 _0980_ a<_0405_ sel<_0383_ b<rxsr_10_ o>_0406_ 
+inst nand2 _1003_ a<baudrate_4_ o>_0428_ b<_0049_ 
+inst or2 _0779_ a<rxstatusa_1_ o>_0243_ b<_0238_ 
+inst or2 _0589_ a<txsr_5_ o>_0096_ b<_0080_ 
+inst and3 _1053_ a<_0455_ o>_0010__6_ c<_0471_ b<_0459_ 
+inst xnor2 _0672_ a<txinbit_12_ o>_0172_ b<baudrate_12_ 
+inst and3 _1091_ a<_0334_ o>_0497_ c<_0496_ b<_0351_ 
+inst dff _1163_ clk<clk q>rxsr_1_ d<_0011__1_ 
+inst nand2 _0664_ a<_0022_ o>_0164_ b<baudrate_15_ 
+inst dff _1200_ clk<clk q>txsr_1_ d<_0020__1_ 
+inst mux2 _0968_ a<rxsr_6_ sel<_0383_ b<rxsr_5_ o>_0399_ 
+inst and3 _1031_ a<_0447_ o>_0456_ c<_0451_ b<_0450_ 
+inst and3 _0551_ a<_0060_ o>_0065_ c<_0064_ b<_0062_ 
+inst nand2 _0927_ a<rx_active o>_0365_ b<_0364_ 
+inst inv _0510_ a<rx_bufb_valid o>_0025_ 
+inst xnor2 _0867_ a<baudrate_13_ o>_0305_ b<_0299_ 
+inst and3 _0937_ a<_0352_ o>_0375_ c<_0374_ b<_0368_ 
+inst nand2 _0920_ a<_0031_ o>_0358_ b<rxinbit_2_ 
+inst nand3 _0997_ a<_0359_ o>_0422_ c<_0421_ b<_0420_ 
+inst nand2 _1018_ a<_0439_ o>_0443_ b<_0442_ 
+inst inv _0542_ a<rxinbit_12_ o>_0056_ 
+inst or2 _0961_ a<_0388_ o>_0011__1_ b<_0395_ 
+inst and3 _1079_ a<_0455_ o>_0010__15_ c<_0488_ b<_0459_ 
+inst nand3 _0558_ a<_0022_ o>_0070_ c<_0069_ b<txinbit_0_ 
+inst mux2 _0791_ a<rx_bufb_3_ sel<_0246_ b<rx_bufa_3_ o>_0250_ 
+inst nand2 _1026_ a<baudrate_13_ o>_0451_ b<_0057_ 
+inst or2 _0975_ a<_0388_ o>_0011__8_ b<_0402_ 
+inst nor3 _1034_ a<_0456_ o>_0459_ c<_0458_ b<_0457_ 
+inst xnor2 _1043_ a<_0048_ o>_0465_ b<_0462_ 
+inst dff _1121_ clk<clk q>tx_bufa_4_ d<_0015__4_ 
+inst dff _1171_ clk<clk q>rxsr_9_ d<_0011__9_ 
+inst nand2 _0576_ a<tx_bufb_0_ o>_0086_ b<_0076_ 
+inst nor2 _0556_ a<txinbit_5_ o>_0068_ b<txinbit_8_ 
+inst inv _0520_ a<baudrate_9_ o>_0034_ 
+inst nor2 _0947_ a<last_rxd o>_0385_ b<rxd_raw 
+inst or2 _0951_ a<_0384_ o>_0000_ b<_0388_ 
+inst and3 _1050_ a<_0455_ o>_0010__5_ c<_0469_ b<_0459_ 
+inst inv _0536_ a<rxinbit_5_ o>_0050_ 
+inst dff _1129_ clk<clk q>tx_bufb_4_ d<_0017__4_ 
+inst and3 _0957_ a<rst_n o>_0007_ c<_0393_ b<_0387_ 
+inst mux2 _0763_ a<txdata_4_ sel<_0228_ b<tx_bufa_4_ o>_0233_ 
+inst dff _1136_ clk<clk q>rx_bufb_valid d<_0006_ 
+inst and2 _0800_ a<rst_n o>_0005__7_ b<_0254_ 
+inst and2 _0855_ a<baudrate_6_ o>_0293_ b<_0292_ 
+inst and2 _0704_ a<txinbit_9_ o>_0195_ b<_0193_ 
+inst mux2 _0817_ a<rxsr_9_ sel<_0238_ b<rx_bufa_8_ o>_0263_ 
+inst or2 _0907_ a<_0308_ o>_0345_ b<_0336_ 
+inst inv _0529_ a<baudrate_12_ o>_0043_ 
+inst and3 _0713_ a<txinbit_11_ o>_0201_ c<_0197_ b<txinbit_12_ 
+inst or2 _0848_ a<_0238_ o>_0287_ b<_0286_ 
+inst dff _1111_ clk<clk q>txinbit_11_ d<_0019__11_ 
+inst xnor2 _0895_ a<_0322_ o>_0333_ b<_0332_ 
+inst and2 _1054_ a<rxinbit_7_ o>_0472_ b<_0470_ 
+inst nand3 _0580_ a<_0077_ o>_0089_ c<_0088_ b<_0087_ 
+inst or2 _0954_ a<_0238_ o>_0391_ b<_0390_ 
+inst xnor2 _0889_ a<_0058_ o>_0327_ b<_0326_ 
+inst and2 _0692_ a<txinbit_5_ o>_0187_ b<_0185_ 
+inst and3 _1069_ a<rxinbit_11_ o>_0482_ c<_0478_ b<rxinbit_12_ 
+inst nand2 _0985_ a<baudrate_9_ o>_0410_ b<_0054_ 
+inst nand2 _1072_ a<rxinbit_13_ o>_0484_ b<_0482_ 
+inst and2 _0835_ a<rst_n o>_0013__3_ b<_0276_ 
+inst nand3 _1000_ a<_0358_ o>_0425_ c<_0424_ b<_0422_ 
+inst nand2 _0999_ a<_0040_ o>_0424_ b<rxinbit_3_ 
+inst nor2 _1016_ a<_0415_ o>_0441_ b<_0440_ 
+inst and2 _0735_ a<rst_n o>_0017__3_ b<_0214_ 
+inst or2 _0651_ a<txinbit_8_ o>_0151_ b<_0039_ 
+inst xnor3 _0745_ a<tx_bufa_2_ o>_0220_ c<_0219_ b<tx_bufa_3_ 
+inst dff _1114_ clk<clk q>txinbit_14_ d<_0019__14_ 
+inst nand3 _0645_ a<_0142_ o>_0145_ c<_0144_ b<_0143_ 
+inst nand3 _0610_ a<_0077_ o>_0113_ c<_0112_ b<_0111_ 
+inst or2 _0635_ a<txinbit_2_ o>_0135_ b<_0031_ 
+inst dff _1105_ clk<clk q>txinbit_5_ d<_0019__5_ 
+inst nand2 _0621_ a<_0076_ o>_0122_ b<_0121_ 
+inst dff _1150_ clk<clk q>rx_bufa_8_ d<_0003__8_ 
+inst and2 _0686_ a<txinbit_3_ o>_0183_ b<_0181_ 
+inst dff _1143_ clk<clk q>rx_bufa_1_ d<_0003__1_ 
+inst dff _1144_ clk<clk q>rx_bufa_2_ d<_0003__2_ 
+inst and3 _0658_ a<_0123_ o>_0158_ c<_0157_ b<_0124_ 
+inst nand3 _0642_ a<_0139_ o>_0142_ c<_0141_ b<_0140_ 
+inst or2 _0752_ a<tx_bufb_8_ o>_0227_ b<_0209_ 
+inst nand2 _1080_ a<rx_active o>_0489_ b<rxsr_0_ 
+inst xnor3 _0919_ a<baudrate_4_ o>_0357_ c<_0289_ b<_0048_ 
+inst or3 _0603_ a<txsr_7_ o>_0107_ c<_0075_ b<_0027_ 
+inst dff _1193_ clk<clk q>last_rxd d<_0001_ 
+inst or2 _0574_ a<txsr_2_ o>_0084_ b<_0080_ 
+inst nor3 _0563_ a<txinbit_4_ o>_0075_ c<_0074_ b<_0073_ 
+inst dff _1186_ clk<clk q>rxinbit_11_ d<_0010__11_ 
+inst xnor2 _0705_ a<txinbit_9_ o>_0196_ b<_0193_ 
+inst xnor3 _0825_ a<rx_bufa_4_ o>_0268_ c<_0267_ b<rx_bufa_5_ 
+inst dff _1198_ clk<clk q>tx_active d<_0014_ 
+inst or3 _0573_ a<txsr_1_ o>_0083_ c<_0075_ b<_0027_ 
+inst xnor2 _0910_ a<baudrate_5_ o>_0348_ b<_0291_ 
+inst nand3 _1096_ a<last_rxd o>_0502_ c<_0501_ b<rxd_raw 
+inst nand3 _0676_ a<txinbit_14_ o>_0176_ c<_0164_ b<_0044_ 
+inst inv _0518_ a<baudrate_6_ o>_0032_ 
+inst and3 _0929_ a<_0357_ o>_0367_ c<_0366_ b<_0360_ 
+inst mux2 _0785_ a<rx_bufb_0_ sel<_0246_ b<rx_bufa_0_ o>_0247_ 
+inst dff _1202_ clk<clk q>txsr_3_ d<_0020__3_ 
+inst nor2 _0697_ a<_0178_ o>_0019__6_ b<_0190_ 
+inst or2 _0549_ a<txsr_0_ o>_0063_ b<txsr_1_ 
+inst or2 _0599_ a<txsr_7_ o>_0104_ b<_0080_ 
+inst xnor3 _1086_ a<baudrate_3_ o>_0492_ c<_0288_ b<rxinbit_2_ 
+inst nor2 _0555_ a<txinbit_6_ o>_0067_ b<txinbit_7_ 
+inst dff _1116_ clk<clk q>tx_bufa_valid d<_0016_ 
+inst dff _1168_ clk<clk q>rxsr_6_ d<_0011__6_ 
+inst inv _0525_ a<baudrate_8_ o>_0039_ 
+inst xnor3 _0940_ a<baudrate_14_ o>_0378_ c<_0300_ b<rxinbit_13_ 
+inst xnor2 _0711_ a<txinbit_11_ o>_0200_ b<_0197_ 
+inst mux2 _0813_ a<rxsr_7_ sel<_0238_ b<rx_bufa_6_ o>_0261_ 
+inst nand2 _0903_ a<_0337_ o>_0341_ b<_0340_ 
+inst and3 _1075_ a<rxinbit_13_ o>_0486_ c<_0482_ b<rxinbit_14_ 
+inst and3 _0862_ a<baudrate_13_ o>_0300_ c<_0298_ b<baudrate_12_ 
+inst or2 _0932_ a<_0314_ o>_0370_ b<_0369_ 
+inst dff _1122_ clk<clk q>tx_bufa_5_ d<_0015__5_ 
+inst nor2 _0700_ a<_0178_ o>_0019__7_ b<_0192_ 
+inst xnor3 _0908_ a<_0032_ o>_0346_ c<_0292_ b<rxinbit_5_ 
+inst dff _1104_ clk<clk q>txinbit_4_ d<_0019__4_ 
+inst nand2 _1030_ a<_0443_ o>_0455_ b<_0454_ 
+inst nand2 _1060_ a<rxinbit_9_ o>_0476_ b<_0474_ 
+inst and3 _1047_ a<_0455_ o>_0010__4_ c<_0467_ b<_0459_ 
+inst and3 _1057_ a<rxinbit_7_ o>_0474_ c<_0470_ b<rxinbit_8_ 
+inst nor2 _0953_ a<was_bit_noise o>_0390_ b<_0389_ 
+inst dff _1161_ clk<clk q>rxstatusa_2_ d<_0012__2_ 
+inst nor2 _0718_ a<_0178_ o>_0019__13_ b<_0204_ 
+inst xnor2 _0681_ a<txinbit_1_ o>_0180_ b<txinbit_0_ 
+inst dff _1159_ clk<clk q>rxstatusa_0_ d<_0012__0_ 
+inst inv _0532_ a<rxinbit_0_ o>_0046_ 
+inst or2 _0832_ a<rxstatusb_2_ o>_0275_ b<_0245_ 
+inst nand2 _0845_ a<_0025_ o>_0285_ b<_0284_ 
+inst nand2 _1081_ a<_0387_ o>_0490_ b<_0489_ 
+inst mux2 _0767_ a<txdata_6_ sel<_0228_ b<tx_bufa_6_ o>_0235_ 
+inst xnor2 _0875_ a<baudrate_7_ o>_0313_ b<_0293_ 
+inst dff _1118_ clk<clk q>tx_bufa_1_ d<_0015__1_ 
+inst mux2 _0777_ a<rxsr_10_ sel<_0121_ b<rxsr_9_ o>_0241_ 
+inst or2 _0584_ a<txsr_4_ o>_0092_ b<_0080_ 
+inst xnor2 _0717_ a<txinbit_13_ o>_0204_ b<_0201_ 
+inst and3 _0852_ a<baudrate_2_ o>_0290_ c<baudrate_3_ b<baudrate_1_ 
+inst nand2 _0596_ a<tx_bufb_4_ o>_0102_ b<_0076_ 
+inst nand2 _0727_ a<_0026_ o>_0210_ b<tx_bufa_valid 
+inst xnor2 _0824_ a<rx_bufa_6_ o>_0267_ b<rx_bufa_7_ 
+inst xnor3 _0891_ a<_0045_ o>_0329_ c<_0301_ b<rxinbit_14_ 
+inst or2 _0885_ a<_0305_ o>_0323_ b<_0322_ 
+inst nand2 _0631_ a<txinbit_1_ o>_0131_ b<_0037_ 
+inst dff _1175_ clk<clk q>rxinbit_0_ d<_0010__0_ 
+inst dff _1181_ clk<clk q>rxinbit_6_ d<_0010__6_ 
+inst nand2 _1012_ a<baudrate_7_ o>_0437_ b<_0052_ 
+inst and2 _0782_ a<rst_n o>_0012__2_ b<_0244_ 
+inst and3 _1095_ a<_0497_ o>_0501_ c<_0500_ b<_0498_ 
+inst nand2 _0655_ a<_0152_ o>_0155_ b<_0154_ 
+inst xnor2 _1067_ a<_0055_ o>_0481_ b<_0478_ 
+inst and2 _0741_ a<rst_n o>_0017__6_ b<_0217_ 
+inst nand3 _1028_ a<_0447_ o>_0453_ c<_0452_ b<_0451_ 
+inst and2 _0737_ a<rst_n o>_0017__4_ b<_0215_ 
+inst or2 _0942_ a<_0324_ o>_0380_ b<_0328_ 
+inst or2 _0641_ a<txinbit_4_ o>_0141_ b<_0038_ 
+inst mux2 _0755_ a<txdata_0_ sel<_0228_ b<tx_bufa_0_ o>_0229_ 
+inst and3 _0660_ a<_0150_ o>_0160_ c<_0158_ b<_0153_ 
+inst xnor2 _1049_ a<_0050_ o>_0469_ b<_0466_ 
+inst and2 _0567_ a<rst_n o>_0014_ b<_0078_ 
+inst dff _1131_ clk<clk q>tx_bufb_6_ d<_0017__6_ 
+inst dff _1109_ clk<clk q>txinbit_9_ d<_0019__9_ 
+inst or3 _0615_ a<txsr_9_ o>_0117_ c<_0075_ b<_0027_ 
+inst or2 _0609_ a<txsr_9_ o>_0112_ b<_0080_ 
+inst dff _1106_ clk<clk q>txinbit_6_ d<_0019__6_ 
+inst xnor3 _0747_ a<tx_bufa_6_ o>_0222_ c<_0221_ b<tx_bufa_7_ 
+inst or2 _0981_ a<_0388_ o>_0011__10_ b<_0406_ 
+inst nand2 _0778_ a<_0238_ o>_0242_ b<_0241_ 
+inst dff _1124_ clk<clk q>tx_bufa_7_ d<_0015__7_ 
+inst xnor2 _1040_ a<_0047_ o>_0463_ b<_0460_ 
+inst nand3 _0607_ a<rst_n o>_0020__7_ c<_0110_ b<_0109_ 
+inst and3 _0677_ a<rst_n o>_0177_ c<_0176_ b<_0163_ 
+inst nor3 _0955_ a<_0331_ o>_0392_ c<_0391_ b<_0382_ 
+inst dff _1205_ clk<clk q>txsr_6_ d<_0020__6_ 
+inst xnor2 _0667_ a<txinbit_14_ o>_0167_ b<baudrate_14_ 
+inst and3 _1068_ a<_0455_ o>_0010__11_ c<_0481_ b<_0459_ 
+inst inv _0507_ a<txinbit_15_ o>_0022_ 
+inst nand2 _1102_ a<_0503_ o>_0009_ b<_0506_ 
+inst or2 _0971_ a<_0388_ o>_0011__6_ b<_0400_ 
+inst xnor2 _0924_ a<baudrate_2_ o>_0362_ b<rxinbit_1_ 
+inst inv _0517_ a<baudrate_2_ o>_0031_ 
+inst nand2 _0988_ a<_0034_ o>_0413_ b<rxinbit_9_ 
+inst nand3 _0678_ a<_0174_ o>_0178_ c<_0177_ b<_0175_ 
+inst or2 _0914_ a<_0311_ o>_0352_ b<_0351_ 
+inst nand2 _0992_ a<baudrate_6_ o>_0417_ b<_0051_ 
+inst or2 _0547_ a<txsr_4_ o>_0061_ b<txsr_5_ 
+inst and2 _0806_ a<rst_n o>_0003__2_ b<_0257_ 
+inst nand2 _1023_ a<_0036_ o>_0448_ b<rxinbit_13_ 
+inst mux2 _0795_ a<rx_bufb_5_ sel<_0246_ b<rx_bufa_5_ o>_0252_ 
+inst dff _1132_ clk<clk q>tx_bufb_7_ d<_0017__7_ 
+inst dff _1182_ clk<clk q>rxinbit_7_ d<_0010__7_ 
+inst and3 _0939_ a<_0335_ o>_0377_ c<_0376_ b<_0342_ 
+inst nand3 _0944_ a<_0333_ o>_0382_ c<_0381_ b<_0377_ 
+inst dff _1172_ clk<clk q>rxsr_10_ d<_0011__10_ 
+inst or2 _0956_ a<rx_noise o>_0393_ b<_0392_ 
+inst inv _0521_ a<baudrate_10_ o>_0035_ 
+inst nand3 _0984_ a<_0035_ o>_0409_ c<_0408_ b<rxinbit_10_ 
+inst and3 _0856_ a<baudrate_6_ o>_0294_ c<_0292_ b<baudrate_7_ 
+inst inv _0535_ a<rxinbit_4_ o>_0049_ 
+inst nand2 _0840_ a<control_3_ o>_0280_ b<_0279_ 
+inst and2 _0822_ a<rst_n o>_0013__1_ b<_0265_ 
+inst and2 _0760_ a<rst_n o>_0015__2_ b<_0231_ 
+inst inv _0539_ a<rxinbit_8_ o>_0053_ 
+inst and2 _0810_ a<rst_n o>_0003__4_ b<_0259_ 
+inst mux2 _0904_ a<_0341_ sel<_0316_ b<_0339_ o>_0342_ 
+inst nand2 _0581_ a<tx_bufb_1_ o>_0090_ b<_0076_ 
+inst and3 _0707_ a<txinbit_9_ o>_0197_ c<_0193_ b<txinbit_10_ 
+inst nor2 _0712_ a<_0178_ o>_0019__11_ b<_0200_ 
+inst xnor2 _1064_ a<rxinbit_10_ o>_0479_ b<_0476_ 
+inst nand3 _0595_ a<_0077_ o>_0101_ c<_0100_ b<_0099_ 
+inst dff _1208_ clk<clk q>txsr_9_ d<_0020__9_ 
+inst xnor3 _0896_ a<baudrate_12_ o>_0334_ c<_0298_ b<rxinbit_11_ 
+inst dff _1212_ clk<clk q>txinbit_2_ d<_0019__2_ 
+inst and2 _0888_ a<_0303_ o>_0326_ b<_0325_ 
+inst xnor2 _0693_ a<txinbit_5_ o>_0188_ b<_0185_ 
+inst nand3 _0949_ a<control_4_ o>_0387_ c<_0386_ b<_0241_ 
+inst and3 _1089_ a<_0356_ o>_0495_ c<_0494_ b<_0492_ 
+inst and2 _0808_ a<rst_n o>_0003__3_ b<_0258_ 
+inst nor2 _0685_ a<_0178_ o>_0019__2_ b<_0182_ 
+inst xnor2 _0986_ a<baudrate_10_ o>_0411_ b<rxinbit_10_ 
+inst nand3 _1005_ a<_0427_ o>_0430_ c<_0429_ b<_0428_ 
+inst and2 _0773_ a<rx_active o>_0238_ b<_0030_ 
+inst mux2 _0836_ a<rxstatusb_4_ sel<_0246_ b<rx_bufa_8_ o>_0277_ 
+inst nand3 _0639_ a<_0136_ o>_0139_ c<_0138_ b<_0137_ 
+inst xnor2 _0871_ a<baudrate_9_ o>_0309_ b<_0295_ 
+inst and2 _0812_ a<rst_n o>_0003__5_ b<_0260_ 
+inst nand2 _0652_ a<txinbit_9_ o>_0152_ b<_0034_ 
+inst nand3 _0625_ a<txinbit_10_ o>_0125_ c<_0124_ b<_0035_ 
+inst nand2 _0627_ a<txinbit_7_ o>_0127_ b<_0033_ 
+inst nor2 _0876_ a<_0312_ o>_0314_ b<_0313_ 
+inst or3 _0881_ a<_0304_ o>_0319_ c<_0318_ b<_0305_ 
+inst nand3 _0592_ a<rst_n o>_0020__4_ c<_0098_ b<_0097_ 
+inst nor2 _0723_ a<_0178_ o>_0019__15_ b<_0207_ 
+inst xnor2 _0708_ a<txinbit_10_ o>_0198_ b<_0195_ 
+inst nand2 _0632_ a<_0129_ o>_0132_ b<_0130_ 
+inst dff _1165_ clk<clk q>rxsr_3_ d<_0011__3_ 
+inst and2 _0814_ a<rst_n o>_0003__6_ b<_0261_ 
+inst dff _1155_ clk<clk q>rx_bufb_4_ d<_0005__4_ 
+inst buf bufx0 a<rx_bufb_valid o>rx_valid ;
+inst buf bufx1 a<rx_bufb o>rxdata ;
+inst insert insrert0 a<_0003__0_ o>_0003_ | index=0 ;
+inst insert insrert1 a<_0003__1_ o>_0003_ | index=1 ;
+inst insert insrert2 a<_0003__2_ o>_0003_ | index=2 ;
+inst insert insrert3 a<_0003__3_ o>_0003_ | index=3 ;
+inst insert insrert4 a<_0003__4_ o>_0003_ | index=4 ;
+inst insert insrert5 a<_0003__5_ o>_0003_ | index=5 ;
+inst insert insrert6 a<_0003__6_ o>_0003_ | index=6 ;
+inst insert insrert7 a<_0003__7_ o>_0003_ | index=7 ;
+inst insert insrert8 a<_0003__8_ o>_0003_ | index=8 ;
+inst insert insrert9 a<_0005__0_ o>_0005_ | index=0 ;
+inst insert insrert10 a<_0005__1_ o>_0005_ | index=1 ;
+inst insert insrert11 a<_0005__2_ o>_0005_ | index=2 ;
+inst insert insrert12 a<_0005__3_ o>_0005_ | index=3 ;
+inst insert insrert13 a<_0005__4_ o>_0005_ | index=4 ;
+inst insert insrert14 a<_0005__5_ o>_0005_ | index=5 ;
+inst insert insrert15 a<_0005__6_ o>_0005_ | index=6 ;
+inst insert insrert16 a<_0005__7_ o>_0005_ | index=7 ;
+inst insert insrert17 a<_0010__0_ o>_0010_ | index=0 ;
+inst insert insrert18 a<_0010__1_ o>_0010_ | index=1 ;
+inst insert insrert19 a<_0010__10_ o>_0010_ | index=10 ;
+inst insert insrert20 a<_0010__11_ o>_0010_ | index=11 ;
+inst insert insrert21 a<_0010__12_ o>_0010_ | index=12 ;
+inst insert insrert22 a<_0010__13_ o>_0010_ | index=13 ;
+inst insert insrert23 a<_0010__14_ o>_0010_ | index=14 ;
+inst insert insrert24 a<_0010__15_ o>_0010_ | index=15 ;
+inst insert insrert25 a<_0010__2_ o>_0010_ | index=2 ;
+inst insert insrert26 a<_0010__3_ o>_0010_ | index=3 ;
+inst insert insrert27 a<_0010__4_ o>_0010_ | index=4 ;
+inst insert insrert28 a<_0010__5_ o>_0010_ | index=5 ;
+inst insert insrert29 a<_0010__6_ o>_0010_ | index=6 ;
+inst insert insrert30 a<_0010__7_ o>_0010_ | index=7 ;
+inst insert insrert31 a<_0010__8_ o>_0010_ | index=8 ;
+inst insert insrert32 a<_0010__9_ o>_0010_ | index=9 ;
+inst insert insrert33 a<_0011__0_ o>_0011_ | index=0 ;
+inst insert insrert34 a<_0011__1_ o>_0011_ | index=1 ;
+inst insert insrert35 a<_0011__10_ o>_0011_ | index=10 ;
+inst insert insrert36 a<_0011__2_ o>_0011_ | index=2 ;
+inst insert insrert37 a<_0011__3_ o>_0011_ | index=3 ;
+inst insert insrert38 a<_0011__4_ o>_0011_ | index=4 ;
+inst insert insrert39 a<_0011__5_ o>_0011_ | index=5 ;
+inst insert insrert40 a<_0011__6_ o>_0011_ | index=6 ;
+inst insert insrert41 a<_0011__7_ o>_0011_ | index=7 ;
+inst insert insrert42 a<_0011__8_ o>_0011_ | index=8 ;
+inst insert insrert43 a<_0011__9_ o>_0011_ | index=9 ;
+inst insert insrert44 a<_0012__0_ o>_0012_ | index=0 ;
+inst insert insrert45 a<_0012__1_ o>_0012_ | index=1 ;
+inst insert insrert46 a<_0012__2_ o>_0012_ | index=2 ;
+inst insert insrert47 a<_0013__0_ o>_0013_ | index=0 ;
+inst insert insrert48 a<_0013__1_ o>_0013_ | index=1 ;
+inst insert insrert49 a<_0013__2_ o>_0013_ | index=2 ;
+inst insert insrert50 a<_0013__3_ o>_0013_ | index=3 ;
+inst insert insrert51 a<_0013__4_ o>_0013_ | index=4 ;
+inst insert insrert52 a<_0015__0_ o>_0015_ | index=0 ;
+inst insert insrert53 a<_0015__1_ o>_0015_ | index=1 ;
+inst insert insrert54 a<_0015__2_ o>_0015_ | index=2 ;
+inst insert insrert55 a<_0015__3_ o>_0015_ | index=3 ;
+inst insert insrert56 a<_0015__4_ o>_0015_ | index=4 ;
+inst insert insrert57 a<_0015__5_ o>_0015_ | index=5 ;
+inst insert insrert58 a<_0015__6_ o>_0015_ | index=6 ;
+inst insert insrert59 a<_0015__7_ o>_0015_ | index=7 ;
+inst insert insrert60 a<_0017__0_ o>_0017_ | index=0 ;
+inst insert insrert61 a<_0017__1_ o>_0017_ | index=1 ;
+inst insert insrert62 a<_0017__2_ o>_0017_ | index=2 ;
+inst insert insrert63 a<_0017__3_ o>_0017_ | index=3 ;
+inst insert insrert64 a<_0017__4_ o>_0017_ | index=4 ;
+inst insert insrert65 a<_0017__5_ o>_0017_ | index=5 ;
+inst insert insrert66 a<_0017__6_ o>_0017_ | index=6 ;
+inst insert insrert67 a<_0017__7_ o>_0017_ | index=7 ;
+inst insert insrert68 a<_0017__8_ o>_0017_ | index=8 ;
+inst insert insrert69 a<_0019__0_ o>_0019_ | index=0 ;
+inst insert insrert70 a<_0019__1_ o>_0019_ | index=1 ;
+inst insert insrert71 a<_0019__10_ o>_0019_ | index=10 ;
+inst insert insrert72 a<_0019__11_ o>_0019_ | index=11 ;
+inst insert insrert73 a<_0019__12_ o>_0019_ | index=12 ;
+inst insert insrert74 a<_0019__13_ o>_0019_ | index=13 ;
+inst insert insrert75 a<_0019__14_ o>_0019_ | index=14 ;
+inst insert insrert76 a<_0019__15_ o>_0019_ | index=15 ;
+inst insert insrert77 a<_0019__2_ o>_0019_ | index=2 ;
+inst insert insrert78 a<_0019__3_ o>_0019_ | index=3 ;
+inst insert insrert79 a<_0019__4_ o>_0019_ | index=4 ;
+inst insert insrert80 a<_0019__5_ o>_0019_ | index=5 ;
+inst insert insrert81 a<_0019__6_ o>_0019_ | index=6 ;
+inst insert insrert82 a<_0019__7_ o>_0019_ | index=7 ;
+inst insert insrert83 a<_0019__8_ o>_0019_ | index=8 ;
+inst insert insrert84 a<_0019__9_ o>_0019_ | index=9 ;
+inst insert insrert85 a<_0020__0_ o>_0020_ | index=0 ;
+inst insert insrert86 a<_0020__1_ o>_0020_ | index=1 ;
+inst insert insrert87 a<_0020__10_ o>_0020_ | index=10 ;
+inst insert insrert88 a<_0020__2_ o>_0020_ | index=2 ;
+inst insert insrert89 a<_0020__3_ o>_0020_ | index=3 ;
+inst insert insrert90 a<_0020__4_ o>_0020_ | index=4 ;
+inst insert insrert91 a<_0020__5_ o>_0020_ | index=5 ;
+inst insert insrert92 a<_0020__6_ o>_0020_ | index=6 ;
+inst insert insrert93 a<_0020__7_ o>_0020_ | index=7 ;
+inst insert insrert94 a<_0020__8_ o>_0020_ | index=8 ;
+inst insert insrert95 a<_0020__9_ o>_0020_ | index=9 ;
+inst insert insrert96 a<rx_bufa_0_ o>rx_bufa | index=0 ;
+inst insert insrert97 a<rx_bufa_1_ o>rx_bufa | index=1 ;
+inst insert insrert98 a<rx_bufa_2_ o>rx_bufa | index=2 ;
+inst insert insrert99 a<rx_bufa_3_ o>rx_bufa | index=3 ;
+inst insert insrert100 a<rx_bufa_4_ o>rx_bufa | index=4 ;
+inst insert insrert101 a<rx_bufa_5_ o>rx_bufa | index=5 ;
+inst insert insrert102 a<rx_bufa_6_ o>rx_bufa | index=6 ;
+inst insert insrert103 a<rx_bufa_7_ o>rx_bufa | index=7 ;
+inst insert insrert104 a<rx_bufa_8_ o>rx_bufa | index=8 ;
+inst insert insrert105 a<rx_bufb_0_ o>rx_bufb | index=0 ;
+inst insert insrert106 a<rx_bufb_1_ o>rx_bufb | index=1 ;
+inst insert insrert107 a<rx_bufb_2_ o>rx_bufb | index=2 ;
+inst insert insrert108 a<rx_bufb_3_ o>rx_bufb | index=3 ;
+inst insert insrert109 a<rx_bufb_4_ o>rx_bufb | index=4 ;
+inst insert insrert110 a<rx_bufb_5_ o>rx_bufb | index=5 ;
+inst insert insrert111 a<rx_bufb_6_ o>rx_bufb | index=6 ;
+inst insert insrert112 a<rx_bufb_7_ o>rx_bufb | index=7 ;
+inst insert insrert113 a<rxinbit_0_ o>rxinbit | index=0 ;
+inst insert insrert114 a<rxinbit_1_ o>rxinbit | index=1 ;
+inst insert insrert115 a<rxinbit_10_ o>rxinbit | index=10 ;
+inst insert insrert116 a<rxinbit_11_ o>rxinbit | index=11 ;
+inst insert insrert117 a<rxinbit_12_ o>rxinbit | index=12 ;
+inst insert insrert118 a<rxinbit_13_ o>rxinbit | index=13 ;
+inst insert insrert119 a<rxinbit_14_ o>rxinbit | index=14 ;
+inst insert insrert120 a<rxinbit_15_ o>rxinbit | index=15 ;
+inst insert insrert121 a<rxinbit_2_ o>rxinbit | index=2 ;
+inst insert insrert122 a<rxinbit_3_ o>rxinbit | index=3 ;
+inst insert insrert123 a<rxinbit_4_ o>rxinbit | index=4 ;
+inst insert insrert124 a<rxinbit_5_ o>rxinbit | index=5 ;
+inst insert insrert125 a<rxinbit_6_ o>rxinbit | index=6 ;
+inst insert insrert126 a<rxinbit_7_ o>rxinbit | index=7 ;
+inst insert insrert127 a<rxinbit_8_ o>rxinbit | index=8 ;
+inst insert insrert128 a<rxinbit_9_ o>rxinbit | index=9 ;
+inst insert insrert129 a<rxsr_0_ o>rxsr | index=0 ;
+inst insert insrert130 a<rxsr_1_ o>rxsr | index=1 ;
+inst insert insrert131 a<rxsr_10_ o>rxsr | index=10 ;
+inst insert insrert132 a<rxsr_2_ o>rxsr | index=2 ;
+inst insert insrert133 a<rxsr_3_ o>rxsr | index=3 ;
+inst insert insrert134 a<rxsr_4_ o>rxsr | index=4 ;
+inst insert insrert135 a<rxsr_5_ o>rxsr | index=5 ;
+inst insert insrert136 a<rxsr_6_ o>rxsr | index=6 ;
+inst insert insrert137 a<rxsr_7_ o>rxsr | index=7 ;
+inst insert insrert138 a<rxsr_8_ o>rxsr | index=8 ;
+inst insert insrert139 a<rxsr_9_ o>rxsr | index=9 ;
+inst insert insrert140 a<rxstatusa_0_ o>rxstatusa | index=0 ;
+inst insert insrert141 a<rxstatusa_1_ o>rxstatusa | index=1 ;
+inst insert insrert142 a<rxstatusa_2_ o>rxstatusa | index=2 ;
+inst insert insrert143 a<rxstatusb_0_ o>rxstatusb | index=0 ;
+inst insert insrert144 a<rxstatusb_1_ o>rxstatusb | index=1 ;
+inst insert insrert145 a<rxstatusb_2_ o>rxstatusb | index=2 ;
+inst insert insrert146 a<rxstatusb_3_ o>rxstatusb | index=3 ;
+inst insert insrert147 a<rxstatusb_4_ o>rxstatusb | index=4 ;
+inst insert insrert148 a<status_1_ o>status | index=1 ;
+inst insert insrert149 a<tx_bufa_0_ o>tx_bufa | index=0 ;
+inst insert insrert150 a<tx_bufa_1_ o>tx_bufa | index=1 ;
+inst insert insrert151 a<tx_bufa_2_ o>tx_bufa | index=2 ;
+inst insert insrert152 a<tx_bufa_3_ o>tx_bufa | index=3 ;
+inst insert insrert153 a<tx_bufa_4_ o>tx_bufa | index=4 ;
+inst insert insrert154 a<tx_bufa_5_ o>tx_bufa | index=5 ;
+inst insert insrert155 a<tx_bufa_6_ o>tx_bufa | index=6 ;
+inst insert insrert156 a<tx_bufa_7_ o>tx_bufa | index=7 ;
+inst insert insrert157 a<tx_bufb_0_ o>tx_bufb | index=0 ;
+inst insert insrert158 a<tx_bufb_1_ o>tx_bufb | index=1 ;
+inst insert insrert159 a<tx_bufb_2_ o>tx_bufb | index=2 ;
+inst insert insrert160 a<tx_bufb_3_ o>tx_bufb | index=3 ;
+inst insert insrert161 a<tx_bufb_4_ o>tx_bufb | index=4 ;
+inst insert insrert162 a<tx_bufb_5_ o>tx_bufb | index=5 ;
+inst insert insrert163 a<tx_bufb_6_ o>tx_bufb | index=6 ;
+inst insert insrert164 a<tx_bufb_7_ o>tx_bufb | index=7 ;
+inst insert insrert165 a<tx_bufb_8_ o>tx_bufb | index=8 ;
+inst insert insrert166 a<txinbit_0_ o>txinbit | index=0 ;
+inst insert insrert167 a<txinbit_1_ o>txinbit | index=1 ;
+inst insert insrert168 a<txinbit_10_ o>txinbit | index=10 ;
+inst insert insrert169 a<txinbit_11_ o>txinbit | index=11 ;
+inst insert insrert170 a<txinbit_12_ o>txinbit | index=12 ;
+inst insert insrert171 a<txinbit_13_ o>txinbit | index=13 ;
+inst insert insrert172 a<txinbit_14_ o>txinbit | index=14 ;
+inst insert insrert173 a<txinbit_15_ o>txinbit | index=15 ;
+inst insert insrert174 a<txinbit_2_ o>txinbit | index=2 ;
+inst insert insrert175 a<txinbit_3_ o>txinbit | index=3 ;
+inst insert insrert176 a<txinbit_4_ o>txinbit | index=4 ;
+inst insert insrert177 a<txinbit_5_ o>txinbit | index=5 ;
+inst insert insrert178 a<txinbit_6_ o>txinbit | index=6 ;
+inst insert insrert179 a<txinbit_7_ o>txinbit | index=7 ;
+inst insert insrert180 a<txinbit_8_ o>txinbit | index=8 ;
+inst insert insrert181 a<txinbit_9_ o>txinbit | index=9 ;
+inst insert insrert182 a<txsr_0_ o>txsr | index=0 ;
+inst insert insrert183 a<txsr_1_ o>txsr | index=1 ;
+inst insert insrert184 a<txsr_10_ o>txsr | index=10 ;
+inst insert insrert185 a<txsr_2_ o>txsr | index=2 ;
+inst insert insrert186 a<txsr_3_ o>txsr | index=3 ;
+inst insert insrert187 a<txsr_4_ o>txsr | index=4 ;
+inst insert insrert188 a<txsr_5_ o>txsr | index=5 ;
+inst insert insrert189 a<txsr_6_ o>txsr | index=6 ;
+inst insert insrert190 a<txsr_7_ o>txsr | index=7 ;
+inst insert insrert191 a<txsr_8_ o>txsr | index=8 ;
+inst insert insrert192 a<txsr_9_ o>txsr | index=9 ;
+inst extract extract0 a<baudrate o>baudrate_0_ | index=0 ;
+inst extract extract1 a<baudrate o>baudrate_1_ | index=1 ;
+inst extract extract2 a<baudrate o>baudrate_10_ | index=10 ;
+inst extract extract3 a<baudrate o>baudrate_11_ | index=11 ;
+inst extract extract4 a<baudrate o>baudrate_12_ | index=12 ;
+inst extract extract5 a<baudrate o>baudrate_13_ | index=13 ;
+inst extract extract6 a<baudrate o>baudrate_14_ | index=14 ;
+inst extract extract7 a<baudrate o>baudrate_15_ | index=15 ;
+inst extract extract8 a<baudrate o>baudrate_2_ | index=2 ;
+inst extract extract9 a<baudrate o>baudrate_3_ | index=3 ;
+inst extract extract10 a<baudrate o>baudrate_4_ | index=4 ;
+inst extract extract11 a<baudrate o>baudrate_5_ | index=5 ;
+inst extract extract12 a<baudrate o>baudrate_6_ | index=6 ;
+inst extract extract13 a<baudrate o>baudrate_7_ | index=7 ;
+inst extract extract14 a<baudrate o>baudrate_8_ | index=8 ;
+inst extract extract15 a<baudrate o>baudrate_9_ | index=9 ;
+inst extract extract16 a<control o>control_0_ | index=0 ;
+inst extract extract17 a<control o>control_1_ | index=1 ;
+inst extract extract18 a<control o>control_2_ | index=2 ;
+inst extract extract19 a<control o>control_3_ | index=3 ;
+inst extract extract20 a<control o>control_4_ | index=4 ;
+inst extract extract21 a<control o>control_5_ | index=5 ;
+inst extract extract22 a<control o>control_6_ | index=6 ;
+inst extract extract23 a<control o>control_7_ | index=7 ;
+inst extract extract24 a<txdata o>txdata_0_ | index=0 ;
+inst extract extract25 a<txdata o>txdata_1_ | index=1 ;
+inst extract extract26 a<txdata o>txdata_2_ | index=2 ;
+inst extract extract27 a<txdata o>txdata_3_ | index=3 ;
+inst extract extract28 a<txdata o>txdata_4_ | index=4 ;
+inst extract extract29 a<txdata o>txdata_5_ | index=5 ;
+inst extract extract30 a<txdata o>txdata_6_ | index=6 ;
+inst extract extract31 a<txdata o>txdata_7_ | index=7 ;

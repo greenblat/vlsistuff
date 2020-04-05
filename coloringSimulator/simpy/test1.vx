@@ -1,0 +1,21 @@
+
+inst and2 iand2 a<in0 b<in1 o>mid0 | dly=5 ; 
+inst xor2 ixor2 a<mid0 b<in2 o>mid1 | dly=5 ; 
+inst python python1 a<clk | func=funcx ;
+inst python python2 a<clk | func=funcy ;
+
+inst dffr dff1 rb<rst_n clk<clk d<mid4 q>mid5 ;
+inst inv inv1 a<mid5 o>mid4 ;
+
+force in0 0 
+force in1 0 
+force in2 0 
+clock clk 10 10
+force rst_n 0 100 1
+vcd aa.vcd
+script verilog.py 
+
+run 10000
+
+
+
