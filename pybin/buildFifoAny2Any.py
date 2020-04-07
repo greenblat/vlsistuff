@@ -28,8 +28,15 @@ def buildFifo(Writes,Reads):
     Str = STRING0
     Str = string.replace(Str,'WRITES',str(Writes))
     Str = string.replace(Str,'READS',str(Reads))
-    Str = string.replace(Str,'WWID',str(bitsFor(Writes)))
-    Str = string.replace(Str,'RWID',str(bitsFor(Reads)))
+    Wx = bitsFor(Writes)-1
+    if Wx==0: WWID = ''
+    else: WWID = '[%d:0]'%Wx
+    Rx = bitsFor(Reads)-1
+    if Rx==0: RWID = ''
+    else: RWID = '[%d:0]'%Rx
+
+    Str = string.replace(Str,'WWID',WWID)
+    Str = string.replace(Str,'RWID',RWID)
     TXT=''
     Wrts = []
     TEXTWRITE2 = '        if (oktowrite && (writes >= 1))  fifos[wptr] <= din[WIDTH-1:0];\n'
@@ -69,7 +76,7 @@ SIMPLECOUNT = 'assign   count = (wptr >= rptr) ? (wptr - rptr) :  (((2 * DEPTH) 
 
 INSTSTRING = '''
 /*
-multififo_dDEPTH_wWRITES_rREADS #(32) fifo (.clk(clk),.rst_n(rst_n),.softreset(softreset)
+multififo_wWRITES_rREADS #(32) fifo (.clk(clk),.rst_n(rst_n),.softreset(softreset)
     .reads(reads),.dout(dout)
     .writes(writes),.din(din)
     ,.full(full)
@@ -81,8 +88,8 @@ multififo_dDEPTH_wWRITES_rREADS #(32) fifo (.clk(clk),.rst_n(rst_n),.softreset(s
 
 STRING0 = '''
 module multififo_wWRITES_rREADS #(parameter WIDTH=32,parameter DEPTH=8) (input clk,input rst_n,input softreset
-    ,input  [WWID:0] writes
-    ,input  [RWID:0] reads
+    ,input  WWID writes
+    ,input  RWID reads
     ,input  [WIDTH*WRITES-1:0]  din
     ,output [WIDTH*READS-1:0]  dout
     ,output empty, output full, output taken
