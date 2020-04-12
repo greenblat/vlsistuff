@@ -3,7 +3,7 @@
 // uart character sequences can produce various transactions on AXI.
 
 
-module debugaxiuart #(parameter BYTES=4, parameter WID=BYTES*8 (
+module debugaxiuart #(parameter BYTES=4, parameter WID=BYTES*8 ) (
     input clk ,input rst_n
     ,input rxd, output txd
 

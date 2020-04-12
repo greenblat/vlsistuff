@@ -7,7 +7,7 @@ def extract(Obj):
     Index = 1+int(Obj.Params['index'])
     New = ((32*'0')+A)[-Index]
     if New!=Out:
-        return [('o',New,Clr)],[]
+        return [('o',New,Clr.copy())],[]
     return [],[]
     
 
@@ -23,8 +23,7 @@ def insert(Obj):
     LL[-Index] = A
     New = ''.join(LL)
     if New!=Out:
-#        print('INSERT',New,Obj.Conns['a'])
-        return [('o',New,Clr)],[]
+        return [('o',New,Clr.copy())],[]
     return [],[]
 
     
@@ -255,15 +254,15 @@ def inv(Obj):
     else:
         Out = 'x'
     if Out!=Obj.vals('o'):
-        Colsa = Obj.addVdd(Colsa)
-        return [('o',Out,Colsa)],[]
+#        Colsa = Obj.addVdd(Colsa)
+        return [('o',Out,Colsa.copy())],[]
     return [],[]
 
 def buf(Obj):
     A,Colsa = Obj.vals('a')
     if A!=Obj.vals('o'):
         Colsa = Obj.addVdd(Colsa)
-        return [('o',A,Colsa)],[]
+        return [('o',A,Colsa.copy())],[]
     return [],[]
 
 
@@ -309,7 +308,7 @@ def ram(Obj):
     Res = [],[]
     if Edge:
         if 'QQ' in Obj.Context:
-            Res =  [('q',Obj.Context.pop('QQ'),ColClk)],[]
+            Res =  [('q',Obj.Context.pop('QQ'),ColClk.copy())],[]
 
         cs,Colscs = Obj.vals('cs')
         if cs=='1':
@@ -337,13 +336,13 @@ def mux2(Obj):
     a,Colsa = Obj.vals('a')
     b,Colsb = Obj.vals('b')
     if sel=='1':
-        Out,Colo0 = a,Colsa
+        Out,Colo0 = a,Colsa.copy()
     elif sel=='0':
-        Out,Colo0 = b,Colsb
+        Out,Colo0 = b,Colsb.copy()
     elif (a==b):
-        Out,Colo0 = a,Colsa
+        Out,Colo0 = a,Colsa.copy()
     else:
-        Out,Colo0 = 'x',ColsSel
+        Out,Colo0 = 'x',ColsSel.copy()
 
     if Out != Obj.vals('o')[0]:
         Colo = mergeColors(Colo0,ColsSel)
@@ -391,8 +390,8 @@ def llist(Color):
 
 def mergeColors(Color0,Color1):
     Merge={}
-    if not Color0: return Color1
-    if not Color1: return Color0
+    if not Color0: return Color1.copy()
+    if not Color1: return Color0.copy()
     Keys = llist(Color0)+llist(Color1)
     Bag = set(Keys)
     for Key in Bag:

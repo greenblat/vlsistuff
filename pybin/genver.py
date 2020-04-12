@@ -114,6 +114,7 @@ def run(Fname,FnameOut,Args):
     lines = File.readlines()
     File.close()
     runFromLines(lines,FnameOut,Args)
+    print('genver run %s -> %s (%s)'%(Fname,FnameOut,Args))
 
 def runFromLines(lines,FnameOut,Args):
     global Code0,Strings

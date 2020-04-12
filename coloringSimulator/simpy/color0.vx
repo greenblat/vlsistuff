@@ -1,21 +1,37 @@
 
 
+net vdd1v | vdd=1v ;
+net vdd3v | vdd=3v ;
 
 inst inv inv1 a<in0 o>x0 ;
 inst inv inv2 a<x0 o>x1 ;
 inst inv inv3 a<x1 o>x2 ;
 inst inv inv4 a<x2 o>x3 ;
 
-inst inv inv5 a<in1 o>x4 ;
-inst nand2 nand0 a<x3 b<x4 o>out  ;
+conn inv1 vdd<vdd1v
+conn inv2 vdd<vdd1v
+conn inv3 vdd<vdd3v
+conn inv4 vdd<vdd3v
 
+inst inv inv5 a<in1 o>x4 ;
+inst nand2 nand0 a<x3 b<x4 o>out vdd<vdd1v  ;
+
+force vdd1v 1 ;
 color in0 color=yellow
 force in0 0 50 1 100 0 200 1 
 color in1 color=blue
 force in1 0 30 1 80 0 120 1 
 
-clock clk 5 5
+force vdd3v 0 150 1  200 0;
+
+clock clk1 5 5
 clock clk2 3 4
+
+inst inv inv5 a<clk1 o>clk1x ;
+inst inv inv6 a<clk2 o>clk2x ;
+inst nand2 nand5 a<clk1x b<clk2x o>outx ;
+
+
 force rst_n 0 25 1
 vcd aa.vcd
 script verilog.py 

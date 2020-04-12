@@ -23,10 +23,14 @@ def main():
     Fname = sys.argv[1]
     List = workClass(Fname).run()
     List = removeDoubles(List)
+    for line in List:
+        if not os.path.exists(line):
+            print('file %s is not found'%line)
     if len(sys.argv)==3:
         Fout = open(sys.argv[2],'w')
         for line in List:
-            Fout.write('%s\n'%(line))
+            if os.path.exists(line):
+                Fout.write('%s\n'%(line))
         Fout.close()
         return
     for line in List:
@@ -78,7 +82,9 @@ class workClass:
                 line = line[:line.index('//')]
             line = replace_setenvs(line)
             wrds = string.split(line)
-            if len(wrds)>0:
+            if (len(wrds)>0)and(wrds[0][0]=='#'):
+                pass
+            elif len(wrds)>0:
                 if wrds[0] in ['-f','-F']:
                     There = self.addpath(wrds[1])
                     More = workClass(There).run()
@@ -89,8 +95,9 @@ class workClass:
                 elif (len(wrds)==1)and(endsWith(wrds[0],'.vvv')):
                     if genver:
                         There = self.addpath(wrds[0])
-                        genver.run(There,False,[])
                         Final = string.replace(There,'.vvv','.v')
+                        genver.run(There,Final,[])
+                        print('>>>>>>>>',Final)
                         self.lines.append(Final)
                     else:
                         print('no genver.py script found')

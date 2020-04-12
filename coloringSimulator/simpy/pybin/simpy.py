@@ -67,6 +67,7 @@ class dbClass:
                 Obj.setPin(Pin,Onet.Value,Onet.Colors,True)
         if self.times==[]: return
         self.Simtime = self.times.pop(0)
+        logs.forcedCycles = self.Simtime
         if (self.Simtime>=self.LastTime)and(self.LastTime>0):
             logs.log_info('lasttime reached. exiting')
             self.RUN = False
@@ -109,7 +110,10 @@ class dbClass:
             self.Fvcd.write('#%d\n'%self.Simtime)
             self.vcdTime = self.Simtime
         Vcdx= self.vcdIndex[Sig]
-        Wid = self.Nets[Sig].Width
+        if Sig not in self.Nets:
+            Wid = 32
+        else:
+            Wid = self.Nets[Sig].Width
         Wid = max(Wid,len(Val))
         if Wid==1:
             self.Fvcd.write('%s%s\n'%(Val,Vcdx))
@@ -126,11 +130,18 @@ class dbClass:
             if line=='': return
             if '//' in line:
                 line = line[:line.index('//')]
+            line = line.replace(';','')
             wrds = line.split()
             if len(wrds)==0:
                 pass 
             elif wrds[0]=='include':
                 self.readme(wrds[1])
+            elif wrds[0]=='conn':
+                Inst = wrds[1]
+                Obj = self.Insts[Inst]
+                Conns = wrds[2:]
+                if Conns[-1]==';': Conns.pop(-1)
+                Obj.addConns(Conns)
             elif wrds[0]=='net':
                 Net = wrds[1]
                 if '|' in wrds:
@@ -143,6 +154,10 @@ class dbClass:
                                 netClass(self,Net,Wid)
                             else:
                                 self.Nets[Net].Width=Wid
+                        elif (len(ww)==2):
+                            if Net not in self.Nets:
+                                netClass(self,Net,1)
+                            self.Nets[Net].Colors[ww[0]]=ww[1]
                         elif (Prm!=';'):
                             logs.log_error('bad param for net %s -- %s'%(Net,Prm))
                 else:
@@ -197,6 +212,7 @@ class dbClass:
                 self.setNet(Net,0,wrds[2],self.Nets[Net].Colors)
                 if len(wrds)>3:
                     LL = wrds[3:]
+                    if LL[-1]==';': LL.pop(-1)
                     while LL!=[]:
                         Time = int(LL.pop(0))
                         Val  = LL.pop(0)
@@ -230,24 +246,38 @@ class instanceClass:
         self.Name = Inst
         self.Context = {}
         self.Conns = {}
+        self.Dirs = {}
         self.Colors = {}
         self.db = db
         self.Delay = 0
         self.Params = Params
         self.Func = False
         db.Insts[Inst] = self
+        self.addConns(Conns)
+
+    def addConns(self,Conns):
         for Conn in Conns:
+            if type(Conn) is str:
+                Dir,Pin,Sig = parseConn(Conn)
+                self.Conns[Pin]=Sig
+                if not Dir:
+                    Dir = findOutDir(self.Type,Pin)
+                self.Dirs[Pin] = Dir
+                db.addMeToNet(Sig,Dir,self,Pin)
             if len(Conn)==3:
                 Dir,Pin,Sig = Conn
                 self.Conns[Pin]=Sig
+                self.Dirs[Pin] = Dir
                 db.addMeToNet(Sig,Dir,self,Pin)
             elif len(Conn)==2:
                 Pin,Sig = Conn
                 self.Conns[Pin]=Sig
                 Dir = findOutDir(Type,Pin)
+                self.Dirs[Pin] = Dir
                 db.addMeToNet(Sig,Dir,self,Pin)
 
     def addVdd(self,Colors):
+        return Colors
         if 'vdd' not in self.Colors:
             return Colors
         if 'vdd' not in Colors:
@@ -258,7 +288,7 @@ class instanceClass:
         VDD = Colors['vdd']
         Vddobj = self.Colors['vdd']
         if VDD!=Vddobj:
-            logs.log_error('VDD collision object=%s/%s hass vdd=%s   net arrived vdd=%s'%(Obj.Name,Obj.Type,Vddobj,VDD))
+            log_error('VDD collision object=%s/%s hass vdd=%s   net arrived vdd=%s'%(self.Name,self.Type,Vddobj,VDD))
         Colors['vdd']=Vddobj
         return Colors
 
@@ -268,7 +298,8 @@ class instanceClass:
         Colors = self.db.Nets[Sig].Colors
         if Colors==None:
             Colors = {}
-        return self.db.Nets[Sig].Value,Colors
+        Ret =  self.db.Nets[Sig].Value,Colors
+        return Ret
 
     def posedge(self,Pin):
         Sig = self.Conns[Pin]
@@ -276,22 +307,85 @@ class instanceClass:
         return Edge
 
     def setPin(self,Pin,Val,Color,noEdge):
+        self.examineColors(Pin,Color)        
         self.run(noEdge)
+
+    def examineColors(self,Pin,Color):
+        Str = ''
+        Str = 'examine floating inputs %s %s %s=%s'%(self.Name,self.Colors,Pin,Color)
+        Zinput = False
+        Vdd = True
+        Clks = []
+        Voltages = []
+        if 'vdd' in self.Colors: Voltages.append(self.Colors['vdd'])
+        for PP in self.Conns:
+            Val,Clrs = self.vals(PP)
+            if (self.Dirs[PP][0]=='i')and(Val=='z'):
+                Zinput = True
+            if (PP=='vdd'):
+                if (Val!='1'): Vdd = False
+            if ('vdd' in Clrs)and(Clrs['vdd'] not in Voltages): 
+                Voltages.append(Clrs['vdd'])
+                
+            if 'clk' in Clrs:
+                CC = Clrs['clk']
+                if type(CC) is tuple:
+                    Kind = CC[0]
+                    if Kind not in Clks: Clks.append(Kind)
+                elif type(CC) is list:
+                    for CCX in CC:
+                        Kind = CCX[0]
+                        if Kind not in Clks: Clks.append(Kind)
+
+
+            Str += '   (%s %s %s)'%(PP,Val,Clrs)
+
+        if Vdd and Zinput:
+            log_error(Str)
+
+        if len(Clks)>1:
+            log_error('CLOCKS %s  in %s / %s'%(Clks,self.Name,self.Type))
+            
+        if len(Voltages)>1:
+            log_error('VOLTAGES %s  in %s / %s'%(Voltages,self.Name,self.Type))
+
+        return
 
     def run(self,noEdge):
         Code = Models[self.Type]
         Nows,Nexts = Code(self)
+
+        if 'vdd' not in self.Colors:
+            if 'vdd' in self.Conns:
+                Val,Vclr = self.vals('vdd')
+                self.Colors['vdd']=Vclr['vdd']
+
+        if 'vdd' in self.Conns:
+            Val,Vclr = self.vals('vdd')
+            if Val!='1':
+                Force = 'z'
+            else:
+                Force = Vclr['vdd'] 
+        else:
+            Force =  False
+
         if noEdge: Nexts=[]
         if self.Delay==0:
             for Pin,Val,Colors in Nows:
                 Sig = self.Conns[Pin]
+                if Force=='z': Val='z'
+                if 'vdd' in self.Colors: Colors['vdd']=self.Colors['vdd']
                 self.db.Nets[Sig].setVal(Val,Colors,True)
             for Pin,Val,Colors in Nexts:
                 Sig = self.Conns[Pin]
+                if Force=='z': Val='z'
+                if 'vdd' in self.Colors: Colors['vdd']=self.Colors['vdd']
                 self.db.Nets[Sig].setNext(Val,Colors)
         else: 
             for Pin,Val,Colors in Nows+Nexts:
                 Sig = self.Conns[Pin]
+                if Force=='z': Val='z'
+                if 'vdd' in self.Colors: Colors['vdd']=self.Colors['vdd']
                 self.db.setFuture(Sig,Val,Colors,self.Delay)
                 
 
@@ -364,8 +458,24 @@ def start_vcd(db):
         db.vcdIndex[Sig]=vcdcode(Pos)
         Wid = db.Nets[Sig].Width
         db.Fvcd.write('$var wire %d %s %s $end\n'%(Wid,vcdcode(Pos),Sig))
+    db.Fvcd.write('$var wire %d %s %s $end\n'%(32,vcdcode(Pos+1),'errors'))
+    db.Fvcd.write('$var wire %d %s %s $end\n'%(32,vcdcode(Pos+2),'wrongs'))
+    db.Fvcd.write('$var wire %d %s %s $end\n'%(32,vcdcode(Pos+3),'corrects'))
+    db.Fvcd.write('$var wire %d %s %s $end\n'%(32,vcdcode(Pos+4),'marks'))
+    db.vcdIndex['errors']=vcdcode(Pos+1)
+    db.vcdIndex['wrongs']=vcdcode(Pos+2)
+    db.vcdIndex['corrects']=vcdcode(Pos+3)
+    db.vcdIndex['marks']=vcdcode(Pos+4)
+#    db.Nets['errors'].Width = 32
+#    db.Nets['wrongs'].Width = 32
+#    db.Nets['corrects'].Width = 32
+#    db.Nets['marks'].Width = 32
     db.Fvcd.write('$upscope $end\n')
-    db.Fvcd.write('$enddefinitions $end\n')
+    db.Fvcd.write('$enddefinitions $end\n') 
+    db.vcdWrite('errors','0')
+    db.vcdWrite('wrongs','0')
+    db.vcdWrite('corrects','0')
+    db.vcdWrite('marks','0')
 
 
 
@@ -414,6 +524,33 @@ def parseParam(wrds):
             Params[WW[0]]=WW[1]
     return Params         
 
+def parseConn(Wrd):
+    if '<' in Wrd:
+        Chr = '<'
+        Dir = 'input'
+    elif '>' in Wrd:
+        Chr = '>'
+        Dir = 'output'
+    elif '=' in Wrd:
+        Chr = '='
+        Dir = False
+    else:
+        return (False,Wrd,Wrd)
+    ww = Wrd.split(Chr)
+    return Dir,ww[0],ww[1]
+    
+
+def log_error(Txt):
+    logs.log_error(Txt)
+    db.vcdWrite('errors',bin(logs.Errors)[2:])
+
+def log_correct(Txt):
+    logs.log_correct(Txt)
+    db.vcdWrite('corrects',bin(logs.Corrects)[2:])
+
+def log_wrong(Txt):
+    logs.log_wrong(Txt)
+    db.vcdWrite('wrongs',bin(logs.Wrongs)[2:])
 
 if __name__ == '__main__': main()
 
