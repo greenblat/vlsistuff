@@ -52,7 +52,7 @@ def buildFifo(Writes,Reads):
         TEXTWRITE3 += 'wire [WIDPTR:0] rptr%d = ((rptr+%d)>=DEPTH) ? ((rptr+%d)-DEPTH) : (rptr+%d);\n'%(II,II,II,II)
 
     for II in range(1,Reads+1):
-        TEXTWRITE3 += 'assign dout[WIDTH*%d-1:WIDTH*%d] = ((reads>=%d)&&oktoread) ? fifos[rptr%d] : 0;\n'%(II,II-1,II,II-1)
+        TEXTWRITE3 += 'assign dout[WIDTH*%d-1:WIDTH*%d] = (count>=%d) ? fifos[rptr%d] : 0;\n'%(II,II-1,II,II-1)
 
     Str = string.replace(Str,'TEXTWRITE2',TEXTWRITE2)
     Str = string.replace(Str,'TEXTWRITE3',TEXTWRITE3)

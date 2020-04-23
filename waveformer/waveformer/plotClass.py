@@ -179,6 +179,8 @@ class plotClass:
                 self.setColor('bus')
                 self.aline(X0+self.trans,self.curY,(Off + End*self.mulx),self.curY)
                 self.aline(X0+self.trans,self.curY+self.muly,(Off + End*self.mulx),self.curY+self.muly)
+                if (type(Data) is str):
+                    Data = string.replace(Data,'"','')
                 self.text(X0 + self.labelOffset*self.mulx,self.curY+self.muly/3,str(Data))
             if (Item[0]!='color')and(Item[0]!='mark'):
                 self.connect(X0,Prev,Data)
