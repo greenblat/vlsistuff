@@ -7,6 +7,7 @@ import module_class
 import new_flattens
 import fixingModule
 import interactive
+import logs
 
 def select_current(Env):
     if (Env.Current==None):
@@ -637,11 +638,11 @@ def external_sig(Mod,Sig):
 def expandStarConnections(Mod,Env):
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
+        try_and_load_module(Obj.Type,Env)
         Pins = Obj.conns.keys()
         for Pin in Pins:
             Conn = Obj.conns[Pin]
             if Pin=='*':
-                try_and_load_module(Obj.Type,Env)
                 if Obj.Type in Env.Modules:
                     Obj.conns.pop('*')
                     Son = Env.Modules[Obj.Type]
@@ -652,6 +653,20 @@ def expandStarConnections(Mod,Env):
                                 Obj.conns[Net] = Net
                                 Mod.add_sig(Net,'wire',WW)
                             
+            elif type(Conn) is str:
+                if Obj.Type in Env.Modules:
+                    Son = Env.Modules[Obj.Type]
+                    if (Pin in Son.nets)and(Conn in Mod.nets):
+                        if external_sig(Son,Pin):
+                            _,WWs = Son.nets[Pin]
+                            _,WWf = Mod.nets[Conn]
+                            if WWs!=WWf:
+                                logs.log_warning('mod=%s inst=%s pin=%s conn=%s wws=%s wwf=%s'%(Mod.Module,Inst,Pin,Conn,WWs,WWf))
+                        
+                
+
+
+
 
 def undefinedWires(Mod):
     Sets=[]

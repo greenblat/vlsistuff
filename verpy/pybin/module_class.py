@@ -110,6 +110,7 @@ class module_class:
             return
         if Name in self.nets:
             WasDir,WasWid = self.nets[Name]
+            logs.log_warning('net %s defined twice? was=%s,%s  now=%s,%s'%(Name,WasDir,WasWid,Dir,Wid))
         else:
             WasDir='wire'
             WasWid=0
@@ -1801,6 +1802,12 @@ def evalz(What):
         return What
 
 
+INSTS = {}
+def inventInst(Type):
+    if Type not in INSTS:
+        INSTS[Type]= 0 
+    INSTS[Type]  += 1
+    return '%s%s'%(Type,INSTS[Type])
 
 
 

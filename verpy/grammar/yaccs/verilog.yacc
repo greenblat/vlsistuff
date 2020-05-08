@@ -48,7 +48,8 @@ Hparams : '#' '(' head_params ')' |  '#' '(' ')' | ;
 Header : ';' | '(' Header_list ')' ';' | '(' ')' ';' ;
 Header_list : Header_list ',' Header_item | Header_item ;
 
-Header_item : ExtDir token | ExtDir Width token | ExtDir integer token | ExtDir Width token  Width | token ;
+Header_item : ExtDir token | ExtDir Width token | ExtDir integer token | ExtDir Width token  Width | ExtDir Width Width token | token | ExtDir token '=' Literal | ExtDir Width token '=' Literal; 
+
 
 
 Module_stuffs : Mstuff Module_stuffs | ;
@@ -74,7 +75,7 @@ Mstuff :
 Define : define string | define token | define token Expr | define  number token '/' number token  ;
 Initial : initial Statement ;
 Definition : 
-     ExtDir Tokens_list ';'
+      ExtDir Tokens_list ';'
     | event Tokens_list ';'
     | IntDir Tokens_list ';'
     | IntDir Tokens_list '=' Expr ';'
@@ -83,13 +84,15 @@ Definition :
     | IntDir Width Tokens_list ';'
     | IntDir Width Tokens_list '=' Expr ';'
     | IntDir Width token Width ';'
+    | IntDir Width Width Tokens_list ';'
+    | IntDir Width Width token '=' Expr ';'
     | IntDir token Width ';'
     | IntDir InstParams Tokens_list ';'
     | token domino token token ';'
     ;
 
 Assign : 
-      assign LSH '=' Expr ';' 
+      assign Soft_assigns ';' 
     | assign AssignParams LSH '=' Expr ';' 
     | assign StrengthDef AssignParams LSH '=' Expr ';' 
     | assign StrengthDef LSH '=' Expr ';' 
@@ -137,13 +140,17 @@ Parameter :
     | parameter signed Width Pairs ';'
     ;
 Localparam : localparam Pairs ';' | localparam Width Pairs ';' ;
-Defparam : defparam Dotted '=' Expr ';' ;
+Defparam : defparam DottedPairs ';' ;
+DottedPair : Dotted '=' Expr ;
+DottedPairs : DottedPairs ',' DottedPair | DottedPair ;
+
 Pairs : Pairs ',' Pair | Pair ;
 Pair : token '=' Expr ;
 
 head_params : head_params ',' head_param | head_param ;
 head_param : 
-    parameter token '=' Expr 
+      parameter token '=' Expr 
+    | parameter Width token '=' Expr 
     | token '=' Expr 
     ;
 
@@ -152,7 +159,6 @@ Instance :
     | token InstParams token '(' ')' ';' 
     | token token ';' 
     | or '(' Exprs ')' ';' 
-    | or token '(' Conns_list ')' ';' 
     | token token '(' Conns_list ')' ';' 
     | token token '(' Exprs ')' ';' 
     | token InstParams token '(' Conns_list ')' ';' 
@@ -287,6 +293,14 @@ Dotted :
     | token '.' token BusBit
     | token '.' token '(' Expr ')'
     ;
+
+Literal : 
+      number
+    | floating
+    | string
+    | bin | hex | dig | ubin | uhex | udig
+    ;
+
 Expr :
      token
     | Dotted
@@ -335,6 +349,7 @@ Expr :
     | '^' Expr %prec UNARY_PREC
     | xnor Expr %prec UNARY_PREC
     | nor Expr %prec UNARY_PREC
+    | nand Expr %prec UNARY_PREC
     | '!' Expr %prec UNARY_PREC
     | '~' Expr %prec UNARY_PREC
     ;

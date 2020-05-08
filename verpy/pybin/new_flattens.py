@@ -8,7 +8,7 @@ from scan_rtl import  compute1
 MathOptsStr = '~ ! & && ~& !& ^ !^ ~^ | || ~| !|'
 MathOpts = string.split(MathOptsStr)
 
-Between = '_'
+Between = '_HIER_'
 def constant_inputs(Current,Env):
     Lits = []
     for Dst,Src,_,_ in Current.hard_assigns:

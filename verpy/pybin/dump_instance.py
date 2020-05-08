@@ -223,6 +223,7 @@ class driverMonitor:
         Monitors.append(self)
         self.Path = Path
         self.state='idle'
+        self.waiting  = 0
 
     def force(self,Sig,Val):
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
@@ -236,7 +237,9 @@ class driverMonitor:
         return self.peek(Sig)==1
 
     def run(self):
-        if self.state=='idle':
+        if self.waiting>0:
+            self.waiting -= 1
+        elif self.state=='idle':
             self.state='work0'
         elif self.state=='work0':
             self.state='work1'
