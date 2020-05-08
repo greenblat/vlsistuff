@@ -7,10 +7,14 @@ except:
     genver = False
 
 try:
+    import regfile3
+except:
+    regfile3 = False
+
+try:
     import regfile2
 except:
     regfile2 = False
-
 
 
 
@@ -89,7 +93,7 @@ class workClass:
                     There = self.addpath(wrds[1])
                     More = workClass(There).run()
                     self.lines.extend(More)
-                elif (len(wrds)==1)and(endsWith(wrds[0],'.v')):
+                elif (len(wrds)==1)and(endsWith(wrds[0],'.v') or endsWith(wrds[0],'.sv')):
                     Abs = self.addpath(wrds[0])
                     self.lines.append(Abs)
                 elif (len(wrds)==1)and(endsWith(wrds[0],'.vvv')):
@@ -102,15 +106,22 @@ class workClass:
                     else:
                         print('no genver.py script found')
                 elif (len(wrds)==1)and(endsWith(wrds[0],'.regfile')):
-                    if regfile2:
-                        There = self.addpath(wrds[0])
+                    There = self.addpath(wrds[0])
+                    Mode = determineWhichRegfileIsCorrect(There) 
+                    if regfile3 and (Mode=='ram'):
+                        Module = regfile3.run(There)
+                        Path,_ = justPath(There)
+                        os.system('/bin/mv %s.v %s'%(Module,Path))
+                        Final = '%s/%s.v'%(Path,Module)
+                        self.lines.append(Final)
+                    elif regfile2 and (Mode=='apb'):
                         Module = regfile2.run(There)
                         Path,_ = justPath(There)
                         os.system('/bin/mv %s.v %s'%(Module,Path))
                         Final = '%s/%s.v'%(Path,Module)
                         self.lines.append(Final)
                     else:
-                        print('no regfile2.py script found')
+                        print('no correct regfile*.py script found for interface mode=%s'%Mode)
 
                 elif (len(wrds)==1)and(endsWith(wrds[0],'.rdl')):
                     There = self.addpath(wrds[0])
@@ -153,5 +164,17 @@ def justPath(Path):
     if len(ww)==1: return '.',ww[0]
     Base = string.join(ww[:-1],'/')
     return Base,ww[-1]
+
+def determineWhichRegfileIsCorrect(There):
+    File = open(There)
+    while 1:
+        line = File.readline()
+        if line=='': return 'apb'
+        wrds = string.split(line)
+        if (len(wrds)>0)and(wrds[0]=='chip'):
+            if 'apb' in wrds: return 'apb'
+            if 'ram' in wrds: return 'ram'
+            print('no specific interface given. assume apb')
+            return 'apb'
 
 if __name__ == '__main__': main()

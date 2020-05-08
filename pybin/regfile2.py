@@ -353,17 +353,16 @@ def treatReg(Reg):
         else:
             Wid1 = Wid
             Ad = Reg.Addr
-            Ind = 0
+            Hi,Lo = 31,0
             while Wid1>0:
-                Line = '    (mpaddr == \'h%x) ? %s :'%(Ad,expandBits(Name,min(Wid1,32),32))
-                Wid1 -= 32
+                Line = '    (mpaddr == \'h%x) ? %s[%d:%d] :'%(Ad,expandBits(Name,min(Wid1,32),32),Hi,Lo)
                 LINES[1].append(Line)
-                Lo = Ind*32
-                Hi = min(Lo+31,Wid-1)
                 Line = '        if (waddr == \'h%x) %s[%d:%d] <= (%s[%d:%d] & ~mask) | (wdata & mask);'%(Ad,Name,Hi,Lo,Name,Hi,Lo)
                 LINES[3].append(Line)
                 Ad += 4
-                Ind += 1
+                Lo += 32
+                Wid1 -= 32
+                Hi = min(Wid-1,Hi+32)
 
 
         Line = '        %s <= %d\'h%x;'%(Name,Wid,Reset)

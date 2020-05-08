@@ -3,7 +3,7 @@
 import os,sys,string
 
 HELPSTRING = '''
-invocation:     buildFifo.py  <Writes> <Reads>
+invocation:     buildFifo.py  <Writes> <Reads>  < -prefix PREFIX >
 this script builds RTL of a multi_sync_fifo with optional number of concurrent writes.
 and Depth being number of fifo entries.
 <Writes> is the number of concurrent writes
@@ -20,14 +20,21 @@ def main():
         print HELPSTRING
         return
 
-    buildFifo(Writes,Reads)
+    Prefix = ''
+    if '-prefix' in sys.argv:
+        Ind = sys.argv.index('-prefix')
+        Prefix = sys.argv[Ind+1]
 
-def buildFifo(Writes,Reads):
-    Fname = 'multififo_w%d_r%d.v'%(Writes,Reads)
+
+    buildFifo(Writes,Reads,Prefix)
+
+def buildFifo(Writes,Reads,Prefix=''):
+    Fname = '%smultififo_w%d_r%d.v'%(Prefix,Writes,Reads)
     Fout = open(Fname,'w')
     Str = STRING0
     Str = string.replace(Str,'WRITES',str(Writes))
     Str = string.replace(Str,'READS',str(Reads))
+    Str = string.replace(Str,'multififo','%smultififo'%Prefix)
     Wx = bitsFor(Writes)-1
     if Wx==0: WWID = ''
     else: WWID = '[%d:0]'%Wx
