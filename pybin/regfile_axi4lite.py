@@ -75,3 +75,21 @@ wire [15:0] paddr = i_pwrite ? iwaddr : iraddr;
 // ------------------
 '''
     
+
+
+
+
+APBHead = ''' 
+module MODULE (input clk, input rst_n,
+    input psel, input pwrite, input [3:0] pstrb, input [15:0] paddr, input [31:0] pwdata, output [31:0] prdata
+    ,output pready, output pslverr
+'''
+APBInst = ''' 
+MODULE rgf (.clk(clk),.rst_n(rst_n),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
+    ,.pwdata(pwdata),.prdata(prdata)
+    ,.pstrb(pstrb)
+'''
+
+
+
+
