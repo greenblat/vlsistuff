@@ -64,7 +64,7 @@ Month = 1+months.index(ww[1])\n\
 Day = int(ww[2])\n\
 Year = int(ww[4])\n\
 Exit=True\n\
-if Year<2030: Exit=False\n\
+if Year<2020: Exit=False\n\
 elif (Month < 10): Exit=False\n\
 elif (Day<15): Exit=False\n\
 if Exit:\n\
@@ -327,12 +327,14 @@ PLI_INT32 vpit_python( PLI_BYTE8 *user_data )
                     err = err + vpi_chk_error(&error_info);
 //                    vpi_printf("ilia string  %s\n",pvalue.value.str);
                     strcpy(execstr,pvalue.value.str);
+//                    printf(">>>>0 |%s|\n",execstr);
                 } else {
 //                    vpi_printf("debug1 4 %d pos=%d\n",iii,pos);
                     pvalue.format = vpiBinStrVal; 
                     vpi_get_value(argH, &pvalue); 
                     sprintf(tempstr,",'%s'",pvalue.value.str);
                     strcat(params,tempstr);
+//                    printf(">>>>1 |%s|%s|\n",execstr,params);
 //                    pvalue.format = vpiIntVal; 
 //                    vpi_get_value(argH, &pvalue); 
 //                    err = err + vpi_chk_error(&error_info);
@@ -351,14 +353,20 @@ PLI_INT32 vpit_python( PLI_BYTE8 *user_data )
             FuncCall = (execstr[Len-1]==')') ;
             if (execstr[Len-1]==')') execstr[Len-1]=0;
             Len = strlen(execstr);
+//            printf(">>>>>2 len=%d %s |%s|\n",Len,execstr,params);
                 
             if (strlen(params)!=0) {
-                if (execstr[Len-1]=='(')
-                    strcat(execstr,&(params[1]));
-                else
-                    strcat(execstr,params);
+                strcat(execstr,&(params[1]));
+//                if (execstr[Len-1]=='(') {
+//                    printf("lastis( |%s|%s|\n",execstr,params);
+//                    strcat(execstr,&(params[1]));
+//                } else {
+//                    printf("notlastis( |%s|%s|\n",execstr,params);
+//                    strcat(execstr,params);
+//                }
             }
             if (FuncCall) strcat(execstr,")");
+//            printf(">>>>>3 len=%d %s |%s|\n",Len,execstr,params);
             int RC = PyRun_SimpleString(execstr);
             checkRC(RC);
             return 0;
@@ -532,7 +540,7 @@ veri_peek(PyObject *self,PyObject *args) {
     handle = get_handle(pathstring);
     if (!handle) {
         vpi_printf("\npython: cannot find sig %s for peek\n",pathstring);
-        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n",pathstring,pathstring);
+        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n    traceback.print_stack()",pathstring,pathstring);
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
     }
@@ -555,7 +563,7 @@ veri_hpeek(PyObject *self,PyObject *args) {
     longi = strtol(pathstring,&ppp,0); 
     handle =  (vpiHandle) longi;
     if (!handle) {
-        vpi_printf("\npython: cannot find sig %s for peek\n",pathstring);
+        vpi_printf("\npython: cannot find sig %s for hpeek\n",pathstring);
         sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n",pathstring,pathstring);
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
@@ -672,6 +680,14 @@ veri_peek_3d(PyObject *self,PyObject *args) {
     return Py_BuildValue("s", pvalue.value.str);
 }
 
+bool hasDot( char *strx) {
+    int ii;
+    while (strx[ii]) {
+        if (strx[ii]=='.') return 1;
+        ii++;
+    }
+    return 0;
+}
 
 static PyObject*
 veri_force(PyObject *self,PyObject *args) {
@@ -696,6 +712,10 @@ veri_force(PyObject *self,PyObject *args) {
     } else if ((vstr[0]=='0')&&(vstr[1]=='x')) {
         pvalue.format = vpiHexStrVal; 
         pvalue.value.str = &(vstr[2]);
+    } else if (hasDot(vstr)) {
+        pvalue.format = vpiRealVal;
+        double Rval = atof(vstr);
+        pvalue.value.real = Rval;
     } else {
         pvalue.format = vpiDecStrVal;
         for (iii=0;vstr[iii];iii++) {
