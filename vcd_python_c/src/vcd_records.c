@@ -18,10 +18,9 @@ int debug = 0;
 int linenum = 0;
 int dones = 0;
 int qdones = 0;
-double start_time =0.0;
-double end_time =0.0;
 char fname1[500];
-char fname2[500];
+char Path[500];
+int Depth = 100;
 int main(argc, argv)
     int             argc;
     char           *argv[];
@@ -29,7 +28,7 @@ int main(argc, argv)
 {
     char option[100];
     fname1[0] = 0;
-    fname2[0] = 0;
+    Path[0] =0;
     if (argc <= 1) do_help();
     if (argc > 1) {
         for (int k = 2; k <= argc; k++) {
@@ -38,18 +37,16 @@ int main(argc, argv)
                 debug=1;
             } else if (strcmp(option,"-help")==0) {
               do_help();
-            } else if (strcmp(option,"-start")==0) {
-                    strcpy(option, *++argv);
-                  start_time=atof(option);
+            } else if (strcmp(option,"-path")==0) {
+                  strcpy(Path, *++argv);
                   k++;
-            } else if (strcmp(option,"-end")==0) {
-                    strcpy(option, *++argv);
-                  end_time=atoi(option);
+            } else if (strcmp(option,"-depth")==0) {
+                  strcpy(option, *++argv);
+                  Depth=atoi(option);
                   k++;
             } else if (fname1[0]==0) strcpy(fname1,option);
         }
     }
-    if (fname2[0]==0) strcpy(fname2,"verilog.py");
 
     readfile(fname1);
 }
@@ -93,6 +90,13 @@ void readfile(fname) char *fname; {
     int searchEnd = 0;
     scopes[0]=0;
     j = (char *) 1;
+    int StartDepth = 0;
+    int CurrentDepth = 0;
+    int Active = 1;
+    if (Path[0]) { 
+        Active=0;
+        StartDepth = 100;
+    }
     while ((j != NULL)&&(inf!=NULL)) {
         j = fgets(line, longestVal, inf);
 
@@ -103,26 +107,47 @@ void readfile(fname) char *fname; {
         i=sscanf(line,"%s %s %s %s %s %s %s",s1,s2,s3,s4,s5,s6,s7);
         linenum ++;
 
+        if ((linenum % 1000000)==0) {
+            printf("<> %d mil\n",linenum/1000000);
+        }
+
         if (i>0) {
             if (strcmp(s1,"$scope")==0) {
                 if (strlen(FULL)>0) strcat(FULL,".");
                 strcat(FULL,s3);
+                CurrentDepth ++;
+
+                if (Path[0] && (strcmp(FULL,Path)==0)) {
+                    StartDepth = CurrentDepth;
+                    Active = 1;
+                }
+                if (CurrentDepth>(StartDepth+Depth)) Active=0;
 
                 pscope ++;
                 scopes[pscope] = strlen(FULL);
 
+//                printf("active %d   curren=%d start=%d dpth=%d  %s\n",Active,CurrentDepth,StartDepth,Depth,FULL);
+
+
             } else if (strcmp(s1,"$var")==0) {
-                fprintf(Frecords,"record %8s %8s   %s.%s \n",s2,s4,FULL,s5);
-                if (strcmp(s5,"Q")==0)  {
-                    fprintf(Fregs,"reg %8s %8s   %s.%s \n",s2,s4,FULL,s5);
-                    qdones ++;
+                if (Active) { 
+                    fprintf(Frecords,"record %8s %8s   %s.%s \n",s2,s4,FULL,s5);
+                    if (strcmp(s5,"Q")==0)  {
+                        fprintf(Fregs,"reg %8s %8s   %s.%s \n",s2,s4,FULL,s5);
+                        qdones ++;
+                    }
+                    dones ++;
                 }
-                dones ++;
             } else if (strcmp(s1,"$end")==0) {
                 searchEnd = 1;
             } else if (strcmp(s1,"$upscope")==0) {
                 pscope --;
                 FULL[scopes[pscope]]=0;
+                CurrentDepth --;
+                if (CurrentDepth<StartDepth) {
+                    Active=0;
+                    StartDepth = 100;
+                } else if (CurrentDepth<=(StartDepth+Depth)) Active=1;
             } else if (strcmp(s1,"$enddefinitions")==0) {
                 wrapItUp();
             } else if (strcmp(s1,"$version")==0) {
