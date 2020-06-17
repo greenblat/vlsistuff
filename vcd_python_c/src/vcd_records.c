@@ -108,7 +108,7 @@ void readfile(fname) char *fname; {
         linenum ++;
 
         if ((linenum % 1000000)==0) {
-            printf("<> %d mil\n",linenum/1000000);
+            printf("<> %d mil  %d found\n",linenum/1000000,dones);
         }
 
         if (i>0) {

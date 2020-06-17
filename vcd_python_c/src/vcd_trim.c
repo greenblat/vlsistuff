@@ -282,6 +282,9 @@ void readVcdFile(fname) char *fname; {
 
         i=sscanf(line,"%s %s %s %s %s %s %s",s1,s2,s3,s4,s5,s6,s7);
         linenum ++;
+        if ((linenum % 50000000)==0) {
+            printf("line=%d mil now=%f\n",linenum/1000000,(Time/1000.0));
+        }
         
         if (i>0) {
             if (switched) {
