@@ -8,17 +8,14 @@
 import os,sys,string
 import logs
 
-CheckList = []
-NoCheckList = []
 
 class vcd_holder:
     def __init__(self,Fname):
         self.File = open(Fname,'r')
-        self.Codes = {}
-        self.Sigs = {}
-        self.Values = {}
-        self.Times = {}
-        self.Regs = {}
+        self.Codes={}
+        self.Sigs={}
+        self.Values={}
+        self.Times={}
         self.SimTime=0
         self.FileClosed=False
         self.Scale=1
@@ -50,11 +47,11 @@ class vcd_holder:
         if ((wrds[5])[0]=='['):
             Bus = Bus + wrds[5] 
         PathBus = string.join(self.path+[Bus],'.')
+        if Code in self.Sigs: return
         self.Codes[PathBus]=Code
         self.Sigs[Code]=PathBus
         self.Values[Code]='x'
         self.Times[Code]= -1
-        self.Regs[Code]= (wrds[1]=='reg')
 
 
     def advance_till(self,Time):
@@ -90,8 +87,9 @@ class vcd_holder:
     def use_value(self,Val,Code):
         self.Values[Code]=Val
         self.Times[Code]=self.SimTime
+
 def main():
-    global Cycle,Vcd1,Vcd2,CheckList
+    global Cycle,Vcd1,Vcd2
     if ('-setup' in sys.argv):
         parse_args(sys.argv[1:])
     else:
@@ -106,7 +104,6 @@ def main():
     if (len(CheckList)==0):
         print 'building checklist'
         build_checklist(Vcd1,Vcd2)
-        print('building checklist %d'%len(CheckList))
 
 
 
@@ -121,71 +118,81 @@ def main():
             print 'cycle ',Cycle
         Vcd1.advance_till(Time1)
         Vcd2.advance_till(Time2)
-        compare_values(CheckList,Vcd1,Vcd2,Cycle)
+        compare_values(CheckList,Vcd1,Vcd2,Cycle,Time1,Time2)
         Time1 += Period1
         Time2 += Period2
         if (Cycles>0)and(Cycle>=Cycles):
             return
 
+    LL=[]
+    for Key in CHANGES:
+        LL.append((CHANGES[Key],Key))
+    LL.sort()
+    LL.reverse()
+    for (Num,Key) in LL:
+       logs.log_info('%12d   %s'%(Num,Key))
+
+
+
+
 def build_checklist(Vcd1,Vcd2):
     global CheckList
-    Sigs1 = Vcd1.Codes.keys()
-    Sigs1.sort()
-    Sigs2 = Vcd2.Codes.keys()
-    Sigs2.sort()
-    for Sig in Sigs1:
-        if (Sig in Sigs2)and(Sig not in CheckList):
-            CheckList.append(Sig)
+    Sigs1 = set(Vcd1.Codes.keys())
+    Sigs2 = set(Vcd2.Codes.keys())
+    CheckList = Sigs1.intersection(Sigs2)
     Fout = open('checklist.mutual','w')
     for Sig in CheckList:
-        Fout.write('%s\n'%(Sig))
+        Code1 = Vcd1.Codes[Sig]
+        Code2 = Vcd2.Codes[Sig]
+        Fout.write('%s    %s  %s\n'%(Sig,Code1,Code2))
     Fout.close()
 
 
+LASTS = {}
+CHANGES = {}
 
-
-def compare_values(CheckList,Vcd1,Vcd2,Time):
+def compare_values(CheckList,Vcd1,Vcd2,Time,Time1,Time2):
     Dones = 0
     Diffs = []
     for Sig in CheckList:
         Code1 = Vcd1.Codes[Sig]
-        Code2 = Vcd2.Codes[Sig]
-
         V1 = Vcd1.Values[Code1]
+        T1 = Vcd1.Times[Code1]
+        Code2 = Vcd2.Codes[Sig]
         V2 = Vcd2.Values[Code2]
-
+        T2 = Vcd2.Times[Code2]
         if (V1!=V2):
-            T1 = Vcd1.Times[Code1]
-            T2 = Vcd2.Times[Code2]
-            R1 = Vcd1.Regs[Code1]
-            R2 = Vcd2.Regs[Code2]
-            Diffs.append((T1,V1,R1,T2,V2,R2,Sig))
+            Diffs += [(T1,V1,T2,V2,Sig)]
             Dones +=1
     Diffs.sort()
-    for (T1,V1,R1,T2,V2,R2,Sig) in Diffs:
-            note_diff('diff',Sig,V1,T1,R1,V2,T2,R2,Time)
+    TT = 0
+    for (T1,V1,T2,V2,Sig) in Diffs:
+        note_diff('diff',Sig,V1,T1,V2,T2,Time)
+        TT = max(TT,max(T1,T2))
 
-
-#    print '   <> %d  %d  %d'%(Dones,len(Diffs),len(CheckList))
+    logs.log_info('   <> %d   @%d (%d  %d) %d'%(Time,Dones,Time1/1000,Time2/1000,int(TT/1000)))
     
-def note_diff(Which,Sig,V1,T1,R1,V2,T2,R2,Time):
-    if R1:
-        RR1 = 'reg'
+def note_diff(Which,Sig,V1,T1,V2,T2,Time):
+    Indx = compIndex(Sig)
+    if Sig not in LASTS:
+        LASTS[Sig] = (V1,V2)
+        CHANGES[Sig] = 1
+        logs.log_info('iii%d cycle=%d   sig=%-50s  v1=%s v2=%s ft1=%.3f   ft2=%.3f '%(Indx,Cycle,Sig,V1,V2,T1,T2))
     else:
-        RR1 = '---'
-    if R2:
-        RR2 = 'reg'
-    else:
-        RR2 = '---'
-    logs.log_info('%s time=%d cycle=%d   sig=%-50s  v1=%s v2=%s ft1=%.3f   ft=%.3f %s/%s'%(Which,Time,Cycle,Sig,V1,V2,T1,T2,RR1,RR2))
-   
+        W1,W2 = LASTS[Sig]
+        CHANGES[Sig] += 1
+        if (W1!=V1)or(W2!=V2):
+            logs.log_info('iii%d cycle=%d   sig=%-50s  v1=%s v2=%s ft1=%.3f   ft2=%.3f '%(Indx,Cycle,Sig,V1,V2,T1,T2))
+            LASTS[Sig] = (V1,V2)
 
+def compIndex(Sig):
+   return Sig.count('.')
 
 
 
 
 def parse_args(List):
-    global Start1,Period1
+    global Start1,Period1,CheckList,NoCheckList
     global Start2,Period2
     global Cycles
     Start1=0
@@ -193,6 +200,8 @@ def parse_args(List):
     Period1=1
     Period2=1
     Cycles=-1
+    CheckList=[]
+    NoCheckList=[]
     if ('-setup' in List):
         X = List.index('-setup')
         Fname = (List[X+1])
@@ -227,13 +236,14 @@ def parse_args(List):
         
 
 def readin_nochecklist(Fil):
+    global CheckList,NoCheckList
     while 1:
         line= Fil.readline()
         if (len(line)==0):
             return
         wrds = string.split(line)
         if (len(wrds)>0):
-            NoCheckList.append(wrds[0])
+            NoCheckList += [wrds[0]]
         
     for Sig in NoCheckList:
         if Sig in CheckList:
@@ -311,6 +321,7 @@ def intx(In):
 
 
 main()
+
 
 
 

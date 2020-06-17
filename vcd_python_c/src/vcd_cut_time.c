@@ -90,7 +90,7 @@ void readfile(fname) char *fname; {
             fprintf(Fout,"%s",line);
             if (line[0]=='#') {
                 now = atof(&(line[1]));                
-                if (now>=end_time) {
+                if ((now>=end_time)&&(end_time>start_time)) {
                     fclose(Fout);
                     exit(0);
                 }

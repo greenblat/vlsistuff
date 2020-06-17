@@ -1,7 +1,18 @@
 #! /usr/bin/python
+
+HelpString = '''
+    lookforPath <dir> <path>
+    dir is directory where single module file reside
+    path is dotted path to instance (like chip.dma.master1.fifo0 ) 
+      after synthesis, instance names tend to become long and not as module names, especially if they are duplicated.
+      this module helps navgate the directory full of single module files to find the correct one.
+'''
 import os,sys,string
 
 def main():
+    if len(sys.argv)==1:
+        print(HelpString)
+        return
     Dir = sys.argv[1]
     Path  = string.split(sys.argv[2],'.')
     lookDeep(Path[0],Dir,Path[1:])
