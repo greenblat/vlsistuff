@@ -78,7 +78,7 @@ void readfile(fname) char *fname; {
         }
         linenum ++;
         if ((linenum % 50000000)==0) {
-            printf(" state=%d lnum=%d %f\n",state,linenum,now);
+            printf(" state=%d lnum=%d %f    %f     %d\n",state,linenum,now,end_time,now>=end_time);
         }
         if (state==0) {
             fprintf(Fout,"%s",line);
