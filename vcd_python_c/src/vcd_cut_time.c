@@ -17,7 +17,7 @@ int linenum = 0;
 int dones = 0;
 double start_time =0.0;
 double end_time =0.0;
-double now;
+double now = 0.0;
 char fname1[500];
 int main(argc, argv)
     int             argc;
@@ -77,16 +77,19 @@ void readfile(fname) char *fname; {
             exit(0);
         }
         linenum ++;
+        if ((linenum % 100000)==0) {
+            printf(" state=%d lnum=%d %f\n",state,linenum,now);
+        }
         if (state==0) {
             fprintf(Fout,"%s",line);
             if (line[0]=='#') {
                 now = atof(&(line[1]));                
                 if (now>=start_time) {
                     state = 1;
-                    printf("state1 lnum=%d\n",linenum);
+                    printf("state1 lnum=%d %f\n",linenum,now);
                 } else {
                     state = 2;
-                    printf("state2 lnum=%d\n",linenum);
+                    printf("state2 lnum=%d %f\n",linenum,now);
                 }
             }
         } else if (state==1) {
@@ -94,7 +97,7 @@ void readfile(fname) char *fname; {
             if (line[0]=='#') {
                 now = atof(&(line[1]));                
                 if ((now>=end_time)&&(end_time>start_time)) {
-                    printf("exit on endtime lnum=%d\n",linenum);
+                    printf("exit on endtime lnum=%d %f\n",linenum,now);
                     fclose(Fout);
                     exit(0);
                 }
@@ -103,7 +106,7 @@ void readfile(fname) char *fname; {
             if (line[0]=='#') {
                 now = atof(&(line[1]));                
                 if (now>=start_time) {
-                    printf("back to state1 lnum=%d\n",linenum);
+                    printf("back to state1 lnum=%d %f\n",linenum,now);
                     fprintf(Fout,"%s",line);
                     state = 1;
                 }
