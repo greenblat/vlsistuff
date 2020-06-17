@@ -40,7 +40,7 @@ int main(argc, argv)
                   k++;
             } else if (strcmp(option,"-end")==0) {
                   strcpy(option, *++argv);
-                  end_time=atoi(option);
+                  end_time=atof(option);
                   k++;
             } else if (fname1[0]==0) strcpy(fname1,option);
         }
