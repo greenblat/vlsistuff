@@ -67,7 +67,7 @@ void readfile(fname) char *fname; {
     int searchEnd = 0;
 
     int state=0;
-
+    double Perc;
     j = (char *) 1;
     while ((j != NULL)&&(inf!=NULL)) {
         j = fgets(line, longestVal, inf);
@@ -78,7 +78,12 @@ void readfile(fname) char *fname; {
         }
         linenum ++;
         if ((linenum % 50000000)==0) {
-            printf(" state=%d lnum=%d %f    %f     %d\n",state,linenum,now,end_time,now>=end_time);
+            if (end_time>0) {
+                Perc = ((100.0 * now)/end_time);
+            } else {
+                Perc = 0.0;
+            }
+            printf(" state=%d lnum=%d %f    %f     %f\n",state,linenum,now,end_time,Perc);
         }
         if (state==0) {
             fprintf(Fout,"%s",line);
