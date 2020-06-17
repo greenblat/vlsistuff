@@ -73,17 +73,20 @@ void readfile(fname) char *fname; {
         j = fgets(line, longestVal, inf);
 
         if (j==NULL) {
+            printf("exit on EOF lnum=%d\n",linenum);
             exit(0);
         }
-
+        linenum ++;
         if (state==0) {
             fprintf(Fout,"%s",line);
             if (line[0]=='#') {
                 now = atof(&(line[1]));                
                 if (now>=start_time) {
                     state = 1;
+                    printf("state1 lnum=%d\n",linenum);
                 } else {
                     state = 2;
+                    printf("state2 lnum=%d\n",linenum);
                 }
             }
         } else if (state==1) {
@@ -91,6 +94,7 @@ void readfile(fname) char *fname; {
             if (line[0]=='#') {
                 now = atof(&(line[1]));                
                 if ((now>=end_time)&&(end_time>start_time)) {
+                    printf("exit on endtime lnum=%d\n",linenum);
                     fclose(Fout);
                     exit(0);
                 }
@@ -99,6 +103,7 @@ void readfile(fname) char *fname; {
             if (line[0]=='#') {
                 now = atof(&(line[1]));                
                 if (now>=start_time) {
+                    printf("back to state1 lnum=%d\n",linenum);
                     fprintf(Fout,"%s",line);
                     state = 1;
                 }
