@@ -12,6 +12,9 @@ PYMONLOG = 'pymon.log'
 
 WHERE = ''
 
+    
+Flogs = [False,False,False,False]
+
 
 import time
 printed_already={}
@@ -27,6 +30,12 @@ except:
     import fakeVeri as veri
 
 finishCycles = 0
+
+def pymonFileName(logFileName):
+    global Flog
+    if Flog:
+        Flog.close()
+    Flog = open(logFileName,'w')
 
 
 noCycles=False
@@ -44,39 +53,49 @@ def get_cycles():
 
     return Now
 
+finishReason = False
 
-
+def finish(Txt):
+    if finishReason:
+        finishReason(Txt,Errors,Wrongs,Corrects)
+    else:
+        log_info('finishing %s with errors=%d wrongs=%d corrects=%d'%(Txt,Errors,Wrongs,Corrects))
+        veri.finish()
+        sys.exit()
 
 def please_print_debugs():
     global print_debug_messages
     print_debug_messages=1
 
-def log_time(Why):
-    log_info('info: %s                                 time=%s'%(Why,time.ctime()))
+def log_time(Why,Which=0):
+    log_info('info: %s                                 time=%s'%(Why,time.ctime()),Which)
 
-def log_fatal(Text):
-#    print 'FATAL error!! %s'%(Text)
-#    log_ending('from fatal')
-    log_error('FATAL! %s'%Text,False,True)
+def log_fatal(Text,Which=0):
+    log_ending('from fatal',Which)
+    log_error('FATAL! %s'%Text,Which,False,True)
+    if finishReason:
+        finishReason('FATAL! %s'%Text,Errors+1,Wrongs,Corrects)
     sys.exit()
 
-def log_error(Text,Tb=True,Pstack=False):
-    log_err(Text,Tb,Pstack)
-def log_err(Text,Tb=True,Pstack=False):
-    global Errors,printed_already,Flog
-    if (not Flog):
-        Flog=open(PYMONLOG,'w')
+def log_error(Text,Which=0,Tb=True,Pstack=False):
+    log_err(Text,Which,Tb,Pstack)
+def log_err(Text,Which=0,Tb=True,Pstack=False):
+    global Errors,printed_already
+    if (not Flogs[Which]):
+        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Errors +=1  
-    Flog.write('@%d: %s %d ERROR: %s\n'%(get_cycles(),WHERE,Errors,Text))
+    Flogs[Which].write('@%d: %s %d ERROR: %s\n'%(get_cycles(),WHERE,Errors,Text))
     if Pstack:
-        traceback.print_stack(file=Flog)
+        traceback.print_stack(file=Flogs[Which])
         
     if Tb:
         veri.force('%s.errors'%TB,str(Errors))
 
 
     if (Errors>MAXERRORS):
-        log_info('max errors reached (%d). bailing out. (MAXERRORS==%d)'%(Errors,MAXERRORS))
+        log_info('max errors reached (%d). bailing out. (MAXERRORS==%d)'%(Errors,MAXERRORS),Which)
+        if finishReason:
+            finishReason('too many errors',Errors+1,Wrongs,Corrects)
         veri.finish()
         sys.exit()   # in icarus, sometimes finish doesnt catch
 
@@ -85,32 +104,34 @@ def log_err(Text,Tb=True,Pstack=False):
     printed_already[Text]=1
     print('@%d: %s %d: ERROR: %s'%(get_cycles(),WHERE,Errors,Text))
 
-def log_correct(Text,Print=True):
-    global Corrects,Flog
-    if (not Flog):
-        Flog=open(PYMONLOG,'w')
+def log_correct(Text,Which=0,Print=True):
+    global Corrects
+    if (not Flogs[Which]):
+        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Corrects += 1
     veri.force('%s.corrects'%TB,str(Corrects))
     if Print:
         print('@%d: %d vs %d (err=%d) CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text))
-    Flog.write('@%d: %d vs %d (err=%d) CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
+    Flogs[Which].write('@%d: %d vs %d (err=%d) CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
 
-def log_ensure(Cond,Text):
+def log_ensure(Cond,Text,Which=0):
     if Cond:
-        log_correct(Text)
+        log_correct(Text,Which)
     else:
-        log_wrong(Text)
+        log_wrong(Text,Which)
     
-def log_wrong(Text):
-    global Wrongs,Flog
+def log_wrong(Text,Which=0):
+    global Wrongs
     Wrongs += 1
     veri.force('%s.wrongs'%TB,str(Wrongs))
-    if (not Flog):
-        Flog=open(PYMONLOG,'w')
+    if (not Flogs[Which]):
+        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: %d vs %d (err=%d): WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text))
-    Flog.write('@%d: %d vs %d (err=%d): WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
+    Flogs[Which].write('@%d: %d vs %d (err=%d): WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     if Wrongs >= MAXWRONGS:
-        log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS))
+        log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS),Which)
+        if finishReason:
+            finishReason('too many wrongs',Errors,Wrongs+1,Corrects)
         veri.finish()
         sys.exit()   # in icarus, sometimes finish doesnt catch
 
@@ -125,27 +146,33 @@ def finish_now(Text='.'):
         Text =  '@%d: @%d: wrongs=%d vs corrects=%d errors=%d warnings=%d: FINISHING on %s'%(get_cycles(),Now,Wrongs,Corrects,Errors,Warnings,Text)
     print(Text)
     Flog.write(Text+'\n')
+    if finishReason:
+        finishReason('finish now',Errors,Wrongs,Corrects)
     veri.finish()
     
 
 
-def log_warning(Text):
+def log_warning(Text,Which=0):
     global Warnings,printed_already,Flog
     if (Text in printed_already):
         return
-    if (not Flog):
-        Flog=open(PYMONLOG,'w')
+    if (not Flogs[Which]):
+        Flogs[Which]= open(PYMONLOG+str(Which),'w')
     print('%d: warning: %s'%(Warnings,Text))
-    Flog.write('%d: warning: %s\n'%(Warnings,Text))
+    Flogs[Which].write('%d: warning: %s\n'%(Warnings,Text))
     printed_already[Text]=1
     Warnings +=1  
 
-def log_info(Text):
-    global Flog
-    if (not Flog):
-        Flog=open(PYMONLOG,'w')
+def log_write(Text,Which=0):
+    if (not Flogs[Which]):
+        Flogs[Which]=open(PYMONLOG+str(Which),'w')
+#    print('%s'%(Text))
+    Flogs[Which].write('%s\n'%(Text))
+def log_info(Text,Which=0):
+    if (not Flogs[Which]):
+        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: info: %s'%(get_cycles(),Text))
-    Flog.write('@%d: info: %s\n'%(get_cycles(),Text))
+    Flogs[Which].write('@%d: info: %s\n'%(get_cycles(),Text))
 
 def log_finfo(Text,File):
     File.write('@%d: info: %s\n'%(get_cycles(),Text))
@@ -181,10 +208,8 @@ def log_dbg(Text):
     if (print_debug_messages):
         print('dbg: ',Text)
 
-def log_ending(Who):
-    log_time('%s.py has %d errors, %d wrongs,  %d corrects and %d warnings logged\n\n'%(Who,Errors,Wrongs,Corrects, Warnings))
-    if (Flog):
-        Flog.close()
+def log_ending(Who,Which=0):
+    log_time('%s.py has %d errors, %d wrongs,  %d corrects and %d warnings logged\n\n'%(Who,Errors,Wrongs,Corrects, Warnings),Which)
     return Errors
 
 
@@ -253,7 +278,27 @@ def valid(Sig):
     V  = intx(veri.peek(Sig))
     return V==1
 
-
+def peekList(List,Prefix,Format='hex'):
+    if type(List) is str:
+        List = string.split(List)
+    res = ''
+    for Sig in List:
+        Sig = '%s.%s'%(Prefix,Sig)
+        if Format=='signed':
+            V = peeksigned(Sig)
+        else:
+            V = peek(Sig)
+        Wrds = string.split(Sig,'.')
+        Base = Wrds[-1]
+        if Format=='hex':
+            Str = ' %s=%s'%(Base,hex(V))
+        elif Format=='bin':
+            Str = ' %s=%s'%(Base,bin(V))
+        else:
+            Str = ' %s=%s'%(Base,V)
+        res += Str
+    return res
+        
 
 
 def peeksigned(Sig):
@@ -384,6 +429,8 @@ def panicFinish(Reason,ContinueFor=20):
     global finishCycles
     finishCycles = get_cycles()+ContinueFor
     log_error('finishCycle activated because of "%s"'%(Reason))
+    if finishReason:
+        finishReason(Reason,Errors,Wrongs,Corrects)
 
 
       
@@ -391,6 +438,8 @@ def finishing(Txt='"not given"',ContinueFor=20):
     global finishCycles
     if finishCycles>0: return
     log_info('finishing on %s'%Txt)
+    if finishReason:
+        finishReason(Txt,Errors,Wrongs,Corrects)
     finishCycles = get_cycles()+ContinueFor
 
 Vars = {}
@@ -528,7 +577,7 @@ def bothOnes(Int):
     return Max,Min
 
 FINISHES = {}
-def finish(Tag,Count):
+def finish_deferred(Tag,Count):
     if Tag not in FINISHES:
         FINISHES[Tag]= Count
     else:
@@ -544,7 +593,10 @@ class aliveHolderClass:
     def run(self):
         if self.Sig=='timeout':
             if self.Wait<=get_cycles():
-                log_info('keepSimulationAlive decided to end this simulation, on timeout')
+                Txt = 'keepSimulationAlive decided to end this simulation, on timeout'
+                log_info(Txt)
+                if finishReason:
+                    finishReason(Txt,Errors,Wrongs,Corrects)
                 veri.finish()
             return 0,'timeout'
 
@@ -637,6 +689,34 @@ def mustKey(Dir,Key,Msg=''):
 def neededBits(Int):
     Bin = bin(Int)[2:]
     return len(Bin)
+
+
+class driverClass:
+    def __init__(self,Path,Monitors):
+        Monitors.append(self)
+        self.Path = Path
+        self.state='idle'
+        self.waiting  = 0 
+
+    def force(self,Sig,Val):
+        veri.force('%s.%s'%(self.Path,Sig),str(Val))
+
+    def peek(self,Sig):
+        return peek('%s.%s'%(self.Path,Sig))
+    def peeksigned(self,Sig):
+        return peeksigned('%s.%s'%(self.Path,Sig))
+    def peekfloat(self,Sig):
+        return peek_float('%s.%s'%(self.Path,Sig))
+
+    def valid(self,Sig):
+        return self.peek(Sig)==1
+
+    def run(self):
+        log_error('run() of driverClass is supposed to be replaced')
+
+
+
+
 
 print('>>>verification_logs loaded')
 

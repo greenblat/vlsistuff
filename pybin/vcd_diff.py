@@ -8,6 +8,7 @@
 import os,sys,string
 import logs
 
+Fulls = []
 
 class vcd_holder:
     def __init__(self,Fname):
@@ -102,7 +103,7 @@ def main():
 
 
     if (len(CheckList)==0):
-        print 'building checklist'
+        logs.log_info( 'building checklist')
         build_checklist(Vcd1,Vcd2)
 
 
@@ -111,7 +112,7 @@ def main():
     Time1=Start1
     Time2=Start2
     Cycle=0
-    print 'starting diffing on %d signals'%(len(CheckList))
+    logs.log_info('starting diffing on %d signals'%(len(CheckList)))
     while (not Vcd1.FileClosed and not Vcd2.FileClosed):
         Cycle+=1
         if ((Cycle%1000)==0):
@@ -151,7 +152,7 @@ def build_checklist(Vcd1,Vcd2):
 LASTS = {}
 CHANGES = {}
 
-def compare_values(CheckList,Vcd1,Vcd2,Time,Time1,Time2):
+def compare_values(CheckList,Vcd1,Vcd2,Cycle,Time1,Time2):
     Dones = 0
     Diffs = []
     for Sig in CheckList:
@@ -167,10 +168,16 @@ def compare_values(CheckList,Vcd1,Vcd2,Time,Time1,Time2):
     Diffs.sort()
     TT = 0
     for (T1,V1,T2,V2,Sig) in Diffs:
-        note_diff('diff',Sig,V1,T1,V2,T2,Time)
+        note_diff('diff',Sig,V1,T1,V2,T2,Cycle)
         TT = max(TT,max(T1,T2))
 
-    logs.log_info('   <> %d   @%d (%d  %d) %d'%(Time,Dones,Time1/1000,Time2/1000,int(TT/1000)))
+    logs.log_info('   <> cycle=%d   diffs=%d (%d  %d) %d'%(Cycle,Dones,Time1/1000,Time2/1000,int(TT/1000)))
+    print(Fulls)
+    if Cycle in Fulls:
+        for (T1,V1,T2,V2,Sig) in Diffs:
+            Indx = compIndex(Sig)
+            logs.log_info('iii%d cycle=%d   sig=%-50s  v1=%s v2=%s ft1=%.3f   ft2=%.3f '%(Indx,Cycle,Sig,V1,V2,T1,T2),2)
+        
     
 def note_diff(Which,Sig,V1,T1,V2,T2,Time):
     Indx = compIndex(Sig)
@@ -232,6 +239,9 @@ def parse_args(List):
         Fname = (List[X+1])
         Fil = open(Fname)
         readin_nochecklist(Fil)
+    for Y in range(0,len(List)):
+        if List[Y]=='-full':
+            Fulls.append(int(List[Y+1]))
 
         
 
