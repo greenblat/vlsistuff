@@ -109,12 +109,23 @@ def main():
         FnameOut = '%s.v'%Top
     run(Fname,FnameOut,sys.argv[3:])
 
+def sameNameV(Fname):   
+    w1 = string.split(Fname,'/')
+    w2 = string.split(w1[-1],'.')
+    Top=w2[0]
+    Path = string.join(w1[:-1],'/')
+    FnameOut = '%s/%s.v'%(Path,Top)
+    return FnameOut
+
+
+
 def run(Fname,FnameOut,Args):
     File = open(Fname)
     lines = File.readlines()
     File.close()
+    if not FnameOut:
+        FnameOut = sameNameV(Fname)
     runFromLines(lines,FnameOut,Args)
-    print('genver run %s -> %s (%s)'%(Fname,FnameOut,Args))
 
 def runFromLines(lines,FnameOut,Args):
     global Code0,Strings
@@ -142,7 +153,7 @@ def runFromLines(lines,FnameOut,Args):
     More = string.join(Args,' ')
     Work = 'python execme.py "%s" > %s'%(More,FnameOut)
     os.system(Work)
-    #    os.system('/bin/rm  execme.py')
+    os.system('/bin/rm  execme.py')
 
 def rework_backs(Str):
     Str1 = string.replace(Str,'\\n','\\\\n')
