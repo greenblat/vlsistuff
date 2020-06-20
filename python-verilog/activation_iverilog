@@ -1,0 +1,8 @@
+#! /bin/csh -f
+
+iverilog -o tb.vvp <VERILOG_FILES>
+setenv PYVERILOG "$*"
+vvp -M/Users/ilia/software/vpi -mvpi7 -lver.log tb.vvp $*
+
+
+

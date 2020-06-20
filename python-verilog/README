@@ -1,6 +1,11 @@
 
 IMPORTANT! in all scripts my path may appear, please change to whatever path is relevant.
 
+This README is about python2.7 (latest is ok). Before You start, You need python development library.
+on linu, try (or similar) :      sudo apt-get install python-dev
+
+
+
 first go to vpi directory and compile the library. README is there.
 there is also vpi7_nc_27.so compiled already, it fits linux fedora and probably most of linux dists.
 !!!! recompile the .so if You can - it might be not the final version.
