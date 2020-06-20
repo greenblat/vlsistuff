@@ -124,10 +124,9 @@ class uartx2Class:
                 else:
                     Int = logs.intx(self.rxstring)
                     self.rxqueue.append(Int)
-                    if not self.dump_lines:
-                        logs.log_info('rx char %02x  "%s"'%(Int,chr(Int)))
-                    elif Int==ord('\n'):
-                        Map = map(chr,self.rxqueue)
+                    logs.log_info('rx char %02x  "%s"'%(Int,chr(Int)))
+                    if Int==ord('\n'):
+                        Map = map(chrx,self.rxqueue)
                         Str = string.join(Map,'')
                         logs.log_info('uartrx: %s'%Str)
                         self.rxqueue=[]
@@ -147,6 +146,10 @@ class uartx2Class:
                 
 
 
+def chrx(In):
+    if (In<0): return '<>'
+    if (In>255): return '<>'
+    return chr(In)
 
 
 

@@ -8,6 +8,12 @@ axi.makeRead(Addr0,Size=2)
 axi.makeWrite(Addr1,Wdata)
 axi.finish(100)
 
+IMPORTANT: full form: axi.makeRead(Addr0,4,2)
+axi.makeRead(Address,Size,Queue)
+
+default is queue 1. so  if there is a long wait, and You need to inject
+reads/writes in the middle, specify second queue: axi.makeRead(Address,4,2)
+
 '''
 
 
@@ -53,12 +59,20 @@ class axiLiteMasterClass:
         self.Queue.append('wait %s'%Many)
         self.Queue.append('finish')
 
-    def makeWrite(self,Address,Wdata):
-        self.Queue.append('force awvalid=1 awaddr=%s'%(Address))
-        self.Queue.append('force awvalid=0 awaddr=0')
-        self.Queue.append('force wvalid=1 wdata=%s wstrb=15 '%(Wdata))
-        self.Queue.append('force wvalid=0 wdata=0 wstrb=0 bready=1')
-#        logs.log_info('makeWrite addr=%x data=%x'%(Address,Wdata))
+    def makeWrite(self,Address,Wdata,Queue=1):
+        if Queue==1:
+            self.Queue.append('force awvalid=1 awaddr=%s'%(Address))
+            self.Queue.append('force awvalid=0 awaddr=0')
+            self.Queue.append('force wvalid=1 wdata=%s wstrb=15 '%(Wdata))
+            self.Queue.append('force wvalid=0 wdata=0 wstrb=0 bready=1')
+        elif Queue==2:
+            self.Queue2.append('force awvalid=1 awaddr=%s'%(Address))
+            self.Queue2.append('force awvalid=0 awaddr=0')
+            self.Queue2.append('force wvalid=1 wdata=%s wstrb=15 '%(Wdata))
+            self.Queue2.append('force wvalid=0 wdata=0 wstrb=0 bready=1')
+        else:
+            logs.log_error('QUEUE can be 1 or 2, not "%s"'%Queue)
+
 
     def run(self):
         self.runResponce()

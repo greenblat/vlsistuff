@@ -58,7 +58,10 @@ finishReason = False
 def finish(Txt):
     if finishReason:
         finishReason(Txt,Errors,Wrongs,Corrects)
-
+    else:
+        log_info('finishing %s with errors=%d wrongs=%d corrects=%d'%(Txt,Errors,Wrongs,Corrects))
+        veri.finish()
+        sys.exit()
 
 def please_print_debugs():
     global print_debug_messages
@@ -149,21 +152,21 @@ def finish_now(Text='.'):
     
 
 
-def log_warning(Text):
+def log_warning(Text,Which=0):
     global Warnings,printed_already,Flog
     if (Text in printed_already):
         return
-    if (not Flog):
-        Flog=open(PYMONLOG,'w')
+    if (not Flogs[Which]):
+        Flogs[Which]= open(PYMONLOG+str(Which),'w')
     print('%d: warning: %s'%(Warnings,Text))
-    Flog.write('%d: warning: %s\n'%(Warnings,Text))
+    Flogs[Which].write('%d: warning: %s\n'%(Warnings,Text))
     printed_already[Text]=1
     Warnings +=1  
 
 def log_write(Text,Which=0):
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
-    print('%s'%(Text))
+#    print('%s'%(Text))
     Flogs[Which].write('%s\n'%(Text))
 def log_info(Text,Which=0):
     if (not Flogs[Which]):
@@ -275,7 +278,27 @@ def valid(Sig):
     V  = intx(veri.peek(Sig))
     return V==1
 
-
+def peekList(List,Prefix,Format='hex'):
+    if type(List) is str:
+        List = string.split(List)
+    res = ''
+    for Sig in List:
+        Sig = '%s.%s'%(Prefix,Sig)
+        if Format=='signed':
+            V = peeksigned(Sig)
+        else:
+            V = peek(Sig)
+        Wrds = string.split(Sig,'.')
+        Base = Wrds[-1]
+        if Format=='hex':
+            Str = ' %s=%s'%(Base,hex(V))
+        elif Format=='bin':
+            Str = ' %s=%s'%(Base,bin(V))
+        else:
+            Str = ' %s=%s'%(Base,V)
+        res += Str
+    return res
+        
 
 
 def peeksigned(Sig):
@@ -666,6 +689,34 @@ def mustKey(Dir,Key,Msg=''):
 def neededBits(Int):
     Bin = bin(Int)[2:]
     return len(Bin)
+
+
+class driverClass:
+    def __init__(self,Path,Monitors):
+        Monitors.append(self)
+        self.Path = Path
+        self.state='idle'
+        self.waiting  = 0 
+
+    def force(self,Sig,Val):
+        veri.force('%s.%s'%(self.Path,Sig),str(Val))
+
+    def peek(self,Sig):
+        return peek('%s.%s'%(self.Path,Sig))
+    def peeksigned(self,Sig):
+        return peeksigned('%s.%s'%(self.Path,Sig))
+    def peekfloat(self,Sig):
+        return peek_float('%s.%s'%(self.Path,Sig))
+
+    def valid(self,Sig):
+        return self.peek(Sig)==1
+
+    def run(self):
+        log_error('run() of driverClass is supposed to be replaced')
+
+
+
+
 
 print('>>>verification_logs loaded')
 

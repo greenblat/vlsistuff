@@ -28,12 +28,14 @@ except:
 
 finishCycles = 0
 
-
+forcedCycles = False
 noCycles=False
 Cycles=0
 def get_cycles():
     global noCycles
-    if noCycles:
+    if forcedCycles:
+        return forcedCycles
+    elif noCycles:
         return veri.stime()
     else:
         Now =  peek('%s.cycles'%TB)
@@ -225,17 +227,21 @@ def parse_args():
     return params
 
 def endsWith(Long,Short):
-    if not isinstance(Long,str): return False
+    if Long is not string: return False
     if Short not in Long: return False
     return  Long.index(Short)==(len(Long)-len(Short)) 
 
 
 def startsWith(Long,Short):
-    if Long is not string: return False
+    if type(Long) is not str: return False
     if Short not in Long: return False
     return  Long.index(Short)==0 
-
+import traceback
 def intx(Val):
+    if Val=='': 
+        print('>>>>>>>>>>>>>>>>>>>>>>>')
+        print(traceback.print_stack())        
+        sys.exit()
     if Val is int: return Val
     if Val is float: return Val
     if Val=='-999': return -1
