@@ -14,7 +14,7 @@ typedef struct alphax {
 /* int star; */
 char lc;
 struct alphax  *downp,*nextp,*fatherp;
-int  value;
+long  value;
 
 } Anode;
 
@@ -319,7 +319,7 @@ Anode * allocate_rest_alpha(arun,str) Anode *arun; char *str;
 
 
 
-void qqsa(ind,val) long unsigned ind; int val;
+void qqsa(ind,val) long unsigned ind; long val;
 {
     Anode *x;
     x = (Anode *)ind;

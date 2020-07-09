@@ -31,6 +31,7 @@
 
 #include "qq64.h"
 
+int  qq_started = 0;
 void alpha_init();
 void qqsa();
 long qqas();
@@ -490,25 +491,34 @@ void (*vlog_startup_routines[])() = {
         0
 };
 
+int diffhandles = 0;
+int gethandles = 0;
+int totalpeeks      = 0;
 
-// int dbg0 = 0;
-// int dbg0 = 1;
-
-vpiHandle get_handle(char *pathstring) {
-    vpiHandle handle,ahandle;
-    return vpi_handle_by_name(pathstring,NULL);
-//    if (dbg0) return vpi_handle_by_name(pathstring,NULL);
-    alpha_init();
+int dbglevel = 0;
+void get_handle(char *pathstring,vpiHandle *ahandle) {
+//    vpiHandle ahandle;
+//    return vpi_handle_by_name(pathstring,NULL);
+    gethandles ++;
+    if (dbglevel&1) {
+        *ahandle =  vpi_handle_by_name(pathstring,NULL);
+        return;
+    }
+    if (!qq_started) {
+        alpha_init();
+        qq_started = 1;
+    }
     long ptr = qqai(pathstring);
     long hval = qqas(ptr);
     if (hval) {
-        ahandle = (vpiHandle) hval;
+        *ahandle = (vpiHandle) hval;
     } else {
-        ahandle =  vpi_handle_by_name(pathstring,NULL);
-        qqsa(ptr,(long) ahandle);
+        *ahandle =  vpi_handle_by_name(pathstring,NULL);
+        qqsa(ptr,(long) *ahandle);
+        diffhandles ++;
     }
-    printf("handle good %lx mine  %lx %lx %lx str=%s\n",handle,ahandle,hval,ptr,pathstring);
-    return handle;
+//    printf("handle good mine  hendle=%lx hval=%lx ptr=%lx str=%s\n",(long)*ahandle,hval,ptr,pathstring);
+    return;
 }
 
 
@@ -522,12 +532,36 @@ veri_exists(PyObject *self,PyObject *args) {
     char *pathstring;
     if (!PyArg_ParseTuple(args, "s",&pathstring))
         return NULL;
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
     if (!handle) {
         return Py_BuildValue("s", "0");
     }
     return Py_BuildValue("s", "1");
 }
+
+static PyObject*
+veri_debuglevel(PyObject *self,PyObject *args) {
+    vpiHandle handle;
+    char *pathstring;
+    if (!PyArg_ParseTuple(args, "s",&pathstring))
+        return NULL;
+    dbglevel = atoi(pathstring);
+    return Py_BuildValue("s", "1");
+}
+
+
+static PyObject*
+veri_debugstatus(PyObject *self,PyObject *args) {
+    char stats[100];
+    sprintf(stats,"peeks=%d geth=%d diffh=%d",totalpeeks,gethandles,diffhandles);
+    if (dbglevel & 2){
+        totalpeeks=0;
+        gethandles=0;
+    }
+    return Py_BuildValue("s", stats);
+}
+
+
 
 
 static PyObject*
@@ -535,9 +569,10 @@ veri_peek(PyObject *self,PyObject *args) {
     vpiHandle handle;
     s_vpi_value pvalue;
     char *pathstring;
+    totalpeeks ++;
     if (!PyArg_ParseTuple(args, "s",&pathstring))
         return NULL;
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find sig %s for peek\n",pathstring);
         sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n    traceback.print_stack()",pathstring,pathstring);
@@ -607,7 +642,7 @@ veri_peek_mem(PyObject *self,PyObject *args) {
     index = atoi(indexstring);
 //    vpi_printf("\n mem=%s ind=%d\n",pathstring,index);
 //    handle =  vpi_handle_by_name(pathstring,NULL);
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find memory %s for peek\n",pathstring);
         sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n",pathstring,pathstring);
@@ -649,7 +684,7 @@ veri_peek_3d(PyObject *self,PyObject *args) {
     index2 = atoi(index2string);
     vpi_printf("\n mem=%s ind=%d\n",pathstring,index);
 //    handle =  vpi_handle_by_name(pathstring,NULL);
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find memory %s for peek\n",pathstring);
         sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n",pathstring,pathstring);
@@ -699,7 +734,7 @@ veri_force(PyObject *self,PyObject *args) {
     if (!PyArg_ParseTuple(args, "ss",&pathstring,&vstr))
         return NULL;
 //    handle =  vpi_handle_by_name(pathstring,NULL);
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find sig %s for force\n",pathstring);
         sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for force'\n",pathstring,pathstring);
@@ -743,7 +778,7 @@ veri_hard_force(PyObject *self,PyObject *args) {
     char *pathstring;
     if (!PyArg_ParseTuple(args, "ss",&pathstring,&vstr))
         return NULL;
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
 //    handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\ncannot find sig %s for force\n",pathstring);
@@ -770,7 +805,7 @@ veri_release(PyObject *self,PyObject *args) {
     char *pathstring;
     if (!PyArg_ParseTuple(args, "ss",&pathstring,&vstr))
         return NULL;
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
 //    handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\ncannot find sig %s for force\n",pathstring);
@@ -837,7 +872,7 @@ veri_force_mem(PyObject *self,PyObject *args) {
     if (!PyArg_ParseTuple(args, "sss",&pathstring,&indexstring,&vstr))
         return NULL;
     index = atoi(indexstring);
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
 //    handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\npython: cannot find memory %s for force\n",pathstring);
@@ -877,7 +912,7 @@ veri_force_3d(PyObject *self,PyObject *args) {
         return NULL;
     index = atoi(indexstring);
     index2 = atoi(index2string);
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
 //    handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\npython: cannot find memory %s for force\n",pathstring);
@@ -1153,7 +1188,7 @@ veri_register(PyObject *self,PyObject *args) {
         time_s.high   = (Delay>>32) & 0xffffffff;
         handle = 0;
     } else {
-        handle = get_handle(pathstring);
+        get_handle(pathstring,&handle);
         if (!handle) {
             vpi_printf("\npython: cannot find sig %s for register\n",pathstring);
             sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for register'\n",pathstring,pathstring);
@@ -1226,6 +1261,10 @@ static PyMethodDef VeriMethods[] = {
     {"peek_mem", veri_peek_mem, METH_VARARGS, "Return the number of arguments received by the process."},
     {"peek_3d", veri_peek_3d, METH_VARARGS, "Return the number of arguments received by the process."},
     {"force", veri_force, METH_VARARGS,
+      "Return the number of arguments received by the process."},
+    {"debuglevel", veri_debuglevel, METH_VARARGS,
+      "Return the number of arguments received by the process."},
+    {"debugstatus", veri_debugstatus, METH_VARARGS,
       "Return the number of arguments received by the process."},
     {"handle", veri_handle, METH_VARARGS,
       "Return the number of arguments received by the process."},
