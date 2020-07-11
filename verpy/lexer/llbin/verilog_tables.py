@@ -94,6 +94,7 @@ Table = [
     ,('dig1','d',' ',         'dig2','add',0)
 
     ,('dig2',Digits,Digits,         'dig2','add',0)
+    ,('dig2',Digits,'_',         'dig2','add',0)
     ,('dig2',Digits,'',             'idle','push','dig')
 
     ,('hex2',HexDig,HexDig,         'hex2','add',0)

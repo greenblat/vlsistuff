@@ -165,8 +165,8 @@ class module_class:
             if '[' in Net:
                 Net = Net[:Net.index('[')]
             if (not myExtras(Net))and(Net not in self.nets)and(Net not in self.parameters)and(Net[0] not in '0123456789')and(Net not in self.localparams)and(Net not in self.genvars):
-                logs.log_err('net %s used before defined'%Net)
-                logs.log_err('localparams %s %s '%(str(self.localparams),self.parameters))
+                logs.log_err('net %s used before defined'%(Net))
+                logs.log_info('defined localparams %s %s '%(str(self.localparams),self.parameters))
 
     def duplicate_inst(self,Inst,Inst2):
         Obj = self.insts[Inst]
@@ -1303,6 +1303,12 @@ def pr_stmt(List,Pref='',Begin=False):
             else:
                 logs.log_error('assigns got L1=%s  List=%s'%(L1,List))
 
+        Vars = matches.matches(List,'parameter ? ?')
+        if Vars:
+            return '%sparameter %s  = %s;\n'%(Pref,Vars[0],pr_expr(Vars[1]))
+        Vars = matches.matches(List,'localparam ? ?')
+        if Vars:
+            return '%slocalparam %s  = %s;\n'%(Pref,Vars[0],pr_expr(Vars[1]))
 
         Vars = matches.matches(List,'declare ? ? ?')
         if Vars:

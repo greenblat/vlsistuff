@@ -82,12 +82,13 @@ Definition :
     | ExtDir Width Tokens_list ';'
     | ExtDir Width Tokens_list Width ';'
     | IntDir Width Tokens_list ';'
-    | IntDir Width Tokens_list '=' Expr ';'
+    | IntDir Width token '=' Expr ';'
     | IntDir Width token Width ';'
     | IntDir Width Width Tokens_list ';'
     | IntDir Width Width token '=' Expr ';'
     | IntDir token Width ';'
     | IntDir InstParams Tokens_list ';'
+    | IntDir InstParams token '=' Expr ';'
     | token domino token token ';'
     ;
 
@@ -177,7 +178,7 @@ Connection : '.' '*' | '.' token '(' Expr ')' | '.' token '(' ')' ;
 AssignParams : '#' '(' Exprs ')' | '#' number | '#' token | '#' floating ;
 Prms_list : Prms_list ',' PrmAssign | PrmAssign ;
 PrmAssign :  '.' token '(' Expr ')' | '.' token ;
-InstParams : '#' '(' Exprs ')' | '#' number | '#' token | '#' '(' Prms_list ')' | '#' '(' ')'  ;
+InstParams : '#' '(' Exprs ')' | '#' number | '#' floating | '#' token | '#' '(' Prms_list ')' | '#' '(' ')'  ;
 
 
 Always : always Statement | always When Statement ;
@@ -194,6 +195,7 @@ GenStatement :
     | Definition 
     | Assign 
     | Parameter 
+    | Localparam
     | Defparam 
     | Instance
     | GenFor_statement
@@ -284,7 +286,11 @@ IntDir : reg | wire | signed | integer | real | reg signed | wire signed | genva
 
 CurlyList : '{' CurlyItems '}' ;
 CurlyItems : CurlyItems ',' CurlyItem | CurlyItem;
-CurlyItem :   Expr CurlyList   | Expr ; 
+CurlyItem :   
+      Expr CurlyList  
+    | Expr
+    | shift_left CurlyList 
+    ; 
 
 Dotted : 
       token '.' Dotted 

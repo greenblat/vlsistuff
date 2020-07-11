@@ -691,6 +691,24 @@ def neededBits(Int):
     return len(Bin)
 
 
+
+def bracketize(List):
+    queue=[]
+    curr=[]
+    for X in List:
+        if X=='(':
+            queue.append(curr[:])
+            curr=[]
+        elif X==')':
+            Last = queue.pop(-1)
+            Last.append(curr)
+            curr = Last[:]
+        else:
+            curr.append(X)
+    return curr
+
+
+
 class driverClass:
     def __init__(self,Path,Monitors):
         Monitors.append(self)

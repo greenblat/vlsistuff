@@ -59,16 +59,16 @@ class axiLiteMasterClass:
         self.Queue.append('wait %s'%Many)
         self.Queue.append('finish')
 
-    def makeWrite(self,Address,Wdata,Queue=1):
+    def makeWrite(self,Address,Wdata,Wstrb=0xff,Queue=1):
         if Queue==1:
             self.Queue.append('force awvalid=1 awaddr=%s'%(Address))
             self.Queue.append('force awvalid=0 awaddr=0')
-            self.Queue.append('force wvalid=1 wdata=%s wstrb=15 '%(Wdata))
+            self.Queue.append('force wvalid=1 wdata=%s wstrb=%s '%(Wdata,Wstrb))
             self.Queue.append('force wvalid=0 wdata=0 wstrb=0 bready=1')
         elif Queue==2:
             self.Queue2.append('force awvalid=1 awaddr=%s'%(Address))
             self.Queue2.append('force awvalid=0 awaddr=0')
-            self.Queue2.append('force wvalid=1 wdata=%s wstrb=15 '%(Wdata))
+            self.Queue2.append('force wvalid=1 wdata=%s wstrb=%s '%(Wdata,Wstrb))
             self.Queue2.append('force wvalid=0 wdata=0 wstrb=0 bready=1')
         else:
             logs.log_error('QUEUE can be 1 or 2, not "%s"'%Queue)
