@@ -1,4 +1,5 @@
 
+
 %token module number token endmodule assign 
 %token input  output  inout reg  wire  tri0 tri1 signed  event
 %token bin hex dig integer real wreal
@@ -105,6 +106,7 @@ WidthInt : Width | integer ;
 Function : 
       function  token ';' Mem_defs Statements  endfunction
     | function  token ';' Statements  endfunction
+    | function  Width Width token ';' Mem_defs Statement  endfunction
     | function  WidthInt token ';' Mem_defs Statement  endfunction
     | function  WidthInt token ';' Statement  endfunction
     | function  token '(' Header_list ')' ';' Statement  endfunction
@@ -126,9 +128,10 @@ Mem_def  :
     | wreal Tokens_list ';'
     | reg Width Tokens_list ';'
     | reg Width token Width ';'
+    | reg Width Width token ';'
     | input Tokens_list ';'
     | input Tokens_list Width ';'
-    | input Width Tokens_list ';'
+    | input Width Width Tokens_list ';'
     | input integer Tokens_list ';'
     | integer Tokens_list ';'
     | integer Tokens_list Width ';'
@@ -138,9 +141,10 @@ Parameter :
       parameter Pairs ';' 
     | parameter signed Pairs ';'
     | parameter Width Pairs ';'
+    | parameter Width Width Pairs ';'
     | parameter signed Width Pairs ';'
     ;
-Localparam : localparam Pairs ';' | localparam Width Pairs ';' ;
+Localparam : localparam Pairs ';' | localparam Width Pairs ';'  | localparam Width Width Pairs ';';
 Defparam : defparam DottedPairs ';' ;
 DottedPair : Dotted '=' Expr ;
 DottedPairs : DottedPairs ',' DottedPair | DottedPair ;
