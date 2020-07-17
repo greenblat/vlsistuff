@@ -125,19 +125,35 @@ def gatherAlwayses(Mod):
         List = ALWAYS[Cond]
         RList = ['list']
         BList = ['list']
-        for Item in List:
-            RR = Item[2]
-            BB = Item[3]
-            RList.append(RR)
-            BList.append(BB)
-            if (BB[0]=='<='):
-                LL = BB[2]
-                if (type(LL) is list): LL = tuple(LL)
-                if LL not in SOURCES: SOURCES.append(LL)
-            MM = module_class.support_set(Item[1])
-            for M1 in MM:
-                if (M1 not in SOURCES): SOURCES.append(M1)
-        Mod.alwayses.append( ( Cond, ('ifelse',Item[1],RList,BList),'always'))
+        if (Cond[0]=='list'):
+            for Item in List:
+                RR = Item[2]
+                BB = Item[3]
+                RList.append(RR)
+                BList.append(BB)
+                if (BB[0]=='<='):
+                    LL = BB[2]
+                    if (type(LL) is list): LL = tuple(LL)
+                    if LL not in SOURCES: SOURCES.append(LL)
+                MM = module_class.support_set(Item[1])
+                for M1 in MM:
+                    if (M1 not in SOURCES): SOURCES.append(M1)
+            Mod.alwayses.append( ( Cond, ('ifelse',Item[1],RList,BList),'always'))
+        elif (Cond[0]=='edge'):
+            for Item in List:
+                BB = Item
+                BList.append(BB)
+                if (BB[0]=='<='):
+                    LL = BB[2]
+                    if (type(LL) is list): LL = tuple(LL)
+                    if LL not in SOURCES: SOURCES.append(LL)
+                MM = module_class.support_set(Item[1])
+                for M1 in MM:
+                    if (M1 not in SOURCES): SOURCES.append(M1)
+            Mod.alwayses.append( ( Cond, BList,'always'))
+            
+        else:
+            logs.log_error('condition list is "%s"'%str(List))
 
 ONES = []
 TWOS = []
@@ -384,6 +400,7 @@ def dffrx1(Obj,Mod):
     return True
 
 
+
 def dffsx1(Obj,Mod):
     D = trans(Obj.conns['D'])
     CK = trans(Obj.conns['CK'])
@@ -404,22 +421,44 @@ def dffsx1(Obj,Mod):
         Mod.hard_assigns.append((QN,('!',Q),'',''))
     return True
 
+
+def dffx1(Obj,Mod):
+    D = trans(Obj.conns['D'])
+    CK = trans(Obj.conns['CK'])
+    Q,QN = getQandQN(Obj,Mod)
+
+    Cond = ('edge', 'posedge', CK)
+    if (Q=='')and(QN==''):
+        logs.log_warning('no Q, QN in dffx1 %s'%Obj.Name)
+        return True
+
+    if (QN==''):
+        Mod.alwayses.append((Cond,('<=',Q,D),'always'))
+    elif (Q==''):
+        Mod.alwayses.append((Cond,('<=',QN,('!',D)),'always'))
+    else:
+        Mod.alwayses.append((Cond,('<=',Q,D),'always'))
+        Mod.hard_assigns.append((QN,('!',Q),'',''))
+    return True
+
 def addfx1(Obj,Mod):
     A = trans(Obj.conns['A'])
     B = trans(Obj.conns['B'])
     CI = trans(Obj.conns['CI'])
-    CO = trans(Obj.conns['CO'])
-    COfunc = ('|',('&',A,B),('&',A,CI),('&',CI,B))
-    Mod.hard_assigns.append((CO,COfunc,'',''))
+    if 'CO' in Obj.conns:
+        CO = trans(Obj.conns['CO'])
+        COfunc = ('|',('&',A,B),('&',A,CI),('&',CI,B))
+        Mod.hard_assigns.append((CO,COfunc,'',''))
     if 'S' in Obj.conns:
         S = trans(Obj.conns['S'])
-        Sfunc = ('^','A','B','CI')
-        Mod.hard_assigns((S,Sfunc,'',''))
+        Sfunc = ('^',A,B,CI)
+        Mod.hard_assigns.append((S,Sfunc,'',''))
     return True
 
 KNOWNS['MX2X1'] = ('func',mx2x1)
 KNOWNS['MX3X1'] = ('func',mx3x1)
 KNOWNS['MX4X1'] = ('func',mx4x1)
+KNOWNS['DFFX1'] = ('func',dffx1)
 KNOWNS['DFFRX1'] = ('func',dffrx1)
 KNOWNS['DFFSX1'] = ('func',dffsx1)
 KNOWNS['ADDFX1'] = ('func',addfx1)

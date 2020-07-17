@@ -24,11 +24,12 @@ def select_current(Env):
 def execute_line(Line,Env):
     RegisteredList = string.split(Registered)
     wrds = string.split(Line)
+    print('execute_line "%s"'%(wrds))
     if (len(wrds)==0):
         return
     if (wrds[0][0]=='#'):
         return
-    if (wrds[0][0]=='/'):
+    if (len(wrds[0])>=2)and(wrds[0][:2]=='//'):
         return
     i = 0
     for word in wrds:
@@ -435,9 +436,10 @@ def execute_line(Line,Env):
         String = '%s(Env.Current,Env.Modules,wrds)'%(wrds[0])
         exec(String)
         return
-    
+    print('got here') 
     if len(wrds)==1:
        Done = importing(wrds[0],Env,False)
+       print('done %s'%Done)
        if Done: return 
 
 
@@ -461,6 +463,7 @@ def importing(Fname,Env,Original=True):
         sys.path += [Path]
 
     what = 'from %s import help_main'%(Fname)
+    print('importing "%s"'%what)
     try:
         exec(what)
     except:

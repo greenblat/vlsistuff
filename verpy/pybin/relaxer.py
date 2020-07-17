@@ -3,9 +3,13 @@ import os,sys,string
 
 def main():
     Fname = sys.argv[1]
+
+
+
+def run(Fname,Fnameout):
     File = open(Fname)
-    Fout = open('out.file','w')
-    Fv = open('out.v','w')
+    Fout = open('%s.out'%Fnameout,'w')
+    Fv = open('%s.lexv'%Fnameout,'w')
 
     while 1:
         line = File.readline()

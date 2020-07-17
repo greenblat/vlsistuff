@@ -87,11 +87,12 @@ def read_verilog_file(Fname,RunDir,Env):
         if not Env.Current: Env.Current=Locals[Mod]
         Env.Modules[Mod]=Locals[Mod]
 
-
+import relaxer
 def read_gate_level_verilog_file(Fname,RunDir):
     logs.log_info('gatelevel readfile %s'%Fname)
     run_lexer(Fname,'%s/lex.out'%RunDir)
-    File = open('%s/lex.out'%RunDir)
+    relaxer.run('lex.out','glvlex')
+    File = open('%s/glvlex.out'%RunDir)
     Locals = glv_readfile(File)
     for Mod in Locals:
         Locals[Mod].cleanZeroNets()
