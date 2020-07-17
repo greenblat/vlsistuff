@@ -26,6 +26,9 @@ def prepare_tb(Mod):
     print 'prepare tb %s'%Name
     STR = string.replace(PREPARE_STRING,'MOD',Name)
     os.system(STR)
+    if not os.path.exists('verilog.py'):
+        os.system('/bin/mv %s.inst.py verilog.py'%Name)
+        
     Fcomp = open('comp','w')
     Fcomp.write(' #! /bin/csh -f\n')
     Fcomp.write(' \n\n')
@@ -50,8 +53,6 @@ PREPARE_STRING = '''
     /bin/rm pymon.file
     /bin/rm *.empty
     /bin/mv MOD.inst tb.v
-    /bin/mv MOD.inst.py verilog.py
-
     /bin/rm lex.out
     /bin/rm db0.pickle
     /bin/rm yacc.log
@@ -72,6 +73,7 @@ def dump_instance(Mod,Simple=False):
         Fout.write('reg [31:0] panics;   initial panics=0;\n')
         Fout.write('reg [31:0] corrects; initial corrects=0;\n')
         Fout.write('reg [31:0] marker;   initial marker=0;\n')
+        Fout.write('reg [31:0] Index;   initial Index=0;\n')
 
     for Param in Mod.parameters:
         Val = Mod.parameters[Param]
@@ -92,6 +94,10 @@ def dump_instance(Mod,Simple=False):
             Fout.write('wire %s %s;\n'%(wids(DirHL[1]),Sig))
         elif ('inout' in Dir1):
             Fout.write('inout_driver drv_%s(.io(%s),.dflt(1\'b0));\n'%(Sig,Sig))
+    if 'clk' not in Sigs:
+        Fout.write('reg clk;\n')
+    if 'rst_n' not in Sigs:
+        Fout.write('reg rst_n;\n')
     if not Simple:
         Fout.write(String1)
         Fout.write(Regs)
@@ -260,6 +266,7 @@ def negedge():
     cycles += 1
     veri.force('tb.cycles',str(cycles))
     if (cycles>1000):
+        logs.log_info('finishing on default guard of 1000')
         veri.finish()
     rst_n = veri.peek('tb.rst_n')
     if (rst_n!='1'):

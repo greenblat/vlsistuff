@@ -307,6 +307,31 @@ class module_class:
                 Fout.write('%s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
         return NOIOS,[]
 
+    def orderLocalParams(self):
+         Base = []
+         Keys = self.localparams.keys()
+         Len = len(Keys)
+         while Keys!=[]:
+            for Lparam in Keys:
+                Expr = self.localparams[Lparam]
+                Sup = support_set(Expr)
+                print('EXPR',Expr,Sup)
+                if (Sup == []): 
+                    Base.append(Lparam)
+                    Keys.remove(Lparam)
+                elif allIn(Sup,self.parameters.keys()):
+                    Base.append(Lparam)
+                    Keys.remove(Lparam)
+                elif allIn(Sup,Base):
+                    Base.append(Lparam)
+                    Keys.remove(Lparam)
+            if len(Keys)==Len:
+                logs.log_warning('orderLocalParams didnt shrink, keys left= %s'%str(Keys))
+                Keys = []
+            Len = len(Keys)
+         return Base                    
+
+
     def dump_verilog(self,Fout,MergeHards=False,Style='new'):
         logs.setCurrentModule('dump_verilog')
         if Style=='new':
@@ -319,7 +344,8 @@ class module_class:
             Hards,Ordered = self.prepareForMerges()
         for Prm in self.includes:
             Fout.write('`include "%s"\n'%(Prm))
-        for Prm in self.localparams:
+        Lparams = self.orderLocalParams()
+        for Prm in Lparams:
             Fout.write('localparam %s = %s;  //   %s \n'%(pr_expr(Prm),pr_expr(self.localparams[Prm]),self.localparams[Prm]))
         for (Name,Dir,Wid) in NOIOS:
             if is_double_def(Wid):
@@ -815,6 +841,7 @@ class module_class:
                     return Wid
     
         logs.log_err('compute_int failed on "%s" %s'%(str(Item),self.Module),False)
+        traceback.print_stack(None,None,logs.Flog)
         return 0
 
 
@@ -975,6 +1002,8 @@ def support_set__(Sig,Bussed):
                 return support_set__(Sig[1],Bussed)+support_set__(Sig[2],Bussed)+support_set__(Sig[3],Bussed)
             except:
                 return support_set__(Sig[1],Bussed)+support_set__(Sig[2],Bussed)
+        if Sig[0] in ['functioncall']:
+            return support_set__(Sig[2],Bussed)
 
         res=[]
         if Sig[0]=='named_begin':
@@ -1085,7 +1114,7 @@ def pr_inst_params(Dir):
     return '#(%s)'%(string.join(res,', '))
 
 def pr_timing(List):
-    if type(List)==types.ListType:
+    if type(List) in (types.ListType,types.TupleType):
         if List[0]=='list':
             res = map(pr_expr,List[1:])
             res = map(str,res)
@@ -1545,7 +1574,7 @@ def pr_expr(What):
         Str = '{%s{%s}}'%(pr_expr(What[1]),pr_expr(What[2]))
         return Str
 
-    if (type(What)==types.ListType):
+    if (type(What) in (types.TupleType,types.ListType)):
         if simply_computable(What):
             X,_ = simply_computable(What)
             return str(X)
@@ -1827,4 +1856,8 @@ def goodToGo(Set,Readies,Ordered):
             return False
     return True
 
+def allIn(Sup,Base):
+    for A in Sup:
+        if A not in Base: return False
+    return True
 
