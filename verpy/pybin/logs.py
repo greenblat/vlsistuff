@@ -228,6 +228,13 @@ def extract_base_name(Fname):
     BB = AA[-1]
     CC = string.split(BB,'.')
     return CC[0]
+def binx(Int,Wid=8):  
+    X = bin(Int)[2:]
+    Pref = '0'*Wid
+    Y = Pref + X 
+    Z = Y[-Wid:]
+    return Z
+
 
 
 

@@ -70,6 +70,7 @@ class module_class:
     def add_net(self,Name,Dir,Wid):
         self.add_sig(Name,Dir,Wid)
     def add_sig(self,Name,Dir,Wid):
+        if Wid==1: Wid=0
         if (type(Name)==types.StringType)and('[' in Name):
             Name = Name[:Name.index('[')]
         if Name=='':
@@ -77,6 +78,7 @@ class module_class:
             self.inventedNets += 1
             self.add_sig(Name,Dir,Wid)
             return Name
+        if (type(Name) is str)and(Name[0] in '0123456789'): return Name
         if Dir not in ['input wire','output wire','wire','reg','input','output','output reg','integer','inout','tri0','tri1','output reg signed','wire signed','signed wire','reg signed','output signed','input logic','output logic','logic','genvar','output signed','input signed','wire signed','inout wire']:
             logs.log_error('add_sig got of %s dir="%s"'%(Name,Dir))
             
@@ -96,6 +98,12 @@ class module_class:
             logs.log_error('add_sig got listName %s'%str(Name))
             return
         if (Dir=='wire')and(Name in self.nets)and(Wid==0):
+            return
+        if (Dir=='wire')and(Name not in self.nets)and(type(Wid) is int):
+            if Wid<2: 
+                self.nets[Name] = ('wire',0)
+            else:
+                self.nets[Name] = ('wire',(Wid-1,0))
             return
         if (Dir=='reg')and(Name in self.nets):
             Pdir,Pwid=self.nets[Name]
@@ -165,8 +173,9 @@ class module_class:
             if '[' in Net:
                 Net = Net[:Net.index('[')]
             if (not myExtras(Net))and(Net not in self.nets)and(Net not in self.parameters)and(Net[0] not in '0123456789')and(Net not in self.localparams)and(Net not in self.genvars):
-                logs.log_err('net %s used before defined'%(Net))
+                logs.log_err('net %s used before defined (%s)'%(Net,Net in self.nets))
                 logs.log_info('defined localparams %s %s '%(str(self.localparams),self.parameters))
+                traceback.print_stack(None,None,logs.Flog)
 
     def duplicate_inst(self,Inst,Inst2):
         Obj = self.insts[Inst]
@@ -580,7 +589,6 @@ class module_class:
                 self.check_net_def(Sig1)
                 return
             if (Net not in self.nets)and(Net not in self.parameters)and(Net not in self.localparams):
-                logs.log_info('adding %s'%Net)
                 self.add_sig(Net,'wire',0)
             return
         if type(Net)==types.TupleType:
@@ -831,7 +839,10 @@ class module_class:
             if Item[0] in ['-','+','*','/']:
                 A = self.compute_int(Item[1])
                 B = self.compute_int(Item[2])
-                return eval('%s%s%s'%(A,Item[0],B))
+                try:
+                    return eval('%s%s%s'%(A,Item[0],B))
+                except:
+                    return [Item[0],A,B]
             if Item[0] in ['dig']:
                 return self.compute_int(Item[2])
             if Item[0] in ['functioncall']:
@@ -839,7 +850,8 @@ class module_class:
                     Val = self.compute_int(Item[2][0])
                     Wid = len(bin(Val+1))-2
                     return Wid
-    
+            if Item[0] == 'subbit':
+                return Item
         logs.log_err('compute_int failed on "%s" %s'%(str(Item),self.Module),False)
         traceback.print_stack(None,None,logs.Flog)
         return 0
@@ -951,9 +963,10 @@ def support_set__(Sig,Bussed):
     if (Sig=='$unconnected'):           return []
     if (Sig=='$unsigned'):              return []
     if (Sig=='$signed'):              return []
-    if type(Sig) in [types.IntType]:    return []
-    if type(Sig) in [types.StringType]: 
+    if type(Sig) is int:    return []
+    if type(Sig) is str: 
         if Sig[0]=='`': return []
+        if Sig[0]=='"': return []
         if Sig in OPS : return []
         if Sig in KEYWORDS : return []
         return [Sig]
@@ -1003,6 +1016,7 @@ def support_set__(Sig,Bussed):
             except:
                 return support_set__(Sig[1],Bussed)+support_set__(Sig[2],Bussed)
         if Sig[0] in ['functioncall']:
+            print('>>>>>>>>>>>',Sig[2])
             return support_set__(Sig[2],Bussed)
 
         res=[]
@@ -1245,6 +1259,11 @@ def pr_stmt(List,Pref='',Begin=False):
                     logs.log_err('bad case item "%s"'%str(Item))
             Str = Str + '%sendcase\n'%Pref
             return  Str
+        if List[0]=='return':
+            Val = pr_expr(List[1])
+            return '%sreturn %s;\n'%(Pref,Val)
+
+
         if List[0]=='while':
             Cond = clean_br(pr_expr(List[1]))
             X = pr_stmt(List[2],Pref+'    ',True)
@@ -1380,6 +1399,7 @@ def pr_stmt(List,Pref='',Begin=False):
 
     if type(List)==types.TupleType:
         return pr_stmt(list(List))
+
     logs.log_err('untreated for prnt stmt %s %s'%(Pref,List))
     traceback.print_stack(None,None,logs.Flog)
     return '[error %s]'%str(List)

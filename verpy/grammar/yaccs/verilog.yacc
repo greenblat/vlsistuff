@@ -21,6 +21,7 @@
 %token xnor nand nor repeat
 %token supply0 supply1
 %token newver
+%token return
 
 %right '?' ':' 
 %left and_and
@@ -129,6 +130,7 @@ Mem_def  :
     | reg Width Tokens_list ';'
     | reg Width token Width ';'
     | reg Width Width token ';'
+    | output reg Width Width token ';'
     | input Tokens_list ';'
     | input Tokens_list Width ';'
     | input Width Width Tokens_list ';'
@@ -262,6 +264,7 @@ Statement :
     | Dotted ';'
     | pragma
     | assign LSH '=' Expr ';'
+    | return token ';'
     ;
 
 For_statement : for '(' Soft_assigns ';' Expr ';' Soft_assigns ')' Statement ; 

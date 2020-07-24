@@ -12,9 +12,10 @@ def get_width(Net,Mod):
     return X
 
 def get_width2(Net,Mod):
-    if type(Net)==types.IntType:
+    if type(Net) is int:
         return 32,needed_bits(Net)
-    if type(Net)==types.StringType:
+    if type(Net) is str:
+        if Net[0] in '0123456789': return get_width2(eval(Net),Mod)
         if Net in Mod.parameters:
             XX =  get_width2(Mod.parameters[Net],Mod)
             return XX
@@ -28,7 +29,7 @@ def get_width2(Net,Mod):
             H = compute1(Wid[0],Mod)
             L = compute1(Wid[1],Mod)
             return H-L+1,H-L+1
-    if type(Net)==types.ListType:
+    if type(Net) in [list,tuple]:
         if Net[0] == '*':
             Smax=0
             Smin=0
@@ -90,7 +91,8 @@ def get_width2(Net,Mod):
             W2,W3 = get_width2(Net[3],Mod)
             return max(W0,W2),min(W1,W3)
         if Net[0] == 'subbit':
-            if Net[1] in Mod.mems:
+
+            if (Mod.mems.keys()!=[])and(Net[1] in Mod.mems):
                 Dir,Wid1,Wid2=Mod.mems[Net[1]]
                 H = compute1(Wid1[0],Mod)
                 L = compute1(Wid1[1],Mod)
@@ -129,7 +131,7 @@ def get_width2(Net,Mod):
 
 
 
-    logs.log_err('get_width got %s, cannot determine the width'%str(Net))
+    logs.log_err('rtl_width get_width got %s, cannot determine the width'%str(Net))
     print traceback.print_stack()
     return 1,1
         

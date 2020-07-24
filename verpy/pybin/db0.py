@@ -245,7 +245,12 @@ def add_module_params(List1):
                 add_module_params(DataBase[Item])
             elif (Item[0]=='head_param'):
                 LL = DataBase[Item]
-                if (len(LL)==4)and(LL[0][0]=='parameter'):
+                Vars = matches.matches(LL,'parameter ? ? = ?')
+                if Vars:
+                    Who = Vars[1][0]
+                    Expr = get_expr(Vars[2])
+                    Current.add_parameter(Who,Expr)
+                elif (len(LL)==4)and(LL[0][0]=='parameter'):
                     Who = LL[1][0]
                     Expr = get_expr(LL[3])
                     Current.add_parameter(Who,Expr)
@@ -254,7 +259,7 @@ def add_module_params(List1):
                     Expr = get_expr(LL[2])
                     Current.add_parameter(Who,Expr)
                 else:
-                    logs.log_err('add_module_paran got %d %s'%(len(LL),LL))
+                    logs.log_err('add_module_param got %d %s'%(len(LL),LL))
                 
 
 
@@ -516,6 +521,16 @@ def get_statement(Item):
         Assigns2 = get_soft_assigns(Vars[2])
         Stmt = get_statement(Vars[3])
         return ['for',Assigns1,Cond,Assigns2,Stmt]
+#ILIA
+    Vars = matches.matches(List,"parameter  ? ;")
+    if Vars:
+        More = get_list(Vars[0])
+        return More
+
+    Vars = matches.matches(List,"localparam  ? ;")
+    if Vars:
+        More = get_list(Vars[0])
+        return More
 
     if len(List)==1:
         if List[0][0]=='Always':
@@ -680,6 +695,10 @@ def get_statement(Item):
             return ['case',Switch,Cases]
         else:
             logs.log_err('CaseKind got %s'%str(List[0]))
+
+    Vars = matches.matches(List,'return ? ;')
+    if Vars:
+        return ['return',Vars[0]]
 
     if (type(List)==types.ListType)and(len(List)==1):
         return get_statement(List[0])
@@ -895,6 +914,12 @@ def get_list(Item):
     if Vars:
         More = get_list(Vars[0])
         return More
+    Vars = matches.matches(Item,'localparam !Pairs ;')
+    if Vars:
+        More = get_list(Vars[0])
+        return More
+
+
     Vars = matches.matches(Item,'? = !Expr')
     if Vars:
         Expr = get_expr(Vars[1])
@@ -1403,7 +1428,7 @@ def add_definition(List):
             Current.add_hard_assign(Net,Expr)
         return
 
-    Vars = matches.matches(List,'!IntDir !Tokens_list = !Expr ;',False)
+    Vars = matches.matches(List,'!IntDir ?  = !Expr ;',False)
     if Vars:
         Dir = get_dir(Vars[0])
         List0 = get_list(Vars[1])
@@ -1412,6 +1437,29 @@ def add_definition(List):
             Current.add_sig(Net,Dir,0)
             Current.add_hard_assign(Net,Expr)
         return
+
+    Vars = matches.matches(List,'!IntDir !Width ?  = !Expr ;',False)
+    if Vars:
+        Dir = get_dir(Vars[0])
+        Wid = get_wid(Vars[1])
+        List0 = get_list(Vars[2])
+        Expr = get_expr(Vars[3])
+        for Net in List0:
+            Current.add_sig(Net,Dir,Wid)
+            Current.add_hard_assign(Net,Expr)
+        return
+
+    Vars = matches.matches(List,'!IntDir !InstParams ?  = !Expr ;',False)
+    if Vars:
+        Dir = get_dir(Vars[0])
+        List0 = get_list(Vars[2])
+        Expr = get_expr(Vars[3])
+        for Net in List0:
+            Current.add_sig(Net,Dir,0)
+            Current.add_hard_assign(Net,Expr)
+        return
+
+
 
     Vars = matches.matches(List,'!IntDir !Width !Tokens_list ;',False)
     if Vars:
@@ -1555,13 +1603,14 @@ def add_localparam(List0):
     if Vars:
         List1 = DataBase[Vars[0]]
         for Item in List1:
-            List2 = DataBase[Item]
-            Vars2 = matches.matches(List2,'?token = !Expr',False)
-#            print('MMMMM',Vars2,List2)
-            if Vars2:
-                Name = Vars2[0][0]
-                Expr = get_expr(Vars2[1])
-                Current.add_localparam(Name,Expr)
+#            print('MMMMM',Item,List1)
+            if len(Item)==2:
+                List2 = DataBase[Item]
+                Vars2 = matches.matches(List2,'?token = !Expr',False)
+                if Vars2:
+                    Name = Vars2[0][0]
+                    Expr = get_expr(Vars2[1])
+                    Current.add_localparam(Name,Expr)
         return
 
     Vars = matches.matches(List0,'localparam !Width !Pairs ;',False)
@@ -1576,20 +1625,20 @@ def add_localparam(List0):
                 Expr = get_expr(Vars2[1])
                 Current.add_localparam(Name,Expr)
         return
+    Vars = matches.matches(List0,'localparam !Width !Width !Pairs ;',False)
+    if Vars:
+        List1 = DataBase[Vars[2]]
+        for Item in List1:
+            List2 = DataBase[Item]
+            Vars2 = matches.matches(List2,'?token = !Expr',False)
+            if Vars2:
+                Name = Vars2[0][0]
+                Expr = get_expr(Vars2[1])
+                Current.add_localparam(Name,Expr)
+        return
+
     logs.log_error('localparam failed in %s'%(str(List0)))
     return
-    List2 = DataBase[Ptr]
-    for Item in List2:
-        if len(Item)==2:    
-            if (Item[0]=='Pair'):
-                List = DataBase[Item]
-                Name=List[0][0]
-                Expr = get_expr(List[2])
-                Current.add_localparam(Name,Expr)
-            else:
-                add_localparam(Item)
-        else:
-            logs.log_error('add_localparam failed on %s %s %s'%(Ptr,Item,List2))
 
 def flattenList(Ptr):
     Key = Ptr[0]

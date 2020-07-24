@@ -8,6 +8,6 @@ set FLAGS = '-g'
 gcc src/verilog_tables.c src/nlexer.c -o verilog_lexer $FLAGS
 
 # copy verilog_lexer executable to Your bin (anywhere in $PATH)
-# /bin/cp verilog_lexer ~/bin/
+/bin/cp verilog_lexer ~/bin/
 
 

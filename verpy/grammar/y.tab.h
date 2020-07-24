@@ -131,14 +131,15 @@
      supply0 = 347,
      supply1 = 348,
      newver = 349,
-     arith_shift_right = 350,
-     SignedLeft = 351,
-     shift_right = 352,
-     shift_left = 353,
-     Veryequal = 354,
-     noteqeq = 355,
-     StarStar = 356,
-     UNARY_PREC = 357
+     return = 350,
+     arith_shift_right = 351,
+     SignedLeft = 352,
+     shift_right = 353,
+     shift_left = 354,
+     Veryequal = 355,
+     noteqeq = 356,
+     StarStar = 357,
+     UNARY_PREC = 358
    };
 #endif
 /* Tokens.  */
@@ -234,14 +235,15 @@
 #define supply0 347
 #define supply1 348
 #define newver 349
-#define arith_shift_right 350
-#define SignedLeft 351
-#define shift_right 352
-#define shift_left 353
-#define Veryequal 354
-#define noteqeq 355
-#define StarStar 356
-#define UNARY_PREC 357
+#define return 350
+#define arith_shift_right 351
+#define SignedLeft 352
+#define shift_right 353
+#define shift_left 354
+#define Veryequal 355
+#define noteqeq 356
+#define StarStar 357
+#define UNARY_PREC 358
 
 
 
