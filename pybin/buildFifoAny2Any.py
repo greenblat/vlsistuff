@@ -3,7 +3,7 @@
 import os,sys,string
 
 HELPSTRING = '''
-invocation:     buildFifo.py  <Writes> <Reads>  < -prefix PREFIX >
+invocation:     buildFifo.py  <Writes> <Reads>
 this script builds RTL of a multi_sync_fifo with optional number of concurrent writes.
 and Depth being number of fifo entries.
 <Writes> is the number of concurrent writes
@@ -20,30 +20,16 @@ def main():
         print HELPSTRING
         return
 
-    Prefix = ''
-    if '-prefix' in sys.argv:
-        Ind = sys.argv.index('-prefix')
-        Prefix = sys.argv[Ind+1]
+    buildFifo(Writes,Reads)
 
-
-    buildFifo(Writes,Reads,Prefix)
-
-def buildFifo(Writes,Reads,Prefix=''):
-    Fname = '%smultififo_w%d_r%d.v'%(Prefix,Writes,Reads)
+def buildFifo(Writes,Reads):
+    Fname = 'multififo_w%d_r%d.v'%(Writes,Reads)
     Fout = open(Fname,'w')
     Str = STRING0
     Str = string.replace(Str,'WRITES',str(Writes))
     Str = string.replace(Str,'READS',str(Reads))
-    Str = string.replace(Str,'multififo','%smultififo'%Prefix)
-    Wx = bitsFor(Writes)-1
-    if Wx==0: WWID = ''
-    else: WWID = '[%d:0]'%Wx
-    Rx = bitsFor(Reads)-1
-    if Rx==0: RWID = ''
-    else: RWID = '[%d:0]'%Rx
-
-    Str = string.replace(Str,'WWID',WWID)
-    Str = string.replace(Str,'RWID',RWID)
+    Str = string.replace(Str,'WWID',str(bitsFor(Writes)-1))
+    Str = string.replace(Str,'RWID',str(bitsFor(Reads)-1))
     TXT=''
     Wrts = []
     TEXTWRITE2 = '        if (oktowrite && (writes >= 1))  fifos[wptr] <= din[WIDTH-1:0];\n'
@@ -59,7 +45,7 @@ def buildFifo(Writes,Reads,Prefix=''):
         TEXTWRITE3 += 'wire [WIDPTR:0] rptr%d = ((rptr+%d)>=DEPTH) ? ((rptr+%d)-DEPTH) : (rptr+%d);\n'%(II,II,II,II)
 
     for II in range(1,Reads+1):
-        TEXTWRITE3 += 'assign dout[WIDTH*%d-1:WIDTH*%d] = (count>=%d) ? fifos[rptr%d] : 0;\n'%(II,II-1,II,II-1)
+        TEXTWRITE3 += 'assign dout[WIDTH*%d-1:WIDTH*%d] = ((reads>=%d)&&oktoread) ? fifos[rptr%d] : 0;\n'%(II,II-1,II,II-1)
 
     Str = string.replace(Str,'TEXTWRITE2',TEXTWRITE2)
     Str = string.replace(Str,'TEXTWRITE3',TEXTWRITE3)
@@ -79,40 +65,37 @@ def bitsFor(Num):
     Bits = len(bin(Int))-2
     return Bits
 
-SIMPLECOUNT = 'assign   count = (wptr >= rptr) ? (wptr - rptr) :  (((2 * DEPTH) - rptr) + wptr);'
 
 INSTSTRING = '''
 /*
-multififo_wWRITES_rREADS #(32) fifo (.clk(clk),.rst_n(rst_n),.softreset(softreset)
+multififo_dDEPTH_wWRITES_rREADS #(32) fifo (.clk(clk),.rst_n(rst_n),.softreset(softreset)
     .reads(reads),.dout(dout)
     .writes(writes),.din(din)
-    ,.full(full)
-    ,.empty(empty)
     ,.count(count[COUNT:0])
-    ,.overflow(overflow)
+    ,.frees(frees[COUNT:0])
     ,.taken(taken)
 '''
 
 STRING0 = '''
 module multififo_wWRITES_rREADS #(parameter WIDTH=32,parameter DEPTH=8) (input clk,input rst_n,input softreset
-    ,input  WWID writes
-    ,input  RWID reads
+    ,input  [WWID:0] writes
+    ,input  [RWID:0] reads
     ,input  [WIDTH*WRITES-1:0]  din
     ,output [WIDTH*READS-1:0]  dout
-    ,output empty, output full, output taken
+    ,output taken
     ,output reg [15:0] count
-    ,output overflow
+    ,output     [15:0] frees
 );
 
+assign frees = DEPTH-count;
 reg [DEPTH-1:0] [WIDTH-1:0] fifos;
 localparam WIDPTR = $clog2(DEPTH);
 reg [WIDPTR:0] wptr,rptr;
-wire oktowrite = (writes+count)<=DEPTH;
-wire oktoread = (reads<=count);
+wire badwrite = (writes>WRITES);
+wire badread  = (reads>READS);
+wire oktowrite = !badwrite && ((writes+count)<=DEPTH);
+wire oktoread = !badread && (reads<=count);
 assign taken = oktowrite;
-assign overflow = !oktowrite && (writes>0);
-assign   empty = count == 0;
-assign   full = count == DEPTH;
 TEXTWRITE3
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin

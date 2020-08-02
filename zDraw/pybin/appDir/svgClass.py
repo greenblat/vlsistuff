@@ -120,7 +120,7 @@ class svgClass:
                 Color = Color1
             self.color(Color[0],Color[1],Color[2])
         else:
-            print 'color missing',Whose
+            print('color missing',Whose)
 
 
     def prtColor(self):
