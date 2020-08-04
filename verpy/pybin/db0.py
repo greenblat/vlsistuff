@@ -503,6 +503,20 @@ def get_statement(Item):
             res.append(('declare',Dir,Net,('packed',Wid0,Wid1)))
         return res 
 
+    Vars = matches.matches(List,'!IntDir !Width ?  = !Expr ;')
+    if Vars:
+        Dir = get_dir(Vars[0])
+        if Dir=='logic': Dir='wire';
+        Wid = get_wid(Vars[1])
+        Net = Vars[2]
+        res=['list']
+        res.append(('declare',Dir,Net,Wid))
+        Src = get_expr(Vars[3])
+        Dst = get_expr(Net)
+        res.append(('assigns',['list',['=',Dst,Src]]))
+        return res 
+        
+        
     Vars = matches.matches(List,'!IntDir !Width !Tokens_list ;')
     if Vars:
         Dir = get_dir(Vars[0])

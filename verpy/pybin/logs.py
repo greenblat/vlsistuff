@@ -100,19 +100,28 @@ def log_ending(Who):
 
 
 
-params={}
-def get_param(Param,Default):
-    print '>>>>',Param,params
-    if Param in params:
-        print '>>>>>',params[Param]
-        return params[Param][0]
-    return Default
+#params={}
+#def get_param(Param,Default):
+#    print '>>>>',Param,params
+#    if Param in params:
+#        print '>>>>>',params[Param]
+#        return params[Param][0]
+#    return Default
 
 
 def parse_args():
-    global params
+    params = {}
     fnames=[]
     state='idle'
+    PYVER = sys.argv[0]
+    AA = string.split(PYVER,'/')
+    AA.pop(-1)
+    ExecPath = string.join(AA,'/')
+    params['execpath'] = ExecPath
+
+
+
+
     for X in sys.argv[1:]:
         if (state=='idle'):
             if (X[0]=='-'):

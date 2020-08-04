@@ -437,6 +437,9 @@ class module_class:
             if Generate[0] in ['for','if','ifelse']:
                 Statement = pr_stmt(Generate,'    ',True)
                 Fout.write('%s\n'%Statement)
+            elif Generate[0] == 'assigns':
+                Statement = pr_stmt(Generate[1],'    ',True)
+                Fout.write('%s\n'%Statement)
             else:
                 for Item in Generate:
                     Statement = pr_stmt(Item,'    ',True)

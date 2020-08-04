@@ -64,7 +64,7 @@ def run_lexer(Fname,FnameOut):
         print 'using system verilog parsing'
         os.system('systemverilog_lexer %s %s'%(Fname,FnameOut))
     else:
-        os.system('verilog_lexer %s %s -no_eol'%(Fname,FnameOut))
+        os.system('%s/verilog_lexer %s %s -no_eol'%(Env.params['execpath'],Fname,FnameOut))
 
 
 

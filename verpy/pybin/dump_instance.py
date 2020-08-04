@@ -224,24 +224,25 @@ Monitors=[]
 cycles=0
 
 
-class driverMonitor:
+class driverMonitor(logs.driverClass):
     def __init__(self,Path,Monitors):
-        Monitors.append(self)
-        self.Path = Path
-        self.state='idle'
-        self.waiting  = 0
-
-    def force(self,Sig,Val):
-        veri.force('%s.%s'%(self.Path,Sig),str(Val))
-
-    def peek(self,Sig):
-        return logs.peek('%s.%s'%(self.Path,Sig))
-    def peeksigned(self,Sig):
-        return logs.peeksigned('%s.%s'%(self.Path,Sig))
-
-    def valid(self,Sig):
-        return self.peek(Sig)==1
-
+        logs.driverClass.__init__(self,Path,Monitors)
+#        Monitors.append(self)
+#        self.Path = Path
+#        self.state='idle'
+#        self.waiting  = 0
+#
+#    def force(self,Sig,Val):
+#        veri.force('%s.%s'%(self.Path,Sig),str(Val))
+#
+#    def peek(self,Sig):
+#        return logs.peek('%s.%s'%(self.Path,Sig))
+#    def peeksigned(self,Sig):
+#        return logs.peeksigned('%s.%s'%(self.Path,Sig))
+#
+#    def valid(self,Sig):
+#        return self.peek(Sig)==1
+#
     def run(self):
         if self.waiting>0:
             self.waiting -= 1
