@@ -61,7 +61,7 @@ def valid(Sig,Base=BASE):\n\
 \n\
 def conclusions():\n\
      # print here end of run things \n\
-     print 'signing off'\n\
+     print('signing off')\n\
      return \n\
 cycles = 0\n\
 def negedge():\n\
@@ -291,26 +291,27 @@ char scriptStart[] = "\n\
 import string,os,sys\n\
 import traceback \n\
 sys.path=sys.path+['./']\n\
+print(dir())\n\
 import veri\n\
-print 'python starting'\n\
+print('python starting')\n\
 \n\
 def conclusions():\n\
-    print 'no conclusions() defined. add def conclusions(): to python code to print info at the end of the run'\n\
-    print 'cheers, ilia     greenblat@mac.com' \n\
+    print('no conclusions() defined. add def conclusions(): to python code to print info at the end of the run')\n\
+    print('cheers, ilia     greenblat@mac.com') \n\
 if os.path.exists(INITFILE):\n\
     try:\n\
-        print 'verilog.py (%s) found'%INITFILE\n\
+        print('verilog.py (%s) found'%INITFILE)\n\
 #        if '.py' in INITFILE: INITFILE = INITFILE[:-3] \n\
-        execfile(INITFILE)  \n\
+        exec(open(INITFILE).read())  \n\
 #        from verilog import *\n\
-        print 'verilog.py found and loaded'\n\
+        print('verilog.py found and loaded')\n\
     except:\n\
         traceback.print_exc() \n\
-        print 'verilog.py exists, but crashed. failed to read verilog.py'\n\
+        print('verilog.py exists, but crashed. failed to read verilog.py')\n\
         veri.finish() \n\
         sys.exit() \n\
 else:\n\
-    print 'verilog.py does not exist'\n\
+    print('verilog.py does not exist')\n\
     sys.exit() \n\
 \n\
 ";
@@ -482,9 +483,6 @@ void pushtok(char *s,int ind) {
         run_time=atof(&(s[1]));
         LASTCHANGE++;
         if ((run_time>=0)&&(run_time<start_time)&&(search)) search_time(start_time);
-//        useTriggers();
-//        printf("next=%f run=%f cond=%d\n",nextTriggerTime,run_time,((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)));
-//        if (vcdF0) { fprintf(vcdF1,"%s\n",s);}
         if ((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)) {
             nextTriggerTime += deltaTime; 
             PyRun_SimpleString(functionTime);
@@ -650,7 +648,6 @@ void search_time(start_time) int start_time;
                 state=Values;
                 return;
             }
-//            useTriggers();
             printf("next=%f run=%f cond=%d\n",nextTriggerTime,run_time,((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)));
             if ((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)) {
                 nextTriggerTime += deltaTime; 
@@ -806,6 +803,7 @@ void do_value(char *strx) {
     }
 }
 
+long zerox = -1;
 
 void record(long code,long bus,int width) {
     char temp[1000];
@@ -833,6 +831,7 @@ void record(long code,long bus,int width) {
             strcpy(sigs[psig].value,"x");
     }
     qqsa(FullName,psig);
+    if (psig==0) zerox = FullName;
     fprintf(Frecords,"record psig=%d sig=%s code=%s full=%s\n",psig,qqia(bus),qqia(code),fullname);
 }
 
@@ -894,10 +893,12 @@ veri_sensitive(PyObject *self,PyObject *args) {
     sensitive_value[psensitive] = val[0];
     psensitive++;
 
-    if (Psig==0) {
+    if (Psig==99999999) {
         printf("\npython: cannot find sig %s for sensitive\n",pathstring);
+        printf("%lx  %lx   %s\n",zerox,qqai(pathstring),pathstring);
         return Py_BuildValue("s", "q");
     }
+    printf(">>>>>> |%s|\n",Str);
     return Py_BuildValue("s", Str);
 }
 
@@ -1071,15 +1072,40 @@ static PyMethodDef VeriMethods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+
+static struct PyModuleDef veri_module_definition =
+{
+    PyModuleDef_HEAD_INIT,
+    "veri", /* name of module */
+    "",          /* module documentation, may be NULL */
+    -1,          /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    VeriMethods,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+};
+
+PyMODINIT_FUNC PyInit_veri(void)
+{
+
+    return PyModule_Create(&veri_module_definition);
+}
+
+
+
+
+
+
+
 PyObject *globals;
 PyObject *locals;
 void start_python() {
-    Py_Initialize();
-    Py_InitModule("veri", VeriMethods);
     char temp[10000];
+    PyImport_AppendInittab("veri", PyInit_veri);
+    Py_Initialize();
     sprintf(temp,"INITFILE = '%s'\n%s",fname2,scriptStart);
     PyRun_SimpleString(temp);
-//    PyRun_SimpleString(scriptStart);
     globals = PyDict_New();
     if (!globals) exit(2);
     PyDict_SetItemString(globals, "__builtins__", PyEval_GetBuiltins());

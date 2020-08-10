@@ -22,7 +22,7 @@
 
 #include "vpi_user.h"
 #include "veriuser.h"
-
+#include "vpi_user_cds.h"
 
 
 
@@ -38,7 +38,7 @@ long allocate_rest_alpha();
 
 int pli_debug=0;
 int import_done=0;
-
+int qq_started = 0;
 
 char CannotFindCallBack[1000];
 
@@ -121,11 +121,15 @@ int isSimpleExpr(exprHndl)
 {
         switch(vpi_get(vpiType, exprHndl)) /* Get the object type */ { 
                 case vpiNet:        
+                case vpiNetBit:
                 case vpiReg:        
+                case vpiRegBit:
                 case vpiIntegerVar: 
                 case vpiRealVar: 
                 case vpiTimeVar:    
                 case vpiParameter: 
+                case vpiSpecParam:
+                case vpiVarSelect:
                 case vpiMemoryWord: return (1);        /* It is a simple expression */ 
                 default: return (0);       /* It is not a simple expression */ 
         }
@@ -303,13 +307,13 @@ PLI_INT32 vpit_python( PLI_BYTE8 *user_data )
             /* expression, print its name */ 
                 pvalue.format = vpiIntVal; 
                 pvalue.format = vpiBinStrVal; 
-                vpi_printf("debugx\n");
+//                vpi_printf("debugx\n");
                 vpi_get_value(argH, &pvalue); 
-                vpi_printf("debugy\n");
+//                vpi_printf("debugy\n");
                 sprintf(tempstr,",'%s'",pvalue.value.str);
                 strcat(params,tempstr);
 //                sprintf(tempstr,",%d",pvalue.value.integer);
-                vpi_printf("ilia integer %d\n",pvalue.value.integer);
+//                vpi_printf("ilia integer %d\n",pvalue.value.integer);
 
             } else if (argH) {
 //                vpi_printf("debug1 2 %d pos=%d\n",iii,pos);
@@ -346,10 +350,11 @@ PLI_INT32 vpit_python( PLI_BYTE8 *user_data )
             Len = strlen(execstr);
                 
             if (strlen(params)!=0) {
-                if (execstr[Len-1]=='(')
-                    strcat(execstr,&(params[1]));
-                else
-                    strcat(execstr,params);
+                strcat(execstr,&(params[1]));
+//                if (execstr[Len-1]=='(')
+//                    strcat(execstr,&(params[1]));
+//                else
+//                    strcat(execstr,params);
             }
             if (FuncCall) strcat(execstr,")");
             int RC = PyRun_SimpleString(execstr);
@@ -476,24 +481,37 @@ void (*vlog_startup_routines[])() = {
 };
 
 
-// int dbg0 = 0;
-// int dbg0 = 1;
+int diffhandles = 0;
+int gethandles = 0;
+int totalpeeks      = 0;
 
-vpiHandle get_handle(char *pathstring) {
-    vpiHandle handle,ahandle;
-    return vpi_handle_by_name(pathstring,NULL);
+int dbglevel = 0;
+
+
+void get_handle(char *pathstring,vpiHandle *ahandle) {
+    vpiHandle handle;
+//    return vpi_handle_by_name(pathstring,NULL);
 //    if (dbg0) return vpi_handle_by_name(pathstring,NULL);
-    alpha_init();
+    gethandles ++;
+    if (dbglevel&1) {
+        *ahandle =  vpi_handle_by_name(pathstring,NULL);
+        return;
+    }
+    if (!qq_started) {
+        alpha_init();
+        qq_started = 1;
+    }
     long ptr = qqai(pathstring);
     long hval = qqas(ptr);
     if (hval) {
-        ahandle = (vpiHandle) hval;
+        *ahandle = (vpiHandle) hval;
     } else {
-        ahandle =  vpi_handle_by_name(pathstring,NULL);
-        qqsa(ptr,(long) ahandle);
+        *ahandle =  vpi_handle_by_name(pathstring,NULL);
+        qqsa(ptr,(long) *ahandle);
+        diffhandles ++;
     }
-    printf("handle good %lx mine  %lx %lx %lx str=%s\n",(long unsigned) handle,(long unsigned) ahandle,hval,ptr,pathstring);
-    return handle;
+//    printf("handle good %lx mine  %lx %lx %lx str=%s\n",(long unsigned) handle,(long unsigned) ahandle,hval,ptr,pathstring);
+    return;
 }
 
 
@@ -507,7 +525,7 @@ veri_exists(PyObject *self,PyObject *args) {
     char *pathstring;
     if (!PyArg_ParseTuple(args, "s",&pathstring))
         return NULL;
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
     if (!handle) {
         return Py_BuildValue("s", "0");
     }
@@ -516,13 +534,38 @@ veri_exists(PyObject *self,PyObject *args) {
 
 
 static PyObject*
+veri_debuglevel(PyObject *self,PyObject *args) {
+    vpiHandle handle;
+    char *pathstring;
+    if (!PyArg_ParseTuple(args, "s",&pathstring))
+        return NULL;
+    dbglevel = atoi(pathstring);
+    return Py_BuildValue("s", "1");
+}
+
+
+static PyObject*
+veri_debugstatus(PyObject *self,PyObject *args) {
+    char stats[100];
+    sprintf(stats,"peeks=%d geth=%d diffh=%d",totalpeeks,gethandles,diffhandles);
+    if (dbglevel & 2){
+        totalpeeks=0;
+        gethandles=0;
+    }
+    return Py_BuildValue("s", stats);
+}
+
+
+
+static PyObject*
 veri_peek(PyObject *self,PyObject *args) {
     vpiHandle handle;
     s_vpi_value pvalue;
     char *pathstring;
+    totalpeeks ++;
     if (!PyArg_ParseTuple(args, "s",&pathstring))
         return NULL;
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find sig %s for peek\n",pathstring);
         sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n",pathstring,pathstring);
@@ -592,7 +635,7 @@ veri_peek_mem(PyObject *self,PyObject *args) {
     index = atoi(indexstring);
 //    vpi_printf("\n mem=%s ind=%d\n",pathstring,index);
 //    handle =  vpi_handle_by_name(pathstring,NULL);
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find memory %s for peek\n",pathstring);
         sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n",pathstring,pathstring);
@@ -634,7 +677,7 @@ veri_peek_3d(PyObject *self,PyObject *args) {
     index2 = atoi(index2string);
     vpi_printf("\n mem=%s ind=%d\n",pathstring,index);
 //    handle =  vpi_handle_by_name(pathstring,NULL);
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find memory %s for peek\n",pathstring);
         sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n",pathstring,pathstring);
@@ -665,6 +708,15 @@ veri_peek_3d(PyObject *self,PyObject *args) {
     return Py_BuildValue("s", pvalue.value.str);
 }
 
+bool hasDot( char *strx) {
+    int ii;
+    while (strx[ii]) {
+        if (strx[ii]=='.') return 1;
+        ii++;
+    }
+    return 0;
+}
+
 
 static PyObject*
 veri_force(PyObject *self,PyObject *args) {
@@ -676,7 +728,7 @@ veri_force(PyObject *self,PyObject *args) {
     if (!PyArg_ParseTuple(args, "ss",&pathstring,&vstr))
         return NULL;
 //    handle =  vpi_handle_by_name(pathstring,NULL);
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find sig %s for force\n",pathstring);
         sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for force'\n",pathstring,pathstring);
@@ -689,6 +741,10 @@ veri_force(PyObject *self,PyObject *args) {
     } else if ((vstr[0]=='0')&&(vstr[1]=='x')) {
         pvalue.format = vpiHexStrVal; 
         pvalue.value.str = &(vstr[2]);
+    } else if (hasDot(vstr)) {
+        pvalue.format = vpiRealVal;
+        double Rval = atof(vstr);
+        pvalue.value.real = Rval;
     } else {
         pvalue.format = vpiDecStrVal;
         for (iii=0;vstr[iii];iii++) {
@@ -716,7 +772,8 @@ veri_hard_force(PyObject *self,PyObject *args) {
     char *pathstring;
     if (!PyArg_ParseTuple(args, "ss",&pathstring,&vstr))
         return NULL;
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
+
 //    handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\ncannot find sig %s for force\n",pathstring);
@@ -743,7 +800,7 @@ veri_release(PyObject *self,PyObject *args) {
     char *pathstring;
     if (!PyArg_ParseTuple(args, "ss",&pathstring,&vstr))
         return NULL;
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
 //    handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\ncannot find sig %s for force\n",pathstring);
@@ -810,7 +867,7 @@ veri_force_mem(PyObject *self,PyObject *args) {
     if (!PyArg_ParseTuple(args, "sss",&pathstring,&indexstring,&vstr))
         return NULL;
     index = atoi(indexstring);
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
 //    handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\npython: cannot find memory %s for force\n",pathstring);
@@ -850,7 +907,8 @@ veri_force_3d(PyObject *self,PyObject *args) {
         return NULL;
     index = atoi(indexstring);
     index2 = atoi(index2string);
-    handle = get_handle(pathstring);
+    get_handle(pathstring,&handle);
+
 //    handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\npython: cannot find memory %s for force\n",pathstring);
@@ -1125,7 +1183,7 @@ veri_register(PyObject *self,PyObject *args) {
         time_s.high   = (Delay>>32) & 0xffffffff;
         handle = 0;
     } else {
-        handle = get_handle(pathstring);
+        get_handle(pathstring,&handle);
         if (!handle) {
             vpi_printf("\npython: cannot find sig %s for register\n",pathstring);
             sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for register'\n",pathstring,pathstring);
@@ -1199,6 +1257,10 @@ static PyMethodDef VeriMethods[] = {
     {"peek_3d", veri_peek_3d, METH_VARARGS, "Return the number of arguments received by the process."},
     {"force", veri_force, METH_VARARGS,
       "Return the number of arguments received by the process."},
+    {"debuglevel", veri_debuglevel, METH_VARARGS,
+      "Return the number of arguments received by the process."},
+    {"debugstatus", veri_debugstatus, METH_VARARGS,
+      "Return the number of arguments received by the process."},
     {"handle", veri_handle, METH_VARARGS,
       "Return the number of arguments received by the process."},
     {"hard_force", veri_hard_force, METH_VARARGS,
@@ -1254,7 +1316,7 @@ PyMODINIT_FUNC PyInit_veri(void)
 
 void start_py() {
 
-    dlopen("libpython3.6.dylib",RTLD_LAZY | RTLD_GLOBAL);
+//    dlopen("libpython3.7.dylib",RTLD_LAZY | RTLD_GLOBAL);
     PyImport_AppendInittab("veri", PyInit_veri);
     Py_Initialize();
     PyRun_SimpleString("import veri; print(dir(veri));\n");

@@ -1,11 +1,21 @@
 #! /bin/csh -f
 
-set INC = /Users/ilia/local/include/python3.6m
+set INC = /Library/Frameworks/Python.framework/Versions/3.8/include/python3.8/
+set LIB = /Library/Frameworks/Python.framework/Versions/3.8/lib
 
 iverilog-vpi src/vpi3_72.c src/qq64.c \
     -I$INC \
-    -L/Users/ilia/local/lib \
-    -lpython3.6m  \
+    -lpython3.8  \
+    -L$LIB \
+
+
+
+
+#    -lpython3.6m  \
+#    -L/Users/ilia/local/lib/ \
+
+
+
 
 
 

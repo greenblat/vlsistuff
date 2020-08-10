@@ -7,5 +7,7 @@ gcc -O3 src/vcd_python.c  src/qq64.c  -o vcd_python \
   -lpython2.7 -L/System/Library/Frameworks/Python.framework/Versions/2.7/lib \
 
 
+/bin/cp vcd_python ~/bin/
+
 
 

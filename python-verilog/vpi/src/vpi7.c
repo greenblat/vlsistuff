@@ -1303,7 +1303,7 @@ void handler(int code) {
 void start_py() {
 
 // Oren - Added to solve linking problem when importing random
-    dlopen("libpython2.7.so",RTLD_LAZY | RTLD_GLOBAL);
+    dlopen("libpython2.7m.so",RTLD_LAZY | RTLD_GLOBAL);
 
     Py_Initialize();
     Py_InitModule("veri", VeriMethods);

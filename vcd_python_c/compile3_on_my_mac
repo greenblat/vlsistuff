@@ -1,0 +1,11 @@
+#! /bin/csh -f
+
+# this is how i compile on my macbook Pro. for Python3
+
+gcc -O3 src3/vcd_python.c  src3/qq64.c  -o vcd_python3 \
+  -I/Library/Frameworks/Python.framework/Versions/3.8/include/python3.8/ \
+  -lpython3.8 -L/Library/Frameworks/Python.framework/Versions/3.8/lib \
+
+
+/bin/cp vcd_python3 ~/bin/
+
