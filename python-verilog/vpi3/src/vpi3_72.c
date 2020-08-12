@@ -67,7 +67,7 @@ elif (Day<15): Exit=False\n\
 if Exit:\n\
     print('PROBLEM!!! PY-VERILOG LICENSE EXPIRED, CALL Ilia today = %s %s %s lic = 15.Oct.2020'%(Year,Month,Day))\n\
     sys.exit()\n\
-print('py-verilog@ilia  license ok, Ilia today = %s %s %s lic = 15.Oct.2020'%(Year,Month,Day))\n\
+print('py3-verilog@ilia  license ok, Ilia today = %s %s %s lic = 15.Oct.2020'%(Year,Month,Day))\n\
 if os.path.exists('./verilog.py'):\n\
     try:\n\
         print('verilog.py found')\n\
@@ -163,7 +163,6 @@ PLI_INT32 vpit_import( PLI_BYTE8 *user_data ) {
         err = err + vpi_chk_error(&error_info);
         while (argH && (!err)) { 
             if (isSimpleExpr(argH)) /* If argument is a simple */ {
-            /* expression, print its name */ 
                 pvalue.format = vpiIntVal; 
                 vpi_get_value(argH, &pvalue); 
                 sprintf(tempstr,",%d",pvalue.value.integer);
@@ -304,7 +303,6 @@ PLI_INT32 vpit_python( PLI_BYTE8 *user_data )
             iii++;
 //            vpi_printf("debug1 1 %d is=%d\n",iii,isSimpleExpr(argH));
             if (isSimpleExpr(argH)) /* If argument is a simple */ {
-            /* expression, print its name */ 
                 pvalue.format = vpiIntVal; 
                 pvalue.format = vpiBinStrVal; 
 //                vpi_printf("debugx\n");
@@ -396,7 +394,6 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
         err = err + vpi_chk_error(&error_info);
         while (argH && (!err)) { 
             if (isSimpleExpr(argH)) /* If argument is a simple */ {
-            /* expression, print its name */ 
                 pvalue.format = vpiIntVal; 
                 vpi_get_value(argH, &pvalue); 
                 sprintf(tempstr,",%d",pvalue.value.integer);
@@ -568,7 +565,7 @@ veri_peek(PyObject *self,PyObject *args) {
     get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find sig %s for peek\n",pathstring);
-        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n",pathstring,pathstring);
+        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('python: cannot find %s for peek')\n",pathstring,pathstring);
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
     }
@@ -592,7 +589,7 @@ veri_hpeek(PyObject *self,PyObject *args) {
     handle =  (vpiHandle) longi;
     if (!handle) {
         vpi_printf("\npython: cannot find sig %s for peek\n",pathstring);
-        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n",pathstring,pathstring);
+        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('python: cannot find %s for peek')\n",pathstring,pathstring);
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
     }
@@ -613,7 +610,7 @@ veri_handle(PyObject *self,PyObject *args) {
     handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\ncannot find sig %s for handle\n",pathstring);
-        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'cannot find %s for handle'\n",pathstring,pathstring);
+        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('cannot find %s for handle')\n",pathstring,pathstring);
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "0");
     }
@@ -638,7 +635,7 @@ veri_peek_mem(PyObject *self,PyObject *args) {
     get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find memory %s for peek\n",pathstring);
-        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n",pathstring,pathstring);
+        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('python: cannot find %s for peek')\n",pathstring,pathstring);
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
     }
@@ -652,7 +649,7 @@ veri_peek_mem(PyObject *self,PyObject *args) {
     handle2 = vpi_handle_by_index(handle, index);
     if (!handle2) {
         vpi_printf("\npython: cannot find memory %s[%d] for peek mem\n",pathstring,index);
-        sprintf(CannotFindCallBack,"try:\n    cannot_find_mem_sig('%s[%d]')\nexcept:\n    print 'python: cannot find %s[%d] for peek'\n",pathstring,index,pathstring,index);
+        sprintf(CannotFindCallBack,"try:\n    cannot_find_mem_sig('%s[%d]')\nexcept:\n    print('python: cannot find %s[%d] for peek')\n",pathstring,index,pathstring,index);
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
 
@@ -680,7 +677,7 @@ veri_peek_3d(PyObject *self,PyObject *args) {
     get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find memory %s for peek\n",pathstring);
-        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for peek'\n",pathstring,pathstring);
+        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('python: cannot find %s for peek')\n",pathstring,pathstring);
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
     }
@@ -731,7 +728,7 @@ veri_force(PyObject *self,PyObject *args) {
     get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find sig %s for force\n",pathstring);
-        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for force'\n",pathstring,pathstring);
+        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('python: cannot find %s for force')\n",pathstring,pathstring);
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
     }
@@ -871,7 +868,7 @@ veri_force_mem(PyObject *self,PyObject *args) {
 //    handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\npython: cannot find memory %s for force\n",pathstring);
-        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'cannot find %s for force'\n",pathstring,pathstring);
+        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('cannot find %s for force')\n",pathstring,pathstring);
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
     }
@@ -912,7 +909,7 @@ veri_force_3d(PyObject *self,PyObject *args) {
 //    handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\npython: cannot find memory %s for force\n",pathstring);
-        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'cannot find %s for force'\n",pathstring,pathstring);
+        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('cannot find %s for force')\n",pathstring,pathstring);
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
     }
@@ -1186,7 +1183,7 @@ veri_register(PyObject *self,PyObject *args) {
         get_handle(pathstring,&handle);
         if (!handle) {
             vpi_printf("\npython: cannot find sig %s for register\n",pathstring);
-            sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print 'python: cannot find %s for register'\n",pathstring,pathstring);
+            sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('python: cannot find %s for register')\n",pathstring,pathstring);
             PyRun_SimpleString(CannotFindCallBack);
             return Py_BuildValue("s", "q");
         }
