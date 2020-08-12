@@ -436,7 +436,7 @@ def panicFinish(Reason,ContinueFor=20):
 def finishing(Txt='"not given"',ContinueFor=20):
     global finishCycles
     if finishCycles>0: return
-    log_info('finishing on %s'%Txt)
+    log_info('finishing %s with errors=%d wrongs=%d corrects=%d'%(Txt,Errors,Wrongs,Corrects))
     if finishReason:
         finishReason(Txt,Errors,Wrongs,Corrects)
     finishCycles = get_cycles()+ContinueFor
@@ -715,9 +715,18 @@ class driverClass:
         self.Path = Path
         self.state='idle'
         self.waiting  = 0 
+        self.edges = {}
 
     def force(self,Sig,Val):
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
+
+    def forceAscii(self,Sig,Txt,Len):
+        Res = '0x'
+        for ii in range(Len):
+            Chr = '%02x'%ord(Txt[ii])
+            Res += Chr
+        self.force(Sig,Res)
+
 
     def peek(self,Sig):
         return peek('%s.%s'%(self.Path,Sig))
@@ -728,6 +737,25 @@ class driverClass:
 
     def valid(self,Sig):
         return self.peek(Sig)==1
+
+
+    def posedge(self,Sig):
+        if Sig not in self.edges:
+            self.edges[Sig] = self.peek(Sig)
+        if self.valid(Sig) and (self.edges[Sig]==0):
+            self.edges[Sig] = 1
+            return True
+        self.edges[Sig] = self.peek(Sig)
+        return False
+    def negedge(self,Sig):
+        if Sig not in self.edges:
+            self.edges[Sig] = self.peek(Sig)
+        if not self.valid(Sig) and (self.edges[Sig]==1):
+            self.edges[Sig] = 0
+            return True
+        self.edges[Sig] = self.peek(Sig)
+        return False
+
 
     def run(self):
         log_error('run() of driverClass is supposed to be replaced')
