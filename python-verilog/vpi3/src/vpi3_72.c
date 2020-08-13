@@ -486,9 +486,6 @@ int dbglevel = 0;
 
 
 void get_handle(char *pathstring,vpiHandle *ahandle) {
-    vpiHandle handle;
-//    return vpi_handle_by_name(pathstring,NULL);
-//    if (dbg0) return vpi_handle_by_name(pathstring,NULL);
     gethandles ++;
     if (dbglevel&1) {
         *ahandle =  vpi_handle_by_name(pathstring,NULL);
@@ -532,7 +529,6 @@ veri_exists(PyObject *self,PyObject *args) {
 
 static PyObject*
 veri_debuglevel(PyObject *self,PyObject *args) {
-    vpiHandle handle;
     char *pathstring;
     if (!PyArg_ParseTuple(args, "s",&pathstring))
         return NULL;
@@ -706,7 +702,7 @@ veri_peek_3d(PyObject *self,PyObject *args) {
 }
 
 bool hasDot( char *strx) {
-    int ii;
+    int ii = 0;
     while (strx[ii]) {
         if (strx[ii]=='.') return 1;
         ii++;

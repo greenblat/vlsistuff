@@ -13,7 +13,7 @@ gcc  -c -O3 src/vpi3_72.c src/qq64.c \
      -Isrc \
      -fPIC \
 
-ld   -dylib  -o vpi7.so \
+ld   -shared --export-dynamic   -o vpi7.so \
     vpi3.o qq64.o \
     -L/usr/lib \
     -L$LIB \
