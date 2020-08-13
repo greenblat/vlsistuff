@@ -1,0 +1,8 @@
+#! /bin/csh -f
+#this is icarus run script
+
+
+vvp -M../../vpi3 -mvpi3_72 tb.vpp
+
+
+
