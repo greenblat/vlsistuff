@@ -1,9 +1,13 @@
 #! /bin/csh -f
 
+set INC = /Library/Frameworks/Python.framework/Versions/3.8/include/python3.8/
+set LIB = /Library/Frameworks/Python.framework/Versions/3.8/lib
+
+
 
 set MTI_HOME = /home/ilia/software/gplcver-2.12a.src/pli_incs
 set INC = /Users/ilia/local/include/python3.6m 
-gcc  -c -g -I$MTI_HOME src/vpi3.c src/qq64.c \
+gcc  -c -O3 src/vpi3_72.c src/qq64.c \
      -Wall \
      -I$INC \
      -Isrc \
@@ -12,8 +16,8 @@ gcc  -c -g -I$MTI_HOME src/vpi3.c src/qq64.c \
 ld   -dylib  -o vpi7.so \
     vpi3.o qq64.o \
     -L/usr/lib \
-    -L/Users/ilia/local/lib \
-    -lpython3.6m \
+    -L$LIB \
+    -lpython3.8 \
     -lc  -lpthread -lutil \
 
 
