@@ -10,9 +10,9 @@ Transtable['!IntKind'] = ['wire','reg']
 def matches(List,Seq,Verbose=False):
     if Verbose:
         logs.log_info('try list=%s pattern=%s'%(List,Seq))
-    if type(Seq)==types.ListType:
+    if type(Seq) is list:
         return listMatches(List,Seq,Verbose)
-    if type(Seq)==types.TupleType:
+    if type(Seq) is tuple:
         return listMatches(List,Seq,Verbose)
     Lseq = Seq.split()
     if len(List)!=len(Lseq): 
@@ -21,7 +21,7 @@ def matches(List,Seq,Verbose=False):
     Vars=[]
     for ind,Iseq in enumerate(Lseq):
         Lind = List[ind]
-        if type(Lind) in [types.TupleType,types.ListType]:
+        if type(Lind) is [tuple,list]:
             Litem = Lind[1]
         else:
             Litem = Lind
@@ -68,23 +68,23 @@ def listMatches(List,Seq,Verbose):
     return X0
 
 def listMatches__(List,Seq,Verbose):
-    if type(List)==types.IntType:
+    if type(List) is int:
         List = str(List)
     if Seq=='?':
         return [List]
 
-    if type(List)==types.TupleType: List = list(List)
-    if type(Seq)==types.TupleType: Seq = list(Seq)
+    if type(List) is tuple: List = list(List)
+    if type(Seq) is tuple: Seq = list(Seq)
     if Verbose:
         logs.log_info('try(0) list=%s pattern=%s'%(List,Seq))
     if str(List)==str(Seq):
         pass
-    elif (type(List) in [types.TupleType,types.ListType])and(type(Seq) in [types.TupleType,types.ListType]): 
+    elif (type(List) is [tuple,list])and(type(Seq) is [tuple,list]): 
         pass
     elif type(List)!=type(Seq): 
         if Verbose: logs.log_info('failed on dff types %s %s list=%s pattern=%s'%(type(List),type(Seq),List,Seq))
         return False
-    if type(List)==types.StringType:
+    if type(List) is str:
         if Seq=='?': return [List]
         Ok =  str(Seq)==str(List)
         if Verbose and not Ok: logs.log_info('failed on dff token list=%s pattern=%s'%(List,Seq))
@@ -96,7 +96,7 @@ def listMatches__(List,Seq,Verbose):
     for ind,Item in enumerate(List):
         V = listMatches(Item,Seq[ind],Verbose)
         if not V: return False
-        if type(V) in [types.ListType,types.TupleType]:
+        if type(V) is [list,tuple]:
             Res.extend(V)
     if Res==[]:  return True
     return Res 

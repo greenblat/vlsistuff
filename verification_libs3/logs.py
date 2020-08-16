@@ -27,7 +27,7 @@ TB = 'tb'
 try:
     import veri
 except:
-    import fakeVeri as veri
+    veri = False
 
 finishCycles = 0
 
@@ -43,12 +43,13 @@ Cycles=0
 def get_cycles():
     global noCycles
     if noCycles:
-        return veri.stime()
+        if veri: return veri.stime()
+        return 0
     else:
         Now =  peek('%s.cycles'%TB)
         if Now<0: noCycles=True
     if (finishCycles>0)and(finishCycles<=Now):
-        veri.finish()
+        if veri: veri.finish()
         sys.exit()
 
     return Now
@@ -60,7 +61,7 @@ def finish(Txt):
         finishReason(Txt,Errors,Wrongs,Corrects)
     else:
         log_info('finishing %s with errors=%d wrongs=%d corrects=%d'%(Txt,Errors,Wrongs,Corrects))
-        veri.finish()
+        if veri: veri.finish()
         sys.exit()
 
 def please_print_debugs():
@@ -89,14 +90,14 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
         traceback.print_stack(file=Flogs[Which])
         
     if Tb:
-        veri.force('%s.errors'%TB,str(Errors))
+        if veri: veri.force('%s.errors'%TB,str(Errors))
 
 
     if (Errors>MAXERRORS):
         log_info('max errors reached (%d). bailing out. (MAXERRORS==%d)'%(Errors,MAXERRORS),Which)
         if finishReason:
             finishReason('too many errors',Errors+1,Wrongs,Corrects)
-        veri.finish()
+        if veri: veri.finish()
         sys.exit()   # in icarus, sometimes finish doesnt catch
 
     if (Text in printed_already):
@@ -109,7 +110,7 @@ def log_correct(Text,Which=0,Print=True):
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Corrects += 1
-    veri.force('%s.corrects'%TB,str(Corrects))
+    if veri: veri.force('%s.corrects'%TB,str(Corrects))
     if Print:
         print('@%d: %d vs %d (err=%d) CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text))
     Flogs[Which].write('@%d: %d vs %d (err=%d) CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
@@ -123,7 +124,7 @@ def log_ensure(Cond,Text,Which=0):
 def log_wrong(Text,Which=0):
     global Wrongs
     Wrongs += 1
-    veri.force('%s.wrongs'%TB,str(Wrongs))
+    if veri: veri.force('%s.wrongs'%TB,str(Wrongs))
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: %d vs %d (err=%d): WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text))
@@ -132,14 +133,17 @@ def log_wrong(Text,Which=0):
         log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS),Which)
         if finishReason:
             finishReason('too many wrongs',Errors,Wrongs+1,Corrects)
-        veri.finish()
+        if veri: veri.finish()
         sys.exit()   # in icarus, sometimes finish doesnt catch
 
 def finish_now(Text='.'):
     global Flog
     if (not Flog):
         Flog=open(PYMONLOG,'w')
-    Now = veri.stime()
+    if veri:
+        Now = veri.stime()
+    else:
+        Now = 0
     if (Wrongs==0)and(Errors==0)and(Warnings==0):
         Text =  '@%d: @%d: corrects=%d FINISHING on all good %s'%(get_cycles(),Now,Corrects,Text)
     else:        
@@ -148,7 +152,7 @@ def finish_now(Text='.'):
     Flog.write(Text+'\n')
     if finishReason:
         finishReason('finish now',Errors,Wrongs,Corrects)
-    veri.finish()
+    if veri: veri.finish()
     
 
 
@@ -271,10 +275,10 @@ def intx(Val):
         return int(Val)
 
 def peek(Sig):
-    V  = intx(veri.peek(Sig))
+    V  = intx(veri_peek(Sig))
     return V
 def valid(Sig):
-    V  = intx(veri.peek(Sig))
+    V  = intx(veri_peek(Sig))
     return V==1
 
 def peekList(List,Prefix,Format='hex'):
@@ -301,7 +305,7 @@ def peekList(List,Prefix,Format='hex'):
 
 
 def peeksigned(Sig):
-    Str = veri.peek(Sig)
+    Str = veri_peek(Sig)
     return intxsigned(Str)
 
 def intxsigned(Str):
@@ -597,10 +601,10 @@ class aliveHolderClass:
                 log_info(Txt)
                 if finishReason:
                     finishReason(Txt,Errors,Wrongs,Corrects)
-                veri.finish()
+                if veri: veri.finish()
             return 0,'timeout'
 
-        Now = veri.peek(self.Sig)
+        Now = veri_peek(self.Sig)
         if Now != self.Val:
             self.Val = Now
             self.finishTime = get_cycles() + self.Wait
@@ -636,7 +640,7 @@ def keepSimulationAlive():
     if When==0: return        
     if When<(get_cycles()-20):
         log_info('keepSimulationAlive decided to end this simulation (%s)'%Blame)
-        veri.finish()
+        if veri: veri.finish()
         
 def fnameCell(Fname):
     wrds = Fname.split('/')
@@ -761,6 +765,9 @@ class driverClass:
         log_error('run() of driverClass is supposed to be replaced')
 
 
+def veri_peek(Sig):
+    if veri: return veri.peek(Sig)
+    return 'x'
 
 
 
