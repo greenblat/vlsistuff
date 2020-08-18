@@ -71,7 +71,7 @@ class module_class:
         self.add_sig(Name,Dir,Wid)
     def add_sig(self,Name,Dir,Wid):
         if Wid==1: Wid=0
-        if (type(Name)==types.StringType)and('[' in Name):
+        if (type(Name) is str)and('[' in Name):
             Name = Name[:Name.index('[')]
         if Name=='':
             Name = 'net_%d'%self.inventedNets
@@ -94,7 +94,7 @@ class module_class:
             return
 
 
-        if type(Name)==types.ListType:
+        if type(Name) is list:
             logs.log_error('add_sig got listName %s'%str(Name))
             return
         if (Dir=='wire')and(Name in self.nets)and(Wid==0):
@@ -127,13 +127,13 @@ class module_class:
 
         if (Wid==0):
             self.nets[Name] =  Dir,WasWid 
-        elif(type(Wid)==types.TupleType):
+        elif(type(Wid) is tuple):
             self.nets[Name]=Dir,Wid
-        elif (type(Wid)==types.IntType)and(Wid>1):
+        elif (type(Wid) is int)and(Wid>1):
             self.nets[Name]=Dir,(Wid-1,0)
-        elif (type(Wid)==types.IntType)and(Wid==1):
+        elif (type(Wid) is int)and(Wid==1):
             self.nets[Name]=Dir,0
-        elif(type(Wid)==types.ListType):
+        elif(type(Wid) is list):
             if Name not in self.netParams:
                 self.netParams[Name]={}
             try:
@@ -149,7 +149,7 @@ class module_class:
 
 
     def add_mem(self,Name,Dir,Wid,Wid2):
-        if type(Name)==types.ListType:
+        if type(Name) is list:
             for NN in Name:
                 self.nets[NN]=(Dir,('double',Wid,Wid2))
         else:
@@ -197,7 +197,7 @@ class module_class:
         Obj.add_param(Prm,Val)
 
     def add_conn(self,Inst,Pin,Sig):
-        if (type(Sig)==types.ListType)and(len(Sig)==1):
+        if (type(Sig) is list)and(len(Sig)==1):
             Sig = Sig[0]
         Obj = self.insts[Inst]
         Sig1 = busify_x(Sig)
@@ -380,7 +380,7 @@ class module_class:
             List = self.modports[Name]
             res=[]
             for XX in List:
-                if type(XX)==types.TupleType:
+                if type(XX) is tuple:
                     Str = '%s %s'%(XX[0],XX[1])
                 else:
                     Str = XX
@@ -391,7 +391,7 @@ class module_class:
             Fout.write('genvar %s;\n'%(Name))
         for Name in self.enums:
             List = self.enums[Name]
-            if type(List)==types.TupleType:
+            if type(List) is tuple:
                 if List[0]=='width_singles':
                     Wid = List[1]
                     Str = ', '.join(List[2])
@@ -500,7 +500,7 @@ class module_class:
         Fout.write('function %s %s;\n'%(pr_wid(X[0]),Func))
         if X[1]!=[]:
             for Item in X[1]:
-                if (type(Item)==types.ListType)and(len(Item)==4):
+                if (type(Item) is list)and(len(Item)==4):
                     Fout.write('%s %s %s;\n'%(Item[3],pr_wid(Item[2]),Item[1]))
                 else:
                     logs.log_err('dump_function ldefs %s '%(Item))
@@ -509,20 +509,20 @@ class module_class:
 
     def dump_task(self,Task,Fout):
         X = self.tasks[Task]
-        if type(X)==types.ListType:
+        if type(X) is list:
             Fout.write('task %s;\nbegin\n'%Task)
             Y = pr_stmt(X,'')
             Fout.write(Y)
             Fout.write('end\nendtask\n')
             return
-        if type(X)==types.TupleType:
+        if type(X) is tuple:
             if len(X)==2:
                 Body=X[0]
                 Ldefs = X[1]
                 Fout.write('task %s;\n'%Task)
                 if Ldefs:
                     for Item in Ldefs:
-                        if (type(Item)==types.TupleType)and(len(Item)==3):
+                        if (type(Item) is tuple)and(len(Item)==3):
                             Fout.write('%s %s %s;\n'%(Item[2],pr_wid(Item[1]),Item[0]))
                         else:
                             logs.log_err('dump_task ldefs %s %s'%(Item,Ldefs))
@@ -539,7 +539,7 @@ class module_class:
         if len(Initial)==0:
             return
         Statement = pr_stmt(Initial,'    ',True)
-        if type(Initial)==types.TupleType:
+        if type(Initial) is tuple:
             Fout.write('initial %s'%(Statement.lstrip()))
         else:
             Fout.write('initial begin\n')
@@ -547,7 +547,7 @@ class module_class:
             Fout.write('end\n')
 
     def get_width(self,Net):
-        if type(Net)==types.StringType:
+        if type(Net) is str:
             if Net in self.nets:
                 Dir,Wid = self.nets[Net]
                 return Wid
@@ -564,7 +564,7 @@ class module_class:
             Obj = self.insts[Inst]
             for Pin in Obj.conns:
                 Sig = Obj.conns[Pin]
-                if type(Sig)==types.StringType:
+                if type(Sig) is str:
                     Sigs[Sig]=1
         Dels=[]
         for Inst in self.insts:
@@ -579,8 +579,8 @@ class module_class:
 
     def check_net_def(self,Net):
         if not Net: return
-        if type(Net)==types.IntType: return
-        if type(Net)==types.StringType:
+        if type(Net) is int: return
+        if type(Net) is str:
             if "'" in Net: return
             if Net in self.insts:
                 return
@@ -594,10 +594,10 @@ class module_class:
             if (Net not in self.nets)and(Net not in self.parameters)and(Net not in self.localparams):
                 self.add_sig(Net,'wire',0)
             return
-        if type(Net)==types.TupleType:
+        if type(Net) is tuple:
             self.check_net_def(list(Net))
             return
-        if type(Net)==types.ListType:
+        if type(Net) is list:
             if Net[0]=='dotted':
                 return
             if Net[0]=='define':
@@ -609,17 +609,17 @@ class module_class:
             if Net[0]=='subbit':
                 Name = Net[1]
                 Ind = make_int(Net[2])
-                if type(Ind)==types.IntType:
+                if type(Ind) is int:
                     if Name not in self.nets:
                         self.add_sig(Name,'wire',(Ind,Ind))
                         return
                     (Dir,WW) = self.nets[Name]
-                    if (type(WW)==types.TupleType)and(len(WW)==2):
+                    if (type(WW) is tuple)and(len(WW)==2):
                         (H,L)=WW
                         H = max(H,Ind)
                         L = min(L,Ind)
                         self.nets[Name]=(Dir,(H,L))
-                    elif (type(WW)==types.TupleType)and(len(WW)==3):
+                    elif (type(WW) is tuple)and(len(WW)==3):
                         if WW[0] not in ['packed','double']:
                             logs.log_error('definition of net %s dir=%s and wid "%s" is wrong  (%s)'%(Name,Dir,WW,Net))
                     else:
@@ -638,7 +638,7 @@ class module_class:
                     self.add_sig(Name,'wire',(Ind0,Ind1))
                     return
                 (Dir,WW) = self.nets[Name]
-                if type(WW)==types.TupleType:
+                if type(WW) is tuple:
                     if WW[0]=='double':
                         return
                     if WW[0]=='packed':
@@ -717,12 +717,12 @@ class module_class:
                 Net = Obj.conns[Pin]
                 if not Net:
                     pass
-                elif type(Net)==types.StringType:
+                elif type(Net) is str:
                     if "'" in Net:
                         pass
                     elif Net not in Wires:
                         Wires[Net]=(0,0)
-                elif type(Net) in [types.TupleType,types.ListType]:
+                elif type(Net) in [tuple,list]:
                     if Net[0] in ['subbit','subbus']:
                         Name = Net[1]
                         if Net[0]=='subbit':
@@ -762,7 +762,7 @@ class module_class:
             Type = Obj.Type
             for Pin in Obj.conns:
                 NN = Obj.conns[Pin]
-                if not ((type(NN)==types.ListType)and(NN[0]=='curly')):
+                if not ((type(NN) is list)and(NN[0]=='curly')):
                     Net = hashit(Obj.conns[Pin])
                     if Net not in netTable:
                         netTable[Net]=[]
@@ -774,11 +774,11 @@ class module_class:
     def relax_name(self,Name,Simple=True):
         if not Name:
             return Name
-        if type(Name)==types.ListType:
+        if type(Name) is list:
             if Name[0] in ['subbit','subbus']:
                 Name[1]=relax_name(Name[1],Simple)
             return Name
-        if type(Name)!=types.StringType:
+        if type(Name)is not str:
             return Name
         if Name[0]=='\\':
             Name=Name[1:]
@@ -826,9 +826,9 @@ class module_class:
                         self.netsTable[Sigx].append((Inst,Type,Pin))
          
     def compute_int(self,Item):
-        if type(Item)==types.IntType:
+        if type(Item) is int:
             return Item
-        if type(Item)==types.StringType:
+        if type(Item) is str:
             if Item[0] in '0123456789':
                 return int(Item)
             if Item in self.parameters:
@@ -838,7 +838,7 @@ class module_class:
                 X = self.localparams[Item]
                 return self.compute_int(X)
     
-        if type(Item)==types.ListType:
+        if type(Item) is list:
             if Item[0] in ['-','+','*','/']:
                 A = self.compute_int(Item[1])
                 B = self.compute_int(Item[2])
@@ -902,12 +902,12 @@ class module_class:
 
     def computeWidth(self,Wid):
         if Wid in ['0',0]: return 1
-        if type(Wid)==types.IntType: return Wid
-        if type(Wid)==types.TupleType:
+        if type(Wid) is int: return Wid
+        if type(Wid) is tuple:
             if len(Wid)==2:
                 Hi = self.compute_int(Wid[0])
                 Lo = self.compute_int(Wid[1])
-                if (type(Hi)==types.IntType)and(type(Lo)==types.IntType):
+                if (type(Hi) is int)and(type(Lo) is int):
                     WW = Hi-Lo+1
                     return WW
         logs.log_error('computeWidth got "%s"'%(str(Wid)))
@@ -973,7 +973,7 @@ def support_set__(Sig,Bussed):
         if Sig in OPS : return []
         if Sig in KEYWORDS : return []
         return [Sig]
-    if type(Sig) in [types.ListType,types.TupleType]:
+    if type(Sig) is [tuple,list]:
         if len(Sig)==1:
             return support_set__(Sig[0],Bussed)
         if Sig[0] in ['const','bin','hex','dig','taskcall']:
@@ -1041,7 +1041,7 @@ def support_set__(Sig,Bussed):
 
 
 def hasit(Net):
-    if type(Net)==types.ListType:
+    if type(Net) is list:
         return tuple(Net)
     return Net
 
@@ -1131,7 +1131,7 @@ def pr_inst_params(Dir):
     return '#(%s)'%(', '.join(res))
 
 def pr_timing(List):
-    if type(List) in (types.ListType,types.TupleType):
+    if type(List) is (list,tuple):
         if List[0]=='list':
             res = map(pr_expr,List[1:])
             res = map(str,res)
@@ -1142,18 +1142,18 @@ def pr_timing(List):
 
 def pr_stmt(List,Pref='',Begin=False):
     if List==None: return '%s;'%Pref
-    if type(List)==types.TupleType:
+    if type(List) is tuple:
         return pr_stmt(list(List),Pref,Begin)
-    if (type(List)==types.IntType):
+    if (type(List) is int):
         return str(List)
     if (List==[]):
         return 'begin /* empty */ end '
-    if (type(List)==types.ListType)and(len(List)==1):
+    if (type(List) is list)and(len(List)==1):
         return pr_stmt(List[0],Pref,Begin)
-    if (type(List)==types.ListType)and(len(List)>2)and(List[0]=='list')and(List[1]=='list'):
+    if (type(List) is list)and(len(List)>2)and(List[0]=='list')and(List[1]=='list'):
         logs.log_warning('ilia double list def')
         return pr_stmt(List[2],Pref,Begin)
-    if (type(List)==types.ListType)and(List[0]=='list'):
+    if (type(List) is list)and(List[0]=='list'):
         if len(List)==2:
             return pr_stmt(List[1],Pref,Begin)
         if Begin:
@@ -1169,7 +1169,7 @@ def pr_stmt(List,Pref='',Begin=False):
             return Res
         else:
             return Res+'%send\n'%Pref
-    elif  type(List)==types.ListType:
+    elif  type(List) is list:
         if List[0]=='comment':
             res = '%s//'%Pref
             for II in List[1:]:
@@ -1248,7 +1248,7 @@ def pr_stmt(List,Pref='',Begin=False):
             for Item in LLL:
                 if len(Item)==2:
                     Switch,Stmt=Item
-                    if (type(Switch)==types.ListType)and(len(Switch)==1):
+                    if (type(Switch) is list)and(len(Switch)==1):
                         Str += '%s%s: '%(Pref+'    ',pr_expr(Switch[0]))
                     else:
                         Str += '%s%s: '%(Pref+'    ',pr_expr(Switch))
@@ -1305,7 +1305,7 @@ def pr_stmt(List,Pref='',Begin=False):
             return Str
         if List[0]=='instance':
             Params = List[3]
-            if type(Params)==types.ListType:
+            if type(Params) is list:
                 PP = []
                 for (A,B) in Params:
                     PP.append('.%s(%s)'%(pr_expr(A),pr_expr(B)))
@@ -1384,7 +1384,7 @@ def pr_stmt(List,Pref='',Begin=False):
                 return 'assign %s = %s;\n'%(Dst,Src)
 
         if List[0]=='reg':
-            if (type(List[1])==types.StringType):
+            if (type(List[1]) is str):
                 if List[1][0]=='width':
                     Hi = pr_expr(List[1][1])
                     Lo = pr_expr(List[1][2])
@@ -1394,13 +1394,13 @@ def pr_stmt(List,Pref='',Begin=False):
                 return 'reg %s;'%List[1]
                 
     if List in ['ILIA_FALSE','ILIA_TRUE']: return List                
-    if type(List)==types.StringType:
+    if type(List) is str:
         if List=='empty_begin_end': return ''
 
-    if (type(List)==types.ListType)and(len(List)==1):
+    if (type(List) is list)and(len(List)==1):
         return pr_stmt(List[0])
 
-    if type(List)==types.TupleType:
+    if type(List) is tuple:
         return pr_stmt(list(List))
 
     logs.log_err('untreated for prnt stmt %s %s'%(Pref,List))
@@ -1465,7 +1465,7 @@ def pr_wid(Wid):
         return 'wid is none error!!'
     if Wid==0:
         return ''
-    if type(Wid)==types.IntType:
+    if type(Wid) is int:
         return '[%s:0]'%(pr_expr(Wid))
     if (len(Wid)==3)and(Wid[0]=='double'):
         return '%s%s'%(pr_wid(Wid[1]),pr_wid(Wid[2]))
@@ -1484,13 +1484,13 @@ def pr_replace(What):
         return What+' '
     return What
 def pr_expr(What):
-    if type(What)==types.IntType:
+    if type(What) is int:
         return str(What)
-    if type(What)==types.LongType:
+    if type(What) is long:
         return str(What)
-    if type(What)==types.FloatType:
+    if type(What) is float:
         return str(What)
-    if type(What)==types.StringType:
+    if type(What) is str:
         return pr_replace(What)
     if not What:
         return ''
@@ -1576,7 +1576,7 @@ def pr_expr(What):
             return pr_expr(['subbus',Bus,(H,L)])
         if single_bits(What[1:]):
             Wid,Val=single_bits(What[1:])
-            if type(Val)==types.StringType:
+            if type(Val) is str:
                 return pr_expr(['const',Wid,'b%s'%Val])
             else:
                 return pr_expr(['const',Wid,'h%x'%Val])
@@ -1597,7 +1597,7 @@ def pr_expr(What):
         Str = '{%s{%s}}'%(pr_expr(What[1]),pr_expr(What[2]))
         return Str
 
-    if (type(What) in (types.TupleType,types.ListType)):
+    if (type(What) in (tuple,list)):
         if simply_computable(What):
             X,_ = simply_computable(What)
             return str(X)
@@ -1621,7 +1621,7 @@ def splitLong(res1):
     return res1
 
 def simply_computable(What):
-    if type(What) in [types.IntType,types.FloatType]:
+    if type(What) is [int,float]:
         return What,'aa'
     if (What[0] in ['-','+','*','/'])and(len(What)==3):
         if  simply_computable(What[1]) and simply_computable(What[2]):
@@ -1631,13 +1631,13 @@ def simply_computable(What):
     return False        
 
 def one_bus(List):
-    if type(List)!=types.ListType:
+    if type(List) is not list:
         return False
     Run = -1
     Bus = False
     H=-1
     for Item in List:
-        if type(Item)!=types.ListType:
+        if type(Item) is not list:
             return False
         if Item[0]!='subbit':
             return False
@@ -1659,7 +1659,7 @@ def one_bus(List):
     return Bus,H,Run
 
 def single_bits(List):
-    if type(List)!=types.ListType:
+    if type(List)is not list:
         return False
     if len(List)==0:
         return False
@@ -1668,7 +1668,7 @@ def single_bits(List):
     Bus = False
     H=-1
     for Item in List:
-        if type(Item)!=types.ListType:
+        if type(Item) is not list:
             return False
         if (Item[0]=='const')and(Item[1] in ['1',1]):
             Bits.append(compute1(Item[2]))
@@ -1684,16 +1684,16 @@ def single_bits(List):
     return Len1,int(Bits1,2)
 
 def compute1(Item):
-    if type(Item)==types.IntType:
+    if type(Item) is int:
         return Item
-    if type(Item)==types.StringType:
+    if type(Item) is str:
         if Item[0] in '0123456789':
             return int(Item)
         if Item in ['b0','b1']:
             return int(Item[1])
         if Item=='x': return 'x'
 
-    if type(Item)==types.ListType:
+    if type(Item) is list:
         if Item[0] in ['-','+','*','/']:
             A = compute1(Item[1])
             B = compute1(Item[2])
@@ -1712,7 +1712,7 @@ def compute1(Item):
 
 
 def clean_inst(Inst):
-    if (type(Inst)!=types.StringType):
+    if (type(Inst) is not str):
         return Inst 
     Inst = Inst.replace('\\','')
     Inst = Inst.replace('[','_')
@@ -1720,7 +1720,7 @@ def clean_inst(Inst):
     return Inst    
 
 def busify_x(Sig):
-    if (type(Sig)==types.StringType)and('[' in Sig)and(Sig[-1]==']')and(Sig[0]!='\\'):
+    if (type(Sig) is str)and('[' in Sig)and(Sig[-1]==']')and(Sig[0]!='\\'):
         ind = Sig.index('[')
         Net = Sig[:ind]
         Inds = Sig[ind+1:-1]
@@ -1731,7 +1731,7 @@ def busify_x(Sig):
     return Sig
 
 def relax_inst_name(Name):
-    if type(Name)in[types.TupleType,types.ListType]:
+    if type(Name) is [tuple,list]:
         if Name[0] in ['subbit']:
             return '%s_%s_'%(Name[1],Name[2])        
     return relax_name(Name)
@@ -1739,11 +1739,11 @@ def relax_inst_name(Name):
 def relax_name(Name,Simple=True):
     if not Name:
         return Name
-    if type(Name) in [types.ListType,types.TupleType]:
+    if type(Name) is [tuple,list]:
         if Name[0] in ['subbit','subbus']:
             Name[1]=relax_name(Name[1],Simple)
         return Name
-    if type(Name)!=types.StringType:
+    if type(Name) is not str:
         return Name
     if Name[0]=='\\':
         Name=Name[1:]
@@ -1755,14 +1755,14 @@ def relax_name(Name,Simple=True):
     return Name        
 
 def hashit(End):    
-    if type(End)==types.ListType:
+    if type(End) is list:
         return tuple(End)
     else:
         return End 
 
 
 def is_double_def(Wid):
-    if type(Wid)not in [types.TupleType,types.ListType]:
+    if type(Wid) is not  [tuple,list]:
         return False
     if (len(Wid)==3)and(Wid[0] in ['packed','double']):
         return True
@@ -1779,9 +1779,9 @@ def make_int(Str):
         return Str
 
 def verilog_conns(Conns):
-    if type(Conns)==types.ListType:
+    if type(Conns) is list:
         return verilog_conns_list(Conns)
-    elif type(Conns)==types.DictType:
+    elif type(Conns) is dict:
         return verilog_conns_dict(Conns)
 
 def verilog_conns_list(Conns):

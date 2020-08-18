@@ -55,6 +55,16 @@ def get_cycles():
 
 finishReason = False
 
+MODULE = ['none']
+def currentModule():
+    return MODULE[0]
+
+def setCurrentModule(Module):
+    MODULE[0]=Module
+
+
+
+
 def finish(Txt):
     if finishReason:
         finishReason(Txt,Errors,Wrongs,Corrects)
@@ -223,6 +233,16 @@ def parse_args():
     global params
     fnames=[]
     state='idle'
+
+    PYVER = sys.argv[0]
+    AA = PYVER.split('/')
+    AA.pop(-1)
+    ExecPath = '/'.join(AA)
+    params['execpath'] = ExecPath
+
+
+
+
     for X in sys.argv[1:]:
         if (state=='idle'):
             if (X[0]=='-'):
@@ -706,6 +726,17 @@ def bracketize(List):
         else:
             curr.append(X)
     return curr
+
+
+
+def record_directory(Fname,SearchDirs):
+    wrds = Fname.split('/')
+    wrds = wrds[:-1]
+    Dir = '/'.join(wrds)
+    if (len(Dir)==0):
+        Dir = '.'
+    if (Dir not in SearchDirs):
+        SearchDirs.append(Dir)
 
 
 

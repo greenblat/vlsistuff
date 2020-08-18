@@ -26,7 +26,7 @@ def main():
 Modules = {}
 
 def dumpDataBase():
-    Keys = DataBase.keys()
+    Keys = list(DataBase.keys())
     Keys.sort()
     Fout = open('database.dump','w')
     for Key in Keys:
@@ -67,7 +67,7 @@ def load_parsed(Rundir):
             
 def load_db0(Fname):
     global DataBase
-    File = open(Fname)
+    File = open(Fname,'rb')
     DataBase = pickle.load(File) 
     File.close()
 
@@ -200,7 +200,7 @@ def add_generate_item(List):
 
     if len(List)==3:
         Statement = get_statements(List[1])
-        if (len(Statement)==1)and(type(Statement)==types.ListType):
+        if (len(Statement)==1)and(type(Statement) is list):
             Statement = Statement[0]
 
         Current.add_generate(Statement)
@@ -269,7 +269,7 @@ def add_module_header(List0):
     if Vars:
         List = get_list(DataBase[Vars[0]])
         for Item in List:
-            if type(Item)==types.TupleType:
+            if type(Item) is tuple:
                 Vars2 = matches.matches(Item,'extdir ? ? ?')
                 if Vars2:
                     Dir = Vars2[0]
@@ -284,7 +284,7 @@ def add_module_header(List0):
                         Current.add_sig(Net,Dir,Wid) 
                 else:
                     logs.log_error('add_module_header got %s'%str(Item))
-            elif type(Item)==types.StringType:
+            elif type(Item) is str:
                 if Dir: Current.add_sig(Item,Dir,Wid) 
             else:                    
                 logs.log_error('add_module_header got(1) %s'%str(Item))
@@ -457,7 +457,7 @@ def get_soft_assigns(Item1):
 
 
 def get_statement(Item):
-    if (type(Item)==types.TupleType):
+    if (type(Item) is tuple):
         List = DataBase[Item]
     else:
         List = Item
@@ -714,7 +714,7 @@ def get_statement(Item):
     if Vars:
         return ['return',Vars[0]]
 
-    if (type(List)==types.ListType)and(len(List)==1):
+    if (type(List) is list)and(len(List)==1):
         return get_statement(List[0])
 
 
@@ -853,11 +853,11 @@ def get_busbit(Item):
     logs.log_err('get_busbit %s %s'%(Item,List))
 
 def get_dir(Item):
-    if (type(Item)==types.ListType)and(len(Item)==1):
+    if (type(Item) is list)and(len(Item)==1):
         return get_dir(Item[0])
     if tuple(Item) in DataBase:
         return get_dir(DataBase[tuple(Item)])
-    if (type(Item)==types.TupleType)and(len(Item)==4):
+    if (type(Item) is tuple)and(len(Item)==4):
         return Item[0]
     Vars = matches.matches(Item,'!PureExt !IntKind',False)
     if Vars:
@@ -881,7 +881,7 @@ def get_dir(Item):
     if Vars:
         return 'reg signed'
 
-    if type(Item)==types.TupleType:
+    if type(Item) is tuple:
         if Item[0] in ['wire','logic']:
             return Item[0]
 
@@ -891,12 +891,12 @@ def get_dir(Item):
 
 
 def get_list(Item):
-    if (type(Item)==types.ListType)and(len(Item)==1):
+    if (type(Item) is list)and(len(Item)==1):
         return get_list(Item[0])
     if tuple(Item) in DataBase:
         return get_list(DataBase[tuple(Item)])
 
-    if (type(Item)==types.TupleType)and(len(Item)==4):
+    if (type(Item) is tuple)and(len(Item)==4):
         return [Item[0]]
     Vars = matches.matches(Item,'? , !Tokens_list')
     if Vars:
@@ -1515,7 +1515,7 @@ def add_definition(List):
         Wid0 = get_wid(Vars[1])
         Wid1 = get_wid(Vars[2])
         Name = get_list(Vars[3])
-        if type(Name)==types.ListType:
+        if type(Name) is list:
             for Net in Name:
                 Current.add_sig(Net,Dir,('packed',Wid0,Wid1))
         else:
@@ -1569,7 +1569,7 @@ def add_definition(List):
 
 
 def get_expr_list(Item):
-    if (type(Item)==types.ListType)and(len(Item)==1):
+    if (type(Item) is list)and(len(Item)==1):
         return get_expr_list(Item[0])
     if in_db(Item):
         return get_expr_list(DataBase[Item])
@@ -1591,13 +1591,13 @@ def get_expr_list(Item):
     return []
 
 def in_db(Item):
-    if type(Item) != types.TupleType: return False
+    if type(Item) is not tuple: return False
     return Item in DataBase
 
 def is_terminal(Item):
-    if type(Item) != types.TupleType: return False
+    if type(Item) is not tuple: return False
     return len(Item)==4
-    if type(Item) != types.TupleType: return False
+    if type(Item) is not tuple: return False
     return Item in DataBase
 
 def add_parameter(Ptr):
@@ -1703,7 +1703,7 @@ def get_conns(Ptr):
 
             else:
                 logs.log_err('strange get_conns %s'%str(Item))
-        elif (type(Item)==types.TupleType)and(Item[0]==','):
+        elif (type(Item) is tuple)and(Item[0]==','):
             pass
         else:
             logs.log_err('strange2 get_conns %s'%str(Item))
@@ -1766,7 +1766,7 @@ def get_expr(Item):
             return Item[0]
         if Item[1]=='hex':
             return ['hex',Item[0]]
-    if (type(Item)==types.TupleType):
+    if (type(Item) is tuple):
         if Item[0]=='*':
             return '*'
     if len(Item)==2:
@@ -1878,11 +1878,11 @@ def get_expr(Item):
                 Op = List[1][0]
                 if Op in ['+','*','|','||','^','&&','||']:
                     RR = [Op]
-                    if (type(Expr0)==types.TupleType)and(Expr0[0]==Op):
+                    if (type(Expr0) is tuple)and(Expr0[0]==Op):
                         RR.extend(list(Expr0[1:]))
                     else:
                         RR.append(Expr0)
-                    if (type(Expr1)==types.TupleType)and(Expr1[0]==Op):
+                    if (type(Expr1) is tuple)and(Expr1[0]==Op):
                         RR.extend(list(Expr1[1:]))
                     else:
                         RR.append(Expr1)
@@ -1980,7 +1980,7 @@ def get_curly_items(Item1):
                 else:
                     logs.log_err('curly got %s out of %s'%(Item,LL))
                     X='error'
-                if (type(X)==types.ListType)and(len(X)==1)and (type(X[0])==types.ListType):
+                if (type(X) is list)and(len(X)==1)and (type(X[0])is list):
                     res.extend(X)
                 else:
                     res.append(X)

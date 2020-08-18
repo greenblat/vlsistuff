@@ -1,0 +1,11 @@
+__init__.pyc
+dbase.pyc
+drawVectorText.pyc
+dumpFormats.pyc
+helpString.pyc
+oglDraw.pyc
+oglGeoms.pyc
+postscript.pyc
+renders.pyc
+schem.pyc
+svgClass.pyc

@@ -80,7 +80,7 @@ def dump_instance(Mod,Simple=False):
         Fout.write('parameter %s = %s;\n'%(Param,pr_expr(Val)))
 
     Regs=''
-    Sigs = Mod.nets.keys()
+    Sigs = list(Mod.nets.keys())
     Sigs.sort()
     for Sig in Sigs:
         DirHL = Mod.nets[Sig]
@@ -123,7 +123,7 @@ def dump_instance(Mod,Simple=False):
     Fout.write('def cucu():\n')
     for Sig in Sigs:
         DirHL = Mod.nets[Sig]
-        Dir1 = sDirHL[0].split()[0]
+        Dir1 = DirHL[0].split()[0]
         if (Dir1=='input')and(Sig not in ['clk','rst_n']):
             Fout.write("    veri.force('tb.%s','0')\n"%(Sig))
 

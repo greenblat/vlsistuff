@@ -43,7 +43,7 @@ class axiLiteMasterClass:
         if Sig in self.Translates: Sig = self.Translates[Sig]
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
-    def makeRead(self,Address,Size=4,Queue=1):
+    def read(self,Address,Size=4,Queue=1):
         if Queue==1:
             self.Queue.append('force arvalid=1 araddr=%s'%(Address))
             self.Queue.append('force arvalid=0 araddr=0 rready=1')
@@ -59,12 +59,12 @@ class axiLiteMasterClass:
         self.Queue.append('wait %s'%Many)
         self.Queue.append('finish')
 
-    def makeWrite(self,Address,Wdata,Wstrb=0xff,Queue=1):
+    def write(self,Address,Wdata,Wstrb=0xff,Queue=1):
         if Queue==1:
             self.Queue.append('force awvalid=1 awaddr=%s'%(Address))
-            self.Queue.append('force awvalid=0 awaddr=0')
+            self.Queue.append('force_cond awready awvalid=0 awaddr=0')
             self.Queue.append('force wvalid=1 wdata=%s wstrb=%s '%(Wdata,Wstrb))
-            self.Queue.append('force wvalid=0 wdata=0 wstrb=0 bready=1')
+            self.Queue.append('force_cond wready wvalid=0 wdata=0 wstrb=0 bready=1')
         elif Queue==2:
             self.Queue2.append('force awvalid=1 awaddr=%s'%(Address))
             self.Queue2.append('force awvalid=0 awaddr=0')
@@ -125,6 +125,16 @@ class axiLiteMasterClass:
             logs.log_info('veri finish from axi Master')
             veri.finish()
             sys.exit()
+        elif (wrds[0]=='force_cond'):
+            Cond = self.peek(wrds[1])
+            if Cond!=1: 
+                self.Queue.insert(0,Cmd)
+                return
+            for wrd in wrds[2:]:
+                ww = wrd.split('=')
+                Var = ww[0]
+                Val = self.evalit(ww[1])
+                self.force(Var,Val)
         elif (wrds[0]=='force'):
             for wrd in wrds[1:]:
                 ww = wrd.split('=')

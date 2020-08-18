@@ -3,6 +3,7 @@ from logs import *
 import traceback
 import types
 import module_class
+import importlib
 
 import new_flattens
 import fixingModule
@@ -100,7 +101,7 @@ def execute_line(Line,Env):
 
     if (wrds[0]=='import'):
         Fname = wrds[1]
-        importing(Fname,Env)
+        my_importing(Fname,Env)
         return
 
     if wrds[0]=='remove_notused_signals':
@@ -438,7 +439,7 @@ def execute_line(Line,Env):
         return
     print('got here') 
     if len(wrds)==1:
-       Done = importing(wrds[0],Env,False)
+       Done = my_importing(wrds[0],Env,False)
        print('done %s'%Done)
        if Done: return 
 
@@ -449,7 +450,7 @@ def execute_line(Line,Env):
 
 
 
-def importing(Fname,Env,Original=True):
+def my_importing(Fname,Env,Original=True):
     Env.try_and_load_module = try_and_load_module
     sys.path += ['.']
     Orig = Fname
@@ -463,15 +464,21 @@ def importing(Fname,Env,Original=True):
         sys.path += [Path]
 
     what = 'from %s import help_main'%(Fname)
-    print('importing "%s"'%what)
     try:
-        exec(what)
+        That = importlib.import_module(Fname)
+        help_main = That.help_main
+        print('importing "%s"'%what)
     except:
-        traceback.print_exc()
-        if Original:
-            log_fatal('failed to import "help_main" from %s or -do %s does not exist'%(Fname,Fname))
-        else:
-            return False
+        log_fatal('failed to import "help_main" from %s or -do %s does not exist'%(Fname,Fname))
+
+#    try:
+#        exec(what)
+#    except:
+#        traceback.print_exc()
+#        if Original:
+#            log_fatal('failed to import "help_main" from %s or -do %s does not exist'%(Fname,Fname))
+#        else:
+#            return False
     if (Env.Current==None):
         Keys = Env.Modules.keys()
         Keys.sort()

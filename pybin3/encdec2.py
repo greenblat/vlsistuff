@@ -37,8 +37,8 @@ def main():
         print('>>>>>nodir')
         wasDir=False
 
-    File = open(Fname,'rb')
     if What[0] in 'dD':
+        File = open(Fname,'r')
         if not OutFileName:
             OutFileName='decoded.file'
         decode_file(File)
@@ -51,6 +51,7 @@ def main():
             os.system('tar xzf aaa.%s'%(OutFileName))
         print('what',What)
     else:
+        File = open(Fname,'rb')
         if not OutFileName:
             OutFileName='encoded.file'
         encode_file(File)
@@ -199,7 +200,10 @@ def decode2(A,B,C,D):
 def encrypt_line(line,Txt):
     res=''
     for Chr in line:
-        X = chr(Chr ^ random.randint(0,255))
+        if type(Chr) is int:
+            X = chr(Chr ^ random.randint(0,255))
+        else:
+            X = chr(ord(Chr) ^ random.randint(0,255))
         res += X
     return res
 

@@ -333,7 +333,7 @@ def asciiForce(Sig,Str):
     res = '0b'
     for Chr in Str:
         Ord = ord(Chr)
-        Bin = bin8(Ord)
+        Bin = binx(Ord,8)
         res += Bin
     veri.force(Sig,res)
 
@@ -730,7 +730,8 @@ class driverClass:
             Chr = '%02x'%ord(Txt[ii])
             Res += Chr
         self.force(Sig,Res)
-
+    def peekbin(self,Sig):
+        return veri.peek('%s.%s'%(self.Path,Sig))
 
     def peek(self,Sig):
         return peek('%s.%s'%(self.Path,Sig))
@@ -760,6 +761,8 @@ class driverClass:
         self.edges[Sig] = self.peek(Sig)
         return False
 
+    def initial(self):
+        return
 
     def run(self):
         log_error('run() of driverClass is supposed to be replaced')
