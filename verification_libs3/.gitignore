@@ -8,4 +8,5 @@ scanDeepListForPanics.pyc
 spiMaster.pyc
 spiMasterClass.pyc
 logs.pyc
+encdec_8b10b.pyc
 

@@ -616,6 +616,8 @@ class module_class:
                     (Dir,WW) = self.nets[Name]
                     if (type(WW) is tuple)and(len(WW)==2):
                         (H,L)=WW
+                        H = make_int(H)
+                        L = make_int(L)
                         H = max(H,Ind)
                         L = min(L,Ind)
                         self.nets[Name]=(Dir,(H,L))
@@ -722,7 +724,7 @@ class module_class:
                         pass
                     elif Net not in Wires:
                         Wires[Net]=(0,0)
-                elif type(Net) in [tuple,list]:
+                elif isinstance(Net,(tuple,list)):
                     if Net[0] in ['subbit','subbus']:
                         Name = Net[1]
                         if Net[0]=='subbit':
@@ -973,7 +975,7 @@ def support_set__(Sig,Bussed):
         if Sig in OPS : return []
         if Sig in KEYWORDS : return []
         return [Sig]
-    if type(Sig) is [tuple,list]:
+    if isinstance(Sig,(tuple,list)):
         if len(Sig)==1:
             return support_set__(Sig[0],Bussed)
         if Sig[0] in ['const','bin','hex','dig','taskcall']:
@@ -1019,7 +1021,6 @@ def support_set__(Sig,Bussed):
             except:
                 return support_set__(Sig[1],Bussed)+support_set__(Sig[2],Bussed)
         if Sig[0] in ['functioncall']:
-            print('>>>>>>>>>>>',Sig[2])
             return support_set__(Sig[2],Bussed)
 
         res=[]
@@ -1131,7 +1132,7 @@ def pr_inst_params(Dir):
     return '#(%s)'%(', '.join(res))
 
 def pr_timing(List):
-    if type(List) is (list,tuple):
+    if isinstance(List,(list,tuple)):
         if List[0]=='list':
             res = map(pr_expr,List[1:])
             res = map(str,res)
@@ -1597,7 +1598,7 @@ def pr_expr(What):
         Str = '{%s{%s}}'%(pr_expr(What[1]),pr_expr(What[2]))
         return Str
 
-    if (type(What) in (tuple,list)):
+    if isinstance(What,(tuple,list)):
         if simply_computable(What):
             X,_ = simply_computable(What)
             return str(X)
@@ -1731,7 +1732,7 @@ def busify_x(Sig):
     return Sig
 
 def relax_inst_name(Name):
-    if type(Name) is [tuple,list]:
+    if isinstance(Name,(tuple,list)):
         if Name[0] in ['subbit']:
             return '%s_%s_'%(Name[1],Name[2])        
     return relax_name(Name)
@@ -1739,7 +1740,7 @@ def relax_inst_name(Name):
 def relax_name(Name,Simple=True):
     if not Name:
         return Name
-    if type(Name) is [tuple,list]:
+    if isinstance(Name,(tuple,list)):
         if Name[0] in ['subbit','subbus']:
             Name[1]=relax_name(Name[1],Simple)
         return Name
@@ -1762,7 +1763,7 @@ def hashit(End):
 
 
 def is_double_def(Wid):
-    if type(Wid) is not  [tuple,list]:
+    if isinstance(Wid,(tuple,list)):
         return False
     if (len(Wid)==3)and(Wid[0] in ['packed','double']):
         return True

@@ -735,6 +735,10 @@ class driverClass:
 
     def peek(self,Sig):
         return peek('%s.%s'%(self.Path,Sig))
+    def peekbit(self,Sig,Ind):
+        X = peek('%s.%s'%(self.Path,Sig))
+        Bit = (X>>Ind)&1
+        return Bit
     def peeksigned(self,Sig):
         return peeksigned('%s.%s'%(self.Path,Sig))
     def peekfloat(self,Sig):

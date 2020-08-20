@@ -437,7 +437,7 @@ def execute_line(Line,Env):
         String = '%s(Env.Current,Env.Modules,wrds)'%(wrds[0])
         exec(String)
         return
-    print('got here') 
+    print('got here %s'%str(wrds)) 
     if len(wrds)==1:
        Done = my_importing(wrds[0],Env,False)
        print('done %s'%Done)
@@ -464,12 +464,18 @@ def my_importing(Fname,Env,Original=True):
         sys.path += [Path]
 
     what = 'from %s import help_main'%(Fname)
+    That = importlib.import_module(Fname)
     try:
+        print('importing0 "%s"'%Fname)
         That = importlib.import_module(Fname)
+        print('importing1 "%s"'%Fname)
         help_main = That.help_main
-        print('importing "%s"'%what)
+        print('importing "%s"'%Fname)
+        help_main(Env)
+        return help_main
     except:
         log_fatal('failed to import "help_main" from %s or -do %s does not exist'%(Fname,Fname))
+        traceback.print_exc()
 
 #    try:
 #        exec(what)

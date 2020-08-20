@@ -27,7 +27,7 @@ def extract_sigs(Src,All=False):
         if All:
             return [Src]
         return []
-    if type(Src) is [tuple,list]:
+    if isinstance(Src,(tuple,list)):
         if len(Src)==0:
             return []
         if (len(Src)>1)and(Src[1]=='token'):

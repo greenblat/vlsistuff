@@ -29,7 +29,7 @@ def get_width2(Net,Mod):
             H = compute1(Wid[0],Mod)
             L = compute1(Wid[1],Mod)
             return H-L+1,H-L+1
-    if type(Net) in [list,tuple]:
+    if isnstance(Net,(list,tuple)):
         if Net[0] == '*':
             Smax=0
             Smin=0

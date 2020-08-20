@@ -21,7 +21,7 @@ def matches(List,Seq,Verbose=False):
     Vars=[]
     for ind,Iseq in enumerate(Lseq):
         Lind = List[ind]
-        if type(Lind) is [tuple,list]:
+        if isinstance(Lind,(tuple,list)):
             Litem = Lind[1]
         else:
             Litem = Lind
@@ -79,7 +79,7 @@ def listMatches__(List,Seq,Verbose):
         logs.log_info('try(0) list=%s pattern=%s'%(List,Seq))
     if str(List)==str(Seq):
         pass
-    elif (type(List) is [tuple,list])and(type(Seq) is [tuple,list]): 
+    elif (isinstance(List,(tuple,list)))and(isinstance(Seq,(tuple,list))): 
         pass
     elif type(List)!=type(Seq): 
         if Verbose: logs.log_info('failed on dff types %s %s list=%s pattern=%s'%(type(List),type(Seq),List,Seq))
@@ -96,7 +96,7 @@ def listMatches__(List,Seq,Verbose):
     for ind,Item in enumerate(List):
         V = listMatches(Item,Seq[ind],Verbose)
         if not V: return False
-        if type(V) is [list,tuple]:
+        if isinstance(V,(list,tuple)):
             Res.extend(V)
     if Res==[]:  return True
     return Res 

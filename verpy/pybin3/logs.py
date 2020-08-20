@@ -700,7 +700,7 @@ def extract_base_name(Fname):
     return CC[0]
 
 def mustKey(Dir,Key,Msg=''):
-    if type(Key) is [list,tuple]:
+    if isinstance(Key,(list,tuple)):
         for Ak in Key:
             mustKey(Dir,Ak,Msg)
     elif Key in Dir: return
