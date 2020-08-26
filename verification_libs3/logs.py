@@ -715,7 +715,7 @@ def bracketize(List):
 
 class driverClass:
     def __init__(self,Path,Monitors):
-        Monitors.append(self)
+        if (Monitors!=-1): Monitors.append(self)
         self.Path = Path
         self.state='idle'
         self.waiting  = 0 

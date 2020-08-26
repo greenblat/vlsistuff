@@ -19,10 +19,6 @@ Flogs = [False,False,False,False]
 import time
 printed_already={}
 
-Flog = False
-Flog2 = False
-Flog3 = False
-Flog4 = False
 TB = 'tb'
 try:
     import veri
@@ -30,12 +26,6 @@ except:
     import fakeVeri as veri
 
 finishCycles = 0
-
-def pymonFileName(logFileName):
-    global Flog
-    if Flog:
-        Flog.close()
-    Flog = open(logFileName,'w')
 
 
 noCycles=False

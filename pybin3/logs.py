@@ -27,6 +27,7 @@ TB = 'tb'
 try:
     import veri
 except:
+    veri = False
     import sys
     def stime():
         return 0
@@ -50,6 +51,7 @@ noCycles=False
 Cycles=0
 def get_cycles():
     global noCycles
+    if not veri: return 0
     if noCycles:
         return veri.stime()
     else:
@@ -279,9 +281,11 @@ def intx(Val):
         return int(Val)
 
 def peek(Sig):
+    if not veri: return 0
     V  = intx(veri.peek(Sig))
     return V
 def valid(Sig):
+    if not veri: return 0
     V  = intx(veri.peek(Sig))
     return V==1
 

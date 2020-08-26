@@ -89,7 +89,8 @@ class module_class:
 
         if Dir=='input wire': Dir='input'
         if Name=='repeat':
-            traceback.print_stack(None,None,logs.Flog)
+            logs.log_info('repeat??')
+            traceback.print_stack(None,None,logs.Flogs[0])
             sys.exit()
             return
 
@@ -144,7 +145,7 @@ class module_class:
 
         else:
             logs.log_err('add_sig %s (%s) got width %s'%(Name,Dir,Wid))
-            traceback.print_stack(None,None,logs.Flog)
+            traceback.print_stack(None,None,logs.Flogs[0])
 
 
 
@@ -162,7 +163,7 @@ class module_class:
     def add_hard_assign(self,Dst,Src,Strength='',Delay=''):
         if (Dst =='')or(Dst==False):
             logs.log_err('add_hard_assign got dst="%s" and src="%s"'%(Dst,Src))
-            traceback.print_stack(None,None,logs.Flog)
+            traceback.print_stack(None,None,logs.Flogs[0])
             return           
         L1 = support_set(Dst,False)+support_set(Src,False)
         self.checkDefined(L1)
@@ -175,7 +176,7 @@ class module_class:
             if (not myExtras(Net))and(Net not in self.nets)and(Net not in self.parameters)and(Net[0] not in '0123456789')and(Net not in self.localparams)and(Net not in self.genvars):
                 logs.log_err('net %s used before defined (%s)'%(Net,Net in self.nets))
                 logs.log_info('defined localparams %s %s '%(str(self.localparams),self.parameters))
-                traceback.print_stack(None,None,logs.Flog)
+                traceback.print_stack(None,None,logs.Flogs[0])
 
     def duplicate_inst(self,Inst,Inst2):
         Obj = self.insts[Inst]
@@ -675,7 +676,7 @@ class module_class:
                 return
 
         logs.log_error('check_net_def module=%s net=%s (%s)'%(self.Module,Net,type(Net)))
-        traceback.print_stack(None,None,logs.Flog)
+        traceback.print_stack(None,None,logs.Flogs[0])
 
     def del_inst(self,Inst):
         Inst = clean_inst(Inst)
@@ -858,7 +859,7 @@ class module_class:
             if Item[0] == 'subbit':
                 return Item
         logs.log_err('compute_int failed on "%s" %s'%(str(Item),self.Module),False)
-        traceback.print_stack(None,None,logs.Flog)
+        traceback.print_stack(None,None,logs.Flogs[0])
         return 0
 
 
@@ -1405,7 +1406,7 @@ def pr_stmt(List,Pref='',Begin=False):
         return pr_stmt(list(List))
 
     logs.log_err('untreated for prnt stmt %s %s'%(Pref,List))
-    traceback.print_stack(None,None,logs.Flog)
+    traceback.print_stack(None,None,logs.Flogs[0])
     return '[error %s]'%str(List)
 
 def split_expr(List,Pref):
@@ -1462,7 +1463,7 @@ def pr_dir(Dir):
 def pr_wid(Wid):
     if Wid==None:
         logs.log_err('wid is none error')
-        traceback.print_stack(None,None,logs.Flog)
+        traceback.print_stack(None,None,logs.Flogs[0])
         return 'wid is none error!!'
     if Wid==0:
         return ''
@@ -1475,7 +1476,7 @@ def pr_wid(Wid):
         return pr_wid(Wid[1])+pr_wid(Wid[2])
     if len(Wid)==3:
         logs.log_err('pr_wid %s'%(str(Wid)))
-        traceback.print_stack(None,None,logs.Flog)
+        traceback.print_stack(None,None,logs.Flogs[0])
         return str(Wid)
     return '[%s:%s]'%(pr_expr(Wid[0]),pr_expr(Wid[1]))
 
@@ -1769,7 +1770,7 @@ def is_double_def(Wid):
         return True
     if len(Wid)!=2:
         logs.log_err('bad width definition, ilia!  %s '%(str(Wid)))
-        traceback.print_stack(None,None,logs.Flog)
+        traceback.print_stack(None,None,logs.Flogs[0])
         return False
     return False        
     

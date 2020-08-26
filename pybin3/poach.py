@@ -11,9 +11,14 @@ def main():
     if len(sys.argv)>3:
         Dst = sys.argv[3]
     if not os.path.exists(Dst): os.mkdir(Dst)
+    if not os.path.exists('./poached'): 
+        os.mkdir('poached')
+    else:
+        os.system('/bin/rm -R poached')
+        os.mkdir('poached')
     travelDeep(Dir,Dst,Ends)
 
-
+FROM = {}
 def travelDeep(Dir,Dst,Ends):
     try:
         List = os.listdir(Dir)
@@ -24,18 +29,28 @@ def travelDeep(Dir,Dst,Ends):
         if endsCorrect(Fname,Ends):
             if not os.path.exists(Dst): mkdir(Dst)
             os.system('/bin/cp %s/%s %s/'%(Dir,Fname,Dst))
+            if os.path.exists('poached/%s'%Fname):
+                if Fname not in FROM: FROM[Fname] = '?'
+                print('>>>>','poached/%s'%Fname,os.path.exists('poached/%s'%Fname))
+                print('warning!! overwritining %s by %s/%s'%(FROM[Fname],Dir,Fname))
+            else:
+                FROM[Fname] = Dir
+                FROM[Fname.lower()] = Dir
+                FROM[Fname.upper()] = Dir
+                print('cp %s/%s'%(Dir,Fname))                
+                os.system('/bin/cp %s/%s poached'%(Dir,Fname))
     for Fdir in List:
-        Full = '%s/%s'%(Dir,Fdir)
-        if os.path.isdir(Full):
-            NewDst = '%s/%s'%(Dst,Fdir)
-            travelDeep(Full,NewDst,Ends)
+        if Fdir[0] != '.':
+            Full = '%s/%s'%(Dir,Fdir)
+            if os.path.isdir(Full):
+                NewDst = '%s/%s'%(Dst,Fdir)
+                travelDeep(Full,NewDst,Ends)
             
 
 def mkdir(Dst):
     WW = Dst.split('/')
     for II in range(1,1+len(WW)):
         Head = '/'.join(WW[:II])
-        print(II,WW,Head)
         if (Head!='') and (not os.path.exists(Head)):
             os.mkdir(Head)
 

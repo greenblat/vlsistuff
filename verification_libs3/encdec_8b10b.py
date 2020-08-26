@@ -50,7 +50,7 @@ K307_p = negate(K307_m,'K307')
 
 def trans8to10(eight,plus):
     if type(eight) is int:
-        eight = ('00000000'+bin(ten)[2:])[-8:]
+        eight = ('00000000'+bin(eight)[2:])[-8:]
     B3 = eight[:3]
     B5 = eight[3:]
 
@@ -102,7 +102,7 @@ def trans4to3(bits4):
     if (bits4=="1101"): return "100"
     if (bits4=="1110"): return "111"
     return False
-def trans5to6(bits5):
+def trans5to6(bits5,plus):
     if (bits5=="00000")and plus: return "100111"
     if (bits5=="00000")and not plus: return "011000"
     if (bits5=="00001")and plus: return "011101"
@@ -197,3 +197,19 @@ def trans6to5(bits6):
     if (bits6=="111001"): return "01000"
     if (bits6=="111010"): return "10111"
     return False
+
+
+
+def main():
+    for ii in range(256):
+        PP = trans8to10(ii,True)
+        PH = '%03x'%(int(PP,2))
+        MM = trans8to10(ii,False)
+        MH = '%03x'%(int(MM,2))
+        print('%02x pp %s mm %s      pp %s m %s'%(ii,PP,MM,PH,MH))
+
+
+if __name__ == '__main__': main()
+
+
+
