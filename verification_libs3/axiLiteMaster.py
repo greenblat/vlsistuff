@@ -59,6 +59,14 @@ class axiLiteMasterClass:
         self.Queue.append('wait %s'%Many)
         self.Queue.append('finish')
 
+    def print(self,Text,Queue=1):
+        if Queue==1:
+            self.Queue.append('print %s'%(Text))
+        elif Queue==2:
+            self.Queue2.append('print %s'%(Text))
+        else:
+            logs.log_error('QUEUE can be 1 or 2, not "%s"'%Queue)
+
     def write(self,Address,Wdata,Wstrb=0xff,Queue=1):
         if Queue==1:
             self.Queue.append('force awvalid=1 awaddr=%s'%(Address))
@@ -104,6 +112,8 @@ class axiLiteMasterClass:
         wrds = Cmd.split()
         if wrds==[]:
             pass
+        elif (wrds[0]=='print'):
+            logs.log_info('axiLiteMaster: %s'%' '.join(wrds[1:]))
         elif (wrds[0]=='force'):
             for wrd in wrds[1:]:
                 ww = wrd.split('=')
@@ -121,6 +131,8 @@ class axiLiteMasterClass:
             pass
         elif (wrds[0]=='wait'):
             self.waiting = int(wrds[1])
+        elif (wrds[0]=='print'):
+            logs.log_info('axiLiteMaster: %s'%' '.join(wrds[1:]))
         elif (wrds[0]=='finish'):
             logs.log_info('veri finish from axi Master')
             veri.finish()

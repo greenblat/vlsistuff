@@ -716,13 +716,19 @@ def bracketize(List):
 class driverClass:
     def __init__(self,Path,Monitors):
         if (Monitors!=-1): Monitors.append(self)
-        self.Path = Path
+        if Path == '':
+            self.Path = Path
+        elif Path[-1] == '.':
+            self.Path = Path
+        else:
+            self.Path = Path + '.'
+
         self.state='idle'
         self.waiting  = 0 
         self.edges = {}
 
     def force(self,Sig,Val):
-        veri.force('%s.%s'%(self.Path,Sig),str(Val))
+        veri.force('%s%s'%(self.Path,Sig),str(Val))
 
     def forceAscii(self,Sig,Txt,Len):
         Res = '0x'
@@ -731,18 +737,18 @@ class driverClass:
             Res += Chr
         self.force(Sig,Res)
     def peekbin(self,Sig):
-        return veri.peek('%s.%s'%(self.Path,Sig))
+        return veri.peek('%s%s'%(self.Path,Sig))
 
     def peek(self,Sig):
-        return peek('%s.%s'%(self.Path,Sig))
+        return peek('%s%s'%(self.Path,Sig))
     def peekbit(self,Sig,Ind):
-        X = peek('%s.%s'%(self.Path,Sig))
+        X = peek('%s%s'%(self.Path,Sig))
         Bit = (X>>Ind)&1
         return Bit
     def peeksigned(self,Sig):
-        return peeksigned('%s.%s'%(self.Path,Sig))
+        return peeksigned('%s%s'%(self.Path,Sig))
     def peekfloat(self,Sig):
-        return peek_float('%s.%s'%(self.Path,Sig))
+        return peek_float('%s%s'%(self.Path,Sig))
 
     def valid(self,Sig):
         return self.peek(Sig)==1
