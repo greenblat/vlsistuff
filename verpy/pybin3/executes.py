@@ -12,7 +12,7 @@ import logs
 
 def select_current(Env):
     if (Env.Current==None):
-        Keys = Env.Modules.keys()
+        Keys = list(Env.Modules.keys())
         Keys.sort()
         if (len(Keys)==1):
             TT = Keys[0]
@@ -151,7 +151,7 @@ def execute_line(Line,Env):
             Env.Current = Env.Modules[string.upper(Env.Top)]
         else:
             log_err('module %s not loaded, cannot become top'%(Env.Top))
-            log_err('loads: %s'%str(Env.Modules.keys()))
+            log_err('loads: %s'%str(list(Env.Modules.keys())))
             sys.exit(3)
         return
     if (wrds[0]=='retype')or(wrds[0]=='retype_instance'):
@@ -162,7 +162,7 @@ def execute_line(Line,Env):
             Env.Current.retype(From,To)
         else:
             donesx = 0
-            Insts = Env.Current.insts.keys()
+            Insts = list(Env.Current.insts.keys())
             for II in Insts:
                Iobj = Env.Current.insts[II]
                if Iobj.Type==From:
@@ -465,17 +465,19 @@ def my_importing(Fname,Env,Original=True):
 
     what = 'from %s import help_main'%(Fname)
     That = importlib.import_module(Fname)
-    try:
-        print('importing0 "%s"'%Fname)
-        That = importlib.import_module(Fname)
-        print('importing1 "%s"'%Fname)
-        help_main = That.help_main
-        print('importing "%s"'%Fname)
-        help_main(Env)
-        return help_main
-    except:
-        log_fatal('failed to import "help_main" from %s or -do %s does not exist'%(Fname,Fname))
-        traceback.print_exc()
+    print('importing0 "%s"'%Fname)
+    That = importlib.import_module(Fname)
+    print('importing1 "%s"'%Fname)
+    help_main = That.help_main
+    print('importing "%s"'%Fname)
+    help_main(Env)
+    return help_main
+#    except:
+#        That = importlib.import_module(Fname)
+#        help_main = That.help_main
+#        help_main(Env)
+#        log_fatal('failed to import "help_main" from %s or -do %s does not exist'%(Fname,Fname))
+#        traceback.print_exc()
 
 #    try:
 #        exec(what)

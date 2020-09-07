@@ -615,7 +615,7 @@ class module_class:
                         self.add_sig(Name,'wire',(Ind,Ind))
                         return
                     (Dir,WW) = self.nets[Name]
-                    if (type(WW) is tuple)and(len(WW)==2):
+                    if (type(WW) is tuple)and(len(WW)==2)and(type(WW[0]) is int):
                         (H,L)=WW
                         H = make_int(H)
                         L = make_int(L)
@@ -648,9 +648,12 @@ class module_class:
                         logs.log_warning('packed: do something about it net=%s ww=%s'%(Net,WW))
                         return
                     (H,L)=WW
-                    H = max(evalz(H),evalz(Ind0))
-                    L = min(evalz(L),evalz(Ind1))
-                    self.nets[Name]=(Dir,(H,L))
+                    try:
+                        H = max(evalz(H),evalz(Ind0))
+                        L = min(evalz(L),evalz(Ind1))
+                        self.nets[Name]=(Dir,(H,L))
+                    except:
+                        pass
                 else:
                     logs.log_warning('check net def got width  name=%s dir=%s ww=%s'%(Name,Dir,WW))
                     self.nets[Name]=(Dir,WW)
@@ -1082,7 +1085,7 @@ class instance_class:
         Pref='    '
         res=[]
         if ('pin0' in self.conns)and('pin1' in self.conns):
-            Pins = self.conns.keys()
+            Pins = list(self.conns.keys())
             Pins.sort()
             for Pin in Pins:
                 Expr = pr_expr(self.conns[Pin])
@@ -1488,8 +1491,6 @@ def pr_replace(What):
 def pr_expr(What):
     if type(What) is int:
         return str(What)
-    if type(What) is long:
-        return str(What)
     if type(What) is float:
         return str(What)
     if type(What) is str:
@@ -1623,7 +1624,9 @@ def splitLong(res1):
     return res1
 
 def simply_computable(What):
-    if type(What) is [int,float]:
+    if type(What) is int:
+        return What,'aa'
+    if type(What) is float:
         return What,'aa'
     if (What[0] in ['-','+','*','/'])and(len(What)==3):
         if  simply_computable(What[1]) and simply_computable(What[2]):
@@ -1764,7 +1767,7 @@ def hashit(End):
 
 
 def is_double_def(Wid):
-    if isinstance(Wid,(tuple,list)):
+    if isinstance(Wid,(tuple,list,int)):
         return False
     if (len(Wid)==3)and(Wid[0] in ['packed','double']):
         return True

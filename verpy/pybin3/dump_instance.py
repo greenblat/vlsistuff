@@ -1,6 +1,5 @@
 
 import os,sys,string
-import types
 import logs
 import traceback
 
@@ -222,7 +221,7 @@ sys.path.append('%s/verification_libs'%NewName)
 import logs
 Monitors=[]
 cycles=0
-
+GIVEUP_TIMEOUT = 1000    # how many cycles to run before retirment. 
 
 class driverMonitor(logs.driverClass):
     def __init__(self,Path,Monitors):
@@ -266,8 +265,8 @@ def negedge():
     global cycles
     cycles += 1
     veri.force('tb.cycles',str(cycles))
-    if (cycles>1000):
-        logs.log_info('finishing on default guard of 1000')
+    if (cycles>GIVEUP_TIMEOUT):
+        logs.log_info('finishing on default guard of %d'%GIVEUP_TIMEOUT)
         veri.finish()
     rst_n = veri.peek('tb.rst_n')
     if (rst_n!='1'):
@@ -280,7 +279,7 @@ def negedge():
 
 """
 def is_double_def(Wid):
-    if type(Wid)not in [types.TupleType,types.ListType]:
+    if not isinstance(Wid,(tuple,list)):
         return False
     if (len(Wid)==3)and(Wid[0] in ['packed','double']):
         return True
@@ -313,7 +312,7 @@ def pr_wid(Wid):
         return 'wid is none error!!'
     if Wid==0:
         return ''
-    if type(Wid)==types.IntType:
+    if type(Wid) is int:
         return '[%s:0]'%(pr_expr(Wid))
     if (len(Wid)==3)and(Wid[0]=='double'):
         return '%s%s'%(pr_wid(Wid[1]),pr_wid(Wid[2]))

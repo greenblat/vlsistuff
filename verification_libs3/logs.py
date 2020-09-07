@@ -329,6 +329,8 @@ def binx(Int,Wid=8):
     Z = Y[-Wid:]
     return Z
 
+def force_ascii(Sig,Str):
+    asciiForce(Sig,Str)
 def asciiForce(Sig,Str):
     res = '0b'
     for Chr in Str:

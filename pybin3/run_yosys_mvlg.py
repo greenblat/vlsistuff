@@ -16,10 +16,13 @@ INCFILE = '''
 read_verilog -sv ALLRTL
 hierarchy -check -top  TOP
 check;
+write_verilog -noattr aa0.glv
 proc; opt; fsm; opt; memory; opt
+write_verilog -noattr aa1.glv
 check;
 
 techmap; opt
+write_verilog -noattr aa2.glv
 dfflibmap -liberty LIB_DFF
 abc -liberty  LIB_ABC
 
@@ -75,7 +78,7 @@ def main():
 
     wrds = mvlgFile.split('.')
     if wrds[-1]=='mvlg':
-        os.system('mvlg_to_one_file %s %s.all'%(mvlgFile,Top))
+        os.system('mvlg_to_one_file.py %s %s.all'%(mvlgFile,Top))
     else:
         os.system('/bin/cp %s %s.all'%(mvlgFile,Top))
     INC = STR.replace('ALLRTL','%s.all'%(Top))
