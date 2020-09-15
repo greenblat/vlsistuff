@@ -782,6 +782,19 @@ class driverClass:
         log_error('run() of driverClass is supposed to be replaced')
 
 
+def check_directory_exists(Fname):
+    if '/' not in Fname:
+        return
+    wrds = Fname.split('/')
+    wrds = wrds[:-1]
+    res=wrds.pop(0)
+    while 1:
+        if not os.path.exists(res):
+            os.mkdir(res)
+        if wrds==[]:
+            return
+        res = res +'/'+wrds.pop(0)
+
 
 
 

@@ -1095,13 +1095,15 @@ def bbox_aline(List):
         Y0=List[0][1] ; Y1=Y0
     except:
         return [(0,0),(1,1)]
-
-    for (X,Y) in List:
-        X0 = min(X0,X)
-        Y0 = min(Y0,Y)
-        X1 = max(X1,X)
-        Y1 = max(Y1,Y)
-    return [(X0,Y0),(X1,Y1)]
+    try:
+        for (X,Y) in List:
+            X0 = min(X0,X)
+            Y0 = min(Y0,Y)
+            X1 = max(X1,X)
+            Y1 = max(Y1,Y)
+        return [(X0,Y0),(X1,Y1)]
+    except:
+        return [(0,0),(1,1)]
 
 import sys,types
 

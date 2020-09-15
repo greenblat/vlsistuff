@@ -574,15 +574,15 @@ def do_the_split(wholelib,dir='tmp'):
                 line2 = line.replace(';',' ; ')
                 line2 = line2.replace('(',' ( ')
                 wrds =  line2.split()
-                print('111',wrds)
+#                print('111',wrds)
                 if len(wrds)==1:
                     line2 = wholelib[ind+1]
                     line2 = line2.replace(';',' ; ')
                     line2 = line2.replace('(',' ( ')
                     wrds =  line2.split()
-                Module = wrds[1] 
+                Module = relaxName(wrds[1])
                 File=open(dir+'/'+Module+'.v','w')
-                print('222',wrds,Module)
+#                print('222',wrds,Module)
                 modules = [Module]+modules
                 File.write(line)
                 print('opening ',Module)
@@ -640,6 +640,13 @@ def remove_synopsys_on_off(Lines):
         elif (state=='on'):
             Linesx.append(line)
     return Linesx
+
+def relaxName(Txt):
+    if Txt[0]=='\\': Txt = Txt[1:]
+    for Chr in "\\/$='":
+        Txt = Txt.replace(Chr,'_')
+    return Txt
+
 
 if __name__ == '__main__':
     main()

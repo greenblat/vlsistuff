@@ -8,7 +8,7 @@ import traceback
 
 
 def scan_statements(Current,Root,functiontorun,Params,Stack):
-    if type(Root)==types.ListType:
+    if type(Root)is list:
         if Root[0]=='list':
             for Item in Root[1:]:
                 scan_statement(Current,functiontorun,Item,Params,Stack)
@@ -71,9 +71,9 @@ def scan_statement(Current,functiontorun,Item,Params,Stack):
 def is_edged_timing(List):
     if not List:
         return False
-    if type(List)==types.StringType:
+    if type(List)is str:
         return False
-    if type(List)==types.TupleType:
+    if type(List)is tuple:
         if List[0]=='*':
             return False
         if List[1]=='token':
@@ -117,9 +117,9 @@ def get_senses(Current,Item,Params,Stack):
 
 
 def compute1(Item,Mod):
-    if type(Item)==types.IntType:
+    if type(Item)is int:
         return Item
-    if type(Item)==types.StringType:
+    if type(Item)is str:
         if Item in Mod.parameters:
             return compute1(Mod.parameters[Item],Mod)
         if Item in Mod.localparams:
@@ -131,7 +131,7 @@ def compute1(Item,Mod):
         except:
             logs.log_warning('compute1 %s failed string'%(str(Item)))
             return 0
-    if type(Item)==types.ListType:
+    if type(Item)is list:
         if Item[0] in ['-','+','*','/']:
             A = compute1(Item[1],Mod)
             B = compute1(Item[2],Mod)

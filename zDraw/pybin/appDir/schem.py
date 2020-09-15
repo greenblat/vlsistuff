@@ -104,7 +104,13 @@ picture action
   pic_prop nonentity xy=0,0
 end
 
-
+picture arrow 
+  pic_aline list=0,1.1,2,1.1,1.5,1.4
+  pic_aline list=0,1,2.3,1
+  pic_aline list=0,0.9,2,0.9,1.5,0.6
+  pic_aline list=1.5,1.4,2.3,1,1.5,0.6
+  pic_prop nonentity xy=0,0
+end
 
 picture sdgnd
   pic_aline list=-1.4,-1.6,1.4,-1.6
@@ -416,6 +422,8 @@ picture cmos
   pic_pin c_b i xy=2,2
   pic_pin c_ i xy=2,2
   pic_pin c i xy=2,-2
+  pic_pin gp i xy=2,2
+  pic_pin gn i xy=2,-2
 end
 picture bcmos
   pic_aline list=2,-0.6,2,-2

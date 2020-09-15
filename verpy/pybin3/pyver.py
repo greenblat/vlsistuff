@@ -93,9 +93,11 @@ def read_gate_level_verilog_file(Fname,RunDir):
     run_lexer(Fname,'%s/lex.out'%RunDir)
     File = open('%s/lex.out'%RunDir)
     Locals = glv_readfile(File)
+    print('>>GLVGLV>>>>>>>',Locals,Fname)
     for Mod in Locals:
         Locals[Mod].cleanZeroNets()
     for Mod in Locals:
+        if not Env.Current: Env.Current=Locals[Mod]
         Env.Modules[Mod]=Locals[Mod]
 
 

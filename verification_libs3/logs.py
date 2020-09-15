@@ -310,8 +310,9 @@ def peeksigned(Sig):
 
 def intxsigned(Str):
     X = intx(Str)
-    if 'x' in Str: return 9999
-    if 'z' in Str: return 9999
+#    log_info('INTSIGNED %s %s %s %s'%(Str,X,('x' in Str),('z' in Str)))
+    if 'x' in Str: return 0x9999
+    if 'z' in Str: return 0x9999
     if Str[0]=='0': return X
     if len(Str)==1: return X
     Base = 1<<len(Str)
@@ -445,6 +446,9 @@ def finishing(Txt='"not given"',ContinueFor=20):
     log_info('finishing %s with errors=%d wrongs=%d corrects=%d'%(Txt,Errors,Wrongs,Corrects))
     if finishReason:
         finishReason(Txt,Errors,Wrongs,Corrects)
+    else:
+        veri.finish()
+        sys.exit()
     finishCycles = get_cycles()+ContinueFor
 
 Vars = {}
@@ -715,6 +719,12 @@ def bracketize(List):
 
 
 
+def str2hex(self,Txt):
+    Res = '0x'
+    for ii in range(len(Txt)):
+        Chr = '%02x'%ord(Txt[ii])
+        Res += Chr
+    return Res
 class driverClass:
     def __init__(self,Path,Monitors):
         if (Monitors!=-1): Monitors.append(self)

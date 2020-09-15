@@ -239,7 +239,7 @@ class module_class:
 
     def dump_new_style_header(self,Fout):
         Fout.write('%s %s'%(self.Kind,pr_expr(self.Module)))
-        if self.parameters.keys()!=[]:
+        if list(self.parameters.keys())!=[]:
             Pref=''
             Fout.write(' #( ')
             for Prm in self.parameters:
@@ -615,7 +615,7 @@ class module_class:
                         self.add_sig(Name,'wire',(Ind,Ind))
                         return
                     (Dir,WW) = self.nets[Name]
-                    if (type(WW) is tuple)and(len(WW)==2)and(type(WW[0]) is int):
+                    if (type(WW) is tuple)and(len(WW)==2):
                         (H,L)=WW
                         H = make_int(H)
                         L = make_int(L)
@@ -624,9 +624,9 @@ class module_class:
                         self.nets[Name]=(Dir,(H,L))
                     elif (type(WW) is tuple)and(len(WW)==3):
                         if WW[0] not in ['packed','double']:
-                            logs.log_error('definition of net %s dir=%s and wid "%s" is wrong  (%s)'%(Name,Dir,WW,Net))
+                            logs.log_error('definition(1) of net %s dir=%s and wid "%s" is wrong  (%s)'%(Name,Dir,WW,Net))
                     else:
-                        logs.log_error('definition of net %s dir=%s and wid "%s" is wrong  (%s)'%(Name,Dir,WW,Net))
+                        logs.log_error('definition(2) of net %s dir=%s and wid "%s" is wrong  (%s) ind %d  %s'%(Name,Dir,WW,Net,Ind,type(WW[0])))
                 return
             if Net[0]=='subbus':
                 Name = Net[1]

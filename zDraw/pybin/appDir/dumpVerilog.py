@@ -101,7 +101,7 @@ def dumpVerilog(Glbs,Root,File):
 
 
 
-    File.write('module %s ('%Mod.Module)
+    File.write('Xmodule %s ('%Mod.Module)
     Pref=' '
     for Inp in Inps:
         File.write('    %sinput %s\n'%(Pref,Inp))
@@ -125,7 +125,8 @@ def dumpVerilog(Glbs,Root,File):
                     if Prm!='name': PP.append(Str)
                 ObjParams = '#(%s)'%(string.join(PP,','))
             else:
-                ObjParams=''
+                ObjParams='#(%d,%d)'%(Obj.Point)
+
             File.write('%s %s %s ('%(Obj.Type,ObjParams,Name))
             if Inst in Conns:
                 Pref = ''

@@ -12,6 +12,7 @@ class connectivityClass:
         self.Wnodes={}
         self.Inps={}
         self.Outs={}
+        self.Inouts={}
         self.Conns={}
         self.prepares()
     
@@ -38,6 +39,13 @@ class connectivityClass:
                 else:
                     self.Outs[Inst]=Inst
                     self.Names[Inst]=Inst
+            elif Obj.Type=='inout':
+                if Inst in self.Names:
+                    self.Inouts[self.Names[Inst]]=Inst
+                else:
+                    self.Inouts[Inst]=Inst
+                    self.Names[Inst]=Inst
+
             elif Obj.Type=='node':
                 self.Nodes[Inst]=[]
             elif Obj.Type=='antenna':
@@ -138,6 +146,9 @@ class connectivityClass:
         for Out in self.Outs:
             File.write('    %soutput %s\n'%(Pref,Out))
             Pref=','
+        for Out in self.Inouts:
+            File.write('    %sinout %s\n'%(Pref,Out))
+            Pref=','
         File.write(');\n')
         for Inst in self.Mod.instances:
             Obj = self.Mod.instances[Inst]
@@ -145,7 +156,7 @@ class connectivityClass:
                 Name = self.Names[Inst]
             else:
                 Name = Obj.Inst
-            if (Obj.Type not in ['vcc','gnd','antenna','input','output','node'])and('logo' not in Obj.Type)and('ilia' not in Obj.Type):
+            if (Obj.Type not in ['vcc','gnd','antenna','input','output','inout','node'])and('logo' not in Obj.Type)and('ilia' not in Obj.Type):
                 if Inst in self.Params:
                     PP = []
                     for Prm,Val in self.Params[Inst]:
@@ -154,7 +165,7 @@ class connectivityClass:
                         if Prm!='name': PP.append(Str)
                     ObjParams = '#(%s)'%(string.join(PP,','))
                 else:
-                    ObjParams=''
+                    ObjParams= '#(%d,%d)'%(Obj.Point)
                 File.write('%s %s %s ('%(Obj.Type,ObjParams,Name))
                 if Inst in self.Conns:
                     Pref = ''
@@ -205,6 +216,8 @@ class connectivityClass:
                 Name = self.Names[Inst]
             else:
                 Name = Obj.Inst
+            if Inst not in self.Params:  
+                self.Params[Inst] = {}
             if (Obj.Type in ['antenna','vcc','gnd','input','output','node'])or('logo' in Obj.Type):
                 pass
             elif Obj.Type == 'nmos':

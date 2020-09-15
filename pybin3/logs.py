@@ -263,7 +263,7 @@ def endsWith(Long,Short):
 
 
 def startsWith(Long,Short):
-    if type(Long) is str: return False
+    if type(Long) is not str: return False
     if Short not in Long: return False
     return  Long.index(Short)==0 
 

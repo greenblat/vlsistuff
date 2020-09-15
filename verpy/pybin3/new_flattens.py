@@ -38,14 +38,14 @@ def remove_buffers(Current,Env):
             Obj.conns[Pin]=Sig1
 
 def translate_expr(Src,Renames):
-    if type(Src)==types.StringType:
+    if type(Src)is str:
         if Src in Renames:
             return Renames[Src][1]
         else:
             return Src
-    if type(Src)==types.IntType:
+    if type(Src)is tuple:
         return Src
-    if type(Src)==types.ListType:
+    if type(Src)is list:
         if Src[0]=='const':
             return Src
         if Src[0] in MathOpts:
@@ -68,7 +68,7 @@ def prepare_trans_table(Current):
     Holder={}
     Renames={}
     for Dst,Src,_,_ in Current.hard_assigns:
-        if (type(Dst)==types.StringType) and (not output_sig(Dst,Current)) and simple_sig_source(Src):
+        if (type(Dst)is str) and (not output_sig(Dst,Current)) and simple_sig_source(Src):
             Holder[str(Dst)]=(Dst,Src)
     for Key in Holder:
         print('holder',Key,Holder[Key])
@@ -83,7 +83,7 @@ def prepare_trans_table(Current):
     Ok=True    
     while Ok:
         Ok=False    
-        Keys = Renames.keys()
+        Keys = list(Renames.keys())
         for Key in Keys:
             (Dst,Src)=Renames[Key]
             Key1 = str(Src)
@@ -97,11 +97,11 @@ def prepare_trans_table(Current):
 def simple_sig_source(Src):
     if not Src:
         return True
-    if type(Src)==types.StringType:
+    if type(Src)is str:
         return True
-    if type(Src)==types.IntType:
+    if type(Src)is tuple:
         return True
-    if type(Src)==types.ListType:
+    if type(Src)is list:
         if Src[0] in ['const','subbit','subbus']:
             return True
     return False
@@ -109,9 +109,9 @@ def simple_sig_source(Src):
 
 
 def is_literal(Expr,Current):
-    if type(Expr)==types.IntType:
+    if type(Expr)is tuple:
         return True
-    if type(Expr)==types.ListType:
+    if type(Expr)is list:
         return Expr[0] in ['const','bin','hex']
 
     return False
@@ -141,7 +141,7 @@ def flatten(Current,Whome,Env,load_module):
         else:
             flatten_inst(Current,Whome,Env.Modules)
     else:
-        Insts= Current.insts.keys()
+        Insts= list(Current.insts.keys())
         for Inst in Insts:
             if (Whome=='*')or(Current.insts[Inst].Type==Whome)or(Current.insts[Inst].Type in Whome):
                  Type = Current.insts[Inst].Type
@@ -192,7 +192,7 @@ def flatten_inst(Current,InstName,modules):
 
         for Net in Son.nets:
             Dir,Wid = Son.nets[Net]
-            if (Dir in ['wire','reg'])and(type(Wid)==types.TupleType)and(Wid[0]=='double'):
+            if (Dir in ['wire','reg'])and(type(Wid)is tuple)and(Wid[0]=='double'):
                 Current.nets['%s_%s'%(InstName,Net)]=(Dir,Wid)
         for Sonpin in Sonobj.conns:
             Sonsig = Sonobj.conns[Sonpin]
@@ -216,7 +216,7 @@ def check_instance_against_module(Current,Instobj,modules):
     Type = Instobj.Type
     Son = modules[Type]
 
-    Conns = Instobj.conns.keys()
+    Conns = list(Instobj.conns.keys())
     Conns.sort()
     Exts=[]
     for Net in Son.nets:
@@ -253,9 +253,9 @@ def prepare_mapping_table(Current,Instobj,modules):
             print('prepare_mapping_table SonPin=%s (%s/%s) is not net in %s '%(SonPin,Instobj.Type,Instobj.Name,Current.Module))
             Dir='wire'
             HsLs=0,0
-        if (type(HsLs)==types.TupleType)and(HsLs[0]=='double'):
+        if (type(HsLs)is tuple)and(HsLs[0]=='double'):
             H,L = total_width(Current,HsLs)
-        elif type(HsLs)==types.TupleType:
+        elif type(HsLs) is tuple:
             H = Son.compute_int(HsLs[0])
             L = Son.compute_int(HsLs[1])
         else:
@@ -289,9 +289,9 @@ def prepare_mapping_table(Current,Instobj,modules):
     return Translate
 
 def total_width(Son,HsLs):
-    if type(HsLs)==types.IntType:
+    if type(HsLs)is tuple:
         return 1
-    if type(HsLs)==types.TupleType:
+    if type(HsLs)is tuple:
         if len(HsLs)==2:
             H = Son.compute_int(HsLs[0])
             L = Son.compute_int(HsLs[1])
@@ -310,7 +310,7 @@ def total_width(Son,HsLs):
 def make_sig_list(Sig,Mod):
     if not Sig:
         return [Sig]
-    if (type(Sig)==types.StringType):
+    if (type(Sig)is str):
         if Sig in Mod.nets:
             Dir,HsLs = Mod.nets[Sig]
             if (HsLs==0):
@@ -329,12 +329,12 @@ def make_sig_list(Sig,Mod):
             return [Sig]
         log_error('sig for flatten %s not found in %s'%(Sig,Mod.Module),True)
         return [Sig]
-    if (type(Sig)==types.ListType)and(Sig[0]=='bin'):
+    if (type(Sig)is list)and(Sig[0]=='bin'):
         return make_sig_list(['const',Sig[1],'b%s'%Sig[2]],Mod)
-    if (type(Sig)==types.ListType)and(Sig[0]=='hex'):
+    if (type(Sig)is list)and(Sig[0]=='hex'):
         return make_sig_list(['const',Sig[1],'h%s'%Sig[2]],Mod)
 
-    if (type(Sig)==types.ListType)and(Sig[0]=='const'):
+    if (type(Sig)is list)and(Sig[0]=='const'):
         Wid = Mod.compute_int(Sig[1])
         if (Wid==1):
             return [ ['const',Sig[1],Sig[2]] ] 
@@ -360,10 +360,10 @@ def make_sig_list(Sig,Mod):
 
 
 
-    if (type(Sig)==types.ListType)and(Sig[0]=='subbit'):
+    if (type(Sig)is list)and(Sig[0]=='subbit'):
         Bus = Sig[1]
         _,Wid = Mod.nets[Bus]
-        if (type(Wid)==types.TupleType)and(len(Wid)==3)and(Wid[0]=='double'):
+        if (type(Wid)is tuple)and(len(Wid)==3)and(Wid[0]=='double'):
             H1 = Mod.compute_int(Wid[1][0])
             L1 = Mod.compute_int(Wid[1][1])
             H2 = Mod.compute_int(Wid[2][0])
@@ -377,7 +377,7 @@ def make_sig_list(Sig,Mod):
             
         return [Sig]
 
-    if (type(Sig)==types.ListType)and(Sig[0]=='subbus'):
+    if (type(Sig)is list)and(Sig[0]=='subbus'):
         Bus = Sig[1]
         _,Wid = Mod.nets[Bus]
         if len(Sig)==3:
@@ -390,7 +390,7 @@ def make_sig_list(Sig,Mod):
             log_error('bus indexing failed %s  "%s" '%(Bus,Sig))
             H=1
             L=0
-        if (type(Wid)==types.TupleType)and(len(Wid)==3)and(Wid[0]=='double'):
+        if (type(Wid)is tuple)and(len(Wid)==3)and(Wid[0]=='double'):
             H1 = Mod.compute_int(Wid[1][0])
             L1 = Mod.compute_int(Wid[1][1])
             H2 = Mod.compute_int(Wid[2][0])
@@ -407,7 +407,7 @@ def make_sig_list(Sig,Mod):
             for i in range(H,L-1,-1):
                 res += [ ['subbit',Bus,str(i)]]
             return res
-    if (type(Sig)==types.ListType)and(Sig[0]=='curly'):
+    if (type(Sig)is list)and(Sig[0]=='curly'):
         res=[]
         for Item in Sig[1:]:
             res += make_sig_list(Item,Mod)
@@ -447,16 +447,16 @@ def flatten_trans2(Inst,Sig,Translate,SonMod):
         return False
     if (Sig==None):
         return None
-    if (type(Sig)==types.StringType)and("'" in Sig):
+    if (type(Sig)is str)and("'" in Sig):
         return Sig
-    if (type(Sig)==types.StringType)and(Sig in Translate):
+    if (type(Sig)is str)and(Sig in Translate):
         return Translate[Sig]
-    if (type(Sig)==types.StringType)and(Sig not in Translate):
+    if (type(Sig)is str)and(Sig not in Translate):
         if (Sig==''):
             return ''
         if (Sig in SonMod.nets):
             Dir,Wid = SonMod.nets[Sig]
-            if type(Wid)==types.TupleType:
+            if type(Wid)is tuple:
                 if len(Wid)==2:
                     H = SonMod.compute_int(Wid[0])
                     L = SonMod.compute_int(Wid[1])
@@ -472,21 +472,21 @@ def flatten_trans2(Inst,Sig,Translate,SonMod):
         if (Sig[0]=='\\'):
             Sig = relax_inst(Sig)
         return '%s_%s'%(Inst1,Sig)
-    if (type(Sig)==types.ListType)and(Sig[0]=='const'):
+    if (type(Sig)is list)and(Sig[0]=='const'):
         return Sig
-    if (type(Sig)==types.ListType)and(Sig[0] in ['bin','hex']):
+    if (type(Sig)is list)and(Sig[0] in ['bin','hex']):
         Lii = make_sig_list(Sig,SonMod)
         if len(Lii)==1:
             return Lii[0]
         return ['curly']+Lii
-    if (type(Sig)==types.IntType):
+    if (type(Sig)is tuple):
         return Sig
 
-    if (type(Sig)==types.ListType)and(Sig[0]=='repeat'):
+    if (type(Sig)is list)and(Sig[0]=='repeat'):
         Many = SonMod.compute_int(Sig[1])
         LL = make_sig_list(Sig[2],SonMod)
         return ['curly']+LL * Many
-    if (type(Sig)==types.ListType)and(Sig[0]=='subbit'):
+    if (type(Sig)is list)and(Sig[0]=='subbit'):
         Bus=Sig[1]
         if (Bus[0]=='\\'):
             Bus = relax_inst(Bus)
@@ -496,7 +496,7 @@ def flatten_trans2(Inst,Sig,Translate,SonMod):
             return Translate[Bsig]
         return ['subbit',Inst+'_'+Bus,Ind]
 
-    if (type(Sig)==types.ListType)and(Sig[0]=='subbus'):
+    if (type(Sig)is list)and(Sig[0]=='subbus'):
         Bus=Sig[1]
         if (Bus[0]=='\\'):
             Bus = relax_inst(Bus)
@@ -515,19 +515,19 @@ def flatten_trans2(Inst,Sig,Translate,SonMod):
             res += [flatten_trans(Inst,['subbit',Bus,str(i)],Translate,SonMod)]
         return ['curly']+res
 
-    if (type(Sig)==types.ListType)and(Sig[0]=='curly'):
+    if (type(Sig)is list)and(Sig[0]=='curly'):
         res = ['curly']
         for X in Sig[1:]:
             Y = flatten_trans(Inst,X,Translate,SonMod)
             res += [Y]
         return res
-    if (type(Sig)==types.ListType)and(Sig[0]=='question'):
+    if (type(Sig)is list)and(Sig[0]=='question'):
         res = ['question']
         for X in Sig[1:]:
             Y = flatten_trans(Inst,X,Translate,SonMod)
             res += [Y]
         return res
-    if (type(Sig)==types.ListType)and(Sig[0] in MathOpts):
+    if (type(Sig)is list)and(Sig[0] in MathOpts):
         res = [Sig[0]]
         for X in Sig[1:]:
             Y = flatten_trans(Inst,X,Translate,SonMod)
