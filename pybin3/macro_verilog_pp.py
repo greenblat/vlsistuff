@@ -111,6 +111,8 @@ def run_main(Params):
             print('%d lines'%dones)
         
     print('done computing...')
+    if ('-specify' in Params):
+        do_the_specify(Lines3)
     File3 = open(OutFileName,'w')
     Lines4=[]
     for line in Lines3:
@@ -120,15 +122,20 @@ def run_main(Params):
             Lines4.append(line)
     File3.close()
     print('lines in the end %d'%len(Lines3))
+
+
     if ('-split' in Params):
         Dir = Params['-split'][0]
         if (Dir=='y'):
             Dir='tmp'
         do_the_split(Lines4,Dir)
 
+
+
+
     File4 = open('file4.v','w')
     state='idle'
-    for line in Lines3:
+    for line in Lines4:
         if len(line)==0:
             pass
         elif line[-1]=='\n':
@@ -646,6 +653,27 @@ def relaxName(Txt):
     for Chr in "\\/$='":
         Txt = Txt.replace(Chr,'_')
     return Txt
+
+def do_the_specify(Lines):
+    ind = 0
+    state = 'idle'
+    print('LINES',len(Lines))
+    while ind < len(Lines):
+        Line = Lines[ind]
+        if state=='idle':
+            if 'specify' in Line:
+                state = 'work'
+                Lines.pop(ind)
+            else:
+                ind += 1
+        elif state=='work':
+            if 'endspecify' in Line:
+                state = 'idle'
+            Lines.pop(ind)
+    
+    print('LINES',len(Lines))
+
+
 
 
 if __name__ == '__main__':
