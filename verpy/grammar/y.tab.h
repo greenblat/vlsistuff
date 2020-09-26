@@ -49,97 +49,98 @@
      inout = 265,
      reg = 266,
      wire = 267,
-     tri0 = 268,
-     tri1 = 269,
-     signed = 270,
-     event = 271,
-     bin = 272,
-     hex = 273,
-     dig = 274,
-     integer = 275,
-     real = 276,
-     wreal = 277,
-     ubin = 278,
-     uhex = 279,
-     udig = 280,
-     domino = 281,
-     and_and = 282,
-     or_or = 283,
-     eq3 = 284,
-     eq_eq = 285,
-     not_eq = 286,
-     gr_eq = 287,
-     sm_eq = 288,
-     always = 289,
-     begin = 290,
-     end = 291,
-     if = 292,
-     else = 293,
-     posedge = 294,
-     negedge = 295,
-     or = 296,
-     wait = 297,
-     emit = 298,
-     string = 299,
-     defparam = 300,
-     parameter = 301,
-     localparam = 302,
-     case = 303,
-     casez = 304,
-     casex = 305,
-     endcase = 306,
-     default = 307,
-     initial = 308,
-     forever = 309,
-     function = 310,
-     endfunction = 311,
-     task = 312,
-     endtask = 313,
-     for = 314,
-     while = 315,
-     backtick_define = 316,
-     backtick_include = 317,
-     backtick_timescale = 318,
-     backtick_undef = 319,
-     define = 320,
-     strong1 = 321,
-     strong0 = 322,
-     pull1 = 323,
-     pull0 = 324,
-     weak1 = 325,
-     weak0 = 326,
-     highz1 = 327,
-     highz0 = 328,
-     fork = 329,
-     join = 330,
-     disable = 331,
-     pragma = 332,
-     plus_range = 333,
-     minus_range = 334,
-     floating = 335,
-     power = 336,
-     star = 337,
-     generate = 338,
-     endgenerate = 339,
-     genvar = 340,
-     force = 341,
-     release = 342,
-     xnor = 343,
-     nand = 344,
-     nor = 345,
-     repeat = 346,
-     supply0 = 347,
-     supply1 = 348,
-     newver = 349,
-     return = 350,
-     arith_shift_right = 351,
-     SignedLeft = 352,
-     shift_right = 353,
-     shift_left = 354,
-     Veryequal = 355,
-     noteqeq = 356,
-     StarStar = 357,
-     UNARY_PREC = 358
+     logic = 268,
+     tri0 = 269,
+     tri1 = 270,
+     signed = 271,
+     event = 272,
+     bin = 273,
+     hex = 274,
+     dig = 275,
+     integer = 276,
+     real = 277,
+     wreal = 278,
+     ubin = 279,
+     uhex = 280,
+     udig = 281,
+     domino = 282,
+     and_and = 283,
+     or_or = 284,
+     eq3 = 285,
+     eq_eq = 286,
+     not_eq = 287,
+     gr_eq = 288,
+     sm_eq = 289,
+     always = 290,
+     begin = 291,
+     end = 292,
+     if = 293,
+     else = 294,
+     posedge = 295,
+     negedge = 296,
+     or = 297,
+     wait = 298,
+     emit = 299,
+     string = 300,
+     defparam = 301,
+     parameter = 302,
+     localparam = 303,
+     case = 304,
+     casez = 305,
+     casex = 306,
+     endcase = 307,
+     default = 308,
+     initial = 309,
+     forever = 310,
+     function = 311,
+     endfunction = 312,
+     task = 313,
+     endtask = 314,
+     for = 315,
+     while = 316,
+     backtick_define = 317,
+     backtick_include = 318,
+     backtick_timescale = 319,
+     backtick_undef = 320,
+     define = 321,
+     strong1 = 322,
+     strong0 = 323,
+     pull1 = 324,
+     pull0 = 325,
+     weak1 = 326,
+     weak0 = 327,
+     highz1 = 328,
+     highz0 = 329,
+     fork = 330,
+     join = 331,
+     disable = 332,
+     pragma = 333,
+     plus_range = 334,
+     minus_range = 335,
+     floating = 336,
+     power = 337,
+     star = 338,
+     generate = 339,
+     endgenerate = 340,
+     genvar = 341,
+     force = 342,
+     release = 343,
+     xnor = 344,
+     nand = 345,
+     nor = 346,
+     repeat = 347,
+     supply0 = 348,
+     supply1 = 349,
+     newver = 350,
+     return = 351,
+     arith_shift_right = 352,
+     SignedLeft = 353,
+     shift_right = 354,
+     shift_left = 355,
+     Veryequal = 356,
+     noteqeq = 357,
+     StarStar = 358,
+     UNARY_PREC = 359
    };
 #endif
 /* Tokens.  */
@@ -153,97 +154,98 @@
 #define inout 265
 #define reg 266
 #define wire 267
-#define tri0 268
-#define tri1 269
-#define signed 270
-#define event 271
-#define bin 272
-#define hex 273
-#define dig 274
-#define integer 275
-#define real 276
-#define wreal 277
-#define ubin 278
-#define uhex 279
-#define udig 280
-#define domino 281
-#define and_and 282
-#define or_or 283
-#define eq3 284
-#define eq_eq 285
-#define not_eq 286
-#define gr_eq 287
-#define sm_eq 288
-#define always 289
-#define begin 290
-#define end 291
-#define if 292
-#define else 293
-#define posedge 294
-#define negedge 295
-#define or 296
-#define wait 297
-#define emit 298
-#define string 299
-#define defparam 300
-#define parameter 301
-#define localparam 302
-#define case 303
-#define casez 304
-#define casex 305
-#define endcase 306
-#define default 307
-#define initial 308
-#define forever 309
-#define function 310
-#define endfunction 311
-#define task 312
-#define endtask 313
-#define for 314
-#define while 315
-#define backtick_define 316
-#define backtick_include 317
-#define backtick_timescale 318
-#define backtick_undef 319
-#define define 320
-#define strong1 321
-#define strong0 322
-#define pull1 323
-#define pull0 324
-#define weak1 325
-#define weak0 326
-#define highz1 327
-#define highz0 328
-#define fork 329
-#define join 330
-#define disable 331
-#define pragma 332
-#define plus_range 333
-#define minus_range 334
-#define floating 335
-#define power 336
-#define star 337
-#define generate 338
-#define endgenerate 339
-#define genvar 340
-#define force 341
-#define release 342
-#define xnor 343
-#define nand 344
-#define nor 345
-#define repeat 346
-#define supply0 347
-#define supply1 348
-#define newver 349
-#define return 350
-#define arith_shift_right 351
-#define SignedLeft 352
-#define shift_right 353
-#define shift_left 354
-#define Veryequal 355
-#define noteqeq 356
-#define StarStar 357
-#define UNARY_PREC 358
+#define logic 268
+#define tri0 269
+#define tri1 270
+#define signed 271
+#define event 272
+#define bin 273
+#define hex 274
+#define dig 275
+#define integer 276
+#define real 277
+#define wreal 278
+#define ubin 279
+#define uhex 280
+#define udig 281
+#define domino 282
+#define and_and 283
+#define or_or 284
+#define eq3 285
+#define eq_eq 286
+#define not_eq 287
+#define gr_eq 288
+#define sm_eq 289
+#define always 290
+#define begin 291
+#define end 292
+#define if 293
+#define else 294
+#define posedge 295
+#define negedge 296
+#define or 297
+#define wait 298
+#define emit 299
+#define string 300
+#define defparam 301
+#define parameter 302
+#define localparam 303
+#define case 304
+#define casez 305
+#define casex 306
+#define endcase 307
+#define default 308
+#define initial 309
+#define forever 310
+#define function 311
+#define endfunction 312
+#define task 313
+#define endtask 314
+#define for 315
+#define while 316
+#define backtick_define 317
+#define backtick_include 318
+#define backtick_timescale 319
+#define backtick_undef 320
+#define define 321
+#define strong1 322
+#define strong0 323
+#define pull1 324
+#define pull0 325
+#define weak1 326
+#define weak0 327
+#define highz1 328
+#define highz0 329
+#define fork 330
+#define join 331
+#define disable 332
+#define pragma 333
+#define plus_range 334
+#define minus_range 335
+#define floating 336
+#define power 337
+#define star 338
+#define generate 339
+#define endgenerate 340
+#define genvar 341
+#define force 342
+#define release 343
+#define xnor 344
+#define nand 345
+#define nor 346
+#define repeat 347
+#define supply0 348
+#define supply1 349
+#define newver 350
+#define return 351
+#define arith_shift_right 352
+#define SignedLeft 353
+#define shift_right 354
+#define shift_left 355
+#define Veryequal 356
+#define noteqeq 357
+#define StarStar 358
+#define UNARY_PREC 359
 
 
 

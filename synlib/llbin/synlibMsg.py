@@ -28,7 +28,8 @@ def main():
         if os.path.exists(Fname):
             os.system('/bin/rm lex.out db0.pickle')
             os.system('llbin/synlib_lexer %s'%Fname)
-            os.system('llbin/synlibyacc.py lex.out')
+            os.system('grep -v eol lex.out > lex.out2')
+            os.system('llbin/synlibyacc.py lex.out2')
             os.system('llbin/simplify_pickle.py db0.pickle db1.pickle')
         else:
             print 'file cannot be read "%s"'%Fname

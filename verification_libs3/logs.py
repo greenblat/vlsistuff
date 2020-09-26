@@ -9,6 +9,7 @@ print_debug_messages=0
 MAXWRONGS = 2000
 MAXERRORS = 2000
 PYMONLOG = 'pymon.log'
+FORCE_WORKS = True
 
 WHERE = ''
 
@@ -275,7 +276,8 @@ def intx(Val):
         return int(Val)
 
 def peek(Sig):
-    V  = intx(veri_peek(Sig))
+    X = veri_peek(Sig)
+    V  = intx(X)
     return V
 def valid(Sig):
     V  = intx(veri_peek(Sig))
@@ -338,7 +340,7 @@ def asciiForce(Sig,Str):
         Ord = ord(Chr)
         Bin = binx(Ord,8)
         res += Bin
-    veri.force(Sig,res)
+    if veri: veri.force(Sig,res)
 
 
 
@@ -447,7 +449,7 @@ def finishing(Txt='"not given"',ContinueFor=20):
     if finishReason:
         finishReason(Txt,Errors,Wrongs,Corrects)
     else:
-        veri.finish()
+        if veri: veri.finish()
         sys.exit()
     finishCycles = get_cycles()+ContinueFor
 
@@ -740,7 +742,7 @@ class driverClass:
         self.edges = {}
 
     def force(self,Sig,Val):
-        veri.force('%s%s'%(self.Path,Sig),str(Val))
+        if veri: veri.force('%s%s'%(self.Path,Sig),str(Val))
 
     def forceAscii(self,Sig,Txt,Len):
         Res = '0x'
@@ -793,6 +795,11 @@ class driverClass:
 def veri_peek(Sig):
     if veri: return veri.peek(Sig)
     return 'x'
+
+def vbits(Txt,Hi,Lo):
+    if Lo==0:
+        return Txt[-(Hi+1):]
+    return Txt[-(Hi+1):-(Lo)]
 
 
 

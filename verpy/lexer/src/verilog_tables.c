@@ -720,6 +720,7 @@ void reserved_words(char *Token,char *tokenType){
     if (strcmp(Token,"join_any")==0) {strcpy(tokenType,"join_any"); return; }
     if (strcmp(Token,"join_none")==0) {strcpy(tokenType,"join_none"); return; }
     if (strcmp(Token,"localparam")==0) {strcpy(tokenType,"localparam"); return; }
+    if (strcmp(Token,"logic")==0) {strcpy(tokenType,"logic"); return; }
     if (strcmp(Token,"mailbox")==0) {strcpy(tokenType,"mailbox"); return; }
     if (strcmp(Token,"module")==0) {strcpy(tokenType,"module"); return; }
     if (strcmp(Token,"negedge")==0) {strcpy(tokenType,"negedge"); return; }

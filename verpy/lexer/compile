@@ -7,7 +7,8 @@ set FLAGS = '-O3'
 set FLAGS = '-g'
 gcc src/verilog_tables.c src/nlexer.c -o verilog_lexer $FLAGS
 
-/bin/cp verilog_lexer  ../pybin/
+/bin/cp verilog_lexer  ../pybin3/
+/bin/cp verilog_lexer  ../pybin2/
 
 # optional. not required
 /bin/cp verilog_lexer  ~/bin/

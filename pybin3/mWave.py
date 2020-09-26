@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python3.8
 
 HelpString = '''
     invocation: mWave.py  <csvfile> <ctrfile>
@@ -199,7 +199,7 @@ def load_sig_from_dirmode(Sig):
             Glbs.SigMin[Sig]=min(Val,Glbs.SigMin[Sig])
 
 def use_command_wrds(wrds):
-    if (CmdFile and (len(wrds)!=0)):
+    if (CmdFile and (not CmdFile.closed) and (len(wrds)!=0)):
         CmdFile.write('%s\n'%' '.join(wrds))
     if len(wrds)==0:
         return

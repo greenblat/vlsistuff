@@ -1,7 +1,7 @@
 
 
 %token module number token endmodule assign 
-%token input  output  inout reg  wire  tri0 tri1 signed  event
+%token input  output  inout reg  wire  logic tri0 tri1 signed  event
 %token bin hex dig integer real wreal
 %token ubin uhex udig
 %token domino and_and or_or eq3 eq_eq not_eq gr_eq sm_eq
@@ -170,6 +170,7 @@ Instance :
     | token token '(' Conns_list ')' ';' 
     | or token '(' Conns_list ')' ';' 
     | token token '(' Exprs ')' ';' 
+    | token '(' Exprs ')' ';' 
     | token InstParams token '(' Conns_list ')' ';' 
     | token InstParams token Width '(' Conns_list ')' ';' 
     | token token Width '(' Conns_list ')' ';'
@@ -289,9 +290,9 @@ Tokens_list : token ',' Tokens_list | token ;
 Width : '[' Expr ':' Expr ']' | '[' Expr plus_range Expr ']' | '[' Expr minus_range Expr ']';
 BusBit : '[' Expr ']' ;
 
-ExtDir : input | output | inout | output reg | input wire | output wire | inout wire | input signed | output signed | output reg signed ;
+ExtDir : input | output | inout | output reg | input wire | output wire | inout wire | input signed | output signed | output reg signed | output logic | input logic ;
 
-IntDir : reg | wire | signed | integer | real | reg signed | wire signed | genvar | supply0 | supply1 | tri0 | tri1 ;
+IntDir : logic |  reg | wire | signed | integer | real | reg signed | wire signed | genvar | supply0 | supply1 | tri0 | tri1 ;
 
 CurlyList : '{' CurlyItems '}' ;
 CurlyItems : CurlyItems ',' CurlyItem | CurlyItem;

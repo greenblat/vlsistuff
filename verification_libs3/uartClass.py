@@ -45,7 +45,7 @@ class uartClass:
             logs.log_error('action by uart is not : %s'%(Str))
 
     def send(self,Byte):
-        if type(Byte) int str:
+        if type(Byte) is str:
             if len(Byte)==1:
                 Byte = ord(Byte)
                 self.send(Byte)

@@ -334,8 +334,8 @@ int main(argc, argv)
 
 {
     int argvx;
-    char            line[5000];
-    char             longline[5000];
+//    char            line[5000];
+//    char             longline[5000];
     char           *j;
     int i,m,k;
     int             maxhash = 3000, stringlength = 8, maxchars = 12000000, maxtabs = 3, maxstrings = 3000;
@@ -728,14 +728,14 @@ char *allocateString(int Len) {
     return Ptr;
 }
 void drive_value(char *Val,char *Code) {
-    char Bus[1000];
     int P = intcode(Code);
     if (P<0) {
-        printf("bad ERROR code=%s got us negative\n",Code);
+        printf("bad ERROR code='%s' got us negative P=%d\n",Code,P);
         return;
     }
     if (P>=maxsig) {
-        printf("bad ERROR code=%s got us too big\n",Code);
+        printf("bad ERROR code=%s P=%d > maxsig %d got us too big\n",Code,P,maxsig);
+        exit(2);
         return;
     }
     int Width = sigs[P].wide; 
@@ -743,6 +743,7 @@ void drive_value(char *Val,char *Code) {
         printf("FATAL internal error. net=%s code=%s (P=%d)has different width declared=%d actual=%ld in linenum %d\n",qqia(sigs[P].fpath),Code,P,Width,strlen(Val),linenum);
         return;
     }
+//    printf("DRIVE wid=%d %s %s\n",sigs[P].wide,Code,qqia(sigs[P].name));
     if (Width<=8) {
         strcpy(sigs[P].value,Val);
     } else {
@@ -817,7 +818,6 @@ void record(long code,long bus,int width) {
     if (psig>maxusedsig)
         maxusedsig = psig;
     sprintf(fullname,"%s.%s",qqia(getscope(temp)),qqia(bus));
-//    printf("fullname %s code=%s  %d\n",fullname,qqia(code),psig);
     long FullName = qqai(fullname);
     if (sigs[psig].code== -1) {
         sigs[psig].name=bus;
@@ -898,7 +898,6 @@ veri_sensitive(PyObject *self,PyObject *args) {
         printf("%lx  %lx   %s\n",zerox,qqai(pathstring),pathstring);
         return Py_BuildValue("s", "q");
     }
-    printf(">>>>>> |%s|\n",Str);
     return Py_BuildValue("s", Str);
 }
 
