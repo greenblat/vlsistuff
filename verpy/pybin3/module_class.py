@@ -3,7 +3,7 @@ import logs
 import traceback
 import matches
 
-MathOps = ('** ~| ~& ~^ !^ + - * / ^ % & | && || ! ~ < > << >> >>> == <= >= != ~&').split()
+MathOps = ('** ~| ~& ~^ !^ + - * / ^ % & | && || ! ~ < > << >> >>> == <= >= != !== ~&').split()
 class module_class:
     def __init__(self,Name,Kind='module'):
         self.Module=Name
@@ -272,13 +272,13 @@ class module_class:
             IOS.sort()
             Pref=''
             for (Name,Dir,Wid) in IOS:
-                if is_double_def(Wid):
-                    if (Wid[0]=='packed'):
-                        Fout.write('    %s%s %s %s %s\n'%(Pref,pr_dir(Dir),pr_wid(Wid[1]),pr_wid(Wid[2]),pr_expr(Name)))
-                    else:
-                        Fout.write('    %s%s %s %s %s\n'%(Pref,pr_dir(Dir),pr_wid(Wid[1]),pr_expr(Name),pr_wid(Wid[2])))
-                else:
-                    Fout.write('    %s%s %s %s\n'%(Pref,pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
+#                if is_double_def(Wid):
+#                    if (Wid[0]=='packed'):
+#                        Fout.write('    %s%s %s %s %s\n'%(Pref,pr_dir(Dir),pr_wid(Wid[1]),pr_wid(Wid[2]),pr_expr(Name)))
+#                    else:
+#                        Fout.write('    %s%s %s %s %s\n'%(Pref,pr_dir(Dir),pr_wid(Wid[1]),pr_expr(Name),pr_wid(Wid[2])))
+#                else:
+                Fout.write('    %s%s %s %s\n'%(Pref,pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
                 Pref=','
             for (Type,Inst) in IFS:
                 Fout.write('    %s%s %s\n'%(Pref,pr_dir(Type),pr_dir(Inst)))
@@ -308,18 +308,18 @@ class module_class:
         for Prm in self.parameters:
             Fout.write('parameter %s = %s;\n'%(pr_expr(Prm),pr_expr(self.parameters[Prm])))
         for (Name,Dir,Wid) in IOS:
-            if is_double_def(Wid):
-                if Wid[0]=='packed':
-                    Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid[1]),pr_wid(Wid[2]),pr_expr(Name)))
-                else:
-                    Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid[1]),pr_expr(Name),pr_wid(Wid[2])))
-            else:
-                Fout.write('%s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
+#            if is_double_def(Wid):
+#                if Wid[0]=='packed':
+#                    Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid[1]),pr_wid(Wid[2]),pr_expr(Name)))
+#                else:
+#                    Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid[1]),pr_expr(Name),pr_wid(Wid[2])))
+#            else:
+             Fout.write('%s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
         return NOIOS,[]
 
     def orderLocalParams(self):
          Base = []
-         Keys = self.localparams.keys()
+         Keys = list(self.localparams.keys())
          Len = len(Keys)
          while Keys!=[]:
             for Lparam in Keys:
@@ -358,12 +358,12 @@ class module_class:
         for Prm in Lparams:
             Fout.write('localparam %s = %s;  //   %s \n'%(pr_expr(Prm),pr_expr(self.localparams[Prm]),self.localparams[Prm]))
         for (Name,Dir,Wid) in NOIOS:
-            if is_double_def(Wid):
-                if Wid[0]=='packed':
-                    Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid[1]),pr_wid(Wid[2]),pr_expr(Name)))
-                else:
-                    Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid[1]),pr_expr(Name),pr_wid(Wid[2])))
-            elif (Name not in Ordered):
+#            if is_double_def(Wid):
+#                if Wid[0]=='packed':
+##                    Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid[1]),pr_wid(Wid[2]),pr_expr(Name)))
+#                else:
+#                    Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid[1]),pr_expr(Name),pr_wid(Wid[2])))
+            if (Name not in Ordered):
                 Fout.write('%s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
         for (Name,Def) in NOIFS:
             Type=Def[1]
@@ -373,6 +373,7 @@ class module_class:
             Fout.write('%s %s(%s);\n'%(Type,Name,','.join(res)))
 
         for Name in self.mems:
+            print('>>>>>>>mems>>>>>>>>>>>>',Name,Wid)
             (Dir,Wid1,Wid2)=self.mems[Name]
             Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid1),pr_expr(Name),pr_wid(Wid2)))
         for (A,B,C,D) in self.pragmas:
@@ -952,8 +953,8 @@ def dump_always(Always,Fout):
     logs.log_err('dump_always %d %s'%(len(Always),Always))
     return ''
 
-OPS =  ['**','~^','^','=','>=','=>','*','/','<','>','+','-','~','!','&','&&','<=','>>','>>>','<<','||','==','!=','|']
-KEYWORDS = ('sub_slice sub_slicebit taskcall functioncall named_begin unsigned if for ifelse edge posedge negedge list case default double_sub').split()
+OPS =  ['**','~^','^','=','>=','=>','*','/','<','>','+','-','~','!','&','&&','<=','>>','>>>','<<','||','==','!=','|','!==','===']
+KEYWORDS = ('sub_slice sub_slicebit taskcall functioncall named_begin unsigned if for ifelse edge posedge negedge list case casex casez default double_sub wait #').split()
 
 def support_set(Sig,Bussed=True):
     Set = support_set__(Sig,Bussed)
@@ -972,6 +973,7 @@ def support_set__(Sig,Bussed):
     if (Sig=='$unconnected'):           return []
     if (Sig=='$unsigned'):              return []
     if (Sig=='$signed'):              return []
+    if (Sig=='$random'):              return []
     if type(Sig) is int:    return []
     if type(Sig) is str: 
         if Sig[0]=='`': return []
@@ -982,7 +984,7 @@ def support_set__(Sig,Bussed):
     if isinstance(Sig,(tuple,list)):
         if len(Sig)==1:
             return support_set__(Sig[0],Bussed)
-        if Sig[0] in ['const','bin','hex','dig','taskcall']:
+        if Sig[0] in ['const','bin','hex','dig','taskcall','dotted','$random']:
             return []
         if Sig[0]=='curly':
             Ind = 1
@@ -1473,7 +1475,7 @@ def pr_wid(Wid):
     if type(Wid) is int:
         return '[%s:0]'%(pr_expr(Wid))
     if (len(Wid)==3)and(Wid[0]=='double'):
-        return '%s%s'%(pr_wid(Wid[1]),pr_wid(Wid[2]))
+        return '%s%s'%(pr_wid((Wid[2][1],Wid[2][0])),pr_wid(Wid[1]))
         
     if (len(Wid)==3)and(Wid[0]=='packed'):
         return pr_wid(Wid[1])+pr_wid(Wid[2])
@@ -1538,7 +1540,7 @@ def pr_expr(What):
         if len(What)==2: return What[1]
         return "%s'h%s"%(What[1],Hex)
     if What[0]=='dig':
-        if What[2][0]=="'": What[2] = What[2][1:]
+        if (len(What[2])>0)and(What[2][0]=="'"): What[2] = What[2][1:]
         return "%s'd%s"%(What[1],What[2])
     if What[0] in MathOps+['!','~']:
         if len(What)==2:
@@ -1856,7 +1858,7 @@ def is_external_dir(Dir):
 
 
 def myExtras(Token):
-    return Token in '$high $signed empty_begin_end unique_case $display'.split()
+    return Token in 'wait # $high $signed empty_begin_end unique_case $display'.split()
 
 def evalz(What):
     try:

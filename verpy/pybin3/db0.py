@@ -1202,17 +1202,23 @@ def add_instance(List):
     if (List[1][0]=='('):
         Inst = invent_inst(Type,Current)
         Current.add_inst(Type,Inst)
-        if (len(List)==4)and(List[2][0]=='Exprs'):
+        if (len(List)>=4)and(List[2][0]=='Exprs'):
             LL = get_exprs(List[2])
             for i in range(len(LL)):
                 Sig = LL[i]
                 Pin = 'pin%d'%i
                 Current.add_conn(Inst,Pin,Sig)
             return
+        else:
+            logs.log_error('add_instance %d %s'%(len(List),str(List)))
     if istoken(List[1]):
         Inst = List[1][0]
         Params=[]
+    elif (List[1][0]=='('):
+        Inst = invent_inst('buf',Current)
+        Params=[]
     else:
+        print('>>>>>>',List[1],List[2])
         Inst = List[2][0]
         Params = get_inst_params(List[1])
     Current.add_inst(Type,Inst)
@@ -1616,7 +1622,6 @@ def add_localparam(List0):
     if Vars:
         List1 = DataBase[Vars[0]]
         for Item in List1:
-#            print('MMMMM',Item,List1)
             if len(Item)==2:
                 List2 = DataBase[Item]
                 Vars2 = matches.matches(List2,'?token = !Expr',False)
@@ -1632,7 +1637,6 @@ def add_localparam(List0):
         for Item in List1:
             List2 = DataBase[Item]
             Vars2 = matches.matches(List2,'?token = !Expr',False)
-#            print('MMMMM',Vars2,List2)
             if Vars2:
                 Name = Vars2[0][0]
                 Expr = get_expr(Vars2[1])
@@ -1823,7 +1827,7 @@ def get_expr(Item):
                     X = List[0][0].replace("'sd",' ')
                 else:
                     X = List[0][0].replace("'d",' ')
-                X1 = X.split(X)
+                X1 = X.split()
                 if len(X1)==1:
                     return ['dig',0,X1]
                 else:

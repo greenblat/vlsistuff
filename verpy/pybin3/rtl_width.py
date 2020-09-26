@@ -26,9 +26,22 @@ def get_width2(Net,Mod):
             (Dir,Wid)=Mod.nets[Net]
             if not Wid:
                 return 1,1
+            if Wid[0] in ('packed','double'):
+                H1 = compute1(Wid[1][0],Mod)
+                L1 = compute1(Wid[1][1],Mod)
+                
+                H2 = compute1(Wid[2][0],Mod)
+                L2 = compute1(Wid[2][1],Mod)
+
+
+
+
+                WW = (abs(H1-L1)+1)*(abs(H2-L2)+1)
+                return WW,WW
+
             H = compute1(Wid[0],Mod)
             L = compute1(Wid[1],Mod)
-            return H-L+1,H-L+1
+            return abs(H-L)+1,abs(H-L)+1
     if isinstance(Net,(list,tuple)):
         if Net[0] == '*':
             Smax=0

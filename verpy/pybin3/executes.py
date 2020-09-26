@@ -462,6 +462,7 @@ def my_importing(Fname,Env,Original=True):
         Path = '/'.join(wrds2[:-1])
         Path = os.path.abspath(Path)
         sys.path += [Path]
+    print('>>IMPORTING>>>',sys.path)
 
     what = 'from %s import help_main'%(Fname)
     That = importlib.import_module(Fname)

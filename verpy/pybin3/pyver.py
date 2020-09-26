@@ -3,6 +3,7 @@
 import os,sys,string
 from support1 import *
 import logs
+logs.setVar('PATH',(logs.__file__).replace('/logs.py',''))
 #from vlexer import run_lexer
 from executes import execute_line
 

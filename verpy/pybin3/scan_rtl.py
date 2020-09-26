@@ -132,7 +132,7 @@ def compute1(Item,Mod):
             logs.log_warning('compute1 %s failed string'%(str(Item)))
             return 0
     if type(Item)is list:
-        if Item[0] in ['-','+','*','/']:
+        if Item[0] in ['-','+','*','/','<<']:
             A = compute1(Item[1],Mod)
             B = compute1(Item[2],Mod)
             Str = '%s%s%s'%(A,Item[0],B)
