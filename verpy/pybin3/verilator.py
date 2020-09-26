@@ -21,6 +21,9 @@ def createTb(Mod):
     Inst = '%s dut(\n'%(Mod.Module)
     Pref = ' '
     Assigns = []
+    for Net in MUSTS:
+        Mod.nets[Net] = ('output reg',(31,0))
+        
     for Net in Mod.nets:
         Dir,Wid = Mod.nets[Net]
         Dir = Dir.replace('reg','')
@@ -28,32 +31,28 @@ def createTb(Mod):
         if 'input' in Dir:
             Fout.write('  ,%s %s %s\n'%(module_class.pr_dir(Dir),module_class.pr_wid(Wid),module_class.pr_expr(Net)))
             Inst += '    %s.%s(%s)\n'%(Pref,Net,Net)
+        elif Net in MUSTS:
+            Fout.write('  ,%s %s %s\n'%(module_class.pr_dir('output reg'),module_class.pr_wid(Wid),module_class.pr_expr(Net)))
         else:
             Fout.write('  ,%s %s %s\n'%(module_class.pr_dir('output'),module_class.pr_wid(Wid),module_class.pr_expr(Net)))
             if 'output' not in Dir:
                 Assigns.append('assign %s = dut.%s;\n'%(Net,Net))
-            else:
+                Mod.nets[Net] = 'output',Wid
+            elif  Net not in MUSTS:
                 Inst += '    %s.%s(%s)\n'%(Pref,Net,Net)
         Pref = ','
     Fout.write(');\n')
     Fout.write('%s);\n'%Inst)
     for Assign in Assigns:
         Fout.write(Assign)
-    Fout.write(HELPERS0)
+    Fout.write(HELPERS1)
     Fout.close()
 
 
+MUSTS = 'cycles errors wrongs panics corrects marker0 marker1 marker2'.split()
 
-HELPERS0 = '''
-reg [31:0] cycles;   initial cycles=0;
-reg [31:0] errors;   initial errors=0;
-reg [31:0] wrongs;   initial wrongs=0;
-reg [31:0] panics;   initial panics=0;
-reg [31:0] corrects; initial corrects=0;
-reg [31:0] marker;   initial marker=0;
-reg [31:0] marker0;   initial marker0=0;
-reg [31:0] marker1;   initial marker1=0;
 
+HELPERS1 = '''
 reg dbg;
 always @(posedge clk) if (incrdbg) begin
     cycles <= cycles + 1;
@@ -61,10 +60,10 @@ always @(posedge clk) if (incrdbg) begin
     wrongs <= wrongs + errors;
     panics <= panics + wrongs;
     corrects <= corrects + panics;
-    marker <= marker + marker;
     marker0 <= marker0 + marker0;
     marker1 <= marker1 + marker1;
-    dbg <= |(cycles^errors^wrongs^panics^corrects^marker^marker0^marker1);
+    marker2 <= marker2 + marker2;
+    dbg <= |(cycles^errors^wrongs^panics^corrects^marker0^marker1^marker2);
 end
 endmodule
 '''
@@ -80,12 +79,12 @@ def forcesAndPeeks(Mod,Fval):
             Fval.write('// %s %d %s\n'%(Net,Wid,Wid1))
             if Wid<=32:
                 Str = STR1.replace('NET',Net)
-                X = (Wid+3)/4
+                X = max(1,int((Wid+3)/4))
                 Str = Str.replace('LL',str(X))
                 Fval.write(Str)
             elif Wid<=64:
                 Str = STR1_1.replace('NET',Net)
-                X = (Wid+3)/4
+                X = max(1,int((Wid+3)/4))
                 Str = Str.replace('LL',str(X))
                 Fval.write(Str)
             else:
@@ -99,7 +98,7 @@ def forcesAndPeeks(Mod,Fval):
                     WW -= 32
                     TOP = 'top->%s[%d],'%(Net,pos)+TOP
                     pos += 1 
-                X = (WW+3)/4
+                X = max(1,int((Wid+3)/4))
                 if (X>0): 
                     PP = '%%0%dx'%X+PP
                     TOP = 'top->%s[%d],'%(Net,pos)+TOP
@@ -120,7 +119,7 @@ def forcesAndPeeks(Mod,Fval):
                 Fval.write(Str)
             else:
                 Fval.write('    if (strcmp(path,"%s")==0) {\n'%(Net))
-                Many = (Wid+31)/32
+                Many = int(0.5+(Wid+31)/32)
                 for ii in range(Many):
                     Fval.write('        copy8(val,%d); top->%s[%d] = strtol(tmp,NULL,16);\n'%(Many-ii-1,Net,Many-ii-1))
                 Fval.write('        return; }\n')

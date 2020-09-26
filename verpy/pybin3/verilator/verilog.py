@@ -4,10 +4,12 @@ import veri
 import string,os,sys
 NewName = os.path.expanduser('~')
 sys.path.append('%s/verification_libs3'%NewName)
+sys.path.append('pys')
 
 import logs
 
 Monitors = []
+logs.setVar('Monitors',Monitors)
 
 def initial(initfile):
     print('initial %s'%initfile)
@@ -87,11 +89,6 @@ class cmdxClass(cmd.Cmd):
         executeCommands()
         Intr.prompt='@%d ?:'%veri.stime()
         CommandsHistory.append('include %s'%Txt)
-    def do_status(self,Txt):
-        Queue.append('status')
-        executeCommands()
-        Intr.prompt='@%d ?:'%veri.stime()
-        CommandsHistory.append('status %s'%Txt)
     def do_assert(self,Txt):
         Queue.append('assert %s'%Txt)
         executeCommands()
@@ -113,21 +110,6 @@ class cmdxClass(cmd.Cmd):
         executeCommands()
         Intr.prompt='@%d ?:'%veri.stime()
         CommandsHistory.append('force %s'%Txt)
-    def do_ram_force(self,Txt):
-        Queue.append('ram_force %s'%Txt)
-        executeCommands()
-        Intr.prompt='@%d ?:'%veri.stime()
-        CommandsHistory.append('ram_force %s'%Txt)
-    def do_ram_peek(self,Txt):
-        Queue.append('ram_peek %s'%Txt)
-        executeCommands()
-        Intr.prompt='@%d ?:'%veri.stime()
-        CommandsHistory.append('ram_peek %s'%Txt)
-    def do_dma_ram(self,Txt):
-        Queue.append('dma_ram %s'%Txt)
-        executeCommands()
-        Intr.prompt='@%d ?:'%veri.stime()
-        CommandsHistory.append('dma_ram  %s'%Txt)
     def do_import(self,Txt):
         wrds = Txt.split()
         if (len(wrds)==3)and(wrds[1]=='as'):
@@ -249,108 +231,12 @@ def executeCommands():
                 logs.log_error('failed to include "%s" file'%(wrds[1]))
         elif (wrds[0]=='define'):
             Locals[wrds[1]]=eval(wrds[2],Locals)
-        elif (wrds[0]=='cpuf'):
-            Addr = eval(wrds[1],Locals)
-            Data = eval(wrds[2],Locals)
-            veri.cpu_ram_f(str(Addr),str(Data))
-        elif (wrds[0]=='cpup'):
-            Addr = eval(wrds[1],Locals)
-            Data = veri.cpu_ram_p(str(Addr))
-            print('cpudata %s'%Data)
-        elif wrds[0] in ['loadCpu','load_cpu']: 
-            if len(wrds)>1: 
-                loadCpu(wrds[1])
-            else:
-                logs.log_error('give application filename to loadCpu')
         elif wrds[0] in ['quit','exit']: 
             veri.finish()
             sys.exit()
-        elif wrds[0] in ['axi_peek']: 
-            if len(wrds)==2:
-                Many = 16
-                Addr = eval(wrds[1],Locals)
-            elif len(wrds)==3:
-                Many = eval(wrds[2],Locals)
-                Addr = eval(wrds[1],Locals)
-            else:
-                logs.log_error('axi_peek <Start> <Count>')
-                Addr=0
-                Many=0
-            guard = 0
-            Str = '%06x : '%Addr
-            for Run in range(Addr,Addr+Many):
-                if guard==16:
-                    logs.log_info(Str)
-                    Str = '%06x : '%Run
-                    guard=0
-
-                if Run in slave.Ram:
-                    Val = hex(slave.Ram[Run] & 0xff)[2:]
-                    if Val[-1]=='L': Val = Val[:-1]
-                    if len(Val)<2: Val = ' '+Val
-
-                else:
-                    Val = ' _'
-                Str += ' '+Val
-                guard += 1
-            logs.log_info(Str)
-        elif wrds[0] in ['axi_force']: 
-            if len(wrds)<2:
-                logs.log_error('axi_force <Start> HexValues ....')
-            else:                
-                Addr = eval(wrds[1],Locals)
-                for wrd in wrds[2:]:
-                    if (len(wrd)>=2)and(wrd[:2]=='0x'):
-                        wrd = wrd[2:]
-                    while len(wrd)>0:
-                        try:
-                            Byte = int(wrd[-2:],16)
-                        except:
-                            logs.log_error('axi_force found "%s" non-hexable'%(wrd[-2:]))
-                            Byte=0
-                        wrd = wrd[:-2]
-                        slave.Ram[Addr]=Byte
-                        Addr += 1
-        elif wrds[0] in ['axi_flood']: 
-            if len(wrds)==4:
-                Val = eval(wrds[3],Locals)
-            else:
-                Val = 0
-            if len(wrds)<3:
-                logs.log_error('axi_flood <Start> <End> [flood Val]')
-            else:
-                Start = eval(wrds[1],Locals)
-                End = eval(wrds[2],Locals)
-                for II in range(Start,End+1):
-                    slave.Ram[II]=Val & 0xff
-
-
-
-        elif wrds[0] in ['dma_ram']: 
-            Low = eval(wrds[1],Locals)
-            High = eval(wrds[2],Locals)
-            for Addr in range(Low,High+1):
-                Val = veri.dma_ram(str(Addr))
-                if Val==(72*'0'):
-                    res = '@%x: 0 '%(Addr)
-                else:
-                    res = '%d @%x: %s '%(len(Val),Addr,Val)
-                logs.log_info('%s'%res)
-        elif wrds[0] in ['ram_peek']: 
-            Low = eval(wrds[1],Locals)
-            High = eval(wrds[2],Locals)
-            res = '@%x: '%(Low*2)
-            many = 0
-            for Addr in range(Low,High+1):
-                Val = veri.cpu_ram_p(str(Addr))
-                res += ' %s'%Val
-                many += 1
-                if many==8:
-                    logs.log_info('%s'%res)
-                    res = '@%x: '%(2*(Addr+1))
-                    many = 0
-            if many>0:
-                logs.log_info('%s'%res)
+        elif wrds[0] in logs.varValues: 
+            Exec = logs.varValues[wrds[0]]
+            Exec.action(' '.join(wrds[1:]))
         elif '.' in wrds[0]: 
             www = wrds[0].split('.')
             if www[0] in imported:

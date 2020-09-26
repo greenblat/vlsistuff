@@ -24,7 +24,7 @@ Flog = False
 Flog2 = False
 Flog3 = False
 Flog4 = False
-TB = 'tb'
+TB = 'tb.'
 try:
     import veri
 except:
@@ -47,7 +47,7 @@ def get_cycles():
         if veri: return veri.stime()
         return 0
     else:
-        Now =  peek('%s.cycles'%TB)
+        Now =  peek('%scycles'%TB)
         if Now<0: noCycles=True
     if (finishCycles>0)and(finishCycles<=Now):
         if veri: veri.finish()
@@ -91,7 +91,7 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
         traceback.print_stack(file=Flogs[Which])
         
     if Tb:
-        if veri: veri.force('%s.errors'%TB,str(Errors))
+        if veri: veri.force('%serrors'%TB,str(Errors))
 
 
     if (Errors>MAXERRORS):
@@ -111,7 +111,7 @@ def log_correct(Text,Which=0,Print=True):
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Corrects += 1
-    if veri: veri.force('%s.corrects'%TB,str(Corrects))
+    if veri: veri.force('%scorrects'%TB,str(Corrects))
     if Print:
         print('@%d: %d vs %d (err=%d) CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text))
     Flogs[Which].write('@%d: %d vs %d (err=%d) CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
@@ -125,7 +125,7 @@ def log_ensure(Cond,Text,Which=0):
 def log_wrong(Text,Which=0):
     global Wrongs
     Wrongs += 1
-    if veri: veri.force('%s.wrongs'%TB,str(Wrongs))
+    if veri: veri.force('%swrongs'%TB,str(Wrongs))
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: %d vs %d (err=%d): WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text))

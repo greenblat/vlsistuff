@@ -25,10 +25,10 @@ class uartClass:
         return (self.txQueue==[])and(self.txWaiting==0)
 
     def peek(self,Sig):
-        return logs.peek('%s.%s'%(self.Path,Sig))
+        return logs.peek('%s%s'%(self.Path,Sig))
 
     def force(self,Sig,Val):
-        veri.force('%s.%s'%(self.Path,Sig),str(Val))
+        veri.force('%s%s'%(self.Path,Sig),str(Val))
 
     def run(self):
         self.runTx()
