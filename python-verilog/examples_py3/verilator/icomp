@@ -1,0 +1,12 @@
+#! /bin/csh -f
+
+
+mvlg.py rtl/fltserver.mvlg all.files
+
+iverilog -o tb.vvp -f all.files rtl/tb.v
+
+
+
+
+
+

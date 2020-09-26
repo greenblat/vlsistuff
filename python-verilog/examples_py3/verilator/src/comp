@@ -1,0 +1,19 @@
+#! /bin/csh -f
+
+set INC = /Library/Frameworks/Python.framework/Versions/3.8/include/python3.8/
+set LIB = /Library/Frameworks/Python.framework/Versions/3.8/lib
+
+/bin/rm -R obj_dir
+
+
+verilator -Wall \
+    -Wno-lint \
+    --top-module tb \
+    -trace \
+    -cc  --exe src/sim_main.cpp \
+    src/tb.v \
+\
+    -LDFLAGS  "-O3 -I$INC  -lpython3.8 -L$LIB" \
+    -CFLAGS   "-O3 -I$INC  -lpython3.8 -L$LIB" \
+    -f all.files 
+make -j -C obj_dir -f Vtb.mk Vtb

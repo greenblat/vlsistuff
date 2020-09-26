@@ -1,0 +1,8 @@
+__pycache__/
+lex.out
+obj_dir/
+pymon.log0
+tb.vvp*
+ver.log
+waves.vcd
+yacc.log

@@ -1,0 +1,30 @@
+
+
+import uart
+import driver
+
+dr wr 0 3.4
+dr wr 1 15.4
+dr wr 2 -45.4
+dr wr 3 1270.0
+dr wr 4 -100
+
+dr add 1 2 5
+dr mul 2 4 6
+
+run 3000000
+
+finish
+
+
+
+
+
+uart tx w100112233
+uart tx w200112233
+uart tx w300112233
+uart tx w400112233
+uart tx r1 r2 r3 r4
+uart tx w30202aabb w0abcd0123  w112345678 w243210fde r0  r1  oadd123 r3 omul324  odiv425 r5  osin446 r6 ocos667 r7
+run 3000000
+

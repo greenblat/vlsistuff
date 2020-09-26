@@ -1,0 +1,33 @@
+float_unit.v
+fltserver.v
+multififo_w1_r10.v
+multififo_w10_r1.v
+syncfifo.v
+uartx2frac.v
+
+fp_adder.v
+fp_divider.v
+fp_gt.v
+fp_multiplier.v
+fp_sqrt.v
+
+divi_u48_u24_8.v
+sqrt_u48_10.v
+fp_float2int.v
+fp_int2float.v
+
+// exptab.v
+findFirstOne32.v
+findLeadingOne32.v
+findLeadingOne48.v
+// fp_over.v
+// logtab.v
+// smalltab.v
+// invertab.v
+// fexponent.v
+
+fp_sincos.v
+reduced_cordic.v
+delay_reg.v
+fp_int2float_was.v
+
