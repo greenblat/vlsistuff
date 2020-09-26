@@ -1,4 +1,7 @@
 
+// Ilia Greenblat : top level of the RTL design.
+// includes uart, regfile and float unit
+
 
 module fltserver (  input clk, input rst_n, input rxd, output txd);
 

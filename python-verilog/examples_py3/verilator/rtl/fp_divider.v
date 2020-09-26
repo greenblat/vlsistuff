@@ -1,3 +1,5 @@
+// Ilia Greenblat
+
 module fp_divider ( input [31:0] src0,input [31:0] src1, output [31:0] out,input vldin, input take_mod, output vldout, input clk,input rst_n,input en);
 wire a_sign = src0[31];
 wire [7:0] a_exp = src0[30:23];

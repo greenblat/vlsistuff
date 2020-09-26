@@ -1,4 +1,6 @@
 
+// Ilia Greenblat : uart with fractional baudrate
+
 
 module uartx2frac(
     input rxd,

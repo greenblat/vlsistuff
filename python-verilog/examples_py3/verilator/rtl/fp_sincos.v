@@ -1,3 +1,4 @@
+// Ilia Greenblat : cordic sinus and cosinus 
 
 module fp_sincos ( input [5:0] what,input [31:0] src0,output [31:0] out,output vldout, input clk,input rst_n,input en,output exception);
 

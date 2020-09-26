@@ -1,3 +1,5 @@
+// Ilia Greenblat
+
 module fp_float2int #(parameter WID=32) ( input [31:0] src0 ,input [5:0] src1,output [31:0] out);
 wire [30:0] ZERO = 31'b0;
 wire [31:0] mant = {1'b1,src0[22:0],8'b0};

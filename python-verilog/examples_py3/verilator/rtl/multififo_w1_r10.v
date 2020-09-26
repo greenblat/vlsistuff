@@ -1,3 +1,4 @@
+// Ilia Greenblat  : script generated multi fifo
 
 module multififo_w1_r10 #(parameter WIDTH=32,parameter DEPTH=8) (input clk,input rst_n,input softreset
     ,input  [0:0] writes

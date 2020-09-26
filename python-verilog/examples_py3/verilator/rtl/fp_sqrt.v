@@ -1,3 +1,5 @@
+// Ilia Greenblat : coric square root
+
 module fp_sqrt ( input [31:0] src0,output [31:0] out,input vldin, output vldout, input clk,input rst_n,input en);
 wire [31:0] ZERO = 0;
 wire a_sign = src0[31];

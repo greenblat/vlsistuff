@@ -1,4 +1,6 @@
 
+// Ilia Greenblat : script-created fixed point divider
+
 module divi_u48_u24_8 ( input clk,input rst_n,input en, input vldin,output reg vldout, input [47:0] src0, input [23:0] src1, output reg  [47:0] out,output reg [22:0] remsrc0der);
 // stages=8 places=[41, 34, 27, 20, 13, 6]
 reg vld1;

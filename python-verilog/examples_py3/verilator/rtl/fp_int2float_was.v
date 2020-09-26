@@ -1,4 +1,6 @@
 
+// Ilia Greenblat: legacy. best to replace by int2float.
+
 
 
 module fp_int2float_was(

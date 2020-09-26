@@ -1,3 +1,4 @@
+// Ilia Greenblat  : sin/cos cordic engine
 
 module reducedCordic(input atan, input sin,input cos, input [31:0] src0,output [31:0] out, input clk,output reg done,input rst_n);
 

@@ -1,0 +1,30 @@
+
+
+example of creating python driven simulation environment of verilator.
+
+first step in this example:
+
+pyver.py rtl/fltserver.v -do verilator
+
+this step creates few files in src/  directory.
+
+next step:
+src/comp  
+
+running this script, will create (hopefully) obj_dir directory and makefile it.
+it needs verilator executable and make and all the linux stuff.
+it also links to python libraries (see the paths that need to be changed in src/comp
+Makefile, written by verilator, creates executable.   obj_dir/Vtb
+
+to run this executable,   obj_dir/Vtb -i 1.seq
+
+1.seq is example of sequence file. 
+
+study it. it imports helpers (dr (iver) and uart) .
+
+The design in RTL, is uart driven floating point unit. It has 8 registers
+writable and readable through uart and bunch of floating point operations on them.
+
+
+
+

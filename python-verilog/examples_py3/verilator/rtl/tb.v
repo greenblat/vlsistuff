@@ -1,3 +1,5 @@
+// Ilia Greenblat : testbench for icarus
+
 module tb;
 reg [31:0] cycles;   initial cycles=0;
 reg [31:0] errors;   initial errors=0;

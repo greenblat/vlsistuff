@@ -1,3 +1,6 @@
+
+// cordic square root (integer)
+
 module sqrt_u48_10 (input clk, input rst_n,input [47:0] src0,output reg [23:0] out,input vldin,input en, output reg vldout);
 
 wire [47:0] What0 = 48'h400000000000;
