@@ -326,7 +326,9 @@ def make_str(Int):
     return Y
 
 def binx(Int,Wid=8):  
-    X = bin(Int)[2:]
+    YY = bin(Int)
+    Ind = YY.index('b')
+    X = YY[Ind+1:]
     Pref = '0'*Wid
     Y = Pref + X
     Z = Y[-Wid:]

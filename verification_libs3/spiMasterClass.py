@@ -17,6 +17,13 @@ class spiMasterClass(logs.driverClass):
         self.was = 0
         self.Expects = {}
 
+    def idle(self):
+        if self.Queue!=[]: return False
+        if self.qu!=[]: return False
+        if self.waiting>0: return False
+        return True
+
+
     def write(self,Addr,Data):
         Abin = logs.binx(Addr,12)
         Abin = reverseBin(Abin)
@@ -24,10 +31,13 @@ class spiMasterClass(logs.driverClass):
         Dbin = logs.binx(Data,16)
         Dbin = reverseBin(Dbin)
         Str = Abin+'1'+'000'+Dbin
-        self.send(Str,1)
+        if 'b' in Str:
+            logs.log_error('SPI WRITE %s'%Str)
+        else:
+            self.send(Str,1)
 
 
-    def read(self,Addr,Check='no',Mask = 0x1ff):
+    def read(self,Addr,Check='no',Mask = 0xffff,Comment=''):
         Abin = logs.binx(Addr,12)
         Abin = reverseBin(Abin)
 
@@ -35,7 +45,7 @@ class spiMasterClass(logs.driverClass):
         Str = Abin+'0'+'000'+Dbin
         self.send(Str,1)
         if Check!='no':
-            self.Expects[Addr] = Check,Mask
+            self.Expects[Addr] = Check,Mask,Comment
 
 
     def send(self,BinStr,Csn=1):
@@ -110,16 +120,16 @@ class spiMasterClass(logs.driverClass):
             logs.log_info('SPI MISO %s %s cmd=%s addr=%x'%(AX,BX,Cmd,Addr))
             if Cmd=='RD':
                 if Addr in self.Expects:
-                    Exp,Mask = self.Expects[Addr]
+                    Exp,Mask,Comment = self.Expects[Addr]
                     Exp = '%04x'%Exp
                     try:
                         Act = '%04x'%(int(BX[:4],16) & ((1<<Mask)-1))
                     except:
                         Act = 'x'
                     if Exp==Act:
-                        logs.log_correct('MISO exp=%s act=%s for add=%x'%(Exp,Act,Addr))
+                        logs.log_correct('MISO "%s" exp=%s act=%s for add=%x'%(Comment,Exp,Act,Addr))
                     else:
-                        logs.log_wrong('MISO exp=%s act=%s for add=%x   %s %s '%(Exp,Act,Addr,type(Exp),type(Act)))
+                        logs.log_wrong('MISO "%s" exp=%s act=%s for add=%x   %s %s '%(Comment,Exp,Act,Addr,type(Exp),type(Act)))
                         
 
 

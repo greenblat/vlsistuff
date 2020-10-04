@@ -198,6 +198,10 @@ def main():
     for ind,II in enumerate(AxiOut):
         Fout.write('    rmatch[%d] ? %s_rdata : \n'%(ind,II))
     Fout.write('   0;\n')
+    Fout.write('assign %s_rresp = \n'%(AxiIn))
+    for ind,II in enumerate(AxiOut):
+        Fout.write('    rmatch[%d] ? %s_rresp : \n'%(ind,II))
+    Fout.write('   0;\n')
 
     for II in AxiOut:
         for Sig in ['arprot','awprot']:
