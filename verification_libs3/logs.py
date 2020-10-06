@@ -14,7 +14,7 @@ FORCE_WORKS = True
 WHERE = ''
 
     
-Flogs = [False,False,False,False]
+Flogs = [False,False,False,False,False,False,False,False]
 
 
 import time
@@ -326,7 +326,8 @@ def make_str(Int):
     return Y
 
 def binx(Int,Wid=8):  
-    YY = bin(Int)
+    Int2 = Int & ((1<<Wid)-1)
+    YY = bin(Int2)
     Ind = YY.index('b')
     X = YY[Ind+1:]
     Pref = '0'*Wid

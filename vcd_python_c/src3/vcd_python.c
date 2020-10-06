@@ -985,15 +985,14 @@ veri_force(PyObject *self,PyObject *args) {
 
 static PyObject*
 veri_peek(PyObject *self,PyObject *args) {
-    char pvalue[10000];
-    char pvalue2[10000];
+    char pvalue[100000];
+    char pvalue2[100000];
     char *pathstring;
     if (!PyArg_ParseTuple(args, "s",&pathstring))
         return NULL;
     long Psig =  qqas(qqai(pathstring));
 
-
-    if (!Psig) {
+    if (Psig == 99999999) {
         printf("\npython: cannot find sig %s for peek\n",pathstring);
         return Py_BuildValue("s", "q");
     }
