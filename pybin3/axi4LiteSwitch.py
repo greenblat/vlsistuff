@@ -143,7 +143,7 @@ assign rready  =  (reading && IN_rready) ? rmatch : 0;
 
 
 def main():
-    Spacing = int(sys.argv[1])
+    Spacing = eval(sys.argv[1])
     AxiIn = sys.argv[2]
     AxiOut = sys.argv[3:]
 
@@ -154,23 +154,27 @@ def main():
     Str = Str.replace('IN','input')
     Str = Str.replace('OUT','output')
     Fout.write(Str)
-
-    for II in AxiOut:
-        Str = INTERFACE.replace('PREF',II)
+    Addressing = []
+    while AxiOut != []:
+        Bus = AxiOut.pop(0)
+        Pages = int(AxiOut.pop(0))
+        Addressing.append((Bus,Pages))
+        Str = INTERFACE.replace('PREF',Bus)
         Str = Str.replace('IN','output')
         Str = Str.replace('OUT','input')
         Fout.write(Str)
         
     Fout.write(');\n')
-    Addr = AxiOut[0]
-    Fout.write("wire [31:0]  BASE_%s = 32'h%x;\n"%(Addr,0))
-    Fout.write("wire [31:0]  HIGH_%s = BASE_%s+16'h%x;\n"%(Addr,Addr,Spacing * 0x1000))
-    for II in AxiOut[1:]:
-        Fout.write("wire [31:0]  BASE_%s = HIGH_%s;\n"%(II,Addr))
-        Fout.write("wire [31:0]  HIGH_%s = BASE_%s+16'h%x;\n"%(II,II,Spacing * 0x1000))
-        Addr = II
+    Bus,Pages = Addressing.pop(0)
+    Len = len(Addressing)
+    Prev = "32'h%x"%Spacing
+    while (Addressing!=[]):
+        Bus,Pages = Addressing.pop(0)
+        Fout.write("wire [31:0]  BASE_%s = %s;\n"%(Bus,Prev))
+        Fout.write("wire [31:0]  HIGH_%s = BASE_%s+16'h%x;\n"%(Bus,Bus,0x400 * Pages))
+        Prev = 'HIGH_%s'%(Bus)
     Str = WARBITER.replace('IN',AxiIn)
-    Str = Str.replace('OUTS',str(len(AxiOut)))
+    Str = Str.replace('OUTS',str(Len))
     Fout.write(Str)
 
     for ind,II in enumerate(AxiOut):

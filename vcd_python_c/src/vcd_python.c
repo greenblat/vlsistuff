@@ -955,8 +955,10 @@ veri_force(PyObject *self,PyObject *args) {
         fprintf(vcdF1,"%s\n",vcdHEADER1);
         fprintf(vcdF1,"#%ld\n",(long) run_time);
     }
+    printf("dbg force %s\n",pathstring);
     long pp = qqai(pathstring);
     int this;
+    printf("dbg2 force %s %lx\n",pathstring,pp);
     if (!qqas(pp)) {
         qqsa(pp,vcdCode);
         codeint(vcdCode);
@@ -967,6 +969,7 @@ veri_force(PyObject *self,PyObject *args) {
         this = qqas(pp);
         codeint(this);
     }
+    printf("dbg3 force %s %lx\n",pathstring,pp);
     int XX = atoi(vstr);
     char tmp[100];
     int Wid = trace_widths[this];
@@ -975,6 +978,7 @@ veri_force(PyObject *self,PyObject *args) {
         fprintf(vcdF1,"#%ld\n",(long) run_time);
         lastTraceTime = run_time;
     }
+    printf("dbg4 force %s %lx\n",pathstring,pp);
     if (Wid>1) 
         fprintf(vcdF1,"b%s %s\n",tmp,codeintstr);
     else

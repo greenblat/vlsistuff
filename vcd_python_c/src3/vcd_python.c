@@ -957,7 +957,7 @@ veri_force(PyObject *self,PyObject *args) {
     }
     long pp = qqai(pathstring);
     int this;
-    if (!qqas(pp)) {
+    if (qqas(pp) == 99999999) {
         qqsa(pp,vcdCode);
         codeint(vcdCode);
         fprintf(vcdF0,"$var reg 1 %s %s $end\n",codeintstr,pathstring);
@@ -969,6 +969,7 @@ veri_force(PyObject *self,PyObject *args) {
     }
     int XX = atoi(vstr);
     char tmp[100];
+    if (this>=1000) return Py_BuildValue("i", 0);
     int Wid = trace_widths[this];
     int2bin(XX,Wid,tmp);
     if (lastTraceTime<run_time) {
