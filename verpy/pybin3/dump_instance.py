@@ -217,7 +217,7 @@ String2 = """
 import os,sys,string,random
 import veri
 NewName = os.path.expanduser('~')
-sys.path.append('%s/verification_libs'%NewName)
+sys.path.append('%s/verification_libs3'%NewName)
 import logs
 Monitors=[]
 cycles=0
