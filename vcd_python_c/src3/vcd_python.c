@@ -20,7 +20,7 @@
 #define Enddef 7
 #define Timescale 8
 
-#define maxsig 5000000
+#define maxsig 7000000
 #define longestVal  200000
 #define SENSITIVES 100
 
@@ -735,11 +735,21 @@ void drive_value(char *Val,char *Code) {
     }
     if (P>=maxsig) {
         printf("bad ERROR code=%s P=%d > maxsig %d got us too big\n",Code,P,maxsig);
-        exit(2);
         return;
     }
+
+
+    if (Val[0] == 'r') {
+        Val[9]=0;
+        strcpy(sigs[P].value,&(Val[1]));
+        return;
+    }
+
     int Width = sigs[P].wide; 
-    if (strlen(Val)>Width) {
+    if (sigs[P].code == -1) {
+        printf("FATAL internal error. code=%s (P=%d) (intcode=%d) is not a declared net linenum %d\n",Code,P,sigs[P].code,linenum);
+        return;
+    } else if (strlen(Val)>Width) {
         printf("FATAL internal error. net=%s code=%s (P=%d)has different width declared=%d actual=%ld in linenum %d\n",qqia(sigs[P].fpath),Code,P,Width,strlen(Val),linenum);
         return;
     }
@@ -797,6 +807,8 @@ void do_value(char *strx) {
             drive_value(temp,&(strx[1]));
         } else if (strx[0]=='b') { 
             strcpy(Valex,&(strx[1]));
+        } else if (strx[0]=='r') { 
+            strcpy(Valex,strx);
         }
     } else {
         drive_value(Valex,strx);
