@@ -1,0 +1,23 @@
+#! /bin/csh -f
+
+# change to your path
+
+set INC = /home/iliag/local/include/python3.8
+set LIB = /home/iliag/local/lib
+
+gcc -O3 src3/vcd_python.c  src3/qq64.c  -o vcd_python3 \
+  -I$INC \
+  -lpython3.8 -L$LIB \
+  -std=c99 \
+
+
+/bin/cp vcd_python3 ~/bin/
+
+
+
+
+
+
+
+
+

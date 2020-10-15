@@ -8,7 +8,7 @@ import random
 
 
 class axiSlaveClass:
-    def __init__(self,Path,Monitors,Prefix='',Suffix=''):
+    def __init__(self,Path,Monitors,prefix='',suffix=''):
         self.Path = Path
         Monitors.append(self)
         self.arqueue=[]
@@ -20,8 +20,8 @@ class axiSlaveClass:
         self.waitread=0
         self.bwaiting=0
         self.bytex=0x30
-        self.Prefix = Prefix
-        self.Suffix = Suffix
+        self.prefix = prefix
+        self.suffix = suffix
         self.Translates = {}
         self.Ram = {}
         self.wready = 0
@@ -29,14 +29,14 @@ class axiSlaveClass:
         self.WAITREAD = 4
 
     def peek(self,Sig):
-        if self.Prefix!='': Sig = '%s%s'%(self.Prefix,Sig)
-        if self.Suffix!='': Sig = '%s%s'%(Sig,self.Suffix)
+        if self.prefix!='': Sig = '%s%s'%(self.prefix,Sig)
+        if self.suffix!='': Sig = '%s%s'%(Sig,self.suffix)
         if Sig in self.Translates: Sig = self.Translates[Sig]
         return logs.peek('%s.%s'%(self.Path,Sig))
 
     def force(self,Sig,Val):
-        if self.Prefix!='': Sig = '%s%s'%(self.Prefix,Sig)
-        if self.Suffix!='': Sig = '%s%s'%(Sig,self.Suffix)
+        if self.prefix!='': Sig = '%s%s'%(self.prefix,Sig)
+        if self.suffix!='': Sig = '%s%s'%(Sig,self.suffix)
         if Sig in self.Translates: Sig = self.Translates[Sig]
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
@@ -190,7 +190,7 @@ class axiSlaveClass:
             if self.awlen==0:
                 self.awlen = -1
                 if wlast!=1:
-                    logs.log_error('axislave %s: %s   no last'%(self.Path,self.Prefix))
+                    logs.log_error('axislave %s: %s   no last'%(self.Path,self.prefix))
             else:
                 self.awlen -= 1
 

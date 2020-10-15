@@ -53,7 +53,8 @@ class axiMasterClass:
         Sig = self.rename(Sig)
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
-    def makeRead(self,Burst,Len,Address,Size=4):
+    def makeRead(self,Burst,Len,Address,Size=4,Rid='none'):
+        if Rid!='none': self.Rid = Rid
         self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         if self.readAction:
             self.READS.append((Len,Address,self.Rid))
@@ -110,12 +111,16 @@ class axiMasterClass:
         self.Queue.append(('this','wait %d'%Many))
         self.Queue.append(('this','finish'))
 
+    def queued_force(self,Net,Val):
+        self.Queue.append(('w','force %s=%s'%(Net,Val)))
+
     def run(self):
 #        logs.log_info('runn lenaw=%d lenar=%d lenq=%d lenw=%d'%(len(self.awQueue),len(self.arQueue),len(self.Queue),len(self.wQueue)))
         self.runResponce()
         self.runAw()
         self.runAr()
         self.runW()
+        self.runB()
         if self.waiting>0:
             self.waiting -= 1
             return
@@ -123,7 +128,7 @@ class axiMasterClass:
 
     def manageRready(self,What):
         if What==1:
-            print '>>>',What,self.rreadyCount,self.rreadyDeny,self.peek('rvalid')
+            print('>>>',What,self.rreadyCount,self.rreadyDeny,self.peek('rvalid'))
         if What==0:
             self.force('rready',0)
             self.rreadyCount=0
@@ -152,9 +157,10 @@ class axiMasterClass:
             rid = self.peek('rid')
             rlast = self.peek('rlast')
             rdatax  = '%032x'%rdata 
-            msb  = (self.datawidth/4) 
+            msb  = int(self.datawidth/4) 
+#            print('MSB "%s" %s    %s'%(msb,type(msb),rdatax))
             rdatax = rdatax[-msb:]
-            logs.log_info('axi responce rid=%x rlast=%d rdata=%s     %s'%(rid,rlast,rdatax,self.Path))
+            logs.log_info('axiM responce rid=%x rlast=%d rdata=%s     %s'%(rid,rlast,rdatax,self.Path))
             if self.readAction:
                 self.readAction(rid,rlast,rdatax)
         else:
@@ -193,6 +199,12 @@ class axiMasterClass:
                 Val = eval(ww[1])
                 self.force(Var,Val)
        
+    def runB(self):
+#        logs.log_info('runB %s %s peek %s %s'%(self.peek('bvalid'),self.peek('bready'),logs.peek('tb.ext_bvalid'),logs.peek('tb.ext_bready')))
+        if self.peek('bvalid')==1:
+            self.force('bready','1')
+        else:
+            self.force('bready','0')
     def runW(self):
         if self.peek('wready')==0: return
         if self.wQueue==[]: 

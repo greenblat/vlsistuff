@@ -155,32 +155,45 @@ def main():
     Str = Str.replace('OUT','output')
     Fout.write(Str)
     Addressing = []
+    Axi = []
     while AxiOut != []:
         Bus = AxiOut.pop(0)
-        Pages = int(AxiOut.pop(0))
+        PP = AxiOut.pop(0)
+        if PP.startswith('0x'):
+            ww = PP.split(',')
+
+            Pages = ('absolute',eval(ww[0]),int(ww[1]))
+        else:
+            Pages = int(PP)
         Addressing.append((Bus,Pages))
         Str = INTERFACE.replace('PREF',Bus)
         Str = Str.replace('IN','output')
         Str = Str.replace('OUT','input')
         Fout.write(Str)
+        Axi.append(Bus)
         
+
     Fout.write(');\n')
-    Bus,Pages = Addressing.pop(0)
     Len = len(Addressing)
     Prev = "32'h%x"%Spacing
     while (Addressing!=[]):
         Bus,Pages = Addressing.pop(0)
-        Fout.write("wire [31:0]  BASE_%s = %s;\n"%(Bus,Prev))
-        Fout.write("wire [31:0]  HIGH_%s = BASE_%s+16'h%x;\n"%(Bus,Bus,0x400 * Pages))
+        if type(Pages) is int:
+            Fout.write("wire [31:0]  BASE_%s = %s;\n"%(Bus,Prev))
+            Fout.write("wire [31:0]  HIGH_%s = BASE_%s+16'h%x;\n"%(Bus,Bus,0x400 * Pages))
+        elif (Pages[0] == 'absolute'):
+            Fout.write("wire [31:0]  BASE_%s = 32'h%x;\n"%(Bus,Pages[1]))
+            Fout.write("wire [31:0]  HIGH_%s = BASE_%s+16'h%x;\n"%(Bus,Bus,0x400 * Pages[2]))
+
         Prev = 'HIGH_%s'%(Bus)
     Str = WARBITER.replace('IN',AxiIn)
     Str = Str.replace('OUTS',str(Len))
     Fout.write(Str)
 
-    for ind,II in enumerate(AxiOut):
+    for ind,II in enumerate(Axi):
         Fout.write('assign  wmatch[%d] = (awaddr>=BASE_%s) && (awaddr<HIGH_%s);\n'%(ind,II,II))
         Fout.write('assign  rmatch[%d] = (araddr>=BASE_%s) && (araddr<HIGH_%s);\n'%(ind,II,II))
-    for ind,II in enumerate(AxiOut):
+    for ind,II in enumerate(Axi):
         Fout.write('assign  %s_awvalid = awvalid[%s];\n'%(II,ind))
         Fout.write('assign  %s_wvalid = wvalid[%s];\n'%(II,ind))
         Fout.write('assign  %s_awaddr = awaddr-BASE_%s;\n'%(II,II))
@@ -199,21 +212,21 @@ def main():
         Fout.write('assign  %s_rready  = (rstate==2) ? rready[%s] : 0;\n'%(II,ind))
 
     Fout.write('assign %s_rdata = \n'%(AxiIn))
-    for ind,II in enumerate(AxiOut):
+    for ind,II in enumerate(Axi):
         Fout.write('    rmatch[%d] ? %s_rdata : \n'%(ind,II))
     Fout.write('   0;\n')
     Fout.write('assign %s_rresp = \n'%(AxiIn))
-    for ind,II in enumerate(AxiOut):
+    for ind,II in enumerate(Axi):
         Fout.write('    rmatch[%d] ? %s_rresp : \n'%(ind,II))
     Fout.write('   0;\n')
 
-    for II in AxiOut:
+    for II in Axi:
         for Sig in ['arprot','awprot']:
             Fout.write('assign %s_%s = %s_%s;\n'%(II,Sig,AxiIn,Sig))
     Fout.write('endmodule\n')
     Fout.close()
 
-    createInstance(AxiIn,AxiOut)
+    createInstance(AxiIn,Axi)
 
 def createInstance(AxiIn,AxiOut):
     Fout = open('axi4LiteSwitch.inst','w')

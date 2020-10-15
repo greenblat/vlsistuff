@@ -14,6 +14,7 @@
 
 #include "sys/time.h"
 #include <Python.h>
+#include <longobject.h>
 
 // Oren - Added to solve linking problem when importing random
 #include <dlfcn.h>
@@ -61,13 +62,13 @@ Month = 1+months.index(ww[1])\n\
 Day = int(ww[2])\n\
 Year = int(ww[4])\n\
 Exit=True\n\
-if Year<2020: Exit=False\n\
+if Year<2025: Exit=False\n\
 elif (Month < 10): Exit=False\n\
 elif (Day<15): Exit=False\n\
 if Exit:\n\
-    print('PROBLEM!!! PY-VERILOG LICENSE EXPIRED, CALL Ilia today = %s %s %s lic = 15.Oct.2020'%(Year,Month,Day))\n\
+    print('PROBLEM!!! PY-VERILOG LICENSE EXPIRED, CALL Ilia today = %s %s %s lic = 15.Oct.2025'%(Year,Month,Day))\n\
     sys.exit()\n\
-print('py3-verilog@ilia  license ok, Ilia today = %s %s %s lic = 15.Oct.2020'%(Year,Month,Day))\n\
+print('py3-verilog@ilia  license ok, Ilia today = %s %s %s lic = 15.Oct.2025'%(Year,Month,Day))\n\
 if os.path.exists('./verilog.py'):\n\
     try:\n\
         print('verilog.py found')\n\
@@ -434,7 +435,7 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
             py_dict = PyModule_GetDict(py_main);
             /* PyObject * PyRes = */ PyRun_String(execstr, Py_single_input, py_dict, py_dict);
 //            PyRun_String(execstr,Py_file_input,globals,locals);
-            long result = PyInt_AsLong(PyDict_GetItemString(py_dict, "result"));
+            long result = PyLong_AsLong(PyDict_GetItemString(py_dict, "result"));
 //            printf("inside %ld (%s)\n",result,execstr);
               value.value.integer = result;
               value.format = vpiIntVal;/* return the result */

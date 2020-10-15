@@ -273,7 +273,8 @@ def intx(Val):
     try:
         return int(Val,2)
     except:
-        return int(Val)
+        print('INTX',type(Val),'"%s"'%Val)
+        return 99999999
 
 def peek(Sig):
     X = veri_peek(Sig)
@@ -730,6 +731,7 @@ def str2hex(self,Txt):
         Chr = '%02x'%ord(Txt[ii])
         Res += Chr
     return Res
+
 class driverClass:
     def __init__(self,Path,Monitors):
         if (Monitors!=-1): Monitors.append(self)
