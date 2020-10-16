@@ -124,15 +124,15 @@ always @(posedge clk or negedge rst_n) begin
         end else if (rstate==0) begin
             if (reading) rstate<=1;
         end else if (rstate==1) begin
-            if (arready) rstate<=2;
+            if (|arready) rstate<=2;
         end else if (rstate==2) begin
-            if (IN_rready) rstate <= 0;
+            if (IN_rready && IN_rvalid) rstate <= 0;
         end else if (rstate==7) begin
             rstate <= 0;
         end
     end
 end
-assign rused = (IN_rready && (rstate==2));
+assign rused = (IN_rready && IN_rvalid && (rstate==2));
 assign rready  =  (reading && IN_rready) ? rmatch : 0;
 
 

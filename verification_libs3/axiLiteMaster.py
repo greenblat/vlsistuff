@@ -102,7 +102,7 @@ class axiLiteMasterClass:
             else:
                 logs.log_info('axiLiteMaster %s responce rdata=%08x'%(Comm,rdata))
         else:
-            self.force('rready',0)
+            self.force('rready',1)
 
 
 
