@@ -62,6 +62,7 @@ def finish(Txt):
         finishReason(Txt,Errors,Wrongs,Corrects)
     else:
         log_info('finishing %s with errors=%d wrongs=%d corrects=%d'%(Txt,Errors,Wrongs,Corrects))
+        closeLogs()
         if veri: veri.finish()
         sys.exit()
 
@@ -75,6 +76,7 @@ def log_time(Why,Which=0):
 def log_fatal(Text,Which=0):
     log_ending('from fatal',Which)
     log_error('FATAL! %s'%Text,Which,False,True)
+    closeLogs()
     if finishReason:
         finishReason('FATAL! %s'%Text,Errors+1,Wrongs,Corrects)
     sys.exit()
@@ -444,16 +446,22 @@ def panicFinish(Reason,ContinueFor=20):
     if finishReason:
         finishReason(Reason,Errors,Wrongs,Corrects)
 
+def closeLogs():
+    for X in in Flogs:
+        if X: X.flush()
+
 
       
 def finishing(Txt='"not given"',ContinueFor=20):
     global finishCycles
     if finishCycles>0: return
     log_info('finishing %s with errors=%d wrongs=%d corrects=%d'%(Txt,Errors,Wrongs,Corrects))
+    closeLogs()
     if finishReason:
         finishReason(Txt,Errors,Wrongs,Corrects)
     else:
         if veri: veri.finish()
+        closeLogs()
         sys.exit()
     finishCycles = get_cycles()+ContinueFor
 
