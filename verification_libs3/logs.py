@@ -447,7 +447,7 @@ def panicFinish(Reason,ContinueFor=20):
         finishReason(Reason,Errors,Wrongs,Corrects)
 
 def closeLogs():
-    for X in in Flogs:
+    for X in Flogs:
         if X: X.flush()
 
 
