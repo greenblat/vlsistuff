@@ -415,7 +415,7 @@ void readfile(fname) char *fname; {
             exit(0);
         }
 
-        if (guard>999999) { guard=0;printf("%d lines %g %d max=%d\n",linenum,run_time,0,maxusedsig);}
+        if (guard>999999) { guard=0;printf("%d lines %g %d maxusedsig=%d\n",linenum,run_time,0,maxusedsig);}
         if (j == NULL) {
             exit(0);
         }
