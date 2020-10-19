@@ -29,6 +29,7 @@ class axiLiteMasterClass:
         self.Queue=[]
         self.Queue2=[]
         self.waiting=0
+        self.bwaiting=0
         self.Translates={}
         self.Prefix = ''
         self.Defines={}
@@ -72,23 +73,41 @@ class axiLiteMasterClass:
             self.Queue.append('force awvalid=1 awaddr=%s'%(Address))
             self.Queue.append('force_cond awready awvalid=0 awaddr=0')
             self.Queue.append('force wvalid=1 wdata=%s wstrb=%s '%(Wdata,Wstrb))
-            self.Queue.append('force_cond wready wvalid=0 wdata=0 wstrb=0 bready=1')
+            self.Queue.append('force_cond wready wvalid=0 wdata=0 wstrb=0')
         elif Queue==2:
             self.Queue2.append('force awvalid=1 awaddr=%s'%(Address))
             self.Queue2.append('force awvalid=0 awaddr=0')
             self.Queue2.append('force wvalid=1 wdata=%s wstrb=%s '%(Wdata,Wstrb))
-            self.Queue2.append('force wvalid=0 wdata=0 wstrb=0 bready=1')
+            self.Queue2.append('force wvalid=0 wdata=0 wstrb=0')
         else:
             logs.log_error('QUEUE can be 1 or 2, not "%s"'%Queue)
 
 
     def run(self):
         self.runResponce()
+        self.runBresponce()
         self.runQueue2()
         if self.waiting>0:
             self.waiting -= 1
             return
         self.runQueue()
+
+    def runBresponce(self):
+        self.force('bready','1')
+        return
+        if self.bwaiting>0:
+            self.bwaiting -= 1
+            self.force('bready',str(int(self.bwaiting<2)))
+            return
+            
+
+        if self.peek('bvalid')==1:
+            self.bwaiting = 4
+            self.force('bready','0')
+            return
+            
+
+
 
     def runResponce(self):
         if self.peek('rvalid')==1:
@@ -127,6 +146,7 @@ class axiLiteMasterClass:
         if self.Queue==[]: return
         Cmd = self.Queue.pop(0)
         wrds = Cmd.split()
+        logs.log_info('qu=%d  cmd="%s" wait=%d'%(len(self.Queue),Cmd,self.waiting))
         if wrds==[]:
             pass
         elif (wrds[0]=='wait'):

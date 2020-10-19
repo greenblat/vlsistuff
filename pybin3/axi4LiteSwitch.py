@@ -42,6 +42,7 @@ assign IN_awready = !awfull;
 assign IN_wready = !wdfull;
 wire writing = !awempty && !wdempty;
 wire [OUTS-1:0] wmatch;
+reg [2:0] wstate;
 wire wused = (wstate==5);
 wire [31:0] awaddr;
 wire bready = IN_bready;
@@ -53,7 +54,6 @@ syncfifo #(.WID(32),.DEPTH(8)) waddrfifo (.clk(clk),.rst_n(rst_n),.validin(IN_aw
     ,.count(),.overflow()
 );
 
-reg [2:0] wstate;
 wire [31:0] wdata;
 wire [3:0] wstrb;
 syncfifo #(.WID(32+4),.DEPTH(8)) wdatafifo (.clk(clk),.rst_n(rst_n),.validin(IN_wvalid),.datain({IN_wdata,IN_wstrb})
@@ -101,7 +101,7 @@ end
 
 wire [OUTS-1:0] awvalid = (writing && (wstate==1)) ? wmatch : 0 ;
 wire [OUTS-1:0] wvalid = (writing && (wstate==2)) ? wmatch : 0 ;
-assign IN_bvalid = (wstate==7) || (writing && (wstate==3) && |(bvalid & wmatch));
+assign IN_bvalid = (wstate==7) || (writing && ((wstate==3)||(wstate==4)) && |(bvalid & wmatch));
 wire [OUTS-1:0] bresp;
 assign IN_bresp = (|bresp) | wbad;
 
@@ -202,8 +202,8 @@ def main():
         Fout.write('assign  %s_bready = bready;\n'%(II))
         Fout.write('assign  awready[%s]  = %s_awready;\n'%(ind,II))
         Fout.write('assign  wready[%s]  = %s_wready;\n'%(ind,II))
-        Fout.write('assign  bresp[%s]  = (wstate==3) ? %s_bresp : 0;\n'%(ind,II))
-        Fout.write('assign  bvalid[%s]  = (wstate==3) ? %s_bvalid : 0;\n'%(ind,II))
+        Fout.write('assign  bresp[%s]  = ((wstate==4)||(wstate==3)) ? %s_bresp : 0;\n'%(ind,II))
+        Fout.write('assign  bvalid[%s]  = ((wstate==4)||(wstate==3)) ? %s_bvalid : 0;\n'%(ind,II))
 
         Fout.write('assign  %s_araddr = araddr-BASE_%s;\n'%(II,II))
         Fout.write('assign  %s_arvalid = arvalid[%s];\n'%(II,ind))
