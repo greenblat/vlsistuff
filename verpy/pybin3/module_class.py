@@ -1564,11 +1564,11 @@ def pr_expr(What):
         else:
             No = pr_expr(What[3])
 
-        Short = '%s ? %s : %s'%(Cond,Yes,No)
+        Short = '(%s ? %s : %s)'%(Cond,Yes,No)
         if len(Short)<120:
             return Short
         
-        return '%s ? %s :\n     %s'%(Cond,Yes,No)
+        return '(%s ? %s :\n     %s)'%(Cond,Yes,No)
 
     if What[0]=='width':
         W = What[1]

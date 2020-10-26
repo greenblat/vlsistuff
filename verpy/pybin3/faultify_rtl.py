@@ -3,15 +3,16 @@
 
 import logs
 from rtl_width import get_width,get_width2
-
+import dump_instance
 
 def help_main(Env):
     Mod = Env.Current
+    Mod.Orig = Mod.Module
     for Inst in Mod.insts:
         Mod.insts[Inst].Type = 'Flt_'+Mod.insts[Inst].Type
     Mod.Treated = {}
     for ind,(Dst,Src,A,B) in enumerate(Mod.hard_assigns):
-        Dst2 = renameDst(Dst,Mod)
+        Dst2 = renameDst(Dst,Mod,'wire')
         Mod.hard_assigns[ind] = (Dst2,Src,A,B)
         
     for ind,(Always,Body,Kind) in enumerate(Mod.alwayses):
@@ -27,6 +28,7 @@ def help_main(Env):
     Fout = open('%s.v'%Mod.Module,'w')
     Mod.dump_verilog(Fout)
     Fout.close()
+    makeFltTb(Mod)
 
 
 def scan_body(Body,Mod):
@@ -118,7 +120,7 @@ def renameDst(Dst,Mod,Kind='wire'):
             Mod.add_inst_param('faultify_%s'%Dst,'WID',busWidth(Dst,Mod))
         return Dst2
 
-    if type(Dst) is list:
+    if (Kind=='reg') and (type(Dst) is list):
         if Dst[0] == 'subbus':
             Dst2 = ['subbus','Flt_'+Dst[1],Dst[2]]
             renameDst(Dst[1],Mod,Kind)
@@ -133,8 +135,115 @@ def renameDst(Dst,Mod,Kind='wire'):
                 Item2 = renameDst(Item,Mod,Kind)
                 Dst2.append(Item2)
             return Dst2
+
+    if (Kind=='wire') and (type(Dst) is list):
+        if Dst[0] == 'subbus':
+#            Dst2 = ['subbus','Flt_'+Dst[1],Dst[2]]
+            Dst2 = 'Flt_'+Dst[1]+'_%d_%d'%(Dst[2][0],Dst[2][1])
+            Wid =  get_width(Dst,Mod)
+            Mod.nets[Dst2] = 'wire',(Wid-1,0)
+            Mod.add_inst_conns('faultifizer','faultify_%s'%Dst2,[('inx',Dst2),('outx',Dst)])
+            Mod.add_inst_param('faultify_%s'%Dst2,'WID',Wid)
+            return Dst2
+        if Dst[0] == 'subbit':
+#            Dst2 = ['subbit','Flt_'+Dst[1],Dst[2]]
+            Dst2 = 'Flt_'+Dst[1]+'_%d'%(Dst[2])
+            Mod.nets[Dst2] = 'wire',0
+            Mod.add_inst_conns('faultifizer','faultify_%s'%Dst2,[('inx',Dst2),('outx',Dst)])
+            Mod.add_inst_param('faultify_%s'%Dst2,'WID',1)
+            return Dst2
+        if Dst[0] == 'curly':
+            Dst2 = ['curly']
+            for Item in Dst[1:]:
+                Item2 = renameDst(Item,Mod,Kind)
+                Dst2.append(Item2)
+            return Dst2
                 
     logs.log_error('renameDst of %s failed'%str(Dst))
     return Dst
+
+String1 = """
+
+always begin
+    clk=0;
+    #10;
+    clk=1;
+    #3;
+    $python("negedge()");
+    #7;
+end
+reg makeStuckList;
+initial begin
+    $dumpvars(0,tb);
+    makeStuckList = 0;
+"""
+
+def makeFltTb(Mod):
+    Fout = open('flt_%s_tb.v'%Mod.Orig,'w')
+    Fout.write(TBHEADER)
+    
+    instance(Mod,Fout)
+
+    Fout.write('endmodule\n')
+    Fout.close()
+    
+def instance(Mod,Fout):
+    Sigs = list(Mod.nets.keys())
+    Sigs.sort()
+    Inps = ''
+    Outs = []
+    Regs = ''
+    Inst0 = ''
+    Cons0 = '%s %s (\n'%(Mod.Orig,Mod.Orig)
+    Cons1 = '%s %s (\n'%(Mod.Module,Mod.Module)
+    Pref = ' '
+    for Sig in Sigs:
+        DirHL = Mod.nets[Sig]
+        Dir1 = DirHL[0]
+        if ('input' in Dir1):
+            Fout.write('reg %s %s;\n'%(dump_instance.wids(DirHL[1]),Sig))
+            Regs +='    %s = 0;\n'%(Sig)
+            Cons0 += '    %s.%s(%s)\n'%(Pref,Sig,Sig)
+            Cons1 += '    %s.%s(%s)\n'%(Pref,Sig,Sig)
+            Pref = ','
+        elif ('output' in Dir1):
+            Fout.write('wire %s %s,flt_%s;\n'%(dump_instance.wids(DirHL[1]),Sig,Sig))
+            Outs.append(Sig)
+            Cons0 += '    %s.%s(%s)\n'%(Pref,Sig,Sig)
+            Cons1 += '    %s.%s(flt_%s)\n'%(Pref,Sig,Sig)
+            Pref = ','
+
+    Cons0 += ');\n'
+    Cons1 += ');\n'
+    Fout.write(Cons0)
+    Fout.write(Cons1)
+    Res = []
+    for Sig in Outs:
+        X = '(%s != flt_%s)'%(Sig,Sig)
+        Res.append(X)
+    Str = '\n    ||'.join(Res)
+    Fout.write('wire cought_fault = %s;\n'%Str)
+    Fout.write(String1)
+    Fout.write(Regs)
+    Fout.write('end\n')
+
+        
+
+
+TBHEADER = '''
+module tb;
+reg [31:0] cycles;   initial cycles=0;
+reg [31:0] errors;   initial errors=0;
+reg [31:0] wrongs;   initial wrongs=0;
+reg [31:0] corrects; initial corrects=0;
+reg [31:0] marker;   initial marker=0;
+reg [39:0] ain;
+reg [31:0] discovered,notdiscovered;
+reg checkX; initial checkX=0;
+
+initial discovered = 0;
+initial notdiscovered = 0;
+'''
+
 
 

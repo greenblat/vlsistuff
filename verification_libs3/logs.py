@@ -329,7 +329,8 @@ def make_str(Int):
     return Y
 
 def binx(Int,Wid=8):  
-    Int2 = Int & ((1<<Wid)-1)
+    Wid = int(Wid)
+    Int2 = int(Int) & ((1<<Wid)-1)
     YY = bin(Int2)
     Ind = YY.index('b')
     X = YY[Ind+1:]
@@ -813,6 +814,18 @@ def vbits(Txt,Hi,Lo):
     if Lo==0:
         return Txt[-(Hi+1):]
     return Txt[-(Hi+1):-(Lo)]
+
+
+def gray_encode(n):
+    return n ^ n >> 1
+
+def gray_decode(n):
+    if n<0: return n
+    m = n >> 1
+    while m:
+        n ^= m
+        m >>= 1
+    return n
 
 
 

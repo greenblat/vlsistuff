@@ -24,12 +24,12 @@
 %token return
 
 %right '?' ':' 
-%left and_and
 %left '|' 
+%left  or_or  
 %left '^' xnor nand nor
 %left '&' 
+%left and_and
 %left  shift_left shift_right SignedLeft arith_shift_right
-%left  or_or  
 %left '<' '>' sm_eq gr_eq
 %left '+' '-' 
 %left eq3 eq_eq not_eq noteqeq Veryequal 

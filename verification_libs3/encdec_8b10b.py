@@ -198,7 +198,26 @@ def trans6to5(bits6):
     if (bits6=="111010"): return "10111"
     return False
 
+KCHARS = {}
+KCHARS[0x1c] = 'K280'
+KCHARS[0x3c] = 'K281'
+KCHARS[0x5c] = 'K282'
+KCHARS[0x7c] = 'K283'
+KCHARS[0x9c] = 'K284'
+KCHARS[0xbc] = 'K285'
+KCHARS[0xdc] = 'K286'
+KCHARS[0xfc] = 'K287'
 
+KCHARS[0xf7] = 'K237'
+KCHARS[0xfb] = 'K277'
+KCHARS[0xfd] = 'K297'
+KCHARS[0xfe] = 'K307'
+
+def symbolx(Kchar,Val):
+    if (Kchar):
+       return KCHARS[Val] 
+    return '%02x'%Val
+        
 
 def main():
     for ii in range(256):

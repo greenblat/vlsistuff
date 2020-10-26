@@ -384,6 +384,13 @@ void conclusions() {
 }
 
 
+char s1[longestVal];
+char s2[longestVal];
+char s3[10000];
+char s4[10000];
+char s5[10000];
+char s6[10000];
+char s7[10000];
 
 
 void readfile(fname) char *fname; {
@@ -391,13 +398,6 @@ void readfile(fname) char *fname; {
     char line[longestVal];
     int i;
     int guard=0;
-    char s1[longestVal];
-    char s2[longestVal];
-    char s3[10000];
-    char s4[10000];
-    char s5[10000];
-    char s6[10000];
-    char s7[10000];
     inf = fopen(fname, "r");
     Frecords = fopen("recorded.nets","w");
     if (inf==NULL) {
@@ -509,6 +509,9 @@ void pushtok(char *s,int ind) {
         else if (n==qqai("$dumpvars")) { 
             state=Dumpvars;
             search=1;
+        } else if (n==qqai("$dumpports")) { 
+            state=Dumpvars;
+            search=1;
         } else if (s[0]=='#') {
             state=Values;
             run_time=atof(&(s[1]));
@@ -571,6 +574,7 @@ void do_var(long n) {
                 ||(n==qqai("integer"))
                 ||(n==qqai("time"))
                 ||(n==qqai("event"))
+                ||(n==qqai("port"))
             ) break;
             shouldbe("wire",n); break;
         case 2:
@@ -799,6 +803,8 @@ void do_value(char *strx) {
             drive_value(temp,&(strx[1]));
         } else if (strx[0]=='b') { 
             strcpy(Valex,&(strx[1]));
+        } else if (strx[0]=='p') { 
+            printf("S1 %s %s %s %s\n",s1,s2,s3,s4);
         }
     } else {
         drive_value(Valex,strx);

@@ -28,7 +28,7 @@ char EXAMPLE[] = "\
 import string\n\
 import veri\n\
 \n\
-New = os.path.expanduser('~/pybin')\n\
+New = os.path.expanduser('~/verification_libs3')\n\
 sys.path.append(New)\n\
 import logs\n\
 Monitors=[]\n\
@@ -386,19 +386,19 @@ void conclusions() {
 
 
 
+char s1[longestVal];
+char s2[longestVal];
+char s3[longestVal];
+char s4[longestVal];
+char s5[longestVal];
+char s6[longestVal];
+char s7[longestVal];
 
 void readfile(fname) char *fname; {
     char *j;
     char line[longestVal];
     int i;
     int guard=0;
-    char s1[longestVal];
-    char s2[longestVal];
-    char s3[10000];
-    char s4[10000];
-    char s5[10000];
-    char s6[10000];
-    char s7[10000];
     inf = fopen(fname, "r");
     Frecords = fopen("recorded.nets","w");
     if (inf==NULL) {
@@ -479,6 +479,7 @@ float lastTraceTime = 0.0;
 void pushtok(char *s,int ind) {
     int pr;
     long n;
+    if (s[0]==0) return;
     if ((ind==1)&&(s[0]=='#')) {
         run_time=atof(&(s[1]));
         LASTCHANGE++;
@@ -504,7 +505,10 @@ void pushtok(char *s,int ind) {
         else if (n==qqai("$comment")) state = Timescale;
         else if (n==qqai("$date")) state = Timescale;
         else if (n==qqai("$version")) state = Timescale;
-        else if (n==qqai("$dumpvars")) { 
+        else if (n==qqai("$dumpports")) { 
+            state=Dumpvars;
+            search=1;
+        } else if (n==qqai("$dumpvars")) { 
             state=Dumpvars;
             search=1;
         } else if (s[0]=='#') {
@@ -569,6 +573,7 @@ void do_var(long n) {
                 ||(n==qqai("integer"))
                 ||(n==qqai("time"))
                 ||(n==qqai("event"))
+                ||(n==qqai("port"))
             ) break;
             shouldbe("wire",n); break;
         case 2:
@@ -738,6 +743,7 @@ void drive_value(char *Val,char *Code) {
         return;
     }
 
+//    printf("drive_value |%s| |%s|\n",Val,Code);
 
     if (Val[0] == 'r') {
         Val[9]=0;
@@ -753,7 +759,7 @@ void drive_value(char *Val,char *Code) {
         printf("FATAL internal error. net=%s code=%s (P=%d)has different width declared=%d actual=%ld in linenum %d\n",qqia(sigs[P].fpath),Code,P,Width,strlen(Val),linenum);
         return;
     }
-//    printf("DRIVE wid=%d %s %s\n",sigs[P].wide,Code,qqia(sigs[P].name));
+//    printf("DRIVE wid=%d %s %s %s   %ld\n",sigs[P].wide,Code,qqia(sigs[P].name),Val,(long) run_time);
     if (Width<=8) {
         strcpy(sigs[P].value,Val);
     } else {
@@ -805,6 +811,12 @@ void do_value(char *strx) {
             temp[0]=strx[0];
             temp[1]=0;
             drive_value(temp,&(strx[1]));
+        } else if (strx[0]=='p') { 
+            drive_value(&(strx[1]),s4);
+            s1[0]=0;
+            s2[0]=0;
+            s3[0]=0;
+            s4[0]=0;
         } else if (strx[0]=='b') { 
             strcpy(Valex,&(strx[1]));
         } else if (strx[0]=='r') { 

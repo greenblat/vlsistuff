@@ -65,13 +65,13 @@ Month = 1+months.index(ww[1])\n\
 Day = int(ww[2])\n\
 Year = int(ww[4])\n\
 Exit=True\n\
-if Year<2020: Exit=False\n\
+if Year<2025: Exit=False\n\
 elif (Month < 10): Exit=False\n\
 elif (Day<15): Exit=False\n\
 if Exit:\n\
-    print 'PROBLEM!!! PY-VERILOG LICENSE EXPIRED, CALL Ilia today = %s %s %s lic = 15.May.2020'%(Year,Month,Day)\n\
+    print 'PROBLEM!!! PY-VERILOG LICENSE EXPIRED, CALL Ilia today = %s %s %s lic = 15.October.2025'%(Year,Month,Day)\n\
     sys.exit()\n\
-print 'py-verilog@ilia  license ok, Ilia today = %s %s %s lic = 15.May.2020'%(Year,Month,Day)\n\
+print 'py-verilog@ilia  license ok, Ilia today = %s %s %s lic = 15.October.2025'%(Year,Month,Day)\n\
 if os.path.exists('./verilog.py'):\n\
     try:\n\
         print 'verilog.py found'\n\

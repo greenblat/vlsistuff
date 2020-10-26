@@ -112,17 +112,17 @@ class axiSlaveClass:
             logs.log_warning('axiSlave read address is not aligned size=%d addrin=%08x'%(arsize,Addr))
         rdata = ''
         takenram = 0
-        for ii in range(16):
+        for ii in range(Incr):
             Add = Addr1 + ii
             if Add in self.Ram:
                 AA = '%02x'%(self.Ram[Add])
                 takenram += 1
-#                logs.log_info('axiSlave addr in ram %x '%(Add))
+#                logs.log_info('axiSlave addr in ram %x %s %d %s'%(Add,AA,Incr,rdata))
             else:
 #                AA = '%02x'%(0xff)
                 AA = '%02x'%(self.bytex)
-                self.bytex += 1
-#                logs.log_info('axiSlave addr not in ram %x '%(Add))
+                self.bytex = (self.bytex+1) & 0xff
+#                logs.log_info('axiSlave addr not in ram %x %s %d %s'%(Add,AA,Incr,rdata))
             rdata = AA + rdata
         self.rqueue.append((rlast,rid,rdata))
         logs.log_info('axiSlave taken from ram %d bytes  rdata=%s addr=%08x'%(takenram,rdata,Addr))

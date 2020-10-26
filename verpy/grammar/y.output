@@ -3972,19 +3972,12 @@ state 161
   338     | Expr . shift_right Expr
   339     | Expr . arith_shift_right Expr
 
-    or_or              shift, and go to state 68
     eq3                shift, and go to state 69
     eq_eq              shift, and go to state 70
     not_eq             shift, and go to state 71
     gr_eq              shift, and go to state 72
     sm_eq              shift, and go to state 73
     power              shift, and go to state 74
-    xnor               shift, and go to state 75
-    nand               shift, and go to state 76
-    nor                shift, and go to state 77
-    '|'                shift, and go to state 79
-    '^'                shift, and go to state 80
-    '&'                shift, and go to state 81
     arith_shift_right  shift, and go to state 82
     shift_right        shift, and go to state 83
     shift_left         shift, and go to state 84
@@ -4030,20 +4023,29 @@ state 162
   338     | Expr . shift_right Expr
   339     | Expr . arith_shift_right Expr
 
-    eq3      shift, and go to state 69
-    eq_eq    shift, and go to state 70
-    not_eq   shift, and go to state 71
-    gr_eq    shift, and go to state 72
-    sm_eq    shift, and go to state 73
-    power    shift, and go to state 74
-    '<'      shift, and go to state 85
-    '>'      shift, and go to state 86
-    '+'      shift, and go to state 87
-    '-'      shift, and go to state 88
-    noteqeq  shift, and go to state 89
-    '*'      shift, and go to state 90
-    '/'      shift, and go to state 91
-    '%'      shift, and go to state 92
+    and_and            shift, and go to state 67
+    eq3                shift, and go to state 69
+    eq_eq              shift, and go to state 70
+    not_eq             shift, and go to state 71
+    gr_eq              shift, and go to state 72
+    sm_eq              shift, and go to state 73
+    power              shift, and go to state 74
+    xnor               shift, and go to state 75
+    nand               shift, and go to state 76
+    nor                shift, and go to state 77
+    '^'                shift, and go to state 80
+    '&'                shift, and go to state 81
+    arith_shift_right  shift, and go to state 82
+    shift_right        shift, and go to state 83
+    shift_left         shift, and go to state 84
+    '<'                shift, and go to state 85
+    '>'                shift, and go to state 86
+    '+'                shift, and go to state 87
+    '-'                shift, and go to state 88
+    noteqeq            shift, and go to state 89
+    '*'                shift, and go to state 90
+    '/'                shift, and go to state 91
+    '%'                shift, and go to state 92
 
     $default  reduce using rule 327 (Expr)
 
@@ -4313,7 +4315,7 @@ state 169
   338     | Expr . shift_right Expr
   339     | Expr . arith_shift_right Expr
 
-    or_or              shift, and go to state 68
+    and_and            shift, and go to state 67
     eq3                shift, and go to state 69
     eq_eq              shift, and go to state 70
     not_eq             shift, and go to state 71
@@ -4366,7 +4368,7 @@ state 170
   338     | Expr . shift_right Expr
   339     | Expr . arith_shift_right Expr
 
-    or_or              shift, and go to state 68
+    and_and            shift, and go to state 67
     eq3                shift, and go to state 69
     eq_eq              shift, and go to state 70
     not_eq             shift, and go to state 71
@@ -4419,7 +4421,7 @@ state 171
   338     | Expr . shift_right Expr
   339     | Expr . arith_shift_right Expr
 
-    or_or              shift, and go to state 68
+    and_and            shift, and go to state 67
     eq3                shift, and go to state 69
     eq_eq              shift, and go to state 70
     not_eq             shift, and go to state 71
@@ -4531,6 +4533,7 @@ state 173
   338     | Expr . shift_right Expr
   339     | Expr . arith_shift_right Expr
 
+    and_and            shift, and go to state 67
     or_or              shift, and go to state 68
     eq3                shift, and go to state 69
     eq_eq              shift, and go to state 70
@@ -4588,7 +4591,7 @@ state 174
   338     | Expr . shift_right Expr
   339     | Expr . arith_shift_right Expr
 
-    or_or              shift, and go to state 68
+    and_and            shift, and go to state 67
     eq3                shift, and go to state 69
     eq_eq              shift, and go to state 70
     not_eq             shift, and go to state 71
@@ -4641,7 +4644,7 @@ state 175
   338     | Expr . shift_right Expr
   339     | Expr . arith_shift_right Expr
 
-    or_or              shift, and go to state 68
+    and_and            shift, and go to state 67
     eq3                shift, and go to state 69
     eq_eq              shift, and go to state 70
     not_eq             shift, and go to state 71
@@ -4693,7 +4696,6 @@ state 176
   339     | Expr . arith_shift_right Expr
   339     | Expr arith_shift_right Expr .
 
-    or_or    shift, and go to state 68
     eq3      shift, and go to state 69
     eq_eq    shift, and go to state 70
     not_eq   shift, and go to state 71
@@ -4742,7 +4744,6 @@ state 177
   338     | Expr shift_right Expr .
   339     | Expr . arith_shift_right Expr
 
-    or_or    shift, and go to state 68
     eq3      shift, and go to state 69
     eq_eq    shift, and go to state 70
     not_eq   shift, and go to state 71
@@ -4791,7 +4792,6 @@ state 178
   338     | Expr . shift_right Expr
   339     | Expr . arith_shift_right Expr
 
-    or_or    shift, and go to state 68
     eq3      shift, and go to state 69
     eq_eq    shift, and go to state 70
     not_eq   shift, and go to state 71

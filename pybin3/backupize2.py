@@ -276,7 +276,7 @@ def use_backup_lines(Path,lines):
                             Obj.files = Obj.files + [Dir+'/'+W1[-1]]
                     else:
                         Obj.files = Obj.files + [Dir+'/'+wrd]
-            elif (wrds[0] in ['erase','remove','delete']):
+            elif (wrds[0] in ['rm','erase','remove','delete']):
                 List = os.listdir(Obj.Path)
                 Res = []
                 for Fnamex in wrds[1:]:
