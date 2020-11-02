@@ -1,0 +1,528 @@
+@0: info: @0 seconds FAULTING DISC 1 glvfault  tb.faulted._09119_.stuck_1_Y output
+
+@630: info: @15 seconds FAULTING DISC 2 glvfault  tb.faulted._12619_.stuck_0_Y output
+
+@630: info: NOTDISCOVERED (2,yes0,no1) fin glvfault  tb.faulted._12619_.stuck_0_Y output
+
+@691: info: YESDISCOVERED at=10 (2,yes1,no1) def glvfault  tb.faulted._12619_.stuck_0_Y output
+
+@691: info: @16 seconds FAULTING DISC 3 glvfault  tb.faulted._06722_.stuck_0_Y output
+
+@806: info: YESDISCOVERED at=15 (3,yes2,no1) def glvfault  tb.faulted._06722_.stuck_0_Y output
+
+@806: info: @17 seconds FAULTING DISC 4 glvfault  tb.faulted._11088_.stuck_0_C input
+
+@1405: info: @32 seconds FAULTING DISC 5 glvfault  tb.faulted._06504_.stuck_1_Y output
+
+@1405: info: NOTDISCOVERED (5,yes2,no2) fin glvfault  tb.faulted._06504_.stuck_1_Y output
+
+@1955: info: @45 seconds FAULTING DISC 6 glvfault  tb.faulted._11406_.stuck_0_A input
+
+@1955: info: NOTDISCOVERED (6,yes2,no3) fin glvfault  tb.faulted._11406_.stuck_0_A input
+
+@2505: info: @58 seconds FAULTING DISC 7 glvfault  tb.faulted._11029_.stuck_1_B input
+
+@2505: info: NOTDISCOVERED (7,yes2,no4) fin glvfault  tb.faulted._11029_.stuck_1_B input
+
+@2560: info: YESDISCOVERED at=4 (7,yes3,no4) def glvfault  tb.faulted._11029_.stuck_1_B input
+
+@2560: info: @58 seconds FAULTING DISC 8 glvfault  tb.faulted._08045_.stuck_1_B input
+
+@3159: info: @73 seconds FAULTING DISC 9 glvfault  tb.faulted._10253_.stuck_1_A input
+
+@3159: info: NOTDISCOVERED (9,yes3,no5) fin glvfault  tb.faulted._10253_.stuck_1_A input
+
+@3250: info: YESDISCOVERED at=40 (9,yes4,no5) def glvfault  tb.faulted._10253_.stuck_1_A input
+
+@3250: info: @74 seconds FAULTING DISC 10 glvfault  tb.faulted._09595_.stuck_1_A input
+
+@3353: info: YESDISCOVERED at=3 (10,yes5,no5) def glvfault  tb.faulted._09595_.stuck_1_A input
+
+@3353: info: @75 seconds FAULTING DISC 11 glvfault  tb.faulted._11265_.stuck_0_A input
+
+@3456: info: YESDISCOVERED at=3 (11,yes6,no5) def glvfault  tb.faulted._11265_.stuck_0_A input
+
+@3456: info: @77 seconds FAULTING DISC 12 glvfault  tb.faulted._12828_.stuck_0_D input
+
+@3559: info: YESDISCOVERED at=3 (12,yes7,no5) def glvfault  tb.faulted._12828_.stuck_0_D input
+
+@3559: info: @78 seconds FAULTING DISC 13 glvfault  tb.faulted._09018_.stuck_1_Y output
+
+@3824: info: YESDISCOVERED at=165 (13,yes8,no5) def glvfault  tb.faulted._09018_.stuck_1_Y output
+
+@3824: info: @84 seconds FAULTING DISC 14 glvfault  tb.faulted._09001_.stuck_0_B input
+
+@3927: info: YESDISCOVERED at=3 (14,yes9,no5) def glvfault  tb.faulted._09001_.stuck_0_B input
+
+@3927: info: @85 seconds FAULTING DISC 15 glvfault  tb.faulted._07898_.stuck_1_A input
+
+@4526: info: @100 seconds FAULTING DISC 16 glvfault  tb.faulted._10198_.stuck_0_Y output
+
+@4526: info: NOTDISCOVERED (16,yes9,no6) fin glvfault  tb.faulted._10198_.stuck_0_Y output
+
+@5076: info: @113 seconds FAULTING DISC 17 glvfault  tb.faulted._10773_.stuck_0_Y output
+
+@5076: info: NOTDISCOVERED (17,yes9,no7) fin glvfault  tb.faulted._10773_.stuck_0_Y output
+
+@5626: info: @127 seconds FAULTING DISC 18 glvfault  tb.faulted._11143_.stuck_1_C input
+
+@5626: info: NOTDISCOVERED (18,yes9,no8) fin glvfault  tb.faulted._11143_.stuck_1_C input
+
+@6176: info: @140 seconds FAULTING DISC 19 glvfault  tb.faulted._10341_.stuck_1_C input
+
+@6176: info: NOTDISCOVERED (19,yes9,no9) fin glvfault  tb.faulted._10341_.stuck_1_C input
+
+@6231: info: YESDISCOVERED at=4 (19,yes10,no9) def glvfault  tb.faulted._10341_.stuck_1_C input
+
+@6231: info: @140 seconds FAULTING DISC 20 glvfault  tb.faulted._11597_.stuck_0_B input
+
+@6830: info: @155 seconds FAULTING DISC 21 glvfault  tb.faulted._06716_.stuck_1_B input
+
+@6830: info: NOTDISCOVERED (21,yes10,no10) fin glvfault  tb.faulted._06716_.stuck_1_B input
+
+@6885: info: YESDISCOVERED at=4 (21,yes11,no10) def glvfault  tb.faulted._06716_.stuck_1_B input
+
+@6885: info: @155 seconds FAULTING DISC 22 glvfault  tb.faulted._10453_.stuck_1_A input
+
+@7156: info: YESDISCOVERED at=171 (22,yes12,no10) def glvfault  tb.faulted._10453_.stuck_1_A input
+
+@7156: info: @161 seconds FAULTING DISC 23 glvfault  tb.faulted._09590_.stuck_0_Y output
+
+@7755: info: @175 seconds FAULTING DISC 24 glvfault  tb.faulted._07964_.stuck_1_A input
+
+@7755: info: NOTDISCOVERED (24,yes12,no11) fin glvfault  tb.faulted._07964_.stuck_1_A input
+
+@7810: info: YESDISCOVERED at=4 (24,yes13,no11) def glvfault  tb.faulted._07964_.stuck_1_A input
+
+@7810: info: @176 seconds FAULTING DISC 25 glvfault  tb.faulted._09152_.stuck_1_C input
+
+@7937: info: YESDISCOVERED at=27 (25,yes14,no11) def glvfault  tb.faulted._09152_.stuck_1_C input
+
+@7937: info: @178 seconds FAULTING DISC 26 glvfault  tb.faulted._09086_.stuck_1_A input
+
+@8536: info: @192 seconds FAULTING DISC 27 glvfault  tb.faulted._09819_.stuck_1_A input
+
+@8536: info: NOTDISCOVERED (27,yes14,no12) fin glvfault  tb.faulted._09819_.stuck_1_A input
+
+@9086: info: @205 seconds FAULTING DISC 28 glvfault  tb.faulted._07324_.stuck_0_A input
+
+@9086: info: NOTDISCOVERED (28,yes14,no13) fin glvfault  tb.faulted._07324_.stuck_0_A input
+
+@9141: info: YESDISCOVERED at=4 (28,yes15,no13) def glvfault  tb.faulted._07324_.stuck_0_A input
+
+@9141: info: @206 seconds FAULTING DISC 29 glvfault  tb.faulted._12940_.stuck_0_D input
+
+@9244: info: YESDISCOVERED at=3 (29,yes16,no13) def glvfault  tb.faulted._12940_.stuck_0_D input
+
+@9244: info: @207 seconds FAULTING DISC 30 glvfault  tb.faulted._06777_.stuck_0_Y output
+
+@9809: info: YESDISCOVERED at=465 (30,yes17,no13) def glvfault  tb.faulted._06777_.stuck_0_Y output
+
+@9809: info: @221 seconds FAULTING DISC 31 glvfault  tb.faulted._08883_.stuck_1_Y output
+
+@9972: info: YESDISCOVERED at=63 (31,yes18,no13) def glvfault  tb.faulted._08883_.stuck_1_Y output
+
+@9972: info: @224 seconds FAULTING DISC 32 glvfault  tb.faulted._07125_.stuck_1_B input
+
+@10571: info: @239 seconds FAULTING DISC 33 glvfault  tb.faulted._08934_.stuck_1_B input
+
+@10571: info: NOTDISCOVERED (33,yes18,no14) fin glvfault  tb.faulted._08934_.stuck_1_B input
+
+@10740: info: YESDISCOVERED at=118 (33,yes19,no14) def glvfault  tb.faulted._08934_.stuck_1_B input
+
+@10740: info: @242 seconds FAULTING DISC 34 glvfault  tb.faulted._10040_.stuck_0_Y output
+
+@11203: info: YESDISCOVERED at=363 (34,yes20,no14) def glvfault  tb.faulted._10040_.stuck_0_Y output
+
+@11203: info: @254 seconds FAULTING DISC 35 glvfault  tb.faulted._10310_.stuck_1_Y output
+
+@11802: info: @269 seconds FAULTING DISC 36 glvfault  tb.faulted._06794_.stuck_1_C input
+
+@11802: info: NOTDISCOVERED (36,yes20,no15) fin glvfault  tb.faulted._06794_.stuck_1_C input
+
+@12352: info: @283 seconds FAULTING DISC 37 glvfault  tb.faulted._12875_.stuck_1_Q output
+
+@12352: info: NOTDISCOVERED (37,yes20,no16) fin glvfault  tb.faulted._12875_.stuck_1_Q output
+
+@12407: info: YESDISCOVERED at=4 (37,yes21,no16) def glvfault  tb.faulted._12875_.stuck_1_Q output
+
+@12407: info: @283 seconds FAULTING DISC 38 glvfault  tb.faulted._08918_.stuck_1_A input
+
+@13006: info: @298 seconds FAULTING DISC 39 glvfault  tb.faulted._08589_.stuck_1_A input
+
+@13006: info: NOTDISCOVERED (39,yes21,no17) fin glvfault  tb.faulted._08589_.stuck_1_A input
+
+@13085: info: YESDISCOVERED at=28 (39,yes22,no17) def glvfault  tb.faulted._08589_.stuck_1_A input
+
+@13085: info: @299 seconds FAULTING DISC 40 glvfault  tb.faulted._06296_.stuck_0_Y output
+
+@13684: info: @314 seconds FAULTING DISC 41 glvfault  tb.faulted._09523_.stuck_0_Y output
+
+@13684: info: NOTDISCOVERED (41,yes22,no18) fin glvfault  tb.faulted._09523_.stuck_0_Y output
+
+@14234: info: @328 seconds FAULTING DISC 42 glvfault  tb.faulted._09147_.stuck_1_B input
+
+@14234: info: NOTDISCOVERED (42,yes22,no19) fin glvfault  tb.faulted._09147_.stuck_1_B input
+
+@14307: info: YESDISCOVERED at=22 (42,yes23,no19) def glvfault  tb.faulted._09147_.stuck_1_B input
+
+@14307: info: @329 seconds FAULTING DISC 43 glvfault  tb.faulted._06925_.stuck_0_B input
+
+@14906: info: @344 seconds FAULTING DISC 44 glvfault  tb.faulted._07330_.stuck_1_Y output
+
+@14906: info: NOTDISCOVERED (44,yes23,no20) fin glvfault  tb.faulted._07330_.stuck_1_Y output
+
+@14961: info: YESDISCOVERED at=4 (44,yes24,no20) def glvfault  tb.faulted._07330_.stuck_1_Y output
+
+@14961: info: @344 seconds FAULTING DISC 45 glvfault  tb.faulted._10853_.stuck_0_A input
+
+@15064: info: YESDISCOVERED at=3 (45,yes25,no20) def glvfault  tb.faulted._10853_.stuck_0_A input
+
+@15064: info: @345 seconds FAULTING DISC 46 glvfault  tb.faulted._09682_.stuck_1_SEL input
+
+@15663: info: @359 seconds FAULTING DISC 47 glvfault  tb.faulted._12026_.stuck_0_A input
+
+@15663: info: NOTDISCOVERED (47,yes25,no21) fin glvfault  tb.faulted._12026_.stuck_0_A input
+
+@16213: info: @372 seconds FAULTING DISC 48 glvfault  tb.faulted._09732_.stuck_1_Y output
+
+@16213: info: NOTDISCOVERED (48,yes25,no22) fin glvfault  tb.faulted._09732_.stuck_1_Y output
+
+@16280: info: YESDISCOVERED at=16 (48,yes26,no22) def glvfault  tb.faulted._09732_.stuck_1_Y output
+
+@16280: info: @373 seconds FAULTING DISC 49 glvfault  tb.faulted._11315_.stuck_1_B input
+
+@16879: info: @387 seconds FAULTING DISC 50 glvfault  tb.faulted._06843_.stuck_1_B input
+
+@16879: info: NOTDISCOVERED (50,yes26,no23) fin glvfault  tb.faulted._06843_.stuck_1_B input
+
+@17429: info: @400 seconds FAULTING DISC 51 glvfault  tb.faulted._08650_.stuck_0_A input
+
+@17429: info: NOTDISCOVERED (51,yes26,no24) fin glvfault  tb.faulted._08650_.stuck_0_A input
+
+@17508: info: YESDISCOVERED at=28 (51,yes27,no24) def glvfault  tb.faulted._08650_.stuck_0_A input
+
+@17508: info: @401 seconds FAULTING DISC 52 glvfault  tb.faulted._11554_.stuck_1_Y output
+
+@17611: info: YESDISCOVERED at=3 (52,yes28,no24) def glvfault  tb.faulted._11554_.stuck_1_Y output
+
+@17611: info: @402 seconds FAULTING DISC 53 glvfault  tb.faulted._10288_.stuck_1_Y output
+
+@18210: info: @416 seconds FAULTING DISC 54 glvfault  tb.faulted._07070_.stuck_0_A input
+
+@18210: info: NOTDISCOVERED (54,yes28,no25) fin glvfault  tb.faulted._07070_.stuck_0_A input
+
+@18760: info: @429 seconds FAULTING DISC 55 glvfault  tb.faulted._06503_.stuck_1_A input
+
+@18760: info: NOTDISCOVERED (55,yes28,no26) fin glvfault  tb.faulted._06503_.stuck_1_A input
+
+@19310: info: @443 seconds FAULTING DISC 56 glvfault  tb.faulted._06919_.stuck_0_A input
+
+@19310: info: NOTDISCOVERED (56,yes28,no27) fin glvfault  tb.faulted._06919_.stuck_0_A input
+
+@19365: info: YESDISCOVERED at=4 (56,yes29,no27) def glvfault  tb.faulted._06919_.stuck_0_A input
+
+@19365: info: @443 seconds FAULTING DISC 57 glvfault  tb.faulted._09626_.stuck_1_Y output
+
+@19498: info: YESDISCOVERED at=33 (57,yes30,no27) def glvfault  tb.faulted._09626_.stuck_1_Y output
+
+@19498: info: @446 seconds FAULTING DISC 58 glvfault  tb.faulted._06792_.stuck_1_B input
+
+@20097: info: @461 seconds FAULTING DISC 59 glvfault  tb.faulted._06840_.stuck_1_B input
+
+@20097: info: NOTDISCOVERED (59,yes30,no28) fin glvfault  tb.faulted._06840_.stuck_1_B input
+
+@20647: info: @475 seconds FAULTING DISC 60 glvfault  tb.faulted._07579_.stuck_0_B input
+
+@20647: info: NOTDISCOVERED (60,yes30,no29) fin glvfault  tb.faulted._07579_.stuck_0_B input
+
+@21197: info: @488 seconds FAULTING DISC 61 glvfault  tb.faulted._11026_.stuck_0_Y output
+
+@21197: info: NOTDISCOVERED (61,yes30,no30) fin glvfault  tb.faulted._11026_.stuck_0_Y output
+
+@21270: info: YESDISCOVERED at=22 (61,yes31,no30) def glvfault  tb.faulted._11026_.stuck_0_Y output
+
+@21270: info: @489 seconds FAULTING DISC 62 glvfault  tb.faulted._08138_.stuck_1_Y output
+
+@21869: info: @503 seconds FAULTING DISC 63 glvfault  tb.faulted._08345_.stuck_1_Y output
+
+@21869: info: NOTDISCOVERED (63,yes31,no31) fin glvfault  tb.faulted._08345_.stuck_1_Y output
+
+@22419: info: @516 seconds FAULTING DISC 64 glvfault  tb.faulted._10128_.stuck_1_A input
+
+@22419: info: NOTDISCOVERED (64,yes31,no32) fin glvfault  tb.faulted._10128_.stuck_1_A input
+
+@22969: info: @529 seconds FAULTING DISC 65 glvfault  tb.faulted._12250_.stuck_0_B input
+
+@22969: info: NOTDISCOVERED (65,yes31,no33) fin glvfault  tb.faulted._12250_.stuck_0_B input
+
+@23519: info: @543 seconds FAULTING DISC 66 glvfault  tb.faulted._11235_.stuck_1_A input
+
+@23519: info: NOTDISCOVERED (66,yes31,no34) fin glvfault  tb.faulted._11235_.stuck_1_A input
+
+@24069: info: @556 seconds FAULTING DISC 67 glvfault  tb.faulted._08491_.stuck_1_B input
+
+@24069: info: NOTDISCOVERED (67,yes31,no35) fin glvfault  tb.faulted._08491_.stuck_1_B input
+
+@24619: info: @570 seconds FAULTING DISC 68 glvfault  tb.faulted._08881_.stuck_0_Y output
+
+@24619: info: NOTDISCOVERED (68,yes31,no36) fin glvfault  tb.faulted._08881_.stuck_0_Y output
+
+@25169: info: @583 seconds FAULTING DISC 69 glvfault  tb.faulted._07186_.stuck_1_A input
+
+@25169: info: NOTDISCOVERED (69,yes31,no37) fin glvfault  tb.faulted._07186_.stuck_1_A input
+
+@25719: info: @597 seconds FAULTING DISC 70 glvfault  tb.faulted._11810_.stuck_1_A input
+
+@25719: info: NOTDISCOVERED (70,yes31,no38) fin glvfault  tb.faulted._11810_.stuck_1_A input
+
+@25774: info: YESDISCOVERED at=4 (70,yes32,no38) def glvfault  tb.faulted._11810_.stuck_1_A input
+
+@25774: info: @598 seconds FAULTING DISC 71 glvfault  tb.faulted._12445_.stuck_1_B input
+
+@26373: info: @612 seconds FAULTING DISC 72 glvfault  tb.faulted._07387_.stuck_0_A input
+
+@26373: info: NOTDISCOVERED (72,yes32,no39) fin glvfault  tb.faulted._07387_.stuck_0_A input
+
+@26923: info: @626 seconds FAULTING DISC 73 glvfault  tb.faulted._09254_.stuck_0_Y output
+
+@26923: info: NOTDISCOVERED (73,yes32,no40) fin glvfault  tb.faulted._09254_.stuck_0_Y output
+
+@27074: info: YESDISCOVERED at=100 (73,yes33,no40) def glvfault  tb.faulted._09254_.stuck_0_Y output
+
+@27074: info: @628 seconds FAULTING DISC 74 glvfault  tb.faulted._12475_.stuck_0_SEL input
+
+@27183: info: YESDISCOVERED at=9 (74,yes34,no40) def glvfault  tb.faulted._12475_.stuck_0_SEL input
+
+@27183: info: @630 seconds FAULTING DISC 75 glvfault  tb.faulted._06827_.stuck_1_C input
+
+@27782: info: @643 seconds FAULTING DISC 76 glvfault  tb.faulted._08508_.stuck_1_SEL input
+
+@27782: info: NOTDISCOVERED (76,yes34,no41) fin glvfault  tb.faulted._08508_.stuck_1_SEL input
+
+@27843: info: YESDISCOVERED at=10 (76,yes35,no41) def glvfault  tb.faulted._08508_.stuck_1_SEL input
+
+@27843: info: @644 seconds FAULTING DISC 77 glvfault  tb.faulted._06661_.stuck_1_B input
+
+@28442: info: @659 seconds FAULTING DISC 78 glvfault  tb.faulted._06880_.stuck_1_Y output
+
+@28442: info: NOTDISCOVERED (78,yes35,no42) fin glvfault  tb.faulted._06880_.stuck_1_Y output
+
+@28503: info: YESDISCOVERED at=10 (78,yes36,no42) def glvfault  tb.faulted._06880_.stuck_1_Y output
+
+@28503: info: @659 seconds FAULTING DISC 79 glvfault  tb.faulted._07371_.stuck_0_B input
+
+@29102: info: @674 seconds FAULTING DISC 80 glvfault  tb.faulted._12815_.stuck_0_D input
+
+@29102: info: NOTDISCOVERED (80,yes36,no43) fin glvfault  tb.faulted._12815_.stuck_0_D input
+
+@29652: info: @687 seconds FAULTING DISC 81 glvfault  tb.faulted._06836_.stuck_1_Y output
+
+@29652: info: NOTDISCOVERED (81,yes36,no44) fin glvfault  tb.faulted._06836_.stuck_1_Y output
+
+@30202: info: @701 seconds FAULTING DISC 82 glvfault  tb.faulted._06984_.stuck_1_B input
+
+@30202: info: NOTDISCOVERED (82,yes36,no45) fin glvfault  tb.faulted._06984_.stuck_1_B input
+
+@30752: info: @715 seconds FAULTING DISC 83 glvfault  tb.faulted._06356_.stuck_1_Y output
+
+@30752: info: NOTDISCOVERED (83,yes36,no46) fin glvfault  tb.faulted._06356_.stuck_1_Y output
+
+@30867: info: YESDISCOVERED at=64 (83,yes37,no46) def glvfault  tb.faulted._06356_.stuck_1_Y output
+
+@30867: info: @716 seconds FAULTING DISC 84 glvfault  tb.faulted._10796_.stuck_0_Y output
+
+@30970: info: YESDISCOVERED at=3 (84,yes38,no46) def glvfault  tb.faulted._10796_.stuck_0_Y output
+
+@30970: info: @718 seconds FAULTING DISC 85 glvfault  tb.faulted._11451_.stuck_1_Y output
+
+@31569: info: @732 seconds FAULTING DISC 86 glvfault  tb.faulted._09208_.stuck_1_A input
+
+@31569: info: NOTDISCOVERED (86,yes38,no47) fin glvfault  tb.faulted._09208_.stuck_1_A input
+
+@32119: info: @746 seconds FAULTING DISC 87 glvfault  tb.faulted._08596_.stuck_1_A input
+
+@32119: info: NOTDISCOVERED (87,yes38,no48) fin glvfault  tb.faulted._08596_.stuck_1_A input
+
+@32198: info: YESDISCOVERED at=28 (87,yes39,no48) def glvfault  tb.faulted._08596_.stuck_1_A input
+
+@32198: info: @747 seconds FAULTING DISC 88 glvfault  tb.faulted._06500_.stuck_0_B input
+
+@32797: info: @761 seconds FAULTING DISC 89 glvfault  tb.faulted._12471_.stuck_1_B input
+
+@32797: info: NOTDISCOVERED (89,yes39,no49) fin glvfault  tb.faulted._12471_.stuck_1_B input
+
+@33347: info: @775 seconds FAULTING DISC 90 glvfault  tb.faulted._08166_.stuck_1_B input
+
+@33347: info: NOTDISCOVERED (90,yes39,no50) fin glvfault  tb.faulted._08166_.stuck_1_B input
+
+@33897: info: @788 seconds FAULTING DISC 91 glvfault  tb.faulted._06358_.stuck_1_B input
+
+@33897: info: NOTDISCOVERED (91,yes39,no51) fin glvfault  tb.faulted._06358_.stuck_1_B input
+
+@34078: info: YESDISCOVERED at=130 (91,yes40,no51) def glvfault  tb.faulted._06358_.stuck_1_B input
+
+@34078: info: @792 seconds FAULTING DISC 92 glvfault  tb.faulted._06710_.stuck_0_Y output
+
+@34439: info: YESDISCOVERED at=261 (92,yes41,no51) def glvfault  tb.faulted._06710_.stuck_0_Y output
+
+@34439: info: @800 seconds FAULTING DISC 93 glvfault  tb.faulted._08402_.stuck_1_A input
+
+@35038: info: @815 seconds FAULTING DISC 94 glvfault  tb.faulted._09211_.stuck_0_B input
+
+@35038: info: NOTDISCOVERED (94,yes41,no52) fin glvfault  tb.faulted._09211_.stuck_0_B input
+
+@35099: info: YESDISCOVERED at=10 (94,yes42,no52) def glvfault  tb.faulted._09211_.stuck_0_B input
+
+@35099: info: @815 seconds FAULTING DISC 95 glvfault  tb.faulted._12686_.stuck_0_A input
+
+@35202: info: YESDISCOVERED at=3 (95,yes43,no52) def glvfault  tb.faulted._12686_.stuck_0_A input
+
+@35202: info: @817 seconds FAULTING DISC 96 glvfault  tb.faulted._07930_.stuck_0_Y output
+
+@35305: info: YESDISCOVERED at=3 (96,yes44,no52) def glvfault  tb.faulted._07930_.stuck_0_Y output
+
+@35305: info: @818 seconds FAULTING DISC 97 glvfault  tb.faulted._12548_.stuck_1_B input
+
+@35414: info: YESDISCOVERED at=9 (97,yes45,no52) def glvfault  tb.faulted._12548_.stuck_1_B input
+
+@35414: info: @819 seconds FAULTING DISC 98 glvfault  tb.faulted._09907_.stuck_1_Y output
+
+@35535: info: YESDISCOVERED at=21 (98,yes46,no52) def glvfault  tb.faulted._09907_.stuck_1_Y output
+
+@35535: info: @821 seconds FAULTING DISC 99 glvfault  tb.faulted._12689_.stuck_1_A input
+
+@35650: info: YESDISCOVERED at=15 (99,yes47,no52) def glvfault  tb.faulted._12689_.stuck_1_A input
+
+@35650: info: @822 seconds FAULTING DISC 100 glvfault  tb.faulted._07368_.stuck_1_B input
+
+@36215: info: YESDISCOVERED at=465 (100,yes48,no52) def glvfault  tb.faulted._07368_.stuck_1_B input
+
+@36215: info: @837 seconds FAULTING DISC 101 glvfault  tb.faulted._11953_.stuck_0_Y output
+
+@36354: info: YESDISCOVERED at=39 (101,yes49,no52) def glvfault  tb.faulted._11953_.stuck_0_Y output
+
+@36354: info: @839 seconds FAULTING DISC 102 glvfault  tb.faulted._07694_.stuck_0_A input
+
+@36953: info: @854 seconds FAULTING DISC 103 glvfault  tb.faulted._11809_.stuck_0_Y output
+
+@36953: info: NOTDISCOVERED (103,yes49,no53) fin glvfault  tb.faulted._11809_.stuck_0_Y output
+
+@37032: info: YESDISCOVERED at=28 (103,yes50,no53) def glvfault  tb.faulted._11809_.stuck_0_Y output
+
+@37032: info: @854 seconds FAULTING DISC 104 glvfault  tb.faulted._11401_.stuck_0_Y output
+
+@37399: info: YESDISCOVERED at=267 (104,yes51,no53) def glvfault  tb.faulted._11401_.stuck_0_Y output
+
+@37399: info: @863 seconds FAULTING DISC 105 glvfault  tb.faulted._09204_.stuck_0_Y output
+
+@37544: info: YESDISCOVERED at=45 (105,yes52,no53) def glvfault  tb.faulted._09204_.stuck_0_Y output
+
+@37544: info: @865 seconds FAULTING DISC 106 glvfault  tb.faulted._12295_.stuck_1_Y output
+
+@38143: info: @881 seconds FAULTING DISC 107 glvfault  tb.faulted._09600_.stuck_1_B input
+
+@38143: info: NOTDISCOVERED (107,yes52,no54) fin glvfault  tb.faulted._09600_.stuck_1_B input
+
+@38693: info: @894 seconds FAULTING DISC 108 glvfault  tb.faulted._08047_.stuck_1_Y output
+
+@38693: info: NOTDISCOVERED (108,yes52,no55) fin glvfault  tb.faulted._08047_.stuck_1_Y output
+
+@38766: info: YESDISCOVERED at=22 (108,yes53,no55) def glvfault  tb.faulted._08047_.stuck_1_Y output
+
+@38766: info: @895 seconds FAULTING DISC 109 glvfault  tb.faulted._11936_.stuck_1_C input
+
+@39365: info: @910 seconds FAULTING DISC 110 glvfault  tb.faulted._08939_.stuck_0_Y output
+
+@39365: info: NOTDISCOVERED (110,yes53,no56) fin glvfault  tb.faulted._08939_.stuck_0_Y output
+
+@39420: info: YESDISCOVERED at=4 (110,yes54,no56) def glvfault  tb.faulted._08939_.stuck_0_Y output
+
+@39420: info: @910 seconds FAULTING DISC 111 glvfault  tb.faulted._12527_.stuck_0_Y output
+
+@39535: info: YESDISCOVERED at=15 (111,yes55,no56) def glvfault  tb.faulted._12527_.stuck_0_Y output
+
+@39535: info: @911 seconds FAULTING DISC 112 glvfault  tb.faulted._06241_.stuck_1_B input
+
+@40134: info: @926 seconds FAULTING DISC 113 glvfault  tb.faulted._07460_.stuck_1_C input
+
+@40134: info: NOTDISCOVERED (113,yes55,no57) fin glvfault  tb.faulted._07460_.stuck_1_C input
+
+@40684: info: @940 seconds FAULTING DISC 114 glvfault  tb.faulted._12978_.stuck_1_D input
+
+@40684: info: NOTDISCOVERED (114,yes55,no58) fin glvfault  tb.faulted._12978_.stuck_1_D input
+
+@40745: info: YESDISCOVERED at=10 (114,yes56,no58) def glvfault  tb.faulted._12978_.stuck_1_D input
+
+@40745: info: @940 seconds FAULTING DISC 115 glvfault  tb.faulted._11710_.stuck_1_A input
+
+@40848: info: YESDISCOVERED at=3 (115,yes57,no58) def glvfault  tb.faulted._11710_.stuck_1_A input
+
+@40848: info: @942 seconds FAULTING DISC 116 glvfault  tb.faulted._12853_.stuck_1_D input
+
+@41447: info: @957 seconds FAULTING DISC 117 glvfault  tb.faulted._07315_.stuck_0_Y output
+
+@41447: info: NOTDISCOVERED (117,yes57,no59) fin glvfault  tb.faulted._07315_.stuck_0_Y output
+
+@41508: info: YESDISCOVERED at=10 (117,yes58,no59) def glvfault  tb.faulted._07315_.stuck_0_Y output
+
+@41508: info: @957 seconds FAULTING DISC 118 glvfault  tb.faulted._12283_.stuck_0_B input
+
+@42107: info: @971 seconds FAULTING DISC 119 glvfault  tb.faulted._12671_.stuck_0_A input
+
+@42107: info: NOTDISCOVERED (119,yes58,no60) fin glvfault  tb.faulted._12671_.stuck_0_A input
+
+@42312: info: YESDISCOVERED at=154 (119,yes59,no60) def glvfault  tb.faulted._12671_.stuck_0_A input
+
+@42312: info: @976 seconds FAULTING DISC 120 glvfault  tb.faulted._11979_.stuck_1_C input
+
+@42415: info: YESDISCOVERED at=3 (120,yes60,no60) def glvfault  tb.faulted._11979_.stuck_1_C input
+
+@42415: info: @977 seconds FAULTING DISC 121 glvfault  tb.faulted._08102_.stuck_1_B input
+
+@43014: info: @992 seconds FAULTING DISC 122 glvfault  tb.faulted._10172_.stuck_1_A input
+
+@43014: info: NOTDISCOVERED (122,yes60,no61) fin glvfault  tb.faulted._10172_.stuck_1_A input
+
+@43099: info: YESDISCOVERED at=34 (122,yes61,no61) def glvfault  tb.faulted._10172_.stuck_1_A input
+
+@43099: info: @993 seconds FAULTING DISC 123 glvfault  tb.faulted._10481_.stuck_1_B input
+
+@43698: info: @1008 seconds FAULTING DISC 124 glvfault  tb.faulted._12225_.stuck_1_A input
+
+@43698: info: NOTDISCOVERED (124,yes61,no62) fin glvfault  tb.faulted._12225_.stuck_1_A input
+
+@44248: info: @1022 seconds FAULTING DISC 125 glvfault  tb.faulted._08801_.stuck_0_B input
+
+@44248: info: NOTDISCOVERED (125,yes61,no63) fin glvfault  tb.faulted._08801_.stuck_0_B input
+
+@44309: info: YESDISCOVERED at=10 (125,yes62,no63) def glvfault  tb.faulted._08801_.stuck_0_B input
+
+@44309: info: @1023 seconds FAULTING DISC 126 glvfault  tb.faulted._09970_.stuck_1_A input
+
+@44424: info: YESDISCOVERED at=15 (126,yes63,no63) def glvfault  tb.faulted._09970_.stuck_1_A input
+
+@44424: info: @1025 seconds FAULTING DISC 127 glvfault  tb.faulted._12658_.stuck_1_A input
+
+@45023: info: @1040 seconds FAULTING DISC 128 glvfault  tb.faulted._12463_.stuck_1_SEL input
+
+@45023: info: NOTDISCOVERED (128,yes63,no64) fin glvfault  tb.faulted._12463_.stuck_1_SEL input
+
+@45573: info: @1053 seconds FAULTING DISC 129 glvfault  tb.faulted._09598_.stuck_1_Y output
+
+@45573: info: NOTDISCOVERED (129,yes63,no65) fin glvfault  tb.faulted._09598_.stuck_1_Y output
+
+@45634: info: YESDISCOVERED at=10 (129,yes64,no65) def glvfault  tb.faulted._09598_.stuck_1_Y output
+
+@45634: info: @1054 seconds FAULTING DISC 130 glvfault  tb.faulted._13029_.stuck_1_D input
+
+@45737: info: YESDISCOVERED at=3 (130,yes65,no65) def glvfault  tb.faulted._13029_.stuck_1_D input
+
+@45737: info: @1055 seconds FAULTING DISC 131 glvfault  tb.faulted._06444_.stuck_1_Y output
+
+@46336: info: @1070 seconds FAULTING DISC 132 glvfault  tb.faulted._06595_.stuck_1_A input
+
+@46336: info: NOTDISCOVERED (132,yes65,no66) fin glvfault  tb.faulted._06595_.stuck_1_A input
+
+@46403: info: YESDISCOVERED at=16 (132,yes66,no66) def glvfault  tb.faulted._06595_.stuck_1_A input
+

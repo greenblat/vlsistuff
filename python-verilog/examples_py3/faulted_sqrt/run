@@ -1,0 +1,11 @@
+#! /bin/csh -f
+#this is icarus run script
+
+
+setenv STUCK_FILE FAULTS.base
+setenv STUCK_FILE FAULTS.shuffled
+
+vvp -M../../vpi -mvpi7 tb.vvp
+
+
+

@@ -1,0 +1,15 @@
+#! /bin/csh -f
+#this is icarus compilation stage
+
+
+# pyver.py rtl/sqrt_u40_5.v -do faultify_rtl
+
+
+/bin/rm tb.vvp
+
+iverilog -otb.vvp rtl/sqrt_u40_5.v rtl/tb.v Flt_sqrt_u40_5.v rtl/faultifizer.v
+
+
+
+
+
