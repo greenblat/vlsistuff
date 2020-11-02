@@ -14,6 +14,7 @@ Dbg = False
 Dbg = True
 
 def help_main(Env):
+    Env.DontFlattens.extend(['nmos_tran','pmos_tran'])
     Mod = Env.Current
     Mod.nets['vdd'] = ('wire',0)
     Mod.nets['vss'] = ('wire',0)
@@ -31,6 +32,19 @@ def help_main(Env):
     writeOut(Mod,'stp2a',Dbg)
     shortMos(Mod)
     writeOut(Mod,'stp2',Dbg)
+
+    stupidSerials(Mod)
+    orientSimpleMoses(Mod)
+    writeOut(Mod,'stp2c',Dbg)
+
+    splitDesignClusters(Mod)
+    simpleInverters(Mod)
+    simpleCmos(Mod)
+    orphanWires(Mod)
+    writeOut(Mod,'xmod',Dbg)
+
+
+
     simpleInverters(Mod)
     followInvs(Mod)
     simpleNands(Mod)
@@ -97,8 +111,161 @@ def help_main(Env):
     turnGatesToAssigns(Mod)
     writeOut(Mod,'stp14',Dbg)
     turnMosesToAssigns(Mod)
+    retypePrimitives(Mod)
     writeOut(Mod,'newv',True)
 
+import spiceMatcher
+def splitDesignClusters(Mod):
+    Mod.prepareNetTable()
+    Clusters = []
+    Used= []
+
+    for Mos in Mod.insts:
+        Obj = Mod.insts[Mos]
+        if (Obj.Type in  ('nmos','pmos'))and (Mos not in Used):
+            S = Obj.conns['s']
+            D = Obj.conns['d']
+            All = travelMosSD([S,D],[Mos],Mod)
+            Used.extend(All)
+            Clusters.append(All)
+    logs.log_info('design split into %d clusters'%len(Clusters))
+    for Clust in Clusters:
+        Nmoses,Pmoses = clusterPattern(Clust,Mod)
+        LogicFunc = spiceMatcher.tryMatchLogicFunc(Nmoses,Pmoses)
+        if LogicFunc:
+            Npaths,Ppaths = LogicFunc
+            for Inst in Clust: Mod.insts.pop(Inst)
+            Inst = inventInst('logicgate')
+            Conns = []
+            Mod.add_inst_conns('logicgate',Inst,Conns)
+            Mod.add_inst_param(Inst,'func0',str(Npaths))
+            Mod.add_inst_param(Inst,'func1',str(Ppaths))
+        else:
+            Recognized = spiceMatcher.matchCluster(Nmoses,Pmoses)
+            if Recognized:
+                for Inst in Clust:
+                    Mod.insts.pop(Inst)
+                for Objx in Recognized:
+                    Mod.add_inst_conns(Objx.Type,inventInst(Objx.Type),Objx.Conns)
+            else:
+                Clust2 = spiceMatcher.matchBasics(Nmoses,Pmoses)
+                logs.log_info('FAILED clust\n',2)
+                for Key in Clust2:
+                    for Item in Clust2[Key]:
+                        logs.log_info('%s : %s'%(Key,Item),2)
+#                for Mos in Nmoses:
+#                    logs.log_info('    %s'%Mos,2)
+#                logs.log_info('',2)
+#                for Mos in Pmoses:
+#                    logs.log_info('    %s'%Mos,2)
+                logs.log_info('\n\n\n',2)
+                
+                
+
+def clusterPattern(Clust,Mod):
+    def signatureMos(Obj):
+        Str = ' %s %s %s %s'%(Obj.Type,Obj.conns['g'],Obj.conns['s'],Obj.conns['d'])
+        return Str
+
+
+    Ns = []
+    Ps = []
+    for Mos in Clust:
+        Obj = Mod.insts[Mos]
+        if Obj.Type == 'nmos': Ns.append(signatureMos(Obj))
+        if Obj.Type == 'pmos': Ps.append(signatureMos(Obj))
+    Pattern = Ns,Ps
+    return Pattern
+
+
+def travelMosSD(Nets,Moses,Mod):
+    if Nets==[]: return Moses
+    Dnets = []
+    Dmoses = []
+    for Net in Nets:
+        if (Net not in ['vss','vdd']):
+            for (Inst,Type,Pin) in Mod.netTable[Net]:
+                if (Type in ('nmos','pmos'))and(Pin in ('s','d'))and(Inst not in Moses)and(Inst not in Dmoses):
+                    S = Mod.insts[Inst].conns['s']
+                    D = Mod.insts[Inst].conns['d']
+                    if (S not in ['vss','vdd']):Dnets.append(S) 
+                    if (D not in ['vss','vdd']):Dnets.append(D) 
+                    Dmoses.append(Inst)
+    return travelMosSD(Dnets,Dmoses+Moses,Mod)        
+
+
+
+
+            
+
+
+def dumpNeural(Mod):
+    Fout = open('%s.neural'%Mod.Module,'w')
+    Renames = {}
+    logs.setVar('int_code',100)
+    logs.setVar('ext_code',1000)
+    def codeit(Net):
+        if Net=='vdd': return 20000
+        if Net=='vss': return 10000
+        if Net in Renames: return Renames[Net]
+        if internalNet(Net,Mod):
+            Code = logs.getVar('int_code')
+            logs.setVar('int_code',Code+1)
+            Renames[Net] = Code
+            return Code
+        else:
+            Code = logs.getVar('ext_code')
+            logs.setVar('ext_code',Code+1)
+            Renames[Net] = Code
+            return Code
+
+    for Nmos in Mod.insts:
+        Obj = Mod.insts[Nmos]
+        if Obj.Type=='nmos':
+            Fout.write('1 %d %d %d '%(codeit(Obj.conns['g']),codeit(Obj.conns['s']),codeit(Obj.conns['d'])))
+
+    for Pmos in Mod.insts:
+        Obj = Mod.insts[Pmos]
+        if Obj.Type=='pmos':
+            Fout.write('2 %d %d %d '%(codeit(Obj.conns['g']),codeit(Obj.conns['s']),codeit(Obj.conns['d'])))
+    Fout.write('\n')
+    for Net in Renames:
+        Fout.write('# %s %d\n'%(Net,Renames[Net]))
+    Fout.close()
+
+
+
+
+
+
+def stupidSerials(Mod):
+    for II in range(3):
+        Mod.prepareNetTable()
+        for Net in Mod.netTable:
+            Conns = Mod.netTable[Net]
+            if internalNet(Net,Mod)and(len(Conns)==2):
+                Inst0 = Conns[0][0]
+                Inst1 = Conns[1][0]
+                print('>>>>>>',Net,Inst0,Inst1)
+                if (Conns[0][1]==Conns[1][1])and(Conns[0][1] in ('nmos','pmos')):
+                    if (Inst0 in Mod.insts)and(Inst1 in Mod.insts):
+                        G0 = Mod.insts[Inst0].conns['g']
+                        G1 = Mod.insts[Inst1].conns['g']
+                        if (G0==G1):
+                            I0 = otherNet(Inst0,Conns[0][2],Mod)
+                            I1 = otherNet(Inst1,Conns[1][2],Mod)
+                            Mod.add_inst_conns(Conns[0][1],Inst0+'_'+Inst1,[('g',G0),('s',I0),('d',I1),('b',Mod.insts[Inst0].conns['b'])])
+                            Mod.insts.pop(Inst0)
+                            Mod.insts.pop(Inst1)
+        
+
+def retypePrimitives(Mod):
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        if Obj.Type == 'nmos' : Obj.Type = 'nmos_gate'
+        if Obj.Type == 'pmos' : Obj.Type = 'pmos_gate'
+        if Obj.Type == 'cmos' : Obj.Type = 'cmos_gate'
+        
 def reportMap(Mod):
     Mod.prepareNetTable()
     Maps = makeMap(Mod)
@@ -446,14 +613,18 @@ def simpleSerialsRound(Mod,Mos,Kind):
         LL = Keys[Net]
         if (len(LL)==2) and (not net_is_external(Net,Mod)) and (len(Mod.netTable[Net])==2):
             if (LL[0][0] in Mod.insts)and(LL[1][0] in Mod.insts):
-                Minst = inventInst('%s_%s'%(Kind,Mos))
-                NewGate = inventInst('g_%s_%s'%(Kind,Mos))
-    
-                Conns = [('o',NewGate),('i0',LL[0][1]),('i1',LL[1][1])]
                 Mod.insts.pop(LL[0][0])
                 Mod.insts.pop(LL[1][0])
-                Inst = inventInst('%s_%s'%(Kind,Mos))
-                Mod.add_inst_conns(Kind,Inst,Conns)
+                G0 = LL[0][1]
+                G1 = LL[1][1]
+                Minst = inventInst('%s_%s'%(Kind,Mos))
+                if G1!=G0:
+                    NewGate = inventInst('g_%s_%s'%(Kind,Mos))
+                    Conns = [('o',NewGate),('i0',G0),('i1',G1)]
+                    Inst = inventInst('%s_%s'%(Kind,Mos))
+                    Mod.add_inst_conns(Kind,Inst,Conns)
+                else:
+                    NewGate = G0
                 NewS = LL[0][2]
                 NewD = LL[1][2]
                 NewB = LL[0][3]
@@ -549,19 +720,21 @@ def simpleParallels(Mod,Mos,Kind):
             Gates = []
             
             for Inst,Ga in LL:
-                Gates.append(Ga)
+                if Ga not in Gates: Gates.append(Ga)
                 Insts.append(Inst)
                 
+            
             Insts.sort()
             Left = Insts[0]
             for Inst in Insts[1:]: Mod.insts.pop(Inst)
             Inst = inventInst('%s_%s'%(Kind,Mos))
-            NewGate = inventInst('g_%s_%s'%(Kind,Mos))
-            Ins = [('o',NewGate)]
-            for ind,Gate in enumerate(Gates):
-                Ins.append(('i%d'%ind,Gate))
-            Mod.add_inst_conns(Kind,Inst,Ins)
-            Mod.insts[Left].conns['g'] = NewGate
+            if len(Gates)>1:
+                NewGate = inventInst('g_%s_%s'%(Kind,Mos))
+                Ins = [('o',NewGate)]
+                for ind,Gate in enumerate(Gates):
+                    Ins.append(('i%d'%ind,Gate))
+                Mod.add_inst_conns(Kind,Inst,Ins)
+                Mod.insts[Left].conns['g'] = NewGate
 
 
 
@@ -891,14 +1064,15 @@ def followInvs(Mod):
             O = Obj.conns['o']
             if internalNet(O,Mod): 
                 Invs[O] = (I,Inst)
+    print('INVS %s '%(str(Invs)))
     for OO in Invs.keys():
         Mid,Inst0 = Invs[OO]
         if (Inst0 in Mod.insts) and (Mid in Invs):
             II,Inst1 = Invs[Mid]
             if II!=OO:
-                Mod.insts.pop(Inst0)
+#                Mod.insts.pop(Inst0)
                 useTranslations([(OO,II)],Mod,True)
-
+                Mod.insts[Inst0].conns['o'] = OO
 
             
     
@@ -1441,6 +1615,7 @@ def internalNet(Net,Mod):
     if 'input' in Dir: return False
     if 'output' in Dir: return False
     if 'inout' in Dir: return False
+    if Net in ['vdd','vss']: return False
     return True
 
 def useTranslations(Translates,Mod,Force=False):
@@ -2079,6 +2254,7 @@ def removeBusses(Mod):
                 if Sig[0]=='subbit':
                     Obj.conns[Pin] = '%s_%s_'%(Sig[1],Sig[2])
                     if Sig[1] not in BUSSED: 
+                        print('>>>>>>Sig',Sig)
                         BUSSED[Sig[1]] = int(Sig[2]),int(Sig[2])
                     else:
                         H,L = BUSSED[Sig[1]]

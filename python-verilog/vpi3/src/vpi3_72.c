@@ -562,7 +562,7 @@ veri_peek(PyObject *self,PyObject *args) {
     get_handle(pathstring,&handle);
     if (!handle) {
         vpi_printf("\npython: cannot find sig %s for peek\n",pathstring);
-        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('python: cannot find %s for peek')\n",pathstring,pathstring);
+        sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('python: cannot find %s for peek, define cannot_find_sig(() func to see where from')\n",pathstring,pathstring);
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
     }

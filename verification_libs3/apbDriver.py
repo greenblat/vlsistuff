@@ -35,7 +35,8 @@ class apbDriver:
         self.markers={}
         self.finishes=False
         self.hexMode = False
-        Monitors.append(self)
+        if Monitors != -1:
+            Monitors.append(self)
         logs.log_info('apbDriver  ver 1.jun.2020')
 
 

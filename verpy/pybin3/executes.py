@@ -145,9 +145,9 @@ def execute_line(Line,Env):
         Env.Top = wrds[1]
         if (Env.Top in Env.Modules):
             Env.Current = Env.Modules[Env.Top]
-        elif (string.lower(Env.Top) in Env.Modules):
+        elif (Env.Top.lower() in Env.Modules):
             Env.Current = Env.Modules[string.lower(Env.Top)]
-        elif (string.upper(Env.Top) in Env.Modules):
+        elif (Env.Top.upper() in Env.Modules):
             Env.Current = Env.Modules[string.upper(Env.Top)]
         else:
             log_err('module %s not loaded, cannot become top'%(Env.Top))

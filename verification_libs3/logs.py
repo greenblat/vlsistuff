@@ -9,6 +9,9 @@ print_debug_messages=0
 MAXWRONGS = 2000
 MAXERRORS = 2000
 PYMONLOG = 'pymon.log'
+if 'PYMONLOG' in os.environ:
+    PYMONLOG = os.environ['PYMONLOG']
+
 FORCE_WORKS = True
 
 WHERE = ''
@@ -275,7 +278,7 @@ def intx(Val):
     try:
         return int(Val,2)
     except:
-        print('INTX',type(Val),'"%s"'%Val)
+        print('ERROR logs.intx got INTX',type(Val),'"%s"'%Val)
         return 99999999
 
 def peek(Sig):
