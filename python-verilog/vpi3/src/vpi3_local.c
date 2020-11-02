@@ -21,8 +21,8 @@
 
 // #define CVCSIMULATOR 1
 
-#include "vpi_user.h"
-#include "veriuser.h"
+// #include "vpi_user.h"
+// #include "veriuser.h"
 #include "vpi_user_cds.h"
 
 
@@ -702,7 +702,7 @@ veri_peek_3d(PyObject *self,PyObject *args) {
     return Py_BuildValue("s", pvalue.value.str);
 }
 
-bool hasDot( char *strx) {
+int hasDot( char *strx) {
     int ii = 0;
     while (strx[ii]) {
         if (strx[ii]=='.') return 1;
