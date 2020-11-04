@@ -744,6 +744,8 @@ def str2hex(self,Txt):
         Res += Chr
     return Res
 
+#class anyClas(driverClass):
+#    driverClass.__init__(self,Path,Monitors)
 class driverClass:
     def __init__(self,Path,Monitors):
         if (Monitors!=-1): Monitors.append(self)

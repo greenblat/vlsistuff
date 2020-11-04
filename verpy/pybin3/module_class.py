@@ -620,8 +620,10 @@ class module_class:
                         (H,L)=WW
                         H = make_int(H)
                         L = make_int(L)
-                        H = max(H,Ind)
-                        L = min(L,Ind)
+                        if type(H) is int:
+                            H = max(H,Ind)
+                        if type(L) is int:
+                            L = min(L,Ind)
                         self.nets[Name]=(Dir,(H,L))
                     elif (type(WW) is tuple)and(len(WW)==3):
                         if WW[0] not in ['packed','double']:

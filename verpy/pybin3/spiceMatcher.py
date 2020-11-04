@@ -94,6 +94,43 @@ MOSPATTERNS['mux4a'] = [
     ,'pmos ?net024 ?ivinn_3_ ?ovoutn'
 ],('mux4a o=?ovoutn i0=?ivinn_0_ i1=?ivinn_1_ i2=?ivinn_2_ i3=?ivinn_3_' )
 
+MOSPATTERNS['muxff0'] = [
+    'nmos ?rst_b ?net226 vss'
+   ,'nmos ?clk ?net226 ?net240'
+   ,'nmos ?rst ?net174 vss'
+   ,'nmos ?net179 ?net174 ?net240'
+   ,'nmos ?rst_b ?net228 ?vin'
+   ,'nmos ?clk_b ?net174 ?net228'
+],[
+    'pmos ?rst ?net237 vdd'
+   ,'pmos ?rst ?vin ?net229'
+   ,'pmos ?clk_b ?net237 ?net239'
+   ,'pmos ?clk ?net229 ?net174'
+   ,'pmos ?net179 ?net239 ?net174'
+],('muxff0 o=?net174 i0=?rst i1=?clk i2=?vin')
+
+  
+MOSPATTERNS['muxff1'] = [
+    'nmos ?net174 ?net179 vss' 
+    ,'nmos ?rst_b ?net231 ?net179'
+    ,'nmos ?clk ?net182 ?net231'
+    ,'nmos ?vout ?net182 ?net232'
+    ,'nmos ?clk_b ?net214 ?net232'
+    ,'nmos ?rst_b ?net214 vss'
+],[
+    'pmos ?net174 ?net179 vdd' 
+   ,'pmos ?rst ?net199 vdd'
+   ,'pmos ?clk ?net199 net200'
+   ,'pmos ?rst ?net179 net230'
+   ,'pmos ?vout ?net182 net200'
+   ,'pmos ?rst_b ?net182 vdd'
+   ,'pmos ?clk_b ?net182 net230'
+],('muxff1 o=?vout i0=?rst i1=?clk i2=?net174')
+
+
+
+
+
 
 
 class Objx:
@@ -106,20 +143,24 @@ def tryMatchLogicFunc(Nmoses,Pmoses):
     Out =   goodLogicCandidate(Nmoses,Pmoses)
     if not Out: return False
     print('tryMatchLogicFunc',Nmoses,Pmoses)
-    logs.setVar('paths',['nmos'])
+    logs.setVar('paths',[])
     labelDepthMos(Nmoses,'vss',Out,[],[],[])
     logs.log_info('NPATHS %s'%str(logs.getVar('paths')))
     NPATHS = logs.getVar('paths')
-    logs.setVar('paths',['pmos'])
+    logs.setVar('paths',[])
     labelDepthMos(Pmoses,'vdd',Out,[],[],[])
     logs.log_info('PPATHS %s'%str(logs.getVar('paths')))
     PPATHS = logs.getVar('paths')
-    return NPATHS,PPATHS
+    return NPATHS,PPATHS,Out
     
 def registerWin(Gates):
+    Gates.sort()
     Was = logs.getVar('paths')
-    logs.setVar('paths',Was + [Gates])
-    print('registerWin',Gates)
+    if Gates not in Was:
+        New = Was + [Gates]
+        New.sort()
+        logs.setVar('paths',New)
+        print('registerWin',Gates)
     
 
 def goodLogicCandidate(Nmoses,Pmoses):
@@ -168,6 +209,7 @@ def labelDepthMos(Moses,Start,End,SofarMoses,SofarNets,SofarGates):
                 DSofarMoses = SofarMoses + [Mos]
                 DSofarNets  = SofarNets  + [Start]
                 DSofarGates = SofarGates + [Wmos[1]]
+                DSofarGates.sort()
                 labelDepthMos(Down,Up,End,DSofarMoses,DSofarNets,DSofarGates)
         elif Wmos[2] == Start:
             print('labelDepthMos2',Mos,'start',Start,End,'||||',SofarMoses,SofarNets,SofarGates)
@@ -181,6 +223,7 @@ def labelDepthMos(Moses,Start,End,SofarMoses,SofarNets,SofarGates):
                 DSofarMoses = SofarMoses + [Mos]
                 DSofarNets  = SofarNets  + [Start]
                 DSofarGates = SofarGates + [Wmos[1]]
+                DSofarGates.sort()
                 labelDepthMos(Down,Up,End,DSofarMoses,DSofarNets,DSofarGates)
         
 
@@ -193,10 +236,6 @@ def matchCluster(Nmoses,Pmoses):
 #    tryMatchLogicFunc(Nmoses,Pmoses)
     for Name in MOSPATTERNS:
         Npat,Ppat,Action = MOSPATTERNS[Name] 
-        print('>>>>',Name,Npat,Ppat,Action,Nmoses,Pmoses)
-        print('>>>>>>>>>',len(Npat),len(Nmoses),len(Ppat),len(Pmoses))
-        print()
-        print()
         if (len(Npat)==len(Nmoses))and(len(Ppat)==len(Pmoses)):
             logs.setVar('pattern',Name)
             Match = matchDeep(Npat+Ppat,Nmoses+Pmoses,{},True)
@@ -381,19 +420,57 @@ def matchBasicCmos(Nmoses,Pmoses):
     for Mos in Pmoses:
         Wmos = Mos.split()
         if Wmos[3]!='vdd':
+            Pg = Wmos[1]
             Key = Wmos[2],Wmos[3]
             Key2 = Wmos[3],Wmos[2]
             if Key in Cmoses0:
                 Nmos,Ng = Cmoses0[Key]
                 Nmoses0.remove(Nmos)
                 Pmoses0.remove(Mos)
-                Cmoses.append('cmos %s %s %s'%(Ng,Wmos[2],Wmos[3]))
+                Cmoses.append('cmos %s %s %s %s'%(Ng,Pg,Wmos[2],Wmos[3]))
             elif Key2 in Cmoses0:
                 Nmos,Ng = Cmoses0[Key]
                 Nmoses0.remove(Nmos)
                 Pmoses0.remove(Mos)
-                Cmoses.append('cmos %s %s %s'%(Ng,Wmos[2],Wmos[3]))
+                Cmoses.append('cmos %s %s %s %s'%(Ng,Pg,Wmos[2],Wmos[3]))
     return Cmoses,Nmoses0,Pmoses0
+
+PATTERNS2 = {}
+
+
+def matchLevel2(Clust):
+    Len = 0
+    for Key in Clust:
+        Len += len(Clust[Key])
+    for Name in PATTERNS2:
+        Items,Action = PATTERNS2[Name]
+        if (len(Items)<=Len):
+            logs.setVar('pattern',Name)
+            Clust = matchDeep2(Items,Clust,Action,{},True)
+    return Clust
+
+
+def matchDeep2(Pat,Clust,Action,Res={},Dbg=False):
+    if Dbg: print('ENTER %s %s %s %s'%(logs.getVar('pattern'),Pat,Moses,Res))
+    if (Pat==[])and(Moses==[]): return Res
+    Pnow = Pat[0]
+    for Mos in Moses:
+        Res1 = matchMos(Pnow,Mos,Res,Dbg)
+        if Res1:
+            if Dbg: print('EE2 %s "%s" "%s" %s   %d %d '%(logs.getVar('pattern'),Pnow,Mos,Res1,len(Pat),len(Moses)))
+            for Resx in Res1:
+                Moses2 = Moses[:]
+                Moses2.remove(Mos)
+                Res2 = matchDeep(Pat[1:],Moses2,Resx,Dbg)
+                if Res2: return Res2
+
+
+
+    if Dbg: print('FAILED %s "%s" %s   %d %d '%(logs.getVar('pattern'),Pnow,Res,len(Pat),len(Moses)))
+    return False
+
+
+
 
 
 

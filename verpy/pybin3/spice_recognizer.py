@@ -133,13 +133,45 @@ def splitDesignClusters(Mod):
         Nmoses,Pmoses = clusterPattern(Clust,Mod)
         LogicFunc = spiceMatcher.tryMatchLogicFunc(Nmoses,Pmoses)
         if LogicFunc:
-            Npaths,Ppaths = LogicFunc
+            Npaths,Ppaths,Out = LogicFunc
             for Inst in Clust: Mod.insts.pop(Inst)
-            Inst = inventInst('logicgate')
-            Conns = []
-            Mod.add_inst_conns('logicgate',Inst,Conns)
-            Mod.add_inst_param(Inst,'func0',str(Npaths))
-            Mod.add_inst_param(Inst,'func1',str(Ppaths))
+            Nvars = extractVars(Npaths)
+            Pvars = extractVars(Ppaths)
+            if (len(Nvars)==1)and(Nvars[0]==Pvars[0]):
+                Inst = inventInst('inv')
+                Mod.add_inst_conns('inv',Inst,[('o',Out),('i',Nvars[0])])
+            elif isFlatList(Npaths):
+                buildGate(Mod,Out,Nvars,'nand')
+
+            elif isFlatList(Ppaths):
+                buildGate(Mod,Out,Nvars,'nor')
+            elif len(Npaths)<=len(Ppaths):
+                Ins = []
+                for In in Npaths:
+                    if len(In)==1:
+                        Ins.append(In[0])
+                    else:
+                        Mid = buildGate(Mod,'',In,'and')
+                        Ins.append(Mid)
+                buildGate(Mod,Out,Ins,'nor')
+                
+            elif len(Npaths)>len(Ppaths):
+                Ins = []
+                for In in Ppaths:
+                    if len(In)==1:
+                        Ins.append(In[0])
+                    else:
+                        Mid = buildGate(Mod,'',In,'or')
+                        Ins.append(Mid)
+                buildGate(Mod,Out,Ins,'nand')
+            else:                
+                Nvars.sort()
+                Conns = [('o',Out)]
+                for ind,Net in enumerate(Nvars):
+                    Conns.append(('i%d'%ind,Net))
+                Mod.add_inst_conns('logicgate',Inst,Conns)
+                Mod.add_inst_param(Inst,'func0',str(Npaths))
+                Mod.add_inst_param(Inst,'func1',str(Ppaths))
         else:
             Recognized = spiceMatcher.matchCluster(Nmoses,Pmoses)
             if Recognized:
@@ -149,17 +181,74 @@ def splitDesignClusters(Mod):
                     Mod.add_inst_conns(Objx.Type,inventInst(Objx.Type),Objx.Conns)
             else:
                 Clust2 = spiceMatcher.matchBasics(Nmoses,Pmoses)
-                logs.log_info('FAILED clust\n',2)
-                for Key in Clust2:
-                    for Item in Clust2[Key]:
-                        logs.log_info('%s : %s'%(Key,Item),2)
-#                for Mos in Nmoses:
-#                    logs.log_info('    %s'%Mos,2)
-#                logs.log_info('',2)
-#                for Mos in Pmoses:
-#                    logs.log_info('    %s'%Mos,2)
-                logs.log_info('\n\n\n',2)
+                Clust3 = spiceMatcher.matchLevel2(Clust2)
+                for Inst in Clust:
+                    Mod.insts.pop(Inst)
+                for Key in Clust3:
+                    List = Clust3[Key]                
+                    for Item in List:
+                        addItem(Key,Item,Mod)
+
+                if Clust3!=[]:
+                    Str = ''
+                    for Key in Clust3:
+                        Str += ' %s:%d'%(Key,len(Clust3[Key]))
+                    logs.log_info('FAILED clust %s\n'%Str,2)
+                    for Key in Clust3:
+                        for Item in Clust3[Key]:
+                            logs.log_info('%s : %s'%(Key,Item),2)
                 
+PINS = {}
+PINS['nmos'] = 'g s d'
+PINS['pmos'] = 'g s d'
+PINS['cmos'] = 'gn gp i o'
+PINS['inv'] = 'o i'
+PINS['mux2'] = 's i0 i1 o'
+def addItem(Key,Item,Mod):
+    Wrds = Item.split()
+    Pins = PINS[Key].split()
+    Conns = zip(Pins,Wrds[1:])
+    Mod.add_inst_conns(Key,inventInst(Key),Conns)
+    
+def zipdir(Pins,Nets):
+    Dir = {}
+    X = zip(Pins,Nets)
+    for (P,N) in X:
+        Dir[P]=N
+    return Dir
+
+
+
+
+
+def buildGate(Mod,Out,Ins,Type):
+    Type = '%s%s'%(Type,len(Ins))
+    Inst = inventInst(Type)
+    if Out=='':
+        Out = inventInst('netx')
+    Conns = [('o',Out)]
+    for ind,Net in enumerate(Ins):
+        Conns.append(('i%d'%ind,Net))
+    Mod.add_inst_conns(Type,Inst,Conns)
+    return Out
+
+def isFlatList(Ppaths):
+    if (type(Ppaths) is list)and(len(Ppaths)==1):
+        Ppaths = Ppaths[0]
+    for X in Ppaths:
+        if type(X) is not str: return False
+    return True
+    
+def extractVars(List):
+    if type(List) is list:
+        res = []
+        for X in List:
+            Y = extractVars(X)
+            res.extend(Y)
+        return res
+    else:
+        return [List]
+
                 
 
 def clusterPattern(Clust,Mod):
