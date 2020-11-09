@@ -832,6 +832,27 @@ def gray_decode(n):
         m >>= 1
     return n
 
+def splitQuotes(Txt):
+    Str = ''
+    state = 'idle'
+    for Chr in Txt:
+        if state=='idle':
+            if Chr=='"':
+                state='work'
+            else:
+                Str += Chr
+        elif state=='idle':
+            if Chr=='"':
+                state='idle'
+            elif Chr==' ':
+                Str += 'SPACE$SPACE'
+            else:
+                Str += Chr
+    Wrds = Txt.split()
+    for ind,Wrd in enumerate(Wrds):
+        X = Wrd.replace('SPACE$SPACE',' ')
+        Wrds[ind] = X
+    return Wrds
 
 
 print('>>>verification_logs loaded')

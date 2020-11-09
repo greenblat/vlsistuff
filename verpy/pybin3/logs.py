@@ -796,6 +796,32 @@ def check_directory_exists(Fname):
         res = res +'/'+wrds.pop(0)
 
 
+def splitQuotes(Txt):
+    Str = ''
+    state = 'idle'
+    for Chr in Txt:
+        if state=='idle':
+            if Chr=='"':
+                state='work'
+                Str += Chr
+            else:
+                Str += Chr
+        elif state=='work':
+            if Chr=='"':
+                state='idle'
+                Str += Chr
+            elif Chr==' ':
+                Str += 'SPACE$SPACE'
+            else:
+                Str += Chr
+    Wrds = Str.split()
+    for ind,Wrd in enumerate(Wrds):
+        X = Wrd.replace('SPACE$SPACE',' ')
+        Wrds[ind] = X
+    return Wrds
+
+
+
 
 
 print('>>>verification_logs loaded')

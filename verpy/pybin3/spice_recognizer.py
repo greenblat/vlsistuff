@@ -36,14 +36,14 @@ def help_main(Env):
     stupidSerials(Mod)
     orientSimpleMoses(Mod)
     writeOut(Mod,'stp2c',Dbg)
-
+    dump_prolog(Mod)
     splitDesignClusters(Mod)
     simpleInverters(Mod)
     simpleCmos(Mod)
     orphanWires(Mod)
     writeOut(Mod,'xmod',Dbg)
 
-
+    writeOutDot(Mod)
 
     simpleInverters(Mod)
     followInvs(Mod)
@@ -129,7 +129,7 @@ def splitDesignClusters(Mod):
             Used.extend(All)
             Clusters.append(All)
     logs.log_info('design split into %d clusters'%len(Clusters))
-    for Clust in Clusters:
+    for ClustNum,Clust in enumerate(Clusters):
         Nmoses,Pmoses = clusterPattern(Clust,Mod)
         LogicFunc = spiceMatcher.tryMatchLogicFunc(Nmoses,Pmoses)
         if LogicFunc:
@@ -178,7 +178,10 @@ def splitDesignClusters(Mod):
                 for Inst in Clust:
                     Mod.insts.pop(Inst)
                 for Objx in Recognized:
-                    Mod.add_inst_conns(Objx.Type,inventInst(Objx.Type),Objx.Conns)
+                    Inst = inventInst(Objx.Type)
+                    Mod.add_inst_conns(Objx.Type,Inst,Objx.Conns)
+                    Obj = Mod.insts[Inst]
+                    Obj.params = Objx.params
             else:
                 Clust2 = spiceMatcher.matchBasics(Nmoses,Pmoses)
                 Clust3 = spiceMatcher.matchLevel2(Clust2)
@@ -187,7 +190,7 @@ def splitDesignClusters(Mod):
                 for Key in Clust3:
                     List = Clust3[Key]                
                     for Item in List:
-                        addItem(Key,Item,Mod)
+                        addItem(Key,Item,Mod,ClustNum)
 
                 if Clust3!=[]:
                     Str = ''
@@ -204,11 +207,16 @@ PINS['pmos'] = 'g s d'
 PINS['cmos'] = 'gn gp i o'
 PINS['inv'] = 'o i'
 PINS['mux2'] = 's i0 i1 o'
-def addItem(Key,Item,Mod):
+PINS['cap'] = 'o'
+def addItem(Key,Item,Mod,Clust=0):
     Wrds = Item.split()
     Pins = PINS[Key].split()
-    Conns = zip(Pins,Wrds[1:])
-    Mod.add_inst_conns(Key,inventInst(Key),Conns)
+    Conns = list(zip(Pins,Wrds[1:]))
+    if Key=='nmos': Conns.append(('b','vss'))
+    if Key=='pmos': Conns.append(('b','vdd'))
+    Inst = inventInst(Key)
+    Mod.add_inst_conns(Key,Inst,Conns)
+    Mod.insts[Inst].params['clust'] = Clust
     
 def zipdir(Pins,Nets):
     Dir = {}
@@ -629,55 +637,61 @@ def makeOut(Net,Mod):
 
             
 def cmosAnd(Mod):
-     Pgates = {}
-     Ngates = {}
-     for Inst in Mod.insts:
-         Obj = Mod.insts[Inst]
-         if Obj.Type == 'cmos':
-             Pg = Obj.conns['gp']
-             Ng = Obj.conns['gn']
-             I = Obj.conns['i']
-             O = Obj.conns['o']
-             register(Pgates,Pg,(I,O,Inst))        
-             register(Ngates,Ng,(I,O,Inst))        
-     Remove = []
-     for Inst in Mod.insts:
-         Obj = Mod.insts[Inst]
-         if Obj.Type == 'nmos':
-             G,S,D = gsd(Obj)
-             if (G in Pgates)and(D=='vss'):
-                 I,O,Cmos = Pgates[G][0]
-                 if (I==S):
-                     In0,O0 = O,I
-                 elif (O==S):
-                     In0,O0 = I,O
-                 else:
-                     In0,O0 = False,False
-                 if In0:                    
-                     Minst = inventInst('and')
-                     Gn = Mod.insts[Cmos].conns['gn']
-                     Mod.add_inst_conns('and',Minst,[('o',O0),('i0',In0),('i1',Gn)])
-                     Mod.insts.pop(Cmos)
-                     Remove.append(Inst)
-         if Obj.Type == 'pmos':
-             G,S,D = gsd(Obj)
-             if (G in Ngates):
-                 I,O,Cmos = Ngates[G][0]
-                 if (I in [D,S]):
-                     In0,O0 = O,I
-                 elif (O in [D,S]):
-                     In0,O0 = I,O
-                 else:
-                     In0,O0 = False,False
-                     
-                 if In0:                    
-                     Minst = inventInst('and')
-                     Gp = Mod.insts[Cmos].conns['gp']
-                     Mod.add_inst_conns('or',Minst,[('o',O0),('i0',In0),('i1',Gp)])
-                     Mod.insts.pop(Cmos)
-                     Remove.append(Inst)
-     removeInsts(Remove,Mod)
-
+    Pgates = {}
+    Ngates = {}
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        if Obj.Type == 'cmos':
+            Pg = Obj.conns['gp']
+            Ng = Obj.conns['gn']
+            I = Obj.conns['i']
+            O = Obj.conns['o']
+            register(Pgates,Pg,(I,O,Inst))        
+            register(Ngates,Ng,(I,O,Inst))        
+    Remove = []
+    Insts = list(Mod.insts.keys())
+    for Inst in Insts:
+        if Inst in Mod.insts:
+            Obj = Mod.insts[Inst]
+        else:
+            Obj = False
+        if not Obj:
+            pass
+        elif Obj.Type == 'nmos':
+            G,S,D = gsd(Obj)
+            if (G in Pgates)and(D=='vss'):
+                I,O,Cmos = Pgates[G][0]
+                if (I==S):
+                    In0,O0 = O,I
+                elif (O==S):
+                    In0,O0 = I,O
+                else:
+                    In0,O0 = False,False
+                if In0:                    
+                    Minst = inventInst('and')
+                    Gn = Mod.insts[Cmos].conns['gn']
+                    Mod.add_inst_conns('and',Minst,[('o',O0),('i0',In0),('i1',Gn)])
+                    Mod.insts.pop(Cmos)
+                    Remove.append(Inst)
+        if Obj.Type == 'pmos':
+            G,S,D = gsd(Obj)
+            if (G in Ngates):
+                I,O,Cmos = Ngates[G][0]
+                if (I in [D,S]):
+                    In0,O0 = O,I
+                elif (O in [D,S]):
+                    In0,O0 = I,O
+                else:
+                    In0,O0 = False,False
+                    
+                if In0:                    
+                    Minst = inventInst('and')
+                    Gp = Mod.insts[Cmos].conns['gp']
+                    Mod.add_inst_conns('or',Minst,[('o',O0),('i0',In0),('i1',Gp)])
+                    Mod.insts.pop(Cmos)
+                    Remove.append(Inst)
+    removeInsts(Remove,Mod)
+           
 
 
 def simpleSerials(Mod,Mos,Kind):
@@ -2412,6 +2426,71 @@ def followAndsOrs(Mod):
 
                 if internalNet(Net,Mod): Mod.insts.pop(Inv)
 
+COLORS = {'0':'khaki','1':'bisque','2':'cornsilk','3':'gainsboro','4':'darkseagreen1'}
+COLORS['5'] = 'gold1'
+COLORS['6'] = 'darkkhaki'
+COLORS['7'] = 'lightpink'
+
+def writeOutDot(Mod):
+    vss,vdd = 0,0
+    Fout = open('%s.dot'%Mod.Module,'w')
+    Fout.write('digraph %s {\n'%(Mod.Module))
+    Mod.prepareNetTable()
+    for Inst in Mod.insts:
+        if 'clust' in Mod.insts[Inst].params:
+            Num = Mod.insts[Inst].params['clust']
+            Color = COLORS[str(Num % 8)]
+            Fout.write('%s [label="%s";style=filled;fillcolor=%s];\n'%(Inst,Mod.insts[Inst].Type,Color))
+        else:
+            Fout.write('%s [label="%s"];\n'%(Inst,Mod.insts[Inst].Type))
+    for Net in Mod.netTable:
+        if Net not in ['vdd','vss']:
+            Dir,_ = Mod.nets[Net]
+            if Dir in ['input','output','inout']:
+                Clr = ';fillcolor=yellow;style=filled'
+            else:
+                Clr = ';fillcolor=azure;style=filled'
+            Fout.write('%s [shape=box%s];\n'%(Net,Clr))
+    for Net in Mod.netTable:
+        if Net not in ['vdd','vss']:
+            for Inst,Type,Pin in Mod.netTable[Net]:
+                if dirToNet(Type,Pin):
+                    Fout.write('%s -> %s [label="%s"];\n'%(Inst,Net,Pin))
+                else:
+                    Fout.write('%s -> %s [label="%s"];\n'%(Net,Inst,Pin))
+        else:
+            for Inst,Type,Pin in Mod.netTable[Net]:
+                if Pin != 'b':
+                    if Net=='vss': 
+                        NN = 'vss%s'%vss
+                        vss += 1
+                    if Net=='vdd': 
+                        NN = 'vdd%s'%vdd
+                        vdd += 1
+                    Fout.write('%s [shape=plaintext];\n'%(NN))
+                    Fout.write('%s -> %s [label="%s";color=red];\n'%(NN,Inst,Pin))
+
+
+    Fout.write('}\n')
+    Fout.close()
+
+def dump_prolog(Mod):
+    Fout = open('%s.pl'%Mod.Module,'w')
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        if Obj.Type == 'nmos':
+            Fout.write('nmos(%s,%s,%s).\n'%(Obj.conns['g'],Obj.conns['s'],Obj.conns['d']))
+        elif Obj.Type == 'pmos':
+            Fout.write('pmos(%s,%s,%s).\n'%(Obj.conns['g'],Obj.conns['s'],Obj.conns['d']))
+        else:
+            logs.log_error('prolog dump failed on %s %s'%(Obj.Type,Inst))
+    Fout.close()
 
 
 
+
+
+def dirToNet(Type,Pin):
+    if Pin == 'o': return True
+    if Pin == 's': return True
+    return False

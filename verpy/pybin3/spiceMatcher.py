@@ -18,6 +18,16 @@ MOSPATTERNS['nand3'] = [ 'nmos ?i1 ?mid0 vss' ,'nmos ?i2 ?mid1 ?mid0',  'nmos ?i
 
 MOSPATTERNS['inv'] = ['nmos ?g ?o vss'],['pmos ?g ?o vdd'],('inv i=?g o=?o')
 
+
+MOSPATTERNS['trcmos'] = ['nmos ?en_n ?in_int vss','nmos ?en ?in ?in_int'],\
+        ['pmos ?en_n ?in ?in_int'], ('and i0=?in i1=?en o=?in_int')
+
+MOSPATTERNS['trcmos2'] = ['nmos ?en ?in ?in_int'],\
+        ['pmos ?en_n ?in ?in_int','pmos ?en ?in_int vdd'], ('or i0=?in i1=?en_n o=?in_int')
+
+MOSPATTERNS['trcmos3'] = ['nmos ?en ?in ?in_int'],\
+        ['pmos ?en_n ?in ?in_int','pmos ?en ?in_int ?x'], ('or i0=?in i1=?en_n o=?in_int')
+
 MOSPATTERNS['nor2'] = [
      'nmos ?i1 ?o vss'
     ,'nmos ?i2 ?o vss'
@@ -128,6 +138,17 @@ MOSPATTERNS['muxff1'] = [
 ],('muxff1 o=?vout i0=?rst i1=?clk i2=?net174')
 
 
+MOSPATTERNS['latch0'] = [
+    'nmos ?ltch_out ?ltch_in vss'
+   ,'nmos ?en_n ?ltch_in ?midn'
+   ,'nmos ?dat ?midn vss'
+
+],[
+    'pmos ?ltch_out ?ltch_in vdd'
+   ,'pmos ?en ?ltch_in ?midp'
+   ,'pmos ?dat ?midp vdd'
+
+],('expression  o=?ltch_in expr="(dat && en_n) ? 0 : (!dat && !en) ? 1 : !ltch_out" ')
 
 
 
@@ -137,6 +158,7 @@ class Objx:
     def __init__(self,Type,Conns):
         self.Type = Type
         self.Conns = Conns
+        self.params= {}
 
 
 def tryMatchLogicFunc(Nmoses,Pmoses):
@@ -245,7 +267,21 @@ def matchCluster(Nmoses,Pmoses):
     return False
 
 def activate(Action,Match):
+
     Wact = Action.split()
+    if Wact[0]=='expression':
+        Wact = logs.splitQuotes(Action)
+
+        CC = Wact[1].split('=')
+        Pin = CC[0]
+        Net = Match[CC[1]]
+        Conns = [(Pin,Net)]
+        Obj = Objx(Wact[0],Conns)
+
+        CC = Wact[2].split('=')
+
+        Obj.params[CC[0]] = CC[1]
+        return [Obj]
     Conns = []
     for Conn in Wact[1:]:
         CC = Conn.split('=')
@@ -293,6 +329,7 @@ def matchMos(Pnow,Mos,Res,Dbg=False):
         return False
 
     if Wpat[1][0]=='?':
+        if not Res: return False
         if Wpat[1] in Res:
             if Wmos[1] != Res[Wpat[1]]:
                 if Dbg: print('matchMos false2 ',Wmos,Wpat)
@@ -384,7 +421,19 @@ def match(Pat,Wrds,Res={}):
 def matchBasics(Nmoses,Pmoses):
     Invs,Nmoses0,Pmoses0 = matchBasicInvs(Nmoses,Pmoses)
     Cmoses,Nmoses1,Pmoses1 = matchBasicCmos(Nmoses0,Pmoses0)
-    return {'inv':Invs,'cmos':Cmoses,'nmos':Nmoses1,'pmos':Pmoses1}
+    Caps = []
+    Nmoses2 = []
+    for Nmos in Nmoses1:
+        Wrds = Nmos.split()
+        if (Wrds[2]==Wrds[3])and(Wrds[2]=='vss'):
+            Caps.append('cap %s'%Wrds[1])
+        else:
+            Nmoses2.append(Nmos)
+            
+    Res =  {'inv':Invs,'cmos':Cmoses,'nmos':Nmoses2,'pmos':Pmoses1}
+    if Caps!=[]:
+        Res['cap'] = Caps
+    return Res
 
 def matchBasicInvs(Nmoses,Pmoses):
     Invs0 = {}
