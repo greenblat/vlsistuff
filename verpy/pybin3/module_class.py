@@ -341,9 +341,34 @@ class module_class:
             Len = len(Keys)
          return Base                    
 
+    def expandInstArrays(self):
+        Insts = list(self.insts.keys())
+        for Inst in Insts:
+            Obj = self.insts[Inst]
+            if 'inst_width' in Obj.params:
+                (Hi,Lo) = Obj.params['inst_width'][1]
+                Wid = Hi-Lo+1
+                for Ind in range(Hi,Lo-1,-1):
+                    New = self.add_inst(Obj.Type,Inst+'_'+str(Ind))
+                    for Pin in Obj.conns:
+                        Sig = Obj.conns[Pin]
+                        if type(Sig) is str:
+                            New.conns[Pin] = Sig
+                        elif Sig[0] in ['subbus']:
+                            New.conns[Pin] = ('subbit',Sig[1],Ind)
+                        elif Sig[0] in ['subbit','subbus','hdig']:
+                            New.conns[Pin] = Sig
+                        elif (type(Sig) is list)and(Sig[0] == 'curly'):
+                            New.conns[Pin] = Sig[Ind+1]
+                        else:
+                            logs.log_error('expand %s %s %d -> %s  %s'%(Inst,Obj.Type,Wid,type(Sig),Sig[0]))
+
+                self.insts.pop(Inst)
+                
 
     def dump_verilog(self,Fout,MergeHards=False,Style='new'):
         logs.setCurrentModule('dump_verilog')
+        self.expandInstArrays()
         if Style=='new':
             NOIOS,NOIFS=self.dump_new_style_header(Fout)
         else:

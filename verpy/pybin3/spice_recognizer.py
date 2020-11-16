@@ -107,6 +107,7 @@ def help_main(Env):
     restoreBusses(Mod,BUSSED,DIRS)
     useVssVdd(Mod)
     writeOut(Mod,'stp13',Dbg)
+    assignSigDirs(Mod)
     reportMap(Mod)
     turnGatesToAssigns(Mod)
     writeOut(Mod,'stp14',Dbg)
@@ -129,6 +130,9 @@ def splitDesignClusters(Mod):
             Used.extend(All)
             Clusters.append(All)
     logs.log_info('design split into %d clusters'%len(Clusters))
+
+    dumpProlog(Mod,Clusters)
+
     for ClustNum,Clust in enumerate(Clusters):
         Nmoses,Pmoses = clusterPattern(Clust,Mod)
         LogicFunc = spiceMatcher.tryMatchLogicFunc(Nmoses,Pmoses)
@@ -2474,7 +2478,22 @@ def writeOutDot(Mod):
     Fout.write('}\n')
     Fout.close()
 
+def dumpProlog(Mod,Clusters):
+    Fout = open('%s.pl'%Mod.Module,'w')
+    Fout.write(':-discontiguous nmos/5.\n:-discontiguous pmos/5.\n')
+
+    for ind,Cluster in enumerate(Clusters):
+        for Inst in Cluster:
+            Obj = Mod.insts[Inst]
+            if Obj.Type == 'nmos':
+                Fout.write('nmos(%s,%s,%s,%s,%s).\n'%(Inst.lower(),Obj.conns['g'],Obj.conns['s'],Obj.conns['d'],ind))
+            elif Obj.Type == 'pmos':
+                Fout.write('pmos(%s,%s,%s,%s,%s).\n'%(Inst.lower(),Obj.conns['g'],Obj.conns['s'],Obj.conns['d'],ind))
+    Fout.close()
+            
+
 def dump_prolog(Mod):
+    return
     Fout = open('%s.pl'%Mod.Module,'w')
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
@@ -2486,9 +2505,43 @@ def dump_prolog(Mod):
             logs.log_error('prolog dump failed on %s %s'%(Obj.Type,Inst))
     Fout.close()
 
+GATES = 'inv nor nand or and nor2 nor3 nor4 or2 or3 or4  and2 and3 and4 and5 xor2 xor3 xor4 nand2 nand3 nand4 nand5 buf'.split()
+def assignSigDirs(Mod):
+    Mod.prepareNetTable()
+    for Net in Mod.nets:
+        Dir,Wid = Mod.nets[Net]
+        if Dir=='inout':
+            if Net not in Mod.netTable:
+                Mod.nets[Net] = 'input',Wid
+            elif 'VDD' in Net:
+                Mod.nets[Net] = 'input',Wid
+            elif 'VSS' in Net:
+                Mod.nets[Net] = 'input',Wid
+            elif sureOut(Mod.netTable[Net]):
+                Mod.nets[Net] = 'output',Wid
+            elif sureIn(Mod.netTable[Net]):
+                Mod.nets[Net] = 'input',Wid
+            else:
+                logs.log_info('NNN %s %s'%(Net,Mod.netTable[Net]))
+
+def sureIn(Tab):
+    for _,Type,Pin in Tab:
+        if (Pin in 'i0 i1 i2 i3 i4'.split())and(Type in GATES):
+            pass
+        elif (Pin in 'g gn gp'.split())and(Type in 'cmos nmos pmos'.split()):
+            pass
+        elif (Pin in 'i g'.split())and(Type in 'latch '.split()):
+            pass
+        else:
+            return False
+    return True
 
 
-
+def sureOut(Tab):
+    for _,Type,Pin in Tab:
+        if (Pin=='o')and(Type in GATES):
+            return True
+    return False
 
 def dirToNet(Type,Pin):
     if Pin == 'o': return True

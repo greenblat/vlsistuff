@@ -174,6 +174,7 @@ Instance :
     | token InstParams token '(' Conns_list ')' ';' 
     | token InstParams token Width '(' Conns_list ')' ';' 
     | token token Width '(' Conns_list ')' ';'
+    | token token Width '(' Exprs ')' ';'
     ;
 
 // | token '(' Exprs ')' ';' 

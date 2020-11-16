@@ -84,6 +84,7 @@ def read_verilog_file(Fname,RunDir,Env):
     print('locals %s'%(Locals.keys()))
     for Mod in Locals:
         Locals[Mod].cleanZeroNets()
+        Locals[Mod].expandInstArrays()
     for Mod in Locals:
         if not Env.Current: Env.Current=Locals[Mod]
         Env.Modules[Mod]=Locals[Mod]

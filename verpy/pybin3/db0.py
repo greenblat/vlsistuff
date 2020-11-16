@@ -1988,8 +1988,19 @@ def get_curly_items(Item1):
                 else:
                     res.append(X)
             elif (Item[0]=='CurlyItems'):
-                more = get_curly_items(Item)
-                res.extend(more)
+                LL = DataBase[Item]
+                while (len(LL)==3)and(LL[1][0]==','):
+                    A = get_curly_items(LL[2])
+                    LL = DataBase[LL[0]]
+                    res = A + res
+                more = get_curly_items(LL[0])
+                res = more + res
+            elif (Item[0]=='Expr'):
+                X = get_expr(Item)
+                res.append(X)
+            else:
+                logs.log_err('curly got %s'%(str(Item)))
+                return []
     return res
 
 

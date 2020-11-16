@@ -361,7 +361,7 @@ int main(argc, argv)
                   k++;
             } else if (strcmp(option,"-end")==0) {
                     strcpy(option, *++argv);
-                  end_time=atoi(option);
+                  end_time=atof(option);
                   k++;
             } else if (fname1[0]==0) strcpy(fname1,option); 
             else if (fname2[0]==0) strcpy(fname2,option);
@@ -406,6 +406,7 @@ void readfile(fname) char *fname; {
         exit(2);
     }
     j = (char *) 1;
+    long last_time = 0;
     while ((j != NULL)&&((end_time<=0)||(run_time<=end_time))&&(inf!=NULL)) {
         j = fgets(line, longestVal, inf);
         linenum++;
@@ -416,10 +417,18 @@ void readfile(fname) char *fname; {
             exit(0);
         }
 
-        if (guard>999999) { guard=0;printf("%d lines %g %d maxusedsigs=%d\n",linenum,run_time,0,maxusedsig);}
+        if (guard>999999) { guard=0;printf("%d lines time=%g %d maxusedsigs=%d\n",linenum,run_time,0,maxusedsig);}
         if (j == NULL) {
+            printf("end of file simtime=%g\n",run_time);
             exit(0);
         }
+
+        if ((run_time-last_time)>10000000) {
+            last_time = run_time;
+            printf("TIME %d lines time=%g %d maxusedsigs=%d\n",linenum,run_time,0,maxusedsig);
+        }
+
+
         i=sscanf(line,"%s %s %s %s %s %s %s",s1,s2,s3,s4,s5,s6,s7);
         int Len = strlen(line);
         if (Len>(longestVal-1000)) {
