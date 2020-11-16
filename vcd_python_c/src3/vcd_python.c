@@ -406,8 +406,8 @@ void readfile(fname) char *fname; {
         exit(2);
     }
     j = (char *) 1;
-    long last_time = 0;
-    while ((j != NULL)&&((end_time<=0)||(run_time<=end_time))&&(inf!=NULL)) {
+    double last_time = 0.0;
+    while ((j != NULL)&&((end_time<=0.0)||(run_time<=end_time))&&(inf!=NULL)) {
         j = fgets(line, longestVal, inf);
         linenum++;
         guard++;
@@ -423,7 +423,7 @@ void readfile(fname) char *fname; {
             exit(0);
         }
 
-        if ((run_time-last_time)>10000000) {
+        if ((run_time-last_time)>10000000.0) {
             last_time = run_time;
             printf("TIME %d lines time=%g %d maxusedsigs=%d\n",linenum,run_time,0,maxusedsig);
         }
@@ -481,18 +481,23 @@ void readfile(fname) char *fname; {
             break;
         }
     }
-    printf("readfile end\n");
+    printf("readfile end run_time=%g end_time=%g  start_time=%g\n",run_time,end_time,start_time);
 }
 int instate;
 float lastTraceTime = 0.0;
 void pushtok(char *s,int ind) {
     int pr;
     long n;
+    int forReal;
     if (s[0]==0) return;
     if ((ind==1)&&(s[0]=='#')) {
         run_time=atof(&(s[1]));
         LASTCHANGE++;
-        if ((run_time>=0)&&(run_time<start_time)&&(search)) search_time(start_time);
+//        printf("DBG r=%g st=%g sea=%d\n",run_time,start_time,search);
+//        if ((run_time>=0)&&(run_time<start_time)) {
+//            search_time(); return;
+//            printf("found time %g\n",run_time);
+//        }
         if ((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)) {
             nextTriggerTime += deltaTime; 
             PyRun_SimpleString(functionTime);
@@ -502,6 +507,7 @@ void pushtok(char *s,int ind) {
     }
     instate++;
 //    printf("dbg state=%d str=%s\n",state,s);
+    forReal = ((run_time>=0)&&(run_time>=start_time));
     switch (state) {
     case Idle:
         n = qqai(s);
@@ -519,17 +525,18 @@ void pushtok(char *s,int ind) {
             search=1;
         } else if (n==qqai("$dumpvars")) { 
             state=Dumpvars;
-            search=1;
+            //search=1;
         } else if (s[0]=='#') {
             state=Values;
             run_time=atof(&(s[1]));
+            search=1;
         } else { 
             printf("idle token state=%d line=%d %s\n",state,linenum,s);
         }
         check_x(1);
         break;
     case Timescale: if (strcmp(s,"$end")==0) state= Idle; break;
-    case Values: do_value(s);check_x(2);break;
+    case Values: do_value(s,forReal);check_x(2);break;
     case Scope: n=qqai(s);do_scope(n);check_x(3);break;            
     case Var: n=qqai(s);do_var(n);check_x(4);break;            
     case Upscope: n=qqai(s);do_upscope(n);check_x(5);break;            
@@ -645,12 +652,12 @@ char *temp;
     return qqai(temp);
 }
 
-void search_time(start_time) int start_time;
-{
+void search_time() {
     char *j;
     char line[1000];
     int nexti,sig,i;
     j = (char *) 1;
+    printf("searching start time %g\n",start_time);
     while (j != NULL) {
         j = fgets(line, 4999, inf);
         linenum++;
@@ -658,21 +665,26 @@ void search_time(start_time) int start_time;
         if (line[0]=='$') {
         } else if (line[0]=='#') {
             run_time=atof(&(line[1]));
+            printf("DBG %g %g\n",run_time,start_time);
             if (run_time>=start_time) {
                 state=Values;
                 return;
             }
-            printf("next=%f run=%f cond=%d\n",nextTriggerTime,run_time,((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)));
-            if ((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)) {
-                nextTriggerTime += deltaTime; 
-                PyRun_SimpleString(functionTime);
-             }
-
-        } else {
-            do_value(line);
         }
     }
+    printf("warning! search time finished the file. run=%g search=%g\n",run_time,start_time);
 }
+//            printf("next=%f run=%f cond=%d\n",nextTriggerTime,run_time,((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)));
+//            if ((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)) {
+//                nextTriggerTime += deltaTime; 
+//                PyRun_SimpleString(functionTime);
+//             }
+//
+//        } else {
+//            do_value(line,0);
+//        }
+//    }
+//}
 
 
 
@@ -741,7 +753,7 @@ char *allocateString(int Len) {
     Ptr = malloc(Len+2);
     return Ptr;
 }
-void drive_value(char *Val,char *Code) {
+void drive_value(char *Val,char *Code,int forReal) {
     int P = intcode(Code);
     if (P<0) {
         printf("bad ERROR code='%s' got us negative P=%d\n",Code,P);
@@ -752,7 +764,6 @@ void drive_value(char *Val,char *Code) {
         return;
     }
 
-//    printf("drive_value |%s| |%s|\n",Val,Code);
 
     if (Val[0] == 'r') {
         Val[9]=0;
@@ -785,8 +796,10 @@ void drive_value(char *Val,char *Code) {
             fprintf(vcdF1,"%s%s\n",Val,Code);
     }
     sigs[P].toggles += 1;
-    armTriggers(P,Val);
-    useTriggers();
+    if (forReal) {
+        armTriggers(P,Val);
+        useTriggers();
+    }
 }
 
 void armTriggers(int P,char *Val) {
@@ -813,15 +826,15 @@ void useTriggers() {
 
 
 
-void do_value(char *strx) {
+void do_value(char *strx,int forReal) {
     char temp[10];
     if (Valex[0]==0) {
         if ((strx[0]=='0')||(strx[0]=='1')||(strx[0]=='x')||(strx[0]=='z')) { 
             temp[0]=strx[0];
             temp[1]=0;
-            drive_value(temp,&(strx[1]));
+            drive_value(temp,&(strx[1]),forReal);
         } else if (strx[0]=='p') { 
-            drive_value(&(strx[1]),s4);
+            drive_value(&(strx[1]),s4,forReal);
             s1[0]=0;
             s2[0]=0;
             s3[0]=0;
@@ -832,7 +845,7 @@ void do_value(char *strx) {
             strcpy(Valex,strx);
         }
     } else {
-        drive_value(Valex,strx);
+        drive_value(Valex,strx,forReal);
         Valex[0]=0;
     }
 }
