@@ -12,6 +12,20 @@ char HELP[] = "vcd_trim_time <VCDFILENAME> -start 222 -end 44444";
 void do_help() { printf("%s\n",HELP); return; }
 void readfile(char *fname);
 
+int intcode(char *st);
+void codeint(int Ind);
+char codeintstr[30];
+
+
+#define maxsig 7000000
+
+int psig=1;
+typedef struct SIG {
+    char value[1024];
+} change_sig;
+
+change_sig sigs[maxsig];
+
 int debug = 0;
 int linenum = 0;
 int dones = 0;
@@ -45,7 +59,7 @@ int main(argc, argv)
             } else if (fname1[0]==0) strcpy(fname1,option);
         }
     }
-
+    for (int i=0;i<maxsig;i++) { sigs[i].value[0]=0;}
     readfile(fname1);
 }
 
@@ -112,14 +126,76 @@ void readfile(fname) char *fname; {
                 now = atof(&(line[1]));                
                 if (now>=start_time) {
                     printf("back to state1 lnum=%d %f\n",linenum,now);
+                    for (int jj=0; jj<maxsig;jj++) {
+                        if (sigs[jj].value[0] == 'b') {
+                            codeint(jj);
+                            fprintf(Fout,"%s %s\n",sigs[jj].value,codeintstr);
+
+                        } else if (sigs[jj].value[0] == '0') {
+                            codeint(jj);
+                            fprintf(Fout,"%c%s\n",sigs[jj].value[0],codeintstr);
+                        } else if (sigs[jj].value[0] == '1') {
+                            codeint(jj);
+                            fprintf(Fout,"%c%s\n",sigs[jj].value[0],codeintstr);
+                        }
+                    }
                     fprintf(Fout,"%s",line);
                     state = 1;
+                }
+            } else {
+                int ll; ll= strlen(line);
+                line[ll-1] = 0;
+                if ((line[0]=='0')||(line[0]=='1')) {
+                    int P = intcode(&line[1]);
+                    line[1]=0;
+                    strcpy(sigs[P].value,line);
+                } else if (line[0]=='b') {
+                    int xind;
+                    for (xind=0;line[xind]!=' ';xind++);
+                    line[xind] = 0;
+                    int P = intcode(&line[xind+1]);
+                    strcpy(sigs[P].value,line);
                 }
             }
         }
     }
 }
 
+
+
+
+
+
+int intcode(char *st) {
+    int cur,i,res=0,machpil=1,more;
+    for (i=0;(st[i]!=0)&&(st[i]!='\n');i++) {
+        cur = (st[i]-' ');  
+        if ((cur>=0)&&(cur<=94)) {
+            more = cur*machpil;
+            res += more;
+            machpil *= 94;  
+        }    
+    }    
+    return res-1;
+}
+
+
+
+void codeint(int Ind) {
+    int pp;  
+    int pos = 1; 
+    int xx = (Ind % 94); 
+    Ind = Ind / 94;  
+    codeintstr[0] = xx + '!'; 
+    codeintstr[1] = 0; 
+    while (Ind!=0) {
+        xx = (Ind % 94)-1;
+        Ind = Ind / 94;  
+        codeintstr[pos] = xx + '!'; 
+        pos++;
+    }    
+    codeintstr[pos] = 0; 
+}
 
 
 
