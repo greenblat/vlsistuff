@@ -35,8 +35,8 @@ class monitorX:
         elif self.Active[II] ==  'end':
                 Key = 'type=%d mod=%d seg=%d seq=%d'%(self.PacketType[II],self.ModuleId[II],self.Segment[II],self.Sequence[II])
                 self.SEQUENCE[II].append(Key)
-                if (self.PacketType[II]==3)and(self.COUNT[II]!=687): logs.log_error('%s lane=%s packet 3 is not length 687'%(self.Name,II))
-                elif (self.PacketType[II]==1)and(self.COUNT[II]!=239): logs.log_error('%s lane=%s packet 1 is not length 239'%(self.Name,II))
+                if (self.PacketType[II]==3)and(self.COUNT[II]!=687): logs.log_error('%s lane=%s packet 3 is not length 687 it is %d'%(self.Name,II,self.COUNT[II]))
+                elif (self.PacketType[II]==1)and(self.COUNT[II]!=239): logs.log_error('%s lane=%s packet 1 is not length 239 it is %d'%(self.Name,II,self.COUNT[II]))
                 logs.log_info('LASTS%s: lane=%d dones=%d cnt=%d type=%d mod=%d seg=%d seq=%d'%(self.Name,II,self.DONES[II],self.COUNT[II],self.PacketType[II],self.ModuleId[II],self.Segment[II],self.Sequence[II]))
                 self.DONES[II] += 1
                 self.COUNT[II] = 0
