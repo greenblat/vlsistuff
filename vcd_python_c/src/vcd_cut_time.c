@@ -128,15 +128,11 @@ void readfile(fname) char *fname; {
                     printf("back to state1 lnum=%d %f\n",linenum,now);
                     for (int jj=0; jj<maxsig;jj++) {
                         if (sigs[jj].value[0] == 'b') {
-                            codeint(jj);
-                            fprintf(Fout,"%s %s\n",sigs[jj].value,codeintstr);
-
+                            fprintf(Fout,"%s\n",sigs[jj].value);
                         } else if (sigs[jj].value[0] == '0') {
-                            codeint(jj);
-                            fprintf(Fout,"%c%s\n",sigs[jj].value[0],codeintstr);
+                            fprintf(Fout,"%s\n",sigs[jj].value);
                         } else if (sigs[jj].value[0] == '1') {
-                            codeint(jj);
-                            fprintf(Fout,"%c%s\n",sigs[jj].value[0],codeintstr);
+                            fprintf(Fout,"%s\n",sigs[jj].value);
                         }
                     }
                     fprintf(Fout,"%s",line);
@@ -147,13 +143,13 @@ void readfile(fname) char *fname; {
                 line[ll-1] = 0;
                 if ((line[0]=='0')||(line[0]=='1')) {
                     int P = intcode(&line[1]);
-                    line[1]=0;
                     strcpy(sigs[P].value,line);
                 } else if (line[0]=='b') {
                     int xind;
                     for (xind=0;line[xind]!=' ';xind++);
                     line[xind] = 0;
                     int P = intcode(&line[xind+1]);
+                    line[xind] = ' ';
                     strcpy(sigs[P].value,line);
                 }
             }
