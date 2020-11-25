@@ -219,7 +219,7 @@ $enddefinitions $end\n\
 
 
 
-FILE *inf;
+FILE *Inf;
 FILE *Frecords;
 FILE *vcdF0 = NULL;
 FILE *vcdF1 = NULL;
@@ -240,7 +240,6 @@ void record();
 void shouldbe();
 void readfile();
 void pushtok();
-void search_time();
 void popscope();
 void pushscope();
 void do_value();
@@ -399,16 +398,16 @@ void readfile(fname) char *fname; {
     char line[longestVal];
     int i;
     int guard=0;
-    inf = fopen(fname, "r");
+    Inf = fopen(fname, "r");
     Frecords = fopen("recorded.nets","w");
-    if (inf==NULL) {
+    if (Inf==NULL) {
         printf("error: cannot open input file %s\n",fname);
         exit(2);
     }
     j = (char *) 1;
     double last_time = 0.0;
-    while ((j != NULL)&&((end_time<=0.0)||(run_time<=end_time))&&(inf!=NULL)) {
-        j = fgets(line, longestVal, inf);
+    while ((j != NULL)&&((end_time<=0.0)||(run_time<=end_time))&&(Inf!=NULL)) {
+        j = fgets(line, longestVal, Inf);
         linenum++;
         guard++;
 
@@ -493,11 +492,6 @@ void pushtok(char *s,int ind) {
     if ((ind==1)&&(s[0]=='#')) {
         run_time=atof(&(s[1]));
         LASTCHANGE++;
-//        printf("DBG r=%g st=%g sea=%d\n",run_time,start_time,search);
-//        if ((run_time>=0)&&(run_time<start_time)) {
-//            search_time(); return;
-//            printf("found time %g\n",run_time);
-//        }
         if ((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)) {
             nextTriggerTime += deltaTime; 
             PyRun_SimpleString(functionTime);
@@ -652,39 +646,6 @@ char *temp;
     return qqai(temp);
 }
 
-void search_time() {
-    char *j;
-    char line[1000];
-    int nexti,sig,i;
-    j = (char *) 1;
-    printf("searching start time %g\n",start_time);
-    while (j != NULL) {
-        j = fgets(line, 4999, inf);
-        linenum++;
-//        if (!(linenum&0x3fff)) printf("%d lines t= %g %s %d\n",linenum,run_time,line,(int)j);
-        if (line[0]=='$') {
-        } else if (line[0]=='#') {
-            run_time=atof(&(line[1]));
-            printf("DBG %g %g\n",run_time,start_time);
-            if (run_time>=start_time) {
-                state=Values;
-                return;
-            }
-        }
-    }
-    printf("warning! search time finished the file. run=%g search=%g\n",run_time,start_time);
-}
-//            printf("next=%f run=%f cond=%d\n",nextTriggerTime,run_time,((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)));
-//            if ((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)) {
-//                nextTriggerTime += deltaTime; 
-//                PyRun_SimpleString(functionTime);
-//             }
-//
-//        } else {
-//            do_value(line,0);
-//        }
-//    }
-//}
 
 
 
@@ -756,11 +717,11 @@ char *allocateString(int Len) {
 void drive_value(char *Val,char *Code,int forReal) {
     int P = intcode(Code);
     if (P<0) {
-        printf("bad ERROR code='%s' got us negative P=%d\n",Code,P);
+        printf("bad ERROR line=%d code='%s' got us negative P=%d val=%s\n",linenum,Code,P,Val);
         return;
     }
     if (P>=maxsig) {
-        printf("bad ERROR code=%s P=%d > maxsig %d got us too big\n",Code,P,maxsig);
+        printf("bad ERROR line=%d code=%s P=%d > maxsig %d got us too big, val=%s\n",linenum,Code,P,maxsig,Val);
         return;
     }
 
