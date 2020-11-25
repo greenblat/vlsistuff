@@ -1,5 +1,6 @@
 # vlsistuff
 ideas and eda software for vlsi design 
+moving to python3, some directories were renamed to to have suffix "3" to signify python3 versio.  gradually removing python2 remains.
 
 #**genver** 
     macro preprossor on verilog files, to aid in writing long verilog structures.
@@ -12,9 +13,11 @@ reading vcd files and making sense out of them (in Python)
 
 #**vcd_python_c**
 reading vcd files and making sense out of them (engine in C)
+much faster
 
 #**python-verilog**
 simulation with python driving and monitoring the simulation. replacement of SV-UVM ugly sisters.
+moving to python3. still need to update directions.
 
 
 #**pybin** 
