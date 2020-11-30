@@ -167,7 +167,7 @@ char *qqia(long unsigned ind)
     }
     if (ind<minimal_valid) {
         printf("warning!! ilia qqia got ind=0x%lx which is illegal min=0x%lu \n",ind,minimal_valid);
-        debug_call(ind);
+//        debug_call(ind);
     }
 /*
     star = ( * (Anode *)ind).star;
