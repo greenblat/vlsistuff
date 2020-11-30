@@ -165,11 +165,11 @@ char *qqia(long unsigned ind)
         alphas[use_alpha][0]=0;
         return alphas[use_alpha];
     }
-    if (ind<minimal_valid) {
-        printf("warning!! ilia qqia got ind=0x%lx which is illegal min=0x%lu \n",ind,minimal_valid);
-        minimal_valid = ind;
+//    if (ind<minimal_valid) {
+//        printf("warning!! ilia qqia got ind=0x%lx which is illegal min=0x%lu \n",ind,minimal_valid);
+//        minimal_valid = ind;
 //        debug_call(ind);
-    }
+//    }
 /*
     star = ( * (Anode *)ind).star;
     if (star != 178) {
