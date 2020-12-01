@@ -16,9 +16,13 @@ class monitorX:
         self.ModuleId = [0,0,0,0,0,0]
         self.Segment = [0,0,0,0,0,0]
 
-    def run(self,II,kchar,tdata,tlast,tready):
-        self.Fout.write('%d %02x %016x %d %d   %s %d\n'%(II,kchar,tdata,tlast,tready,self.Active[II],self.COUNT[II]))
-        if ((kchar & 0xf)==0xf)and((tdata & 0xffffffff)==0x5cfd5c1c)and(self.Active[II]=='idle'):
+    def run(self,II,kchar,tdata,tlast,tready,tfirst):
+        self.Fout.write('%d %02x %016x %d %d %d   %s %d\n'%(II,kchar,tdata,tlast,tfirst,tready,self.Active[II],self.COUNT[II]))
+        
+        sof =  ((kchar & 0xf)==0xf)and((tdata & 0xffffffff)==0x5cfd5c1c)and(self.Active[II]=='idle')
+        if tfirst and not sof:
+            logs.log_error('SOF without DATA %s lane=%s  ks=%02x td=%016x act=%s'%(self.Name,II,kchar,tdata,self.Active[II]))
+        if (sof):
             self.Active[II] = 'packet'
             self.PacketType[II] = (tdata>>56)&0x7
             self.ModuleId[II]   = (tdata>>40)&0x1f
@@ -28,6 +32,12 @@ class monitorX:
         elif self.Active[II] ==  'packet':
             if ((kchar & 0xf0)==0xf0)and(((tdata>>32) & 0xffffffff)==0x5cfe5cfb):
                 self.Active[II] = 'end'
+            elif ((kchar & 0xf0)==0xf0)and(((tdata>>32) & 0xffffffff)==0xbcbcbcbc):
+                self.Active[II] = 'idle'
+                logs.log_info('BCBC ABORT %s %di dones=%d cnt=%d type=%d mod=%d seg=%d seq=%d  '%(self.Name,II,self.DONES[II],self.COUNT[II],self.PacketType[II],self.ModuleId[II],self.Segment[II],self.Sequence[II]))
+            elif ((kchar & 0xf)==0xf0)and(((tdata) & 0xffffffff)==0xbcbcbcbc):
+                logs.log_info('BCBC ABORT %s %di dones=%d cnt=%d type=%d mod=%d seg=%d seq=%d  '%(self.Name,II,self.DONES[II],self.COUNT[II],self.PacketType[II],self.ModuleId[II],self.Segment[II],self.Sequence[II]))
+                self.Active[II] = 'idle'
             elif self.COUNT[II]==1:
                 self.Sequence[II] = tdata & 0xffffffff
                 logs.log_info('START%s: lane=%d dones=%d cnt=%d type=%d mod=%d seg=%d seq=%d'%(self.Name,II,self.DONES[II],self.COUNT[II],self.PacketType[II],self.ModuleId[II],self.Segment[II],self.Sequence[II]))

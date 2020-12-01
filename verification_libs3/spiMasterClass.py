@@ -5,23 +5,49 @@ import veri
 import sys,string,os
 
 class spiMasterClass(logs.driverClass):
-    def __init__(self,Path,Monitors):
+    def __init__(self,Path,Monitors,Freq=1,Renames={}):
         logs.driverClass.__init__(self,Path,Monitors)
         self.Queue = []
         self.qu = []
+        self.Renames = Renames
         self.force('spi_ss',1)
         self.force('spi_clk',0)
-        self.Freq = 1
+        self.Freq = Freq
         self.Back = []
         self.Forw = []
         self.was = 0
         self.Expects = {}
+
+    def force(self,Sig,Val):
+        if Sig in self.Renames: Sig = self.Renames[Sig]
+        logs.driverClass.force(self,Sig,Val)
+
+    def peek(self,Sig):
+        if Sig in self.Renames: Sig = self.Renames[Sig]
+        return logs.driverClass.peek(self,Sig)
 
     def idle(self):
         if self.Queue!=[]: return False
         if self.qu!=[]: return False
         if self.waiting>0: return False
         return True
+
+    def action(self,Txt):
+        wrds = Txt.split()
+        Cmd = wrds[0]
+        if Cmd =='read':
+            if len(wrds)==2:
+                self.read(wrds[1])
+            else:
+                self.read(wrds[1],wrds[2])
+        elif Cmd =='write':
+            self.write(wrds[1],wrds[2])
+        elif Cmd =='wait':
+            self.wait(wrds[1])
+        elif Cmd =='waitNotBusy':
+            return
+        else:
+            logs.log_error('action not recogninzed "%s"'%Cmd)
 
 
     def write(self,Addr,Data):
@@ -91,7 +117,7 @@ class spiMasterClass(logs.driverClass):
         if (What[0]==0)and(self.was==1):            
             self.Back.append(str(self.peek('spi_miso')))
             self.Forw.append(str(What[1]))
-            veri.force('tb.help0',str(len(self.Back)))
+#            veri.force('tb.help0',str(len(self.Back)))
         self.was = What[0]
         self.force('spi_clk',What[0])
         self.force('spi_mosi',What[1])
@@ -103,6 +129,7 @@ class spiMasterClass(logs.driverClass):
             Part = FL[:12]
             Part.reverse()
             Addr = int(''.join(Part),2)
+            Cmd = '?'
             if FL[12]=='0': Cmd='RD'
             if FL[12]=='1': Cmd='WR'
 

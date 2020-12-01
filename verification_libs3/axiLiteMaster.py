@@ -146,7 +146,7 @@ class axiLiteMasterClass:
         if self.Queue==[]: return
         Cmd = self.Queue.pop(0)
         wrds = Cmd.split()
-        logs.log_info('qu=%d  cmd="%s" wait=%d'%(len(self.Queue),Cmd,self.waiting))
+#        logs.log_info('qu=%d  cmd="%s" wait=%d'%(len(self.Queue),Cmd,self.waiting))
         if wrds==[]:
             pass
         elif (wrds[0]=='wait'):
