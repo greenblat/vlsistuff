@@ -660,7 +660,9 @@ def report_averages():
     for _,Sig in tmp:
         Sum = Glbs.SigSum[Sig]
         Len = len(Glbs.SigDb[Sig])
-        Ave = Sum/Len
+        Ave = 0
+        if Len>0:
+            Ave = Sum/Len
         print('%s = %f  < %d  < %f'%(Sig,Glbs.SigMin[Sig],Ave,Glbs.SigMax[Sig]))
 
 def absorb_dir_times():
@@ -745,7 +747,7 @@ def absorb_lines(Fname):
                 else:
                     Glbs.SigMin[Sig]=min(Val,Glbs.SigMin[Sig])
         else:
-            print('line dropped ',len(wrds),len(Glbs.SigNames),wrds)
+            print('line dropped lenwrds=%d lensigs=%d  wrds=%s'%(len(wrds),len(Glbs.SigNames),wrds))
 
 def findSignals(Mask='*'):
     L1=[]

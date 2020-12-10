@@ -1,0 +1,17 @@
+* spice of aaa
+.subckt aaa
++    aa
++    cc
++    gnd
++    vcc
+
+xinv_0 gnd aa bb vcc inv 
+xinv_1 gnd bb cc vcc inv 
+.ends
+* xaaa 
+*+    aa
+*+    cc
+*+    gnd
+*+    vcc
+*+ aaa
+

@@ -1,0 +1,31 @@
+* wrapper of cntrl
+.model d_cntrl d_python (path="path" module="cntrl")
+.subckt cntrl a0 a1 a2 a3 clk rst_n 
+c00 a0 0 0.1pf
+c01 a1 0 0.1pf
+c02 a2 0 0.1pf
+c03 a3 0 0.1pf
+aout0 [d_a0] [a0] dtoa
+aout1 [d_a1] [a1] dtoa
+aout2 [d_a2] [a2] dtoa
+aout3 [d_a3] [a3] dtoa
+ain0 [clk] [d_clk] atod
+ain1 [rst_n] [d_rst_n] atod
+a_cntrl 
++  [d_clk d_rst_n]
++ [d_a0 d_a1 d_a2 d_a3]
++ d_cntrl
+.ends
+
+
+
+* instance
+*xcntrl
+*+ a0
+*+ a1
+*+ a2
+*+ a3
+*+ clk
+*+ rst_n
+*cntrl
+

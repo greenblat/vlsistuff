@@ -1,0 +1,29 @@
+#! /bin/csh -f
+
+set INC = /Library/Frameworks/Python.framework/Versions/3.9/include/python3.9/
+set LIB = /Library/Frameworks/Python.framework/Versions/3.9/lib
+
+/bin/rm -R obj_dir
+
+
+verilator -Wall \
+    -Wno-lint \
+    --top-module wrap_cntrl \
+    -trace \
+    -cc  --exe src/wrapper.cpp \
+    src/wrap_cntrl.v \
+\
+    -LDFLAGS  "-O3 -I$INC  -lpython3.9 -L$LIB" \
+    -CFLAGS   "-O3 -I$INC  -lpython3.9 -L$LIB" \
+    -f all.files 
+cd obj_dir
+make -f Vwrap_cntrl.mk
+# make -j -C obj_dir -f Vtb.mk Vtb
+
+
+g++  wrapper.o verilated.o verilated_vcd_c.o Vwrap_cntrl__ALL.a     -fPIC -O3 -I/Library/Frameworks/Python.framework/Versions/3.9/include/python3.9/      -lpython3.9 -L/Library/Frameworks/Python.framework/Versions/3.9/lib      -o wrap_cntrl.so -lm -lstdc++ --shared
+
+
+
+
+

@@ -1,0 +1,34 @@
+* spice of rrr
+.subckt rrr
++    aout
++    clk
++    rst
++    vcc
+
+ccap_0 aout 0 1pf
+
+mnmos_0 0 a3 wire1 0 nch W=1 L=1
+mnmos_1 0 a2 wire10 0 nch W=1 L=1
+mnmos_2 0 a1 wire20 0 nch W=1 L=1
+mnmos_3 0 a0 wire21 0 nch W=1 L=1
+
+rres_0 aout wire1 8kohm
+rres_1 vcc aout 7.5kohm
+rres_2 aout wire10 4kohm
+rres_3 aout wire21 1kohm
+rres_4 aout wire20 2kohm
+
+xcntrl_0 a0 a1 a2 a3 clk rst cntrl 
+ccap_1 wire1 0 0.1pf
+ccap_2 wire10 0 0.1pf
+ccap_3 wire20  0 0.1pf
+ccap_4 wire21 0 0.1pf
+.ends
+* xrrr 
+*+    aout
+*+    clk
+*+    0
+*+    rst
+*+    vcc
+*+ rrr
+

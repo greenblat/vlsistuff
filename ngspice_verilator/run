@@ -1,0 +1,19 @@
+#! /bin/csh -f
+
+# ~/github/vlsistuff/zDraw/pybin3/zDraw.py zdraw/rrr.zdraw -do spice -do quit
+# /bin/rm rrr.zpic
+# /bin/mv rrr.cir zdraw/
+
+# exit
+# pyver.py rtl/cntrl.v -do verilatorEmbed -do clean
+
+ngspice cir_src/top.cir
+
+waves2csv.py www.waves
+
+exit
+mWave.py out.csv
+
+
+
+

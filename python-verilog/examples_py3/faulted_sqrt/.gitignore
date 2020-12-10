@@ -1,0 +1,6 @@
+
+
+dump.vcd
+*.pyc
+__pycache__/
+

@@ -1,0 +1,23 @@
+picture cntrl
+pic_pin rst i xy=0.0,1.8
+pic_pin clk i xy=0.0,1.0
+pic_pin a[2] o xy=4.0,1.2
+pic_pin a[3] o xy=4.0,0.5
+pic_pin a[0] o xy=3.9,2.6
+pic_pin a[1] o xy=3.9,1.8
+pic_aline list=3.30,3.16,0.80,2.75
+pic_aline list=0.80,2.75,0.82,0.27
+pic_aline list=0.82,0.27,3.30,0.00
+pic_aline list=3.30,0.00,3.30,3.16
+pic_aline list=2.60,0.80,2.14,0.75
+pic_aline list=2.14,0.75,1.78,1.08
+pic_aline list=1.78,1.08,1.71,1.66
+pic_aline list=1.71,1.66,1.93,2.12
+pic_aline list=1.93,2.12,2.48,2.17
+pic_aline list=0.00,0.96,0.80,0.96
+pic_aline list=0.00,1.83,0.80,1.83
+pic_aline list=3.30,0.53,4.00,0.53
+pic_aline list=3.30,1.16,3.98,1.16
+pic_aline list=3.30,1.83,3.90,1.83
+pic_aline list=3.30,2.55,3.90,2.55
+end

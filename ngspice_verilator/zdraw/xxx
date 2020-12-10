@@ -1,0 +1,98 @@
+/Users/ilia/github/vlsistuff/zDraw/pybin3/appDir
+pygame 2.0.0 (SDL 2.0.12, python 3.9.0)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+home /Users/ilia/.pyzdraw
+here /Users/ilia/github/vlsistuff/ngspice_verilator/zdraw/.pyzdraw
+info: read_init_file set context "pics_lib" "pics"
+info: home dir .pyzdraw loaded
+info: writing spice file "rrr.cir"
+name antenna_3 a[0]
+name antenna_2 a[1]
+name antenna_0 a[2]
+name antenna_1 a[3]
+name output_0 aout
+name antenna_5 a[0]
+name antenna_6 a[1]
+name antenna_7 a[2]
+name antenna_8 a[3]
+name input_1 rst
+name input_2 clk
+name2 antenna_3 a[0]
+name2 antenna_2 a[1]
+name2 antenna_0 a[2]
+name2 antenna_1 a[3]
+name2 output_0 aout
+name2 antenna_5 a[0]
+name2 antenna_6 a[1]
+name2 antenna_7 a[2]
+name2 antenna_8 a[3]
+name2 input_1 rst
+name2 input_2 clk
+name2 gnd_0 gnd
+name2 vcc_0 vcc
+name2 gnd_1 gnd
+name2 gnd_2 gnd
+name2 gnd_3 gnd
+name2 gnd_4 gnd
+name2 wire2 gnd
+name2 wire6 vcc
+name2 wire9 gnd
+name2 wire11 aout
+name2 wire4 aout
+name2 wire5 aout
+name2 wire12 aout
+name2 wire13 gnd
+name2 wire14 a[2]
+name2 wire15 a[3]
+name2 wire22 gnd
+name2 wire23 gnd
+name2 wire24 gnd
+name2 wire25 a[0]
+name2 wire26 a[1]
+name2 wire29 a[0]
+name2 wire30 a[1]
+name2 wire31 a[2]
+name2 wire32 a[3]
+name2 wire33 rst
+name2 wire34 clk
+CONNS nmos_0 o wire1
+CONNS nmos_0 i gnd
+CONNS nmos_0 g a[3]
+
+CONNS res_0 p wire1
+CONNS res_0 n aout
+
+CONNS res_1 p aout
+CONNS res_1 n vcc
+
+CONNS res_2 n aout
+CONNS res_2 p wire10
+
+CONNS nmos_1 i gnd
+CONNS nmos_1 o wire10
+CONNS nmos_1 g a[2]
+
+CONNS cap_0 n aout
+CONNS cap_0 p gnd
+
+CONNS res_4 n aout
+CONNS res_4 p wire20
+
+CONNS res_3 n aout
+CONNS res_3 p wire21
+
+CONNS nmos_2 o wire20
+CONNS nmos_2 i gnd
+CONNS nmos_2 g a[1]
+
+CONNS nmos_3 o wire21
+CONNS nmos_3 i gnd
+CONNS nmos_3 g a[0]
+
+CONNS cntrl_0 a[0] a[0]
+CONNS cntrl_0 a[1] a[1]
+CONNS cntrl_0 a[2] a[2]
+CONNS cntrl_0 a[3] a[3]
+CONNS cntrl_0 rst rst
+CONNS cntrl_0 clk clk
+

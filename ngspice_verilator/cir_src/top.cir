@@ -1,0 +1,63 @@
+Code Model Test: d_source + d_state
+
+* (compile (concat "SPICE_SCRIPTS=. ../../../src/ngspice " buffer-file-name) t)
+* path,module,isize,osize,PARAM(rise_delay),PARAM(fall_delay));
+
+
+
+vdummy  dummy 0  DC=0
+vcc vcc 0 PWL (0 0 200n 1v ) 
+r1 vcc chrg 5000ohm
+c1 chrg 0   10pF
+Vdd Vdd 0 DC=1v
+Vgnd Vgnd 0 DC=0v
+
+vclk  vclk 0 PWL ((0 0 100n 1v 200n 0v)  r=0
+
+
+* a_python [clk d_chrg up] [o3 o4 o5] d_python
+* a_source  [enable reset up]  d_source1
+* a_osc  [enable clk] clk  d_xor1
+* abridgex [d_chrg] [x_chrg] dtoa
+* abridge1 [chrg] [d_chrg] atod
+
+.include zdraw/rrr.cir 
+.include src/cntrl.cir 
+
+xrrr aout vclk chrg Vdd rrr
+
+.model atod adc_bridge (in_low=0.5 in_high=0.51)
+.model dtoa dac_bridge (out_low=0.1 out_high=0.9)
+.model d_python d_python (path="aaa"   module="bbb")
+.model d_source1 d_source (input_file="d_state-stimulus.txt")
+.model d_xor1 d_xor (rise_delay=1ns fall_delay=3ns)
+
+.model nmos1 nmos level=8 version=3.3.0
+.model pmos1 pmos level=8 version=3.3.0
+.model nch nmos level=8 version=3.3.0
+.model pch pmos level=8 version=3.3.0
+
+
+.control
+set noaskquit
+set noacct
+tran 100ps 5000ns
+* eprint clk up reset o3 o4 o5
+eprvcd  xrrr.xcntrl_0.d_a0  xrrr.xcntrl_0.d_a1 xrrr.xcntrl_0.d_a2 xrrr.xcntrl_0.d_a3 xrrr.xcntrl_0.d_clk xrrr.xcntrl_0.d_rst_n > myfirst.vcd
+print aout chrg vcc > m.ana
+set wr_singlescale 1
+set wr_vecnames   aout chrg vcc
+wrdata www.waves aout chrg vcc vclk xrrr.a0 xrrr.a1 xrrr.a2 xrrr.a3
+* plot chrg vcc
+* gnuplot aaa chrg vcc
+quit
+.endc
+.end
+
+
+
+
+
+
+
+

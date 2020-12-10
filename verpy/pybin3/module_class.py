@@ -620,6 +620,7 @@ class module_class:
                 return
             if (Net not in self.nets)and(Net not in self.parameters)and(Net not in self.localparams):
                 self.add_sig(Net,'wire',0)
+                logs.log_info('net %s defined by connection'%Net)
             return
         if type(Net) is tuple:
             self.check_net_def(list(Net))

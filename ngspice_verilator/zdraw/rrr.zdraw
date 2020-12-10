@@ -1,0 +1,115 @@
+schematic rrr
+inst nmos nmos_0 xy=21.2,2.6 rot=r90
+inst res res_0 xy=20.2,12.6
+inst gnd gnd_0 xy=21.2,1.6
+inst res res_1 xy=25.6,19.8
+inst node node_0 xy=21.2,18.7
+inst node node_1 xy=26.6,18.7
+inst vcc vcc_0 xy=26.6,24.6
+inst node node_2 xy=14.9,18.7
+inst nmos nmos_1 xy=14.9,2.6 rot=r90
+inst gnd gnd_1 xy=14.9,1.6
+inst res res_2 xy=13.9,13.0
+inst output output_0 xy=32.1,18.7
+inst antenna antenna_0 xy=12.6,4.6 rot=r180
+inst cap cap_0 xy=25.6,9.8
+inst gnd gnd_2 xy=26.6,9.1
+inst antenna antenna_1 xy=18.7,4.6 rot=r180
+inst res res_3 xy=-0.1,12.9
+inst res res_4 xy=6.7,12.7
+inst nmos nmos_2 xy=7.7,2.4 rot=r90
+inst nmos nmos_3 xy=0.9,2.3 rot=r90
+inst gnd gnd_3 xy=7.7,1.2
+inst gnd gnd_4 xy=0.9,1.1
+inst node node_3 xy=7.7,18.7
+inst node node_4 xy=0.9,18.7
+inst antenna antenna_2 xy=5.3,4.4 rot=r180
+inst antenna antenna_3 xy=-2.4,4.3 rot=r180
+inst node node_5 xy=-21.8,-5.8
+inst node node_6 xy=41.6,27.1
+inst cntrl cntrl_0 xy=-11.9,22.6
+inst antenna antenna_5 xy=-4.8,25.2
+inst antenna antenna_6 xy=-4.8,24.4
+inst antenna antenna_7 xy=-4.8,23.8
+inst antenna antenna_8 xy=-4.8,23.1
+inst input input_1 xy=-13.3,24.7
+inst input input_2 xy=-13.4,23.2
+inst cap cap_1 xy=-4.1,12.7 rot=r270
+inst node node_7 xy=0.9,11.7
+inst gnd gnd_5 xy=-4.1,10.5
+inst cap cap_2 xy=3.0,12.4 rot=r270
+inst cap cap_3 xy=9.8,12.2 rot=r270
+inst cap cap_4 xy=16.3,11.9 rot=r270
+inst gnd gnd_6 xy=3.0,10.3
+inst gnd gnd_7 xy=9.8,9.9
+inst gnd gnd_8 xy=16.3,9.9
+inst node node_8 xy=21.1,11.0
+inst node node_9 xy=14.9,11.2
+inst node node_10 xy=7.7,11.4
+wire wire1 nmos_0.o node_8 list=21.2,6.6,21.1,11.0
+wire wire2 gnd_0 nmos_0.i list=21.2,1.6,21.2,2.6
+wire wire3 node_0 res_0.n list=21.2,18.7,21.2,16.6
+wire wire4 node_1 res_1.p list=26.6,18.7,26.6,19.8
+wire wire5 node_0 node_1 list=21.2,18.7,26.6,18.7
+wire wire6 vcc_0 res_1.n list=26.6,24.6,26.6,23.8
+wire wire7 node_2 node_0 list=14.9,18.7,21.2,18.7
+wire wire8 res_2.n node_2 list=14.9,17.0,14.9,18.7
+wire wire9 gnd_1 nmos_1.i list=14.9,1.6,14.9,2.6
+wire wire10 nmos_1.o node_9 list=14.9,6.6,14.9,11.2
+wire wire11 node_1 output_0 list=26.6,18.7,32.1,18.7
+wire wire12 node_1 cap_0.n list=26.6,18.7,26.6,13.8
+wire wire13 gnd_2 cap_0.p list=26.6,9.1,26.6,9.8
+wire wire14 antenna_0 nmos_1.g list=12.6,4.6,12.9,4.6
+wire wire15 antenna_1 nmos_0.g list=18.7,4.6,19.2,4.6
+wire wire16 node_4 node_3 list=0.9,18.7,7.7,18.7
+wire wire17 node_3 node_2 list=7.7,18.7,14.9,18.7
+wire wire18 node_3 res_4.n list=7.7,18.7,7.7,16.7
+wire wire19 node_4 res_3.n list=0.9,18.7,0.9,16.9
+wire wire20 res_4.p node_10 list=7.7,12.7,7.7,11.4
+wire wire21 res_3.p node_7 list=0.9,12.9,0.9,11.7
+wire wire22 gnd_3 gnd_3 list=7.7,1.2,7.7,1.2
+wire wire23 gnd_3 nmos_2.i list=7.7,1.2,7.7,2.4
+wire wire24 gnd_4 nmos_3.i list=0.9,1.1,0.9,2.3
+wire wire25 antenna_3 nmos_3.g list=-2.4,4.3,-1.1,4.3
+wire wire26 antenna_2 nmos_2.g list=5.3,4.4,5.7,4.4
+wire wire29 cntrl_0.a0 antenna_5 list=-8.0,25.2,-4.8,25.2
+wire wire30 antenna_6 cntrl_0.a1 list=-4.8,24.4,-8.0,24.4
+wire wire31 antenna_7 cntrl_0.a2 list=-4.8,23.8,-7.9,23.8
+wire wire32 antenna_8 cntrl_0.a3 list=-4.8,23.1,-7.9,23.1
+wire wire33 input_1 cntrl_0.rst list=-13.3,24.7,-11.9,24.4
+wire wire34 input_2 cntrl_0.clk list=-13.4,23.2,-11.9,23.6
+wire wire27 node_7 nmos_3.o list=0.9,11.7,0.9,6.3
+wire wire28 cap_1.n node_7 list=-0.1,11.7,0.9,11.7
+wire wire35 gnd_5 cap_1.p list=-4.1,10.5,-4.1,11.7
+wire wire36 gnd_6 cap_2.p list=3.0,10.3,3.0,11.4
+wire wire37 cap_3.p cap_3.p list=9.8,11.2,9.8,11.2
+wire wire38 gnd_7 cap_3.p list=9.8,9.9,9.8,11.2
+wire wire39 gnd_8 cap_4.p list=16.3,9.9,16.3,10.9
+wire wire40 node_8 res_0.p list=21.1,11.0,21.2,12.6
+wire wire41 cap_4.n node_8 list=20.3,10.9,21.1,11.0
+wire wire42 node_9 res_2.p list=14.9,11.2,14.9,13.0
+wire wire43 cap_3.n node_9 list=13.8,11.2,14.9,11.2
+wire wire44 node_10 nmos_2.o list=7.7,11.4,7.7,6.4
+wire wire45 cap_2.n node_10 list=7.0,11.4,7.7,11.4
+param antenna_3 name a0 xy=-6.0,4.3
+param antenna_2 name a1 xy=1.6,4.3
+param antenna_0 name a2 xy=8.9,4.4
+param antenna_1 name a3 xy=15.3,4.4
+param output_0 name aout xy=35.5,18.1
+param res_3 size 1kohm xy=1.9,14.5
+param res_4 size 2kohm xy=9.0,14.7
+param res_2 size 4kohm xy=15.9,14.1
+param res_0 size 8kohm xy=22.3,14.4
+param res_1 size 7.5kohm xy=27.6,21.4
+param cap_0 size 1pf xy=28.1,11.4
+param antenna_5 name a0 xy=-2.7,25.1
+param antenna_6 name a1 xy=-2.7,24.4
+param antenna_7 name a2 xy=-2.9,23.6
+param antenna_8 name a3 xy=-2.9,22.5
+param input_1 name rst xy=-17.9,24.6
+param input_2 name clk xy=-18.0,23.0
+param cap_1 size 0.1pf xy=-3.1,12.9
+param cap_2 size 0.1pf xy=4.0,12.6
+param cap_3 size 0.1pf xy=10.8,12.3
+param cap_4 size 0.1pf xy=17.3,12.1
+end

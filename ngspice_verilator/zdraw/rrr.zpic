@@ -1,0 +1,13 @@
+picture rrr
+pic_aline list=0.5,0,0.5,3.0,3.0,3.0,3.0,0,0.5,0
+pic_line list=0,1.0,0.5,0
+pic_pin clk i xy=0,1.0
+pic_text clk xy=0.6,1.0
+pic_line list=0,2.0,0.5,0
+pic_pin rst i xy=0,2.0
+pic_text rst xy=0.6,2.0
+pic_line list=3.0,1.5,0.5,0
+pic_pin aout i xy=3.5,1.5
+pic_text aout xy=3.0,1.5 align=right
+pic_text rrr xy=0.5,3.2
+end

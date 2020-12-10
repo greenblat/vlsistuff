@@ -1,0 +1,21 @@
+schematic aaa
+inst antenna antenna_0 xy=14.8,9.0 rot=r180
+inst inv inv_0 xy=17.7,7.0
+inst antenna antenna_1 xy=29.6,11.2 rot=r180
+inst antenna antenna_2 xy=7.8,8.9
+inst input input_0 xy=4.1,8.9
+inst inv inv_1 xy=31.4,9.2
+inst output output_1 xy=37.1,11.2
+inst antenna antenna_3 xy=23.0,9.0
+wire wire1 antenna_0 inv_0.i1 list=14.8,9.0,17.7,9.0
+wire wire4 input_0 antenna_2 list=4.1,8.9,7.8,8.9
+wire wire5 antenna_1 inv_1.i1 list=29.6,11.2,31.4,11.2
+wire wire6 output_1 inv_1.o1 list=37.1,11.2,35.4,11.2
+wire wire7 inv_0.o1 antenna_3 list=21.7,9.0,23.0,9.0
+param antenna_2 name aa xy=10.0,8.9
+param antenna_0 name aa xy=12.4,9.3
+param antenna_3 name bb xy=24.6,8.7
+param antenna_1 name bb xy=26.6,10.9
+param input_0 name aa xy=0.3,8.9
+param output_1 name cc xy=40.2,13.3
+end
