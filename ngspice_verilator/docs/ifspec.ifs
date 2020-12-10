@@ -1,0 +1,55 @@
+
+
+NAME_TABLE:
+
+
+C_Function_Name:       cm_d_python
+Spice_Model_Name:      d_python
+Description:           "digital python interface"
+
+PORT_TABLE:
+
+Port_Name:           in                 out 
+Description:         "input"            "output"
+Direction:           in                 out 
+Default_Type:        d                  d   
+Allowed_Types:       [d]                [d] 
+Vector:              yes                yes 
+Vector_Bounds:       -                  -   
+Null_Allowed:        no                 no  
+
+
+PARAMETER_TABLE:
+
+Parameter_Name:     module
+Description:        "module name"
+Data_Type:          string
+Default_Value:      "none"
+Limits:             -
+Vector:             no
+Vector_Bounds:      -
+Null_Allowed:       no
+
+PARAMETER_TABLE:
+
+Parameter_Name:     path
+Description:        "path to verilog module"
+Data_Type:          string
+Default_Value:      "none"
+Limits:             -
+Vector:             no
+Vector_Bounds:      -
+Null_Allowed:       no
+
+PARAMETER_TABLE:
+
+Parameter_Name:     rise_delay                  fall_delay
+Description:        "rise delay"                "fall delay"
+Data_Type:          real                        real
+Default_Value:      1.0e-9                      1.0e-9
+Limits:             [1e-12 -]                   [1e-12 -]
+Vector:              no                          no
+Vector_Bounds:       -                           -
+Null_Allowed:       yes                         yes
+
+
