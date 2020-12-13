@@ -54,6 +54,8 @@ class frameDriverClass(logs.driverClass):
             self.Active = True
         elif Cmd=='setup':
             self.setup(' '.join(wrds[1:]))
+        elif ('=' in Cmd):
+            self.action('setup '+Txt)
         else:
             logs.log_error('action %s is not recognized'%Cmd)
 

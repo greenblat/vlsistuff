@@ -42,6 +42,7 @@ class sequenceClass:
         self.Translates = Translates
         for (Nickname,Object) in AGENTS:
             self.agents[Nickname]=Object
+        self.searchPath = ['.'] 
 
     def readfile(self,Filename):
         File = open(Filename)
@@ -50,22 +51,31 @@ class sequenceClass:
         for Line in List:
             if len(Line)>1:
                 self.Sequence.append(Line[:-1])
+        self.searchPath.append(os.path.abspath(os.path.dirname(Filename)))
         self.workIncludes()
 
 
     def workIncludes(self):
-        Seq = []
         Dones = True
         while Dones:
             Dones = False
+            Seq = []
             for ind,Line in enumerate(self.Sequence):
                 wrds = Line.split()
                 if (len(wrds)==0)or(wrds[0][0] in '#/'):
                     pass
                 elif (wrds[0]=='include'):
-                    Lines = open(wrds[1]).readlines()
-                    Seq.extend(Lines) 
-                    Done = True
+                    Fname = wrds[1]
+                    Found = False
+                    for Path in self.searchPath:
+                        if (not Found) and os.path.exists('%s/%s'%(Path,Fname)):
+                            Lines = open('%s/%s'%(Path,Fname)).readlines()
+                            Seq.extend(Lines) 
+                            Found = True
+                            Dones = True
+                    if not Found:
+                        logs.log_error('include file "%s" no found in %s'%(Fname,self.searchPath))
+                        Dones = False
                 else:
                     Seq.append(Line)
             self.Sequence = Seq
