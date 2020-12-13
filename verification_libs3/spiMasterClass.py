@@ -31,6 +31,8 @@ class spiMasterClass(logs.driverClass):
         if self.qu!=[]: return False
         if self.waiting>0: return False
         return True
+    def busy(self):
+        return not self.idle()
 
     def action(self,Txt):
         wrds = Txt.split()

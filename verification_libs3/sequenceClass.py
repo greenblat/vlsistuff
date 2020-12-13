@@ -40,9 +40,17 @@ class sequenceClass:
         self.waitNotBusy = False
         self.agents={}
         self.Translates = Translates
+        self.Translates['rnd'] = self.rnd
         for (Nickname,Object) in AGENTS:
             self.agents[Nickname]=Object
         self.searchPath = ['.'] 
+
+
+    def rnd(self,Low,High):
+        L,H = self.eval(Low),self.eval(High)
+        X = random.randint(L,H)
+        return X
+
 
     def readfile(self,Filename):
         File = open(Filename)
@@ -114,6 +122,9 @@ class sequenceClass:
         if '//' in Line: Line = Line[:Line.index('//')]
         wrds = Line.split()
         if len(wrds)==0: return
+        if wrds[0] == 'seed':
+            random.seed = eval(wrds[1])
+            return
         if wrds[0] == 'wait':
             self.waiting = eval(wrds[1])
             return
@@ -137,11 +148,19 @@ class sequenceClass:
             self.force(wrds[1],self.eval(wrds[2]))
             return
         elif wrds[0] in self.agents:
-            if wrds[1]=='notbusy':
+            if wrds[1]=='waitNotBusy':
                 self.waitNotBusy = wrds[0]
                 return
             Wrds = map(str,map(self.eval,wrds[1:]))
-            self.agents[wrds[0]].action(' '.join(Wrds))
+            Wrds2 = []
+            for Wrd in Wrds:
+                if '=' in Wrd:
+                    ww = Wrd.split('=')
+                    w1 = self.eval(ww[1])
+                    Wrds2.append('%s=%s'%(ww[0],w1))
+                else:
+                    Wrds2.append(Wrd)
+            self.agents[wrds[0]].action(' '.join(Wrds2))
             return
         elif (wrds[0] == 'print'):
             Res = ''

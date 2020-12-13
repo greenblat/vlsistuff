@@ -28,7 +28,14 @@ class frameDriverClass(logs.driverClass):
         self.X = 0
         self.Y = 0
         self.Active = False
+        self.Rows = []
+        self.Mode = 'random'
         
+    def newRow(self,Row,First,Last):
+        self.Rows.append((Row,First,Last))
+        self.Mode = 'rows'
+
+
     def setup(self,Params):
         List = Params.split()
         for PrmVal in List:
@@ -46,6 +53,8 @@ class frameDriverClass(logs.driverClass):
         if Sig in self.Renames: Sig = self.Renames[Sig]
         return logs.driverClass.peek(self,Sig)
 
+    def busy(self):
+        return self.state!='idle'
 
     def action(self,Txt):
         wrds = Txt.split()
@@ -57,11 +66,29 @@ class frameDriverClass(logs.driverClass):
         elif ('=' in Cmd):
             self.action('setup '+Txt)
         else:
-            logs.log_error('action %s is not recognized'%Cmd)
+            logs.log_error('framer action %s is not recognized'%Cmd)
 
-
+    def forceData(self):
+        Wid = Params['pixelwidth'] 
+        Per = Params['pixelsperclock']
+        if Per == 1: 
+            Orig = self.CurrentRow.pop(0)
+            self.force('data',limitPixl(Orig,Wid))
+        elif Per == 2: 
+            Orig0 = limitPixel(self.CurrentRow.pop(0),Wid)
+            Orig1 = limitPixel(self.CurrentRow.pop(0),Wid)
+            Comb =  (Orig0<<Wid)|Orig1
+            self.force('data',Comb)
+        elif Per == 3: 
+            Orig0 = limitPixel(self.CurrentRow.pop(0),8)
+            Orig1 = limitPixel(self.CurrentRow.pop(0),8)
+            Orig2 = limitPixel(self.CurrentRow.pop(0),8)
+            Comb =  (Orig0<<16)|(Orig1<<8)|Orig2
+            self.force('data',Comb)
+            
 
     def run(self):
+        if not self.Active: return
         if self.waiting>0:
             self.waiting -= 1
             return
@@ -73,13 +100,35 @@ class frameDriverClass(logs.driverClass):
             self.force('vsync',1)
             self.waiting = self.Params['hgap']
             self.state = 'line'
+            if self.Mode == 'rows':
+                self.CurrentRow,First,Last = self.Rows.pop(0)
+                print('>>>>MOE ROWS')
             return
         if self.state=='line':
-            self.force('hsync',1)
-            self.force('data',self.inventData(self.X,self.Y))
-            self.X += 1
-            if self.X >= self.Params['columns']:
-                self.state = 'endofline'
+            if self.Mode == 'rows':
+                if self.CurrentRow!=[]:
+                    self.force('data',self.CurrentRow.pop(0))
+                    self.force('hsync',1)
+                if len(self.CurrentRow)==0:
+                    self.state = 'endofline'
+
+                    if self.Rows!=[]:
+                        self.CurrentRow,First,Last = self.Rows.pop(0)
+                    else:
+                        self.state = 'endOfFrame'
+                
+            else:
+                self.force('data',self.inventData(self.X,self.Y))
+                self.X += 1
+                if self.X >= self.Params['columns']:
+                    self.state = 'endofline'
+            return
+        if self.state=='endOfFrame':
+            self.force('hsync',0)
+            self.force('data',0)
+            self.waiting = self.Params['vgap']
+            self.force('vsync',0)
+            self.state='idle'
             return
         if self.state=='endofline':
             self.force('hsync',0)
@@ -116,3 +165,5 @@ class frameDriverClass(logs.driverClass):
 
 
 
+def limitPixel(Pix,Wid):
+    return (Pix & ((1<<Wid)-1))
