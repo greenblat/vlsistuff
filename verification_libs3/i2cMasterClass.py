@@ -9,7 +9,7 @@ and complex commands:   write7addr read7addr write10addr read10addr
 import logs
 import veri
 import sys,string,os
-
+TB = 'tb'
 class i2cMasterClass(logs.driverClass):
     def __init__(self,Path,Monitors,Freq=1,Renames={}):
         logs.driverClass.__init__(self,Path,Monitors)
@@ -151,7 +151,7 @@ class i2cMasterClass(logs.driverClass):
 
 
     def run(self):
-        veri.force('tb.marker',str(self.waiting))
+        veri.force(TB+'.marker',str(self.waiting))
         if self.waiting>0:
             self.waiting -= 1
             return

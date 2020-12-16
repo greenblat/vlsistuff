@@ -123,6 +123,7 @@ class sequenceClass:
             self.waitNotBusy = False
         if self.Ptr == len(self.Sequence): return
         Line = self.Sequence[self.Ptr]
+        print('line',Line)
         self.Ptr += 1
         if '#' in Line: Line = Line[:Line.index('#')]
         if '//' in Line: Line = Line[:Line.index('//')]
@@ -153,7 +154,7 @@ class sequenceClass:
         elif wrds[0] == 'label':
             self.Labels[wrds[1]] = self.Ptr-1
         elif wrds[0] == 'goto':
-            Lbl = self.wrds[1]
+            Lbl = wrds[1]
             if Lbl in self.Labels:
                 self.Ptr = self.Labels[Lbl]
                 return
@@ -172,7 +173,7 @@ class sequenceClass:
             Val = self.evalExpr(BB)
             if not Val:  return
 
-            Lbl = self.wrds[2]
+            Lbl = wrds[2]
             if Lbl in self.Labels:
                 self.Ptr = self.Labels[Lbl]
                 return
@@ -246,17 +247,41 @@ class sequenceClass:
         Defs = {}
         Wrds = Wrds1[:]
         for ind,Wrd in enumerate(Wrds):
-            if (str(Wrd)[0] in string.letters)and(Wrd not in ['or','and','not']):
-                if veri.exists(Wrd):
+            if (str(Wrd)[0] in string.ascii_letters)and(Wrd not in ['or','and','not']):
+#                print('AAAAAA',Wrd,veri.exists(Wrd),type(veri.exists(Wrd)))
+                if veri.exists(Wrd) != '0':
                     Val = logs.peek(Wrd)
                     Defs[Wrd]=Val
                     Wrds[ind]=Val
-        Txt = string.join(map(str,Wrds),' ')
+                elif Wrd in self.Translates:
+                    Defs[Wrd]=self.Translates[Wrd]
+                    Wrds[ind]=self.Translates[Wrd]
+
+        Txt = ' '.join(map(str,Wrds))
         if Txt == '': return 0
         try:
-            X = self.eval(Txt,Defs)
+            X = eval(Txt,Defs)
             return X
         except:
             logs.log_error('evaluation of %s failed'%Txt)
             return 0
+
+
+
+def makeExpr(Txt):
+    for Chr in '<>=()!+-*/':
+        Txt = Txt.replace(Chr,' %s '%Chr)
+    Txt  = Txt.replace('  ',' ')
+    for From in ['= =','> =','! =','< =']:
+        To = From.replace(' ','')
+        Txt  = Txt.replace(From,To)
+    wrds = Txt.split()
+    for ind,wrd in enumerate(wrds):
+        try:
+            val = eval(wrd)
+            wrds[ind]=val
+        except:
+            pass
+    return wrds
+
 
