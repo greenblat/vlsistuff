@@ -33,7 +33,9 @@ import random
 class sequenceClass:
     def __init__(self,Path,Monitors,SEQUENCE='',AGENTS=[],Translates={}):
         self.Path = Path
-        Monitors.append(self)
+        self.Name = 'main'
+        if Monitors!= -1:
+            Monitors.append(self)
         self.Sequence = SEQUENCE.split('\n')
         self.workIncludes()
         self.waiting = 0
@@ -47,6 +49,15 @@ class sequenceClass:
         self.searchPath = ['.'] 
         self.Ptr = 0
         self.Labels = {}
+        self.Subs = {}
+        self.Sons = []
+
+    def newone(self,Seq,Name):
+        New = sequenceClass(self.Path,-1,'',self.agents,self.Translates)
+        New.Sequence = Seq
+        New.Name = Name
+        self.Sons.append(New)
+
 
     def rnd(self,Low,High):
         L,H = self.eval(Low),self.eval(High)
@@ -66,6 +77,31 @@ class sequenceClass:
                 self.Sequence.append(Line[:-1])
         self.searchPath.append(os.path.abspath(os.path.dirname(Filename)))
         self.workIncludes()
+        self.extractSequences()
+
+
+    def extractSequences(self):
+        LL = []
+        SUB = []
+        state = 'idle'
+        for Line in self.Sequence:
+            wrds = Line.split()
+            if wrds==[]:
+                pass
+            elif (state=='idle'):
+                if wrds[0]=='sequence':
+                    SEQ = wrds[1]
+                    state='sub'
+                else:
+                    LL.append(Line)
+            elif (state=='sub'):
+                if wrds[0]=='end':
+                    self.Subs[SEQ] = SUB
+                    SUB = []
+                    state = 'idle'
+                else:
+                    SUB.append(Line)
+
 
 
     def workIncludes(self):
@@ -97,6 +133,11 @@ class sequenceClass:
     def force(self,Sig,Val):
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
+    def exists(self,Sig):
+        Full = '%s.%s'%(self.Path,Sig)
+        if veri.exists(Full)=='0': return False
+        return True
+
     def peek(self,Sig):
         Full = '%s.%s'%(self.Path,Sig)
         if veri.exists(Full)=='0': return False
@@ -115,6 +156,8 @@ class sequenceClass:
 
 
     def run(self):
+        for Son in self.Sons:
+            Son.run()
         if self.waiting>0:
             self.waiting -= 1
             return
@@ -123,7 +166,6 @@ class sequenceClass:
             self.waitNotBusy = False
         if self.Ptr == len(self.Sequence): return
         Line = self.Sequence[self.Ptr]
-        print('line',Line)
         self.Ptr += 1
         if '#' in Line: Line = Line[:Line.index('#')]
         if '//' in Line: Line = Line[:Line.index('//')]
@@ -153,6 +195,11 @@ class sequenceClass:
             return
         elif wrds[0] == 'label':
             self.Labels[wrds[1]] = self.Ptr-1
+        elif wrds[0] in ['spawn','fork']:
+            Seq = self.Subs[wrds[1]]
+            Name = wrds[2]
+            self.newone(Seq,Name)
+            logs.log_info('spawning %s %s'%(wrds[1],Name))
         elif wrds[0] == 'goto':
             Lbl = wrds[1]
             if Lbl in self.Labels:
@@ -189,7 +236,9 @@ class sequenceClass:
             sys.exit()
 
         elif (wrds[0] == 'force'):
-            self.force(wrds[1],self.eval(wrds[2]))
+            BB = makeExpr(wrds[2])
+            Val = self.evalExpr(BB)
+            self.force(wrds[1],Val)
             return
         elif (wrds[0] == 'waitUntil'):
             if self.Guardian>0:
@@ -249,8 +298,8 @@ class sequenceClass:
         for ind,Wrd in enumerate(Wrds):
             if (str(Wrd)[0] in string.ascii_letters)and(Wrd not in ['or','and','not']):
 #                print('AAAAAA',Wrd,veri.exists(Wrd),type(veri.exists(Wrd)))
-                if veri.exists(Wrd) != '0':
-                    Val = logs.peek(Wrd)
+                if self.exists(Wrd):
+                    Val = self.peek(Wrd)
                     Defs[Wrd]=Val
                     Wrds[ind]=Val
                 elif Wrd in self.Translates:
