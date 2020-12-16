@@ -576,6 +576,8 @@ def fixedp(Int,Shift):
     Res = 1.0 * Int /X
     return Res
 
+def bin2ascii(Bin):
+    return bin2str(Bin)
 def bin2string(Bin):
     return bin2str(Bin)
 

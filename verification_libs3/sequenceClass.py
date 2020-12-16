@@ -37,6 +37,7 @@ class sequenceClass:
         self.Sequence = SEQUENCE.split('\n')
         self.workIncludes()
         self.waiting = 0
+        self.Guardian = 0   # against wait too long.
         self.waitNotBusy = False
         self.agents={}
         self.Translates = Translates
@@ -44,7 +45,8 @@ class sequenceClass:
         for (Nickname,Object) in AGENTS:
             self.agents[Nickname]=Object
         self.searchPath = ['.'] 
-
+        self.Ptr = 0
+        self.Labels = {}
 
     def rnd(self,Low,High):
         L,H = self.eval(Low),self.eval(High)
@@ -53,6 +55,9 @@ class sequenceClass:
 
 
     def readfile(self,Filename):
+        if not os.path.exists(Filename):
+            logs.log_error('failed to read "%s" file.'%(Filename))
+            sys.exit()
         File = open(Filename)
         List = File.readlines()
         File.close()
@@ -116,8 +121,9 @@ class sequenceClass:
         if self.waitNotBusy:
             if self.agents[self.waitNotBusy].busy(): return
             self.waitNotBusy = False
-        if self.Sequence==[]: return
-        Line = self.Sequence.pop(0)
+        if self.Ptr == len(self.Sequence): return
+        Line = self.Sequence[self.Ptr]
+        self.Ptr += 1
         if '#' in Line: Line = Line[:Line.index('#')]
         if '//' in Line: Line = Line[:Line.index('//')]
         wrds = Line.split()
@@ -144,9 +150,71 @@ class sequenceClass:
         if (wrds[0] == 'marker'):
             veri.force('tb.marker',wrds[1])
             return
+        elif wrds[0] == 'label':
+            self.Labels[wrds[1]] = self.Ptr-1
+        elif wrds[0] == 'goto':
+            Lbl = self.wrds[1]
+            if Lbl in self.Labels:
+                self.Ptr = self.Labels[Lbl]
+                return
+            for ind,Line in enumerate(self.Sequence):
+                ww = Line.split()
+                if (ww[0]=='label'):
+                    if ww[1] not in self.Labels:
+                        self.Labels[ww[1]] = ind
+            if Lbl in self.Labels:
+                self.Ptr = self.Labels[Lbl]
+                return
+            logs.log_error('didnt find label "%s"'%Lbl)
+            sys.exit()
+        elif wrds[0] == 'if':
+            BB = makeExpr(wrds[1])
+            Val = self.evalExpr(BB)
+            if not Val:  return
+
+            Lbl = self.wrds[2]
+            if Lbl in self.Labels:
+                self.Ptr = self.Labels[Lbl]
+                return
+            for ind,Line in enumerate(self.Sequence):
+                ww = Line.split()
+                if (ww[0]=='label'):
+                    if ww[1] not in self.Labels:
+                        self.Labels[ww[1]] = ind
+            if Lbl in self.Labels:
+                self.Ptr = self.Labels[Lbl]
+                return
+            logs.log_error('didnt find label "%s"'%Lbl)
+            sys.exit()
+
         elif (wrds[0] == 'force'):
             self.force(wrds[1],self.eval(wrds[2]))
             return
+        elif (wrds[0] == 'waitUntil'):
+            if self.Guardian>0:
+                self.Guardian -= 1
+                if self.Guardian==0:
+                    logs.log_error('Guardian expired')
+                    logs.finish('Guardian expired %s'%(self.Fname))
+                    veri.finish()
+                    sys.exit()
+            if (len(wrds)==3)and(self.Guardian==0):
+                Guard = self.eval(wrds[2])
+                self.Guardian=Guard
+
+                    
+            BB = makeExpr(wrds[1])
+            Val = self.evalExpr(BB)
+            if not Val: 
+                self.Ptr -= 1
+                return
+            logs.log_info('>>>>> finished waitUntil %s (left %d)'%(str(BB),self.Guardian))
+            self.Guardian = 0
+            return
+
+
+
+
         elif wrds[0] in self.agents:
             if wrds[1]=='waitNotBusy':
                 self.waitNotBusy = wrds[0]
@@ -174,4 +242,21 @@ class sequenceClass:
         else:
             logs.log_error('what!! sequence failed %s on %s agents=%s'%(wrds[0],Line,list(self.agents.keys())))
 
+    def evalExpr(self,Wrds1):
+        Defs = {}
+        Wrds = Wrds1[:]
+        for ind,Wrd in enumerate(Wrds):
+            if (str(Wrd)[0] in string.letters)and(Wrd not in ['or','and','not']):
+                if veri.exists(Wrd):
+                    Val = logs.peek(Wrd)
+                    Defs[Wrd]=Val
+                    Wrds[ind]=Val
+        Txt = string.join(map(str,Wrds),' ')
+        if Txt == '': return 0
+        try:
+            X = self.eval(Txt,Defs)
+            return X
+        except:
+            logs.log_error('evaluation of %s failed'%Txt)
+            return 0
 

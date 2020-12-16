@@ -13,9 +13,10 @@ import logs
 import veri
 
 class axiMasterClass:
-    def __init__(self,Path,Monitors):
+    def __init__(self,Path,Monitors,Name='?'):
         self.Path = Path
         Monitors.append(self)
+        self.Name=Name
         self.Queue=[]
         self.arQueue=[]
         self.awQueue=[]
@@ -32,6 +33,9 @@ class axiMasterClass:
         self.renames={}
         self.prefix=''
         self.suffix=''
+        self.AWVALID = False
+        self.ARVALID = False
+        self.WVALID = False
 
     def rename(self,Sig):
         if Sig in self.renames:
@@ -53,8 +57,29 @@ class axiMasterClass:
         Sig = self.rename(Sig)
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
+    def action(self,Txt):
+        print('ACT',Txt)
+        wrds = Txt.split()
+        if wrds[0]=='write':
+            self.makeWrite(1,1,eval(wrds[1]),2,[eval(wrds[2])])
+        elif wrds[0]=='read':
+            self.makeRead(1,1,eval(wrds[1]),2)
+        else:
+            logs.log_error('action %s axiMater unrecognized %s'%(self.Name,Txt))
+            
+
+    def busy(self):
+        if self.Queue!=[]: return True
+        if self.arQueue!=[]: return True
+        if self.awQueue!=[]: return True
+        if self.wQueue!=[]: return True
+        return False
+
     def makeRead(self,Burst,Len,Address,Size=4,Rid='none'):
-        if Rid!='none': self.Rid = Rid
+        if Rid!='none': 
+            self.Rid = Rid
+        else: 
+            self.Rid = 1
         self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         if self.readAction:
             self.READS.append((Len,Address,self.Rid))
@@ -87,8 +112,9 @@ class axiMasterClass:
     def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
-        logs.log_info('makeWrite >>>>> %x size=%s'%(Address,Size))
         self.Rid += 1
+        if Len<=0:
+            logs.log_warning('axiMaster %s got len=%d for write'%(self.Name,Len))
         for ii in range(Len):
             if len(Wdatas)==0:
                 Wdata = '0x%08x%08x%08x%08x'%(self.Rid+0x1000*ii,0x100+self.Rid+0x1000*ii,0x200+self.Rid+0x1000*ii,0x300+self.Rid+0x1000*ii)
@@ -104,6 +130,7 @@ class axiMasterClass:
             self.Queue.append(('w','force wvalid=1 wdata=%s wstrb=0x%x wlast=%d'%(Wdata,Wstrb,Wlast)))
 
         self.Queue.append(('w','force wvalid=0 wdata=0 wstrb=0 wlast=0'))
+        logs.log_info('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)))
             
     def wait(self,Many):
         self.Queue.append(('this','wait %d'%Many))
@@ -170,6 +197,9 @@ class axiMasterClass:
 
 
     def runQueue(self):
+#        print('\n\n\n\ 0 RUNQ',self.Queue)
+#        print('RUNQ',self.awQueue)
+#        print('RUNQ',self.wQueue)
         while self.Queue!=[]:
             Dst,Cmd = self.Queue.pop(0)
             if Dst=='aw':
@@ -206,7 +236,7 @@ class axiMasterClass:
         else:
             self.force('bready','0')
     def runW(self):
-        if self.peek('wready')==0: return
+        if (self.WVALID) and (self.peek('wready')==0): return
         if self.wQueue==[]: 
             self.force('wvalid',0)
             return
@@ -216,6 +246,7 @@ class axiMasterClass:
             pass
         elif (wrds[0]=='force'):
             self.forces(wrds[1:])
+        self.WVALID = ('wvalid=1' in Cmd)
 
     def forces(self,wrds):
         for wrd in wrds:
@@ -225,19 +256,22 @@ class axiMasterClass:
             self.force(Var,Val)
 
     def runAw(self):
-        if self.peek('awready')==0: return
+        if (self.AWVALID) and (self.peek('awready')==0): return
         if self.awQueue==[]: 
             self.force('awvalid',0)
             return
         Cmd = self.awQueue.pop(0)
         wrds = Cmd.split()
+        print('runAw',wrds)
         if wrds==[]:
             pass
         elif (wrds[0]=='force'):
             self.forces(wrds[1:])
 
+        self.AWVALID = ('awvalid=1' in Cmd)
+
     def runAr(self):
-        if self.peek('arready')==0: return
+        if (self.ARVALID) and (self.peek('arready')==0): return
         if self.arQueue==[]: 
             self.force('arvalid',0)
             return
@@ -247,5 +281,6 @@ class axiMasterClass:
             pass
         elif (wrds[0]=='force'):
             self.forces(wrds[1:])
+        self.ARVALID = ('arvalid=1' in Cmd)
 
 
