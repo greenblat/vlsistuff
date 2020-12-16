@@ -97,12 +97,13 @@ class frameDriverClass(logs.driverClass):
             self.state = 'start'
             return
         if self.state=='start':
+            if self.Mode == 'rows':
+                if self.Rows==[]: return
+                self.CurrentRow,First,Last = self.Rows.pop(0)
+                print('>>>>MORE ROWS')
             self.force('vsync',1)
             self.waiting = self.Params['hgap']
             self.state = 'line'
-            if self.Mode == 'rows':
-                self.CurrentRow,First,Last = self.Rows.pop(0)
-                print('>>>>MOE ROWS')
             return
         if self.state=='line':
             if self.Mode == 'rows':
@@ -167,3 +168,4 @@ class frameDriverClass(logs.driverClass):
 
 def limitPixel(Pix,Wid):
     return (Pix & ((1<<Wid)-1))
+

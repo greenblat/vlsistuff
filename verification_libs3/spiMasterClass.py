@@ -3,7 +3,7 @@
 import logs
 import veri
 import sys,string,os
-
+TB = 'tb'
 class spiMasterClass(logs.driverClass):
     def __init__(self,Path,Monitors,Freq=1,Renames={}):
         logs.driverClass.__init__(self,Path,Monitors)
@@ -37,6 +37,15 @@ class spiMasterClass(logs.driverClass):
     def action(self,Txt):
         wrds = Txt.split()
         Cmd = wrds[0]
+        if Cmd =='send':
+            Str = ''
+            for Wrd in wrds[1:]:
+                Abin = logs.binx(Wrd,8)
+                Str += Abin
+            logs.log_info('SEND SPI %d %s'%(len(Str),Str))
+            self.send(Str,1)
+            return
+                
         if Cmd =='read':
             if len(wrds)==2:
                 self.read(wrds[1])
@@ -49,7 +58,7 @@ class spiMasterClass(logs.driverClass):
         elif Cmd =='waitNotBusy':
             return
         else:
-            logs.log_error('action not recogninzed "%s"'%Cmd)
+            logs.log_error('spiMaster action not recogninzed "%s"'%Txt)
 
 
     def write(self,Addr,Data):
@@ -119,7 +128,7 @@ class spiMasterClass(logs.driverClass):
         if (What[0]==0)and(self.was==1):            
             self.Back.append(str(self.peek('spi_miso')))
             self.Forw.append(str(What[1]))
-#            veri.force('tb.help0',str(len(self.Back)))
+#            veri.force(TB+'.help0',str(len(self.Back)))
         self.was = What[0]
         self.force('spi_clk',What[0])
         self.force('spi_mosi',What[1])
@@ -167,3 +176,4 @@ def reverseBin(Txt):
     List.reverse()
     Str = ''.join(List)
     return Str
+

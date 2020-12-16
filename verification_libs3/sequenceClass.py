@@ -129,10 +129,10 @@ class sequenceClass:
         wrds = Line.split()
         if len(wrds)==0: return
         if wrds[0] == 'seed':
-            random.seed = eval(wrds[1])
+            random.seed = self.eval(wrds[1])
             return
         if wrds[0] == 'wait':
-            self.waiting = eval(wrds[1])
+            self.waiting = self.eval(wrds[1])
             return
         if wrds[0] == 'exec':
             Cmd = ' '.join(wrds[1:])
