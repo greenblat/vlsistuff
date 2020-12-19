@@ -154,45 +154,54 @@ class sequenceClass:
         except:
             return Txt
 
+    def runSons(self):
+        if self.Sons==[]: return
+        ind = 0
+        while ind <len(self.Sons):
+            Son = self.Sons[ind]
+            Busy = Son.run()
+            if not Busy:
+                self.Sons.pop(ind)
+            else:
+                ind += 1
 
     def run(self):
-        for Son in self.Sons:
-            Son.run()
+        self.runSons()
         if self.waiting>0:
             self.waiting -= 1
-            return
+            return True
         if self.waitNotBusy:
-            if self.agents[self.waitNotBusy].busy(): return
+            if self.agents[self.waitNotBusy].busy(): return True
             self.waitNotBusy = False
-        if self.Ptr == len(self.Sequence): return
+        if self.Ptr == len(self.Sequence): return False
         Line = self.Sequence[self.Ptr]
         self.Ptr += 1
         if '#' in Line: Line = Line[:Line.index('#')]
         if '//' in Line: Line = Line[:Line.index('//')]
         wrds = Line.split()
-        if len(wrds)==0: return
+        if len(wrds)==0: return True
         if wrds[0] == 'seed':
             random.seed = self.eval(wrds[1])
-            return
+            return True
         if wrds[0] == 'wait':
             self.waiting = self.eval(wrds[1])
-            return
+            return True
         if wrds[0] == 'exec':
             Cmd = ' '.join(wrds[1:])
             exec(Cmd)
-            return
+            return True
         if wrds[0] == 'define':
             Var = wrds[1]
             Val = self.eval(wrds[2])
             self.Translates[Var]=Val
-            return
+            return True
         if wrds[0] == 'finish':
             logs.log_info('finishing on sequence')
             veri.finish()
             sys.exit()
         if (wrds[0] == 'marker'):
             veri.force('tb.marker',wrds[1])
-            return
+            return True
         elif wrds[0] == 'label':
             self.Labels[wrds[1]] = self.Ptr-1
         elif wrds[0] in ['spawn','fork']:
@@ -239,7 +248,7 @@ class sequenceClass:
             BB = makeExpr(wrds[2])
             Val = self.evalExpr(BB)
             self.force(wrds[1],Val)
-            return
+            return True
         elif (wrds[0] == 'waitUntil'):
             if self.Guardian>0:
                 self.Guardian -= 1
@@ -257,10 +266,10 @@ class sequenceClass:
             Val = self.evalExpr(BB)
             if not Val: 
                 self.Ptr -= 1
-                return
+                return True
             logs.log_info('>>>>> finished waitUntil %s (left %d)'%(str(BB),self.Guardian))
             self.Guardian = 0
-            return
+            return True
 
 
 
@@ -268,7 +277,7 @@ class sequenceClass:
         elif wrds[0] in self.agents:
             if wrds[1]=='waitNotBusy':
                 self.waitNotBusy = wrds[0]
-                return
+                return True
             Wrds = map(str,map(self.eval,wrds[1:]))
             Wrds2 = []
             for Wrd in Wrds:
@@ -279,7 +288,7 @@ class sequenceClass:
                 else:
                     Wrds2.append(Wrd)
             self.agents[wrds[0]].action(' '.join(Wrds2))
-            return
+            return True
         elif (wrds[0] == 'print'):
             Res = ''
             for Wrd in wrds[1:]:
@@ -288,9 +297,10 @@ class sequenceClass:
                 else:
                     Res += ' '+Wrd
             logs.log_info('PRINT %s'%Res)
-            return
+            return True
         else:
             logs.log_error('what!! sequence failed %s on %s agents=%s'%(wrds[0],Line,list(self.agents.keys())))
+            return False
 
     def evalExpr(self,Wrds1):
         Defs = {}

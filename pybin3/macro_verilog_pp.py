@@ -242,6 +242,8 @@ def compute_constants(line):
 
 def use_defines(line,Def2):
     dones=True
+    if "`celldefine" in line: return ''
+    if "`endcelldefine" in line: return ''
     while ('`' in line)and(dones):
         dones =False
         i = 0
