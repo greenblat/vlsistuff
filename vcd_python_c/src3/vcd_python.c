@@ -378,7 +378,12 @@ int main(argc, argv)
 }
 
 
+int python_started = 0;
 void conclusions() {
+    if (!python_started) {
+        printf("it appears that Your vcd file has no data\n");
+        return;
+    }
     PyRun_SimpleString("conclusions()");
 
 }
@@ -430,11 +435,12 @@ void readfile(fname) char *fname; {
 
         i=sscanf(line,"%s %s %s %s %s %s %s",s1,s2,s3,s4,s5,s6,s7);
         int Len = strlen(line);
+//        printf("len %d i=%d\n",Len,i);
         if (Len>(longestVal-1000)) {
             printf("wow! vcd line is way too long (%d) we support up to %d\n\n",Len,longestVal-1000);
             exit(1);
         }
-//        printf("line %d len=%d  i=%d %d %d\n",linenum,strlen(line),i,strlen(s1),strlen(s2));
+//        printf("line %d len=%d  i=%d %d %d %s %s\n",linenum,strlen(line),i,strlen(s1),strlen(s2),s1,s2);
         switch (i) {
         case 7:
             pushtok(s1,1);
@@ -1116,6 +1122,7 @@ void start_python() {
     if (!globals) exit(2);
     PyDict_SetItemString(globals, "__builtins__", PyEval_GetBuiltins());
     locals = Py_BuildValue("{}");
+    python_started = 1;
 }
 
 char *int2bin(int AA,int Wid,char *tmp) {
