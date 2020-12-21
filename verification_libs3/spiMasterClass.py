@@ -100,11 +100,12 @@ class spiMasterClass(logs.driverClass):
         self.Queue.append((0,0,1))
         self.Queue.append(('wait',self.Freq))
         self.Queue.append((0,0,0))
+        self.Queue.append(('wait',self.Freq))
         for Chr in LL:
 #                             clk,chr,ss
-            self.Queue.append((1,Chr,0))
-            self.Queue.append(('wait',self.Freq))
             self.Queue.append((0,Chr,0))
+            self.Queue.append(('wait',self.Freq))
+            self.Queue.append((1,Chr,0))
             self.Queue.append(('wait',self.Freq))
         self.Queue.append((0,0,0))
         self.Queue.append(('wait',self.Freq))

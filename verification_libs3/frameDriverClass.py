@@ -30,6 +30,7 @@ class frameDriverClass(logs.driverClass):
         self.Active = False
         self.Rows = []
         self.Mode = 'random'
+        self.state = 'idle'
         
     def newRow(self,Row,First,Last):
         self.Rows.append((Row,First,Last))
@@ -54,7 +55,7 @@ class frameDriverClass(logs.driverClass):
         return logs.driverClass.peek(self,Sig)
 
     def busy(self):
-        return self.state!='idle'
+        return (self.state!='idle')or(self.waiting>0)
 
     def action(self,Txt):
         wrds = Txt.split()
@@ -93,12 +94,15 @@ class frameDriverClass(logs.driverClass):
             self.waiting -= 1
             return
         if self.state=='idle':
+            if self.Rows==[]:  return
             self.waiting = self.Params['vgap']
             self.state = 'start'
             return
         if self.state=='start':
             if self.Mode == 'rows':
-                if self.Rows==[]: return
+                if self.Rows==[]: 
+                    self.state = 'idle'
+                    return
                 self.CurrentRow,First,Last = self.Rows.pop(0)
                 print('>>>>MORE ROWS')
             self.force('vsync',1)
