@@ -277,7 +277,7 @@ class sequenceClass:
             if wrds[1]=='waitNotBusy':
                 self.waitNotBusy = wrds[0]
                 return True
-            Wrds = map(str,map(self.eval,wrds[1:]))
+            Wrds = list(map(str,map(self.eval,wrds[1:])))
             Wrds2 = []
             for Wrd in Wrds:
                 if '=' in Wrd:
