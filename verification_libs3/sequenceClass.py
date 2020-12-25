@@ -196,8 +196,7 @@ class sequenceClass:
             self.Translates[Var]=Val
             return True
         if wrds[0] == 'finish':
-            logs.log_info('finishing on sequence')
-            veri.finish()
+            logs.finish('finishing on sequence')
             sys.exit()
         if (wrds[0] == 'marker'):
             veri.force('tb.marker',wrds[1])

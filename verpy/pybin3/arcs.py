@@ -52,8 +52,8 @@ def adds(Dst,Src,Nons):
     for In in SetS:
         if In not in ARCSFW:
             ARCSFW[In] = []
-            for Out in SetD:
-                if Out not in ARCSFW[In]: ARCSFW[In].append(Out)
+        for Out in SetD:
+            if Out not in ARCSFW[In]: ARCSFW[In].append(Out)
 
 def cleanNons(Lst,Nons):
     for Non in Nons:

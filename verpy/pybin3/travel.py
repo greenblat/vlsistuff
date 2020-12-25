@@ -27,17 +27,16 @@ def travel(Hld,Net,Sofar):
     if len(Sofar)>1:
         Head = Sofar[0] 
         if Head in Sofar[1:]:
-#            logs.log_info('LOOP %s %s %s'%(Hld.Name,Net,Sofar))
             report('LOOP',Hld.Name,Net,Sofar)
             return
 
     if (Net in Hld.TERMS)and(len(Sofar)>1):
-#        logs.log_info('TOTERM %s.%s  %s\n\n\n'%(Hld.Name,Net,Sofar))
         report('TOTERM',Hld.Name,Net,Sofar)
         return
 
     if Net in  Hld.ARCSFW:
         Fws = Hld.ARCSFW[Net]
+        print('FWS',Net,Fws)
         for Fw in Fws:
             travel(Hld,Fw,[('fw',Hld.Name,Fw)]+Sofar)
     if Net in Hld.OUTPUTS:

@@ -57,8 +57,10 @@ class i2cMasterClass(logs.driverClass):
     def start(self):
         self.bitqueue.append((1,1,1))
         self.bitqueue.append((1,0,1))
+        self.bitqueue.append((0,0,1))
 
     def stop(self):
+        self.bitqueue.append((0,0,1))
         self.bitqueue.append((1,0,1))
         self.bitqueue.append((1,1,1))
         logs.log_info('RX %s'%str(self.RX))
@@ -93,16 +95,16 @@ class i2cMasterClass(logs.driverClass):
         self.writeBytes(Data,Bytes)
 
     def read7addr(self,Addr,Bytes=2):
-        self.send7bitaddr(Addr,0)
+        self.send7bitaddr(Addr,1)
         self.readBytes(Bytes)
 
     def write10addr(self,Addr,Bytes=2):
-        self.send10bitaddr(Addr,0)
+        self.send10bitaddr(Addr,1)
         self.readBytes(Bytes)
 
     def writeBytes(self,Data,Bytes):
         Dbin = logs.binx(Data,Bytes*8)
-        Dbin = reverseBin(Dbin)
+#        Dbin = reverseBin(Dbin)
         
         for Byte in range(Bytes-1):
             for II in range(8): self.data(Dbin[Byte*8+II])
@@ -129,10 +131,8 @@ class i2cMasterClass(logs.driverClass):
 #        Abin = reverseBin(Abin)
         self.start()
         for II in range(7): self.data(Abin[II])
-        print('abin',Abin)
         self.data(Rd)
         self.waitack()
-        print('>>bitqueue>>',self.bitqueue)
 
     def send10bitaddr(self,Addr,Rd):
         Abin = logs.binx(Addr,10)
@@ -176,7 +176,6 @@ class i2cMasterClass(logs.driverClass):
             self.force('scl',What[0])
             if What[1] in [0,1,'0','1']:
                 self.force('sda',What[1])
-                print('%d force sda %s wait=%s clk=%s    %s'%(veri.stime(),What[1],self.waiting,What[0],self.bitqueue[:10]))
             if What[1] == 'L' :
                 self.force('sda',1)
                 self.check(0)
