@@ -60,11 +60,10 @@ class i2cMasterClass(logs.driverClass):
         self.bitqueue.append((0,0,1))
 
     def stop(self):
+        self.bitqueue.append(('RX',0,0))
         self.bitqueue.append((0,0,1))
         self.bitqueue.append((1,0,1))
         self.bitqueue.append((1,1,1))
-        logs.log_info('RX %s'%str(self.RX))
-        self.RX = []
 
     def data(self,Data):
         if type(Data) is list:
@@ -170,6 +169,10 @@ class i2cMasterClass(logs.driverClass):
         if What[0]=='wait': 
             self.waiting = What[1]
             return
+        if What[0]=='RX': 
+            logs.log_info('RX %s'%str(self.RX))
+            self.RX=[]
+            return
 
         if What[0] in [0,1]:
             self.waiting = int(self.Freq * What[2])
@@ -185,12 +188,19 @@ class i2cMasterClass(logs.driverClass):
             if What[1] == 'Q' :
                 self.force('sda',1)
                 if What[0]==1:
-                    self.RX.append(self.peek('sda'))
+                    self.RX.append(logs.driverClass.peek(self,'sda'))
             return
 
         logs.log_error('WHAT I2C got "%s"'%str(What))
 
+    def finish(self):
+        self.bitqueue.append(('finish',0,0))
 
+    def write(self,Slave,Addr,Data):
+       self.write7addr(Slave,(Addr<<32)+Data,6)
+    def read(self,Slave,Addr,Data=0):
+       self.write7addr(Slave,Addr,2)
+       self.read7addr(Slave,4)
 
 def reverseBin(Txt):
     List = list(Txt)

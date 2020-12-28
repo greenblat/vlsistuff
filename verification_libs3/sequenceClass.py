@@ -29,6 +29,7 @@ import random
 
 # def initialSequence(Fname):
 
+TB = 'tb'
 
 class sequenceClass:
     def __init__(self,Path,Monitors,SEQUENCE='',AGENTS=[],Translates={}):
@@ -199,7 +200,7 @@ class sequenceClass:
             logs.finish('finishing on sequence')
             sys.exit()
         if (wrds[0] == 'marker'):
-            veri.force('tb.marker',wrds[1])
+            veri.force('%s.marker'%TB,wrds[1])
             return True
         elif wrds[0] == 'label':
             self.Labels[wrds[1]] = self.Ptr-1
