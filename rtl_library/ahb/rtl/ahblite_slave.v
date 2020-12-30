@@ -60,7 +60,7 @@ always @(posedge hclk or negedge hresetn) begin
             writing0 <= hwrite;
             valid0 <= 1;
             wsize0 <= hsize;
-        end else if (!hsel) begin
+        end else if (!relevant_hsel) begin
             addr0 <= 0;
             writing0 <= 0;
             valid0 <= 0;
