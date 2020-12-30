@@ -6,7 +6,8 @@ axi.makeRead(1,16,0x100,4)
 axi.makeWrite(1,16,0x100,4)
 axi.wait(100)
 '''
-
+# def makeRead(self,Burst,Len,Address,Size=4,Rid='none'):
+# def makeWriteWstrb(self,Burst,Len,Address,Size=4,Wstrb='auto',Wdatas=[]):
 
 import os,sys,string,types
 import logs

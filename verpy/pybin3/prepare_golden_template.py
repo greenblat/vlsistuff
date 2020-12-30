@@ -27,7 +27,7 @@ def help_main(Env):
         if 'input' in Dir:
             Str += '        %s = self.peek("%s")\n'%(Net,Net)
     
-    Str += '     def outgoing(self):\n        if (self.Observing):\n'
+    Str += '    def outgoing(self):\n        if (self.Observing):\n'
     for Net in Mod.nets:
         Dir,_ = Mod.nets[Net]
         if 'output' in Dir:
