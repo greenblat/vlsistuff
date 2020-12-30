@@ -99,6 +99,7 @@ assign pstrb =
 
 assign paddr = addr0;
 assign pwdata = hwdata;
+assign hrdata = prdata;
 endmodule
 
 
