@@ -175,7 +175,7 @@ class module_class:
                 Net = Net[:Net.index('[')]
             if (not myExtras(Net))and(Net not in self.nets)and(Net not in self.parameters)and(Net[0] not in '0123456789')and(Net not in self.localparams)and(Net not in self.genvars):
                 logs.log_err('net %s used before defined (%s)'%(Net,Net in self.nets))
-                logs.log_info('defined localparams %s %s '%(str(self.localparams),self.parameters))
+                logs.log_info('defined localparams %s %s '%(list(self.localparams.keys())[:10],list(self.parameters.keys())[:10]))
                 traceback.print_stack(None,None,logs.Flogs[0])
 
     def duplicate_inst(self,Inst,Inst2):

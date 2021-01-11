@@ -716,6 +716,11 @@ def get_statement(Item):
     if (type(List) is list)and(len(List)==1):
         return get_statement(List[0])
 
+    Vars = matches.matches(List,'!IntDir !Tokens_list  = !Expr ;')
+    if Vars:
+        logs.log_err('needs care. wire in genvar with assign')
+        return
+
 
     logs.log_err(' db0: untreated statement len=%d list="%s"'%(len(List),List),True)
     return []
@@ -891,12 +896,18 @@ def get_dir(Item):
 
 def get_list(Item):
     if (type(Item) is list)and(len(Item)==1):
-        return get_list(Item[0])
+        Item =  Item[0]
     if tuple(Item) in DataBase:
-        return get_list(DataBase[tuple(Item)])
+        Item = DataBase[tuple(Item)]
+    if (type(Item) is list)and(len(Item)==1):
+        Item =  Item[0]
 
     if (type(Item) is tuple)and(len(Item)==4):
         return [Item[0]]
+
+    if tuple(Item) in DataBase:
+        Item = DataBase[tuple(Item)]
+
     Vars = matches.matches(Item,'? , !Tokens_list')
     if Vars:
         More = get_list(Vars[1])
@@ -1218,7 +1229,6 @@ def add_instance(List):
         Inst = invent_inst('buf',Current)
         Params=[]
     else:
-        print('>>>>>>',List[1],List[2])
         Inst = List[2][0]
         Params = get_inst_params(List[1])
     Current.add_inst(Type,Inst)
