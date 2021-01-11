@@ -1621,7 +1621,8 @@ def add_localparam(List0):
     Vars = matches.matches(List0,'localparam !Pairs ;',False)
     if Vars:
         List1 = DataBase[Vars[0]]
-        for Item in List1:
+        Pairs = get_list(Vars[0])
+        for Item in Pairs:
             if len(Item)==2:
                 List2 = DataBase[Item]
                 Vars2 = matches.matches(List2,'?token = !Expr',False)
@@ -1629,6 +1630,10 @@ def add_localparam(List0):
                     Name = Vars2[0][0]
                     Expr = get_expr(Vars2[1])
                     Current.add_localparam(Name,Expr)
+            elif (len(Item)==3)and(Item[0]=='parameter'):
+                Name = Item[1]
+                Expr = get_expr(Item[2])
+                Current.add_localparam(Name,Expr)
         return
 
     Vars = matches.matches(List0,'localparam !Width !Pairs ;',False)
@@ -1757,6 +1762,7 @@ def findField(Item):
     return 'findField'
 
 def get_expr(Item):
+    if type(Item) is int: return Item
     if len(Item)==4:
         if Item[1]=='token':
             if '.' in Item[0]:
@@ -1914,6 +1920,7 @@ def get_expr(Item):
                 return get_expr(List[2])
                 
                 
+                
         elif len(List)==5:
             if List[1][0]=='?':
                 try:
@@ -1929,13 +1936,20 @@ def get_expr(Item):
         logs.log_err('bad get_expr %s %s %s'%(Item,len(List),List))
         traceback.print_stack(None,None,logs.Flog)
         return 0
+    if len(Item)==3:
+            if Item[0]=='dig':
+                return ['dig',Item[1],Item[1]]
+            if Item[0]=='hex':
+                return ['hex',Item[1],Item[1]]
+            if Item[0]=='bin':
+                return ['bin',Item[1],Item[1]]
     if len(Item)==4:
         if (Item[1]=='floating'):
             return float(Item[0])
         if Item[1]=='always':
             return Item[0]
 
-    logs.log_err('very bad expr %s %d'%(str(Item),len(Item)))
+    logs.log_err('DB0: very bad expr %s %d'%(str(Item),len(Item)))
     traceback.print_stack()
     return 0
 

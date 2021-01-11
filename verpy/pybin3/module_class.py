@@ -325,7 +325,6 @@ class module_class:
             for Lparam in Keys:
                 Expr = self.localparams[Lparam]
                 Sup = support_set(Expr)
-                print('EXPR',Expr,Sup)
                 if (Sup == []): 
                     Base.append(Lparam)
                     Keys.remove(Lparam)

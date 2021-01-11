@@ -7,7 +7,9 @@ Transtable = {}
 Transtable['!PureExt'] = ['input','output','inout']
 Transtable['!IntKind'] = ['wire','reg']
 
+Varsx = []
 def matches(List,Seq,Verbose=False):
+    global Varsx
     if Verbose:
         logs.log_info('try list=%s pattern=%s'%(List,Seq))
     if type(Seq) is list:
@@ -58,13 +60,16 @@ def matches(List,Seq,Verbose=False):
         elif (Iseq!=Litem):
             if Verbose: logs.log_info('matches stopped(2) at iseq=|%s| who=|%s| %s '%(Iseq,Litem,List[ind]))
             return False
+    Varsx = Vars[:]
     if Vars==[]: return True 
     return Vars 
 
 
 def listMatches(List,Seq,Verbose):
+    global Varsx
     X0 = listMatches__(List,Seq,Verbose)
     if Verbose: logs.log_info('listMatches match(x0)=%s %s %s'%(X0,List,Seq))
+    Varsx = X0
     return X0
 
 def listMatches__(List,Seq,Verbose):
