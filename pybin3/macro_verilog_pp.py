@@ -1,4 +1,4 @@
-#! /usr/bin/env python3.8
+#! /usr/bin/env python3
 '''
     help:   invocation: macro_verilog_pp.py [-h] [-y Dir] [-I Dir] [-o <filename>]  [-split [dir]]  File1 File2 ....
 
