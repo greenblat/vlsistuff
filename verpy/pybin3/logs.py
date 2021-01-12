@@ -820,7 +820,8 @@ def splitQuotes(Txt):
         Wrds[ind] = X
     return Wrds
 
-
+def pStack():
+    traceback.print_stack()
 
 
 
