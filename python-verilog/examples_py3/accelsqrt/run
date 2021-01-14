@@ -1,0 +1,10 @@
+#! /bin/csh -f
+
+comp
+
+simv +SEQ=test0.seq
+
+
+
+
+

@@ -1,0 +1,9 @@
+#! /bin/csh -f
+
+
+mvlg.py rtl/accel_sqrt.mvlg all.files
+iverilog -o tb.vvp -f all.files tb.v
+
+
+
+

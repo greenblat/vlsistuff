@@ -1,0 +1,7 @@
+/Users/ilia/github/vlsistuff/python-verilog/examples_py3/accelsqrt/rtl/accel_sqrt.v
+/Users/ilia/github/vlsistuff/python-verilog/examples_py3/accelsqrt/rtl/axi_write_slave.v
+/Users/ilia/github/vlsistuff/python-verilog/examples_py3/accelsqrt/rtl/sqrt_u40_5.v
+/Users/ilia/github/vlsistuff/python-verilog/examples_py3/accelsqrt/rtl/syncfifo.v
+/Users/ilia/github/vlsistuff/python-verilog/examples_py3/accelsqrt/rtl/async16fifo.v
+/Users/ilia/github/vlsistuff/python-verilog/examples_py3/accelsqrt/rtl/async_stage.v
+/Users/ilia/github/vlsistuff/python-verilog/examples_py3/accelsqrt/rtl/synchronizer_level.v
