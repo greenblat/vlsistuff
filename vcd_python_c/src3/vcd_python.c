@@ -258,6 +258,7 @@ int linenum;
 int LASTCHANGE=0;
 int search=0;
 
+long Changes = 0;
 int maxusedsig;
 int debug;
 
@@ -795,6 +796,7 @@ void useTriggers() {
 
 void do_value(char *strx,int forReal) {
     char temp[10];
+    Changes++;
     if (Valex[0]==0) {
         if ((strx[0]=='0')||(strx[0]=='1')||(strx[0]=='x')||(strx[0]=='z')) { 
             temp[0]=strx[0];
@@ -865,6 +867,12 @@ veri_stime(PyObject *self,PyObject *args) {
     return Py_BuildValue("l", (long) run_time);
 }
 
+static PyObject*
+veri_changes(PyObject *self,PyObject *args) {
+    if (!PyArg_ParseTuple(args, ""))
+        return NULL;
+    return Py_BuildValue("l", (long) Changes);
+}
 
 
 static PyObject*
@@ -1077,6 +1085,7 @@ static PyMethodDef VeriMethods[] = {
     {"force", veri_force, METH_VARARGS, "tracing of new signals."},
     {"trace", veri_trace, METH_VARARGS, "tracing of new signals."},
     {"stime", veri_stime, METH_VARARGS, "Return the number of arguments received by the process."},
+    {"changes", veri_changes, METH_VARARGS, "Return the number of arguments received by the process."},
     {"listing", veri_listing, METH_VARARGS, "Return the number of arguments received by the process."},
     {"sensitive", veri_sensitive, METH_VARARGS,"add to watch list"},
     {"finish", veri_finish, METH_VARARGS, "Return the number of arguments received by the process."},

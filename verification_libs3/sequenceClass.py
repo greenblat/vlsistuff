@@ -146,6 +146,11 @@ class sequenceClass:
         return Val
 
     def eval(self,Txt):
+        if type(Txt) is list:
+            Str = ''
+            for X in Txt:
+                Str += str(self.eval(X))+' '
+            return Str
         if Txt in self.Translates:
             return self.eval(self.Translates[Txt])
 
@@ -193,8 +198,15 @@ class sequenceClass:
             return True
         if wrds[0] == 'define':
             Var = wrds[1]
-            Val = self.eval(wrds[2])
-            self.Translates[Var]=Val
+            if len(wrds)==3:
+                Val = self.eval(wrds[2])
+                self.Translates[Var]=Val
+            elif len(wrds)>3:
+                Val = list(map(self.eval,wrds[2:]))
+                self.Translates[Var]=Val
+
+
+
             return True
         if wrds[0] == 'finish':
             logs.finish('finishing on sequence')
@@ -279,6 +291,7 @@ class sequenceClass:
                 self.waitNotBusy = wrds[0]
                 return True
             Wrds = list(map(str,map(self.eval,wrds[1:])))
+            print('WWWW',Wrds)
             Wrds2 = []
             for Wrd in Wrds:
                 if '=' in Wrd:

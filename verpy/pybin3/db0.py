@@ -337,7 +337,7 @@ def getTypeDefWid(Kind):
 
 
     logs.log_error('getTypeDefWid name=%s '%(str(Kind)))
-    traceback.print_stack(None,None,logs.Flog)
+    traceback.print_stack(None,None,logs.Flogs[0])
     return 5
 
 
@@ -974,6 +974,9 @@ def get_list(Item):
 
     if Item[0][0]=='ExtDir':
         return [getExtDir(Item)]
+
+    if (type(Item) is list)and(len(Item))==1:
+        return get_list(Item[0])
 
     logs.log_err('get_list %s'%str(Item))
     logs.pStack()
@@ -1944,7 +1947,7 @@ def get_expr(Item):
 
 
         logs.log_err('bad get_expr %s %s %s'%(Item,len(List),List))
-        traceback.print_stack(None,None,logs.Flog)
+        traceback.print_stack(None,None,logs.Flogs[0])
         return 0
     if len(Item)==3:
             if Item[0]=='dig':

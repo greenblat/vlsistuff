@@ -31,7 +31,7 @@ def prepare_tb(Mod):
     Fcomp = open('comp','w')
     Fcomp.write(' #! /bin/csh -f\n')
     Fcomp.write(' \n\n')
-    Fcomp.write('iverilog -o tb.vvp tb.v \\\n')
+    Fcomp.write('iverilog  -Wtimescale  -o tb.vvp -g2012 -I ../rtl tb.v \\\n')
     Fcomp.write('    ../rtl/%s.v  \\\n\n\n\n'%Name)
     Fcomp.close()
     os.system('chmod +x comp')
@@ -65,6 +65,7 @@ def dump_instance(Mod,Simple=False):
     Name = Mod.Module
     Fout = open('%s.inst'%(Name),'w')
     if not Simple:
+        Fout.write('`timescale 1ns/1ps\n')
         Fout.write('module tb;\n')
         Fout.write('reg [31:0] cycles;   initial cycles=0;\n')
         Fout.write('reg [31:0] errors;   initial errors=0;\n')

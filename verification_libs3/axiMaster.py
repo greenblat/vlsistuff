@@ -16,7 +16,7 @@ import veri
 class axiMasterClass:
     def __init__(self,Path,Monitors,Name='?'):
         self.Path = Path
-        Monitors.append(self)
+        if Monitors != -1: Monitors.append(self)
         self.Name=Name
         self.Queue=[]
         self.arQueue=[]
@@ -62,12 +62,13 @@ class axiMasterClass:
         print('ACT',Txt)
         wrds = Txt.split()
         if wrds[0]=='write':
-            self.makeWrite(1,1,eval(wrds[1]),2,[eval(wrds[2])])
+            self.makeWrite(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),list(map(eval,wrds[5:])))
         elif wrds[0]=='read':
             self.makeRead(1,1,eval(wrds[1]),2)
         else:
             logs.log_error('action %s axiMater unrecognized %s'%(self.Name,Txt))
             
+# Burst,Len,Address,Size=4,Wdatas=[]):
 
     def busy(self):
         if self.Queue!=[]: return True

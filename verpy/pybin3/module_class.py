@@ -1715,6 +1715,7 @@ def single_bits(List):
     Bits1 = ''.join(map(str,Bits))
     Len1 = len(Bits1)
     if 'x' in Bits1: return Len1,Bits1
+    if 'z' in Bits1: return Len1,Bits1
     return Len1,int(Bits1,2)
 
 def compute1(Item):
@@ -1742,7 +1743,7 @@ def compute1(Item):
 
 
     logs.pStack('compute1 in moduleClass faiuled on "%s" %s'%(Item,type(Item)))
-    return ''%str(Item) 
+    return str(Item) 
 
 
 def clean_inst(Inst):
