@@ -380,7 +380,7 @@ class module_class:
             Fout.write('`include "%s"\n'%(Prm))
         Lparams = self.orderLocalParams()
         for Prm in Lparams:
-            Fout.write('localparam %s = %s;  //   %s \n'%(pr_expr(Prm),pr_expr(self.localparams[Prm]),self.localparams[Prm]))
+            Fout.write('localparam %s = %s;\n'%(pr_expr(Prm),pr_expr(self.localparams[Prm])))
         for (Name,Dir,Wid) in NOIOS:
 #            if is_double_def(Wid):
 #                if Wid[0]=='packed':
