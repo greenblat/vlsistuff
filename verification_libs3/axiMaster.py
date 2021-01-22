@@ -64,7 +64,7 @@ class axiMasterClass:
         if wrds[0]=='write':
             self.makeWrite(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),list(map(eval,wrds[5:])))
         elif wrds[0]=='read':
-            self.makeRead(1,1,eval(wrds[1]),2)
+            self.makeRead(eval(wrds[1]),eval(wrds[2]),eval(wrds[2]),2)
         else:
             logs.log_error('action %s axiMater unrecognized %s'%(self.Name,Txt))
             
