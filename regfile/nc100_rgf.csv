@@ -1,0 +1,14 @@
+kind,access,width,name,reset,addr,desc
+reg,rw,32,rega,0x123456,0x0,first register
+reg,rw,32,control0,0xcc00,0x4,control register
+reg,ro,24,statusa, ,0x8,
+field,ro,2,dma0, ,,
+field,ro,8,cpu1, ,,
+field,ro,3,spi0, ,,
+reg,rw_pulse,24,regb,0x0,0xc,
+field,rw_pulse,2,odma, ,,
+field,rw_pulse,8,ocpu, ,,
+field,rw_pulse,3,ospi, ,,
+reg,external,32,extern, ,0x10,dual fifo
+gap,,0,gap, ,0x14,
+ram,,32,ldst_ram, ,0x800,
