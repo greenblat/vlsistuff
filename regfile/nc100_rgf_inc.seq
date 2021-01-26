@@ -1,0 +1,6 @@
+define rega 0x0
+define control0 0x4
+define statusa 0x8
+define regb 0xc
+define extern 0x10
+define ldst_ram 0x800

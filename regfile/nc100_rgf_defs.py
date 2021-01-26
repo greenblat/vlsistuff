@@ -1,0 +1,13 @@
+ADDR_MAP = {}
+rega = 0x0
+ADDR_MAP["rega"] = 0x0
+control0 = 0x4
+ADDR_MAP["control0"] = 0x4
+statusa = 0x8
+ADDR_MAP["statusa"] = 0x8
+regb = 0xc
+ADDR_MAP["regb"] = 0xc
+extern = 0x10
+ADDR_MAP["extern"] = 0x10
+ldst_ram = 0x800
+ADDR_MAP["ldst_ram"] = 0x800
