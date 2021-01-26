@@ -1,6 +1,7 @@
 
 
 
+
 import logs
 import veri
 import sys,os,string
@@ -257,9 +258,12 @@ class sequenceClass:
             sys.exit()
 
         elif (wrds[0] == 'force'):
-            BB = makeExpr(wrds[2])
-            Val = self.evalExpr(BB)
-            self.force(wrds[1],Val)
+            Ind = 1
+            while Ind < len(wrds):
+                BB = makeExpr(wrds[Ind+1])
+                Val = self.evalExpr(BB)
+                self.force(wrds[Ind],Val)
+                Ind += 2
             return True
         elif (wrds[0] == 'waitUntil'):
             if self.Guardian>0:
@@ -344,7 +348,7 @@ def makeExpr(Txt):
     for Chr in '<>=()!+-*/':
         Txt = Txt.replace(Chr,' %s '%Chr)
     Txt  = Txt.replace('  ',' ')
-    for From in ['= =','> =','! =','< =']:
+    for From in ['= =','> =','! =','< =','< <','> >']:
         To = From.replace(' ','')
         Txt  = Txt.replace(From,To)
     wrds = Txt.split()
