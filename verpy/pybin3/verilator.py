@@ -199,7 +199,9 @@ def getWid(Net,Wid,Mod):
     if Wid in ['0',0]: return 0
     if Wid in ['1',1]: return 1
     if type(Wid) is int: return Wid
+   
     if type(Wid) is tuple:
+        print('getWid',Wid)
         if len(Wid)==2:
             Hi = getWid(Net,Wid[0],Mod)
             Lo = getWid(Net,Wid[1],Mod)
@@ -209,6 +211,11 @@ def getWid(Net,Wid,Mod):
             BB = getWid(Net,Wid[2],Mod)
             return AA*BB
     if type(Wid) is list:
+        if Wid[0] == 'functioncall':
+            if Wid[1]=='$clog2':
+                X = getWid(Net,Wid[2][0],Mod)
+                Bits = len(bin(X))-2
+                return Bits
         if len(Wid)==3:
             AA = getWid(Net,Wid[1],Mod)
             BB = getWid(Net,Wid[2],Mod)
@@ -216,7 +223,8 @@ def getWid(Net,Wid,Mod):
             return getWid(Net,Str,Mod)
         return 1
     if type(Wid) is str:
-        return eval(Wid,Mod.parameters)
+        print('LOCAL',Mod.localparams)
+        return eval(Wid,Mod.parameters,Mod.localparams)
 
     logs.log_error('wid of "%s" failed "%s"'%(Net,Wid)) 
     return 1

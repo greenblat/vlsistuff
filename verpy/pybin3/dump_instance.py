@@ -224,6 +224,21 @@ Monitors=[]
 cycles=0
 GIVEUP_TIMEOUT = 1000    # how many cycles to run before retirment. 
 
+import sequenceClass
+seq = sequenceClass.sequenceClass('tb',Monitors,'',[])
+
+
+def sequence(TestName):
+    Seq = logs.bin2string(TestName)
+    seq.readfile(Seq)
+    logs.setVar('sequence',Seq)
+    Dir = os.path.dirname(Seq)
+    logs.setVar('testsdir',Dir)
+    logs.log_info('SEQUENCE %d'%len(seq.Sequence))
+
+
+
+
 class driverMonitor(logs.driverClass):
     def __init__(self,Path,Monitors):
         logs.driverClass.__init__(self,Path,Monitors)
@@ -257,7 +272,7 @@ class driverMonitor(logs.driverClass):
         if self.valid('validin')and self.valid('takenin'):
             return
 
-
+# example of driver class usage
 # driverMonitor('tb',Monitors)
 
 
