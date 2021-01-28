@@ -127,32 +127,47 @@ def examine(Txt):
 
 def treatFields():
     DbFields = Db['fields']
+    Nc = 0
     for Reg in DbFields:
         Fields = DbFields[Reg]
         Pos = 0
-        print('>>>',Fields[0].Params)
+        Winaccess='gap'
         Access = Fields[0].Params['access']
-        LL = []
+        LLI = []
+        LLO = []
+        NC = ''
         for Field in Fields:
             Wid = Field.Params['wid']
             Name = Field.Params['names'][0]
             Access = Field.Params['access']
+            if Access!='gap':
+                Winaccess = Access
+
             if Wid==1:
                 WW = ''
             else:
                 WW = '[%s:0]'%(Wid-1)
-            if outAccess(Access):
+            if Access=='gap':
+                LLO.insert(0,"%d'b0"%Wid)
+                NC += 'wire [%s:0] nc%d;\n'%(Wid-1,Nc)
+                LLI.insert(0,"nc%s"%Nc)
+                Nc += 1
+
+            elif outAccess(Access):
                 LINES[7].append('    ,output %s %s'%(WW,Name))
-                LL.insert(0,Name)
+                LLI.insert(0,Name)
             elif inAccess(Access):
                 LINES[7].append('    ,input  %s %s'%(WW,Name))
-                LL.insert(0,Name)
+                LLO.insert(0,Name)
             else:
                 logs.log_error('fields not legal access %s for %s'%(Access,Name))
-        if inAccess(Access):
-            LINES[6].append('assign %s = { %s };'%(Reg,' ,'.join(LL)))
-        elif outAccess(Access):
-            LINES[6].append('assign { %s } = %s;'%(' ,'.join(LL),Reg))
+        if Winaccess=='gap':
+            logs.log_error('fields not legal access %s for %s'%(Winaccess,Reg))
+        elif inAccess(Winaccess):
+            LINES[6].append('assign %s = { %s };'%(Reg,' ,'.join(LLO)))
+        elif outAccess(Winaccess):
+            LINES[6].append(NC)
+            LINES[6].append('assign { %s } = %s;'%(' ,'.join(LLI),Reg))
 
 
 
@@ -176,7 +191,8 @@ def gatherFields():
         elif Reg.Kind=='field':
             Acc.append(Reg)
             if Active:
-                Reg.Params['access'] = Obj.Params['access']
+                if Reg.Params['access']!='gap':
+                    Reg.Params['access'] = Obj.Params['access']
                 Nreg = Obj.Params['names'][0]
                 if Nreg not in FIELDED_REGS: FIELDED_REGS.append(Nreg)
                 if Active not in Db['fields']:
@@ -307,6 +323,16 @@ def advanceAddr(Obj):
     else:
         logs.log_error('advanceAddr got %s'%(Obj.Kind))
         return Bytes
+
+INSTANCE = '''
+MODULE MODULE (.clk(clk),.rst_n(rst_n)
+    .pwrite(pwrite),.paddr(paddr),.psel(psel),.penable(penable)
+    ,.prdata(prdata),.pwdata(pwdata),.pstrb(pstrb)
+    ,.pready(pready),.pslverr(pselverr)
+'''
+
+
+
 
 HEADER = '''module MODULE (
     input clk,input rst_n,input pwrite, input pread
@@ -757,12 +783,19 @@ def dumpApb(Db):
     Str = Str.replace('ADDWID',str(Addwid))
     Str = Str.replace('WSTRB',str(Wstrb))
     Db['fout'].write(Str)
+
+    Str = INSTANCE.replace('MODULE',Db['module'])
+    Finst = open('%s.inst'%Db['module'],'w')
+    Finst.write(Str)
+
+
     Temp = []
     for Li in LINES[0]:
         Li = Li.replace(' reg ',' ')
         Wrds = Li.split()
         if Wrds[-1] not in FIELDED_REGS:
             Db['fout'].write(Li+'\n')
+            Finst.write('    ,.%s(%s)\n'%(Wrds[-1],Wrds[-1]))
         else:
             Li = Li.replace('input','wire')
             Li = Li.replace('output','wire')
@@ -771,7 +804,13 @@ def dumpApb(Db):
             Temp.append(Li)
     for Li in LINES[7]:
          Db['fout'].write('%s\n'%Li)
+         wrds = Li.split()
+         Finst.write('    ,.%s(%s)\n'%(wrds[-1],wrds[-1]))
     Db['fout'].write(');\n')
+
+    Finst.write(');\n')
+    Finst.close()
+
     Db['fout'].write(APB2RAM)
     for Li in Temp:
         Db['fout'].write('%s\n'%Li)
