@@ -70,7 +70,7 @@ def readFile(File):
             Item = itemClass(wrds)
             Db['items'].append(Item)
 
-SYNONYMS = {'wid':'width'}
+SYNONYMS = {'wid':'width','desc':'description','rw':'wr','rw_pulse':'wr_pulse'}
 
 class itemClass:
     def __init__(self,Wrds):
@@ -139,9 +139,10 @@ def treatFields():
         for Field in Fields:
             Wid = Field.Params['wid']
             Name = Field.Params['names'][0]
-            Access = Field.Params['access']
-            if Access!='gap':
-                Winaccess = Access
+            if 'access' in Field.Params:
+                Access = Field.Params['access']
+                if Access!='gap':
+                    Winaccess = Access
 
             if Wid==1:
                 WW = ''
@@ -191,7 +192,7 @@ def gatherFields():
         elif Reg.Kind=='field':
             Acc.append(Reg)
             if Active:
-                if Reg.Params['access']!='gap':
+                if ('access' not in Reg.Params) or ( Reg.Params['access']!='gap'):
                     Reg.Params['access'] = Obj.Params['access']
                 Nreg = Obj.Params['names'][0]
                 if Nreg not in FIELDED_REGS: FIELDED_REGS.append(Nreg)
@@ -230,6 +231,7 @@ def assignAddresses():
             LINES[5].append('%s = 0x%x'%(Name,Addr))
             LINES[5].append('ADDR_MAP["%s"] = 0x%x'%(Name,Addr))
         Addr += int(advanceAddr(Reg))
+        print('REG',Reg.Kind,Reg.Params,Addr)
         Reg.HADDR = Addr
     Chip.Addr = Addr
     Chip.HADDR = Addr
@@ -285,7 +287,7 @@ def advanceAddr(Obj):
 
 
 
-    if Obj.Kind in ['reg','counter']:
+    if Obj.Kind in ['reg','external']:
         logs.mustKey(Obj.Params,'width')
         return Add*Bytes
     elif Obj.Kind in ('ram'):
@@ -390,7 +392,7 @@ def dumpRam(Postfix=''):
 
 def bodyDump0(Db,File):
     for Reg in Db['regs']:
-        if Reg.Kind in ['counter','reg']:
+        if Reg.Kind in ['external','reg']:
             treatReg(Reg)
         elif Reg.Kind=='array':
             treatArray(Reg)
@@ -551,7 +553,7 @@ def treatReg(Reg):
             LINES[4].append(Str)
 
         treatPrdata(Reg,Wid,Name)
-    elif 'rw' in Access:
+    elif ('rw' in Access)or('wr' in Access):
         Line = '    ,output reg [%d:0] %s'%(Wid-1,Name)
         LINES[0].append(Line)
         lastAddr = Reg.Addr

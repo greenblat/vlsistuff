@@ -37,6 +37,10 @@ def createXml(Module,Db):
             Amount = Item.Params['depth']
         elif Item.Kind=='gap':
             Usable=False
+        elif Item.Kind=='field':
+            Usable=False
+        elif Item.Kind=='external':
+            Usable=False
         else:
             logs.mustKey(Item.Params,'access','rw') 
             Acc = Item.Params['access']
