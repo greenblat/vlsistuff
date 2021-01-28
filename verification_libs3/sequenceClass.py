@@ -295,7 +295,6 @@ class sequenceClass:
                 self.waitNotBusy = wrds[0]
                 return True
             Wrds = list(map(str,map(self.eval,wrds[1:])))
-            print('WWWW',Wrds)
             Wrds2 = []
             for Wrd in Wrds:
                 if '=' in Wrd:
