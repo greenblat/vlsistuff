@@ -507,9 +507,9 @@ class module_class:
             Dset = support_set(Dst)
             Ok = goodToGo(Set,Readies,Ordered)
             if not Ok:
-                logs.log_info('failed %s net=%s ok=%s dset=%s   set=%s'%(Failed,Dst,Ok,Dset,Set))
+                logs.log_debug('failed %s net=%s ok=%s dset=%s   set=%s'%(Failed,Dst,Ok,Dset,Set))
             if Ok and (len(Dset)==1)and(Dset[0]==Dst):
-                logs.log_info('ok net=%s'%(Dst))
+                logs.log_debug('ok net=%s'%(Dst))
                 Dir,Wid = self.nets[Dst]
                 self.nets.pop(Dst)
                 Hards.append((Dir,Wid,(Dst,Src,A,B)))

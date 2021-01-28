@@ -1645,6 +1645,7 @@ def add_localparam(List0):
                     Current.add_localparam(Name,Expr)
             elif (len(Item)==3)and(Item[0]=='parameter'):
                 Name = Item[1]
+                print('XXXXX',Item[2])
                 Expr = get_expr(Item[2])
                 Current.add_localparam(Name,Expr)
         return
@@ -1776,6 +1777,7 @@ def findField(Item):
 
 def get_expr(Item):
     if type(Item) is int: return Item
+    if type(Item) is str: return Item
     if len(Item)==4:
         if Item[1]=='token':
             if '.' in Item[0]:

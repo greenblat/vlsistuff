@@ -204,6 +204,8 @@ def log_infox(Text,Where,Print=False):
         print('@%d:     %s\n'%(get_cycles(),Text))
 
 
+def log_debug(Text):
+    log_dbg(Text)
 def log_dbg(Text):
     if (print_debug_messages):
         print('dbg: ',Text)
