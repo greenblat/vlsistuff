@@ -76,7 +76,7 @@ def createXml(Module,Db):
             Addr = Item.Addr
             Wid = Item.Params['width']
             if (Wid>BusWidth)and(Wid<=(BusWidth*2)):
-                BusBytes = BusWidth/8
+                BusBytes = int(BusWidth/8)
                 Fccc.write('#define %sADDR_%-50s  (%s_BASEADDR+0x%x)\n'%(Pref,Reg.upper()+'_LO',Module.upper(),Addr))
                 Fccc.write('#define %sADDR_%-50s  (%s_BASEADDR+0x%x)\n'%(Pref,Reg.upper()+'_HI',Module.upper(),Addr+BusBytes))
                 Fvcc.write('`define %sADDR_%-50s  \'h%x\n'%(Pref,Reg.upper()+'_LO',Addr))

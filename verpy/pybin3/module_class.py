@@ -486,7 +486,7 @@ class module_class:
         for Param in self.parameters:
             Readies.append(Param)
     
-        logs.log_info('readies %s'%str(Readies))
+        logs.log_debug('readies %s'%str(Readies))
         Ordered = []
         Hards = []
         dones = 1

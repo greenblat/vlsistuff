@@ -16,6 +16,8 @@ def run(Fname,Dirx='.'):
     Dir = Dirx
     File = open(Dirx + '/' +Fname)
     readFile(File)
+    computeWidthFromFields()
+    treatFields()
     assignAddresses()
     Prmx = Db['chip'].Params
     Params = Db['chip'].Params['names']
@@ -24,12 +26,7 @@ def run(Fname,Dirx='.'):
 
     Module = Params[0] 
     Db['module']=Module
-    if 'apb' in Params:
-        Postfix = '_ram'
-    else:
-        Postfix = ''
     Db['dir']=Dirx
-    Db['fout'] = dumpRam(Postfix)
     Db['lines'] = LINES
     if 'apb' in Params:
         dumpApb(Db)
@@ -50,25 +47,90 @@ def report2(LINES):
             logs.log_info('%s: %s'%(Key,Li))
 
 Db = {'items':[],'clocks':[],'regs':[]}
-def readFile(File):
-    while True:
-        line = File.readline()
-        if line=='': 
-            if 'regs' not in Db:
-                generate()
-            return
+
+def createLines(File):
+    Lines = File.readlines()
+    Long = ''
+    for line in Lines:
         if '//' in line: line = line[:line.index('//')]
-        if '#' in line: line = line[:line.index('#')]
-        wrds = line.split()
-        if len(wrds)==0:
-            pass
-        elif (wrds[0]=='end'):
+        elif '#' in line: line = line[:line.index('#')]
+        else:
+            line = line[:-1]
+        Long += line + ' ;;; '
+    Wrds = Long.split()
+    Res = []
+    state = 'idle'
+    for Wrd in Wrds:
+        if state=='idle':
+            if '"' in Wrd:
+                Acc = Wrd
+                state = 'work'
+            else:
+                Res.append(Wrd)
+        elif state=='work':
+            Acc += ' '+Wrd
+            if Wrd.endswith('"'):
+                state = 'idle'
+                Acc = Acc.replace(';;;','\n')
+                Res.append(Acc)
+    Res2 = []
+    while ';;;' in Res:
+        X = Res.index(';;;')
+        Head = Res[:X]
+        Res = Res[X+1:]
+        if Head!=[]:
+            Res2.append(Head)
+    return Res2        
+
+
+checkNames = {}
+def readFile(File):
+    Lines = createLines(File)  
+    for wrds in Lines:
+        if (wrds[0]=='end'):
             generate()
+            return
         elif (wrds[0]=='chip'):
             Db['chip'] = itemClass(wrds)
         else:
             Item = itemClass(wrds)
             Db['items'].append(Item)
+            Kind = Item.Kind
+            Name = Item.Params['names'][0]
+            Item.Name = Name
+            checkPair(Kind,Name)
+
+def checkPair(Kind,Name):
+    if Kind == 'field': return
+    if Kind not in checkNames: 
+        checkNames[Kind]=[Name]
+        return
+    if Name in checkNames[Kind]:
+        logs.log_error('double defined item %s of kind %s . previous=%s'%((Name,Kind,checkNames[Kind])))
+        return
+
+    checkNames[Kind].append(Name)
+
+
+#     while True:
+#         line = File.readline()
+#         if line=='': 
+#             if 'regs' not in Db:
+#                 generate()
+#             return
+#         if '//' in line: line = line[:line.index('//')]
+#         if '#' in line: line = line[:line.index('#')]
+#         wrds = line.split()
+#         if len(wrds)==0:
+#             pass
+#         elif (wrds[0]=='end'):
+#             generate()
+#         elif (wrds[0]=='chip'):
+#             Db['chip'] = itemClass(wrds)
+#         else:
+#             Item = itemClass(wrds)
+#             Db['items'].append(Item)
+
 
 SYNONYMS = {'wid':'width','desc':'description','rw':'wr','rw_pulse':'wr_pulse'}
 
@@ -138,6 +200,7 @@ def treatFields():
         NC = ''
         for Field in Fields:
             Wid = Field.Params['wid']
+            Hi,Lo = Field.Params['position']
             Name = Field.Params['names'][0]
             if 'access' in Field.Params:
                 Access = Field.Params['access']
@@ -156,41 +219,73 @@ def treatFields():
 
             elif outAccess(Access):
                 LINES[7].append('    ,output %s %s'%(WW,Name))
+                LINES[6].append('assign %s = %s[%d:%d];'%(Name,Reg,Hi,Lo))
                 LLI.insert(0,Name)
             elif inAccess(Access):
                 LINES[7].append('    ,input  %s %s'%(WW,Name))
-                LLO.insert(0,Name)
+                LINES[6].append('assign %s[%d:%d] = %s;'%(Reg,Hi,Lo,Name))
             else:
                 logs.log_error('fields not legal access %s for %s'%(Access,Name))
-        if Winaccess=='gap':
-            logs.log_error('fields not legal access %s for %s'%(Winaccess,Reg))
-        elif inAccess(Winaccess):
-            LINES[6].append('assign %s = { %s };'%(Reg,' ,'.join(LLO)))
-        elif outAccess(Winaccess):
-            LINES[6].append(NC)
-            LINES[6].append('assign { %s } = %s;'%(' ,'.join(LLI),Reg))
+#        if Winaccess=='gap':
+#            logs.log_error('fields not legal access %s for %s'%(Winaccess,Reg))
+#        elif inAccess(Winaccess):
+#            LINES[6].append('assign %s = { %s };'%(Reg,' ,'.join(LLO)))
+#        elif outAccess(Winaccess):
+#            LINES[6].append(NC)
+#            LINES[6].append('assign { %s } = %s;'%(' ,'.join(LLI),Reg))
 
 
 
 def generate():
     gatherFields()
-    treatFields()
+    uniquifyFields()
 
 FIELDED_REGS = []    
+
+def uniquifyFields():
+    Takens = {}
+    for Reg in Db['regs']:
+        Name = Reg.Name
+        if Name in Db['fields']:
+            List = Db['fields'][Name]
+            for Field in List:
+                Fname = Field.Name
+                if Fname in Takens:
+                    Takens[Fname].append((Field,Reg))
+                else:
+                    Takens[Fname] = [(Field,Reg)]
+    for Fname in Takens:
+        List = Takens[Fname]
+        if len(List)>1:
+            logs.log_info('duplicate fields %s. uniquifying'%Fname)
+            for Field,Reg in List:
+                if 'suffix' in Reg.Params:
+                    Suff = Reg.Params['suffix']
+                    Newname = Fname+Suff
+                elif 'prefix' in Reg.Params:
+                    Pref = Reg.Params['prefix']
+                    Newname = Pref+Fname
+                else:
+                    Newname = Reg.Name+'_'+Fname
+                Field.Name = Newname
+                Field.Params['names'][0] = Newname
+               
+            
+        
+
 
 def gatherFields():
     Active = False
     Obj = False
-    Acc = []
     Db['fields'] = {}
     Db['regs'] = []
     for Reg in Db['items']:
         if Reg.Kind=='reg':
             Active = Reg.Params['names'][0]
             Obj = Reg
+            Reg.Name = Active
             Db['regs'].append(Reg)
         elif Reg.Kind=='field':
-            Acc.append(Reg)
             if Active:
                 if ('access' not in Reg.Params) or ( Reg.Params['access']!='gap'):
                     Reg.Params['access'] = Obj.Params['access']
@@ -200,6 +295,7 @@ def gatherFields():
                     Db['fields'][Active] = [Reg]
                 else:
                     Db['fields'][Active].append(Reg)
+                Reg.Name = Reg.Params['names'][0]
             else:
                 logs.log_error('no reg for field %s'%(Reg.Params))
         else:
@@ -220,6 +316,47 @@ def getPrm(Obj,Name,Default):
         return getPrm(Obj,ALIASES[Name],Default)
     return Default
 
+def computeWidthFromFields():
+    for Reg in Db['regs']:
+        Name= getPrm(Reg,'names',['err'])[0]
+        if Reg.Kind in ['reg','array','ram']:
+            Name= getPrm(Reg,'names',['err'])[0]
+            Reg.Name = Name
+
+            OrigWid= getPrm(Reg,'width',0)
+            Ptr = 0
+            Wid = 0
+            if Name in Db['fields']:
+                List = Db['fields'][Name]
+                for Obj in List:
+                    Name= getPrm(Obj,'names',['err'])[0]
+                    Obj.Name = Name
+                    Add0 = getPrm(Obj,'width',0)
+                    Add = getPrm(Obj,'width',0)
+                    if Add==0:
+                        logs.log_error('reg %s field %s has no width'%(Name,Obj.Name))
+                    Align = getPrm(Obj,'align',0)
+                    print('RAL',Obj.Name,Align)
+                    if (Align>0):
+                       if (Align<=Add):
+                          logs.log_error('field %s of reg %s has bith width and align. align is smaller.'%(Obj.Name,Name))
+                       else:
+                          Add = Align
+                    Obj.Params['position'] = (Wid+Add0-1,Wid)
+                    Wid += Add
+                print('REG',Reg.Name,Wid)
+                if OrigWid==0:
+                    Reg.Params['width']=Wid
+                elif (OrigWid<Wid):
+                    logs.log_error('fields of reg %s (wid=%d) take more bits (%d)'%(Reg.Name,OrigWid,Wid))
+
+
+            else:
+                logs.log_error('reg %s has no width and no fields (defined %s)'%(Name,list(Db['fields'].keys())))
+            
+
+
+
 def assignAddresses():
     Chip = Db['chip']
     Addr = getPrm(Chip,'base',0)
@@ -231,7 +368,6 @@ def assignAddresses():
             LINES[5].append('%s = 0x%x'%(Name,Addr))
             LINES[5].append('ADDR_MAP["%s"] = 0x%x'%(Name,Addr))
         Addr += int(advanceAddr(Reg))
-        print('REG',Reg.Kind,Reg.Params,Addr)
         Reg.HADDR = Addr
     Chip.Addr = Addr
     Chip.HADDR = Addr
@@ -284,7 +420,9 @@ def advanceAddr(Obj):
         else:
             Add = int(round(1.0*Bytes2/Bytes + 0.5))
 #            print('REG','add',Add,'bytes',Bytes,'bytes2',Bytes2,Add*Bytes,Wid,Obj.Params['names'])
-
+    else:
+        logs.log_error('missing wid in %s  defs:%s'%(Obj.Params['names'][0],Obj.Params))
+        Add = 4
 
 
     if Obj.Kind in ['reg','external']:
@@ -367,7 +505,7 @@ always @(posedge clk ASYNCRST) begin
     if (!rst_n) begin '''
 
 LINES = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[]}
-def dumpRam(Postfix=''):
+def dumpRam(Postfix,File):
     Module = Db['chip'].Params['names'][0] 
     try:
         Buswid = Db['chip'].Params['width']
@@ -381,16 +519,17 @@ def dumpRam(Postfix=''):
     Str = Str.replace('BUSWID',str(Buswid))
     Str = Str.replace('ADDWID',str(Addwid))
     Str = Str.replace('WSTRB',str(Wstrb))
-    File = open('%s/%s.v'%(Dir,Module),'w')
     File.write(Str)
     Db['module']=Module
-    bodyDump0(Db,File)
+#    bodyDump0(Db,File)
+    for Line in LINES[0]:
+        File.write('%s\n'%Line)
     bodyDump1(Db,File)
     return File
     
 
 
-def bodyDump0(Db,File):
+def bodyDump0(Db):
     for Reg in Db['regs']:
         if Reg.Kind in ['external','reg']:
             treatReg(Reg)
@@ -403,8 +542,6 @@ def bodyDump0(Db,File):
         else:
             logs.log_error('wrong kind %s %s'%(Reg.Kind,Reg.Params))
     
-    for Line in LINES[0]:
-        File.write('%s\n'%Line)
 
 def bodyDump1(Db,File):
     Base = getPrm(Db['chip'],'base',0)
@@ -774,6 +911,23 @@ assign pslverr = 0;
 
 
 def dumpApb(Db):
+    bodyDump0(Db)
+    Module = Db['chip'].Params['names'][0] 
+    Dir = Db['dir']
+    Db['fout'] = open('%s/%s.v'%(Dir,Module),'w')
+    Str = INSTANCE.replace('MODULE',Db['module'])
+    Finst = open('%s.inst'%Db['module'],'w')
+    Finst.write(Str)
+    apbHead()
+    Temp = helper0(Finst)
+    enclosingModule(Temp,Finst)
+    ramModule(Finst)
+    dumpRam('_ram',Db['fout'])
+    Finst.close()
+
+def ramModule(Finst):
+    return
+def apbHead():
     Str = APBHead.replace('MODULE',Db['module'])
     Buswid = Db['chip'].Params['width']
     Addwid = Db['chip'].Params['addrwid']
@@ -786,17 +940,13 @@ def dumpApb(Db):
     Str = Str.replace('WSTRB',str(Wstrb))
     Db['fout'].write(Str)
 
-    Str = INSTANCE.replace('MODULE',Db['module'])
-    Finst = open('%s.inst'%Db['module'],'w')
-    Finst.write(Str)
-
-
+def helper0(Finst):
     Temp = []
     for Li in LINES[0]:
         Li = Li.replace(' reg ',' ')
         Wrds = Li.split()
         if Wrds[-1] not in FIELDED_REGS:
-            Db['fout'].write(Li+'\n')
+#            Db['fout'].write('xxx'+Li+'\n')
             Finst.write('    ,.%s(%s)\n'%(Wrds[-1],Wrds[-1]))
         else:
             Li = Li.replace('input','wire')
@@ -804,18 +954,18 @@ def dumpApb(Db):
             Li = Li.replace(',','')
             Li = Li + ';'
             Temp.append(Li)
+    return Temp
+
+def enclosingModule(Temp,Finst):
     for Li in LINES[7]:
          Db['fout'].write('%s\n'%Li)
          wrds = Li.split()
          Finst.write('    ,.%s(%s)\n'%(wrds[-1],wrds[-1]))
     Db['fout'].write(');\n')
-
     Finst.write(');\n')
-    Finst.close()
-
-    Db['fout'].write(APB2RAM)
     for Li in Temp:
         Db['fout'].write('%s\n'%Li)
+    Db['fout'].write(APB2RAM)
     Str = APBInst.replace('MODULE',Db['module']+'_ram')
     Db['fout'].write(Str)
     for Li in LINES[0]:
