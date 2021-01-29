@@ -336,7 +336,6 @@ def computeWidthFromFields():
                     if Add==0:
                         logs.log_error('reg %s field %s has no width'%(Name,Obj.Name))
                     Align = getPrm(Obj,'align',0)
-                    print('RAL',Obj.Name,Align)
                     if (Align>0):
                        if (Align<=Add):
                           logs.log_error('field %s of reg %s has bith width and align. align is smaller.'%(Obj.Name,Name))
@@ -344,14 +343,13 @@ def computeWidthFromFields():
                           Add = Align
                     Obj.Params['position'] = (Wid+Add0-1,Wid)
                     Wid += Add
-                print('REG',Reg.Name,Wid)
                 if OrigWid==0:
                     Reg.Params['width']=Wid
                 elif (OrigWid<Wid):
                     logs.log_error('fields of reg %s (wid=%d) take more bits (%d)'%(Reg.Name,OrigWid,Wid))
 
 
-            else:
+            if (OrigWid==0)and( getPrm(Reg,'width',0)==0):
                 logs.log_error('reg %s has no width and no fields (defined %s)'%(Name,list(Db['fields'].keys())))
             
 
