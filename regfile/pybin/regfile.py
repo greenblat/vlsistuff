@@ -38,6 +38,11 @@ def run(Fname,Dirx='.'):
     runXml()
 #    report()
 #    report2(LINES)
+    if LINES[8]!=[]:
+        Fspl = open('%s.splits'%Module,'w')
+        for Line in LINES[8]:
+            Fspl.write(Line+'\n')
+        Fspl.close()
     return Db['module']
 
 def report2(LINES):
@@ -46,7 +51,7 @@ def report2(LINES):
         for Li in LL:
             logs.log_info('%s: %s'%(Key,Li))
 
-Db = {'items':[],'clocks':[],'regs':[]}
+Db = {'items':[],'clocks':[],'regs':[],'fields':[]}
 
 def createLines(File):
     Lines = File.readlines()
@@ -86,6 +91,7 @@ def createLines(File):
 checkNames = {}
 def readFile(File):
     Lines = createLines(File)  
+    Lines = treatTemplates(Lines)
     for wrds in Lines:
         if (wrds[0]=='end'):
             generate()
@@ -96,9 +102,12 @@ def readFile(File):
             Item = itemClass(wrds)
             Db['items'].append(Item)
             Kind = Item.Kind
-            Name = Item.Params['names'][0]
-            Item.Name = Name
-            checkPair(Kind,Name)
+            if len(Item.Params['names'])>0:
+                Name = Item.Params['names'][0]
+                Item.Name = Name
+                checkPair(Kind,Name)
+            else:
+                Item.Name = 'none'
 
 def checkPair(Kind,Name):
     if Kind == 'field': return
@@ -111,25 +120,34 @@ def checkPair(Kind,Name):
 
     checkNames[Kind].append(Name)
 
-
-#     while True:
-#         line = File.readline()
-#         if line=='': 
-#             if 'regs' not in Db:
-#                 generate()
-#             return
-#         if '//' in line: line = line[:line.index('//')]
-#         if '#' in line: line = line[:line.index('#')]
-#         wrds = line.split()
-#         if len(wrds)==0:
-#             pass
-#         elif (wrds[0]=='end'):
-#             generate()
-#         elif (wrds[0]=='chip'):
-#             Db['chip'] = itemClass(wrds)
-#         else:
-#             Item = itemClass(wrds)
-#             Db['items'].append(Item)
+def treatTemplates(Lines):
+    Templates = {}
+    Curr = []
+    state = 'idle'
+    Result = []
+    for Line in Lines:
+        if state=='idle':
+            if Line[0]=='template':
+                Name = Line[1]
+                Curr = []
+                state = 'work'
+            elif Line[0]=='instance':
+                Temp = Line[1]
+                Inst = Line[2]
+                for LL in Templates[Temp]:
+                    LX = LL[:]
+                    if LX[0]=='reg':
+                        LX[1] = Inst+LX[1]
+                    Result.append(LX)
+            else:
+                Result.append(Line)
+        elif state=='work':
+            if Line[0] == 'endtemplate':
+                Templates[Name] = Curr[:]
+                state='idle'
+            else:
+                Curr.append(Line)
+    return Result
 
 
 SYNONYMS = {'wid':'width','desc':'description','rw':'wr','rw_pulse':'wr_pulse'}
@@ -191,13 +209,21 @@ def treatFields():
     DbFields = Db['fields']
     Nc = 0
     for Reg in DbFields:
+        Split=True
+        RegObj = findObj(Db['regs'],Reg)
+        if 'fields' in RegObj.Params:
+            Wid = getPrm(RegObj,'width',0)
+            if Wid<=1:
+                WW = ''
+            else:
+                WW = '[%s:0]'%(Wid-1)
+            LINES[7].append('    ,output %s %s'%(WW,RegObj.Name))
+            Split=False
+            
         Fields = DbFields[Reg]
         Pos = 0
         Winaccess='gap'
         Access = Fields[0].Params['access']
-        LLI = []
-        LLO = []
-        NC = ''
         for Field in Fields:
             Wid = Field.Params['wid']
             Hi,Lo = Field.Params['position']
@@ -207,33 +233,32 @@ def treatFields():
                 if Access!='gap':
                     Winaccess = Access
 
-            if Wid==1:
+            if Wid<=1:
                 WW = ''
             else:
                 WW = '[%s:0]'%(Wid-1)
-            if Access=='gap':
-                LLO.insert(0,"%d'b0"%Wid)
-                NC += 'wire [%s:0] nc%d;\n'%(Wid-1,Nc)
-                LLI.insert(0,"nc%s"%Nc)
-                Nc += 1
 
-            elif outAccess(Access):
-                LINES[7].append('    ,output %s %s'%(WW,Name))
-                LINES[6].append('assign %s = %s[%d:%d];'%(Name,Reg,Hi,Lo))
-                LLI.insert(0,Name)
+            if outAccess(Access):
+                if Split:
+                    LINES[7].append('    ,output %s %s'%(WW,Name))
+                if ('fields' in RegObj.Params):
+                    LINES[8].append('assign %s = %s[%d:%d];'%(Name,Reg,Hi,Lo))
+                else:
+                    LINES[6].append('assign %s = %s[%d:%d];'%(Name,Reg,Hi,Lo))
             elif inAccess(Access):
-                LINES[7].append('    ,input  %s %s'%(WW,Name))
-                LINES[6].append('assign %s[%d:%d] = %s;'%(Reg,Hi,Lo,Name))
+                if Split:
+                    LINES[7].append('    ,input  %s %s'%(WW,Name))
+                if ('fields' in RegObj.Params):
+                    LINES[8].append('assign %s[%d:%d] = %s;'%(Reg,Hi,Lo,Name))
+                else:
+                    LINES[6].append('assign %s[%d:%d] = %s;'%(Reg,Hi,Lo,Name))
             else:
                 logs.log_error('fields not legal access %s for %s'%(Access,Name))
-#        if Winaccess=='gap':
-#            logs.log_error('fields not legal access %s for %s'%(Winaccess,Reg))
-#        elif inAccess(Winaccess):
-#            LINES[6].append('assign %s = { %s };'%(Reg,' ,'.join(LLO)))
-#        elif outAccess(Winaccess):
-#            LINES[6].append(NC)
-#            LINES[6].append('assign { %s } = %s;'%(' ,'.join(LLI),Reg))
 
+def findObj(List,Name):
+    for Obj in List:
+        if Obj.Name==Name: return Obj
+    return False
 
 
 def generate():
@@ -317,15 +342,17 @@ def getPrm(Obj,Name,Default):
     return Default
 
 def computeWidthFromFields():
+    Db['splits'] = {}
+    Db['splitsw'] = {}
     for Reg in Db['regs']:
-        Name= getPrm(Reg,'names',['err'])[0]
-        if Reg.Kind in ['reg','array','ram']:
-            Name= getPrm(Reg,'names',['err'])[0]
-            Reg.Name = Name
+        Name= Reg.Name
+        if (Name!='none') and(Reg.Kind in ['reg','array','ram']):
+            Name = Reg.Name
 
             OrigWid= getPrm(Reg,'width',0)
             Ptr = 0
             Wid = 0
+            Map = []
             if Name in Db['fields']:
                 List = Db['fields'][Name]
                 for Obj in List:
@@ -341,14 +368,20 @@ def computeWidthFromFields():
                           logs.log_error('field %s of reg %s has bith width and align. align is smaller.'%(Obj.Name,Name))
                        else:
                           Add = Align
+                          Db['splits'][Reg.Name] = Reg
                     Obj.Params['position'] = (Wid+Add0-1,Wid)
+                    while (len(Map)<(Wid+Add0)): Map.append('0')
+                    for X in range(Wid+Add0-1,Wid,-1):
+                        Map[X] = '1'
+                        
+
                     Wid += Add
                 if OrigWid==0:
                     Reg.Params['width']=Wid
                 elif (OrigWid<Wid):
                     logs.log_error('fields of reg %s (wid=%d) take more bits (%d)'%(Reg.Name,OrigWid,Wid))
 
-
+                Db['splitsw'][Reg.Name]=Map
             if (OrigWid==0)and( getPrm(Reg,'width',0)==0):
                 logs.log_error('reg %s has no width and no fields (defined %s)'%(Name,list(Db['fields'].keys())))
             
@@ -402,6 +435,7 @@ def simpleAdvanceAddr(Obj):
 
 
 def advanceAddr(Obj):
+            
     if 'width' in Db['chip'].Params:
         Bytes = Db['chip'].Params['width']/8
         busWid = Db['chip'].Params['width']
@@ -418,8 +452,8 @@ def advanceAddr(Obj):
         else:
             Add = int(round(1.0*Bytes2/Bytes + 0.5))
 #            print('REG','add',Add,'bytes',Bytes,'bytes2',Bytes2,Add*Bytes,Wid,Obj.Params['names'])
-    else:
-        logs.log_error('missing wid in %s  defs:%s'%(Obj.Params['names'][0],Obj.Params))
+    elif (Obj.Kind not in ['gap']):
+        logs.log_error('advanceAddr: missing wid in %s %s  defs:%s'%(Obj.Kind,Obj.Name,Obj.Params))
         Add = 4
 
 
@@ -502,7 +536,7 @@ always @(posedge clk) if (pwrite) last_wdata <= wdata & mask;
 always @(posedge clk ASYNCRST) begin
     if (!rst_n) begin '''
 
-LINES = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[]}
+LINES = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[]}
 def dumpRam(Postfix,File):
     Module = Db['chip'].Params['names'][0] 
     try:
@@ -590,6 +624,16 @@ def bodyDump1(Db,File):
 
     File.write('    end else if (pwrite)  begin\n')
     for Line in LINES[3]:
+        Reg = Line.split()[4]
+        if Reg in Db['splitsw']:
+            Obj = Db['splits'][Reg]
+            Map = Db['splitsw'][Reg]
+            Map.reverse()
+            Bin = ''.join(Map)
+            Int = int(Bin,2)
+            MASK = "%d'h%x"%(Obj.Params['width'],Int)
+            Line = Line.replace('<= ','<= %s & ('%MASK)
+            Line = Line.replace(';',');')
         File.write('%s\n'%Line)
 
     File.write('    end\n')
@@ -679,6 +723,11 @@ def treatReg(Reg):
                 Wid2 -= 32
             Line = '    ,output %s_pulse'%(Name)
             LINES[0].append(Line)
+            if 'ready' in Reg.Params:
+                Line = '    ,input %s_ready'%(Name)
+                LINES[0].append(Line)
+#                LINES[9].append(Name)
+
             STR = ROPULSE
             if 'duration' in Reg.Params:
                 STR = ROPULSE_DURATION
@@ -895,6 +944,7 @@ module MODULE (input clk, input rst_n,
     ,output pready, output pslverr
 '''
 APBInst = '''
+wire [1023:0] ZEROES = 1024'b0;
 MODULE rgf (.clk(clk),.rst_n(rst_n),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
     ,.pwdata(pwdata),.prdata(prdata)
     ,.pstrb(pstrb)
@@ -919,12 +969,9 @@ def dumpApb(Db):
     apbHead()
     Temp = helper0(Finst)
     enclosingModule(Temp,Finst)
-    ramModule(Finst)
     dumpRam('_ram',Db['fout'])
     Finst.close()
 
-def ramModule(Finst):
-    return
 def apbHead():
     Str = APBHead.replace('MODULE',Db['module'])
     Buswid = Db['chip'].Params['width']
@@ -944,7 +991,7 @@ def helper0(Finst):
         Li = Li.replace(' reg ',' ')
         Wrds = Li.split()
         if Wrds[-1] not in FIELDED_REGS:
-#            Db['fout'].write('xxx'+Li+'\n')
+            Db['fout'].write(Li+'\n')
             Finst.write('    ,.%s(%s)\n'%(Wrds[-1],Wrds[-1]))
         else:
             Li = Li.replace('input','wire')
@@ -959,19 +1006,41 @@ def enclosingModule(Temp,Finst):
          Db['fout'].write('%s\n'%Li)
          wrds = Li.split()
          Finst.write('    ,.%s(%s)\n'%(wrds[-1],wrds[-1]))
+    for Line in LINES[9]:
+        Db['fout'].write('    ,input %s_ready\n'%Line)
     Db['fout'].write(');\n')
     Finst.write(');\n')
+
     for Li in Temp:
         Db['fout'].write('%s\n'%Li)
     Db['fout'].write(APB2RAM)
+    if LINES[9]==[]:
+        Db['fout'].write('assign pready = 1;\n')
+    else:
+        Db['fout'].write('assign pready = \n')
+        for Name in LINES[9]:
+            Db['fout'].write('    %s_pulse ? %s_ready :\n'%(Name,Name))
+        Db['fout'].write('    1;\n')
+
     Str = APBInst.replace('MODULE',Db['module']+'_ram')
     Db['fout'].write(Str)
     for Li in LINES[0]:
         wrds = Li.split()
-        Db['fout'].write('    ,.%s(%s)\n'%(wrds[-1],wrds[-1]))
+        Conn = wrds[-1]
+        Conn2 = wrds[-1]
+        if Conn in Db['splits']:
+            RR = Db['splits'][Conn]
+            Acc = RR.Params['access']
+            Wid = RR.Params['width']
+            if inAccess(Acc):
+                Conn2 = 'ZEROES[%d:0] | %s'%(Wid-1,Conn2)
+        Db['fout'].write('    ,.%s(%s)\n'%(Conn,Conn2))
     Db['fout'].write(');\n')
     for Li in LINES[6]:
          Db['fout'].write('%s\n'%Li)
+
+
+
     Db['fout'].write('endmodule\n')
 
 
