@@ -380,8 +380,8 @@ def computeWidthFromFields():
                     Reg.Params['width']=Wid
                 elif (OrigWid<Wid):
                     logs.log_error('fields of reg %s (wid=%d) take more bits (%d)'%(Reg.Name,OrigWid,Wid))
-
-                Db['splitsw'][Reg.Name]=Map
+                if Reg.Name in Db['splits']:
+                    Db['splitsw'][Reg.Name]=Map
             if (OrigWid==0)and( getPrm(Reg,'width',0)==0):
                 logs.log_error('reg %s has no width and no fields (defined %s)'%(Name,list(Db['fields'].keys())))
             
