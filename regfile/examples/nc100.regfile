@@ -22,17 +22,48 @@ chip nc100_rgf apb reset=async wid=32 addrwid=16 empty=0xdeadbeaf
 reg rega wid=32 access=rw reset=0x123456 desc=first.register
 reg control0 wid=32 access=rw reset=0xcc00 desc=control.register
 reg statusa wid=24 access=ro
-field dma0 wid=2
+field dma0 wid=2 align=8
 field cpu1 wid=8
 field spi0 wid=3 desc=spi.status
 
 reg regb wid=24 access=rw_pulse reset=0x0
-field odma wid=2
+field odma wid=2 align=8
 field ocpu wid=8
 field ospi wid=3 desc=spi.status
 
 
 reg extern wid=32 access=external desc=dual.fifo
+
+template TMP0
+gap align=256 
+reg tmp0 wid=32 access=rw
+reg tmp1 wid=24 access=rw 
+reg tmp2 wid=16 access=rw
+endtemplate
+
+// template name is prefixed to all regs in each instance.
+instance TMP0 eth0
+instance TMP0 eth1
+instance TMP0 eth2
+instance TMP0 eth3
+
+reg wider access=rw desc=staaam fields=external
+field wide0 wid=32
+field wide1 wid=32
+field wide2 wid=32
+field wide3 wid=32
+
+reg longer access=ro desc=staaam fields=external
+field long0 wid=32
+field long1 wid=32
+field long2 wid=32
+field long3 wid=32
+
+
+reg ronly access=ro_pulse wid=32 ready=true
+reg ronly2 access=ro_pulse wid=16 ready=true
+
+
 
 gap align=2048
 ram ldst_ram wid=32 depth=128
