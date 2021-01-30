@@ -82,7 +82,7 @@
 <td align="left" > <font size="6"> spi0 </font> </td>
 <td align="left" > <font size="6">   </font> </td>
 <td align="left" > <font size="6">  </font> </td>
-<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6"> spi status </font> </td>
 </tr>
 <tr bgcolor=#80ff80><td align="left" > <font size="6"> reg </font> </td>
 <td align="left" > <font size="6"> rw_pulse </font> </td>
@@ -114,7 +114,7 @@
 <td align="left" > <font size="6"> ospi </font> </td>
 <td align="left" > <font size="6">   </font> </td>
 <td align="left" > <font size="6">  </font> </td>
-<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6"> spi status </font> </td>
 </tr>
 <tr bgcolor=#80ff80><td align="left" > <font size="6"> reg </font> </td>
 <td align="left" > <font size="6"> external </font> </td>
@@ -130,6 +130,230 @@
 <td align="left" > <font size="6"> gap </font> </td>
 <td align="left" > <font size="6">   </font> </td>
 <td align="left" > <font size="6"> 0x14 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> eth0tmp0 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x100 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 24 </font> </td>
+<td align="left" > <font size="6"> eth0tmp1 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x104 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 16 </font> </td>
+<td align="left" > <font size="6"> eth0tmp2 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x108 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> gap </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6"> 0 </font> </td>
+<td align="left" > <font size="6"> gap </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x10c </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> eth1tmp0 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x200 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 24 </font> </td>
+<td align="left" > <font size="6"> eth1tmp1 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x204 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 16 </font> </td>
+<td align="left" > <font size="6"> eth1tmp2 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x208 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> gap </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6"> 0 </font> </td>
+<td align="left" > <font size="6"> gap </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x20c </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> eth2tmp0 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x300 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 24 </font> </td>
+<td align="left" > <font size="6"> eth2tmp1 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x304 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 16 </font> </td>
+<td align="left" > <font size="6"> eth2tmp2 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x308 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> gap </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6"> 0 </font> </td>
+<td align="left" > <font size="6"> gap </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x30c </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> eth3tmp0 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x400 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 24 </font> </td>
+<td align="left" > <font size="6"> eth3tmp1 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x404 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 16 </font> </td>
+<td align="left" > <font size="6"> eth3tmp2 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x408 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 128 </font> </td>
+<td align="left" > <font size="6"> wider </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x40c </font> </td>
+<td align="left" > <font size="6"> staaam </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> field </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> wide0 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> field </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> wide1 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> field </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> wide2 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> field </font> </td>
+<td align="left" > <font size="6"> rw </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> wide3 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> ro </font> </td>
+<td align="left" > <font size="6"> 128 </font> </td>
+<td align="left" > <font size="6"> longer </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x41c </font> </td>
+<td align="left" > <font size="6"> staaam </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> field </font> </td>
+<td align="left" > <font size="6"> ro </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> long0 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> field </font> </td>
+<td align="left" > <font size="6"> ro </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> long1 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> field </font> </td>
+<td align="left" > <font size="6"> ro </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> long2 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> field </font> </td>
+<td align="left" > <font size="6"> ro </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> long3 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> ro_pulse </font> </td>
+<td align="left" > <font size="6"> 32 </font> </td>
+<td align="left" > <font size="6"> ronly </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x42c </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#80ff80><td align="left" > <font size="6"> reg </font> </td>
+<td align="left" > <font size="6"> ro_pulse </font> </td>
+<td align="left" > <font size="6"> 16 </font> </td>
+<td align="left" > <font size="6"> ronly2 </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x430 </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+</tr>
+<tr bgcolor=#ffffa0><td align="left" > <font size="6"> gap </font> </td>
+<td align="left" > <font size="6">  </font> </td>
+<td align="left" > <font size="6"> 0 </font> </td>
+<td align="left" > <font size="6"> gap </font> </td>
+<td align="left" > <font size="6">   </font> </td>
+<td align="left" > <font size="6"> 0x434 </font> </td>
 <td align="left" > <font size="6">  </font> </td>
 </tr>
 <tr bgcolor=#80ff80><td align="left" > <font size="6"> ram </font> </td>
