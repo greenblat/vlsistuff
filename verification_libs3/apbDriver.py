@@ -243,10 +243,9 @@ class apbDriver:
                 self.seq0.pop(0)
                 return
 
-            if self.peek('pready')==0:
-                return
-
-            List = self.seq0.pop(0)
+            List = self.seq0[0]
+#            if self.peek('pready')==0:
+#                return
             if (len(List[0])==3): List.pop(0)
 #            logs.log_info('DBG0 %s'%str(List))
             for (Sig,Val) in List:
@@ -272,7 +271,6 @@ class apbDriver:
                 elif Sig=='catch':
                     Who,Exp = Val
                     X = self.peek(self.rename(Who))
-                    print(">>>>>>>>>",Exp,type(Exp))
                     if Exp=='none':
                         pass
                     elif type(Exp) is types.FunctionType:
@@ -286,6 +284,8 @@ class apbDriver:
                     self.installUntil(Val,0)
                 else:
                     self.force(self.rename(Sig),Val)
+            if self.peek('pready')==1:
+                self.seq0.pop(0)
             return
         if self.peek('pready')==0:
             self.waiting0 = 10
@@ -295,10 +295,10 @@ class apbDriver:
             What = self.queue0.pop(0)
             if What[0]=='write':
 #                logs.log_info('write apb queue0 seq0 %s %s %s'%(What[0],hex(What[1]),hex(What[2])))
-                self.seq0.append([('penable',0),('lock',1),('psel',1),('paddr',What[1]),('pwdata',What[2]),('pwrite',1)])
+                self.seq0.append([('penable',0),('lock',1),('psel',1),('pstrb',0xf),('paddr',What[1]),('pwdata',What[2]),('pwrite',1)])
                 self.seq0.append([('penable',1)])
                 if (self.queue0==[])or(self.queue0[0][0] not in ['write','read']):
-                    self.seq0.append([('conditional','pready',1),('psel',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0),('lock',0)])
+                    self.seq0.append([('conditional','pready',1),('psel',0),('pstrb',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0),('lock',0)])
 #                self.seq0.append([('lock',0)])
 
             elif What[0]=='read':
