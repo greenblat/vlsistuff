@@ -3,18 +3,21 @@
 
 1. double fields allowed. Add suffix=SUF or prefix=SUF to the "reg" and all double fields 
     will be uniquified. If some reg doesnt have suffix/prefix, it's whole name will be used as prefix.
+    suffix/prefix not used if the field is unique in the first place.
 
-2. Order of modules in output verilog. firsy comes the enclosing apb module, then enclosed ram module.
+2. Order of modules in output verilog. first comes the enclosing apb module, then enclosed ram module.
 3. description can be now in the form of  desc="dad afwerw werwerwe werwer\nwede". It means, it can spread over several lines. And if it has spaces or newlines - must be enclosed in "..."
 4.Fields can have "align" parameter.   wid=8 align=16   : means, the field is 8 bits, but occupies 16 bits of the register layout.
+5. added "templates" and "instances" of these templates. look in example. 
+6. if in reg there is param in the form  "fields=external" - the regfile will output one bus and prepare <MOD>.splits file to be usable elsewhere.
+field external=true   : means the verilog will output whole bus. Include file separate will have the fields break down. Helps move multi-field  busses across hierarchies.
 
-
-# PLANNED FIXES
+# HALF WAY FIXES
 
 - ro_pulse can have "ready=true" parameter. It means ro_pulse will force "not pready" until "<REG>_ready goes up
 
-- field external=true   : means the verilog will output whole bus. Include file separate will have the fields break down. Helps move multi-field  busses across hierarchies.
 
+# PLANNED FIXES
 
 
 
