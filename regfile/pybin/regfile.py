@@ -498,7 +498,7 @@ def advanceAddr(Obj):
         return Bytes
 
 INSTANCE = '''
-MODULE MODULE (.clk(clk),.rst_n(rst_n)
+MODULE MODULE (.pclk(pclk),.present(present)
     .pwrite(pwrite),.paddr(paddr),.psel(psel),.penable(penable)
     ,.prdata(prdata),.pwdata(pwdata),.pstrb(pstrb)
     ,.pready(pready),.pslverr(pselverr)
@@ -508,7 +508,7 @@ MODULE MODULE (.clk(clk),.rst_n(rst_n)
 
 
 HEADER = '''module MODULE (
-    input clk,input rst_n,input pwrite, input pread
+    input pclk,input presetn,input pwrite, input pread
     ,input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata
     ,input [WSTRB-1:0] pstrb
     ,input [ADDWID-1:0] paddr ,output reg [BUSWID-1:0] last_wdata
@@ -527,15 +527,15 @@ PSTRB8 = '{{8{pstrb[7]}},{8{pstrb[6]}},{8{pstrb[5]}},{8{pstrb[4]}},{8{pstrb[3]}}
 STRING1 = '''
 
 reg [BUSWID-1:0] prdata_reg;
-always @(posedge clk) prdata_reg <=  prdata_wire;
+always @(posedge pclk) prdata_reg <=  prdata_wire;
 assign prdata =   RAMS
     prdata_reg;
 
 wire [BUSWID-1:0] mask = { PSTRB };
 wire [BUSWID-1:0] wdata = pwdata;
-always @(posedge clk) if (pwrite) last_wdata <= wdata & mask;
-always @(posedge clk ASYNCRST) begin
-    if (!rst_n) begin '''
+always @(posedge pclk) if (pwrite) last_wdata <= wdata & mask;
+always @(posedge pclk ASYNCRST) begin
+    if (!presetn) begin '''
 
 LINES = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[]}
 def dumpRam(Postfix,File):
@@ -616,7 +616,7 @@ def bodyDump1(Db,File):
     Str = Db['chip'].RAMS_WIRES + '\n' + Str
     RST = getPrm(Db['chip'],'reset','async')
     if RST=='async':
-        Str = Str.replace('ASYNCRST','or negedge rst_n')
+        Str = Str.replace('ASYNCRST','or negedge presetn')
     else:
         Str = Str.replace('ASYNCRST','')
     File.write('%s\n'%Str)
@@ -647,42 +647,32 @@ def bodyDump1(Db,File):
 
 ROPULSE = '''
 wire REG_rd_sel = pread && (mpaddr=='hADDR);
-reg REG_rd_pulse_reg; always @(posedge clk)  REG_rd_pulse_reg <= REG_rd_sel;
+reg REG_rd_pulse_reg; always @(posedge pclk)  REG_rd_pulse_reg <= REG_rd_sel;
 assign REG_pulse = REG_rd_pulse_reg;
 '''
-
-ROPULSE_DURATION = '''
-wire REG_rd_sel = pread && (mpaddr=='hADDR);
-mlbr_pulse_extender extend_REG (.clk(clk),.rst_n(rst_n),.duration(16'dDURATION),.pulsein(REG_rd_sel),.pulseout(REG_pulse));
-'''
-
 
 
 RWPULSE = '''
 wire REG_wr_sel = pwrite && (mpaddr=='hADDR);
-reg REG_wr_pulse_reg; always @(posedge clk)  REG_wr_pulse_reg <= REG_wr_sel;
+reg REG_wr_pulse_reg; always @(posedge pclk)  REG_wr_pulse_reg <= REG_wr_sel;
 assign REG_pulse = REG_wr_pulse_reg;
-'''
-RWPULSE_DURATION = '''
-wire REG_wr_sel = pwrite && (mpaddr=='hADDR);
-mlbr_pulse_extender extend_REG (.clk(clk),.rst_n(rst_n),.duration(16'dDURATION),.pulsein(REG_wr_sel),.pulseout(REG_pulse));
 '''
 
 RAM_ROPULSE_RANGE = '''
 assign REG_rd_pulse = pread && (mpaddr>='hLADDR) && (mpaddr < 'hHADDR);
-reg REG_rd_pulse_dly; always @(posedge clk)  REG_rd_pulse_dly <= REG_rd_pulse;
+reg REG_rd_pulse_dly; always @(posedge pclk)  REG_rd_pulse_dly <= REG_rd_pulse;
 assign REG_rd_data_valid = REG_rd_pulse_dly;
 '''
 
 ROPULSE_RANGE = '''
 wire REG_rd_sel = pread &&  (mpaddr>='hLADDR) && (mpaddr < 'hHADDR);
-reg REG_rd_pulse_reg; always @(posedge clk)  REG_rd_pulse_reg <= REG_rd_sel;
+reg REG_rd_pulse_reg; always @(posedge pclk)  REG_rd_pulse_reg <= REG_rd_sel;
 assign REG_rd_pulse = REG_rd_pulse_reg;
 '''
 
 RWPULSE_RANGE = '''
 wire REG_wr_sel = pwrite && (mpaddr>='hLADDR) && (mpaddr < 'hHADDR);
-reg REG_wr_pulse_reg; always @(posedge clk)  REG_wr_pulse_reg <= REG_wr_sel;
+reg REG_wr_pulse_reg; always @(posedge pclk)  REG_wr_pulse_reg <= REG_wr_sel;
 assign REG_wr_pulse = REG_wr_pulse_reg;
 '''
 RAM_RWPULSE_RANGE = '''
@@ -940,13 +930,13 @@ def runXml():
     regfile_html.produce_html(Module,Db)
 
 APBHead = '''
-module MODULE (input clk, input rst_n,
+module MODULE (input pclk, input presetn,
     input psel, input penable, input pwrite, input [WSTRB-1:0] pstrb, input [ADDWID-1:0] paddr, input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata
     ,output pready, output pslverr
 '''
 APBInst = '''
 wire [1023:0] ZEROES = 1024'b0;
-MODULE rgf (.clk(clk),.rst_n(rst_n),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
+MODULE rgf (.pclk(pclk),.presetn(presetn),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
     ,.pwdata(pwdata),.prdata(prdata)
     ,.pstrb(pstrb)
 '''
