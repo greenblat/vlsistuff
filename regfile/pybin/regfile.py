@@ -16,6 +16,7 @@ def run(Fname,Dirx='.'):
     Dir = Dirx
     File = open(Dirx + '/' +Fname)
     readFile(File)
+    
     computeWidthFromFields()
     treatFields()
     assignAddresses()
@@ -67,7 +68,7 @@ def createLines(File):
     state = 'idle'
     for Wrd in Wrds:
         if state=='idle':
-            if '"' in Wrd:
+            if ('"' in Wrd)and(Wrd[-1]!='"'):
                 Acc = Wrd
                 state = 'work'
             else:
@@ -371,7 +372,7 @@ def computeWidthFromFields():
                           Db['splits'][Reg.Name] = Reg
                     Obj.Params['position'] = (Wid+Add0-1,Wid)
                     while (len(Map)<(Wid+Add0)): Map.append('0')
-                    for X in range(Wid+Add0-1,Wid,-1):
+                    for X in range(Wid+Add0-1,Wid-1,-1):
                         Map[X] = '1'
                         
 
