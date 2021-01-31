@@ -27,7 +27,7 @@ First line in any register definition file is chip line.
  **access**  can be rw (or wr) , ro , rw_pulse, ro_pulse, 
  **description** Has either no spaces, or enclosed in "..." .
  **reset** is relevant to writable registers.
- **ready=true** is relevant to ro_pulse registers. specific ready signal to this reg will stall the APB.
+ **ready=true** is relevant to ro/rw_pulse registers. specific ready signal to this reg will stall the APB.
 **prefix** or **suffix**  is relevant to fields of this register, if the field can be double used.
 **fields=external**   causes the fields split to be written in separate file. It makes easier to pass wide busses through hierarchies.
 

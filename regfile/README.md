@@ -10,14 +10,9 @@
 4.Fields can have "align" parameter.   wid=8 align=16   : means, the field is 8 bits, but occupies 16 bits of the register layout.
 5. added "templates" and "instances" of these templates. look in example. 
 6. if in reg there is param in the form  "fields=external" - the regfile will output one bus and prepare <MOD>.splits file to be usable elsewhere.
-field external=true   : means the verilog will output whole bus. Include file separate will have the fields break down. Helps move multi-field  busses across hierarchies.
+field external=true   : means the verilog will output whole bus. Separate "include" file will have the fields break down. Helps move multi-field  busses across hierarchies.
 
-# HALF WAY FIXES
-
-- ro_pulse can have "ready=true" parameter. It means ro_pulse will force "not pready" until "<REG>_ready goes up
-
-
-# PLANNED FIXES
+7. rw_pulse and ro_pulse can have "ready=true" parameter. It means ro_pulse will force "not pready" until "<REG>_ready goes up. The idea is to sync read only read and write to unrelated clock.
 
 
 
