@@ -12,6 +12,7 @@ header_string = '''
   <body>
   <center>
       <h1>CHIPCHIP regfile </h1>
+  </center> <left>
       <table border>
 '''
 
@@ -29,7 +30,7 @@ table_header_string = '''
 '''
 Order = 'access width reset clk description'.split()
 
-tail_string = '</table> </center> </body> </html>\n\n'
+tail_string = '</table> </left> </body> </html>\n\n'
 def switch_colors():
     global color,othercolor
     x = color
