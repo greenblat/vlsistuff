@@ -186,15 +186,15 @@ class regClass:
         if self.description:
             Desc = 'description="%s"'%self.description
             Desc = Desc.replace('""','"')
-            Desc = Desc.replace(' ','.')
+#            Desc = Desc.replace(' ','.')
 
         Fout.write('reg %s%s access=%s wid=%d reset=%s %s\n'%(self.Name,Who,self.Access,self.Wid,hex(self.Reset),Desc))
-        for Fi in self.fields:
+        for ind,Fi in enumerate(self.fields):
             Fname = Fi[0]
             if Fi[4]:
                 Desc = 'description="%s"'%(Fi[4])
                 Desc = Desc.replace('""','"')
-                Desc = Desc.replace(' ','.')
+#                Desc = Desc.replace(' ','.')
             else:
                 Desc = ' '
             Rst = combineRsts(0,Fi[3])
@@ -206,7 +206,18 @@ class regClass:
             if Fname.startswith('reserved'):
                 Access='gap'
             
-            Fout.write('field %s access=%s wid=%d %s %s\n'%(Fname,Access,Fi[2],Rst,Desc))
+            if Fname.startswith('reserved'):
+                pass
+            elif len(self.fields)>(ind+1):
+                Fnext = self.fields[ind+1]
+                if Fnext[0].startswith('reserved'):
+                    Wid2 = Fi[2]+Fnext[2]
+                    Fout.write('field %s access=%s wid=%d align=%d %s %s\n'%(Fname,Access,Fi[2],Wid2,Rst,Desc))
+                else:
+                    Fout.write('field %s access=%s wid=%d %s %s\n'%(Fname,Access,Fi[2],Rst,Desc))
+            else:
+                Fout.write('field %s access=%s wid=%d %s %s\n'%(Fname,Access,Fi[2],Rst,Desc))
+
             if (Fname in fieldsKeeper)and(Access!='gap'):
                 print('ERROR! double field name %s  in reg %s'%(Fname,self.Name))
             else:

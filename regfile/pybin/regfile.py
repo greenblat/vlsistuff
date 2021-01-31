@@ -717,12 +717,9 @@ def treatReg(Reg):
             if 'ready' in Reg.Params:
                 Line = '    ,input %s_ready'%(Name)
                 LINES[0].append(Line)
-#                LINES[9].append(Name)
+                LINES[9].append(Name)
 
             STR = ROPULSE
-            if 'duration' in Reg.Params:
-                STR = ROPULSE_DURATION
-                STR = STR.replace('DURATION',str(Reg.Params['duration']))
             Str = STR.replace('REG',Name)
             Str = Str.replace('ADDR',hex(lastAddr)[2:])
             LINES[4].append(Str)
@@ -740,9 +737,10 @@ def treatReg(Reg):
             Line = '    ,output %s_pulse'%(Name)
             LINES[0].append(Line)
             STR = RWPULSE
-            if 'duration' in Reg.Params:
-                STR = RWPULSE_DURATION
-                STR = STR.replace('DURATION',str(Reg.Params['duration']))
+            if 'ready' in Reg.Params:
+                Line = '    ,input %s_ready'%(Name)
+                LINES[0].append(Line)
+                LINES[9].append(Name)
             Str = STR.replace('REG',Name)
             Str = Str.replace('ADDR',hex(lastAddr)[2:])
             LINES[4].append(Str)
@@ -997,8 +995,8 @@ def enclosingModule(Temp,Finst):
          Db['fout'].write('%s\n'%Li)
          wrds = Li.split()
          Finst.write('    ,.%s(%s)\n'%(wrds[-1],wrds[-1]))
-    for Line in LINES[9]:
-        Db['fout'].write('    ,input %s_ready\n'%Line)
+#    for Line in LINES[9]:
+#        Db['fout'].write('    ,input %s_ready\n'%Line)
     Db['fout'].write(');\n')
     Finst.write(');\n')
 
