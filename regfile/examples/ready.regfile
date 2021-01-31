@@ -3,8 +3,9 @@ chip ready_rgf apb reset=async wid=32 addrwid=16 empty=0xdeadbeaf
 
 reg ronly access=ro_pulse wid=32 ready=true
 reg ronly2 access=ro_pulse wid=16 ready=true
+reg wonly access=rw_pulse wid=16 ready=true
 
-
+reg one  wid=1  access=rw reset=1 desc="stam"
 reg rega wid=32 access=rw reset=0x123456 desc=first.register
 reg control0 wid=32 access=rw reset=0xcc00 desc=control.register
 reg statusa wid=24 access=ro
