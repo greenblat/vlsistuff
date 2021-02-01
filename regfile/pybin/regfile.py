@@ -212,6 +212,7 @@ def treatFields():
     for Reg in DbFields:
         Split=True
         RegObj = findObj(Db['regs'],Reg)
+        RegWid = RegObj.Params['width']
         if 'fields' in RegObj.Params:
             Wid = getPrm(RegObj,'width',0)
             if Wid<=1:
@@ -225,6 +226,9 @@ def treatFields():
         Pos = 0
         Winaccess='gap'
         Access = Fields[0].Params['access']
+        Cover = []
+        for X in range(RegWid): Cover.append('0')
+
         for Field in Fields:
             Wid = Field.Params['wid']
             Hi,Lo = Field.Params['position']
@@ -238,6 +242,9 @@ def treatFields():
                 WW = ''
             else:
                 WW = '[%s:0]'%(Wid-1)
+
+            for PP in range(Lo,Hi+1):
+                Cover[PP] = '1'
 
             if outAccess(Access):
                 if Split:
@@ -255,12 +262,35 @@ def treatFields():
                     LINES[6].append('assign %s[%d:%d] = %s;'%(Reg,Hi,Lo,Name))
             else:
                 logs.log_error('fields not legal access %s for %s'%(Access,Name))
+        if inAccess(Access)and('0' in Cover):
+            Ranges = getRanges(Cover)
+            for Lo,Hi in Ranges:
+                LINES[6].append('assign %s[%d:%d] = 0;'%(Reg,Hi,Lo))
 
 def findObj(List,Name):
     for Obj in List:
         if Obj.Name==Name: return Obj
     return False
 
+def getRanges(List):
+    Ranges = []
+    Lo = 0
+    Hi = 0
+    state='idle'
+    for ii in range(len(List)):
+        if state=='idle':
+            if List[ii]=='0':
+                state = 'work'
+                Lo = ii
+        elif state=='work':
+            if List[ii]=='1':
+                state = 'idle'
+                Ranges.append((Lo,Hi))
+            else:
+                Hi = ii
+    if state=='work':
+        Ranges.append((Lo,Hi))
+    return Ranges
 
 def generate():
     gatherFields()
@@ -351,9 +381,11 @@ def computeWidthFromFields():
             Name = Reg.Name
 
             OrigWid= getPrm(Reg,'width',0)
+            OrigReset = getPrm(Reg,'reset',0)
             Ptr = 0
             Wid = 0
             Map = []
+            BuildReset = 0
             if Name in Db['fields']:
                 List = Db['fields'][Name]
                 for Obj in List:
@@ -375,14 +407,29 @@ def computeWidthFromFields():
                     for X in range(Wid+Add0-1,Wid-1,-1):
                         Map[X] = '1'
                         
+                    if 'reset' in Obj.Params:
+                        Freset = Obj.Params['reset']
+                        Bin = len(bin(Freset))-2
+                        if Add0<Bin:
+                            logs.log_error('reset value 0x%x of field %s of reg %s is wider than bits allocated to it = %d'%(Freset,Name,Reg.Name,Add0))
+                            Freset = Freset & ((1<<Add)-1)
+                        BuildReset |= (Freset<<Wid)
 
                     Wid += Add
                 if OrigWid==0:
                     Reg.Params['width']=Wid
                 elif (OrigWid<Wid):
                     logs.log_error('fields of reg %s (wid=%d) take more bits (%d)'%(Reg.Name,OrigWid,Wid))
+                elif (OrigWid>Wid):
+                    logs.log_warning('fields of reg %s (wid=%d) take less bits (%d). consider removing width= from reg definition line'%(Reg.Name,OrigWid,Wid))
                 if Reg.Name in Db['splits']:
                     Db['splitsw'][Reg.Name]=Map
+
+                if (OrigReset==0)and(BuildReset!=0):
+                    Reg.Params['reset'] = BuildReset
+                elif (OrigReset!=0)and(BuildReset!=0)and(OrigReset!=BuildReset):
+                    logs.log_error("reg %s has reset value of it's own and also fields. remove one or the other"%(Reg.Name))
+
             if (OrigWid==0)and( getPrm(Reg,'width',0)==0):
                 logs.log_error('reg %s has no width and no fields (defined %s)'%(Name,list(Db['fields'].keys())))
             
