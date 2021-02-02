@@ -1,5 +1,5 @@
 
-module nc100_rgf (input clk, input rst_n,
+module nc100_rgf (input pclk, input presetn,
     input psel, input penable, input pwrite, input [4-1:0] pstrb, input [16-1:0] paddr, input [32-1:0] pwdata, output [32-1:0] prdata
     ,output pready, output pslverr
     ,output [31:0] rega
@@ -39,8 +39,6 @@ module nc100_rgf (input clk, input rst_n,
     ,output [2:0] ospi
     ,output [127:0] wider
     ,output [127:0] longer
-    ,input ronly_ready
-    ,input ronly2_ready
 );
     wire [23:0] statusa;
     wire [23:0] regb;
@@ -50,13 +48,10 @@ module nc100_rgf (input clk, input rst_n,
 wire i_pread = psel && !pwrite;
 wire i_pwrite = psel && pwrite && penable;
 assign pslverr = 0;
-assign pready = 
-    ronly_pulse ? ronly_ready :
-    ronly2_pulse ? ronly2_ready :
-    1;
+assign pready = 1;
 
 wire [1023:0] ZEROES = 1024'b0;
-nc100_rgf_ram rgf (.clk(clk),.rst_n(rst_n),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
+nc100_rgf_ram rgf (.pclk(pclk),.presetn(presetn),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
     ,.pwdata(pwdata),.prdata(prdata)
     ,.pstrb(pstrb)
     ,.rega(rega)
@@ -101,7 +96,7 @@ assign ocpu = regb[15:8];
 assign ospi = regb[18:16];
 endmodule
 module nc100_rgf_ram (
-    input clk,input rst_n,input pwrite, input pread
+    input pclk,input presetn,input pwrite, input pread
     ,input [32-1:0] pwdata, output [32-1:0] prdata
     ,input [4-1:0] pstrb
     ,input [16-1:0] paddr ,output reg [32-1:0] last_wdata
@@ -175,16 +170,16 @@ wire ldst_ram_rd_data_valid;
 
 
 reg [32-1:0] prdata_reg;
-always @(posedge clk) prdata_reg <=  prdata_wire;
+always @(posedge pclk) prdata_reg <=  prdata_wire;
 assign prdata =       ldst_ram_rd_data_valid ? ldst_ram_rdata :
 
     prdata_reg;
 
 wire [32-1:0] mask = { {{8{pstrb[3]}},{8{pstrb[2]}},{8{pstrb[1]}},{8{pstrb[0]}}} };
 wire [32-1:0] wdata = pwdata;
-always @(posedge clk) if (pwrite) last_wdata <= wdata & mask;
-always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin 
+always @(posedge pclk) if (pwrite) last_wdata <= wdata & mask;
+always @(posedge pclk or negedge presetn) begin
+    if (!presetn) begin 
         rega <= 32'h123456;
         control0 <= 32'hcc00;
         regb <= 24'h0;
@@ -204,7 +199,7 @@ always @(posedge clk or negedge rst_n) begin
     end else if (pwrite)  begin
         if (mpaddr == 'h0) rega <= (rega & ~mask) | (wdata & mask);
         if (mpaddr == 'h4) control0 <= (control0 & ~mask) | (wdata & mask);
-        if (mpaddr == 'hc) regb <= 24'h6fe02 & ((regb & ~mask) | (wdata & mask));
+        if (mpaddr == 'hc) regb <= 24'h7ff03 & ((regb & ~mask) | (wdata & mask));
         if (mpaddr == 'h100) eth0tmp0 <= (eth0tmp0 & ~mask) | (wdata & mask);
         if (mpaddr == 'h104) eth0tmp1 <= (eth0tmp1 & ~mask) | (wdata & mask);
         if (mpaddr == 'h108) eth0tmp2 <= (eth0tmp2 & ~mask) | (wdata & mask);
@@ -225,27 +220,27 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 wire regb_wr_sel = pwrite && (mpaddr=='hc);
-reg regb_wr_pulse_reg; always @(posedge clk)  regb_wr_pulse_reg <= regb_wr_sel;
+reg regb_wr_pulse_reg; always @(posedge pclk)  regb_wr_pulse_reg <= regb_wr_sel;
 assign regb_pulse = regb_wr_pulse_reg;
 
 
 wire extern_rd_sel = pread && (mpaddr=='h10);
-reg extern_rd_pulse_reg; always @(posedge clk)  extern_rd_pulse_reg <= extern_rd_sel;
+reg extern_rd_pulse_reg; always @(posedge pclk)  extern_rd_pulse_reg <= extern_rd_sel;
 assign extern_rd_pulse = extern_rd_pulse_reg;
 
 
 wire extern_wr_sel = pwrite && (mpaddr=='h10);
-reg extern_wr_pulse_reg; always @(posedge clk)  extern_wr_pulse_reg <= extern_wr_sel;
+reg extern_wr_pulse_reg; always @(posedge pclk)  extern_wr_pulse_reg <= extern_wr_sel;
 assign extern_wr_pulse = extern_wr_pulse_reg;
 
 
 wire ronly_rd_sel = pread && (mpaddr=='h42c);
-reg ronly_rd_pulse_reg; always @(posedge clk)  ronly_rd_pulse_reg <= ronly_rd_sel;
+reg ronly_rd_pulse_reg; always @(posedge pclk)  ronly_rd_pulse_reg <= ronly_rd_sel;
 assign ronly_pulse = ronly_rd_pulse_reg;
 
 
 wire ronly2_rd_sel = pread && (mpaddr=='h430);
-reg ronly2_rd_pulse_reg; always @(posedge clk)  ronly2_rd_pulse_reg <= ronly2_rd_sel;
+reg ronly2_rd_pulse_reg; always @(posedge pclk)  ronly2_rd_pulse_reg <= ronly2_rd_sel;
 assign ronly2_pulse = ronly2_rd_pulse_reg;
 
 wire [2:0] ExtraBytesldst_ram  =  pstrb[0] ? 0 : pstrb[1] ? 1 : pstrb[2] ? 2 : pstrb[3] ? 3 : 0;
@@ -253,7 +248,7 @@ assign ldst_ram_addr = ((mpaddr - 'h800)>>2);
 assign ldst_ram_wdata = wdata;
 
 assign ldst_ram_rd_pulse = pread && (mpaddr>='h800) && (mpaddr < 'ha00);
-reg ldst_ram_rd_pulse_dly; always @(posedge clk)  ldst_ram_rd_pulse_dly <= ldst_ram_rd_pulse;
+reg ldst_ram_rd_pulse_dly; always @(posedge pclk)  ldst_ram_rd_pulse_dly <= ldst_ram_rd_pulse;
 assign ldst_ram_rd_data_valid = ldst_ram_rd_pulse_dly;
 
 

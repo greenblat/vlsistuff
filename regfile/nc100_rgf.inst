@@ -1,5 +1,5 @@
 
-nc100_rgf nc100_rgf (.clk(clk),.rst_n(rst_n)
+nc100_rgf nc100_rgf (.pclk(pclk),.present(present)
     .pwrite(pwrite),.paddr(paddr),.psel(psel),.penable(penable)
     ,.prdata(prdata),.pwdata(pwdata),.pstrb(pstrb)
     ,.pready(pready),.pslverr(pselverr)

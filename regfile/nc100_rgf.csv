@@ -1,42 +1,42 @@
-kind,access,width,name,reset,addr,desc
-reg,rw,32,rega,0x123456,0x0,first register
-reg,rw,32,control0,0xcc00,0x4,control register
-reg,ro,24,statusa, ,0x8,
-field,ro,2,dma0, ,,
-field,ro,8,cpu1, ,,
-field,ro,3,spi0, ,,spi status
-reg,rw_pulse,24,regb,0x0,0xc,
-field,rw_pulse,2,odma, ,,
-field,rw_pulse,8,ocpu, ,,
-field,rw_pulse,3,ospi, ,,spi status
-reg,external,32,extern, ,0x10,dual fifo
-gap,,0,gap, ,0x14,
-reg,rw,32,eth0tmp0, ,0x100,
-reg,rw,24,eth0tmp1, ,0x104,
-reg,rw,16,eth0tmp2, ,0x108,
-gap,,0,gap, ,0x10c,
-reg,rw,32,eth1tmp0, ,0x200,
-reg,rw,24,eth1tmp1, ,0x204,
-reg,rw,16,eth1tmp2, ,0x208,
-gap,,0,gap, ,0x20c,
-reg,rw,32,eth2tmp0, ,0x300,
-reg,rw,24,eth2tmp1, ,0x304,
-reg,rw,16,eth2tmp2, ,0x308,
-gap,,0,gap, ,0x30c,
-reg,rw,32,eth3tmp0, ,0x400,
-reg,rw,24,eth3tmp1, ,0x404,
-reg,rw,16,eth3tmp2, ,0x408,
-reg,rw,128,wider, ,0x40c,staaam
-field,rw,32,wide0, ,,
-field,rw,32,wide1, ,,
-field,rw,32,wide2, ,,
-field,rw,32,wide3, ,,
-reg,ro,128,longer, ,0x41c,staaam
-field,ro,32,long0, ,,
-field,ro,32,long1, ,,
-field,ro,32,long2, ,,
-field,ro,32,long3, ,,
-reg,ro_pulse,32,ronly, ,0x42c,
-reg,ro_pulse,16,ronly2, ,0x430,
-gap,,0,gap, ,0x434,
-ram,,32,ldst_ram, ,0x800,
+kind,access,width,pos,name,reset,addr,desc
+reg,rw,32, ,rega,0x123456,0x0
+reg,rw,32, ,control0,0xcc00,0x4
+reg,ro,24, ,statusa, ,0x8
+field,ro,2,[1:0],dma0, ,
+field,ro,8,[15:8],cpu1, ,
+field,ro,3,[18:16],spi0, ,
+reg,rw_pulse,24, ,regb,0x0,0xc
+field,rw_pulse,2,[1:0],odma, ,
+field,rw_pulse,8,[15:8],ocpu, ,
+field,rw_pulse,3,[18:16],ospi, ,
+reg,external,32, ,extern, ,0x10
+gap,,0, ,gap, ,0x14
+reg,rw,32, ,eth0tmp0, ,0x100
+reg,rw,24, ,eth0tmp1, ,0x104
+reg,rw,16, ,eth0tmp2, ,0x108
+gap,,0, ,gap, ,0x10c
+reg,rw,32, ,eth1tmp0, ,0x200
+reg,rw,24, ,eth1tmp1, ,0x204
+reg,rw,16, ,eth1tmp2, ,0x208
+gap,,0, ,gap, ,0x20c
+reg,rw,32, ,eth2tmp0, ,0x300
+reg,rw,24, ,eth2tmp1, ,0x304
+reg,rw,16, ,eth2tmp2, ,0x308
+gap,,0, ,gap, ,0x30c
+reg,rw,32, ,eth3tmp0, ,0x400
+reg,rw,24, ,eth3tmp1, ,0x404
+reg,rw,16, ,eth3tmp2, ,0x408
+reg,rw,128, ,wider, ,0x40c
+field,rw,32,[31:0],wide0, ,
+field,rw,32,[63:32],wide1, ,
+field,rw,32,[95:64],wide2, ,
+field,rw,32,[127:96],wide3, ,
+reg,ro,128, ,longer, ,0x41c
+field,ro,32,[31:0],long0, ,
+field,ro,32,[63:32],long1, ,
+field,ro,32,[95:64],long2, ,
+field,ro,32,[127:96],long3, ,
+reg,ro_pulse,32, ,ronly, ,0x42c
+reg,ro_pulse,16, ,ronly2, ,0x430
+gap,,0, ,gap, ,0x434
+ram,,32, ,ldst_ram, ,0x800
