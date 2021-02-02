@@ -545,7 +545,7 @@ def advanceAddr(Obj):
         return Bytes
 
 INSTANCE = '''
-MODULE MODULE (.pclk(pclk),.present(present)
+MODULE MODULE (.pclk(pclk),.presetn(presetn)
     .pwrite(pwrite),.paddr(paddr),.psel(psel),.penable(penable)
     ,.prdata(prdata),.pwdata(pwdata),.pstrb(pstrb)
     ,.pready(pready),.pslverr(pselverr)
