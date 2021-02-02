@@ -172,21 +172,29 @@ class regClass:
                 elif Fi[0].startswith('reserved'):
                     pass
                 else:
-                    print('Ilia access error %s'%(self.Name))
+                    print('Ilia access error %s %s '%(self.Name,self.Access))
+            elif (Fi[1]=='gap'):
+                pass
             else: 
-                print('Ilia access error %s'%(self.Name))
+                print('Ilia access error %s %s'%(self.Name,Fi[1]))
         if len(self.fields)==1: self.fields=[]
         self.Reset = Rsts
         return True
 
 
     def report(self,Fout,Who):
-        if self.Name.startswith('reserved'): return
+#        if self.Name.startswith('reserved'): return
         Desc = ' ' 
         if self.description:
             Desc = 'description="%s"'%self.description
             Desc = Desc.replace('""','"')
 #            Desc = Desc.replace(' ','.')
+
+        if (self.Access=='none') or (len(self.fields)==1):
+            Fout.write('gap wid=%d\n'%(self.Wid))
+            return
+                
+
 
         Fout.write('reg %s%s access=%s wid=%d reset=%s %s\n'%(self.Name,Who,self.Access,self.Wid,hex(self.Reset),Desc))
         for ind,Fi in enumerate(self.fields):
@@ -219,7 +227,7 @@ class regClass:
                 Fout.write('field %s access=%s wid=%d %s %s\n'%(Fname,Access,Fi[2],Rst,Desc))
 
             if (Fname in fieldsKeeper)and(Access!='gap'):
-                print('ERROR! double field name %s  in reg %s'%(Fname,self.Name))
+                print('Warning! double field name %s  in reg %s, will be expanded in RTL'%(Fname,self.Name))
             else:
                 fieldsKeeper[Fname] = True
 
@@ -230,6 +238,7 @@ def parseField(List):
     if appears('sw = rw',List): Access='rw'
     if appears('sw = w',List): Access='rw_pulse'
     if appears('sw = r',List): Access='ro'
+    if appears('hw = na',List): Access='gap'
     if appears('name =',List):
         Ind = List.index('name')+2
         Desc = List[Ind]

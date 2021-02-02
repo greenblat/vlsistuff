@@ -538,6 +538,9 @@ def advanceAddr(Obj):
             return (X+1)*Align - Obj.Addr
         elif 'abs' in Obj.Params:
             return Obj.Params['abs']
+        elif 'width' in Obj.Params:
+            return Add*Bytes
+
         else:
             logs.log_error('advanceAddr GAP got %s'%str(Obj.Params))
     else:
