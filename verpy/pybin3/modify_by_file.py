@@ -101,11 +101,12 @@ def excecuteLine(Mod,wrds):
 def add_conns(Mod,Inst,List):
     Obj = Mod.insts[Inst]
     for PinNet in List:
-        Pin,Net  = PinNet.split('=')
-        Mod.add_conn(Inst,Pin,Net)
-#        Obj.conns[Pin]=Net
-        Mod.donesx +=1
-
+        if '=' in PinNet:
+            Pin,Net  = PinNet.split('=')
+            Mod.add_conn(Inst,Pin,Net)
+            Mod.donesx +=1
+        else:
+            logs.log_error('bad Pin=Net token %s for inst %s'%(PinNet,Inst))
 
 
 
