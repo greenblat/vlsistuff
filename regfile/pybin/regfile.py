@@ -513,8 +513,8 @@ def advanceAddr(Obj):
         logs.mustKey(Obj.Params,'depth')
         if 'modifier' in Obj.Params:
             Modif = Obj.Params['modifier']
-            if Modif not in ['internal','dpram','external']:
-                logs.log_error('ram mode=%s of %s is not supported (external,internal,dpram) '%(Modif,Obj.Params['names'][0]))
+            if Modif not in ['internal','external']:
+                logs.log_error('ram mode=%s of %s is not supported (external,internal) '%(Modif,Obj.Params['names'][0]))
                 
         Dep = Obj.Params['depth']
         if (Bytes2<=Bytes):
@@ -565,7 +565,6 @@ HEADER = '''module MODULE (
 '''
 
 STRING0 = '''
-);
 wire [ADDWID-1:0] mpaddr = (pread||pwrite) ? (paddr - 'hBASE)  : 0;
 wire [BUSWID-1:0] prdata_wire =
 '''
@@ -582,12 +581,22 @@ assign prdata =   RAMS
     prdata_reg;
 
 wire [BUSWID-1:0] mask = { PSTRB };
-wire [BUSWID-1:0] wdata = pwdata;
 always @(posedge pclk) if (pwrite) last_wdata <= wdata & mask;
 always @(posedge pclk ASYNCRST) begin
     if (!presetn) begin '''
 
-LINES = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[]}
+
+W1C = '''
+always @(posedge pclk ASYNCRST) begin
+    if (!presetn) begin 
+        NAME_int <= 0;
+    end else begin
+        NAME_int <= (NAME_wr_pulse ? (NAME_int & ~ wdata) : NAME_int) | NAME;
+    end
+end
+'''
+
+LINES = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[]}
 def dumpRam(Postfix,File):
     Module = Db['chip'].Params['names'][0] 
     try:
@@ -634,6 +643,13 @@ def bodyDump1(Db,File):
     Addwid = Db['chip'].Params['addrwid']
     if Buswid==64: Wstrb=8
     if Buswid==32: Wstrb=4
+    File.write(');\n')
+    Str = 'wire [BUSWID-1:0] wdata = pwdata;\n'.replace('BUSWID',str(Buswid))
+    File.write(Str)
+
+    for Line in LINES[10]:
+        File.write('%s\n'%Line)
+
     Str = STRING0.replace('MASK',hex(Mask)[2:])
     Str = Str.replace('BASE',hex(Base)[2:])
     Str = Str.replace('BUSWID',str(Buswid))
@@ -643,6 +659,8 @@ def bodyDump1(Db,File):
 
     for Line in LINES[1]:
         File.write('%s\n'%Line)
+
+
     Default = getPrm(Db['chip'],'empty',"0xdeaddead")
     if (type(Default) is int):
         Default = hex(Default)[2:]
@@ -814,14 +832,21 @@ def treatReg(Reg):
         Line = '        %s <= %d\'h%x;'%(Name,Wid,Reset)
         LINES[2].append(Line)
 
-    elif 'external' in Access:
-        Line = '    ,input [%d:0] %s'%(Wid-1,Name)
+    elif Access in ['external','w1c']:
+        Line = '    ,input %s %s'%(widi(Wid),Name)
         LINES[0].append(Line)
-        Line = '    ,output %s_rd_pulse'%(Name)
-        LINES[0].append(Line)
-        Line = '    ,output %s_wr_pulse'%(Name)
-        LINES[0].append(Line)
-        treatPrdata(Reg,Wid,Name)
+        if Access=='external':
+            LINES[0].append(Line)
+            LINES[0].append(Line)
+            treatPrdata(Reg,Wid,Name)
+        else:
+            Line0 = '    wire %s_rd_pulse;'%(Name)
+            Line1 = '    wire %s_wr_pulse;'%(Name)
+            Line2 = '    reg %s %s_int;'%(widi(Wid),Name)
+            Str = W1C.replace('NAME',Name)
+            LINES[10].extend([Line0,Line1,Line2,Str])
+            treatPrdata(Reg,Wid,Name+'_int')
+
         Str = ROPULSE.replace('assign REG','assign %s_rd'%Name)
         Str = Str.replace('REG',Name)
         Str = Str.replace('ADDR',hex(Reg.Addr)[2:])
@@ -830,7 +855,14 @@ def treatReg(Reg):
         Str = Str.replace('REG',Name)
         Str = Str.replace('ADDR',hex(Reg.Addr)[2:])
         LINES[4].append(Str)
+    else:
+        logs.log_error('ACCESS not recognized %s of %s'%(Access,Name))
 
+def widi(WID):
+    if type(WID) is int:
+        if WID<2: return ''
+        return '[%d:0]'%(WID-1)
+    return '[%s-1:0]'%(WID)
 def treatArray(Reg):
     Access = getPrm(Reg,'access','rw')
     Wid = getPrm(Reg,'width',32)
@@ -933,6 +965,10 @@ def treatRam(Reg):
         Line = 'assign %s_wdata = wdata[%d:0];'%(Name,Wid-1)
     LINES[4].append(Line)
 
+    if 'ready' in Reg.Params:
+        Line = '    ,input %s_ready'%(Name)
+        LINES[0].append(Line)
+        LINES[9].append(Name)
 
 
     Str = RAM_ROPULSE_RANGE.replace('REG',Name)

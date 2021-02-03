@@ -24,7 +24,9 @@ First line in any register definition file is chip line.
 
 ## REG parameters
   **width (or wid)** is register width. It can be any number, including big numbers like 500. In case there are fields, wid parameter is not required.
- **access**  can be rw (or wr) , ro , rw_pulse, ro_pulse, 
+ **access**  can be rw (or wr) , ro , rw_pulse, ro_pulse,  w1c or external
+      **access=w1c** is clear on write ones. Incoming read-only bus sets (by ORing with register)) bits in flipflop register. reading it does nothing. writing to it will clear all bits active in PWDATA.
+      **access=external**  output read/write pulsed strobes, dataout and datain. It is "DIY register".
  **description** Has either no spaces, or enclosed in "..." .
  **reset** is relevant to writable registers.
  **ready=true** is relevant to ro/rw_pulse registers. specific ready signal to this reg will stall the APB.
@@ -38,10 +40,12 @@ Fields dont have access. The access (read/write/...) is determined by the regist
 Fields should have width parameter and may have description.
 
 **field** Name **wid**=8 **align=**16 **desc**=DESC
-**align** is misnomer. It is the number of bits the field will be allocated in register. Active bits are defined by wid (or synonym width).
+**align** is misnomer. It is the number of bits the field will be allocated in register. Active bits are defined by wid (or synonym width). Usefull for keeping fields on byte boundaries.
+
+Please refrain from defining REG with a single FIELD.  it is ugly, not to say smart challenged.
 
 
-## TEMPLATE ans INSTANCE
+## TEMPLATE and INSTANCE
 
 1. **template** Tname
    **reg** ...
@@ -55,8 +59,8 @@ Template works like macro.
  **instance** will expand the template, where all registers and fields will be prefixed with Iname.
 
 ## GAP
-**gap align**=1024  **abs**=0x1000
-defined jump in address. Only one: align or abs is allowed.
+**gap align**=1024  **abs**=0x1000 **wid=**32
+defined jump in address. Only one flag per gap is allowed : align ,abs or wid.
 
 ## EXTERNAL
 **ram**   Name **wid**=32 **depth=1024** **desc**=Description

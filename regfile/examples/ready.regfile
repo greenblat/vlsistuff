@@ -19,6 +19,12 @@ field ocpu wid=8
 field ospi wid=3 desc=spi.status
 
 
+reg w1cc access=w1c wid=32 desc="w1c register"
+
+
+gap align=256
+ram ramx wid=17 depth=256 ready=true
+
 
 end
 
