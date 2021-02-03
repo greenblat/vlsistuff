@@ -16,14 +16,14 @@ def work(line,state):
     if state=='idle':
         if '0544927322' in line:
             wrds = line.split()
-            if (len(wrds)==3)and(wrds[0][:5] = '#####'):
+            if (len(wrds)==3)and(wrds[0][:5] == '#####'):
                 Fname = wrds[2]
                 Fmid = openFile(Fname)
                 return 'work'
     elif state=='work':
         if '0504231259' in line:
             wrds = line.split()
-            if (len(wrds)==3)and(wrds[0][:5] = '#####'):
+            if (len(wrds)==3)and(wrds[0][:5] == '#####'):
                 Fmid.close()
                 return 'idle'
         else:
@@ -41,9 +41,12 @@ def mkdirPath(Path):
     if '/' not in Path: return
     WW = Path.split('/')
     WW.pop(-1)
-    for ii in range(1,len(WW)):
+    print(WW,Path)
+    for ii in range(1,len(WW)+1):
         Sub = '/'.join(WW[:ii])
-        if not os.path.exists(Sub):
+        Abs = os.path.abspath(Sub)
+        print(Abs,Sub,ii,len(WW)+1)
+        if not os.path.exists(Abs):
             os.mkdir(Sub)
 
 
