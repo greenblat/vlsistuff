@@ -1645,7 +1645,6 @@ def add_localparam(List0):
                     Current.add_localparam(Name,Expr)
             elif (len(Item)==3)and(Item[0]=='parameter'):
                 Name = Item[1]
-                print('XXXXX',Item[2])
                 Expr = get_expr(Item[2])
                 Current.add_localparam(Name,Expr)
         return
