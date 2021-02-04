@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python3.9
 
 import os,sys,string
 
@@ -550,7 +550,7 @@ def advanceAddr(Obj):
 INSTANCE = '''
 MODULE MODULE (.pclk(pclk),.presetn(presetn)
     .pwrite(pwrite),.paddr(paddr),.psel(psel),.penable(penable)
-    ,.prdata(prdata),.pwdata(pwdata),.pstrb(pstrb)
+    ,.prdata(prdata),.prdata_wire(),.pwdata(pwdata),.pstrb(pstrb)
     ,.pready(pready),.pslverr(pselverr)
 '''
 
@@ -559,14 +559,14 @@ MODULE MODULE (.pclk(pclk),.presetn(presetn)
 
 HEADER = '''module MODULE (
     input pclk,input presetn,input pwrite, input pread
-    ,input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata
+    ,input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata, output [BUSWID-1:0] prdata_wire
     ,input [WSTRB-1:0] pstrb
     ,input [ADDWID-1:0] paddr ,output reg [BUSWID-1:0] last_wdata
 '''
 
 STRING0 = '''
 wire [ADDWID-1:0] mpaddr = (pread||pwrite) ? (paddr - 'hBASE)  : 0;
-wire [BUSWID-1:0] prdata_wire =
+assign [BUSWID-1:0] prdata_wire =
 '''
 
 PSTRB4 = '{{8{pstrb[3]}},{8{pstrb[2]}},{8{pstrb[1]}},{8{pstrb[0]}}}';
@@ -1015,13 +1015,13 @@ def runXml():
 
 APBHead = '''
 module MODULE (input pclk, input presetn,
-    input psel, input penable, input pwrite, input [WSTRB-1:0] pstrb, input [ADDWID-1:0] paddr, input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata
+    input psel, input penable, input pwrite, input [WSTRB-1:0] pstrb, input [ADDWID-1:0] paddr, input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata,output [BUSWID-1:0] prdata_wire
     ,output pready, output pslverr
 '''
 APBInst = '''
 wire [1023:0] ZEROES = 1024'b0;
 MODULE rgf (.pclk(pclk),.presetn(presetn),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
-    ,.pwdata(pwdata),.prdata(prdata)
+    ,.pwdata(pwdata),.prdata(prdata),.prdata_wire(prdata_wire)
     ,.pstrb(pstrb)
 '''
 
