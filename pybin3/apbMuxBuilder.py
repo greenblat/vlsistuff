@@ -41,6 +41,7 @@ def main():
     for II in range(Portsnum):
         File.write("assign psel%d  = psel && (paddr>=32'h%x) && (paddr<32'h%x);\n"%(II,Run,Run+Incraddr))
         File.write("reg psel%d_d1; always @(pclk) psel%d_d1  <= psel%d;\n"%(II,II,II))
+        File.write("assign paddr%d  = paddr%d-32'h%x;\n"%(II,II,Run))
         Run += Incraddr;
     File.write('assign pready = \n')
     for II in range(Portsnum):
