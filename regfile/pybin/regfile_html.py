@@ -65,7 +65,10 @@ def produce_html(Module,Db):
     OpcodeWidth = 16
     ofile = open('%s_rgf.html'%(Module),'w')
     Fcsv = open('%s.csv'%(Module),'w')
+    Fmd = open('%s.md'%(Module),'w')
     Fcsv.write('kind,access,width,pos,name,reset,addr,desc\n')
+    Fmd.write('|kind|access|width|pos|name|reset|addr|desc|\n')
+    Fmd.write('|----|------|-----|---|----|-----|----|----|\n')
     Str = header_string.replace('CHIPCHIP',Module)
     ofile.write(Str)
 #    ofile.write(table_header_string.replace('OPCODEWIDTH',str(OpcodeWidth)))
@@ -119,9 +122,11 @@ def produce_html(Module,Db):
             (H,L) = Item.Params['position']
             List = [Item.Kind,Item.Params['access'],Item.Params['width'],'[%s:%s]'%(H,L),Item.Params['names'][0],Reset,Addr,Desc]
             Fcsv.write('%s,%s,%s,%s,%s,%s,%s\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6]))
+            Fmd.write('|%s|%s|%s|%s|%s|%s|%s|\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6]))
         else:
             List = [Item.Kind,Item.Params['access'],Item.Params['width'],' ',Item.Params['names'][0],Reset,Addr,Desc]
             Fcsv.write('%s,%s,%s,%s,%s,%s,%s\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6]))
+            Fmd.write('|%s|%s|%s|%s|%s|%s|%s|\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6]))
 
         acolor=color
 #        ofile.write('<tr bgcolor='+color+'> <td><a target="_blank" href="file:chip_doc.html/#'+Inst+'">'+Inst+'</a></td>\n')
@@ -134,6 +139,7 @@ def produce_html(Module,Db):
     ofile.write(tail_string)
     ofile.close()
     Fcsv.close()
+    Fmd.close()
 
 def run_on_coding(wrds,ofile,Size=4):
     for word in wrds:
