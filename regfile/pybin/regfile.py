@@ -566,7 +566,7 @@ HEADER = '''module MODULE (
 
 STRING0 = '''
 wire [ADDWID-1:0] mpaddr = (pread||pwrite) ? (paddr - 'hBASE)  : 0;
-assign [BUSWID-1:0] prdata_wire =
+assign prdata_wire =
 '''
 
 PSTRB4 = '{{8{pstrb[3]}},{8{pstrb[2]}},{8{pstrb[1]}},{8{pstrb[0]}}}';
