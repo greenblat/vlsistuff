@@ -57,6 +57,14 @@ def valid(Sig,Base=BASE):\n\
     return X=='1'\n\
 \n\
 \n\
+def peekbinx(Sig,Wid,Base=BASE):\n\
+    LL = []\n\
+    for X in range(Wid):\n\
+        Chr = peekbin('%s[%d]'%(Sig,X),Base)\n\
+        LL.append(Chr)\n\
+    LL.reverse()\n\
+    Str = ''.join(LL)\n\
+    return Str\n\
 \n\
 \n\
 def conclusions():\n\
@@ -223,6 +231,9 @@ FILE *inf;
 FILE *Frecords;
 FILE *vcdF0 = NULL;
 FILE *vcdF1 = NULL;
+FILE *vcdFX = NULL;
+
+
 int vcdCode = 1;
 int intcode();
 void do_help() { 
@@ -400,6 +411,7 @@ void readfile(fname) char *fname; {
     int guard=0;
     inf = fopen(fname, "r");
     Frecords = fopen("recorded.nets","w");
+    vcdFX = fopen('back.vcd","w");
     if (inf==NULL) {
         printf("error: cannot open input file %s\n",fname);
         exit(2);
@@ -412,8 +424,10 @@ void readfile(fname) char *fname; {
 
         if (j==0) {
             conclusions();
+            fclose(vcdFX);
             exit(0);
         }
+        fprintf(vcdFX,line);
 
         if (guard>999999) { guard=0;printf("%d lines %g %d maxusedsig=%d\n",linenum,run_time,0,maxusedsig);}
         if (j == NULL) {
