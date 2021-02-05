@@ -67,6 +67,18 @@ def produce_html(Module,Db):
     Fcsv = open('%s.csv'%(Module),'w')
     Fmd = open('%s.md'%(Module),'w')
     Fcsv.write('kind,access,width,pos,name,reset,addr,desc\n')
+    Fmd.write('# register file "**%s**"\n'%Module)
+    Prmx = Db['chip'].Params
+    Keys = list(Prmx.keys())
+    Keys.sort()
+    for Key in Keys:
+        if Key != 'names':
+            if Key=='empty':
+                Fmd.write(' - %s %s\n'%(Key,hex(Prmx[Key])))
+            else:
+                Fmd.write(' - %s %s\n'%(Key,Prmx[Key]))
+
+    Fmd.write('\n\n')
     Fmd.write('|kind|access|width|pos|name|reset|addr|desc|\n')
     Fmd.write('|----|------|-----|---|----|-----|----|----|\n')
     Str = header_string.replace('CHIPCHIP',Module)
