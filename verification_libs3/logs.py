@@ -133,8 +133,8 @@ def log_wrong(Text,Which=0):
     if veri: veri.force('%swrongs'%TB,str(Wrongs))
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
-    print('@%d: %d vs %d (err=%d):  WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text))
-    Flogs[Which].write('@%d: %d vs %d (err=%d):  WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
+    print('@%d @%d: %d vs %d (err=%d):  WRONG: %s'%(veri.stime(),get_cycles(),Wrongs,Corrects,Errors,Text))
+    Flogs[Which].write('@%d @%d: %d vs %d (err=%d):  WRONG: %s\n'%(veri.stime(),get_cycles(),Wrongs,Corrects,Errors,Text))
     if Wrongs >= MAXWRONGS:
         log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS),Which)
         if finishReason:
