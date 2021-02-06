@@ -76,7 +76,7 @@ class sequenceClass:
         List = File.readlines()
         File.close()
         for Line in List:
-            if len(Line)>1:
+            if (len(Line)>1)and(Line[-1]=='\n'):
                 self.Sequence.append(Line[:-1])
         self.searchPath.append(os.path.abspath(os.path.dirname(Filename)))
         self.workIncludes()
