@@ -35,8 +35,10 @@ class apbDriver:
         self.markers={}
         self.finishes=False
         self.hexMode = False
+        self.Backs = []
         if Monitors != -1:
             Monitors.append(self)
+        self.Caller = False
         logs.log_info('apbDriver  ver 1.jun.2020')
 
 
@@ -84,6 +86,9 @@ class apbDriver:
     def marker(self,Which):
         self.queue0.append(('marker',Which))
 
+    def prdata(self):
+        Who,Act,Addr = self.Backs.pop(0)
+        return Act
 
     def action(self,Cmd):
         wrds = Cmd.split()
@@ -94,6 +99,13 @@ class apbDriver:
                 self.read(wrds[1],wrds[2])
         elif wrds[0]=='write':
             self.write(wrds[1],wrds[2])
+        elif wrds[0]=='prdata':
+            Who,Act,Addr = self.Backs.pop(0)
+            Deg = wrds[1]
+            if self.Caller:
+                self.Caller.Translates[Deg]=Act
+                print('XXXXX',Deg,Act)
+
         elif wrds[0]=='wait':
             self.wait(wrds[1])
         else:
@@ -112,6 +124,11 @@ class apbDriver:
     def forcenet(self,Net,Val):
         self.queue0.append(('force',Net,Val))
 
+    def eval(self,Data):
+        if self.Caller:
+            return eval(Data,self.renames,self.Caller.Translates)
+        return eval(Data,self.renames)
+
     def write(self,Addr,Data):
         if type(Addr) is str:
 #            logs.log_info('translate address in=%s out=%x'%(Addr,self.translate(Addr)))
@@ -120,7 +137,7 @@ class apbDriver:
             Data = logs.float2binary(Data)
 #        logs.log_info('apb write  address=%x  data=%x'%(Addr,Data))
         if type(Data) is str:
-            Data = eval(Data,self.renames)
+            Data = self.eval(Data)
         self.queue0.append(('write',Addr,Data))
 
     def write1(self,Addr,Data):
@@ -207,9 +224,6 @@ class apbDriver:
         self.run1()
 
     def run0(self):
-#        if (len(self.queue0),len(self.seq0)) != (0,0):
-#            logs.log_info('run0 wait0=%d until0=%s queue0=%d seq0=%d %s'%(self.waiting0,self.wait_until0,len(self.queue0),len(self.seq0),self.seq0))
-  
         if self.waiting0>0:
             self.waiting0 -= 1
             return
@@ -269,17 +283,16 @@ class apbDriver:
                 elif Sig=='wait':
                     self.waiting0=int(Val)
                 elif Sig=='catch':
-                    Who,Exp = Val
-                    X = self.peek(self.rename(Who))
-                    if Exp=='none':
-                        pass
-                    elif type(Exp) is types.FunctionType:
-                        Exp(X)
+                    Who,Exp,Addr = Val
+                    Act = self.peek(self.rename(Who))
+                    if type(Exp) is types.FunctionType:
+                        Exp(Act)
                     elif type(Exp) is int:
-                        logs.log_ensure((Exp==X),'apb %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(self.Name,X,Exp,Exp,Exp,self.rename(Who)),2)
+                        logs.log_ensure((Exp==Act),'apb addr=%x %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(Addr,self.Name,Act,Exp,Exp,Exp,self.rename(Who)),2)
                     else: 
-                        Exp0 = eval(Exp,self.renames)
-                        logs.log_info2('apb %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(self.Name,X,Exp,Exp0,Exp0,self.rename(Who)))
+                        Act = self.peek(self.rename(Who))
+                        logs.log_info('apb addr=%x %s read act=%x who=%s'%(Addr,self.Name,Act,self.rename(Who)))
+                        self.Backs.append((Who,Act,Addr))
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 else:
@@ -304,7 +317,7 @@ class apbDriver:
             elif What[0]=='read':
                 self.seq0.append([('lock','1'),('psel',1),('paddr',What[1]),('pwrite',0)])
                 self.seq0.append([('penable',1)])
-                self.seq0.append([('conditional','pready',1),('catch',('prdata',What[2])),('psel',0),('paddr',0),('pwrite',0),('penable',0)])
+                self.seq0.append([('conditional','pready',1),('catch',('prdata',What[2],What[1])),('psel',0),('paddr',0),('pwrite',0),('penable',0)])
                 self.seq0.append([('lock','0'),('wait',5)])
             elif What[0]=='wait':
                 self.seq0.append([('wait',What[1])])
@@ -375,16 +388,18 @@ class apbDriver:
                 elif Sig=='wait':
                     self.waiting1=int(Val)
                 elif Sig=='catch':
-                    Who,Exp = Val
+                    Who,Exp,Addr = Val
                     X = self.peek(self.rename(Who))
-                    logs.log_info2('catch %s %s'%(Who,Exp))
+                    logs.log_info('catch %s %s'%(Who,Exp))
                     if type(Exp) is function:
                         Exp(X)
                     elif type(Exp)== int:
-                        logs.log_info2('apb %s read act=%x exp=%s (%x) (0d%d)   who=%s'%(self.Name,X,Exp,Exp,Exp,self.rename(Who)))
+                        logs.log_info('apb %s read act=%x exp=%s (%x) (0d%d)   who=%s'%(self.Name,X,Exp,Exp,Exp,self.rename(Who)))
                     else: 
                         Exp0 = eval(Exp,self.renames)
-                        logs.log_info2('apb %s read act=%x exp=%s (%x) (0d%d)   who=%s'%(self.Name,X,Exp,Exp0,Exp0,self.rename(Who)))
+                        logs.log_info('apb %s read act=%x exp=%s (%x) (0d%d)   who=%s'%(self.Name,X,Exp,Exp0,Exp0,self.rename(Who)))
+                        self.Backs.append((Who,Act,Addr))
+
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 else:
@@ -404,7 +419,7 @@ class apbDriver:
             elif What[0]=='read':
                 self.seq1.append([('lock','1'),('psel',1),('paddr',What[1]),('pwrite',0)])
                 self.seq1.append([('penable',1)])
-                self.seq1.append([('conditional','pready',1),('catch',('prdata',What[2])),('psel',0),('paddr',0),('pwrite',0),('penable',0)])
+                self.seq1.append([('conditional','pready',1),('catch',('prdata',What[2],What[1])),('psel',0),('paddr',0),('pwrite',0),('penable',0)])
                 self.seq1.append([('lock','0')])
             elif What[0]=='wait':
                 self.seq1.append([('wait',What[1])])

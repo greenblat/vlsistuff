@@ -48,6 +48,7 @@ class sequenceClass:
         self.Translates['rnd'] = self.rnd
         for (Nickname,Object) in AGENTS:
             self.agents[Nickname]=Object
+            Object.Caller = self
         self.searchPath = ['.'] 
         self.Ptr = 0
         self.Labels = {}
@@ -310,6 +311,8 @@ class sequenceClass:
             for Wrd in wrds[1:]:
                 if self.peek(Wrd):
                     Res += ' %s=%s'%(Wrd,self.peek(Wrd))
+                elif Wrd in self.Translates:
+                    Res += str(self.Translates[Wrd])
                 else:
                     Res += ' '+Wrd
             logs.log_info('PRINT %s'%Res)

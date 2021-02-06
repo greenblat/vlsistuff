@@ -161,6 +161,7 @@ class itemClass:
         self.Addr = -1
         self.RAMS = ''
         self.RAMS_WIRES = ''
+        self.incs = []
     def dump(self):
         print('%s : (%d 0x%x) %s'%(self.Kind,self.Addr,self.Addr,self.Params))
     def Synonyms(self):
@@ -325,7 +326,13 @@ def uniquifyFields():
                     Newname = Reg.Name+'_'+Fname
                 Field.Name = Newname
                 Field.Params['names'][0] = Newname
-               
+        elif (len(List)==1):
+            Field,Reg = List[0]
+            if 'suffix' in Reg.Params:
+                logs.log_warning('no need for suffix in reg=%s field=%s - it is unique'%(Reg.Name,Field.Name))
+            if 'prefix' in Reg.Params:
+                logs.log_warning('no need for prefix in reg=%s field=%s - it is unique'%(Reg.Name,Field.Name))
+
             
         
 
@@ -352,11 +359,16 @@ def gatherFields():
                 else:
                     Db['fields'][Active].append(Reg)
                 Reg.Name = Reg.Params['names'][0]
+                Obj.incs.append(Reg.Name)
             else:
                 logs.log_error('no reg for field %s'%(Reg.Params))
         else:
             Db['regs'].append(Reg)
             Active=False
+    for Reg in Db['regs']:
+        if len(Reg.incs)==1:
+            logs.log_warning('REG "%s" has just one field "%s". this is not needed.'%(Reg.Name,Reg.incs[0]))
+
 
 def report():
     logs.mustKey(Db,'chip')
@@ -772,7 +784,7 @@ def treatReg(Reg):
     if (Reset==0)and(Default!=0): Reset=Default
     Name= getPrm(Reg,'names',['err'])[0]
     if 'ro' in Access:
-        Line = '    ,input [%d:0] %s'%(Wid-1,Name)
+        Line = '    ,input %s %s'%(widi(Wid),Name)
         LINES[0].append(Line)
         if 'pulse' in Access:
             lastAddr = Reg.Addr
@@ -794,7 +806,7 @@ def treatReg(Reg):
 
         treatPrdata(Reg,Wid,Name)
     elif ('rw' in Access)or('wr' in Access):
-        Line = '    ,output reg [%d:0] %s'%(Wid-1,Name)
+        Line = '    ,output reg %s %s'%(widi(Wid),Name)
         LINES[0].append(Line)
         lastAddr = Reg.Addr
         Wid2 = Wid
@@ -844,6 +856,11 @@ def treatReg(Reg):
             Line1 = '    wire %s_wr_pulse;'%(Name)
             Line2 = '    reg %s %s_int;'%(widi(Wid),Name)
             Str = W1C.replace('NAME',Name)
+            RST = getPrm(Db['chip'],'reset','async')
+            if RST=='async':
+                Str = Str.replace('ASYNCRST','or negedge presetn')
+            else:
+                Str = Str.replace('ASYNCRST','')
             LINES[10].extend([Line0,Line1,Line2,Str])
             treatPrdata(Reg,Wid,Name+'_int')
 
@@ -968,7 +985,7 @@ def treatRam(Reg):
     if 'ready' in Reg.Params:
         Line = '    ,input %s_ready'%(Name)
         LINES[0].append(Line)
-        LINES[9].append(Name)
+        LINES[9].append(('ram',Name))
 
 
     Str = RAM_ROPULSE_RANGE.replace('REG',Name)
@@ -1081,8 +1098,6 @@ def enclosingModule(Temp,Finst):
          Db['fout'].write('%s\n'%Li)
          wrds = Li.split()
          Finst.write('    ,.%s(%s)\n'%(wrds[-1],wrds[-1]))
-#    for Line in LINES[9]:
-#        Db['fout'].write('    ,input %s_ready\n'%Line)
     Db['fout'].write(');\n')
     Finst.write(');\n')
 
@@ -1094,7 +1109,10 @@ def enclosingModule(Temp,Finst):
     else:
         Db['fout'].write('assign pready = \n')
         for Name in LINES[9]:
-            Db['fout'].write('    %s_pulse ? %s_ready :\n'%(Name,Name))
+            if (type(Name) is tuple)and(Name[0]=='ram'):
+                Db['fout'].write('    (%s_wr_pulse || %s_rd_pulse) ? %s_ready :\n'%(Name[1],Name[1],Name[1]))
+            else:
+                Db['fout'].write('    %s_pulse ? %s_ready :\n'%(Name,Name))
         Db['fout'].write('    1;\n')
 
     Str = APBInst.replace('MODULE',Db['module']+'_ram')
