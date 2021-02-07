@@ -108,7 +108,7 @@ def add_conns(Mod,Inst,List):
             Mod.donesx +=1
         else:
             logs.log_error('bad Pin=Net token %s for inst %s'%(PinNet,Inst))
-
+AHBX = 'haddr=hs_Xhaddr 
 def scanFunctions(wrds):
     Res = []
     for Word in wrds:
@@ -120,7 +120,9 @@ def scanFunctions(wrds):
                 PI = wx[1]
             else:
                 SL = Job
-                PI = ''[1]
+                PI = ''
+        
+
         if Words.startswith('conns(')
 
 
