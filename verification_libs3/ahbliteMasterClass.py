@@ -2,6 +2,7 @@
 import os,sys
 import veri
 import logs
+import random
 
 
 BURSTS = 'single incr incr4 wrap4 incr8 wrap8 incr16 wrap16'.split()
@@ -28,6 +29,7 @@ def burstcode(Burst):
 
 SEQ = 3
 NONSEQ = 2
+BUSY = 1
 IDLE = 0
 
 class ahbliteMaster(logs.driverClass):
@@ -40,6 +42,7 @@ class ahbliteMaster(logs.driverClass):
         self.waiting=0
         self.HSEL = 1
         self.translations=Translations
+        self.busyOk = True
 
     def translate(self,Addr):
         if Addr[0] in '0123456789':
@@ -126,6 +129,8 @@ class ahbliteMaster(logs.driverClass):
                 self.seq.append([('hburst',Burst),('haddr',What[3]),('hwdata',0),('hwrite',HW),('htrans',NONSEQ),('hsize',2),('hsel',1),('hready',1)])
                 for X in range(burstlen(What[1])):
                     Addr = What[3]+4*X
+                    if (self.busyOk)and(random.randint(0,100)>80):
+                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',BUSY),('hsize',2),('hsel',1),('hready',1)])
                     if HW==1:
                         self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('hsize',2),('hsel',1),('hready',1)])
                     else:
