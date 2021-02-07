@@ -94,25 +94,43 @@ class ahbliteMaster(logs.driverClass):
         if  Sig in self.translations:
             Sig = self.translations[Sig]
         return self.peek(Sig)
+    def tr_force(self,Sig,Val):
+        if  Sig in self.translations:
+            Sig = self.translations[Sig]
+        return self.force(Sig,Val)
 
     def run(self):
         if self.waiting>0:
             self.waiting -= 1
             return
         hreadyout = self.tr_peek('hreadyout')
-        if hreadyout==0: return
-        if self.seq!=[]:
-            List = self.seq.pop(0)
+        if self.seq==[]:
+            self.tr_force('hsel',0)
+            self.tr_force('htrans',0)
+            self.tr_force('hburst',0)
+            self.tr_force('hwrite',0)
+        elif self.seq!=[]:
+            List = self.seq[0]
             for (Sig,Val) in List:
                 if  Sig in self.translations:
                     Sig = self.translations[Sig]
                 if Sig=='wait':
                     self.waiting=int(Val)
                 elif Sig=='catch':
-                    X = self.tr_peek(Val[0])
-                    logs.log_info('ahb %s read 0x%x addr=0x%x'%(self.Name,X,Val[1]))
+                    if hreadyout==1:
+                        X = self.tr_peek(Val[0])
+                        logs.log_info('ahb %s read 0x%x addr=0x%x'%(self.Name,X,Val[1]))
                 else:
                     self.force(Sig,Val)
+            if self.tr_peek('hresp')!=0:
+                self.seq = []
+                self.tr_force('hsel',0)
+                self.tr_force('htrans',0)
+                self.tr_force('hburst',0)
+                self.tr_force('hwrite',0)
+                return
+            if hreadyout==0: return
+            self.seq.pop(0)
             return
 
         if self.queue!=[]:

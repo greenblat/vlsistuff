@@ -27,6 +27,7 @@ def executeLines(Mod,Cmdlines):
             excecuteLine(Mod,wrds)
 
 def excecuteLine(Mod,wrds):
+    wrds = scanFunctions(wrds)
     if (wrds[0]=='unconn'):
         Inst = wrds[1]
         if Inst not in  Mod.insts:
@@ -108,5 +109,18 @@ def add_conns(Mod,Inst,List):
         else:
             logs.log_error('bad Pin=Net token %s for inst %s'%(PinNet,Inst))
 
+def scanFunctions(wrds):
+    Res = []
+    for Word in wrds:
+        if Word.startswith('ahbconn('):
+            Job = Word[7:-1]
+            if ',' in Job: 
+                wx = Job.split(',')
+                SL = wx[0]
+                PI = wx[1]
+            else:
+                SL = Job
+                PI = ''[1]
+        if Words.startswith('conns(')
 
 

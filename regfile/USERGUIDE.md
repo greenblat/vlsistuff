@@ -99,6 +99,18 @@ field ospi wid=3 desc=spi.status
 end
 ```
 
+## POINTS 
+
+- register can have unlimited width. It will be split between several addresses as needed. No coherency is built in.
+
+- access rw_pulse will generate pulse when last location of register is written. This can be used to push to a fifo or enforce coherency.
+
+- access ro_pulse also produces pulse when last location is read. To catch coherency start reading from the last address and use the pulse to catch the whole bus.
+
+  
+
+
+
 questions/suggestions:    Ilia greenblat@mac.com
 
 
