@@ -37,6 +37,7 @@ class axiMasterClass:
         self.AWVALID = False
         self.ARVALID = False
         self.WVALID = False
+        self.Size = 2
 
     def rename(self,Sig):
         if Sig in self.renames:
@@ -57,16 +58,23 @@ class axiMasterClass:
     def force(self,Sig,Val):
         Sig = self.rename(Sig)
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
-
     def action(self,Txt):
-        print('ACT',Txt)
+        print('ACT',self.Name,Txt)
         wrds = Txt.split()
         if wrds[0]=='write':
-            self.makeWrite(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),list(map(eval,wrds[5:])))
+            if len(wrds)==3:
+                self.makeWrite(1,1,eval(wrds[1]),self.Size,[eval(wrds[2])])
+            elif len(wrds)>=6:
+                self.makeWrite(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),list(map(eval,wrds[5:])))
         elif wrds[0]=='read':
-            self.makeRead(eval(wrds[1]),eval(wrds[2]),eval(wrds[2]),2)
+            if len(wrds)==2:
+                self.makeRead(1,1,eval(wrds[1]))
+            else:
+                self.makeRead(eval(wrds[1]),eval(wrds[2]),eval(wrds[2]),2)
         else:
             logs.log_error('action %s axiMater unrecognized %s'%(self.Name,Txt))
+
+#    def makeRead(self,Burst,Len,Address,Size=4,Rid='none'):
             
 # Burst,Len,Address,Size=4,Wdatas=[]):
 
