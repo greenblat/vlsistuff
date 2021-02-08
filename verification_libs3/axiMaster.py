@@ -8,6 +8,7 @@ axi.wait(100)
 '''
 # def makeRead(self,Burst,Len,Address,Size=4,Rid='none'):
 # def makeWriteWstrb(self,Burst,Len,Address,Size=4,Wstrb='auto',Wdatas=[]):
+# def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
 
 import os,sys,string,types
 import logs
@@ -246,17 +247,19 @@ class axiMasterClass:
         else:
             self.force('bready','0')
     def runW(self):
-        if (self.WVALID) and (self.peek('wready')==0): return
+#        if (self.WVALID) and (self.peek('wready')==0): return
         if self.wQueue==[]: 
             self.force('wvalid',0)
             return
-        Cmd = self.wQueue.pop(0)
+        Cmd = self.wQueue[0]
         wrds = Cmd.split()
         if wrds==[]:
             pass
         elif (wrds[0]=='force'):
             self.forces(wrds[1:])
         self.WVALID = ('wvalid=1' in Cmd)
+        if (self.peek('wready')==1):
+            self.wQueue.pop(0)
 
     def forces(self,wrds):
         for wrd in wrds:
