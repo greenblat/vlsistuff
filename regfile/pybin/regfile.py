@@ -6,6 +6,7 @@ import logs
 
 import xml_regfile2_create
 import regfile_html
+import regfile_c
 
 def main():
     Fname = sys.argv[1]
@@ -1029,6 +1030,7 @@ def runXml():
     Module = Db['chip'].Params['names'][0]
     xml_regfile2_create.createXml(Module,Db)
     regfile_html.produce_html(Module,Db)
+    regfile_c.produce_c_headers(Module,Db)
 
 APBHead = '''
 module MODULE (input pclk, input presetn,
