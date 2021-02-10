@@ -290,7 +290,6 @@ class apbDriver:
                     elif type(Exp) is int:
                         logs.log_ensure((Exp==Act),'apb addr=%x %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(Addr,self.Name,Act,Exp,Exp,Exp,self.rename(Who)),2)
                     else: 
-                        Act = self.peek(self.rename(Who))
                         logs.log_info('apb addr=%x %s read act=%x who=%s'%(Addr,self.Name,Act,self.rename(Who)))
                         self.Backs.append((Who,Act,Addr))
                 elif Sig=='until':
@@ -394,7 +393,7 @@ class apbDriver:
                     if type(Exp) is function:
                         Exp(X)
                     elif type(Exp)== int:
-                        logs.log_info('apb %s read act=%x exp=%s (%x) (0d%d)   who=%s'%(self.Name,X,Exp,Exp,Exp,self.rename(Who)))
+                        logs.log_ensure((Exp==Act),'apb addr=%x %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(Addr,self.Name,Act,Exp,Exp,Exp,self.rename(Who)),2)
                     else: 
                         Exp0 = eval(Exp,self.renames)
                         logs.log_info('apb %s read act=%x exp=%s (%x) (0d%d)   who=%s'%(self.Name,X,Exp,Exp0,Exp0,self.rename(Who)))
