@@ -129,10 +129,13 @@ def run_main(Params):
         if (Dir=='y'):
             Dir='tmp'
         do_the_split(Lines4,Dir)
+    Lines5 = []
+    doFile4(Lines4,Lines5)
+    doFile5(Lines5)
 
 
 
-
+def doFile4(Lines4,Lines5):
     File4 = open('file4.v','w')
     state='idle'
     for line in Lines4:
@@ -167,10 +170,39 @@ def run_main(Params):
             else:
                 line=''
         
+
+
         wrds = line.split()
         if len(wrds)>0:
             File4.write('%s\n'%line)
+            Lines5.append(line+'\n')
     File4.close()
+
+def doFile5(Lines5):
+    File5 = open('file5.v','w')
+    state='header'
+    for line in Lines5:
+        if (state=='header'):
+            File5.write(line)
+            if ';' in line:
+                state = 'externals'
+        elif (state=='externals'):
+            wrds = line.split()
+            if (len(wrds)>0)and(wrds[0] in ['input','output','inout','parameter']):
+                File5.write(line)
+            elif (len(wrds)>0)and(wrds[0] in ['assign','localparam','always']):
+                state = 'finish'
+            elif (len(wrds)>0)and(wrds[0] in ['endmodule']):
+                state = 'finish'
+        elif (state=='finish'):
+            File5.write('endmodule\n\n')
+            File5.close()
+            return
+    File5.write('endmodule\n\n')
+    File5.close()
+    return
+
+
 
 Pat0 = re.compile('[{:\-+ \[][0-9]+ *[\*] *[0-9]+')
 Pat1 = re.compile('[{:\-+ \[][0-9]+ *[+-] *[0-9]+')
