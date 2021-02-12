@@ -1,4 +1,7 @@
 # LATEST FIXES
+1. added "field gap wid=4"   : expand "field with aligh" notion. adding field named "gap" inserts empty bits in regfile.
+
+# LATEST FIXES
 1. reg with access=w1c is clear on write ones. Incoming read-only bus sets (by ORing with register)) bits in flipflop register. reading it does nothing. writing to it will clear all bits active in PWDATA.
 
 # LATEST FIXES

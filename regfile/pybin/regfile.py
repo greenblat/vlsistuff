@@ -249,18 +249,30 @@ def treatFields():
                 Cover[PP] = '1'
 
             if outAccess(Access):
-                if Split:
+                if Name == 'gap':
+                    pass
+                elif Split:
                     LINES[7].append('    ,output %s %s'%(WW,Name))
-                if ('fields' in RegObj.Params):
+
+
+                if Name == 'gap':
+                    pass
+                elif ('fields' in RegObj.Params):
                     LINES[8].append('assign %s = %s[%d:%d];'%(Name,Reg,Hi,Lo))
                 else:
                     LINES[6].append('assign %s = %s[%d:%d];'%(Name,Reg,Hi,Lo))
             elif inAccess(Access):
-                if Split:
+                if Name == 'gap':
+                    pass
+                elif Split:
                     LINES[7].append('    ,input  %s %s'%(WW,Name))
                 if ('fields' in RegObj.Params):
+                    if Name == 'gap':
+                        Name = '0'
                     LINES[8].append('assign %s[%d:%d] = %s;'%(Reg,Hi,Lo,Name))
                 else:
+                    if Name == 'gap':
+                        Name = '0'
                     LINES[6].append('assign %s[%d:%d] = %s;'%(Reg,Hi,Lo,Name))
             else:
                 logs.log_error('fields not legal access %s for %s'%(Access,Name))
@@ -308,7 +320,9 @@ def uniquifyFields():
             List = Db['fields'][Name]
             for Field in List:
                 Fname = Field.Name
-                if Fname in Takens:
+                if Fname == 'gap':
+                    pass
+                elif Fname in Takens:
                     Takens[Fname].append((Field,Reg))
                 else:
                     Takens[Fname] = [(Field,Reg)]
@@ -417,8 +431,13 @@ def computeWidthFromFields():
                           Db['splits'][Reg.Name] = Reg
                     Obj.Params['position'] = (Wid+Add0-1,Wid)
                     while (len(Map)<(Wid+Add0)): Map.append('0')
-                    for X in range(Wid+Add0-1,Wid-1,-1):
-                        Map[X] = '1'
+                    if (Name=='gap'):
+                        for X in range(Wid+Add0-1,Wid-1,-1):
+                            Map[X] = '0'
+                            Db['splits'][Reg.Name] = Reg
+                    else:                        
+                        for X in range(Wid+Add0-1,Wid-1,-1):
+                            Map[X] = '1'
                         
                     if 'reset' in Obj.Params:
                         Freset = Obj.Params['reset']

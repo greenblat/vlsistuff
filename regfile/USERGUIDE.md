@@ -42,6 +42,8 @@ Fields should have width parameter and may have description.
 **field** Name **wid**=8 **align=**16 **desc**=DESC
 **align** is misnomer. It is the number of bits the field will be allocated in register. Active bits are defined by wid (or synonym width). Usefull for keeping fields on byte boundaries.
 
+**field** **gap** (field with name "gap") acts also as empty bits insertion.
+
 Please refrain from defining REG with a single FIELD.  it is ugly, not to say smart challenged.
 
 
