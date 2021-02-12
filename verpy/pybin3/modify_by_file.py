@@ -1,6 +1,8 @@
 import sys
 import logs
 from executes import execute_line
+from module_class import is_external_dir
+from dump_instance import wids
 def help_main(Env):
     Mod = Env.Current
     if not '-file' in sys.argv:
@@ -11,23 +13,30 @@ def help_main(Env):
     File = open(Cmdfilename)
     Cmdlines = File.readlines()
     File.close()
-    executeLines(Mod,Cmdlines)
+    executeLines(Mod,Cmdlines,Env)
     execute_line('dump_verilog %s.modv'%Mod.Module,Env)
     logs.log_info('Done %d modification commands, failed %d '%(Mod.donesx,logs.Errors))
 
-def executeLines(Mod,Cmdlines):
+def executeLines(Mod,Cmdlines,Env):
     Mod.donesx = 0
-    for Cmdline in Cmdlines:
+    while Cmdlines != []:
+        Cmdline = Cmdlines.pop(0)
         if '//' in Cmdline: Cmdline = Cmdline[:Cmdline.index('//')]
         if '#' in Cmdline: Cmdline = Cmdline[:Cmdline.index('#')]
         wrds = Cmdline.split()
         if wrds==[]:
             pass
-        else:
-            excecuteLine(Mod,wrds)
+        elif (wrds[0]=='include'):
+            Fil = open(wrds[1])
+            LL = Fil.readlines()
+            Fil.close()
+            Cmdlines = LL + Cmdlines
 
-def excecuteLine(Mod,wrds):
-    wrds = scanFunctions(wrds)
+        else:
+            excecuteLine(Mod,wrds,Env)
+
+def excecuteLine(Mod,wrds,Env):
+    wrds = scanFunctions(wrds,Env)
     if (wrds[0]=='unconn'):
         Inst = wrds[1]
         if Inst not in  Mod.insts:
@@ -95,7 +104,15 @@ def excecuteLine(Mod,wrds):
             Mod.insts.pop(Old)
             Mod.insts[New] = Obj
         Mod.donesx +=1 
-                
+    elif (wrds[0]=='remove_unused_wires'):
+        removeUnused(Mod)
+    elif (wrds[0]=='elaborateSimpleAssigns'):
+        elaborateSimpleAssigns(Mod)
+    elif (wrds[0]=='save'):
+        Fname = wrds[1]
+        execute_line('dump_verilog %s'%Fname,Env)
+    elif wrds[0].startswith('remove_gen'):
+        Mod.generates=[]
     else:
         logs.log_error('bad command line %s'%' '.join(wrds))
 
@@ -108,12 +125,14 @@ def add_conns(Mod,Inst,List):
             Mod.donesx +=1
         else:
             logs.log_error('bad Pin=Net token %s for inst %s'%(PinNet,Inst))
-AHBX = 'haddr=hs_Xhaddr 
-def scanFunctions(wrds):
+AHBX = 'haddrYY=hsXX_haddr hselYY=hsXX_hsel hwriteYY=hsXX_hwrite hwdataYY=hsXX_hwdata hrdataYY=hsXX_hrdata htransYY=hsXX_htrans hburstYY=hsXX_hburst hreadyYY=hsXX_hready hreadyoutYY=hsXX_hreadyout hsizeYY=hsXX_hsize'
+
+APBX = 'paddr=paddrXX psel=pselXX pwrite=pwriteX pwdata=pwdataXX prdata=prdataXX penable=penableXX pready=preadyXX pstrb=pstrbXX'
+def scanFunctions(wrds,Env):
     Res = []
     for Word in wrds:
         if Word.startswith('ahbconn('):
-            Job = Word[7:-1]
+            Job = Word[8:-1]
             if ',' in Job: 
                 wx = Job.split(',')
                 SL = wx[0]
@@ -121,8 +140,61 @@ def scanFunctions(wrds):
             else:
                 SL = Job
                 PI = ''
-        
+            Str = AHBX.replace('YY',PI)                    
+            Str = Str.replace('XX',SL)                    
+            Res.extend(Str.split())
 
-        if Words.startswith('conns(')
+        elif Word.startswith('apbconn('):
+            Job = Word[8:-1]
+            Str = APBX.replace('XX',Job)
+            Res.extend(Str.split())
+        elif Word.startswith('conns('):
+            Son = Word[6:-1]
+            Env.try_and_load_module(Son,Env)
+            if Son in Env.Modules:
+                Sonobj = Env.Modules[Son]
+                for Net in Sonobj.nets:
+                    Dir,Wid = Sonobj.nets[Net]
+                    if is_external_dir(Dir):
+                        Str = '%s=%s%s'%(Net,Net,wids(Wid))
+                        Res.append(Str)
+            else:
+                logs.log_error('module %s could not be loaded'%Son)
 
+                
+    
+        else:
+            Res.append(Word)
+    return Res
+
+def removeUnused(Mod):
+    Mod.prepareNetTable()
+    Nets = list(Mod.nets.keys())
+    for Net in Nets:
+        if Net not in Mod.netTable:
+            Mod.nets.pop(Net)
+            
+def elaborateSimpleAssigns(Mod):
+    Mod.prepareNetTable()
+    Ind = 0
+    dones = 0
+    failed = 0
+    while Ind < len(Mod.hard_assigns):
+        done = False
+        Dst,Src,_,_  = Mod.hard_assigns[Ind]
+        if (str(Dst) in Mod.netTable):             #and (str(Src) in Mod.netTable):
+            if (str(Dst) in Mod.nets)and((str(Src) in Mod.nets)or(Src[0] in ['subbus','subbit'])):
+                Ldst = Mod.netTable[Dst]
+                for (Inst,Type,Pin) in Ldst:
+#                Lsrc = Mod.netTable[Src]
+#                if (len(Ldst)==1)and(len(Lsrc)==1):
+#                    (Inst,Type,Pin) = Ldst[0]
+                    Mod.insts[Inst].conns[Pin]=Src
+                    Mod.hard_assigns.pop(Ind)
+                    done = True
+                    dones += 1
+        if not done: 
+            Ind += 1 
+            failed += 1
+    logs.log_info('elaborateSimpleAssigns did %d replacements and skipped %d'%(dones,failed))
 

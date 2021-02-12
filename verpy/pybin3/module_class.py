@@ -3,6 +3,8 @@ import logs
 import traceback
 import matches
 
+logs.print_warning_messages = False
+
 MathOps = ('** ~| ~& ~^ !^ + - * / ^ % & | && || ! ~ < > << >> >>> == <= >= != !== ~&').split()
 class module_class:
     def __init__(self,Name,Kind='module'):
@@ -397,7 +399,6 @@ class module_class:
             Fout.write('%s %s(%s);\n'%(Type,Name,','.join(res)))
 
         for Name in self.mems:
-            print('>>>>>>>mems>>>>>>>>>>>>',Name,Wid)
             (Dir,Wid1,Wid2)=self.mems[Name]
             Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid1),pr_expr(Name),pr_wid(Wid2)))
         for (A,B,C,D) in self.pragmas:
@@ -510,8 +511,11 @@ class module_class:
                 logs.log_debug('failed %s net=%s ok=%s dset=%s   set=%s'%(Failed,Dst,Ok,Dset,Set))
             if Ok and (len(Dset)==1)and(Dset[0]==Dst):
                 logs.log_debug('ok net=%s'%(Dst))
-                Dir,Wid = self.nets[Dst]
-                self.nets.pop(Dst)
+                if Dst in self.nets:
+                    Dir,Wid = self.nets[Dst]
+                    self.nets.pop(Dst)
+                else:
+                    Dir,Wid = 'wire',1
                 Hards.append((Dir,Wid,(Dst,Src,A,B)))
                 Ordered.append(Dst)
                 self.hard_assigns.pop(Ind)
@@ -619,7 +623,7 @@ class module_class:
                 return
             if (Net not in self.nets)and(Net not in self.parameters)and(Net not in self.localparams):
                 self.add_sig(Net,'wire',0)
-                logs.log_info('net %s defined by connection'%Net)
+                logs.log_warning('net %s defined by connection'%Net)
             return
         if type(Net) is tuple:
             self.check_net_def(list(Net))
@@ -665,7 +669,7 @@ class module_class:
                     Ind0 = (Net[2])
                     Ind1 = Net[3]
                 if Name not in self.nets:
-                    logs.log_info('declared new bus, deduced from connections %s: wire [%s:%s] %s;'%(self.Module,Ind0,Ind1,Name))
+                    logs.log_warning('declared new bus, deduced from connections %s: wire [%s:%s] %s;'%(self.Module,Ind0,Ind1,Name))
                     self.add_sig(Name,'wire',(Ind0,Ind1))
                     return
                 (Dir,WW) = self.nets[Name]
@@ -1093,8 +1097,8 @@ class instance_class:
     def add_conn(self,Pin,Sig):
         if Pin in self.conns:
             logs.log_warning('replacing connection pin=%s inst=%s was=%s now=%s'%(Pin,self.Name,self.conns[Pin],Sig))
-            
         self.conns[Pin]=Sig
+
     def add_param(self,Prm,Val):
         self.params[Prm]=Val
     def dump(self,File):
@@ -1791,7 +1795,11 @@ def relax_name(Name,Simple=True):
 
 def hashit(End):    
     if type(End) is list:
-        return tuple(End)
+        for X in End:
+            RR = []
+            if type(X) is list:
+                RR.append(tuple(X))
+        return tuple(RR)
     else:
         return End 
 

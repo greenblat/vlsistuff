@@ -253,6 +253,10 @@ def add_module_params(List1):
                     Who = LL[1][0]
                     Expr = get_expr(LL[3])
                     Current.add_parameter(Who,Expr)
+                elif (len(LL)==4)and(LL[0][0]=='localparam'):
+                    Who = LL[1][0]
+                    Expr = get_expr(LL[3])
+                    Current.add_parameter(Who,Expr)
                 elif (len(LL)==3)and(LL[1][0]=='='):
                     Who = LL[0][0]
                     Expr = get_expr(LL[2])
@@ -884,6 +888,12 @@ def get_dir(Item):
     Vars = matches.matches(Item,'reg signed',False)
     if Vars:
         return 'reg signed'
+    Vars = matches.matches(Item,'input logic',False)
+    if Vars:
+        return 'input'
+    Vars = matches.matches(Item,'output logic',False)
+    if Vars:
+        return 'output'
 
     if type(Item) is tuple:
         if Item[0] in ['wire','logic']:

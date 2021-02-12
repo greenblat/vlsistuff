@@ -6,6 +6,7 @@ Corrects = 0
 Wrongs = 0   
 Warnings = 0   
 print_debug_messages=0
+print_warning_messages= True
 MAXWRONGS = 2000
 MAXERRORS = 2000
 PYMONLOG = 'pymon.log'
@@ -154,7 +155,7 @@ def finish_now(Text='.'):
 
 def log_warning(Text,Which=0):
     global Warnings,printed_already,Flog
-    if (Text in printed_already):
+    if (Text in printed_already) or not print_warning_messages:
         return
     if (not Flogs[Which]):
         Flogs[Which]= open(PYMONLOG+str(Which),'w')
