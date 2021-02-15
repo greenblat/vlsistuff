@@ -16,7 +16,7 @@ class EnvironmentClass:
         self.Current=None
         self.DontFlattens=[]
         self.systemverilog=False
-        self.VerilogExtensions=['v','glv']
+        self.VerilogExtensions=['v','glv','sv']
 
 Env = EnvironmentClass()
 def main():
