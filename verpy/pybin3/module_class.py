@@ -657,8 +657,10 @@ class module_class:
                     elif (type(WW) is tuple)and(len(WW)==3):
                         if WW[0] not in ['packed','double']:
                             logs.log_error('definition(1) of net %s dir=%s and wid "%s" is wrong  (%s)'%(Name,Dir,WW,Net))
+                    elif (type(WW) is int):
+                        self.nets[Name]=(Dir,(Ind,0))
                     else:
-                        logs.log_error('definition(2) of net %s dir=%s and wid "%s" is wrong  (%s) ind %d  %s'%(Name,Dir,WW,Net,Ind,type(WW[0])))
+                        logs.log_error('definition(2) of net %s dir=%s and wid "%s" is wrong  (%s) ind %d  %s'%(Name,Dir,WW,Net,Ind,WW))
                 return
             if Net[0]=='subbus':
                 Name = Net[1]
@@ -686,8 +688,17 @@ class module_class:
                         self.nets[Name]=(Dir,(H,L))
                     except:
                         pass
+                elif type(WW) is int:
+                    try:
+                        H = max(WW,evalz(Ind0))
+                        L = min(WW,evalz(Ind1))
+                        self.nets[Name]=(Dir,(H,L))
+                    except:
+                        pass
+                    
+                    
                 else:
-                    logs.log_warning('check net def got width  name=%s dir=%s ww=%s'%(Name,Dir,WW))
+                    logs.log_error('check net def got width  name=%s dir=%s ww=%s'%(Name,Dir,WW))
                     self.nets[Name]=(Dir,WW)
                 return
 
@@ -792,6 +803,15 @@ class module_class:
                 else:
                     self.add_sig(Wire,'wire',(Hi,Lo))
                 
+    def mergeNetTableBusses(self):
+        Keys = list(self.netTable.keys())
+        for Key in Keys:
+            if Key and ('[' in Key):
+                Bus = Key[:Key.index('[')]
+                if Bus in self.netTable:
+                    Lbus = self.netTable[Key]
+                    self.netTable[Bus].extend(Lbus)
+                    self.netTable.pop(Key)
 
     def prepareNetTable(self):
         netTable={}
@@ -800,8 +820,8 @@ class module_class:
             Type = Obj.Type
             for Pin in Obj.conns:
                 NN = Obj.conns[Pin]
-                if not ((type(NN) is list)and(NN[0]=='curly')):
-                    Net = hashit(Obj.conns[Pin])
+                if NN and not ((type(NN) is list)and(NN[0]=='curly')):
+                    Net = hashit(NN)
                     if Net not in netTable:
                         netTable[Net]=[]
                     netTable[Net].append((Inst,Type,Pin))
@@ -1015,7 +1035,7 @@ def support_set__(Sig,Bussed):
     if isinstance(Sig,(tuple,list)):
         if len(Sig)==1:
             return support_set__(Sig[0],Bussed)
-        if Sig[0] in ['const','bin','hex','dig','taskcall','dotted','$random']:
+        if Sig[0] in ['define','const','bin','hex','dig','taskcall','dotted','$random']:
             return []
         if Sig[0]=='curly':
             Ind = 1
@@ -1795,10 +1815,14 @@ def relax_name(Name,Simple=True):
 
 def hashit(End):    
     if type(End) is list:
+        if End[0]=='subbit': return pr_expr(End)
+        if End[0]=='subbus': return pr_expr(End)
         for X in End:
             RR = []
             if type(X) is list:
                 RR.append(tuple(X))
+            else:
+                RR.append(X)
         return tuple(RR)
     else:
         return End 
@@ -1926,4 +1950,6 @@ def allIn(Sup,Base):
     for A in Sup:
         if A not in Base: return False
     return True
+
+
 
