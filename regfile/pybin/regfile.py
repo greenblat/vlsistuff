@@ -246,8 +246,10 @@ def treatFields():
 
             if Wid<=1:
                 WW = ''
+                RegHiLo = Reg
             else:
                 WW = '[%s:0]'%(Wid-1)
+                RegHiLo = '%s[%s:%s]'%(Reg,Hi,Lo)
 
             for PP in range(Lo,Hi+1):
                 Cover[PP] = '1'
@@ -262,9 +264,9 @@ def treatFields():
                 if Name == 'gap':
                     pass
                 elif ('fields' in RegObj.Params):
-                    LINES[8].append('assign %s = %s[%d:%d];'%(Name,Reg,Hi,Lo))
+                    LINES[8].append('assign %s = %s;'%(Name,RegHiLo))
                 else:
-                    LINES[6].append('assign %s = %s[%d:%d];'%(Name,Reg,Hi,Lo))
+                    LINES[6].append('assign %s = %s;'%(Name,RegHiLo))
             elif inAccess(Access):
                 if Name == 'gap':
                     pass
@@ -273,11 +275,11 @@ def treatFields():
                 if ('fields' in RegObj.Params):
                     if Name == 'gap':
                         Name = '0'
-                    LINES[8].append('assign %s[%d:%d] = %s;'%(Reg,Hi,Lo,Name))
+                    LINES[8].append('assign %s = %s;'%(RegHiLo,Name))
                 else:
                     if Name == 'gap':
                         Name = '0'
-                    LINES[6].append('assign %s[%d:%d] = %s;'%(Reg,Hi,Lo,Name))
+                    LINES[6].append('assign %s = %s;'%(RegHiLo,Name))
             else:
                 logs.log_error('fields not legal access %s for %s'%(Access,Name))
         if inAccess(Access)and('0' in Cover):

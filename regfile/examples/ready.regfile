@@ -21,6 +21,11 @@ field ospi wid=3 desc=spi.status
 
 reg w1cc access=w1c wid=32 desc="w1c register"
 
+reg badfwr access=wr desc=staam
+field flag wid=1 
+
+reg badfro access=ro desc=staam
+field flag wid=1 
 
 gap align=256
 ram ramx wid=17 depth=256 ready=true
