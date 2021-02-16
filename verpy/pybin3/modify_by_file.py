@@ -282,7 +282,7 @@ def report_connectivity(Mod):
             Num += 1
 
     Fcsv = open('missing.csv','w')
-    Fcsv.write('MODULE,Instance,Type\n')
+    Fcsv.write('MODULE,Instance,Type,Orphan Connect,Suggested Buddy\n')
     Num = 0
     for Inst in Singles:
         LL = Singles[Inst]
