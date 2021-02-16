@@ -60,7 +60,6 @@ def createLines(File):
     Long = ''
     for line in Lines:
         if '//' in line: line = line[:line.index('//')]
-        elif '#' in line: line = line[:line.index('#')]
         else:
             line = line[:-1]
         Long += line + ' ;;; '
@@ -84,6 +83,11 @@ def createLines(File):
     while ';;;' in Res:
         X = Res.index(';;;')
         Head = Res[:X]
+        Pos = -1
+        for ind,Tok in enumerate(Head):
+            if Tok[0]=='#': Pos = ind
+        if Pos>=0:
+            Head = Head[:Pos]
         Res = Res[X+1:]
         if Head!=[]:
             Res2.append(Head)
