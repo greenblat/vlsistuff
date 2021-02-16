@@ -281,6 +281,18 @@ def report_connectivity(Mod):
             logs.log_info('             #%d        %s'%(Num,Net))
             Num += 1
 
+    Fcsv = open('missing.csv','w')
+    Fcsv.write('MODULE,Instance,Type\n')
+    Num = 0
+    for Inst in Singles:
+        LL = Singles[Inst]
+        (Type,_,_) = LL[0]
+        Fcsv.write('cell ,%s,%s\n'%(Inst,Type))
+        for Type,Pin,Net in LL:
+            Fcsv.write('%d,,,%s, ,\n'%(Num,Net)) 
+            Num += 1
+    Fcsv.close()
+
 reported = True
 def reportNetTable(Mod):
     global reported
