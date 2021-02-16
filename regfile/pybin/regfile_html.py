@@ -54,6 +54,34 @@ def oneLine(Color,LL,ofile,Size=6):
     ofile.write('<td align="center">'+' '+'</td>\n')
     ofile.write('</tr>\n')
 
+FPYHEADER = '''
+FIELDS = {}
+REGS = {}
+DEFAULTS = {}
+ADDR_MAP = {}
+# = (Width, Offset)
+
+
+def prepfield(Name, Val):
+    if Name in FIELDS:
+        (Wid, Off) = FIELDS[Name]
+        Mask = (1 << Wid)-1
+        Res = (Mask & Val) << Off
+        return Res, ~(Mask << Off)
+    return 0, 0xffffffff
+
+
+def setField(Reg, Field, Val):
+    if Field == 'default':
+        REGS[Reg] = DEFAULTS[Reg]
+        return
+    Prep, Mask = prepfield(Field, Val)
+    if Reg not in REGS:
+        REGS[Reg] = DEFAULTS[Reg]
+    REGS[Reg] = (REGS[Reg] & Mask) | Prep
+
+
+'''
 
 def produce_html(Module,Db):
     global color,othercolor
@@ -68,6 +96,8 @@ def produce_html(Module,Db):
     Fmd = open('%s.md'%(Module),'w')
     Fcsv.write('kind,access,width,pos,name,reset,addr,desc\n')
     Fmd.write('# register file "**%s**"\n'%Module)
+    Fpy = open('%s.py'%Module,'w')
+    Fpy.write(FPYHEADER)
     Prmx = Db['chip'].Params
     Keys = list(Prmx.keys())
     Keys.sort()
@@ -134,11 +164,23 @@ def produce_html(Module,Db):
             (H,L) = Item.Params['position']
             List = [Item.Kind,Item.Params['access'],Item.Params['width'],'[%s:%s]'%(H,L),Item.Params['names'][0],Reset,Addr,Desc.replace('\n',' ')]
             Fcsv.write('%s,%s,%s,%s,%s,%s,%s,%s\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
+            if List[0] == 'reg': List[0] = '**reg**'
             Fmd.write('|%s|%s|%s|%s|%s|%s|%s|%s|\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
+            if Item.Name!='gap':
+                Fpy.write('FIELDS["%s"] = (%s, %s)\n'%(Item.Name,H-L+1,L))
         else:
             List = [Item.Kind,Item.Params['access'],Item.Params['width'],' ',Item.Params['names'][0],Reset,Addr,Desc.replace('\n',' ')]
             Fcsv.write('%s,%s,%s,%s,%s,%s,%s,%s\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
+            if List[0] == 'reg': List[0] = '**reg**'
             Fmd.write('|%s|%s|%s|%s|%s|%s|%s|%s|\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
+            if 'reg' in List[0]:
+                Fpy.write('ADDR_MAP["%s"] = %s\n'%(Item.Name,hex(Item.Addr)))
+                Fpy.write('%s = %s\n'%(Item.Name,hex(Item.Addr)))
+                if 'reset' not in Item.Params:
+                    Reset = 0
+                else:
+                    Reset = Item.Params['reset']
+                Fpy.write('DEFAULTS["%s"] = %s\n'%(Item.Name,hex(Reset)))
 
         acolor=color
 #        ofile.write('<tr bgcolor='+color+'> <td><a target="_blank" href="file:chip_doc.html/#'+Inst+'">'+Inst+'</a></td>\n')
@@ -152,9 +194,11 @@ def produce_html(Module,Db):
     ofile.close()
     Fcsv.close()
     Fmd.close()
+    Fpy.close()
 
 def run_on_coding(wrds,ofile,Size=4):
     for word in wrds:
          ofile.write('<td align="left" > <font size="%s"> '%Size+str(word)+' </font> </td>\n')
+
 
 
