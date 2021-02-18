@@ -54,6 +54,10 @@ def excecuteLine(Mod,wrds,Env):
         Env.read_verilog_file(Fname,Env.rundir,Env)
         return
 
+    if (wrds[0]=='add_inout'):
+        for Wrd in wrds[1:]:
+            Mod.nets[Wrd] = 'inout',0
+        return
     if (wrds[0]=='copy_inst'):
         From = wrds[1]
         TypeInst = wrds[2]
@@ -171,7 +175,7 @@ def excecuteLine(Mod,wrds,Env):
         Env.donesx +=1
         return
     if (wrds[0]=='report_connectivity'):
-        report_connectivity(Mod)
+        report_connectivity(Mod,Env)
         return
     if (wrds[0]=='remove_unused_wires'):
         removeUnused(Mod)
@@ -204,9 +208,9 @@ def add_conns(Mod,Inst,List,Env):
 
 
 
-AHBX = 'haddrYY=hsXX_haddr[31:0] hselYY=hsXX_hsel hwriteYY=hsXX_hwrite hwdataYY=hsXX_hwdata[31:0] hrdataYY=hsXX_hrdata[31:0] htransYY=hsXX_htrans[1:0] hburstYY=hsXX_hburst[2:0] hreadyYY=bmc_hsXX_hready hreadyoutYY=hsXX_bmc_hready hsizeYY=hsXX_hsize[2:0] hprotYY=hsXX_hprot[3:0]'
+AHBX = 'haddrYY=hsXX_haddr[31:0] hselYY=hsXX_hsel hwriteYY=hsXX_hwrite hwdataYY=hsXX_hwdata[31:0] hrdataYY=hsXX_hrdata[31:0] htransYY=hsXX_htrans[1:0] hburstYY=hsXX_hburst[2:0] hreadyYY=bmc_hsXX_hready hreadyoutYY=hsXX_bmc_hready hsizeYY=hsXX_hsize[2:0] hprotYY=hsXX_hprot[3:0] hrespYY=hsXX_hresp[1:0]'
 
-APBX = 'paddr=paddr32 psel=psXX_psel pwrite=pwrite pwdata=pwdata[31:0] prdata=psXX_prdata[31:0] penable=penable pready=psXX_pready pstrb=pstrb[3:0]'
+APBX = 'paddr=paddr psel=psXX_psel pwrite=pwrite pwdata=pwdata[31:0] prdata=psXX_prdata[31:0] penable=penable pready=psXX_pready pstrb=pstrb[3:0] pslverr=psXX_pslverr'
 def scanFunctions(wrds,Env):
     Res = []
     for Word in wrds:
@@ -254,13 +258,31 @@ def removeUnused(Mod):
             print('remove %s'%Net)
             Mod.nets.pop(Net)
 
-def report_connectivity(Mod):
+PINDIRS = {}
+def buildPinDirs(Mod,Env):
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        Type = Obj.Type
+        if Type not in Env.Modules:
+            Env.try_and_load_module(Type,Env)
+        if Type in Env.Modules:
+            Son = Env.Modules[Type]
+            for Pin in Son.nets:
+                Dir,_ = Son.nets[Pin]
+                PINDIRS[(Inst,Pin)] = Dir
+        else:
+            logs.log_error('missing %s being loaded'%Type)
+
+
+def report_connectivity(Mod,Env):
     Mod.prepareNetTable()
     reportNetTable(Mod)
     Mod.mergeNetTableBusses()
+    buildPinDirs(Mod,Env)
     Nets = list(Mod.netTable.keys())
     Num = 0
     Singles = {}
+    Fines = []
     for Net in Nets:
         if Net in Mod.nets:
             Dir,_ = Mod.nets[Net]
@@ -273,24 +295,46 @@ def report_connectivity(Mod):
                     else:
                         Singles[Inst].append((Type,Pin,Net))
 
+    for Inst in Mod.insts:
+        if Inst not in Singles:
+            Type = Mod.insts[Inst].Type
+            Fines.append((Inst,Type))
+
     for Inst in Singles:
         LL = Singles[Inst]
         (Type,_,_) = LL[0]
         logs.log_info('SINGLE ____  %s   %s'%(Inst,Type))
         for Type,Pin,Net in LL:
-            logs.log_info('             #%d        %s'%(Num,Net))
+            if Net in Mod.nets:
+                Dir,Wid = Mod.nets[Net]
+                if type(Wid) is tuple:
+                    Net = '%s[%s:%s]'%(Net,Wid[0],Wid[1])
+            Dir = '.'
+            if (Inst,Pin) in PINDIRS:
+               Dir = PINDIRS[(Inst,Pin)]
+            logs.log_info('             #%d        %-50s    %s'%(Num,Net,Dir))
             Num += 1
 
     Fcsv = open('missing.csv','w')
-    Fcsv.write('MODULE,Instance,Type,Orphan Connect,Suggested Buddy\n')
+    Fcsv.write('MODULE,Instance,Type,Orphan Connect,Port Dir,Suggested Buddy\n')
     Num = 0
     for Inst in Singles:
         LL = Singles[Inst]
         (Type,_,_) = LL[0]
         Fcsv.write('cell ,%s,%s\n'%(Inst,Type))
         for Type,Pin,Net in LL:
-            Fcsv.write('%d,,,%s, ,\n'%(Num,Net)) 
+            Dir = '.'
+            if (Inst,Pin) in PINDIRS:
+                Dir = PINDIRS[(Inst,Pin)]
+            if Net in Mod.nets:
+                _,Wid = Mod.nets[Net]
+                if type(Wid) is tuple:
+                    Net = '%s[%s:%s]'%(Net,Wid[0],Wid[1])
+            Fcsv.write('%d,,,%s,%s,\n'%(Num,Net,Dir)) 
             Num += 1
+    Fcsv.write('MODULE,Fully Covered\n')
+    for Inst,Type in Fines:
+        Fcsv.write('cell ,%s,%s\n'%(Inst,Type))
     Fcsv.close()
 
 reported = True

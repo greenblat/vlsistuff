@@ -812,6 +812,10 @@ class module_class:
                     Lbus = self.netTable[Key]
                     self.netTable[Bus].extend(Lbus)
                     self.netTable.pop(Key)
+                else:
+                    Lbus = self.netTable[Key]
+                    self.netTable[Bus] = Lbus
+                    self.netTable.pop(Key)
 
     def prepareNetTable(self):
         netTable={}

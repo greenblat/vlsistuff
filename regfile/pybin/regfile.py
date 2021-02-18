@@ -236,7 +236,7 @@ def treatFields():
         for X in range(RegWid): Cover.append('0')
 
         for Field in Fields:
-            Wid = Field.Params['wid']
+            Wid= getPrm(Field,'width',0)
             Hi,Lo = Field.Params['position']
             Name = Field.Params['names'][0]
             if 'access' in Field.Params:
@@ -1093,6 +1093,8 @@ def dumpApb(Db):
 
 def apbHead():
     Str = APBHead.replace('MODULE',Db['module'])
+    missParam(Db['chip'].Params,'width',32)
+    missParam(Db['chip'].Params,'addrwid',32)
     Buswid = Db['chip'].Params['width']
     Addwid = Db['chip'].Params['addrwid']
     if Buswid == 32:
@@ -1103,6 +1105,12 @@ def apbHead():
     Str = Str.replace('ADDWID',str(Addwid))
     Str = Str.replace('WSTRB',str(Wstrb))
     Db['fout'].write(Str)
+
+
+def missParam(Dir,Param,Default):
+    if Param in Dir: return
+    Dir[Param]=Default
+
 
 def helper0(Finst):
     Temp = []

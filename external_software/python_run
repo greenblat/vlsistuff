@@ -1,5 +1,6 @@
 #! /bin/csh -f
 
+# yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
 tar xzf  Python-3.9.0.tar.gz
 cd Python-3.9.0/
 ./configure --prefix  $HOME --exec_prefix $HOME --enable-shared
