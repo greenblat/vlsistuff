@@ -246,31 +246,30 @@ def treatFields():
 
             if Wid<=1:
                 WW = ''
-                RegHiLo = Reg
+                if RegWid<=1:
+                    RegHiLo = Reg
+                else:
+                    RegHiLo = '%s[%s]'%(Reg,Hi)
+                    if (Hi!=Lo):
+                        logs.log_error('ILIA reg=%s field=%s hilo= %s %s'%(Reg,Field,Hi,Lo))
             else:
                 WW = '[%s:0]'%(Wid-1)
                 RegHiLo = '%s[%s:%s]'%(Reg,Hi,Lo)
 
             for PP in range(Lo,Hi+1):
                 Cover[PP] = '1'
-
-            if outAccess(Access):
-                if Name == 'gap':
-                    pass
-                elif Split:
+            if Name == 'gap':
+                pass
+            elif outAccess(Access):
+                if Split:
                     LINES[7].append('    ,output %s %s'%(WW,Name))
 
-
-                if Name == 'gap':
-                    pass
-                elif ('fields' in RegObj.Params):
+                if ('fields' in RegObj.Params):
                     LINES[8].append('assign %s = %s;'%(Name,RegHiLo))
                 else:
                     LINES[6].append('assign %s = %s;'%(Name,RegHiLo))
             elif inAccess(Access):
-                if Name == 'gap':
-                    pass
-                elif Split:
+                if Split:
                     LINES[7].append('    ,input  %s %s'%(WW,Name))
                 if ('fields' in RegObj.Params):
                     if Name == 'gap':
