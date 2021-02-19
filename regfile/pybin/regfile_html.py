@@ -88,7 +88,6 @@ def produce_html(Module,Db):
 #    return                       # use first one.
     Chip = Db['chip']
     Items = Db['items']
-    print(list(Db.keys()))
     Range = Chip.Addr+4
     OpcodeWidth = 16
     ofile = open('%s_rgf.html'%(Module),'w')

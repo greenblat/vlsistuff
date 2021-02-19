@@ -535,8 +535,9 @@ def advanceAddr(Obj):
         if Wid<=busWid:
             Add = 1
         else:
-            Add = int(round(1.0*Bytes2/Bytes + 0.5))
-#            print('REG','add',Add,'bytes',Bytes,'bytes2',Bytes2,Add*Bytes,Wid,Obj.Params['names'])
+            Add0 = int(Bytes2/Bytes)
+            Add1 = int((Bytes2 % Bytes)>0)
+            Add  = Add0 + Add1
     elif (Obj.Kind not in ['gap']):
         logs.log_error('advanceAddr: missing wid in %s %s  defs:%s'%(Obj.Kind,Obj.Name,Obj.Params))
         Add = 4

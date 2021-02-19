@@ -42,7 +42,6 @@ def outputStructures(Module,Items,Fch):
             else:
                 ACC = 'ro'
             Addr = hex(Item.Addr)
-            print('NN',Item.Name,Addr,hex(RunAddr),Jump)
             if Item.Addr>RunAddr:
                 Empties = int((Item.Addr-RunAddr)/4)+( ((Item.Addr-RunAddr)%4)!=0)
                 if Empties<2:
