@@ -120,6 +120,12 @@ class ahbliteMaster(logs.driverClass):
                     if hreadyout==1:
                         X = self.tr_peek(Val[0])
                         logs.log_info('ahb %s read 0x%x addr=0x%x'%(self.Name,X,Val[1]))
+                elif Sig=='waitUntil':
+                    (Net,What) = Val
+                    if  Net in self.translations:
+                        Net = self.translations[Net]
+                    Act = self.peek(Net)
+                    if (Act != What): return
                 else:
                     self.force(Sig,Val)
             if self.tr_peek('hresp')!=0:
@@ -129,6 +135,7 @@ class ahbliteMaster(logs.driverClass):
                 self.tr_force('hburst',0)
                 self.tr_force('hwrite',0)
                 return
+            print('LLL',len(self.seq),List)
             if hreadyout==0: return
             self.seq.pop(0)
             return
@@ -166,9 +173,8 @@ class ahbliteMaster(logs.driverClass):
 
             if What[0]=='read':
                 self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hready',1)])
-                self.seq.append([('wait',1)])
                 self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('catch',('hrdata',What[1])),('hsel',self.HSEL),('hready',1)])
-                self.seq.append([('wait',5)])
+                self.seq.append([('waitUntil',('hreadyout',1))])
                 return
 
 

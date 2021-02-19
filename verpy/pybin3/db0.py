@@ -1955,7 +1955,7 @@ def get_expr(Item):
                 Hi = get_expr(List[1])
                 Lo = get_expr(List[3])
                 return ['width',Hi,Lo]
-
+        
 
         logs.log_err('bad get_expr %s %s %s'%(Item,len(List),List))
         traceback.print_stack(None,None,logs.Flogs[0])
@@ -1976,8 +1976,9 @@ def get_expr(Item):
         return Item
     if (len(Item)==4)and(Item[0] in ['question']):
         return Item
-
-    logs.log_err('DB0: very bad expr %s %d'%(str(Item),len(Item)))
+    if Item[0] == 'curly':
+        return Item 
+    logs.log_err('DB0: very bad expr %s %s'%(len(Item),str(Item)))
     traceback.print_stack()
     return 0
 

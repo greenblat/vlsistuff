@@ -1,5 +1,6 @@
 import os,sys
 import logs
+import datetime 
 from executes import execute_line
 from module_class import is_external_dir
 from dump_instance import wids
@@ -316,6 +317,11 @@ def report_connectivity(Mod,Env):
             Num += 1
 
     Fcsv = open('missing.csv','w')
+    Date = datetime.date.today()
+    Time = datetime.datetime.now()
+    DDD = str(Date.day)+'/'+str(Date.month)+'/'+str(Date.year)+' '+str(Time.hour)+'h,%s'%(os.environ['HOST'])
+
+    Fcsv.write('generated on,%s\n'%DDD)
     Fcsv.write('MODULE,Instance,Type,Orphan Connect,Port Dir,Suggested Buddy\n')
     Num = 0
     for Inst in Singles:
