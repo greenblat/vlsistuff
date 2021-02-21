@@ -40,7 +40,7 @@ def executeLines(Mod,Cmdlines,Env):
             Mod = Env.Current
 
 def excecuteLine(Mod,wrds,Env):
-    wrds = scanFunctions(wrds,Env)
+    wrds = scanFunctions(wrds,Env,Mod)
     if (wrds[0]=='source'):
         Fname = wrds[1]
         os.system(Fname)
@@ -56,9 +56,24 @@ def excecuteLine(Mod,wrds,Env):
         return
 
     if (wrds[0]=='add_inout'):
-        for Wrd in wrds[1:]:
-            Mod.nets[Wrd] = 'inout',0
+        add_wires(Mod,'inout',wrds[1:])
         return
+    if (wrds[0]=='add_input'):
+        add_wires(Mod,'input',wrds[1:])
+        return
+    if (wrds[0]=='add_output'):
+        add_wires(Mod,'output',wrds[1:])
+        return
+
+    if (wrds[0]=='copy_params'):
+        From = wrds[1]
+        Other = Env.Modules[From]
+        for Param in  Other.parameters:
+            Mod.parameters[Param] =  Other.parameters[Param]
+        for Param in  Other.localparams:
+            Mod.localparams[Param] =  Other.localparams[Param]
+        return
+
     if (wrds[0]=='copy_inst'):
         From = wrds[1]
         TypeInst = wrds[2]
@@ -78,14 +93,23 @@ def excecuteLine(Mod,wrds,Env):
                 Mod.add_inst(TypeInst,Inst)
                 found = True
             if found:
-                for Pin in Other.insts[Inst].conns:
-                    Sig =  Other.insts[Inst].conns[Pin]
-                    if (type(Sig) is str) and (Sig in Other.nets):
-                        Dir,WW = Other.nets[Sig]
-                        if (type(WW) is tuple)and(len(WW)==2):
-                            Sig = ['subbus',Sig,WW[0],WW[1]]
-
+                Oobj =  Other.insts[Inst]
+                for Pin in Oobj.conns:
+                    Sig =  Oobj.conns[Pin]
                     Mod.add_conn(Inst,Pin,module_class.pr_expr(Sig))
+                    if (type(Sig) is str) and (Sig in Other.nets):
+                        _,WW = Other.nets[Sig]
+                        if (type(WW) is tuple)and(len(WW)==2):
+                            Sup = module_class.support_set(WW[0])
+                            for Param in Sup:
+                                if Param in Other.parameters:
+                                    Mod.parameters[Param] =  Other.parameters[Param]
+                                elif Param in Other.localparams:
+                                    Mod.localparams[Param] =  Other.localparams[Param]
+                                
+                for Param in Oobj.params:
+                   Mod.insts[Inst].params[Param] =  Oobj.params[Param]
+
         return
 
 
@@ -197,6 +221,16 @@ def excecuteLine(Mod,wrds,Env):
         return
     logs.log_error('bad command line %s'%' '.join(wrds))
 
+def add_wires(Mod,Dir,wrds):
+    for Wrd in wrds:
+        Wrd0 = module_class.busify_x(Wrd)
+        if type(Wrd0) is str:
+            Mod.nets[Wrd] = Dir,0
+        elif Wrd0[0] == 'subbus':
+            Mod.nets[Wrd0[1]] = Dir,(Wrd0[2],Wrd0[3])
+        else:
+            log.log_error('add_%s doesnt make sense "%s"'%(Dir,wrds))
+
 def add_conns(Mod,Inst,List,Env):
     Obj = Mod.insts[Inst]
     for PinNet in List:
@@ -207,12 +241,29 @@ def add_conns(Mod,Inst,List,Env):
         else:
             logs.log_error('bad Pin=Net token %s for inst %s'%(PinNet,Inst))
 
+def recomputeDims(Sig,Oparameters,Mparameters,Mlocals,Oobj_params):
+    if type(Sig) is str: return Sig
+    y = {**Mlocals, **Oobj_params}
+    z = {**Oparameters, **Mparameters}
+    zz = {**z, **y}
+    if (type(Sig) is tuple)or(type(Sig) is list): 
+        if Sig[0] == 'subbus':
+            if len(Sig)==3:
+                print('PREXPR',Sig[2][0],module_class.pr_expr(Sig[2][0]),zz )
+                H = eval(str(module_class.pr_expr(Sig[2][0])),zz)
+                L = eval(str(Sig[2][1]),zz)
+            elif len(Sig)==4:
+                print('PREXPR',Sig[2],module_class.pr_expr(Sig[2]),zz )
+                H = eval(str(module_class.pr_expr(Sig[2])),zz)
+                L = eval(str(Sig[3]),zz)
+            return ['subbus',Sig[1],H,L]
+    return Sig        
 
 
 AHBX = 'haddrYY=hsXX_haddr[31:0] hselYY=hsXX_hsel hwriteYY=hsXX_hwrite hwdataYY=hsXX_hwdata[31:0] hrdataYY=hsXX_hrdata[31:0] htransYY=hsXX_htrans[1:0] hburstYY=hsXX_hburst[2:0] hreadyYY=bmc_hsXX_hready hreadyoutYY=hsXX_bmc_hready hsizeYY=hsXX_hsize[2:0] hprotYY=hsXX_hprot[3:0] hrespYY=hsXX_hresp[1:0]'
 
 APBX = 'paddr=paddr psel=psXX_psel pwrite=pwrite pwdata=pwdata[31:0] prdata=psXX_prdata[31:0] penable=penable pready=psXX_pready pstrb=pstrb[3:0] pslverr=psXX_pslverr'
-def scanFunctions(wrds,Env):
+def scanFunctions(wrds,Env,Mod):
     Res = []
     for Word in wrds:
         if Word.startswith('ahbconn('):
@@ -240,6 +291,13 @@ def scanFunctions(wrds,Env):
                 for Net in Sonobj.nets:
                     Dir,Wid = Sonobj.nets[Net]
                     if is_external_dir(Dir):
+                        if (type(Wid) is tuple)and(len(Wid) == 2):
+                            Sup = module_class.support_set(Wid)
+                            for Param in Sup:
+                                if Param in Sonobj.parameters:
+                                    Mod.parameters[Param] =  Sonobj.parameters[Param]
+                                elif Param in Sonobj.localparams:
+                                    Mod.localparams[Param] =  Sonobj.localparams[Param]
                         Str = '%s=%s%s'%(Net,Net,wids(Wid))
                         Res.append(Str)
             else:
@@ -286,7 +344,8 @@ def report_connectivity(Mod,Env):
     Fines = []
     for Net in Nets:
         if Net in Mod.nets:
-            Dir,_ = Mod.nets[Net]
+            Dir,WW = Mod.nets[Net]
+            print('NNNN',Net,Dir,WW)
             if not is_external_dir(Dir):
                 List = Mod.netTable[Net]
                 if len(List)==1:
@@ -295,7 +354,8 @@ def report_connectivity(Mod,Env):
                         Singles[Inst] = [(Type,Pin,Net)]
                     else:
                         Singles[Inst].append((Type,Pin,Net))
-
+        else:
+            print('WWWWW',Net)
     for Inst in Mod.insts:
         if Inst not in Singles:
             Type = Mod.insts[Inst].Type
@@ -316,10 +376,12 @@ def report_connectivity(Mod,Env):
             logs.log_info('             #%d        %-50s    %s'%(Num,Net,Dir))
             Num += 1
 
-    Fcsv = open('missing.csv','w')
     Date = datetime.date.today()
     Time = datetime.datetime.now()
     DDD = str(Date.day)+'/'+str(Date.month)+'/'+str(Date.year)+' '+str(Time.hour)+'h,%s'%(os.environ['HOST'])
+    CSVDATE = 'd'+str(Date.day)+'_m'+str(Date.month)+'_'+str(Date.year)+'_'+str(Time.hour)+'h'
+
+    Fcsv = open('missing_%s.csv'%CSVDATE,'w')
 
     Fcsv.write('generated on,%s\n'%DDD)
     Fcsv.write('MODULE,Instance,Type,Orphan Connect,Port Dir,Suggested Buddy\n')

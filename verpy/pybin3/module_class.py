@@ -5,7 +5,7 @@ import matches
 
 logs.print_warning_messages = False
 
-MathOps = ('** ~| ~& ~^ !^ + - * / ^ % & | && || ! ~ < > << >> >>> == <= >= != !== ~&').split()
+MathOps = ('** ~| ~& ~^ !^ + - * / ^ % & | && || ! ~ < > << >> >>> == <= >= != !== ~& === !==').split()
 class module_class:
     def __init__(self,Name,Kind='module'):
         self.Module=Name
@@ -1265,7 +1265,7 @@ def pr_stmt(List,Pref='',Begin=False):
             return '%swait(%s);\n'%(Pref,Dly)
         if List[0] == '#':
             Dly = clean_br(pr_expr(List[1]))
-            return '%s#%s;\n'%(Pref,Dly)
+            return '%s#(%s);\n'%(Pref,Dly)
             
         if List[0] in ['<=','=']:
             Dst = clean_br(pr_expr(List[1]))
