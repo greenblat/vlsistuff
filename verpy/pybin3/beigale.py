@@ -11,6 +11,7 @@ def help_main(Env):
     Mod.insts = {}
     Mod.generates = []
     Mod.hard_assigns = []
+    Mod.initials = []
     Nets = list(Mod.nets.keys())
     for Net in Nets:
         Dir,_ = Mod.nets[Net]

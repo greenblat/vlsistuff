@@ -65,6 +65,7 @@ def excecuteLine(Mod,wrds,Env):
         add_wires(Mod,'output',wrds[1:])
         return
 
+
     if (wrds[0]=='copy_params'):
         From = wrds[1]
         Other = Env.Modules[From]
@@ -96,16 +97,17 @@ def excecuteLine(Mod,wrds,Env):
                 Oobj =  Other.insts[Inst]
                 for Pin in Oobj.conns:
                     Sig =  Oobj.conns[Pin]
-                    Mod.add_conn(Inst,Pin,module_class.pr_expr(Sig))
                     if (type(Sig) is str) and (Sig in Other.nets):
                         _,WW = Other.nets[Sig]
                         if (type(WW) is tuple)and(len(WW)==2):
+                            Sig = '%s%s'%(Sig,module_class.pr_wid(WW))
                             Sup = module_class.support_set(WW[0])
                             for Param in Sup:
                                 if Param in Other.parameters:
                                     Mod.parameters[Param] =  Other.parameters[Param]
                                 elif Param in Other.localparams:
                                     Mod.localparams[Param] =  Other.localparams[Param]
+                    Mod.add_conn(Inst,Pin,module_class.pr_expr(Sig))
                                 
                 for Param in Oobj.params:
                    Mod.insts[Inst].params[Param] =  Oobj.params[Param]
@@ -127,6 +129,18 @@ def excecuteLine(Mod,wrds,Env):
                 logs.log_error('instance %s has no pin %s'%(Inst,Pin))
         return
 
+    if (wrds[0]=='del_conn'):
+        Inst = wrds[1]
+        if Inst not in  Mod.insts:
+            logs.log_error('instance %s is not in module'%Inst)
+            return
+        Obj = Mod.insts[Inst] 
+        for Pin in wrds[2:]:
+            if Pin in Obj.conns: 
+                Obj.conns.pop(Pin)
+            else:
+                logs.log_error('del_conn isnt=%s pin=%s failed'%(Inst,Pin))
+        return
     if (wrds[0]=='add_conn'):
         Inst = wrds[1]
         if Inst not in  Mod.insts:
@@ -201,6 +215,7 @@ def excecuteLine(Mod,wrds,Env):
         return
     if (wrds[0]=='report_connectivity'):
         report_connectivity(Mod,Env)
+        pairsTable(Mod)
         return
     if (wrds[0]=='remove_unused_wires'):
         removeUnused(Mod)
@@ -328,6 +343,9 @@ def buildPinDirs(Mod,Env):
             Son = Env.Modules[Type]
             for Pin in Son.nets:
                 Dir,_ = Son.nets[Pin]
+                if ' ' in Dir:
+                    ww = Dir.split()
+                    Dir = ww[0]
                 PINDIRS[(Inst,Pin)] = Dir
         else:
             logs.log_error('missing %s being loaded'%Type)
@@ -345,7 +363,6 @@ def report_connectivity(Mod,Env):
     for Net in Nets:
         if Net in Mod.nets:
             Dir,WW = Mod.nets[Net]
-            print('NNNN',Net,Dir,WW)
             if not is_external_dir(Dir):
                 List = Mod.netTable[Net]
                 if len(List)==1:
@@ -404,6 +421,69 @@ def report_connectivity(Mod,Env):
     for Inst,Type in Fines:
         Fcsv.write('cell ,%s,%s\n'%(Inst,Type))
     Fcsv.close()
+
+
+def pairsTable(Mod):
+    buildPairsTable(Mod)
+    reportPairsTable(Mod)
+
+def reportPairsTable(Mod):
+    Keys = list(PAIRS.keys())
+    Keys.sort()
+    Fcsv = open('%s_pairs.csv'%Mod.Module,'w')
+    Fcsv.write('Src,Dst,#fwrd,#back\n')
+    Dones = []
+    for Src,Dst in Keys:
+        if (Src,Dst) not in Dones:
+            List = PAIRS[(Src,Dst)]
+            List.sort()
+            List2 = []
+            if (Dst,Src) in PAIRS:
+                List2 = PAIRS[(Dst,Src)]
+            Fcsv.write('%s,%s,%d,%d\n'%(Src,Dst,len(List),len(List2)))
+            for Net in List:
+                Fcsv.write('->,,->,,%s\n'%(Net))
+            for Net in List2:
+                Fcsv.write('<-,,,<-,%s\n'%(Net))
+            Dones.append((Dst,Src))
+            
+    Fcsv.close()
+
+def buildPairsTable(Mod):
+    Nets = list(Mod.netTable.keys())
+    Num = 0
+    for Net in Nets:
+        if Net in Mod.nets:
+            Dir,WW = Mod.nets[Net]
+            Ext =  is_external_dir(Dir)
+            List = Mod.netTable[Net]
+            if len(List) == 2:
+                Inst0,_,Pin0 = List[0]
+                Inst1,_,Pin1 = List[1]
+                if (Inst0,Pin0) in PINDIRS:
+                    Dir0 = PINDIRS[(Inst0,Pin0)]
+                else:
+                    Dir0 = 'inout'
+                if (Inst1,Pin1) in PINDIRS:
+                    Dir1 = PINDIRS[(Inst1,Pin1)]
+                else:
+                    Dir1 = 'inout'
+
+                if (Dir0,Dir1) == ('input','output'):
+                    recordPair(Inst1,Inst0,Net)
+                elif (Dir1,Dir0) == ('input','output'):
+                    recordPair(Inst0,Inst1,Net)
+                else:
+                   logs.log_warning('DIRECTIONS %s  %s=%s %s=%s'%(Net,Inst0,Dir0,Inst1,Dir1))
+                    
+
+PAIRS = {}
+                
+def recordPair(Src,Dst,Net):
+    Key=(Src,Dst)
+    if Key not in PAIRS: PAIRS[Key] = []
+    PAIRS[Key].append(Net)
+                
 
 reported = True
 def reportNetTable(Mod):

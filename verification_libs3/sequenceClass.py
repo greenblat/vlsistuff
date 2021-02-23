@@ -114,11 +114,18 @@ class sequenceClass:
             Seq = []
             for ind,Line in enumerate(self.Sequence):
                 wrds = Line.split()
+                logs.log_info('INCLUDEX %d %s'%(len(self.Sequence),str(wrds)))
                 if (len(wrds)==0)or(wrds[0][0] in '#/'):
                     pass
                 elif (wrds[0]=='include'):
                     Fname = wrds[1]
                     Found = False
+                    logs.log_info('INCLUDE %s %s'%(Fname,os.path.exists(Fname)))
+                    if os.path.exists(Fname):
+                        Lines = open(Fname).readlines()
+                        Seq.extend(Lines) 
+                        Found = True
+                        Dones = True
                     for Path in self.searchPath:
                         if (not Found) and os.path.exists('%s/%s'%(Path,Fname)):
                             Lines = open('%s/%s'%(Path,Fname)).readlines()
@@ -126,10 +133,11 @@ class sequenceClass:
                             Found = True
                             Dones = True
                     if not Found:
-                        logs.log_error('include file "%s" no found in %s'%(Fname,self.searchPath))
+                        logs.log_error('X include file "%s" no found in %s'%(Fname,self.searchPath))
                         Dones = False
                 else:
                     Seq.append(Line)
+            logs.log_info('SEQEND %d'%len(Seq))
             self.Sequence = Seq
 
 
@@ -326,7 +334,6 @@ class sequenceClass:
         Wrds = Wrds1[:]
         for ind,Wrd in enumerate(Wrds):
             if (str(Wrd)[0] in string.ascii_letters)and(Wrd not in ['or','and','not']):
-#                print('AAAAAA',Wrd,veri.exists(Wrd),type(veri.exists(Wrd)))
                 if self.exists(Wrd):
                     Val = self.peek(Wrd)
                     Defs[Wrd]=Val

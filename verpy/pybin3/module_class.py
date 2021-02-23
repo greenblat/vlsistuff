@@ -509,7 +509,7 @@ class module_class:
             Ok = goodToGo(Set,Readies,Ordered)
             if not Ok:
                 logs.log_debug('failed %s net=%s ok=%s dset=%s   set=%s'%(Failed,Dst,Ok,Dset,Set))
-            if Ok and (len(Dset)==1)and(Dset[0]==Dst):
+            if Ok and (len(Dset)==1)and(Dset[0]==Dst)and not self.is_external(Dst) :
                 logs.log_debug('ok net=%s'%(Dst))
                 if Dst in self.nets:
                     Dir,Wid = self.nets[Dst]
