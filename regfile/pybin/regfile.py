@@ -219,7 +219,7 @@ def treatFields():
         Split=True
         RegObj = findObj(Db['regs'],Reg)
         RegWid = RegObj.Params['width']
-        if 'fields' in RegObj.Params:
+        if ('fields' in RegObj.Params)and(RegObj.Name not in EXTERNAL_REGS):
             Wid = getPrm(RegObj,'width',0)
             if Wid<=1:
                 WW = ''
@@ -279,6 +279,10 @@ def treatFields():
                     if Name == 'gap':
                         Name = '0'
                     LINES[6].append('assign %s = %s;'%(RegHiLo,Name))
+            elif Access=='external':
+                LINES[8].append('\n\n// external reg with fields, take one')
+                LINES[8].append('assign %s = %s;'%(RegHiLo,Name))
+                LINES[8].append('assign %s = %s;\n'%(Name,RegHiLo))
             else:
                 logs.log_error('fields not legal access %s for %s'%(Access,Name))
         if inAccess(Access)and('0' in Cover):
@@ -316,6 +320,7 @@ def generate():
     uniquifyFields()
 
 FIELDED_REGS = []    
+EXTERNAL_REGS = []    
 
 def uniquifyFields():
     Takens = {}
@@ -368,6 +373,8 @@ def gatherFields():
             Obj = Reg
             Reg.Name = Active
             Db['regs'].append(Reg)
+            if Reg.Params['access']=='external':
+                EXTERNAL_REGS.append(Reg.Name)
         elif Reg.Kind=='field':
             if Active:
                 if ('access' not in Reg.Params) or ( Reg.Params['access']!='gap'):
@@ -874,8 +881,8 @@ def treatReg(Reg):
         Line = '    ,input %s %s'%(widi(Wid),Name)
         LINES[0].append(Line)
         if Access=='external':
-            LINES[0].append(Line)
-            LINES[0].append(Line)
+            LINES[0].append('    ,output  %s_rd_pulse'%(Name))
+            LINES[0].append('    ,output  %s_wr_pulse'%(Name))
             treatPrdata(Reg,Wid,Name)
         else:
             Line0 = '    wire %s_rd_pulse;'%(Name)
@@ -1117,7 +1124,7 @@ def helper0(Finst):
     for Li in LINES[0]:
         Li = Li.replace(' reg ',' ')
         Wrds = Li.split()
-        if Wrds[-1] not in FIELDED_REGS:
+        if (Wrds[-1] not in FIELDED_REGS)or(Wrds[-1] in EXTERNAL_REGS):
             Db['fout'].write(Li+'\n')
             Finst.write('    ,.%s(%s)\n'%(Wrds[-1],Wrds[-1]))
         else:

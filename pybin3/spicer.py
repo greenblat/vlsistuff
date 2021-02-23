@@ -62,6 +62,7 @@ def regular_spice(File,Fname):
 
 def cadence_spice(File):
     lines = scan_file(File)
+    print('len %d'%len(lines))
     gather_headers(lines)
     write_verilogs(lines)
 
@@ -70,10 +71,12 @@ Headers = {}
 def write_verilogs(lines):
     state='idle'
     for line in lines:
+        line = line.lower()
         line = line.replace('(',' ( ')
         line = line.replace(')',' ) ')
         wrds = line.split()
-        if (wrds[0]=='subckt'):
+        print('wrds0',wrds[0])
+        if (wrds[0] in ['subckt','.subckt']):
             state='cell'
             Cell = wrds[1]
             Modules[Cell]=moduleClass(Cell)
@@ -196,7 +199,9 @@ def write_verilogs(lines):
 
 def gather_headers(lines):
     for line in lines:
+        line = line.lower()
         wrds = line.split()
+        print(wrds[0])
         if (wrds[0]=='subckt'):
             heads=[]
             for wrd in wrds:
