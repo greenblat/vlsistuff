@@ -126,7 +126,7 @@ def excecuteLine(Mod,wrds,Env):
                 Obj.conns[Pin]=False
                 Env.donesx +=1
             else:
-                logs.log_error('instance %s has no pin %s'%(Inst,Pin))
+                Obj.conns[Pin]=False
         return
 
     if (wrds[0]=='del_conn'):
