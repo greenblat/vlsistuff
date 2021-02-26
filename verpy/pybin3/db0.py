@@ -1909,7 +1909,7 @@ def get_expr(Item):
                 Expr0 = get_expr(List[0])
                 Expr1 = get_expr(List[2])
                 Op = List[1][0]
-                if Op in ['+','*','|','||','^','&&','||']:
+                if Op in ['+','*','|','||','^','&&','||','<<','>>']:
                     RR = [Op]
                     if (type(Expr0) is tuple)and(Expr0[0]==Op):
                         RR.extend(list(Expr0[1:]))
@@ -1972,7 +1972,7 @@ def get_expr(Item):
             return float(Item[0])
         if Item[1]=='always':
             return Item[0]
-    if (len(Item)==3)and(Item[0] in ['+','-','/','*','functioncall']):
+    if (len(Item)==3)and(Item[0] in ['<<','>>','+','-','/','*','functioncall']):
         return Item
     if (len(Item)==4)and(Item[0] in ['question']):
         return Item
