@@ -39,13 +39,9 @@ def run_yacc(YaccTableName,Flexname,RunDir,Fname):
 
     if YaccTableName:
         load_yacc_table(YaccTableName)
-    logs.log_info('yacc step0')
     readlexfile(Flexname)
-    logs.log_info('yacc step1')
     run_machine()
-    logs.log_info('yacc step2')
     reportDb(RunDir)
-    logs.log_info('yacc step3')
     Fout.close()
 
 def readlexfile(Flexname):

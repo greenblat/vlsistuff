@@ -380,6 +380,16 @@ def report_connectivity(Mod,Env):
                         Singles[Inst] = [(Type,Pin,Net)]
                     else:
                         Singles[Inst].append((Type,Pin,Net))
+                else:
+                    DD = []
+                    for Inst,Type,Pin in List:
+                        if Type in Env.Modules:
+                            if Pin in Env.Modules[Type].nets:
+                                D1,_ = Env.Modules[Type].nets[Pin]
+                                if 'output' in D1: D1 = 'output'
+                                DD.append(D1)
+                    if not reasonableDirs(DD):
+                        logs.log_error('net %s has a problem %s'%(Net,DD))
         else:
             print('WWWWW',Net)
     for Inst in Mod.insts:
@@ -431,6 +441,12 @@ def report_connectivity(Mod,Env):
         Fcsv.write('cell ,%s,%s\n'%(Inst,Type))
     Fcsv.close()
 
+def reasonableDirs(DD):
+    if len(DD)<=1: return True
+    if 'input' not in DD: return False
+    if 'output' not in DD: return False
+    if DD.count('output')>1: return False
+    return True
 
 def pairsTable(Mod):
     buildPairsTable(Mod)
