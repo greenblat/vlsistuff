@@ -328,9 +328,18 @@ def removeUnused(Mod):
     Mod.prepareNetTable()
     Nets = list(Mod.nets.keys())
     for Net in Nets:
-        if Net not in Mod.netTable:
-            print('remove %s'%Net)
+        Dir,Wid = Mod.nets[Net]
+        if (Wid == 0) and (Net not in Mod.netTable) and isInternal(Dir):
+            logs.log_info('REMOVE %s'%Net)
             Mod.nets.pop(Net)
+
+def isInternal(Dir):
+    if 'input' in Dir: return False
+    if 'output' in Dir: return False
+    if 'inout' in Dir: return False
+    return True
+
+
 
 PINDIRS = {}
 def buildPinDirs(Mod,Env):
