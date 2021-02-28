@@ -326,10 +326,11 @@ def scanFunctions(wrds,Env,Mod):
 
 def removeUnused(Mod):
     Mod.prepareNetTable()
+    Mod.mergeNetTableBusses()
     Nets = list(Mod.nets.keys())
     for Net in Nets:
         Dir,Wid = Mod.nets[Net]
-        if (Wid == 0) and (Net not in Mod.netTable) and isInternal(Dir):
+        if (Net not in Mod.netTable) and isInternal(Dir):
             logs.log_info('REMOVE %s'%Net)
             Mod.nets.pop(Net)
 
