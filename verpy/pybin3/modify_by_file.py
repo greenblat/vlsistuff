@@ -443,11 +443,12 @@ def report_connectivity(Mod,Env):
 
 def reasonableDirs(DD):
     if len(DD)<=1: return True
+    DD.sort()
+    if ('inout' in DD)and(len(DD)==2): return True
     if 'input' not in DD: return False
     if 'output' not in DD: return False
     if DD.count('output')>1: return False
     return True
-
 def pairsTable(Mod):
     buildPairsTable(Mod)
     reportPairsTable(Mod)
