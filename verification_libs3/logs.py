@@ -856,6 +856,11 @@ def splitQuotes(Txt):
         Wrds[ind] = X
     return Wrds
 
-
+def peekbus(Bus,Path,Wid):
+    Res = ''
+    for II in range(Wid-1,-1,-1):
+        X = veri.peek('%s.%s[%s]'%(Path,Bus,II))
+        Res += X
+    return intx(Res)
 print('>>>verification_logs loaded')
 
