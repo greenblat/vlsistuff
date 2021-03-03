@@ -55,6 +55,8 @@ def excecuteLine(Mod,wrds,Env):
         Env.read_verilog_file(Fname,Env.rundir,Env)
         return
 
+    if (wrds[0]=='assign'):
+        Mod.add_hard_assign(wrds[1],wrds[2])
     if (wrds[0]=='add_inout'):
         add_wires(Mod,'inout',wrds[1:])
         return
