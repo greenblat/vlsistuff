@@ -179,7 +179,7 @@ def produce_html(Module,Db):
             if Item.Name!='gap':
                 Fpy.write('FIELDS["%s"] = (%s, %s)\n'%(Item.Name,H-L+1,L))
         elif Item.Kind == 'gap':
-            List = [Item.Kind,Item.Params['access'],hex(Item.Params['diff']),' ',Item.Name,'',Addr,Desc.replace('\n',' ')]
+            List = [Item.Kind,Item.Params['access'],hex(8*Item.Params['diff']),' ',Item.Name,'',Addr,Desc.replace('\n',' ')]
             Fcsv.write('%s,%s,%s,%s,%s,%s,%s,%s\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
         else:
             List = [Item.Kind,Item.Params['access'],Item.Params['width'],' ',Item.Name,Reset,Addr,Desc.replace('\n',' ')]
