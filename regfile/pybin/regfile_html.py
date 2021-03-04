@@ -146,6 +146,17 @@ def produce_html(Module,Db):
     run_on_coding(origarr,ofile)
     ofile.write('</tr>\n')
 
+    Last = False
+    for Item in Items:
+        if Item.Kind=='gap':
+            Item.Params['names']=['gap']
+            Item.Name = 'gap'
+            Last = Item
+        elif (Item.Addr>0)and Last:
+            Diff = Item.Addr-Last.Addr
+            Last.Params['diff']=Diff
+            Last = False
+
     for Item in Items:
         if 'reset' not in Item.Params: 
             Reset = ' '
@@ -167,8 +178,11 @@ def produce_html(Module,Db):
             Fmd.write('|%s|%s|%s|%s|%s|%s|%s|%s|\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
             if Item.Name!='gap':
                 Fpy.write('FIELDS["%s"] = (%s, %s)\n'%(Item.Name,H-L+1,L))
+        elif Item.Kind == 'gap':
+            List = [Item.Kind,Item.Params['access'],Item.Params['width'],' ',Item.Name,hex(Item.Params['diff']),Addr,Desc.replace('\n',' ')]
+            Fcsv.write('%s,%s,%s,%s,%s,%s,%s,%s\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
         else:
-            List = [Item.Kind,Item.Params['access'],Item.Params['width'],' ',Item.Params['names'][0],Reset,Addr,Desc.replace('\n',' ')]
+            List = [Item.Kind,Item.Params['access'],Item.Params['width'],' ',Item.Name,Reset,Addr,Desc.replace('\n',' ')]
             Fcsv.write('%s,%s,%s,%s,%s,%s,%s,%s\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
             if List[0] == 'reg': List[0] = '**reg**'
             Fmd.write('|%s|%s|%s|%s|%s|%s|%s|%s|\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
