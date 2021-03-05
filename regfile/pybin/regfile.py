@@ -1071,9 +1071,10 @@ module MODULE (input pclk, input presetn,
 '''
 APBInst = '''
 wire [1023:0] ZEROES = 1024'b0;
+wire [31:0] last_wdata;
 MODULE rgf (.pclk(pclk),.presetn(presetn),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
     ,.pwdata(pwdata),.prdata(prdata),.prdata_wire(prdata_wire)
-    ,.pstrb(pstrb)
+    ,.pstrb(pstrb),.last_wdata(last_wdata)
 '''
 
 APB2RAM = '''
