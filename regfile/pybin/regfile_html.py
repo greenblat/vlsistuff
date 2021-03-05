@@ -152,6 +152,7 @@ def produce_html(Module,Db):
             Item.Params['names']=['gap']
             Item.Name = 'gap'
             Last = Item
+            Item.Params['diff'] = 0
         elif (Item.Addr>0)and Last:
             Diff = Item.Addr-Last.Addr
             Last.Params['diff']=Diff
