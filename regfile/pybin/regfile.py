@@ -610,6 +610,7 @@ HEADER = '''module MODULE (
 '''
 
 STRING0 = '''
+wire [ADDWID-1:0] mpaddr0 =  ADDWID'hMASK & paddr;
 wire [ADDWID-1:0] mpaddr = (pread||pwrite) ? (paddr - 'hBASE)  : 0;
 assign prdata_wire =
 '''
@@ -694,6 +695,7 @@ def bodyDump1(Db,File):
 
     for Line in LINES[10]:
         File.write('%s\n'%Line)
+#    Haddr = Db['chip'].HADDR
 
     Str = STRING0.replace('MASK',hex(Mask)[2:])
     Str = Str.replace('BASE',hex(Base)[2:])
