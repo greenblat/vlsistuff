@@ -610,8 +610,8 @@ HEADER = '''module MODULE (
 '''
 
 STRING0 = '''
-wire [ADDWID-1:0] mpaddr0 =  ADDWID'hMASK & paddr;
-wire [ADDWID-1:0] mpaddr = (pread||pwrite) ? (paddr - 'hBASE)  : 0;
+wire [ADDWID-1:0] mpaddr0 =  ADDWID'hMASK & (paddr - 'hBASE);
+wire [ADDWID-1:0] mpaddr = (pread||pwrite) ? mpaddr0  : 0;
 assign prdata_wire =
 '''
 
