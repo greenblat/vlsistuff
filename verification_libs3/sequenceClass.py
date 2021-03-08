@@ -6,6 +6,7 @@ import logs
 import veri
 import sys,os,string
 import random
+import importlib
 
 #built in commands: finish,wait,marker,force,print,define,include,exec
 
@@ -38,6 +39,7 @@ class sequenceClass:
         self.Name = 'main'
         if Monitors!= -1:
             Monitors.append(self)
+        self.Monitors = Monitors
         self.Sequence = SEQUENCE.split('\n')
         self.workIncludes()
         self.waiting = 0
@@ -294,7 +296,18 @@ class sequenceClass:
             self.Guardian = 0
             return True
 
-
+        elif (wrds[0] == 'seq'):  # commands to myself
+            if wrds[1] == 'import':
+                Module = wrds[2]
+                if Module.endswith('.py'):
+                    Module = Module[:-3]
+                That = importlib.import_module(Module)
+                self.agents[Module] = That
+                That.Caller = self
+                self.Monitors.append(That)
+                logs.log_info('helper %s added'%(Module))
+            else:
+                logs.log_error('sequence class accepts only import, not %s'%str(wrds))
 
 
         elif wrds[0] in self.agents:
