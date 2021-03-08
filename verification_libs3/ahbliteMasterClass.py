@@ -166,9 +166,8 @@ class ahbliteMaster(logs.driverClass):
 
             if What[0]=='write':
                 self.seq.append([('haddr',What[1]),('hwdata',What[2]),('hwrite',1),('htrans',2),('hsize',2),('hsel',1),('hready',1)])
-                self.seq.append([('wait',1)])
-                self.seq.append([('haddr',0),('hwdata',What[2]),('hwrite',0),('htrans',0),('hsize',0),('hsel',self.HSEL),('hready',1)])
-                self.seq.append([('wait',5)])
+                self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('hsel',self.HSEL),('hready',1)])
+                self.seq.append([('waitUntil',('hreadyout',1))])
                 return
 
             if What[0]=='read':
