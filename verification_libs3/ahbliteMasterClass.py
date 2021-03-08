@@ -127,7 +127,7 @@ class ahbliteMaster(logs.driverClass):
                     Act = self.peek(Net)
                     if (Act != What): return
                 else:
-                    self.force(Sig,Val)
+                    self.tr_force(Sig,Val)
             if self.tr_peek('hresp')!=0:
                 self.seq = []
                 self.tr_force('hsel',0)
@@ -135,7 +135,6 @@ class ahbliteMaster(logs.driverClass):
                 self.tr_force('hburst',0)
                 self.tr_force('hwrite',0)
                 return
-            print('LLL',len(self.seq),List)
             if hreadyout==0: return
             self.seq.pop(0)
             return

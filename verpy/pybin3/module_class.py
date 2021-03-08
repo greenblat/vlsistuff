@@ -905,7 +905,7 @@ class module_class:
                 A = self.compute_int(Item[1])
                 B = self.compute_int(Item[2])
                 try:
-                    return eval('%s%s%s'%(A,Item[0],B))
+                    return int(eval('%s%s%s'%(A,Item[0],B)))
                 except:
                     return [Item[0],A,B]
             if Item[0] in ['dig']:
@@ -913,7 +913,7 @@ class module_class:
             if Item[0] in ['functioncall']:
                 if Item[1]=='$clog2':
                     Val = self.compute_int(Item[2][0])
-                    Wid = len(bin(Val+1))-2
+                    Wid = len(bin(int(Val)+1))-2
                     return Wid
             if Item[0] == 'subbit':
                 return Item

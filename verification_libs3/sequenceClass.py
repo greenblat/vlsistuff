@@ -114,13 +114,11 @@ class sequenceClass:
             Seq = []
             for ind,Line in enumerate(self.Sequence):
                 wrds = Line.split()
-                logs.log_info('INCLUDEX %d %s'%(len(self.Sequence),str(wrds)))
                 if (len(wrds)==0)or(wrds[0][0] in '#/'):
                     pass
                 elif (wrds[0]=='include'):
                     Fname = wrds[1]
                     Found = False
-                    logs.log_info('INCLUDE %s %s'%(Fname,os.path.exists(Fname)))
                     if os.path.exists(Fname):
                         Lines = open(Fname).readlines()
                         Seq.extend(Lines) 

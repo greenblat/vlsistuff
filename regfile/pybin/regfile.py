@@ -610,7 +610,8 @@ HEADER = '''module MODULE (
 '''
 
 STRING0 = '''
-wire [ADDWID-1:0] mpaddr = (pread||pwrite) ? (paddr - 'hBASE)  : 0;
+wire [ADDWID-1:0] mpaddr0 =  ADDWID'hMASK & (paddr - 'hBASE);
+wire [ADDWID-1:0] mpaddr = (pread||pwrite) ? mpaddr0  : 0;
 assign prdata_wire =
 '''
 
@@ -694,6 +695,7 @@ def bodyDump1(Db,File):
 
     for Line in LINES[10]:
         File.write('%s\n'%Line)
+#    Haddr = Db['chip'].HADDR
 
     Str = STRING0.replace('MASK',hex(Mask)[2:])
     Str = Str.replace('BASE',hex(Base)[2:])
@@ -1071,9 +1073,10 @@ module MODULE (input pclk, input presetn,
 '''
 APBInst = '''
 wire [1023:0] ZEROES = 1024'b0;
+wire [31:0] last_wdata;
 MODULE rgf (.pclk(pclk),.presetn(presetn),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
     ,.pwdata(pwdata),.prdata(prdata),.prdata_wire(prdata_wire)
-    ,.pstrb(pstrb)
+    ,.pstrb(pstrb),.last_wdata(last_wdata)
 '''
 
 APB2RAM = '''
