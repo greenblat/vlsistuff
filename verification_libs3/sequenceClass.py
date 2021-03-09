@@ -8,7 +8,7 @@ import sys,os,string
 import random
 import importlib
 
-#built in commands: finish,wait,marker,force,print,define,include,exec
+#built in commands: finish,wait,marker,force,print,define,include,exec,check,seq import
 
 # finish    # kill simulation
 # wait 100    # dont do for 100 clocks
@@ -301,6 +301,11 @@ class sequenceClass:
                 Module = wrds[2]
                 if Module.endswith('.py'):
                     Module = Module[:-3]
+                if '/' in Module:
+                    wrds = Module.split('/')
+                    Path = '/'.join(wrds[:-1])
+                    Module = wrds[-1]
+                sys.path.append(Path)
                 That = importlib.import_module(Module)
                 self.agents[Module] = That
                 That.Caller = self
@@ -308,7 +313,7 @@ class sequenceClass:
                 logs.log_info('helper %s added'%(Module))
             else:
                 logs.log_error('sequence class accepts only import, not %s'%str(wrds))
-
+            return
 
         elif wrds[0] in self.agents:
             if wrds[1]=='waitNotBusy':
