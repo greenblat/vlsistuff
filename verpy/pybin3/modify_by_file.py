@@ -3,6 +3,7 @@ import logs
 import datetime 
 from executes import execute_line
 from module_class import is_external_dir
+from module_class import hashit
 from dump_instance import wids
 import module_class
 def help_main(Env):
@@ -218,6 +219,7 @@ def excecuteLine(Mod,wrds,Env):
     if (wrds[0]=='report_connectivity'):
         report_connectivity(Mod,Env)
         pairsTable(Mod)
+        singlesTable(Mod)
         return
     if (wrds[0]=='remove_unused_wires'):
         removeUnused(Mod)
@@ -455,6 +457,42 @@ def reasonableDirs(DD):
 def pairsTable(Mod):
     buildPairsTable(Mod)
     reportPairsTable(Mod)
+
+def singlesTable(Mod):
+    Mod.mergeNetTableBusses()
+    Insts = list(Mod.insts.keys())
+    Insts.sort()
+    Fout = open('%s.nets.csv'%Mod.Module,'w')
+    for Inst in Insts:
+        Obj =Mod.insts[Inst]
+        Type = Obj.Type
+        Pins = list(Obj.conns.keys())
+        Pins.sort()
+        Fout.write(',,,\n---->,%s,%s\n'%(Inst,Type))
+        for Pin in Pins:
+            if (Inst,Pin) in PINDIRS:
+                Dir = PINDIRS[(Inst,Pin)]
+                Fout.write(',%s,%s'%(Pin,Dir))
+                Con = hashit(Obj.conns[Pin])
+                if Con in Mod.netTable:
+                    List = Mod.netTable[Con]
+                    ii = 0
+                    while ii<len(List):
+                        (In,Ty,Pi) = List[ii]
+                        if (In,Pi) in PINDIRS:
+                            Dirx = PINDIRS[(In,Pi)]
+                        else:
+                            Dirx = Dir
+                        if In==Inst:
+                            List.pop(ii)
+                        elif (Dirx == Dir):
+                            List.pop(ii)
+                        else:
+                            ii += 1
+                    List.sort()
+                    for (In,_,Pi) in List:
+                        Fout.write(',%s.%s'%(In,Pi))
+                Fout.write('\n')
 
 def reportPairsTable(Mod):
     Keys = list(PAIRS.keys())
