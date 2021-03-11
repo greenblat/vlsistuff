@@ -473,7 +473,7 @@ def singlesTable(Mod):
             if (Inst,Pin) in PINDIRS:
                 Dir = PINDIRS[(Inst,Pin)]
                 Fout.write(',%s,%s'%(Pin,Dir))
-                Con = hashit(Obj.conns[Pin])
+                Con = str(hashit(Obj.conns[Pin]))
                 if Con in Mod.netTable:
                     List = Mod.netTable[Con]
                     ii = 0
