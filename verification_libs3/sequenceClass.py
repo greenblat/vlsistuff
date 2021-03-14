@@ -305,7 +305,7 @@ class sequenceClass:
                     wrds = Module.split('/')
                     Path = '/'.join(wrds[:-1])
                     Module = wrds[-1]
-                sys.path.append(Path)
+                    sys.path.append(Path)
                 That = importlib.import_module(Module)
                 self.agents[Module] = That
                 That.Caller = self
