@@ -342,7 +342,8 @@ class sequenceClass:
                 elif Wrd in self.Translates:
                     Res += str(self.Translates[Wrd])
                 elif (Wrd[0] == '('):
-                    Val = self.evalExpr(Wrd)
+                    BB = makeExpr(Wrd)
+                    Val = self.evalExpr(BB)
                     Res += ' '+str(Val)
                 else:
                     Res += ' '+Wrd
@@ -377,7 +378,7 @@ class sequenceClass:
 
 
 def makeExpr(Txt):
-    for Chr in '<>=()!+-*/':
+    for Chr in '&|<>=()!+-*/':
         Txt = Txt.replace(Chr,' %s '%Chr)
     Txt  = Txt.replace('  ',' ')
     for From in ['= =','> =','! =','< =','< <','> >']:
