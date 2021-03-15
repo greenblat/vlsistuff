@@ -341,6 +341,9 @@ class sequenceClass:
                     Res += ' %s=%s'%(Wrd,self.peek(Wrd))
                 elif Wrd in self.Translates:
                     Res += str(self.Translates[Wrd])
+                elif (Wrd[0] == '('):
+                    Val = self.evalExpr(Wrd)
+                    Res += ' '+str(Val)
                 else:
                     Res += ' '+Wrd
             logs.log_info('PRINT %s'%Res)
