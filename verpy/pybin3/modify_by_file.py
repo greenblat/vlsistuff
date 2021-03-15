@@ -31,7 +31,8 @@ def executeLines(Mod,Cmdlines,Env):
         if wrds==[]:
             pass
         elif (wrds[0]=='include'):
-            Fil = open(wrds[1])
+            Abs = os.path.expandvars(wrds[1])
+            Fil = open(Abs)
             LL = Fil.readlines()
             Fil.close()
             Cmdlines = LL + Cmdlines
