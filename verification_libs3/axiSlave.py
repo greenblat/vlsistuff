@@ -40,6 +40,37 @@ class axiSlaveClass:
         if Sig in self.Translates: Sig = self.Translates[Sig]
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
+    def action(self,Text):
+        Wrds = Text.split()
+        if Wrds == []:
+            pass
+        elif Wrds[0] == 'ramfile':
+            File = open(Wrds[1])
+            lines = File.readlines()
+            File.close()
+            Addr = 0
+            for line in lines:
+                wrds = line.split()
+                for wrd in wrds:
+                    if wrd[0]=='@':
+                        Addr = int(wrd[1:],16)
+                    else:
+                        Addr = self.addWord(Addr,Wrd)
+        elif Wrds[0] == 'ram':
+            Addr = eval(Wrds[1])
+            for Wrd in Wrds[2:]:
+                Addr = self.addWord(Addr,Wrd)
+                
+
+    def addWord(self,Addr,Word):
+        Data = int(wrd,16)
+        self.Ram[Addr] = Data & 0xff
+        self.Ram[Addr+1] = (Data>>8) & 0xff
+        self.Ram[Addr+2] = (Data>>16) & 0xff
+        self.Ram[Addr+3] = (Data>>24) & 0xff
+        Addr += 4
+        return Addr
+
     def run(self):
 #        pudb.set_trace()
         self.reading()

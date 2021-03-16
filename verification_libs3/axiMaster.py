@@ -165,29 +165,33 @@ class axiMasterClass:
         self.runQueue()
 
     def manageRready(self,What):
-        if What==1:
-            print('>>>',What,self.rreadyCount,self.rreadyDeny,self.peek('rvalid'))
+#        if What==1:
+#            print('>>>',What,self.rreadyCount,self.rreadyDeny,self.peek('rvalid'))
         if What==0:
             self.force('rready',0)
             self.rreadyCount=0
-            return
+            return 0
         if self.rreadyDeny>0:
             self.force('rready',0)
             self.rreadyDeny += 1
             if self.rreadyDeny > self.rreadyDenys:
                 self.rreadyDeny=0
                 self.rreadyCount=0
+            return 0
         elif self.rreadyCount==self.rreadyOnes:
             self.force('rready',0)
             self.rreadyDeny = 1
             self.rreadyCount=0
+            return 0
         else:
             self.force('rready',1)
             self.rreadyCount += 1
+            return 1
 
     def runResponce(self):
         if self.peek('rvalid')==1:
-            self.manageRready(1)
+            Ready = self.manageRready(1)
+            if Ready == 0: return
             rdata = self.peek('rdata')
             if self.datawidth==0:
                 rrr = self.bpeek('rdata')
