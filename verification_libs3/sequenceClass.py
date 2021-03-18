@@ -219,6 +219,10 @@ class sequenceClass:
 
             return True
         if wrds[0] == 'finish':
+            for Agent in self.agents:
+                Obj = self.agents[Agent]
+                if 'report' in dir(Obj):
+                    Obj.report()
             logs.finish('finishing on sequence')
             sys.exit()
         if (wrds[0] == 'marker'):

@@ -170,15 +170,18 @@ def produce_html(Module,Db):
         if 'width' not in Item.Params: Item.Params['width']=0
         if 'description' not in Item.Params: Item.Params['description'] = ''
         Desc = Item.Params['description'].replace('.',' ')
+        Desc0 = Desc.replace('\\n','<br>')
+        Desc0 = Desc0.replace('\n','<br>')
         if Item.Kind=='gap':
             Item.Params['names']=['gap']
         Addr = hex(Item.Addr)
         if Item.Addr<0: Addr = ''
         if 'position' in Item.Params:
             (H,L) = Item.Params['position']
-            List = [Item.Kind,Item.Params['access'],Item.Params['width'],'[%s:%s]'%(H,L),Item.Params['names'][0],Reset,Addr,Desc.replace('\n',' ')]
+            List = [Item.Kind,Item.Params['access'],Item.Params['width'],'[%s:%s]'%(H,L),Item.Params['names'][0],Reset,Addr,Desc]
             Fcsv.write('%s,%s,%s,%s,%s,%s,%s,%s\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
             if List[0] == 'reg': List[0] = '**reg**'
+            List = [Item.Kind,Item.Params['access'],Item.Params['width'],'[%s:%s]'%(H,L),Item.Params['names'][0],Reset,Addr,Desc0]
             Fmd.write('|%s|%s|%s|%s|%s|%s|%s|%s|\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
             if Item.Name!='gap':
                 Fpy.write('FIELDS["%s"] = (%s, %s)\n'%(Item.Name,H-L+1,L))
@@ -189,7 +192,7 @@ def produce_html(Module,Db):
             List = [Item.Kind,Item.Params['access'],Item.Params['width'],' ',Item.Name,Reset,Addr,Desc.replace('\n',' ')]
             Fcsv.write('%s,%s,%s,%s,%s,%s,%s,%s\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
             if List[0] == 'reg': List[0] = '**reg**'
-            Fmd.write('|%s|%s|%s|%s|%s|%s|%s|%s|\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
+            Fmd.write('|%s|%s|%s|%s|%s|%s|%s|%s|\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],Desc0))
             if 'reg' in List[0]:
                 Fpy.write('ADDR_MAP["%s"] = %s\n'%(Item.Name,hex(Item.Addr)))
                 Fpy.write('%s = %s\n'%(Item.Name,hex(Item.Addr)))

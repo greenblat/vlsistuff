@@ -2,28 +2,22 @@
 
 import logs
 import veri
-import types
-import string
 
 
-class jtagClass:
+class jtagClass(logs.driverClass):
     def __init__(self,Path,Monitors,JTCK='jtck',JTDI='jtdi',JTMS='jtms',JTDO='jtdo'):
+        logs.driverClass.__init__(self,Path,Monitors)
         self.queue=[]
         self.commands=[]
-        self.Path = Path
         self.jtck = JTCK
         self.jtdi = JTDI
         self.jtdo = JTDO
         self.jtms = JTMS
-        self.state='idle'
         self.responce=''
         self.callback=False
         self.Fout=False
         self.lastIr = (0x20,8)
-        Monitors.append(self)
 
-    def force(self,Sig,Val):
-        veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
     def run(self):
         if self.state=='idle':
@@ -55,7 +49,7 @@ class jtagClass:
         elif self.state=='step1':
             self.force(self.jtck,0)
             if self.Catch==1:
-                self.responce = veri.peek('%s.%s'%(self.Path,self.jtdo))+self.responce
+                self.responce = self.peek(self.jtdo)+self.responce
             elif self.Catch=='x':
                 self.responce = 'X'+self.responce
             elif self.responce!='':
@@ -190,7 +184,7 @@ def main():
      
 
 if (__name__ == '__main__'):
-    import os,sys,string
+    import os,sys
     main()
 
 

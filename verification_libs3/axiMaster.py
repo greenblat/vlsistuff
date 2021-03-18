@@ -68,10 +68,11 @@ class axiMasterClass:
             elif len(wrds)>=6:
                 self.makeWrite(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),list(map(eval,wrds[5:])))
         elif wrds[0]=='read':
-            if len(wrds)==2:
-                self.makeRead(1,1,eval(wrds[1]))
-            else:
-                self.makeRead(eval(wrds[1]),eval(wrds[2]),eval(wrds[2]),2)
+            Burst = eval(wrds[1])
+            Len   = eval(wrds[2])
+            Addr  = eval(wrds[3])
+            self.makeRead(Burst,Len,Addr,2,3)
+# axim read  1 32 0x00045600 4 7
         else:
             logs.log_error('action %s axiMater unrecognized %s'%(self.Name,Txt))
 
