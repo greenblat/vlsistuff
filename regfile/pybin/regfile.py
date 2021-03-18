@@ -68,7 +68,7 @@ def createLines(File):
     state = 'idle'
     for Wrd in Wrds:
         if state=='idle':
-            if ('"' in Wrd)and(Wrd[-1]!='"'):
+            if ('"' in Wrd)and(Wrd.count('"')==1):
                 Acc = Wrd
                 state = 'work'
             else:
@@ -189,6 +189,9 @@ def getParams(wrds):
     for wrd in wrds:
         if '=' in wrd:
             ww = wrd.split('=')
+            if len(ww)>2:
+                Join = '='.join(ww[1:])
+                ww = [ww[0],Join]
             AA = examine(ww[1])
             Res[ww[0]] = AA
         else:
@@ -197,6 +200,7 @@ def getParams(wrds):
     return Res 
 
 def examine(Txt):
+    if Txt=='': return Txt
     if logs.startsWith(Txt,'0x'):
         X = Txt.replace('_','')
         return eval(X)
