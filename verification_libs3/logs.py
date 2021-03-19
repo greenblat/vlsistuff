@@ -13,6 +13,7 @@ if 'PYMONLOG' in os.environ:
     PYMONLOG = os.environ['PYMONLOG']
 
 FORCE_WORKS = True
+TRACE = False
 
 WHERE = ''
 
@@ -95,8 +96,11 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
     if Pstack:
         traceback.print_stack(file=Flogs[Which])
         
-    if Tb:
+    if Tb: 
         if veri: veri.force('%serrors'%TB,str(Errors))
+    if TRACE: 
+        print('EEREEEEEEEEEE')
+        veri.force('20',str(Errors))
 
 
     if (Errors>MAXERRORS):
@@ -116,7 +120,8 @@ def log_correct(Text,Which=0,Print=True):
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Corrects += 1
-    if veri: veri.force('%scorrects'%TB,str(Corrects))
+    if TRACE: veri.force('22',str(Corrects))
+    elif veri: veri.force('%scorrects'%TB,str(Corrects))
     if Print:
         print('@%d: %d vs %d (err=%d) CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text))
     Flogs[Which].write('@%d: %d vs %d (err=%d) CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
@@ -130,7 +135,8 @@ def log_ensure(Cond,Text,Which=0):
 def log_wrong(Text,Which=0):
     global Wrongs
     Wrongs += 1
-    if veri: veri.force('%swrongs'%TB,str(Wrongs))
+    if TRACE: veri.force('21',str(Corrects))
+    elif veri: veri.force('%swrongs'%TB,str(Wrongs))
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d @%d: %d vs %d (err=%d):  WRONG: %s'%(veri.stime(),get_cycles(),Wrongs,Corrects,Errors,Text))
