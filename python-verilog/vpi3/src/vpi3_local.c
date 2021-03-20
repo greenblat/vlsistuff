@@ -1309,7 +1309,7 @@ PyMODINIT_FUNC PyInit_veri(void)
 
 
 void start_py() {
-    dlopen("libpython3.8.so",RTLD_LAZY | RTLD_GLOBAL);
+    dlopen("libpython3.9.so",RTLD_LAZY | RTLD_GLOBAL);
     PyImport_AppendInittab("veri", PyInit_veri);
     Py_Initialize();
     PyRun_SimpleString("import veri; print(dir(veri));\n");
