@@ -99,7 +99,6 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
     if Tb: 
         if veri: veri.force('%serrors'%TB,str(Errors))
     if TRACE: 
-        print('EEREEEEEEEEEE')
         veri.force('20',str(Errors))
 
 

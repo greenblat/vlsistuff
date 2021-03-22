@@ -18,6 +18,43 @@ class jtagClass(logs.driverClass):
         self.Fout=False
         self.lastIr = (0x20,8)
 
+    def busy(self):
+        if self.queue!=[]: return True
+        if self.commands!=[]: return True
+        return False
+
+
+    def action(self,Txt):
+        wrds = Txt.split()
+        if wrds[0] == 'ir':
+            Len = eval(wrds[1])
+            Ir = eval(wrds[2])
+            self.sendIr(self,Ir,Len)
+
+        elif wrds[0] == 'ir1':
+            Len = eval(wrds[1])
+            Ir = eval(wrds[2])
+            self.sendIr1(self,Ir,Len)
+
+        elif wrds[0] == 'dr':
+            Len = eval(wrds[1])
+            Dr = eval(wrds[2])
+            self.sendDr(self,Dr,Len)
+
+        elif wrds[0] == 'dr1':
+            Len = eval(wrds[1])
+            Dr = eval(wrds[2])
+            self.sendDr1(self,Dr,Len)
+
+        elif wrds[0] == 'dr1check':
+            Len = eval(wrds[1])
+            Dr = eval(wrds[2])
+            self.sendDr1Check(self,Dr,Len)
+        elif wrds[0] == 'idle':
+            Len = eval(wrds[1])
+            Tms = eval(wrds[2])
+            self.sendIdle(Len,Tms)
+
 
     def run(self):
         if self.state=='idle':
@@ -94,7 +131,7 @@ class jtagClass(logs.driverClass):
     def sendIr(self,Ir,irLen=8):
         self.queue.extend([(0,0,0),(1,0,0),(1,0,0),(0,0,0),(0,0,0)])
         irString = make_bin_i(Ir,irLen)
-        print 'irString',irString
+        logs.log_info('irString %s'%(irStrings))
         for Bit in irString[:-1]:
             self.queue.append((0,int(Bit),1))
         self.queue.append((1,int(irString[-1]),1))
@@ -184,7 +221,6 @@ def main():
      
 
 if (__name__ == '__main__'):
-    import os,sys
     main()
 
 

@@ -1070,6 +1070,7 @@ static PyObject*
 veri_finish(PyObject *self,PyObject *args) {
     if (!PyArg_ParseTuple(args, ""))
         return NULL;
+    conclusions();
     printf("finish called from python\n");
     exit(0);
     return Py_BuildValue("i", 1);
