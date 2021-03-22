@@ -87,7 +87,7 @@ class jtagDriverClass(logs.driverClass):
         elif self.state=='step1':
             self.force(self.jtck,0)
             if self.Catch==1:
-                self.responce = self.peek(self.jtdo)+self.responce
+                self.responce = str(self.peek(self.jtdo))+self.responce
             elif self.Catch=='x':
                 self.responce = 'X'+self.responce
             elif self.responce!='':
