@@ -29,32 +29,33 @@ class jtagDriverClass(logs.driverClass):
         if wrds[0] == 'ir':
             Len = eval(wrds[1])
             Ir = eval(wrds[2])
-            self.sendIr(self,Ir,Len)
+            self.sendIr(Ir,Len)
 
         elif wrds[0] == 'ir1':
             Len = eval(wrds[1])
             Ir = eval(wrds[2])
-            self.sendIr1(self,Ir,Len)
+            self.sendIr1(Ir,Len)
 
         elif wrds[0] == 'dr':
             Len = eval(wrds[1])
             Dr = eval(wrds[2])
-            self.sendDr(self,Dr,Len)
+            self.sendDr(Dr,Len)
 
         elif wrds[0] == 'dr1':
             Len = eval(wrds[1])
             Dr = eval(wrds[2])
-            self.sendDr1(self,Dr,Len)
+            self.sendDr1(Dr,Len)
 
         elif wrds[0] == 'dr1check':
             Len = eval(wrds[1])
             Dr = eval(wrds[2])
-            self.sendDr1Check(self,Dr,Len)
+            self.sendDr1Check(Dr,Len)
         elif wrds[0] == 'idle':
             Len = eval(wrds[1])
             Tms = eval(wrds[2])
             self.sendIdle(Len,Tms)
-
+        else:
+            logs.log_error('action text %s is not recognized'%(Txt))
 
     def run(self):
         if self.state=='idle':
