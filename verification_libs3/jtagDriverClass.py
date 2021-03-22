@@ -132,7 +132,7 @@ class jtagDriverClass(logs.driverClass):
     def sendIr(self,Ir,irLen=8):
         self.queue.extend([(0,0,0),(1,0,0),(1,0,0),(0,0,0),(0,0,0)])
         irString = make_bin_i(Ir,irLen)
-        logs.log_info('irString %s'%(irStrings))
+        logs.log_info('irString %s'%(irString))
         for Bit in irString[:-1]:
             self.queue.append((0,int(Bit),1))
         self.queue.append((1,int(irString[-1]),1))
