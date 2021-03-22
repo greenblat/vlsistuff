@@ -4,7 +4,7 @@ import logs
 import veri
 
 
-class jtagClass(logs.driverClass):
+class jtagDriverClass(logs.driverClass):
     def __init__(self,Path,Monitors,JTCK='jtck',JTDI='jtdi',JTMS='jtms',JTDO='jtdo'):
         logs.driverClass.__init__(self,Path,Monitors)
         self.queue=[]
