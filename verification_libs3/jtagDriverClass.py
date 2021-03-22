@@ -191,7 +191,7 @@ def make_bin_i(Data,Len):
 
 
 def make_bin(Data,Len):
-    if (type(Data) int str):
+    if (type(Data) is str):
         if len(Data)==Len:
             return Data
         
