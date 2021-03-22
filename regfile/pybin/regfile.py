@@ -886,6 +886,11 @@ def treatReg(Reg):
     elif Access in ['external','w1c']:
         Line = '    ,input %s %s'%(widi(Wid),Name)
         LINES[0].append(Line)
+        if Access == 'w1c':
+            Line = '    ,output %s %s_out_reg'%(widi(Wid),Name)
+            LINES[0].append(Line)
+            
+
         if Access=='external':
             LINES[0].append('    ,output  %s_rd_pulse'%(Name))
             LINES[0].append('    ,output  %s_wr_pulse'%(Name))
@@ -894,13 +899,14 @@ def treatReg(Reg):
             Line0 = '    wire %s_rd_pulse;'%(Name)
             Line1 = '    wire %s_wr_pulse;'%(Name)
             Line2 = '    reg %s %s_int;'%(widi(Wid),Name)
+            Line3 = 'assign %s_out_reg = %s_int;'%(Name,Name)
             Str = W1C.replace('NAME',Name)
             RST = getPrm(Db['chip'],'reset','async')
             if RST=='async':
                 Str = Str.replace('ASYNCRST','or negedge presetn')
             else:
                 Str = Str.replace('ASYNCRST','')
-            LINES[10].extend([Line0,Line1,Line2,Str])
+            LINES[10].extend([Line0,Line1,Line2,Line3,Str])
             treatPrdata(Reg,Wid,Name+'_int')
 
         Str = ROPULSE.replace('assign REG','assign %s_rd'%Name)
