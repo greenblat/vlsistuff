@@ -341,7 +341,9 @@ class sequenceClass:
         elif (wrds[0] == 'print'):
             Res = ''
             for Wrd in wrds[1:]:
-                if self.peek(Wrd):
+                if Wrd[0] in '0123456789':
+                    Res += ' %s'%Wrd
+                elif self.peek(Wrd):
                     Res += ' %s=%s'%(Wrd,self.peek(Wrd))
                 elif Wrd in self.Translates:
                     Res += str(self.Translates[Wrd])
