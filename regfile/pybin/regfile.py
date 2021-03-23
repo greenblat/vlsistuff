@@ -641,7 +641,7 @@ always @(posedge pclk ASYNCRST) begin
     if (!presetn) begin 
         NAME_int <= 0;
     end else begin
-        NAME_int <= (NAME_wr_pulse ? (NAME_int & ~ last_wdata) : NAME_int) | NAME;
+        NAME_int <= (NAME_wr_sel ? (NAME_int & ~ wdata) : NAME_int) | NAME;
     end
 end
 '''
