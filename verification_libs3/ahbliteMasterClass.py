@@ -43,6 +43,8 @@ class ahbliteMaster(logs.driverClass):
         self.HSEL = 1
         self.translations=Translations
         self.busyOk = True
+        self.Size = 2
+        self.Prot = 0
 
     def translate(self,Addr):
         if Addr[0] in '0123456789':
@@ -66,6 +68,10 @@ class ahbliteMaster(logs.driverClass):
             Addr = eval(wrds[2])
             self.queue.append(('burst',wrds[0],Kind,Addr))
 
+        elif wrds[0]=='size':
+            self.Size = eval(wrds[1])
+        elif wrds[0]=='prot':
+            self.Prot = eval(wrds[1])
         elif wrds[0]=='write':
             self.write(wrds[1],wrds[2])
         elif wrds[0]=='read':
@@ -150,15 +156,15 @@ class ahbliteMaster(logs.driverClass):
 
                 Burst = burstcode(What[1])
 
-                self.seq.append([('hburst',Burst),('haddr',What[3]),('hwdata',0),('hwrite',HW),('htrans',NONSEQ),('hsize',2),('hsel',1),('hready',1)])
+                self.seq.append([('hburst',Burst),('haddr',What[3]),('hwdata',0),('hwrite',HW),('htrans',NONSEQ),('hsize',self.Size),('hsel',1),('hready',1)])
                 for X in range(burstlen(What[1])):
                     Addr = What[3]+4*X
                     if (self.busyOk)and(random.randint(0,100)>80):
-                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',BUSY),('hsize',2),('hsel',1),('hready',1)])
+                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',BUSY),('hsize',self.Size),('hsel',1),('hready',1)])
                     if HW==1:
-                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('hsize',2),('hsel',1),('hready',1)])
+                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('hsize',self.Size),('hsel',1),('hready',1)])
                     else:
-                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('catch',('hrdata',Addr)),('hsize',2),('hsel',1),('hready',1)])
+                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('catch',('hrdata',Addr)),('hsize',self.Size),('hsel',1),('hready',1)])
                 
                 self.seq.append([('hburst',0),('haddr',0),('hwdata',0),('hwrite',0),('htrans',IDLE),('hsize',0),('hsel',self.HSEL),('hready',1)])
 
@@ -170,7 +176,7 @@ class ahbliteMaster(logs.driverClass):
                 return
 
             if What[0]=='read':
-                self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hready',1)])
+                self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hready',1),('hsize',self.HSIZE)])
                 self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('catch',('hrdata',What[1])),('hsel',self.HSEL),('hready',1)])
                 self.seq.append([('waitUntil',('hreadyout',1))])
                 return
