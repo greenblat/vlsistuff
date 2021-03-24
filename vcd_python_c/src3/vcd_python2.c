@@ -62,6 +62,7 @@ def valid(Sig,Base=BASE):\n\
 def conclusions():\n\
      # print here end of run things \n\
      print('signing off')\n\
+     logs.closeLogs() \n\
      return \n\
 cycles = 0\n\
 def negedge():\n\
@@ -233,6 +234,7 @@ void do_help() {
     exit(0); }
 void check_x(int i) { return; }
 void do_dumpvars(char *s) { return; }
+char *allocateString(int Len);
 
 char *int2bin(int AA,int Wid,char *tmp);
 void useTriggers();
@@ -564,22 +566,38 @@ void do_upscope(long n){
     if (instate==1) popscope();
     if (n==qqai("$end")) state=Idle;
 }
+
+void createTrace(char *Name,int Code) {
+    char Full[100];
+    codeint(Code); 
+    fprintf(Outf,"$var reg 32 %s %s [31:0] $end\n",codeintstr,Name); 
+    sprintf(Full,"trace.%s",Name);
+    qqsa(qqai(Full),Code);
+    sigs[Code].name = qqai(Full);
+    sigs[Code].path = qqai("trace");
+    sigs[Code].fpath = qqai("trace");
+    sigs[Code].wide = 32;
+    sigs[Code].code=Code;
+    sigs[Code].allocated = allocateString(33);
+}
+
 void do_enddefinitions(char *s) {
     int ii;
+    char Signame[100];
     if (strcmp("$end",s)==0) { 
         state=Idle;
         printf("maxusedsig %d/%d\n",maxusedsig,maxsig);
         fprintf(Outf,"$scope module tracer $end\n");
         for (ii=0;ii<20;ii++) {
-            codeint(ii+maxusedsig+1);
-            fprintf(Outf,"$var reg 32 %s trace%d [31:0] $end\n",codeintstr,ii); 
+            sprintf(Signame,"trace%d",ii);
+            createTrace(Signame,ii+maxusedsig+1); 
+//            codeint(ii+maxusedsig+1);
+//            fprintf(Outf,"$var reg 32 %s trace%d [31:0] $end\n",codeintstr,ii); 
         }
-        codeint(ii+maxusedsig+1);
-        fprintf(Outf,"$var reg 32 %s errors [31:0] $end\n",codeintstr); 
-        codeint(ii+maxusedsig+2);
-        fprintf(Outf,"$var reg 32 %s wrongs [31:0] $end\n",codeintstr); 
-        codeint(ii+maxusedsig+3);
-        fprintf(Outf,"$var reg 32 %s corrects [31:0] $end\n",codeintstr); 
+
+        createTrace("errors",ii+maxusedsig+1); 
+        createTrace("wrongs",ii+maxusedsig+2); 
+        createTrace("corrects",ii+maxusedsig+3); 
         fprintf(Outf,"$upscope $end\n");
         fprintf(Outf,"$enddefinitions $end\n");
 
@@ -1002,12 +1020,16 @@ veri_force(PyObject *self,PyObject *args) {
     char tmp[100];
     if (!PyArg_ParseTuple(args, "ss",&pathstring,&vstr))
         return NULL;
-
-    int X = atoi(pathstring);
-    codeint(maxusedsig+1+X);
+    long Psig =  qqas(qqai(pathstring));
+    if (Psig == 99999999) {
+        printf("\npython: cannot find sig %s for peek\n",pathstring);
+        return Py_BuildValue("i", "1");
+    }
+    codeint(Psig);
+    int wid = sigs[Psig].wide;
     int XX = atoi(vstr);
-    int2bin(XX,32,tmp);
-    fprintf(Outf,"b%s %s  DBG%d\n",tmp,codeintstr,X);
+    int2bin(XX,wid,tmp);
+    fprintf(Outf,"b%s %s  DBG%s\n",tmp,codeintstr,pathstring);
     return Py_BuildValue("i", 0);
 }
 

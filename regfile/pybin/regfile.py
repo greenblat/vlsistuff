@@ -158,6 +158,8 @@ def treatTemplates(Lines):
 
 SYNONYMS = {'wid':'width','desc':'description','rw':'wr','rw_pulse':'wr_pulse'}
 
+
+
 class itemClass:
     def __init__(self,Wrds):
         self.Kind = Wrds[0]
@@ -229,8 +231,14 @@ def treatFields():
                 WW = ''
             else:
                 WW = '[%s:0]'%(Wid-1)
-            LINES[7].append('    ,output %s %s'%(WW,RegObj.Name))
+            Access = RegObj.Params['access']
+            if 'pulse' not in Access:
+                if inAccess(Access):
+                    LINES[7].append('    ,input %s %s'%(WW,RegObj.Name))
+                else:
+                    LINES[7].append('    ,output %s %s'%(WW,RegObj.Name))
             Split=False
+            EXTERNAL_FIELDS.append(RegObj.Name)
             
         Fields = DbFields[Reg]
         Pos = 0
@@ -325,6 +333,7 @@ def generate():
 
 FIELDED_REGS = []    
 EXTERNAL_REGS = []    
+EXTERNAL_FIELDS = []    
 
 def uniquifyFields():
     Takens = {}
@@ -1137,14 +1146,14 @@ def helper0(Finst):
     for Li in LINES[0]:
         Li = Li.replace(' reg ',' ')
         Wrds = Li.split()
-        if (Wrds[-1] not in FIELDED_REGS)or(Wrds[-1] in EXTERNAL_REGS):
+        if (Wrds[-1] not in FIELDED_REGS)or(Wrds[-1] in EXTERNAL_REGS)or (Wrds[-1] in EXTERNAL_FIELDS):
             Db['fout'].write(Li+'\n')
             Finst.write('    ,.%s(%s)\n'%(Wrds[-1],Wrds[-1]))
         else:
             Li = Li.replace('input','wire')
             Li = Li.replace('output','wire')
             Li = Li.replace(',','')
-            Li = Li + ';'
+            Li = Li + '; // hhh'
             Temp.append(Li)
     return Temp
 
