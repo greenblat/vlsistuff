@@ -591,13 +591,12 @@ void do_enddefinitions(char *s) {
         for (ii=0;ii<20;ii++) {
             sprintf(Signame,"trace%d",ii);
             createTrace(Signame,ii+maxusedsig+1); 
-//            codeint(ii+maxusedsig+1);
-//            fprintf(Outf,"$var reg 32 %s trace%d [31:0] $end\n",codeintstr,ii); 
         }
 
         createTrace("errors",ii+maxusedsig+1); 
         createTrace("wrongs",ii+maxusedsig+2); 
         createTrace("corrects",ii+maxusedsig+3); 
+        createTrace("cycles",ii+maxusedsig+4); 
         fprintf(Outf,"$upscope $end\n");
         fprintf(Outf,"$enddefinitions $end\n");
 

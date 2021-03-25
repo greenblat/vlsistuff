@@ -99,7 +99,7 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
     if Tb: 
         if veri: veri.force('%serrors'%TB,str(Errors))
     if TRACE: 
-        veri.force('20',str(Errors))
+        veri.force('trace.errors',str(Errors))
 
 
     if (Errors>MAXERRORS):
@@ -119,7 +119,7 @@ def log_correct(Text,Which=0,Print=True):
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Corrects += 1
-    if TRACE: veri.force('22',str(Corrects))
+    if TRACE: veri.force('trace.corrects',str(Corrects))
     elif veri: veri.force('%scorrects'%TB,str(Corrects))
     if Print:
         print('@%d: %d vs %d (err=%d) CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text))
@@ -131,15 +131,18 @@ def log_ensure(Cond,Text,Which=0):
     else:
         log_wrong(Text,Which)
     
+def stime():
+    if veri: return veri.stime()
+    return 0
 def log_wrong(Text,Which=0):
     global Wrongs
     Wrongs += 1
-    if TRACE: veri.force('21',str(Corrects))
+    if TRACE: veri.force('trace.wrongs',str(Wrongs))
     elif veri: veri.force('%swrongs'%TB,str(Wrongs))
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
-    print('@%d @%d: %d vs %d (err=%d):  WRONG: %s'%(veri.stime(),get_cycles(),Wrongs,Corrects,Errors,Text))
-    Flogs[Which].write('@%d @%d: %d vs %d (err=%d):  WRONG: %s\n'%(veri.stime(),get_cycles(),Wrongs,Corrects,Errors,Text))
+    print('@%d @%d: %d vs %d (err=%d):  WRONG: %s'%(stime(),get_cycles(),Wrongs,Corrects,Errors,Text))
+    Flogs[Which].write('@%d @%d: %d vs %d (err=%d):  WRONG: %s\n'%(stime(),get_cycles(),Wrongs,Corrects,Errors,Text))
     if Wrongs >= MAXWRONGS:
         log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS),Which)
         if finishReason:
@@ -183,6 +186,10 @@ def log_write(Text,Which=0):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
 #    print('%s'%(Text))
     Flogs[Which].write('%s\n'%(Text))
+
+def log_debug(Text,Which=0):
+    return
+
 def log_info(Text,Which=0):
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
