@@ -646,6 +646,7 @@ always @(posedge pclk ASYNCRST) begin
 
 
 W1C = '''
+wire NAME_wr_sel;
 always @(posedge pclk ASYNCRST) begin
     if (!presetn) begin 
         NAME_int <= 0;
@@ -918,13 +919,19 @@ def treatReg(Reg):
             LINES[10].extend([Line0,Line1,Line2,Line3,Str])
             treatPrdata(Reg,Wid,Name+'_int')
 
-        Str = ROPULSE.replace('assign REG','assign %s_rd'%Name)
-        Str = Str.replace('REG',Name)
-        Str = Str.replace('ADDR',hex(Reg.Addr)[2:])
-        LINES[4].append(Str)
+
+        if (Access == 'external'):
+            Str = ROPULSE.replace('assign REG','assign %s_rd'%Name)
+            Str = Str.replace('REG',Name)
+            Str = Str.replace('ADDR',hex(Reg.Addr)[2:])
+            LINES[4].append(Str)
+
         Str = RWPULSE.replace('assign REG','assign %s_wr'%Name)
         Str = Str.replace('REG',Name)
         Str = Str.replace('ADDR',hex(Reg.Addr)[2:])
+        if (Access == 'w1c'):
+            Str = Str.replace('wire','assign')
+
         LINES[4].append(Str)
     else:
         logs.log_error('ACCESS not recognized %s of %s'%(Access,Name))
