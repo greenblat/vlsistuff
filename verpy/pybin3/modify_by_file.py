@@ -239,6 +239,42 @@ def excecuteLine(Mod,wrds,Env):
     if wrds[0].startswith('remove_gen'):
         Mod.generates=[]
         return
+
+    if wrds[0] == 'new_hierarchy':
+        Mod.prepareNetTable()
+        Mod.mergeNetTableBusses()
+        Name = wrds[1]
+        New = module_class.module_class(Name)
+        Env.Modules[Name] = New
+        Insts = wrds[2:]
+        for Inst in wrds[2:]:
+            if Inst in Mod.insts:
+                Obj = Mod.insts[Inst]
+                New.insts[Inst] = Obj
+                Mod.insts.pop(Inst)
+        Nets = list(Mod.nets.keys())
+        Mod.insts[Name] = module_class.instance_class(Name,Name)
+        for Net in Nets:
+            if Net in Mod.netTable:
+                List = Mod.netTable[Net]
+                In,Out = False,False
+                for (Pin,Inst,Type) in List:
+                    if Inst in Insts: In = True
+                    if Inst in Mod.insts: Out = True
+                 
+                if In and not Out:
+                    New.nets[Net] = Mod.nets[Net]
+                    Mod.nets.pop(Net)
+                elif In and Out:
+                    Dir,Wid = Mod.nets[Net]
+                    New.nets[Net] = 'inout',Wid
+                    Mod.insts[Name].conns[Net] = Net
+        Fout = open('%s.v'%Name,'w')
+        New.dump_verilog(Fout)
+        Fout.close()
+
+
+
     logs.log_error('bad command line %s'%' '.join(wrds))
 
 def add_wires(Mod,Dir,wrds):
