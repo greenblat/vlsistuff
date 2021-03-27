@@ -284,7 +284,6 @@ typedef struct SIG {
     int wide;
     char *allocated;
     char value[9];
-    char traceable;
     int toggles;
 } change_sig;
 
@@ -351,7 +350,7 @@ int main(argc, argv)
     fname1[0]=0;
     fname2[0]=0;
 /* update hash table maxsize, if wanted */
-    for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].allocated=0; sigs[i].traceable=0; sigs[i].toggles=0;} 
+    for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].allocated=0; sigs[i].toggles=0;} 
     for (i=0;i<SENSITIVES;i++) armed[i]=0;
     if (argc <= 1) do_help();
     if (argc > 1) {
@@ -395,7 +394,19 @@ void conclusions() {
     PyRun_SimpleString("conclusions()");
 
 }
+void replaceReal(char *line) {
+int xx;
+    if (line[0]!='$') return;
+    if (line[5]!='r') return;
+    if (line[6]!='e') return;
+    if (line[7]!='a') return;
+    if (line[8]!='l') return;
 
+    line[5] = 'w';
+    line[6] = 'i';
+    line[7] = 'r';
+    line[8] = 'e';
+}
 
 
 char s1[longestVal];
@@ -425,6 +436,7 @@ void readfile(fname) char *fname; {
         linenum++;
         guard++;
         if (!enddefsline(line))  
+//            replaceReal(line);   // no need.
             fprintf(Outf,"%s",line);
         if (j==0) {
             conclusions();
@@ -571,11 +583,11 @@ void createTrace(char *Name,int Code) {
     char Full[100];
     codeint(Code); 
     fprintf(Outf,"$var reg 32 %s %s [31:0] $end\n",codeintstr,Name); 
-    sprintf(Full,"trace.%s",Name);
+    sprintf(Full,"tracer.%s",Name);
     qqsa(qqai(Full),Code);
     sigs[Code].name = qqai(Full);
-    sigs[Code].path = qqai("trace");
-    sigs[Code].fpath = qqai("trace");
+    sigs[Code].path = qqai("tracer");
+    sigs[Code].fpath = qqai("tracer");
     sigs[Code].wide = 32;
     sigs[Code].code=Code;
     sigs[Code].allocated = allocateString(33);
@@ -791,16 +803,6 @@ void drive_value(char *Val,char *Code,int forReal) {
     } else {
         strcpy(sigs[P].allocated,Val);
     }
-    if (sigs[P].traceable) {
-        if (lastTraceTime<run_time) {
-            fprintf(vcdF1,"#%ld\n",(long) run_time);
-            lastTraceTime = run_time;
-        }
-        if (Val[0]=='b')
-            fprintf(vcdF1,"%s %s\n",Val,Code);
-        else
-            fprintf(vcdF1,"%s%s\n",Val,Code);
-    }
     sigs[P].toggles += 1;
     if (forReal) {
         armTriggers(P,Val);
@@ -905,7 +907,8 @@ void shouldbe(char *st,long n) {
 }
 
 int get_handle(char *pathstring) {
-    return 0;
+    long Psig =  qqas(qqai(pathstring));
+    return (Psig != 99999999);
 }
 
 static PyObject*
@@ -971,45 +974,7 @@ veri_sensitive(PyObject *self,PyObject *args) {
 }
 
 
-int trace_widths[1000];
 
-static PyObject*
-veri_trace(PyObject *self,PyObject *args) {
-    char *pathstring;
-    char *wstr;
-    if (!PyArg_ParseTuple(args, "ss",&pathstring,&wstr))
-        return NULL;
-
-    if (!vcdF0) {
-        vcdF0  = fopen("more0.vcd","w");
-        fprintf(vcdF0,"%s\n",vcdHEADER0);
-        vcdF1  = fopen("more1.vcd","w");
-        fprintf(vcdF1,"%s\n",vcdHEADER1);
-        fprintf(vcdF1,"#%ld\n",(long) run_time);
-    }
-
-    long pp = qqai(pathstring);
-    long was = qqas(pp);
-    if (was) {
-        sigs[was].traceable = 1;
-        codeint(was);
-        printf("traceable now %s   %ld     |%s|   name=%s full=%s \n",pathstring,was,codeintstr,qqia(sigs[was].name),qqia(sigs[was].fpath));
-        if (sigs[was].wide>1)
-            fprintf(vcdF0,"$var reg %d %s %s [%d:0] $end\n",sigs[was].wide,codeintstr,pathstring,sigs[was].wide-1);
-        else
-            fprintf(vcdF0,"$var reg %d %s %s $end\n",sigs[was].wide,codeintstr,pathstring);
-        return Py_BuildValue("s", 0);
-    }
-    qqsa(pp,vcdCode);
-    codeint(vcdCode);
-    trace_widths[vcdCode]=atoi(wstr);
-    if (trace_widths[vcdCode]>1)
-        fprintf(vcdF0,"$var reg %s %s %s [%d:0] $end\n",wstr,codeintstr,pathstring,trace_widths[vcdCode]-1);
-    else
-        fprintf(vcdF0,"$var reg %s %s %s $end\n",wstr,codeintstr,pathstring);
-    vcdCode += 1;
-    return Py_BuildValue("i", 0);
-}
 
 
 static PyObject*
@@ -1028,7 +993,7 @@ veri_force(PyObject *self,PyObject *args) {
     int wid = sigs[Psig].wide;
     int XX = atoi(vstr);
     int2bin(XX,wid,tmp);
-    fprintf(Outf,"b%s %s  DBG%s\n",tmp,codeintstr,pathstring);
+    fprintf(Outf,"b%s %s\n",tmp,codeintstr);
     return Py_BuildValue("i", 0);
 }
 
@@ -1073,18 +1038,6 @@ veri_peek(PyObject *self,PyObject *args) {
 
 
 
-static PyObject*
-veri_listing(PyObject *self,PyObject *args) {
-    char *pathstring,*vstr,*filename;
-    FILE *File;
-    if (!PyArg_ParseTuple(args, "sss",&pathstring,&vstr,&filename))
-        return NULL;
-
-    File = fopen(filename,"w");
-    int depth = atoi(vstr);
-    fclose(File);
-    return Py_BuildValue("i", 1);
-}
 
 
 static PyObject*
@@ -1115,10 +1068,8 @@ static PyMethodDef VeriMethods[] = {
     {"exists", veri_exists, METH_VARARGS, "Return the number of arguments received by the process."},
     {"peek", veri_peek, METH_VARARGS, "Return the number of arguments received by the process."},
     {"force", veri_force, METH_VARARGS, "tracing of new signals."},
-    {"trace", veri_trace, METH_VARARGS, "tracing of new signals."},
     {"stime", veri_stime, METH_VARARGS, "Return the number of arguments received by the process."},
     {"changes", veri_changes, METH_VARARGS, "Return the number of arguments received by the process."},
-    {"listing", veri_listing, METH_VARARGS, "Return the number of arguments received by the process."},
     {"sensitive", veri_sensitive, METH_VARARGS,"add to watch list"},
     {"finish", veri_finish, METH_VARARGS, "Return the number of arguments received by the process."},
     {"toggles", veri_toggles, METH_VARARGS, "Return the number of arguments received by the process."},

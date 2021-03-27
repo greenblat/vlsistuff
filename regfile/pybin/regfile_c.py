@@ -55,12 +55,18 @@ def outputStructures(Module,Items,Fch):
 
     Fch.write('} %s_RegDef;\n'%Module)
 
+def ensureParam(Item,Param):
+    if Param in Item.Params: return
+    logs.log_error('ensureParams item=%s missing=%s   avail=%s'%(Item.Name,Param,Item.Params))
+    Item.Params[Param] = -1,-1
 
 def outputFields(Items,Fch):
     for Item in Items:
         if Item.Kind=='reg':
             Active = Item.Name
         elif Item.Kind=='field':
+            ensureParam(Item,'width')
+            ensureParam(Item,'position')
             Fch.write('#define %s_COUNT (%d)\n'%(Item.Name,Item.Params['width']))
             Fch.write('#define %s_OFFSET (%s)\n'%(Item.Name,Item.Params['position'][1]))
 

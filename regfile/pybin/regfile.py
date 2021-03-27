@@ -114,6 +114,10 @@ def readFile(File):
                 checkPair(Kind,Name)
             else:
                 Item.Name = 'none'
+    logs.log_warning('You should have "end" line as last line.')
+    generate()
+
+
 
 def checkPair(Kind,Name):
     if Kind == 'field': return
@@ -511,20 +515,20 @@ def assignAddresses():
 
 def computeWid(Obj):
     Wid = Obj.Params['width']
-    AA = Wid/32
+    AA = int(Wid/32)
     Rest = Wid-(AA*32)
     if Rest>0: AA += 1
     return AA
 
 def bytes(Wid):
-    A = Wid/8
+    A = int(Wid/8)
     B= (Wid % 8)>0
     return A+B
 
 
 def simpleAdvanceAddr(Obj):
     if 'width' in Db['chip'].Params:
-        Bytes = Db['chip'].Params['width']/8
+        Bytes = int(Db['chip'].Params['width']/8)
         busWid = Db['chip'].Params['width']
     else:
         Bytes = 4
@@ -542,7 +546,7 @@ def simpleAdvanceAddr(Obj):
 def advanceAddr(Obj):
             
     if 'width' in Db['chip'].Params:
-        Bytes = Db['chip'].Params['width']/8
+        Bytes = int(Db['chip'].Params['width']/8)
         busWid = Db['chip'].Params['width']
         Bytes2 = Bytes
     else:
@@ -595,7 +599,8 @@ def advanceAddr(Obj):
             if Diff==0: return 0
             return (X+1)*Align - Obj.Addr
         elif 'abs' in Obj.Params:
-            return Obj.Params['abs']
+            
+            return Obj.Params['abs']-Obj.Addr
         elif 'width' in Obj.Params:
             return Add*Bytes
 
@@ -1007,13 +1012,9 @@ def treatRam(Reg):
     LINES[0].append(Line)
 
     BusWidth = Db['chip'].Params['width']
-    BusBytes = BusWidth/8
+    BusBytes = int(BusWidth/8)
     if BusBytes==8: AdShift = 3
     elif BusBytes==4: AdShift = 2
-#    Bytes = (Wid/8)+((Wid%8)!=0);
-#    if Bytes==1: AdShift=0
-#    elif Bytes==2: AdShift=1
-#    elif Bytes==4: AdShift=2
 
     Line = 'wire [2:0] ExtraBytes%s  =  pstrb[0] ? 0 : pstrb[1] ? 1 : pstrb[2] ? 2 : pstrb[3] ? 3 '%(Name)
     if (BusBytes==8):
@@ -1089,6 +1090,7 @@ def dumpDefines():
 def runXml():
     Module = Db['chip'].Params['names'][0]
     xml_regfile2_create.createXml(Module,Db)
+    regfile_html.produce_md(Module,Db)
     regfile_html.produce_html(Module,Db)
     regfile_c.produce_c_headers(Module,Db)
 

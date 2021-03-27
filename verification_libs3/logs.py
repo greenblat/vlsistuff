@@ -99,7 +99,7 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
     if Tb: 
         if veri: veri.force('%serrors'%TB,str(Errors))
     if TRACE: 
-        veri.force('trace.errors',str(Errors))
+        veri.force('tracer.errors',str(Errors))
 
 
     if (Errors>MAXERRORS):
@@ -119,7 +119,7 @@ def log_correct(Text,Which=0,Print=True):
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Corrects += 1
-    if TRACE: veri.force('trace.corrects',str(Corrects))
+    if TRACE: veri.force('tracer.corrects',str(Corrects))
     elif veri: veri.force('%scorrects'%TB,str(Corrects))
     if Print:
         print('@%d: %d vs %d (err=%d) CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text))
@@ -137,7 +137,7 @@ def stime():
 def log_wrong(Text,Which=0):
     global Wrongs
     Wrongs += 1
-    if TRACE: veri.force('trace.wrongs',str(Wrongs))
+    if TRACE: veri.force('tracer.wrongs',str(Wrongs))
     elif veri: veri.force('%swrongs'%TB,str(Wrongs))
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
@@ -168,6 +168,16 @@ def finish_now(Text='.'):
         finishReason('finish now',Errors,Wrongs,Corrects)
     if veri: veri.finish()
     
+def status(Text):
+    if veri:
+        Now = '@'+str(veri.stime())+':'
+    else:
+        Now = ''
+    if (Wrongs==0)and(Errors==0)and(Warnings==0):
+        Text =  '@%d:  %s  corrects=%d  on all good %s'%(get_cycles(),Now,Corrects,Text)
+    else:        
+        Text =  '@%d: %s: wrongs=%d vs corrects=%d errors=%d warnings=%d: on %s'%(get_cycles(),Now,Wrongs,Corrects,Errors,Warnings,Text)
+    log_info(Text)
 
 
 def log_warning(Text,Which=0):
