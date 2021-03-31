@@ -3,6 +3,7 @@
 import logs
 import veri
 
+# jtag = jtagDriverClass.jtagDriverClass('tb',Monitors,'JTCK','JTDI','JTMS','JTDO')
 
 class jtagDriverClass(logs.driverClass):
     def __init__(self,Path,Monitors,JTCK='jtck',JTDI='jtdi',JTMS='jtms',JTDO='jtdo'):

@@ -646,6 +646,10 @@ def elaborateSimpleAssigns(Mod):
             failed += 1
     logs.log_info('elaborateSimpleAssigns did %d replacements and skipped %d'%(dones,failed))
 
-
+def connectivity(Env):
+    Mod = Env.Current
+    report_connectivity(Mod,Env)
+    pairsTable(Mod)
+    singlesTable(Mod)
 
 

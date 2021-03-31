@@ -6,6 +6,7 @@ import logs
 logs.setVar('PATH',(logs.__file__).replace('/logs.py',''))
 #from vlexer import run_lexer
 from executes import execute_line
+import macro_verilog_pp
 
 from glvreader import glv_readfile
 dbx = False
@@ -74,7 +75,13 @@ def run_lexer(Fname,FnameOut):
 
 def read_verilog_file(Fname,RunDir,Env):
     global dbx
-    run_lexer(Fname,'%s/lex.out'%RunDir)
+    tmpfilename = '/tmp/xyz_%s'%os.getpid()
+    Params = { 'fnames':[Fname],'-specify':True,'-o':[tmpfilename]}
+    macro_verilog_pp.run_main(Params,'00010')
+
+
+    run_lexer(tmpfilename,'%s/lex.out'%RunDir)
+    os.system('/bin/rm %s'%tmpfilename)
     if Env.systemverilog:
         from vyaccer3 import run_yacc
         import db1 as dbx

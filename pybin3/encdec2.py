@@ -84,7 +84,7 @@ def encode_file(File):
             if ZLIB:
                 encline += Zobj.compress(line)
             else:
-                encline +=line
+                encline += str(line)
         encline = encode_in_parts(encline,Fout)
 
 def encode_in_parts(encline,Fout):

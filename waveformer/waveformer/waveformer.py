@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 import os,sys,string,types
-VERSION = '14oct2015'
+VERSION = '31mar2021'
 from arrow import make_arrow
 def main():
     if ('-help' in sys.argv)or('-h' in sys.argv)or(len(sys.argv)==1):
@@ -114,6 +114,7 @@ class databaseClass:
         self.lastTime = 0
         self.display=[]
         self.marks={}
+        self.highestmark={}
         self.sigLens={}
         self.ScaleX = 1
     def getColor(self,What):
@@ -123,7 +124,14 @@ class databaseClass:
         return (0,0,0)
 
     def recordMark(self,Sig,Name,X,Y):
-        self.marks[(Sig,Name)]=(X,Y)
+        Key = (Sig,Name)
+        if Key in self.marks:
+            Ind = self.highestmark[Key]
+            self.marks[(Sig,'%s.%s'%(Name,Ind))]=(X,Y)
+            self.highestmark[Key] += 1
+        else:
+            self.marks[Key]=(X,Y)
+            self.highestmark[Key] = 1
     def dump(self):
         for Sig in self.sigs:
             self.sigs[Sig].dump()
@@ -209,6 +217,9 @@ class databaseClass:
                 print 'error! raw=%s not in sigs'%Raw
                 return False
 
+        if type(Raw) is float:
+            print('XXXX',Raw,int(Raw))
+            return [round(Raw)]
         if type(Raw)!=types.ListType:
             print 'error! strange raw list "%s" %s for sig %s'%(str(Raw),type(Raw),self.activeSig)
             return False
@@ -324,8 +335,8 @@ class databaseClass:
         
         if 'vgrid' in self.params:
             (Start,Step)=self.params['vgrid']
-            Start = Start/self.ScaleX
-            Step = Step/self.ScaleX
+            Start = eval(str(Start),Db.params)/self.ScaleX
+            Step = eval(str(Step),Db.params)/self.ScaleX
             Db.Plot.vgrid(Start,Step,self.lastTime,self.getColor('vgrid'))
 
         for Where in self.params['vmark']:
@@ -371,6 +382,11 @@ class databaseClass:
 
         for Rec in self.marks.keys():
             if (MM==Rec[1]): return self.marks[Rec]
+
+        for Rec in self.marks.keys():
+            if (Mark==Rec[1]): return self.marks[Rec]
+
+        print('findMark failed on %s'%Mark,list(self.marks.keys()))
         return False
 
 
@@ -394,10 +410,12 @@ class databaseClass:
                     print 'error! len of undefined signal "%s"'%Sig
                     return 'missing'
                 return self.sigs[Sig].lastTime
-
-
-        print 'error! missing compute expr',Expr
-        return 'missing'
+        try:
+            Val = eval(str(Expr),self.params)
+            return Val
+        except:
+            print 'error! missing compute expr',Expr
+            return 'missing'
 
 
 
@@ -500,7 +518,7 @@ def use_expr(Expr,line,Num):
     elif Expr[0]=='set':
         Db.params[Expr[1]]=Expr[2]
     elif (len(Expr)==3)and(Expr[1]=='='):
-        Db.params[Expr[0]]=Expr[2]
+        Db.params[Expr[0]]=eval(str(Expr[2]),Db.params)
     else:
         print 'line #%d: %s was not used'%(Num,line[:-1])
 
