@@ -21,7 +21,6 @@ class jtagDriverClass(logs.driverClass):
 
     def busy(self):
         if self.queue!=[]: return True
-        if self.commands!=[]: return True
         return False
 
 
