@@ -30,7 +30,6 @@ def make_arrow(X0,Y0,X1,Y1,Len):
     Angle = math.atan(Dx/Dy)
     Angp = Angle+toRadian(10)
     Angn = Angle-toRadian(10)
-#    print pangle(Angle),pangle(Angp),pangle(Angn)
     
     Sinp = (math.sin(Angp)*Len)
     Cosp = (math.cos(Angp)*Len)
@@ -63,8 +62,6 @@ def make_arrow(X0,Y0,X1,Y1,Len):
         Y3 = Y1+Cosn
         Quad = 4
 
-#    print 'quad=%d'%Quad,
-#    printIt(((X2,Y2),(X3,Y3)),X1,Y1)
     return (X2,Y2),(X3,Y3)
         
 
@@ -77,7 +74,7 @@ def pangle(Angle):
 
 def printIt(XY,X,Y):
     (X0,Y0),(X1,Y1) = XY
-    print '%.1f %1.f        %.1f %.1f            -===   %.1f %1.f'%(X0,Y0,X1,Y1,X,Y)
+    print('%.1f %1.f        %.1f %.1f            -===   %.1f %1.f'%(X0,Y0,X1,Y1,X,Y))
 
 def main():
     XY = make_arrow(0,0,10,10,2)

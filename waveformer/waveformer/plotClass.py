@@ -1,5 +1,4 @@
 
-import string,types
 
 
 class plotClass:
@@ -78,19 +77,19 @@ class plotClass:
             self.aline(X0,Start0,(X0 + self.trans),self.curY+self.muly)
 
     def setColor(self,Whose):
-        if (Whose in [0,1,'sig','bus'])or((type(Whose)==types.StringType)and(Whose[0]=='"')):
+        if (Whose in [0,1,'sig','bus'])or((type(Whose) is str)and(Whose[0]=='"')):
             if self.tempColor:
                 self.color(self.tempColor[0],self.tempColor[1],self.tempColor[2]);
                 return
         if Whose in self.Db.params['color']:
             Color1 = self.Db.params['color'][Whose]
-            if type(Color1)==types.StringType:
+            if type(Color1) is str:
                 Color = getColor(Color1)
             else:
                 Color = Color1
             self.color(Color[0],Color[1],Color[2])
         else:
-            print 'color missing',Whose
+            print('color missing',Whose)
 
     def color(self,R,G,B):
         self.Ps.color(R,G,B)
@@ -180,7 +179,7 @@ class plotClass:
                 self.aline(X0+self.trans,self.curY,(Off + End*self.mulx),self.curY)
                 self.aline(X0+self.trans,self.curY+self.muly,(Off + End*self.mulx),self.curY+self.muly)
                 if (type(Data) is str):
-                    Data = string.replace(Data,'"','')
+                    Data = Data.replace('"','')
                 self.text(X0 + self.labelOffset*self.mulx,self.curY+self.muly/3,str(Data))
             if (Item[0]!='color')and(Item[0]!='mark'):
                 self.connect(X0,Prev,Data)

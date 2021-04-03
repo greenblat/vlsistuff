@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-import os,sys,string
+import os,sys
 import png
 import math
 
@@ -149,8 +149,8 @@ class matrixClass:
         Dist = int(math.sqrt(Df)+0.5)
          
         for Ind in range(Dist):
-            X = Ind*(X1-X0)/Dist +X0
-            Y = Ind*(Y1-Y0)/Dist +Y0
+            X = int(Ind*(X1-X0)/Dist +X0)
+            Y = int(Ind*(Y1-Y0)/Dist +Y0)
             if (Y>=0)and(X>0)and(Y<self.mY)and((3*X)<self.mX):
                 if Dash0==0:
                     self.Mat[Y][3*X+0]=Color[0]

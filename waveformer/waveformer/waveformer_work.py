@@ -1,11 +1,12 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 
-import os,sys,string,types
+import os,sys
 VERSION = '31mar2021'
 from arrow import make_arrow
+print('AAAAA')
 def main():
     if ('-help' in sys.argv)or('-h' in sys.argv)or(len(sys.argv)==1):
-        print Example
+        print(Example)
         return
     Fname = sys.argv[1]
     Foutname = 'plotted'
@@ -15,7 +16,7 @@ def main():
     File = open(Fname)
     readfile(File)
     if Db.sigs.keys()==[]:
-        print 'no signals defined.exiting'
+        print('no signals defined.exiting')
         quit()
     Db.Ps = postscriptClass.postscriptClass('%s.ps'%Foutname,Db)
     Db.Svg = svgClass.svgClass('%s.svg'%Foutname,Db)
@@ -47,9 +48,9 @@ def readfile(File):
         if '//' in line:
             line = line[:line.index('//')]
 
-        line = string.replace(line,'(',' ( ')
-        line = string.replace(line,')',' ) ')
-        wrds = string.split(line)
+        line = line.replace('(',' ( ')
+        line = line.replace(')',' ) ')
+        wrds = line.split()
         if wrds!=[]:
             if wrds[0]=='include':
                 try:
@@ -57,7 +58,7 @@ def readfile(File):
                     readfile(File2)
                     File2.close()
                 except:
-                    print 'cannot open file "%s"'%wrds[1]
+                    print('cannot open file "%s"'%wrds[1])
             else:
                 intify(wrds)
                 Expr = gather_opens(wrds)
@@ -80,10 +81,10 @@ def gather_opens(wrds):
         if X=='(': opens += 1
         elif X==')': opens -= 1
         if (opens<0):
-            print 'error! unbalanced (-) opens/closes %s'%str(wrds)
+            print('error! unbalanced (-) opens/closes %s'%str(wrds))
             return []
     if (opens>0):
-        print 'error! unbalanced (+) opens/closes %s'%str(wrds)
+        print('error! unbalanced (+) opens/closes %s'%str(wrds))
         return []
 
 
@@ -136,11 +137,11 @@ class databaseClass:
         for Sig in self.sigs:
             self.sigs[Sig].dump()
         for Param in self.params:
-            print 'param %s %s'%(Param,self.params[Param])
+            print('param %s %s'%(Param,self.params[Param]))
     def explicit(self):
         for Sig in self.sigs:
             Time = self.sigs[Sig].explicit()
-            if type(Time)==types.IntType:
+            if type(Time) is int:
                 self.lastTime = max(self.lastTime,Time)
 
     def shrink_explicit(self):
@@ -148,7 +149,6 @@ class databaseClass:
         (From,To,ScaleX) = self.params['range']
         if ScaleX==1: return
         To = self.compute(To)
-        print 'to',To
         From = self.compute(From)
         self.params['range'] = (From/ScaleX,To/ScaleX,1)
         self.lastTime = self.lastTime/ScaleX
@@ -156,7 +156,7 @@ class databaseClass:
         for Sig in self.sigs:
             List = self.sigs[Sig].expl
             for ind,Item in enumerate(List):
-                if type(Item[0])in [types.IntType,types.FloatType]:
+                if (type(Item[0]) is int)or(type(Item[0]) is float):
                     LL = list(Item)
                     LL[0] = 1.0*LL[0]/ScaleX
                     LL[1] = 1.0*LL[1]/ScaleX
@@ -166,7 +166,7 @@ class databaseClass:
                     LL[1] = 1.0*LL[1]/ScaleX
                     List[ind]=tuple(LL)
                 else:
-                    print 'error for ilia fix shrink',Sig,Item
+                    print('error for ilia fix shrink',Sig,Item)
 
                 
 
@@ -187,8 +187,8 @@ class databaseClass:
     def invert(self,List):
         Res=[]
         for Item in List:
-            if type(Item)==types.ListType:
-                if (type(Item[0])==types.IntType):
+            if type(Item) is list:
+                if (type(Item[0]) is int):
                     rr = Item[:]
                     if (Item[1]==0):
                         rr[1]=1
@@ -207,21 +207,20 @@ class databaseClass:
         return Res
             
     def expand(self,Raw):
-        if type(Raw)==types.StringType:
+        if type(Raw) is str:
             if Raw=='break':
                 return [Raw]
             if Raw in self.sigs:
                 if self.sigs[Raw].full==[]: return False
                 return self.sigs[Raw].full[:]
             else:
-                print 'error! raw=%s not in sigs'%Raw
+                print('error! raw=%s not in sigs'%Raw)
                 return False
 
         if type(Raw) is float:
-            print('XXXX',Raw,int(Raw))
             return [round(Raw)]
-        if type(Raw)!=types.ListType:
-            print 'error! strange raw list "%s" %s for sig %s'%(str(Raw),type(Raw),self.activeSig)
+        if type(Raw) is not list:
+            print('error! strange raw list "%s" %s for sig %s'%(str(Raw),type(Raw),self.activeSig))
             return False
 
         try:
@@ -233,7 +232,7 @@ class databaseClass:
 
         if (str(Raw[0]) in Db.params):
             Val =  Db.params[Raw[0]]
-            if type(Val)==types.IntType:
+            if type(Val) is int:
                 Raw[0]=Val
         if Raw[0] in ['invert','not']:
             Wave = Raw[1:]
@@ -244,7 +243,7 @@ class databaseClass:
             return Inverted
         if Raw[0] == 'color':
             return [Raw]
-        if type(Raw[0])==types.IntType:
+        if type(Raw[0]) is int:
             return [Raw]
             
         if Raw[0]=='delay':
@@ -254,7 +253,7 @@ class databaseClass:
             elif len(Raw)==3:
                 Val = Raw[2]
             else:
-                print 'error! bad delay %s'%str(Raw)
+                print('error! bad delay %s'%str(Raw))
                 return False
             Wave = [[By,0]]+Raw[2:]
             Part = self.expand(Wave)
@@ -303,7 +302,7 @@ class databaseClass:
             if Sig=='*':
                 pass
             elif Sig not in self.sigs:
-                print 'error! "%s" sig not in defined'%Sig
+                print('error! "%s" sig not in defined'%Sig)
             else:
                 Len = max(Len,len(Sig))
         Db.Plot.waveOffset = Len*0.8
@@ -314,12 +313,12 @@ class databaseClass:
                 if Sig=='*':
                     pass
                 elif Sig not in self.sigs:
-                    print 'error! %s sig not in defined'%Sig
+                    print('error! %s sig not in defined'%Sig)
                 else:
                     self.sigs[Sig].limit(From,To)
             self.ScaleX = ScaleX
-            print 'range limit %s %s last=%s scalex=1/%.1f'%(From,To,self.lastTime,ScaleX)
-            if type(To)==types.IntType:
+            print('range limit %s %s last=%s scalex=1/%.1f'%(From,To,self.lastTime,ScaleX))
+            if type(To) is int:
                 self.lastTime=To
         
         Db.Plot.setScale(self.lastTime,len(Display))
@@ -329,7 +328,7 @@ class databaseClass:
             if Sig=='*':
                 Db.Plot.skipY()
             elif Sig not in self.sigs:
-                print 'error! %s sig not in defined'%Sig
+                print('error! %s sig not in defined'%Sig)
             else:
                 Db.Plot.plot(Sig,self.sigs[Sig].expl,self.getColor('sig'))
         
@@ -342,19 +341,19 @@ class databaseClass:
         for Where in self.params['vmark']:
             if len(Where)>=2:
                 X = self.compute(Where[1])
-                print 'vmark %s at %s %s'%(Where[0],Where[1],X)
-                if type(X) in [types.IntType,types.FloatType]:
+                print('vmark %s at %s %s'%(Where[0],Where[1],X))
+                if (type(X) is int)or(type(X) is float):
                     Db.Plot.vline(X,self.getColor('vmark'),(0.8,0.2))
                     Db.Plot.text(X,'up',Where[0],self.getColor('vmark'))
             else:
-                print 'error! vmark needs a name and computable number. it got "%s"'%(str(Where))
+                print('error! vmark needs a name and computable number. it got "%s"'%(str(Where)))
         for (M0,M1) in self.params['arrow']:
             Mark0 = M0[1]
             Mark1 = M1[1]
             X0Y0 = self.findMark(Mark0)
             X1Y1 = self.findMark(Mark1)
             if (not X0Y0) or (not X1Y1):
-                print 'error! arrow marks not both present %s %s marks: %s'%(Mark0,Mark1,self.marks.keys())
+                print('error! arrow marks not both present %s %s marks: %s'%(Mark0,Mark1,self.marks.keys()))
             else:
                 X0,Y0 = X0Y0
                 X1,Y1 = X1Y1
@@ -374,7 +373,7 @@ class databaseClass:
 
     def findMark(self,Mark):
         if '.' in Mark:
-            MM = tuple(string.split(Mark,'.'))
+            MM = tuple(Mark.split('.'))
         else:
             MM = Mark
         for Rec in self.marks.keys():
@@ -392,9 +391,9 @@ class databaseClass:
 
 
     def compute(self,Expr):
-        if (type(Expr)==types.IntType):
+        if (type(Expr) is int):
             return Expr
-        if (type(Expr)==types.ListType):
+        if (type(Expr) is list):
             if len(Expr)==1:
                 Ex = Expr[0]
                 return self.compute(Ex)
@@ -407,14 +406,14 @@ class databaseClass:
             if Expr[0]=='len':
                 Sig = Expr[1]
                 if Sig not in self.sigs:
-                    print 'error! len of undefined signal "%s"'%Sig
+                    print('error! len of undefined signal "%s"'%Sig)
                     return 'missing'
                 return self.sigs[Sig].lastTime
         try:
             Val = eval(str(Expr),self.params)
             return Val
         except:
-            print 'error! missing compute expr',Expr
+            print('error! missing compute expr',Expr)
             return 'missing'
 
 
@@ -428,13 +427,13 @@ class sigClass:
         self.full = []
         self.expl = []
     def dump(self):
-        print 'sig %s %s'%(self.Name,self.raw)
-        print 'sig %s expnd %s'%(self.Name,self.full)
-        print 'sig %s expli %s'%(self.Name,self.expl)
+        print('sig %s %s'%(self.Name,self.raw))
+        print('sig %s expnd %s'%(self.Name,self.full))
+        print('sig %s expli %s'%(self.Name,self.expl))
     def explicit(self):
         LastTime=0
         for Item in self.full:
-            if type(Item[0])==types.IntType:
+            if type(Item[0]) is int:
                 self.expl.append((LastTime,LastTime+Item[0],Item[1]))
                 LastTime += Item[0]
             elif (Item[0]=='mark'):
@@ -443,13 +442,13 @@ class sigClass:
                 elif len(Item)==3:
                     self.expl.append(('mark',LastTime,Item[1],Item[2]))
                 else:
-                    print 'sigClass error %s'%(str(Item))
+                    print('sigClass error %s'%(str(Item)))
             elif (Item[0]=='color'):
                 self.expl.append(('color',LastTime,Item[1]))
             elif (Item=='break'):
                 self.expl.append(('break',LastTime,0))
             else:
-                print 'strange in wave of class %s %s %s'%(self.Name,Item,self.full)
+                print('strange in wave of class %s %s %s'%(self.Name,Item,self.full))
         self.lastTime=LastTime
         return LastTime
     def limit(self,From,To):
@@ -461,7 +460,7 @@ class sigClass:
                     self.expl.pop(Ind)
                 else:
                     Ind += 1
-            elif (type(Item[0])==types.IntType):
+            elif (type(Item[0]) is int):
                 if (Item[1]<From)or(Item[0]>To):
                     self.expl.pop(Ind)
                 elif (Item[0]<From):
@@ -503,24 +502,24 @@ def use_expr(Expr,line,Num):
         Db.params['range'] = (Expr[1],Expr[2])
     elif Expr[0]=='arrow':
         if len(Expr)!=3:
-            print 'error! arrow needs two points. "%s"'%(str(Expr))
+            print('error! arrow needs two points. "%s"'%(str(Expr)))
         else:
             Db.params['arrow'].append((Expr[1],Expr[2]))
     elif Expr[0]=='color':
         Who = Expr[1]
-        if type(Expr[2])==types.StringType:
+        if type(Expr[2]) is str:
             Clr = getColor(Expr[2])
             Db.params['color'][Who]=(Clr[0],Clr[1],Clr[2])
         elif (len(Expr)==5):
             Db.params['color'][Who]=(Expr[2],Expr[3],Expr[4])
         else:
-            print 'error! color spec is strange "%s"'%(string.join(Expr,' '))
+            print('error! color spec is strange "%s"'%(' '.join(Expr)))
     elif Expr[0]=='set':
         Db.params[Expr[1]]=Expr[2]
     elif (len(Expr)==3)and(Expr[1]=='='):
         Db.params[Expr[0]]=eval(str(Expr[2]),Db.params)
     else:
-        print 'line #%d: %s was not used'%(Num,line[:-1])
+        print('line #%d: %s was not used'%(Num,line[:-1]))
 
 def mergeList(Pa,Pb,Func):
     Res = []

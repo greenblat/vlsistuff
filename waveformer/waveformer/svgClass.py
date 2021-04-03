@@ -1,6 +1,5 @@
 
 
-import string,types
 
 
 class svgClass:
@@ -78,19 +77,19 @@ class svgClass:
         return
 
     def setColor(self,Whose):
-        if (Whose in [0,1,'sig','bus'])or((type(Whose)==types.StringType)and(Whose[0]=='"')):
+        if (Whose in [0,1,'sig','bus'])or((type(Whose) is str)and(Whose[0]=='"')):
             if self.tempColor:
                 self.color(self.tempColor[0],self.tempColor[1],self.tempColor[2]);
                 return
         if Whose in self.Db.params['color']:
             Color1 = self.Db.params['color'][Whose]
-            if type(Color1)==types.StringType:
+            if type(Color1) is str:
                 Color = getColor(Color1)
             else:
                 Color = Color1
             self.color(Color[0],Color[1],Color[2])
         else:
-            print 'color missing',Whose
+            print('color missing',Whose)
 
 
     def prtColor(self):

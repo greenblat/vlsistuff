@@ -788,7 +788,7 @@ class Writer:
         # :todo: Certain exceptions in the call to ``.next()`` or the
         # following try would indicate no row data supplied.
         # Should catch.
-        i,row = enumrows.next()
+        i,row = enumrows.__next__()
         try:
             # If this fails...
             extend(row)
@@ -1916,8 +1916,9 @@ class Reader:
             while True:
                 try:
                     type, data = self.chunk(lenient=lenient)
-                except ValueError, e:
-                    raise ChunkError(e.args[0])
+                except:
+                    print('ChunkError')
+                    sys.exit()
                 if type == 'IEND':
                     # http://www.w3.org/TR/PNG/#11IEND
                     break
@@ -2780,5 +2781,5 @@ def _main(argv):
 if __name__ == '__main__':
     try:
         _main(sys.argv)
-    except Error, e:
-        print >>sys.stderr, e
+    except Error:
+        print('main failed')

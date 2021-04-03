@@ -1,5 +1,4 @@
 
-import string,types
 
 
 class postscriptClass:
@@ -19,8 +18,8 @@ class postscriptClass:
         self.Db = Db
 
     def open(self,PageX,PageY,Scale):
-        PS0 = string.replace(PSOPEN,'XXXX',str(int(PageX)))
-        PS1 = string.replace(PS0,'YYYY',str(int(PageY)))
+        PS0 = PSOPEN.replace('XXXX',str(int(PageX)))
+        PS1 = PS0.replace('YYYY',str(int(PageY)))
         self.File.write(PS1)
         self.File.write('%.1f %.1f scale\n'%(Scale,Scale))
 
