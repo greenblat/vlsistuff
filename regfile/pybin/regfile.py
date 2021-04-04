@@ -656,7 +656,7 @@ always @(posedge pclk ASYNCRST) begin
     if (!presetn) begin 
         NAME_int <= 0;
     end else begin
-        NAME_int <= (NAME_wr_sel ? (NAME_int & ~ wdata) : NAME_int) | NAME;
+        NAME_int <= (NAME_wr_sel ? (NAME_int & ~ wdata[WID:0]) : NAME_int) | NAME;
     end
 end
 '''
@@ -785,6 +785,9 @@ reg REG_rd_pulse_reg; always @(posedge pclk)  REG_rd_pulse_reg <= REG_rd_sel;
 assign REG_pulse = REG_rd_pulse_reg;
 '''
 
+W1CPULSE = '''
+assign REG_wr_sel = pwrite && (mpaddr=='hADDR);
+'''
 
 RWPULSE = '''
 wire REG_wr_sel = pwrite && (mpaddr=='hADDR);
@@ -879,7 +882,10 @@ def treatReg(Reg):
             Str = Str.replace('ADDR',hex(lastAddr)[2:])
             LINES[4].append(Str)
         treatPrdata(Reg,Wid,Name)
-        if Wid<=32:
+        if Wid<32:
+            Line = '        if (mpaddr == \'h%x) %s <= (%s & ~mask[%d:0]) | (wdata[%d:0] & mask[%d:0]);'%(Reg.Addr,Name,Name,Wid-1,Wid-1,Wid-1)
+            LINES[3].append(Line)
+        elif Wid==32:
             Line = '        if (mpaddr == \'h%x) %s <= (%s & ~mask) | (wdata & mask);'%(Reg.Addr,Name,Name)
             LINES[3].append(Line)
         else:
@@ -916,6 +922,9 @@ def treatReg(Reg):
             Line2 = '    reg %s %s_int;'%(widi(Wid),Name)
             Line3 = 'assign %s_out_reg = %s_int;'%(Name,Name)
             Str = W1C.replace('NAME',Name)
+            if Wid>32:
+                logs.log_error('W1C registers (%s : %sbits) are not geared for width>32. please split'%(Name,Wid))
+            Str = Str.replace('WID',str(Wid-1))
             RST = getPrm(Db['chip'],'reset','async')
             if RST=='async':
                 Str = Str.replace('ASYNCRST','or negedge presetn')
@@ -931,13 +940,15 @@ def treatReg(Reg):
             Str = Str.replace('ADDR',hex(Reg.Addr)[2:])
             LINES[4].append(Str)
 
-        Str = RWPULSE.replace('assign REG','assign %s_wr'%Name)
-        Str = Str.replace('REG',Name)
-        Str = Str.replace('ADDR',hex(Reg.Addr)[2:])
-        if (Access == 'w1c'):
-            Str = Str.replace('wire','assign')
+            Str = RWPULSE.replace('assign REG','assign %s_wr'%Name)
+            Str = Str.replace('REG',Name)
+            Str = Str.replace('ADDR',hex(Reg.Addr)[2:])
+            LINES[4].append(Str)
+        elif (Access == 'w1c'):
+            Str = W1CPULSE.replace('REG',Name)
+            Str = Str.replace('ADDR',hex(Reg.Addr)[2:])
+            LINES[4].append(Str)
 
-        LINES[4].append(Str)
     else:
         logs.log_error('ACCESS not recognized %s of %s'%(Access,Name))
 
