@@ -118,8 +118,6 @@ class ahbliteMaster(logs.driverClass):
         elif self.seq!=[]:
             List = self.seq[0]
             for (Sig,Val) in List:
-                if  Sig in self.translations:
-                    Sig = self.translations[Sig]
                 if Sig=='wait':
                     self.waiting=int(Val)
                 elif Sig=='catch':
@@ -128,9 +126,7 @@ class ahbliteMaster(logs.driverClass):
                         logs.log_info('ahb %s read 0x%x addr=0x%x'%(self.Name,X,Val[1]))
                 elif Sig=='waitUntil':
                     (Net,What) = Val
-                    if  Net in self.translations:
-                        Net = self.translations[Net]
-                    Act = self.peek(Net)
+                    Act = self.tr_peek(Net)
                     if (Act != What): return
                 else:
                     self.tr_force(Sig,Val)
