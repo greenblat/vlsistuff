@@ -368,7 +368,7 @@ class sequenceClass:
                 if self.exists(Wrd):
                     Val = self.peek(Wrd)
                     self.Defs[Wrd]=Val
-                    self.DEFS.append((Wrd,hex(Val)))
+                    self.DEFS.append((Wrd,Val))
                     Wrds[ind]=Val
                 elif Wrd in self.Translates:
                     self.Defs[Wrd]=self.Translates[Wrd]
