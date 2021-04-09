@@ -337,7 +337,7 @@ class sequenceClass:
         elif (wrds[0] == 'check'):
             BB = makeExpr(wrds[1])
             Val = self.evalExpr(BB)
-            logs.log_ensure(Val,'CHECK of %s'%wrds[1]) 
+            logs.log_ensure(Val,'CHECK of %s  vars=%s '%(wrds[1],self.DEFS)) 
         elif (wrds[0] == 'print'):
             Res = ''
             for Wrd in wrds[1:]:
@@ -360,22 +360,22 @@ class sequenceClass:
             return False
 
     def evalExpr(self,Wrds1):
-        Defs = {}
+        self.Defs = {}
         Wrds = Wrds1[:]
         for ind,Wrd in enumerate(Wrds):
             if (str(Wrd)[0] in string.ascii_letters)and(Wrd not in ['or','and','not']):
                 if self.exists(Wrd):
                     Val = self.peek(Wrd)
-                    Defs[Wrd]=Val
+                    self.Defs[Wrd]=Val
                     Wrds[ind]=Val
                 elif Wrd in self.Translates:
-                    Defs[Wrd]=self.Translates[Wrd]
+                    self.Defs[Wrd]=self.Translates[Wrd]
                     Wrds[ind]=self.Translates[Wrd]
 
         Txt = ' '.join(map(str,Wrds))
         if Txt == '': return 0
         try:
-            X = eval(Txt,Defs)
+            X = eval(Txt,self.Defs)
             return X
         except:
             logs.log_error('evaluation of %s failed'%Txt)
