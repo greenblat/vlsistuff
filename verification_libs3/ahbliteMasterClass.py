@@ -127,7 +127,12 @@ class ahbliteMaster(logs.driverClass):
                     if hreadyout==1:
                         X = self.tr_peek(Val[0])
                         if Val[2]!= 'none':
-                            logs.log_ensure(X==Val[2],'ahb %s read act=0x%x exp=%x addr=0x%x '%(self.Name,X,Val[2],Val[1]))
+                            if type(Val[2]) == str:
+                                Exp = eval(Val[2])
+                            else:
+                                Exp = Val[2]
+                            logs.log_info('ahb %s read act=0x%x exp=%s addr=0x%x '%(self.Name,X,Exp,Val[1]))
+                            logs.log_ensure(X==Exp,'ahb %s read act=0x%x exp=%x addr=0x%x '%(self.Name,X,Exp,Val[1]))
                         else:
                             logs.log_info('ahb %s read 0x%x addr=0x%x'%(self.Name,X,Val[1]))
                 elif Sig=='waitUntil':
@@ -178,10 +183,12 @@ class ahbliteMaster(logs.driverClass):
                 return
 
             if What[0]=='read':
+                
                 self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hready',1),('hsize',self.HSIZE)])
                 self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('catch',('hrdata',What[1],What[2])),('hsel',self.HSEL),('hready',1)])
                 self.seq.append([('waitUntil',('hreadyout',1))])
                 return
+
 
 
 
