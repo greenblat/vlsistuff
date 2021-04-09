@@ -236,11 +236,11 @@ def treatFields():
             else:
                 WW = '[%s:0]'%(Wid-1)
             Access = RegObj.Params['access']
-            if 'pulse' not in Access:
-                if inAccess(Access):
-                    LINES[7].append('    ,input %s %s'%(WW,RegObj.Name))
-                else:
-                    LINES[7].append('    ,output %s %s'%(WW,RegObj.Name))
+#            if 'pulse' not in Access:
+#                if inAccess(Access):
+#                    LINES[7].append('    ,input %s %s'%(WW,RegObj.Name))
+#                else:
+#                    LINES[7].append('    ,output %s %s'%(WW,RegObj.Name))
             Split=False
             EXTERNAL_FIELDS.append(RegObj.Name)
             
@@ -1166,6 +1166,8 @@ def helper0(Finst):
     for Li in LINES[0]:
         Li = Li.replace(' reg ',' ')
         Wrds = Li.split()
+        Reg = Wrds[-1]
+#        print('HELPER0',Reg, (Wrds[-1] not in FIELDED_REGS),(Wrds[-1] in EXTERNAL_REGS), (Wrds[-1] in EXTERNAL_FIELDS))
         if (Wrds[-1] not in FIELDED_REGS)or(Wrds[-1] in EXTERNAL_REGS)or (Wrds[-1] in EXTERNAL_FIELDS):
             Db['fout'].write(Li+'\n')
             Finst.write('    ,.%s(%s)\n'%(Wrds[-1],Wrds[-1]))
