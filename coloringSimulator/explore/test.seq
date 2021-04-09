@@ -1,0 +1,20 @@
+
+
+
+
+wait 20
+force aaa 2
+force bbb 2
+force ccc 2
+wait 100
+force aaa 3
+wait 100
+force bbb 3
+wait 100
+force ccc 3
+force eee 3
+wait 100
+force eee 2
+wait 100
+finish
+

@@ -1,0 +1,38 @@
+
+`define BW 63
+
+module xdesign (
+
+input [`BW:0] clk0,
+input [`BW:0] clk1,
+input [`BW:0] aaa,
+input [`BW:0] bbb,
+input [`BW:0] ccc,
+input [`BW:0] eee,
+output [`BW:0] qgood,
+output [`BW:0] qbad
+);
+
+wire [`BW:0] ddd,qmid0,qmid1,qmid2;
+wire [`BW:0] clk0m,clk1m;
+wire [`BW:0] ddd1,ddd2;
+
+color #(.CLOCK("clk0"),.COLOR("yellow")) color0(.in0(clk0),.out0(clk0m));
+color #(.CLOCK("clk1"),.COLOR("blue")) color1(.in0(clk1),.out0(clk1m));
+
+blob #(.FUNC("in0 ^ in1 ^ in2")) blob1 (.in0(aaa),.in1(bbb),.in2(ccc),.out0(ddd));
+blob #(.FUNC("!in0")) blob2 (.in0(ddd),.out0(ddd1));
+blob #(.FUNC("!in0")) blob3 (.in0(ddd1),.out0(ddd2));
+
+flop flop0 (.clk(clk0m),.dd(ddd2),.qq(qmid0));
+flop flop1 (.clk(clk1m),.dd(eee),.qq(qmid2));
+
+color #(.REFCLOCK("clk1")) color2 (.in0(qmid0),.out0(qmid1));
+
+blob #(.FUNC("in0 || in1")) blob4 (.in0(qmid1),.in1(qmid2),.out0(qgood));
+blob #(.FUNC("in0 && in1")) blob5 (.in0(qmid0),.in1(qmid2),.out0(qbad));
+
+
+
+endmodule
+
