@@ -303,6 +303,18 @@ def intx(Val):
         print('ERROR logs.intx got INTX',type(Val),'"%s"'%Val)
         return 99999999
 
+
+def peekBus(Bus,Wid,Base=''):
+    Res = ''
+    for Ind in range(Wid-1,-1,-1):
+        Sig = '%s[%d]'%(Bus,Ind)
+        X = veri.peek('%s%s'%(Base,Sig))
+        Res += X
+    Res = Res.replace('z','0')
+    Res = Res.replace('x','0')
+    return int(Res,2)
+
+
 def peek(Sig):
     X = veri_peek(Sig)
     V  = intx(X)

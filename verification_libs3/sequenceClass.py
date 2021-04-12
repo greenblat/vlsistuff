@@ -338,7 +338,7 @@ class sequenceClass:
             BB = makeExpr(wrds[1])
             Val = self.evalExpr(BB)
             logs.log_ensure(Val,'CHECK of %s  vars=%s '%(wrds[1],self.DEFS)) 
-        elif (wrds[0] == 'print'):
+        elif (wrds[0] in ['correct','wrong','print']):
             Res = ''
             for Wrd in wrds[1:]:
                 if Wrd[0] in '0123456789':
@@ -353,7 +353,12 @@ class sequenceClass:
                     Res += ' '+str(Val)
                 else:
                     Res += ' '+Wrd
-            logs.log_info('PRINT %s'%Res)
+            if wrds[0]=='correct':
+                logs.log_correct('   %s'%Res)
+            elif wrds[0]=='wrong':
+                logs.log_wrong('   %s'%Res)
+            else:
+                logs.log_info('PRINT %s'%Res)
             return True
         else:
             logs.log_error('what!! sequence failed %s on %s agents=%s'%(wrds[0],Line,list(self.agents.keys())))

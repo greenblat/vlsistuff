@@ -5,7 +5,7 @@ import veri
 import logs
 import sys
 print(sys.path)
-# import ctypes
+import ctypes
 
 import random
 
@@ -13,6 +13,8 @@ CODES = [0]
 def newNet(Father,Pin,Inst):
     Net = netClass(Father,Pin,Inst)
     Net.Code = len(CODES)
+    Id = id(Net)
+    print(Pin,Inst,ctypes.cast(Id, ctypes.py_object).value)
     CODES.append(Net)
     return Net.Code
 
@@ -153,7 +155,7 @@ class instanceClass:
 
     def getNet(self,Pin):
         Code = self.Pins[Pin]
-#        return ctypes.cast(id(Code), ctypes.py_object).value
+#        print(ctypes.cast(id(Code), ctypes.py_object).value)
         if Code>=len(CODES):
             logs.log_error('code %d (%d) is illegal for pin %s path %s'%(Code,len(CODES),Pin,self.Path))
             return 0

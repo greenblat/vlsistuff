@@ -237,6 +237,10 @@ def sequence(TestName):
     logs.log_info('SEQUENCE %d'%len(seq.Sequence))
 
 
+def cannot_find_sig(Sig):
+    logs.log_error('cannot find "%s" signal in the design'%Sig)
+
+
 
 
 class driverMonitor(logs.driverClass):

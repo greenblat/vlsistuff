@@ -670,8 +670,13 @@ def dumpRam(Postfix,File):
     except:
         logs.log_error('You need to have width and addrwid in chip line. it is buswidth')
         sys.exit()
-    if Buswid==64: Wstrb=8
-    if Buswid==32: Wstrb=4
+    if Buswid==128: Wstrb=16
+    elif Buswid==64: Wstrb=8
+    elif Buswid==32: Wstrb=4
+    else:
+        logs.log_error('BUSWIDTH is %d , allowed values are 32,64,128'%Buswid)
+        Wstrb = 4
+        Buswid = 32
     Str = HEADER.replace('MODULE',Module+Postfix)
     Str = Str.replace('BUSWID',str(Buswid))
     Str = Str.replace('ADDWID',str(Addwid))
@@ -706,8 +711,13 @@ def bodyDump1(Db,File):
     Mask = ((1<<X)-1) & 0xfffc
     Buswid = Db['chip'].Params['width']
     Addwid = Db['chip'].Params['addrwid']
-    if Buswid==64: Wstrb=8
-    if Buswid==32: Wstrb=4
+    if Buswid==128: Wstrb=16
+    elif Buswid==64: Wstrb=8
+    elif Buswid==32: Wstrb=4
+    else:
+        logs.log_error('BUSWIDTH is %d , allowed values are 32,64,128'%Buswid)
+        Wstrb = 4
+        Buswid = 32
     File.write(');\n')
     Str = 'wire [BUSWID-1:0] wdata = pwdata;\n'.replace('BUSWID',str(Buswid))
     File.write(Str)
