@@ -295,7 +295,7 @@ def treatFields():
                     if Name == 'gap':
                         Name = '0'
                     LINES[6].append('assign %s = %s;'%(RegHiLo,Name))
-            elif Access=='external':
+            elif Access in ['external' ,'w1c']:
                 LINES[8].append('\n\n// external reg with fields, take one')
                 LINES[8].append('assign %s = %s;'%(RegHiLo,Name))
                 LINES[8].append('assign %s = %s;\n'%(Name,RegHiLo))
