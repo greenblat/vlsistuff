@@ -20,6 +20,7 @@ class jtagDriverClass(logs.driverClass):
         self.lastIr = (0x20,8)
         self.waiting = 0
         self.RATE = 10
+        self.Catch = 0
 
     def busy(self):
         if self.queue!=[]: return True
@@ -67,6 +68,7 @@ class jtagDriverClass(logs.driverClass):
             logs.log_error('action text %s is not recognized'%(Txt))
 
     def run(self):
+        veri.force('tb.marker6',str(self.waiting))
         if self.waiting:
             self.waiting -= 1
             return
@@ -99,24 +101,31 @@ class jtagDriverClass(logs.driverClass):
             self.state='step1'
         elif self.state=='step1':
             self.force(self.jtck,0)
-            if self.Catch==1:
-                self.responce = str(self.peek(self.jtdo))+self.responce
-            elif self.Catch=='x':
-                self.responce = 'X'+self.responce
-            elif self.responce!='':
-                (Cmd,Val,Len) = self.commands.pop(0)
-                self.RR = logs.intx(self.responce)
-                try:
-                    logs.log_info('jtag RES 0x%x %s %x %s %x %s lastir=(%x)'%(self.RR,self.responce,logs.intx(self.responce),Cmd,Val,Len[0],Len[1]))
-                except:
-                    logs.log_info('jtag RES 0x%x %s %s %s (x) %s lastir=(%s)'%(self.RR,self.responce,Cmd,Val,Len,Len))
-                if self.callback:
-                    self.callback(logs.intx(self.responce),Cmd,Val,Len)
-                self.responce=''
-            else:
-                self.responce=''
-               
             self.state='idle'
+            self.catching()
+
+    def catching(self):
+        if self.Catch==1:
+            self.responce = str(self.peek(self.jtdo))+self.responce
+            veri.force('tb.marker7',str(1+len(self.responce)))
+        elif self.Catch=='x':
+            self.responce = 'X'+self.responce
+        elif self.responce!='':
+            (Cmd,Val,Len) = self.commands.pop(0)
+            self.RR = logs.intx(self.responce)
+            logs.log_info('END RR %s %x'%(self.responce,self.RR),2)
+            try:
+                logs.log_info('jtag RES 0x%x %s %x %s %x %s lastir=(%x)'%(self.RR,self.responce,logs.intx(self.responce),Cmd,Val,Len[0],Len[1]))
+            except:
+                logs.log_info('jtag RES 0x%x %s %s %s (x) %s lastir=(%s)'%(self.RR,self.responce,Cmd,Val,Len,Len))
+            if self.callback:
+                self.callback(logs.intx(self.responce),Cmd,Val,Len)
+            self.responce=''
+        else:
+            self.responce=''
+               
+
+
     def sendLabel(self,Text,Fout):
         self.queue.append(('label',Text,Fout))
             
