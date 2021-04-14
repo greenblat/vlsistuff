@@ -45,6 +45,7 @@ class ahbliteMaster(logs.driverClass):
         self.busyOk = True
         self.HSIZE = 2
         self.HPROT = 0
+        self.Enable = True
 
     def translate(self,Addr):
         if Addr[0] in '0123456789':
@@ -68,6 +69,8 @@ class ahbliteMaster(logs.driverClass):
             Addr = eval(wrds[2])
             self.queue.append(('burst',wrds[0],Kind,Addr))
 
+        elif wrds[0]=='enable':
+            self.Enable = eval(wrds[1])
         elif wrds[0]=='size':
             self.HSIZE = eval(wrds[1])
         elif wrds[0]=='prot':
@@ -109,6 +112,8 @@ class ahbliteMaster(logs.driverClass):
         return self.force(Sig,Val)
 
     def run(self):
+        if not self.Enable:
+            return
         if self.waiting>0:
             self.waiting -= 1
             return

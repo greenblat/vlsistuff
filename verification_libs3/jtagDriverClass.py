@@ -18,6 +18,8 @@ class jtagDriverClass(logs.driverClass):
         self.callback=False
         self.Fout=False
         self.lastIr = (0x20,8)
+        self.waiting = 0
+        self.RATE = 10
 
     def busy(self):
         if self.queue!=[]: return True
@@ -26,7 +28,9 @@ class jtagDriverClass(logs.driverClass):
 
     def action(self,Txt):
         wrds = Txt.split()
-        if wrds[0] == 'ir':
+        if wrds[0] == 'rate':
+            self.RATE = eval(wrds[1])
+        elif wrds[0] == 'ir':
             Len = eval(wrds[1])
             Ir = eval(wrds[2])
             self.sendIr(Ir,Len)
@@ -52,12 +56,21 @@ class jtagDriverClass(logs.driverClass):
             self.sendDr1Check(Dr,Len)
         elif wrds[0] == 'idle':
             Len = eval(wrds[1])
-            Tms = eval(wrds[2])
+            if len(wrds)>=3:
+                Tms = eval(wrds[2])
+            else:
+                Tms = 0
             self.sendIdle(Len,Tms)
+        elif wrds[0] == 'check':
+            logs.log_ensure((self.RR==eval(wrds[1])),'JTAG CHECK exp=%x act=%x'%(eval(wrds[1]),self.RR))
         else:
             logs.log_error('action text %s is not recognized'%(Txt))
 
     def run(self):
+        if self.waiting:
+            self.waiting -= 1
+            return
+        self.waiting = self.RATE
         if self.state=='idle':
             if self.queue!=[]:
                 self.Tms,self.Tdi,self.Catch = self.queue.pop(0)
@@ -92,11 +105,11 @@ class jtagDriverClass(logs.driverClass):
                 self.responce = 'X'+self.responce
             elif self.responce!='':
                 (Cmd,Val,Len) = self.commands.pop(0)
-                RR = logs.intx(self.responce)
+                self.RR = logs.intx(self.responce)
                 try:
-                    logs.log_info('jtag RES 0x%x %s %x %s %x %s lastir=(%x)'%(RR,self.responce,logs.intx(self.responce),Cmd,Val,Len[0],Len[1]))
+                    logs.log_info('jtag RES 0x%x %s %x %s %x %s lastir=(%x)'%(self.RR,self.responce,logs.intx(self.responce),Cmd,Val,Len[0],Len[1]))
                 except:
-                    logs.log_info('jtag RES 0x%x %s %s %s (x) %s lastir=(%s)'%(RR,self.responce,Cmd,Val,Len,Len))
+                    logs.log_info('jtag RES 0x%x %s %s %s (x) %s lastir=(%s)'%(self.RR,self.responce,Cmd,Val,Len,Len))
                 if self.callback:
                     self.callback(logs.intx(self.responce),Cmd,Val,Len)
                 self.responce=''
