@@ -1214,8 +1214,8 @@ def enclosingModule(Temp,Finst):
                 Db['fout'].write('    %s_pulse ? %s_ready :\n'%(Name,Name))
         Db['fout'].write('    1;\n')
     if 'external' not in Db['chip'].Params:
-        Buswid = Db['chip'].Params['width']
-        Db['fout'].write('wire [:0] last_wdata;\n'%(BusWid-1))
+        BusWid = Db['chip'].Params['width']
+        Db['fout'].write('wire [%s:0] last_wdata;\n'%(BusWid-1))
     Str = APBInst.replace('MODULE',Db['module']+'_ram')
     Db['fout'].write(Str)
     for Li in LINES[0]:
