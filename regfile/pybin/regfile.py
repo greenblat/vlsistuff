@@ -926,6 +926,7 @@ def treatReg(Reg):
             LINES[0].append('    ,output  %s_rd_pulse'%(Name))
             LINES[0].append('    ,output  %s_wr_pulse'%(Name))
             treatPrdata(Reg,Wid,Name)
+            Db['chip'].Params['external'] = True
         else:
             Line0 = '    wire %s_rd_pulse;'%(Name)
             Line1 = '    wire %s_wr_pulse;'%(Name)
@@ -1122,7 +1123,7 @@ module MODULE (input pclk, input presetn,
 '''
 APBInst = '''
 wire [1023:0] ZEROES = 1024'b0;
-wire [31:0] last_wdata;
+// wire [31:0] last_wdata;
 MODULE rgf (.pclk(pclk),.presetn(presetn),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
     ,.pwdata(pwdata),.prdata(prdata),.prdata_wire(prdata_wire)
     ,.pstrb(pstrb),.last_wdata(last_wdata)
@@ -1164,6 +1165,8 @@ def apbHead():
     Str = Str.replace('ADDWID',str(Addwid))
     Str = Str.replace('WSTRB',str(Wstrb))
     Db['fout'].write(Str)
+    if 'external' in Db['chip'].Params:
+        Db['fout'].write('    ,output [%s:0] last_wdata\n'%(Buswid-1))
 
 
 def missParam(Dir,Param,Default):
@@ -1210,7 +1213,9 @@ def enclosingModule(Temp,Finst):
             else:
                 Db['fout'].write('    %s_pulse ? %s_ready :\n'%(Name,Name))
         Db['fout'].write('    1;\n')
-
+    if 'external' not in Db['chip'].Params:
+        Buswid = Db['chip'].Params['width']
+        Db['fout'].write('wire [:0] last_wdata;\n'%(BusWid-1))
     Str = APBInst.replace('MODULE',Db['module']+'_ram')
     Db['fout'].write(Str)
     for Li in LINES[0]:
