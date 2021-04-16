@@ -24,6 +24,7 @@ def help_main(Env):
         if Str:
             Fout.write(Str)
         
+    Fout.write('    }\n')
     Fout.write('}\n')
     Fout.close()
 
