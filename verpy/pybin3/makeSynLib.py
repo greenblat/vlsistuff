@@ -13,13 +13,13 @@ def help_main(Env):
         Str = False
         if 'input' in Dir:
             Str = PIN.replace('PIN',Net)
-            Str = Str.replace('DRIECTION','input')
+            Str = Str.replace('DIRECTION','input')
         elif 'inout' in Dir:
             Str = PIN.replace('PIN',Net)
-            Str = Str.replace('DRIECTION','inout')
+            Str = Str.replace('DIRECTION','inout')
         elif 'output' in Dir:
             Str = PIN.replace('PIN',Net)
-            Str = Str.replace('DRIECTION','output')
+            Str = Str.replace('DIRECTION','output')
 
         if Str:
             Fout.write(Str)
