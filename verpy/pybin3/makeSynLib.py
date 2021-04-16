@@ -7,11 +7,43 @@ def help_main(Env):
     Lib = LIB.replace('MODULE',Mod.Module)
     Lib = Lib.replace('LIBRARY',Mod.Module)
     Fout.write(Lib)
-    Fout.write(STRING0.replace('MODULE',Mod.Module))
+    for Net in Mod.nets:
+        Dir,Wid = Mod.nets[Net]
+        if externalDir(Dir)and(Wid!=0)and( type(Wid) is tuple):
+            H,L = Wid
+            Name = '%s_%s_%s'%(Net,H,L)
+            Type = TYPE.replace('TYPE',Name)
+            Type = Type.replace('HHH',str(H))
+            Type = Type.replace('LLL',str(L))
+            Bits = H-L+1
+            Type = Type.replace('BITS',str(Bits))
+            Fout.write(Type)
+            
+    Fout.write(CELL.replace('MODULE',Mod.Module))
+            
     for Net in Mod.nets:
         Dir,Wid = Mod.nets[Net]
         Str = False
-        if 'input' in Dir:
+        if (Wid!=0)and(type(Wid) is tuple) and externalDir(Dir):
+            H,L = Wid
+            Name = '%s_%s_%s'%(Net,H,L)
+            Bus = BUS.replace('TYPE',Name)
+            Bus = Bus.replace('BUS',Net)
+            Pin = PIN.replace('PIN','%s[%s:%s]' % (Net,H,L))
+            if 'input' in Dir:
+                Bus = Bus.replace('DIRECTION','input')
+                Pin = Pin.replace('DIRECTION','input')
+            elif 'inout' in Dir:
+                Bus = Bus.replace('DIRECTION','inout')
+                Pin = Pin.replace('DIRECTION','inout')
+            elif 'output' in Dir:
+                Bus = Bus.replace('DIRECTION','output')
+                Pin = Pin.replace('DIRECTION','output')
+            Fout.write(Bus)
+            Fout.write(Pin)
+            Fout.write('    }\n')
+
+        elif 'input' in Dir:
             Str = PIN.replace('PIN',Net)
             Str = Str.replace('DIRECTION','input')
         elif 'inout' in Dir:
@@ -28,7 +60,36 @@ def help_main(Env):
     Fout.write('}\n')
     Fout.close()
 
-STRING0 = '''
+def externalDir(Dir):
+    if 'input' in Dir: return True
+    if 'inout' in Dir: return True
+    if 'output' in Dir: return True
+    return False
+
+TYPE = '''
+    type ( TYPE ) {
+        base_type : array;
+        data_type : bit;
+        bit_width : BITS;
+        bit_from  : HHH;
+        bit_to    : LLL;
+        downto    : true;
+    }
+'''
+
+BUS = '''
+       bus(BUS) {
+            bus_type : TYPE;
+            direction            : DIRECTION;
+            switch_pin           : false;
+            power_down_function  : "!VDD + VSS";
+            related_power_pin    : VDD;
+            related_ground_pin   : VSS;
+'''
+
+
+
+CELL = '''
 cell ("MODULE") {
        area : 2.4696; 
        cell_footprint : "MODULE";
@@ -37,13 +98,11 @@ cell ("MODULE") {
             voltage_name : VDD;
             pg_type : "primary_power";
             direction : "input";
-            related_bias_pin : "VBP";
        }
        pg_pin (VSS) {
             voltage_name : VSS;
             pg_type : "primary_ground";
             direction : "input";
-            related_bias_pin : "VBN";
        }
 '''
 
@@ -69,6 +128,7 @@ library (LIBRARY) {
     voltage_unit : "1V";
     current_unit : "1mA";
     leakage_power_unit : "1nW";
+    bus_naming_style         : "%s[%d]" ;
     time_unit : "1ns";
     capacitive_load_unit (1, "pf");
     pulling_resistance_unit : "1kohm";
@@ -144,4 +204,28 @@ library (LIBRARY) {
     k_volt_rise_transition : 0;
     k_volt_setup_fall : 0;
     k_volt_setup_rise : 0;
+
+    define(ecsm_version, library, float);
+
+   define_group(ecsm_waveform, rise_transition);
+   define_group(ecsm_waveform, fall_transition);
+
+   define(values, ecsm_capacitance, string);
+   define(index_1, ecsm_waveform, string);
+   define(values, ecsm_waveform, string);
+   define_group(ecsm_capacitance, pin);
+   define_group(ecsm_capacitance, bus);
+   define(index_1, ecsm_capacitance, string);
+
+   define( ecsm_vtp, library, float );
+   define( ecsm_vtn, library, float );
+
+   ecsm_vtp     : 0.479;
+   ecsm_vtn     : 0.482;
+
+   ecsm_version : 2.0;
+
+   voltage_map (VDD, 0.99) ;
+   voltage_map (VSS, 0.0) ;
+
 '''
