@@ -928,8 +928,8 @@ def treatReg(Reg):
             treatPrdata(Reg,Wid,Name)
             Db['chip'].Params['external'] = True
         else:
-            Line0 = '    wire %s_rd_pulse;'%(Name)
-            Line1 = '    wire %s_wr_pulse;'%(Name)
+#            Line0 = '    wire %s_rd_pulse;'%(Name)
+#            Line1 = '    wire %s_wr_pulse;'%(Name)
             Line2 = '    reg %s %s_int;'%(widi(Wid),Name)
             Line3 = 'assign %s_out_reg = %s_int;'%(Name,Name)
             Str = W1C.replace('NAME',Name)
@@ -941,7 +941,7 @@ def treatReg(Reg):
                 Str = Str.replace('ASYNCRST','or negedge presetn')
             else:
                 Str = Str.replace('ASYNCRST','')
-            LINES[10].extend([Line0,Line1,Line2,Line3,Str])
+            LINES[10].extend([Line2,Line3,Str])
             treatPrdata(Reg,Wid,Name+'_int')
 
 
