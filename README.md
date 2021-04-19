@@ -32,3 +32,5 @@ there are apb axi ad other helpers.
 
 #**zDraw**
 rewrite of zDraw using pygame (as openGL became obsolete on my MacBook).
+
+**MIT license** 
