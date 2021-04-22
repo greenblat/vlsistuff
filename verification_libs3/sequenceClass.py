@@ -51,6 +51,7 @@ class sequenceClass:
         for (Nickname,Object) in AGENTS:
             self.agents[Nickname]=Object
             Object.Caller = self
+            Object.SeqObj = self
         self.searchPath = ['.'] 
         self.Ptr = 0
         self.Labels = {}
