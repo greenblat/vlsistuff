@@ -796,6 +796,11 @@ class driverClass:
         self.waiting  = 0 
         self.edges = {}
 
+    def exists(self,Val):
+        Full = peek('%s%s'%(self.Path,Sig))
+        X = veri.exists(Full)
+        return Full == '1'
+
     def force(self,Sig,Val):
         if veri: veri.force('%s%s'%(self.Path,Sig),str(Val))
 

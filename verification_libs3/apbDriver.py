@@ -40,6 +40,14 @@ class apbDriver:
             Monitors.append(self)
         self.Caller = False
         logs.log_info('apbDriver  ver 1.jun.2020')
+        self.noList = []
+        if not self.exists('pstrb'):
+            self.noList.append('pstrb')
+
+    def exists(self,Sig):
+        Full = '%s.%s'%(self.Path,Sig)
+        X = veri.exists(Full)
+        return Full == '1'
 
 
     def setName(self,Name):
@@ -174,13 +182,21 @@ class apbDriver:
             return self.rename(self.renames[Sig])
         return Sig
     def peek(self,Sig):
+        if Sig in self.noList:
+            return 0
+        if Sig in self.translations:
+            Sig = self.translations[Sig]
         if self.Path=='':
             Full = self.rename(Sig)
         else:
             Full = '%s.%s'%(self.Path,self.rename(Sig))
         return logs.peek(Full)
     def force(self,Sig,Val):
+        if Sig in self.noList:
+            return 
 #        logs.log_info('forcing %s %s <- %x'%(self.Name,Sig,Val))
+        if Sig in self.translations:
+            Sig = self.translations[Sig]
         if self.hexMode: Val = hex(Val)
         if self.Path=='':
             veri.force(Sig,str(Val))
