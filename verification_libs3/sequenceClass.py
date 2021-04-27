@@ -224,6 +224,8 @@ class sequenceClass:
                 Obj = self.agents[Agent]
                 if 'report' in dir(Obj):
                     Obj.report()
+                if 'onFinish' in dir(Obj):
+                    Obj.onFinish()
             logs.finish('finishing on sequence')
             sys.exit()
         if (wrds[0] == 'marker'):
