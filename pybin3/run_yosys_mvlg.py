@@ -38,6 +38,9 @@ check;
 opt;
 check;
 clean;
+opt;
+check;
+clean;
 write_verilog TOP.flat
 '''
 
