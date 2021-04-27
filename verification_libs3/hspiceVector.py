@@ -49,10 +49,10 @@ class hspiceVector(logs.driverClass):
             logs.log_error('no signals?')
             sys.exit()
         newLine = ''
-        for Sig in self.Sigs:
+        for Wid,Sig in self.Sigs:
             Val = self.peek(Sig)
             if Val<0: Val = 0
-            newLine += ' %x'%Val
+            newLine += ' %0%dx'%(Wid,Val)
         if newLine != self.lastLine:
             self.Fout.write('%8d %s\n'%(self.Time,newLine))
             self.lastLine = newLine
@@ -73,15 +73,25 @@ class hspiceVector(logs.driverClass):
                 logs.log_error('name must include direction io, like i:CLK (%s)' % (Pin))
             IO += ' '+WW[0]
             Sig = WW[1]
-            self.Sigs.append(Sig)
             Val = veri.peek('%s%s'%(self.Path,Sig))
             Wid = len(Val)
             if Wid == 1:
                 Vname += ' '+Sig
                 Radix += ' 1'
+                self.Sigs.append((1,Sig))
+            elif Wid < 5:
+                Vname += ' '+Sig
+                Radix += ' %s' % Wid
+                self.Sigs.append((1,Sig))
             else:
                 Vname += ' %s[[%s:0]]'%(Sig,Wid-1)
-                Radix += ' 4'
+                X = int(Wid/4)
+                AA = '4' * X
+                Y = Wid % 4
+                if (Y>0):
+                    AA = str(Y)+AA
+                Radix += ' '+ AA
+                self.Sigs.append((len(AA),Sig))
 
         self.Fout.write('radix %s\n'%Radix)                
         self.Fout.write('vname %s\n'%Vname)                
