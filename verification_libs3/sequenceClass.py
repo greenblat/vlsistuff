@@ -40,6 +40,7 @@ class sequenceClass:
         logs.testFileName = '?'
         if Monitors!= -1:
             Monitors.append(self)
+        self.Monitors = Monitors
         self.Sequence = []
         self.workIncludes()
         self.waiting = 0
@@ -126,7 +127,12 @@ class sequenceClass:
         while Dones:
             Dones = False
             Seq = []
-            for ind,(Line,x) in enumerate(self.Sequence):
+            for ind,Linex in enumerate(self.Sequence):
+                try:
+                    Line,x = Linex
+                except:
+                    Line = Linex
+                    x = '???'
                 wrds = Line.split()
                 if (len(wrds)==0)or(wrds[0][0] in '#/'):
                     pass
@@ -135,7 +141,8 @@ class sequenceClass:
                     Found = False
                     if os.path.exists(Fname):
                         Lines = open(Fname).readlines()
-                        Seq.extend(Lines) 
+                        for x,Line in enumerate(Lines):
+                            Seq.append((Line,1000+x))
                         Found = True
                         Dones = True
                     for Path in self.searchPath:
