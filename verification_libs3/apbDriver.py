@@ -39,7 +39,7 @@ class apbDriver:
         if Monitors != -1:
             Monitors.append(self)
         self.Caller = False
-        logs.log_info('apbDriver  ver 1.jun.2020')
+        logs.log_info('apbDriver  ver 27.apr.2021')
         self.noList = []
         if not self.exists('pstrb'):
             self.noList.append('pstrb')
@@ -104,7 +104,7 @@ class apbDriver:
             if len(wrds)==2:
                 self.read(wrds[1])
             else:
-                self.read(wrds[1],wrds[2])
+                self.read(wrds[1],self.eval(wrds[2]))
         elif wrds[0]=='write':
             self.write(wrds[1],wrds[2])
         elif wrds[0]=='prdata':
@@ -300,6 +300,7 @@ class apbDriver:
                     self.waiting0=int(Val)
                 elif Sig=='catch':
                     Who,Exp,Addr = Val
+                    print('EXP',Who,Addr,Exp)
                     Act = self.peek(self.rename(Who))
                     if type(Exp) is types.FunctionType:
                         Exp(Act)

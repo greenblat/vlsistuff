@@ -773,7 +773,7 @@ def bracketize(List):
 
 
 
-def str2hex(self,Txt):
+def str2hex(Txt):
     Res = '0x'
     for ii in range(len(Txt)):
         Chr = '%02x'%ord(Txt[ii])

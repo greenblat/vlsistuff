@@ -1,6 +1,5 @@
 
-
-
+DEFAULTWAITGUARD = 1000000
 
 import logs
 import veri
@@ -37,10 +36,11 @@ class sequenceClass:
     def __init__(self,Path,Monitors,SEQUENCE='',AGENTS=[],Translates={}):
         self.Path = Path
         self.Name = 'main'
+        self.testFileName = '?'
+        logs.testFileName = '?'
         if Monitors!= -1:
             Monitors.append(self)
-        self.Monitors = Monitors
-        self.Sequence = SEQUENCE.split('\n')
+        self.Sequence = []
         self.workIncludes()
         self.waiting = 0
         self.Guardian = 0   # against wait too long.
@@ -57,6 +57,7 @@ class sequenceClass:
         self.Labels = {}
         self.Subs = {}
         self.Sons = []
+        self.Seed = 0
 
     def newone(self,Seq,Name):
         New = sequenceClass(self.Path,-1,'',self.agents,self.Translates)
@@ -65,7 +66,15 @@ class sequenceClass:
         self.Sons.append(New)
 
 
-    def rnd(self,Low,High):
+    def rnd(self,Low,High=0):
+        if High==0:
+            L = self.eval(Low)
+            X = random.randint(0,L)
+            return X
+        if type(Low) is list:
+            X = random.randint(0,len(Low)-1)
+            return eval(Low[X])
+
         L,H = self.eval(Low),self.eval(High)
         X = random.randint(L,H)
         return X
@@ -75,12 +84,14 @@ class sequenceClass:
         if not os.path.exists(Filename):
             logs.log_error('failed to read "%s" file.'%(Filename))
             sys.exit()
+        self.testFileName = Filename
+        logs.testFileName = Filename
         File = open(Filename)
         List = File.readlines()
         File.close()
-        for Line in List:
-            if (len(Line)>1)and(Line[-1]=='\n'):
-                self.Sequence.append(Line[:-1])
+        for lnum,Line in enumerate(List):
+            if len(Line)>1:
+                self.Sequence.append((Line[:-1],lnum))
         self.searchPath.append(os.path.abspath(os.path.dirname(Filename)))
         self.workIncludes()
         self.extractSequences()
@@ -90,7 +101,7 @@ class sequenceClass:
         LL = []
         SUB = []
         state = 'idle'
-        for Line in self.Sequence:
+        for Line,_ in self.Sequence:
             wrds = Line.split()
             if wrds==[]:
                 pass
@@ -115,7 +126,7 @@ class sequenceClass:
         while Dones:
             Dones = False
             Seq = []
-            for ind,Line in enumerate(self.Sequence):
+            for ind,(Line,x) in enumerate(self.Sequence):
                 wrds = Line.split()
                 if (len(wrds)==0)or(wrds[0][0] in '#/'):
                     pass
@@ -130,15 +141,15 @@ class sequenceClass:
                     for Path in self.searchPath:
                         if (not Found) and os.path.exists('%s/%s'%(Path,Fname)):
                             Lines = open('%s/%s'%(Path,Fname)).readlines()
-                            Seq.extend(Lines) 
+                            for xx,LL in enumerate(Lines):
+                                Seq.append((LL,xx)) 
                             Found = True
                             Dones = True
                     if not Found:
-                        logs.log_error('X include file "%s" no found in %s'%(Fname,self.searchPath))
+                        logs.log_warning('include file "%s" no found in %s'%(Fname,self.searchPath))
                         Dones = False
                 else:
-                    Seq.append(Line)
-            logs.log_info('SEQEND %d'%len(Seq))
+                    Seq.append((Line,x))
             self.Sequence = Seq
 
 
@@ -156,12 +167,9 @@ class sequenceClass:
         Val = hex(logs.peek(Full))
         return Val
 
-    def eval(self,Txt):
-        if type(Txt) is list:
-            Str = ''
-            for X in Txt:
-                Str += str(self.eval(X))+' '
-            return Str
+    def eval(self,Txt,Bad=False):
+        if type(Txt) is int:
+            return Txt
         if Txt in self.Translates:
             return self.eval(self.Translates[Txt])
 
@@ -169,6 +177,8 @@ class sequenceClass:
             Val = eval(Txt,self.Translates)
             return Val
         except:
+            if Bad:
+                logs.log_error('failed eval of "%s"' % str(Txt))
             return Txt
 
     def runSons(self):
@@ -188,17 +198,33 @@ class sequenceClass:
             self.waiting -= 1
             return True
         if self.waitNotBusy:
-            if self.agents[self.waitNotBusy].busy(): return True
+            if self.agents[self.waitNotBusy].busy(): 
+                if self.Guardian>0:
+                    self.Guardian -= 1
+                    if self.Guardian==0:
+                        Lnum = self.Sequence[self.Ptr][1]
+                        logs.log_error('Guardian expired %s at line %s'%(self.waitNotBusy,Lnum))
+                        self.agentsFinish()
+                        logs.finish('Guardian expired %s at line %s'%(self.waitNotBusy,Lnum))
+                        veri.finish()
+                        sys.exit()
+                return True
             self.waitNotBusy = False
         if self.Ptr == len(self.Sequence): return False
-        Line = self.Sequence[self.Ptr]
+        Line,lnum = self.Sequence[self.Ptr]
         self.Ptr += 1
         if '#' in Line: Line = Line[:Line.index('#')]
         if '//' in Line: Line = Line[:Line.index('//')]
+        logs.log_write('sequence: %s'%Line,7)
         wrds = Line.split()
         if len(wrds)==0: return True
         if wrds[0] == 'seed':
-            random.seed = self.eval(wrds[1])
+            Val = self.eval(wrds[1])
+            random.seed(Val)
+            logs.log_info('SEED FROM Sequence %s'%Val)
+            return True
+        if wrds[0] == 'logfile':
+            logs.setLogfileName(wrds[1],0)
             return True
         if wrds[0] == 'wait':
             self.waiting = self.eval(wrds[1])
@@ -220,13 +246,9 @@ class sequenceClass:
 
             return True
         if wrds[0] == 'finish':
-            for Agent in self.agents:
-                Obj = self.agents[Agent]
-                if 'report' in dir(Obj):
-                    Obj.report()
-                if 'onFinish' in dir(Obj):
-                    Obj.onFinish()
-            logs.finish('finishing on sequence')
+            logs.log_info('finishing on sequence')
+            self.agentsFinish()
+            logs.finish('\033[0m\b sequence %s seed=%d '%(self.testFileName,self.Seed))
             sys.exit()
         if (wrds[0] == 'marker'):
             veri.force('%s.marker'%TB,wrds[1])
@@ -243,7 +265,7 @@ class sequenceClass:
             if Lbl in self.Labels:
                 self.Ptr = self.Labels[Lbl]
                 return
-            for ind,Line in enumerate(self.Sequence):
+            for ind,(Line,_) in enumerate(self.Sequence):
                 ww = Line.split()
                 if (ww[0]=='label'):
                     if ww[1] not in self.Labels:
@@ -262,7 +284,7 @@ class sequenceClass:
             if Lbl in self.Labels:
                 self.Ptr = self.Labels[Lbl]
                 return
-            for ind,Line in enumerate(self.Sequence):
+            for ind,(Line,_) in enumerate(self.Sequence):
                 ww = Line.split()
                 if (ww[0]=='label'):
                     if ww[1] not in self.Labels:
@@ -285,8 +307,10 @@ class sequenceClass:
             if self.Guardian>0:
                 self.Guardian -= 1
                 if self.Guardian==0:
-                    logs.log_error('Guardian expired')
-                    logs.finish('Guardian expired %s'%(self.Fname))
+                    Lnum = self.Sequence[self.Ptr][1]
+                    logs.log_error('Guardian expired at line %s'%(Lnum))
+                    self.agentsFinish()
+                    logs.finish('Guardian expired %s  at line %s'%(self.Fname,Lnumtr))
                     veri.finish()
                     sys.exit()
             if (len(wrds)==3)and(self.Guardian==0):
@@ -299,7 +323,8 @@ class sequenceClass:
             if not Val: 
                 self.Ptr -= 1
                 return True
-            logs.log_info('>>>>> finished waitUntil %s (left %d)'%(str(BB),self.Guardian))
+            Lnum = self.Sequence[self.Ptr][1]
+            logs.log_info('>>>>> finished waitUntil %s (left %d)   at line %s'%(str(BB),self.Guardian,Lnum))
             self.Guardian = 0
             return True
 
@@ -325,6 +350,11 @@ class sequenceClass:
         elif wrds[0] in self.agents:
             if wrds[1]=='waitNotBusy':
                 self.waitNotBusy = wrds[0]
+                if len(wrds)>2:
+                    self.Guardian = eval(wrds[2])
+                else:
+                    self.Guardian = DEFAULTWAITGUARD
+
                 return True
             Wrds = list(map(str,map(self.eval,wrds[1:])))
             Wrds2 = []
@@ -344,9 +374,7 @@ class sequenceClass:
         elif (wrds[0] in ['correct','wrong','print']):
             Res = ''
             for Wrd in wrds[1:]:
-                if Wrd[0] in '0123456789':
-                    Res += ' %s'%Wrd
-                elif self.peek(Wrd):
+                if acceptablePath(Wrd) and self.peek(Wrd):
                     Res += ' %s=%s'%(Wrd,self.peek(Wrd))
                 elif Wrd in self.Translates:
                     Res += str(self.Translates[Wrd])
@@ -363,6 +391,8 @@ class sequenceClass:
             else:
                 logs.log_info('PRINT %s'%Res)
             return True
+        elif (wrds[0] == 'debuglevel'):
+            veri.debuglevel(wrds[1])
         else:
             logs.log_error('what!! sequence failed %s on %s agents=%s'%(wrds[0],Line,list(self.agents.keys())))
             return False
@@ -391,6 +421,14 @@ class sequenceClass:
             logs.log_error('evaluation of %s failed'%Txt)
             return 0
 
+    def agentsFinish(self):
+        for Agent in self.agents:
+            Obj = self.agents[Agent]
+#            logs.log_info('trying %s.onFinish()'%Agent)
+            try:
+                Obj.onFinish()
+            except:
+                logs.log_info('no  %s.onFinish() found , add "    def onFinish(self):" to the agent'%Agent)
 
 
 def makeExpr(Txt):
@@ -409,4 +447,9 @@ def makeExpr(Txt):
             pass
     return wrds
 
+def acceptablePath(Word):
+    if Word[0] not in string.ascii_letters: return False
+    for X in Word[1:]:
+        if X not in ('_'+string.digits + string.ascii_letters): return False
+    return True
 
