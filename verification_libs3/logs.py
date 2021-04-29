@@ -92,7 +92,7 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Errors +=1  
-    Flogs[Which].write('@%d: %s %d ERROR: %s\n'%(get_cycles(),WHERE,Errors,Text))
+    Flogs[Which].write('@%d: %s %d ___ERROR: %s\n'%(get_cycles(),WHERE,Errors,Text))
     if Pstack:
         traceback.print_stack(file=Flogs[Which])
         
@@ -112,7 +112,7 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
     if (Text in printed_already):
         return
     printed_already[Text]=1
-    print('@%d: %s %d: ERROR: %s'%(get_cycles(),WHERE,Errors,Text))
+    print('@%d: %s %d: ___ERROR: %s'%(get_cycles(),WHERE,Errors,Text))
 
 def log_correct(Text,Which=0,Print=True):
     global Corrects
@@ -122,8 +122,8 @@ def log_correct(Text,Which=0,Print=True):
     if TRACE: veri.force('tracer.corrects',str(Corrects))
     elif veri: veri.force('%scorrects'%TB,str(Corrects))
     if Print:
-        print('@%d: %d vs %d (err=%d) CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text))
-    Flogs[Which].write('@%d: %d vs %d (err=%d) CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
+        print('@%d: %d vs %d (err=%d) ___CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text))
+    Flogs[Which].write('@%d: %d vs %d (err=%d) ___CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
 
 def log_ensure(Cond,Text,Which=0):
     if Cond:
@@ -141,8 +141,8 @@ def log_wrong(Text,Which=0):
     elif veri: veri.force('%swrongs'%TB,str(Wrongs))
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
-    print('@%d @%d: %d vs %d (err=%d):  WRONG: %s'%(stime(),get_cycles(),Wrongs,Corrects,Errors,Text))
-    Flogs[Which].write('@%d @%d: %d vs %d (err=%d):  WRONG: %s\n'%(stime(),get_cycles(),Wrongs,Corrects,Errors,Text))
+    print('@%d: %d vs %d (err=%d):  ___WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text))
+    Flogs[Which].write('@%d: %d vs %d (err=%d):  ___WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     if Wrongs >= MAXWRONGS:
         log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS),Which)
         if finishReason:
