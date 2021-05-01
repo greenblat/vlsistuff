@@ -55,6 +55,11 @@ class ahbliteMaster(logs.driverClass):
         logs.log_error('cannot determine "%s" address'%Addr)
         return 0
 
+
+    def onFinish(self):
+        return
+
+
     def busy(self):
         if self.queue!=[]: return True
         if self.waiting>0: return True

@@ -22,48 +22,53 @@ class jtagDriverClass(logs.driverClass):
         self.RATE = 10
         self.Catch = 0
 
+    def onFinish(self):
+        return
     def busy(self):
         if self.queue!=[]: return True
         return False
 
+    def eval(self,What):
+        return self.SeqObj.evalStr(What)
 
     def action(self,Txt):
         wrds = Txt.split()
         if wrds[0] == 'rate':
-            self.RATE = eval(wrds[1])
+            self.RATE = self.eval(wrds[1])
         elif wrds[0] == 'ir':
-            Len = eval(wrds[1])
-            Ir = eval(wrds[2])
+            Len = self.eval(wrds[1])
+            Ir = self.eval(wrds[2])
             self.sendIr(Ir,Len)
 
         elif wrds[0] == 'ir1':
-            Len = eval(wrds[1])
-            Ir = eval(wrds[2])
+            Len = self.eval(wrds[1])
+            Ir = self.eval(wrds[2])
             self.sendIr1(Ir,Len)
 
         elif wrds[0] == 'dr':
-            Len = eval(wrds[1])
-            Dr = eval(wrds[2])
+            Len = self.eval(wrds[1])
+            Dr = self.eval(wrds[2])
+            logs.log_info('DDDDDR %s %s %s %s'%(type(Len),type(Dr),Len,Dr))
             self.sendDr(Dr,Len)
 
         elif wrds[0] == 'dr1':
-            Len = eval(wrds[1])
-            Dr = eval(wrds[2])
+            Len = self.eval(wrds[1])
+            Dr = self.eval(wrds[2])
             self.sendDr1(Dr,Len)
 
         elif wrds[0] == 'dr1check':
-            Len = eval(wrds[1])
-            Dr = eval(wrds[2])
+            Len = self.eval(wrds[1])
+            Dr = self.eval(wrds[2])
             self.sendDr1Check(Dr,Len)
         elif wrds[0] == 'idle':
-            Len = eval(wrds[1])
+            Len = self.eval(wrds[1])
             if len(wrds)>=3:
-                Tms = eval(wrds[2])
+                Tms = self.eval(wrds[2])
             else:
                 Tms = 0
             self.sendIdle(Len,Tms)
         elif wrds[0] == 'check':
-            logs.log_ensure((self.RR==eval(wrds[1])),'JTAG CHECK exp=%x act=%x'%(eval(wrds[1]),self.RR))
+            logs.log_ensure((self.RR==self.eval(wrds[1])),'JTAG CHECK exp=%x act=%x'%(self.eval(wrds[1]),self.RR))
         else:
             logs.log_error('action text %s is not recognized'%(Txt))
 

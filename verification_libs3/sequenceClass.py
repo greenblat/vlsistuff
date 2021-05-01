@@ -49,12 +49,14 @@ class sequenceClass:
         self.agents={}
         self.Translates = Translates
         self.Translates['rnd'] = self.rnd
+        self.Translates['eflash'] = self.eflash
         for (Nickname,Object) in AGENTS:
             self.agents[Nickname]=Object
             Object.Caller = self
             Object.SeqObj = self
         self.searchPath = ['.'] 
         self.Ptr = 0
+        self.Stack = []
         self.Labels = {}
         self.Subs = {}
         self.Sons = []
@@ -66,6 +68,14 @@ class sequenceClass:
         New.Name = Name
         self.Sons.append(New)
 
+    def eflash(self,Addr):
+        if 'EFLASH' in dir(self):
+            if Addr in self.EFLASH:
+                return self.EFLASH[Addr]
+            logs.log_error('eflash preloaded, but addr %x is not in there'%Addr)
+            return 0
+        logs.log_error('no eflash preloaded')
+        return 0
 
     def rnd(self,Low,High=0):
         if High==0:
@@ -109,12 +119,15 @@ class sequenceClass:
             elif (state=='idle'):
                 if wrds[0]=='sequence':
                     SEQ = wrds[1]
+                    Params = wrds[2:]
                     state='sub'
                 else:
                     LL.append(Line)
             elif (state=='sub'):
                 if wrds[0]=='end':
-                    self.Subs[SEQ] = SUB
+                    self.Subs[SEQ] = Params,SUB
+                    for PP in Params:
+                        self.Translates[PP] = 0
                     SUB = []
                     state = 'idle'
                 else:
@@ -267,41 +280,41 @@ class sequenceClass:
             Name = wrds[2]
             self.newone(Seq,Name)
             logs.log_info('spawning %s %s'%(wrds[1],Name))
+        elif wrds[0] == 'return':
+            if self.Stack==[]:
+                logs.log_error('return in sequence from empty stack')
+                return
+            self.Ptr = self.Stack.pop(-1)
+            return
+        elif wrds[0] == 'call':
+            Sub = wrds[1]
+            if Sub not in self.Subs:
+                logs.log_error('subsequence %s is not defined, ok %s'%(Sub,list(self.Subs.keys())))
+                return
+            Params,_ = self.Subs[Sub]
+            self.Stack.append(self.Ptr)
+            Actuals = wrds[2:]
+            if len(Actuals)!=len(Params):
+                logs.log_error('subsequence %s params %d != %d  act  %s params %s'%(Sub,len(Actuals),len(Params),Actuals,Params))
+                return
+            Zip = list(zip(Params,Actuals))
+            for (PP,AA) in Zip:
+                Val = self.eval(AA)
+                self.Translates[PP]=Val
+
+            self.jumpLabel(Sub)
+            self.Ptr += 1
+            return
         elif wrds[0] == 'goto':
             Lbl = wrds[1]
-            if Lbl in self.Labels:
-                self.Ptr = self.Labels[Lbl]
-                return
-            for ind,(Line,_) in enumerate(self.Sequence):
-                ww = Line.split()
-                if (ww[0]=='label'):
-                    if ww[1] not in self.Labels:
-                        self.Labels[ww[1]] = ind
-            if Lbl in self.Labels:
-                self.Ptr = self.Labels[Lbl]
-                return
-            logs.log_error('didnt find label "%s"'%Lbl)
-            sys.exit()
+            self.jumpLabel(Lbl)
+            return
         elif wrds[0] == 'if':
             BB = makeExpr(wrds[1])
             Val = self.evalExpr(BB)
             if not Val:  return
-
-            Lbl = wrds[2]
-            if Lbl in self.Labels:
-                self.Ptr = self.Labels[Lbl]
-                return
-            for ind,(Line,_) in enumerate(self.Sequence):
-                ww = Line.split()
-                if (ww[0]=='label'):
-                    if ww[1] not in self.Labels:
-                        self.Labels[ww[1]] = ind
-            if Lbl in self.Labels:
-                self.Ptr = self.Labels[Lbl]
-                return
-            logs.log_error('didnt find label "%s"'%Lbl)
-            sys.exit()
-
+            self.jumpLabel(Lbl)
+            return
         elif (wrds[0] == 'force'):
             Ind = 1
             while Ind < len(wrds):
@@ -404,12 +417,30 @@ class sequenceClass:
             logs.log_error('what!! sequence failed %s on %s agents=%s'%(wrds[0],Line,list(self.agents.keys())))
             return False
 
+    def jumpLabel(self,Lbl):
+        if Lbl in self.Labels:
+            self.Ptr = self.Labels[Lbl]
+            return
+        for ind,(Line,_) in enumerate(self.Sequence):
+            ww = Line.split()
+            if (ww[0] in ['sequence','label']):
+                if ww[1] not in self.Labels:
+                    self.Labels[ww[1]] = ind
+        if Lbl in self.Labels:
+            self.Ptr = self.Labels[Lbl]
+            return
+        logs.log_error('didnt find label "%s"'%Lbl)
+        sys.exit()
+    def evalStr(self,Str):
+        BB = makeExpr(Str)
+        Val = self.evalExpr(BB)
+        return Val
     def evalExpr(self,Wrds1):
         self.Defs = {}
         self.DEFS = []
         Wrds = Wrds1[:]
         for ind,Wrd in enumerate(Wrds):
-            if (str(Wrd)[0] in string.ascii_letters)and(Wrd not in ['or','and','not']):
+            if (str(Wrd)[0] in '_'+string.ascii_letters)and(Wrd not in ['or','and','not']):
                 if self.exists(Wrd):
                     Val = self.peek(Wrd)
                     self.Defs[Wrd]=Val
@@ -425,7 +456,7 @@ class sequenceClass:
             X = eval(Txt,self.Defs)
             return X
         except:
-            logs.log_error('evaluation of %s failed'%Txt)
+            logs.log_error('evaluation of %s failed'%Txt,0,True,True)
             return 0
 
     def agentsFinish(self):
