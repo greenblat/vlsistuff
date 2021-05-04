@@ -44,6 +44,8 @@ class apbDriver:
         if not self.exists('pstrb'):
             self.noList.append('pstrb')
 
+    def onFinish(self):
+        return
     def exists(self,Sig):
         Full = '%s.%s'%(self.Path,Sig)
         X = veri.exists(Full)

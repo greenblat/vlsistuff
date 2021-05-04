@@ -40,6 +40,8 @@ class axiMasterClass:
         self.WVALID = False
         self.Size = 2
 
+    def onFinish(self):
+        return
     def rename(self,Sig):
         if Sig in self.renames:
             return self.renames[Sig]
