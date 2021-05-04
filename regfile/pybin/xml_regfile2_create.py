@@ -42,8 +42,9 @@ def createXml(Module,Db):
         elif Item.Kind=='external':
             Usable=False
         else:
-            logs.mustKey(Item.Params,'access','rw') 
-            Acc = Item.Params['access']
+            logs.mustKey(Item.Params,'access','#%d:'%Item.Lnum) 
+            if 'access' in Item.Params:
+                Acc = Item.Params['access']
             Amount = 0
         if Usable: 
             Wid = Item.Params['width']
@@ -52,7 +53,7 @@ def createXml(Module,Db):
                 Item.Params['description'] = Item.Params['desc']
             if 'description' not in Item.Params:
                 Desc = 'DESC NOT GIVEN'
-                logs.log_warning('description of %s not given'%Reg)
+                logs.log_warning('#%d: description of %s not given'%(Item.Lnum,Reg))
             else:
                 Desc = Item.Params['description']
             if 'reset' not in Item.Params:
@@ -62,17 +63,17 @@ def createXml(Module,Db):
             Addr = Item.Addr
     #        Fout.write('item %s %x %s\n'%(Item.Kind,Item.Addr,Item.Params))
             if Wid<=32:
-                writeItem(Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount)
+                writeItem(Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount)
             else:
                 Acc0 = Acc
                 Acc = Acc.replace('_pulse','')
                 Run = 0
                 while Wid>32:
-                    writeItem(Fout,Module,Acc,Addr,32,Reset,Desc,Reg+'_%d'%Run,Amount)
+                    writeItem(Item,Fout,Module,Acc,Addr,32,Reset,Desc,Reg+'_%d'%Run,Amount)
                     Addr += 4
                     Run += 1 
                     Wid -= 32
-                writeItem(Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg+'_%d'%Run,Amount)
+                writeItem(Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg+'_%d'%Run,Amount)
             Addr = Item.Addr
             Wid = Item.Params['width']
             if (Wid>BusWidth)and(Wid<=(BusWidth*2)):
@@ -98,7 +99,7 @@ def writable(Acc):
 
 
 
-def writeItem(Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount=0):
+def writeItem(Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount=0):
     Reset = str(Reset)
     Desc = str(Desc).replace('.',' ')
     Desc = Desc.replace('"','')
@@ -150,7 +151,7 @@ def writeItem(Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount=0):
         Str = Str.replace('DESCRIPTION',Desc)
         Fout.write(Str)
     else:
-        logs.log_error('acc = %s is not treated for reg %s in %s'%(Acc,Reg,Module))
+        logs.log_error('#%d: acc = %s is not treated for reg %s in %s'%(Item.Lnum,Acc,Reg,Module))
 
 
 

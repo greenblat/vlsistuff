@@ -58,6 +58,7 @@ Db = {'items':[],'clocks':[],'regs':[],'fields':[]}
 def createLines(File):
     Lines = File.readlines()
     Long = ''
+    Lnum = 0
     for line in Lines:
         if '//' in line: line = line[:line.index('//')]
         else:
@@ -82,6 +83,7 @@ def createLines(File):
     Res2 = []
     while ';;;' in Res:
         X = Res.index(';;;')
+        Lnum += 1
         Head = Res[:X]
         Pos = -1
         for ind,Tok in enumerate(Head):
@@ -90,7 +92,7 @@ def createLines(File):
             Head = Head[:Pos]
         Res = Res[X+1:]
         if Head!=[]:
-            Res2.append(Head)
+            Res2.append((Lnum,Head))
     return Res2        
 
 
@@ -98,20 +100,20 @@ checkNames = {}
 def readFile(File):
     Lines = createLines(File)  
     Lines = treatTemplates(Lines)
-    for wrds in Lines:
+    for Lnum,wrds in Lines:
         if (wrds[0]=='end'):
             generate()
             return
         elif (wrds[0]=='chip'):
-            Db['chip'] = itemClass(wrds)
+            Db['chip'] = itemClass(Lnum,wrds)
         else:
-            Item = itemClass(wrds)
+            Item = itemClass(Lnum,wrds)
             Db['items'].append(Item)
             Kind = Item.Kind
             if len(Item.Params['names'])>0:
                 Name = Item.Params['names'][0]
                 Item.Name = Name
-                checkPair(Kind,Name)
+                checkPair(Item,Kind,Name)
             else:
                 Item.Name = 'none'
     logs.log_warning('You should have "end" line as last line.')
@@ -119,13 +121,13 @@ def readFile(File):
 
 
 
-def checkPair(Kind,Name):
+def checkPair(Item,Kind,Name):
     if Kind == 'field': return
     if Kind not in checkNames: 
         checkNames[Kind]=[Name]
         return
     if Name in checkNames[Kind]:
-        logs.log_error('double defined item %s of kind %s . previous=%s'%((Name,Kind,checkNames[Kind])))
+        logs.log_error('#%d: double defined item %s of kind %s . previous=%s'%((Item.Lnum,Name,Kind,checkNames[Kind])))
         return
 
     checkNames[Kind].append(Name)
@@ -135,7 +137,7 @@ def treatTemplates(Lines):
     Curr = []
     state = 'idle'
     Result = []
-    for Line in Lines:
+    for Lnum,Line in Lines:
         if state=='idle':
             if Line[0]=='template':
                 Name = Line[1]
@@ -148,9 +150,9 @@ def treatTemplates(Lines):
                     LX = LL[:]
                     if LX[0]=='reg':
                         LX[1] = Inst+LX[1]
-                    Result.append(LX)
+                    Result.append((Lnum,LX))
             else:
-                Result.append(Line)
+                Result.append((Lnum,Line))
         elif state=='work':
             if Line[0] == 'endtemplate':
                 Templates[Name] = Curr[:]
@@ -165,16 +167,21 @@ SYNONYMS = {'wid':'width','desc':'description','rw':'wr','rw_pulse':'wr_pulse'}
 
 
 class itemClass:
-    def __init__(self,Wrds):
+    def __init__(self,Lnum,Wrds):
         self.Kind = Wrds[0]
-        self.Params = getParams(Wrds[1:])
+        self.Lnum = Lnum
+        self.Params = getParams(Lnum,Wrds[1:])
         self.Synonyms()
         self.Addr = -1
         self.RAMS = ''
         self.RAMS_WIRES = ''
         self.incs = []
+
+
     def dump(self):
-        print('%s : (%d 0x%x) %s'%(self.Kind,self.Addr,self.Addr,self.Params))
+        print('#%d %s : (%d 0x%x) %s'%(self.Lnum,self.Kind,self.Addr,self.Addr,self.Params))
+
+
     def Synonyms(self):
         for Key in SYNONYMS:
             if Key in self.Params:
@@ -182,14 +189,8 @@ class itemClass:
                 if Val not in self.Params:
                     self.Params[Val] = self.Params[Key]
 
-def expandBits(Name,Wid,Bits):
-    if Wid==Bits: return Name
-    if Wid<Bits:
-        Line = '{%d\'b0,%s}'%(Bits-Wid,Name)
-        return Line
-    return 'ERROR%s'%Name
 
-def getParams(wrds):
+def getParams(Lnum,wrds):
     Res = {}
     Nn = []
     for wrd in wrds:
@@ -198,14 +199,15 @@ def getParams(wrds):
             if len(ww)>2:
                 Join = '='.join(ww[1:])
                 ww = [ww[0],Join]
-            AA = examine(ww[1])
+            AA = examine(Lnum,ww[1])
             Res[ww[0]] = AA
         else:
             Nn.append(wrd)
     Res['names']=Nn
     return Res 
+    
 
-def examine(Txt):
+def examine(Lnum,Txt):
     if Txt=='': return Txt
     if logs.startsWith(Txt,'0x'):
         X = Txt.replace('_','')
@@ -217,10 +219,19 @@ def examine(Txt):
         try:
             return eval(Txt)
         except:
-            logs.log_error('examine of "%s" failed'%Txt)
+            logs.log_error('#%d: examine of "%s" failed'%(Lnum,Txt))
             return 0
     else:
         return Txt
+
+
+def expandBits(Name,Wid,Bits):
+    if Wid==Bits: return Name
+    if Wid<Bits:
+        Line = '{%d\'b0,%s}'%(Bits-Wid,Name)
+        return Line
+    return 'ERROR%s'%Name
+    
 
 def treatFields():
     DbFields = Db['fields']
@@ -267,7 +278,7 @@ def treatFields():
                 else:
                     RegHiLo = '%s[%s]'%(Reg,Hi)
                     if (Hi!=Lo):
-                        logs.log_error('ILIA reg=%s field=%s hilo= %s %s'%(Reg,Field,Hi,Lo))
+                        logs.log_error('#%d: ILIA reg=%s field=%s hilo= %s %s'%(RegObj.Lnum,Reg,Field,Hi,Lo))
             else:
                 WW = '[%s:0]'%(Wid-1)
                 RegHiLo = '%s[%s:%s]'%(Reg,Hi,Lo)
@@ -300,7 +311,7 @@ def treatFields():
                 LINES[8].append('assign %s = %s;'%(RegHiLo,Name))
                 LINES[8].append('assign %s = %s;\n'%(Name,RegHiLo))
             else:
-                logs.log_error('fields not legal access %s for %s'%(Access,Name))
+                logs.log_error('#%d: fields not legal access %s for %s'%(RegObj.Lnum,Access,Name))
         if inAccess(Access)and('0' in Cover):
             Ranges = getRanges(Cover)
             for Lo,Hi in Ranges:
@@ -390,7 +401,7 @@ def gatherFields():
             Obj = Reg
             Reg.Name = Active
             Db['regs'].append(Reg)
-            if Reg.Params['access']=='external':
+            if ('access' in Reg.Params) and (Reg.Params['access']=='external'):
                 EXTERNAL_REGS.append(Reg.Name)
         elif Reg.Kind=='field':
             if Active:
@@ -405,13 +416,13 @@ def gatherFields():
                 Reg.Name = Reg.Params['names'][0]
                 Obj.incs.append(Reg.Name)
             else:
-                logs.log_error('no reg for field %s'%(Reg.Params))
+                logs.log_error('#%d: no reg for field %s'%(Reg.Lnum,Reg.Params))
         else:
             Db['regs'].append(Reg)
             Active=False
     for Reg in Db['regs']:
         if len(Reg.incs)==1:
-            logs.log_warning('REG "%s" has just one field "%s". this is not needed.'%(Reg.Name,Reg.incs[0]))
+            logs.log_warning('#%d: REG "%s" has just one field "%s". this is not needed.'%(Reg.Lnum,Reg.Name,Reg.incs[0]))
 
 
 def report():
@@ -450,11 +461,11 @@ def computeWidthFromFields():
                     Add0 = getPrm(Obj,'width',0)
                     Add = getPrm(Obj,'width',0)
                     if Add==0:
-                        logs.log_error('reg %s field %s has no width'%(Name,Obj.Name))
+                        logs.log_error('#%d: reg %s field %s has no width'%(Reg.Lnum,Name,Obj.Name))
                     Align = getPrm(Obj,'align',0)
                     if (Align>0):
                        if (Align<=Add):
-                          logs.log_error('field %s of reg %s has bith width and align. align is smaller.'%(Obj.Name,Name))
+                          logs.log_error('#%d: field %s of reg %s has bith width and align. align is smaller.'%(Reg.Lnum,Obj.Name,Name))
                        else:
                           Add = Align
                           Db['splits'][Reg.Name] = Reg
@@ -472,7 +483,7 @@ def computeWidthFromFields():
                         Freset = Obj.Params['reset']
                         Bin = len(bin(Freset))-2
                         if Add0<Bin:
-                            logs.log_error('reset value 0x%x of field %s of reg %s is wider than bits allocated to it = %d'%(Freset,Name,Reg.Name,Add0))
+                            logs.log_error('#%d: reset value 0x%x of field %s of reg %s is wider than bits allocated to it = %d'%(Reg.Lnum,Freset,Name,Reg.Name,Add0))
                             Freset = Freset & ((1<<Add)-1)
                         BuildReset |= (Freset<<Wid)
 
@@ -480,19 +491,19 @@ def computeWidthFromFields():
                 if OrigWid==0:
                     Reg.Params['width']=Wid
                 elif (OrigWid<Wid):
-                    logs.log_error('fields of reg %s (wid=%d) take more bits (%d)'%(Reg.Name,OrigWid,Wid))
+                    logs.log_error('#%d: fields of reg %s (wid=%d) take more bits (%d)'%(Reg.Lnum,Reg.Name,OrigWid,Wid))
                 elif (OrigWid>Wid):
-                    logs.log_warning('fields of reg %s (wid=%d) take less bits (%d). consider removing width= from reg definition line'%(Reg.Name,OrigWid,Wid))
+                    logs.log_warning('#%d: fields of reg %s (wid=%d) take less bits (%d). consider removing width= from reg definition line'%(Reg.Lnum,Reg.Name,OrigWid,Wid))
                 if Reg.Name in Db['splits']:
                     Db['splitsw'][Reg.Name]=Map
 
                 if (OrigReset==0)and(BuildReset!=0):
                     Reg.Params['reset'] = BuildReset
                 elif (OrigReset!=0)and(BuildReset!=0)and(OrigReset!=BuildReset):
-                    logs.log_error("reg %s has reset value of it's own and also fields. remove one or the other"%(Reg.Name))
+                    logs.log_error("#%d: reg %s has reset value of it's own and also fields. remove one or the other"%(Reg.Lnum,Reg.Name))
 
             if (OrigWid==0)and( getPrm(Reg,'width',0)==0):
-                logs.log_error('reg %s has no width and no fields (defined %s)'%(Name,list(Db['fields'].keys())))
+                logs.log_error('#%d: reg %s has no width and no fields (defined %s)'%(Reg.Lnum,Name,list(Db['fields'].keys())))
             
 
 
@@ -563,7 +574,7 @@ def advanceAddr(Obj):
             Add1 = int((Bytes2 % Bytes)>0)
             Add  = Add0 + Add1
     elif (Obj.Kind not in ['gap']):
-        logs.log_error('advanceAddr: missing wid in %s %s  defs:%s'%(Obj.Kind,Obj.Name,Obj.Params))
+        logs.log_error('#%d: advanceAddr: missing wid in %s %s  defs:%s'%(Obj.Lnum,Obj.Kind,Obj.Name,Obj.Params))
         Add = 4
 
 
@@ -576,13 +587,13 @@ def advanceAddr(Obj):
         if 'modifier' in Obj.Params:
             Modif = Obj.Params['modifier']
             if Modif not in ['internal','external']:
-                logs.log_error('ram mode=%s of %s is not supported (external,internal) '%(Modif,Obj.Params['names'][0]))
+                logs.log_error('#%d: ram mode=%s of %s is not supported (external,internal) '%(Obj.Lnum,Modif,Obj.Params['names'][0]))
                 
         Dep = Obj.Params['depth']
         if (Bytes2<=Bytes):
             return Dep*Bytes
         else:
-            logs.log_error('ram %s is not supported to  be wider than bus (%d>%d)'%(Obj.Params['names'][0],Bytes2,Bytes))
+            logs.log_error('#%d: ram %s is not supported to  be wider than bus (%d>%d)'%(Obj.Lnum,Obj.Params['names'][0],Bytes2,Bytes))
             return Bytes * 2 * Dep
 
             
@@ -605,9 +616,9 @@ def advanceAddr(Obj):
             return Add*Bytes
 
         else:
-            logs.log_error('advanceAddr GAP got %s'%str(Obj.Params))
+            logs.log_error('#%d: advanceAddr GAP got %s'%str(Obj.Lnum,Obj.Params))
     else:
-        logs.log_error('advanceAddr got %s'%(Obj.Kind))
+        logs.log_error('#%d: advanceAddr got %s'%(Obj.Lnum,Obj.Kind))
         return Bytes
 
 INSTANCE = '''
@@ -702,7 +713,7 @@ def bodyDump0(Db):
         elif Reg.Kind=='gap': 
             pass
         else:
-            logs.log_error('wrong kind %s %s'%(Reg.Kind,Reg.Params))
+            logs.log_error('#%d: wrong kind %s %s'%(Reg.Lnum,Reg.Kind,Reg.Params))
     
 
 def bodyDump1(Db,File):
@@ -715,7 +726,7 @@ def bodyDump1(Db,File):
     elif Buswid==64: Wstrb=8
     elif Buswid==32: Wstrb=4
     else:
-        logs.log_error('BUSWIDTH is %d , allowed values are 32,64,128'%Buswid)
+        logs.log_error('#%d: BUSWIDTH is %d , allowed values are 32,64,128'%(Reg.Lnum,Buswid))
         Wstrb = 4
         Buswid = 32
     File.write(');\n')
@@ -934,7 +945,7 @@ def treatReg(Reg):
             Line3 = 'assign %s_out_reg = %s_int;'%(Name,Name)
             Str = W1C.replace('NAME',Name)
             if Wid>32:
-                logs.log_error('W1C registers (%s : %sbits) are not geared for width>32. please split'%(Name,Wid))
+                logs.log_error('#%d: W1C registers (%s : %sbits) are not geared for width>32. please split'%(Reg.Lnum,Name,Wid))
             Str = Str.replace('WID',str(Wid-1))
             RST = getPrm(Db['chip'],'reset','async')
             if RST=='async':
@@ -961,7 +972,7 @@ def treatReg(Reg):
             LINES[4].append(Str)
 
     else:
-        logs.log_error('ACCESS not recognized %s of %s'%(Access,Name))
+        logs.log_error('#%d: ACCESS not recognized %s of %s'%(Reg.Lnum,Access,Name))
 
 def widi(WID):
     if type(WID) is int:

@@ -39,6 +39,7 @@ class hspiceVector(logs.driverClass):
     def onFinish(self):
         if self.Fout:
             self.Fout.close()
+            self.Fout1.close()
 
     def run(self):
         if not self.Enable: return
@@ -49,22 +50,33 @@ class hspiceVector(logs.driverClass):
             logs.log_error('no signals?')
             sys.exit()
         newLine = ''
-        for Wid,Sig in self.Sigs:
+        newLine1 = ''
+        for Wid1,Wid,Sig in self.Sigs:
             Val = self.peek(Sig)
             if Val<0: Val = 0
-            newLine += ' %0%dx'%(Wid,Val)
+            Str = ' %'+'0%dx'%Wid
+            newLine += Str%(Val)
+            Bin = Wid1*'0'+bin(Val)[2:]
+            Bin = Bin[-Wid1:]
+            newLine1 += ' %s'%(Bin)
         if newLine != self.lastLine:
             self.Fout.write('%8d %s\n'%(self.Time,newLine))
+            self.Fout1.write('%8d %s\n'%(self.Time,newLine1))
             self.lastLine = newLine
         self.Time += self.Step
             
 
     def opening(self):
         self.Fout = open(self.fileName,'w')
+        self.Fout1 = open('bit_'+self.fileName,'w')
         self.Fout.write('; dump of hspice from %s\n' % self.Path)
+        self.Fout1.write('; dump of hspice from %s in bit format\n' % self.Path)
         Radix = ''
         Vname = ''
+        Radix1 = ''
+        Vname1 = ''
         IO = ''
+        IO1 = ''
         print('OPENING',self.IOlist)
         self.Sigs = []
         for Pin in self.IOlist:
@@ -78,11 +90,18 @@ class hspiceVector(logs.driverClass):
             if Wid == 1:
                 Vname += ' '+Sig
                 Radix += ' 1'
-                self.Sigs.append((1,Sig))
+                Vname1 += ' '+Sig
+                Radix1 += ' 1'
+                self.Sigs.append((1,1,Sig))
+                IO1 += ' '+WW[0]
             elif Wid < 5:
                 Vname += ' '+Sig
                 Radix += ' %s' % Wid
-                self.Sigs.append((1,Sig))
+                for X in range(Wid-1,-1,-1):
+                    Vname1 += ' '+Sig+'<%d>'%X
+                Radix1 += ' '+(Wid*'1')
+                self.Sigs.append((1,1,Sig))
+                IO1 += ' '+(Wid*WW[0])
             else:
                 Vname += ' %s[[%s:0]]'%(Sig,Wid-1)
                 X = int(Wid/4)
@@ -91,13 +110,23 @@ class hspiceVector(logs.driverClass):
                 if (Y>0):
                     AA = str(Y)+AA
                 Radix += ' '+ AA
-                self.Sigs.append((len(AA),Sig))
+                self.Sigs.append((Wid,len(AA),Sig))
+                Radix1 += ' '+(Wid*'1')
+                for X in range(Wid-1,-1,-1):
+                    Vname1 += ' '+Sig+'<%d>'%X
+                IO1 += ' '+(Wid*WW[0])
 
-        self.Fout.write('radix %s\n'%Radix)                
-        self.Fout.write('vname %s\n'%Vname)                
-        self.Fout.write('io    %s\n'%IO)                
-        self.Fout.write('tunit  ns\n')                
-        self.Fout.write('; Tabular  data\n')                
+        self.Fout.write('radix %s\n'%Radix)
+        self.Fout.write('vname %s\n'%Vname)
+        self.Fout.write('io    %s\n'%IO)
+        self.Fout.write('tunit  ns\n')
+        self.Fout.write('; Tabular  data\n')
+                 
+        self.Fout1.write('radix %s\n'%Radix1)
+        self.Fout1.write('vname %s\n'%Vname1)
+        self.Fout1.write('io    %s\n'%IO1)
+        self.Fout1.write('tunit  ns\n')
+        self.Fout1.write('; Tabular  data\n')
                  
 
 

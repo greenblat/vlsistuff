@@ -57,7 +57,7 @@ def outputStructures(Module,Items,Fch):
 
 def ensureParam(Item,Param):
     if Param in Item.Params: return
-    logs.log_error('ensureParams item=%s missing=%s   avail=%s'%(Item.Name,Param,Item.Params))
+    logs.log_error('#%d: ensureParams item=%s missing=%s   avail=%s'%(Item.Lnum,Item.Name,Param,Item.Params))
     Item.Params[Param] = -1,-1
 
 def outputFields(Items,Fch):
