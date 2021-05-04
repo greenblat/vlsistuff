@@ -462,10 +462,12 @@ class sequenceClass:
     def agentsFinish(self):
         for Agent in self.agents:
             Obj = self.agents[Agent]
-#            logs.log_info('trying %s.onFinish()'%Agent)
-            try:
-                Obj.onFinish()
-            except:
+            if 'onFinish' in dir(Obj):
+                try:
+                    Obj.onFinish()
+                except:
+                    logs.log_info('%s.onFinish() failed'%Agent)
+            else:
                 logs.log_info('no  %s.onFinish() found , add "    def onFinish(self):" to the agent'%Agent)
 
 
