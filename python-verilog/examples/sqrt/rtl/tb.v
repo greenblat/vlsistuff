@@ -26,7 +26,7 @@ initial begin
 end
 sqrt_u40_5 sqrt_u40_5 (
      .clk(clk) ,.rst_n(rst_n) ,.en(en)
-    ,.ain(ain[39:0]) ,.vldin(vldin)
+    ,.ain(ain[30:0]) ,.vldin(vldin)
     ,.out(out[19:0]) ,.vldout(vldout)
 );
 endmodule

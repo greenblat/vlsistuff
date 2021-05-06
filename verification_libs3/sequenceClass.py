@@ -42,7 +42,9 @@ class sequenceClass:
             Monitors.append(self)
         self.Monitors = Monitors
         self.Sequence = []
+        logs.log_info('INCLUDES STARTED')
         self.workIncludes()
+        logs.log_info('INCLUDES DONE')
         self.waiting = 0
         self.Guardian = 0   # against wait too long.
         self.waitNotBusy = False
@@ -105,7 +107,20 @@ class sequenceClass:
                 self.Sequence.append((Line[:-1],lnum))
         self.searchPath.append(os.path.abspath(os.path.dirname(Filename)))
         self.workIncludes()
+        self.definesPreRun()
         self.extractSequences()
+
+    def definesPreRun(self):
+        for Line,_ in self.Sequence:
+            wrds = Line.split()
+            if wrds[0] == 'define':
+                Var = wrds[1]
+                if len(wrds)==3:
+                    Val = self.eval(wrds[2])
+                    self.Translates[Var]=Val
+                elif len(wrds)>3:
+                    Val = list(map(self.eval,wrds[2:]))
+                    self.Translates[Var]=Val
 
 
     def extractSequences(self):
@@ -457,6 +472,8 @@ class sequenceClass:
             return X
         except:
             logs.log_error('evaluation of %s failed'%Txt,0,True,True)
+            logs.log_info('TRANSLATES %s'%(str(self.Translates)))
+            logs.log_info('RDS %s'%(str(Wrds)))
             return 0
 
     def agentsFinish(self):

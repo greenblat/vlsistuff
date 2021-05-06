@@ -13,7 +13,7 @@ wire [39:0] Decr19 = Decra19+Decrb19;
 wire [39:0] YY19_1 = YY20+Decr19;
 wire [39:0] Base19 =  40'b1<<19;
 wire smaller19 =  (YY19_1<=datain20);
-wire [39:0] YY19 = smaller19 ? YY19_1 : YY20;
+wire [39:0] YY19 = smaller19 ? YY19_1 : ~YY20;
 wire [19:0] Y19 = smaller19 ? Y20+Base19 : Y20;
 wire [39:0] datain19 = datain20;
 wire vld19 = vld20;

@@ -443,15 +443,15 @@ void readfile(fname) char *fname; {
             exit(0);
         }
 
-        if (guard>999999) { guard=0;printf("%d lines time=%g %d maxusedsigs=%d\n",linenum,run_time,0,maxusedsig);}
+        if (guard>9999999) { guard=0;printf("%d lines time=%g %d maxusedsigs=%d\n",linenum,run_time,0,maxusedsig);}
         if (j == NULL) {
             printf("end of file simtime=%g\n",run_time);
             exit(0);
         }
 
-        if ((run_time-last_time)>10000000.0) {
+        if ((run_time-last_time)>10000000000.0) {
             last_time = run_time;
-            printf("TIME %d lines time=%g %d maxusedsigs=%d\n",linenum,run_time,0,maxusedsig);
+//            printf("TIME %d lines time=%g %d maxusedsigs=%d\n",linenum,run_time,0,maxusedsig);
         }
 
 

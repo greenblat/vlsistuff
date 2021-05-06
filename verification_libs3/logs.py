@@ -901,5 +901,16 @@ def peekbus(Bus,Path,Wid):
         X = veri.peek('%s.%s[%s]'%(Path,Bus,II))
         Res += X
     return intx(Res)
-print('>>>verification_logs loaded')
 
+
+def ensureExists(Dir,Index):
+    if type(Dir) is dict:
+        if Index not in Dir:
+            Dir[Index] = 0
+        return
+    if type(Dir) is list:
+        while len(Dir)<Index:
+            Dir.append(0)
+
+
+print('>>>verification_logs loaded')
