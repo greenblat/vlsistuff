@@ -77,6 +77,9 @@ def read_verilog_file(Fname,RunDir,Env):
     global dbx
     tmpfilename = '/tmp/xyz_%s'%os.getpid()
     Params = { 'fnames':[Fname],'-specify':True,'-o':[tmpfilename]}
+    More = logs.parse_args()
+    if '-d' in More:
+        Params['-d'] = More['-d']
     macro_verilog_pp.run_main(Params,'00010')
 
 

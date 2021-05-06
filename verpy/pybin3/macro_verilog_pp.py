@@ -8,6 +8,7 @@
     it replaces all macro definitions
     it computes constants, in the form of "16-1"
 
+    -d define  add DEFINE
     -y Dir     adds search directory to includes list
     -I Dir     identical to -y
     -o Filename  [file3.v default] the script creates one file with all substitutions
