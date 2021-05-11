@@ -8,7 +8,7 @@ Warnings = 0
 print_debug_messages=0
 print_warning_messages= True
 MAXWRONGS = 2000
-MAXERRORS = 2000
+MAXERRORS = 2000000
 PYMONLOG = 'pymon.log'
 
 WHERE = ''

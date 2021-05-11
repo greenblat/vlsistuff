@@ -39,6 +39,7 @@ class axiMasterClass:
         self.ARVALID = False
         self.WVALID = False
         self.Size = 2
+        self.AXI3 = False
 
     def onFinish(self):
         return
@@ -64,7 +65,11 @@ class axiMasterClass:
     def action(self,Txt):
         print('ACT',self.Name,Txt)
         wrds = Txt.split()
-        if wrds[0]=='write':
+        if wrds[0]=='axi3':
+            self.AXI3 = True
+        elif wrds[0]=='axi4':
+            self.AXI3 = Fase
+        elif wrds[0]=='write':
             if len(wrds)==3:
                 self.makeWrite(1,1,eval(wrds[1]),self.Size,[eval(wrds[2])])
             elif len(wrds)>=6:
@@ -106,7 +111,6 @@ class axiMasterClass:
             return
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
-        self.Rid += 1
         for ii in range(Len):
             if len(Wdatas)==0:
                 Wdata = '0x%08x%08x%08x%08x'%(self.Rid+0x1000*ii,0x100+self.Rid+0x1000*ii,0x200+self.Rid+0x1000*ii,0x300+self.Rid+0x1000*ii)
@@ -118,15 +122,21 @@ class axiMasterClass:
                 Wlast=1
             else:
                 Wlast = 0
-            self.Queue.append(('w','force wvalid=1 wdata=%s wstrb=0x%x wlast=%d'%(Wdata,Wstrb,Wlast)))
+            Str = 'force wvalid=1 wdata=%s wstrb=0x%x wlast=%d'%(Wdata,Wstrb,Wlast)
+            if self.AXI3:
+                Str += ' wid=%d'%self.Rid
+            self.Queue.append(('w',Str))
 
-        self.Queue.append(('w','force wvalid=0 wdata=0 wstrb=0 wlast=0'))
+        Str = 'force wvalid=0 wdata=0 wstrb=0 wlast=0'
+        if self.AXI3:
+            Str += ' wid=%d'%self.Rid
+        self.Queue.append(('w',Str))
+        self.Rid += 1
 
 
     def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
-        self.Rid += 1
         if Len<=0:
             logs.log_warning('axiMaster %s got len=%d for write'%(self.Name,Len))
         for ii in range(Len):
@@ -141,10 +151,17 @@ class axiMasterClass:
             else:
                 Wlast = 0
             Wstrb = (1<<(1<<Size))-1
-            self.Queue.append(('w','force wvalid=1 wdata=%s wstrb=0x%x wlast=%d'%(Wdata,Wstrb,Wlast)))
+            Str = 'force wvalid=1 wdata=%s wstrb=0x%x wlast=%d'%(Wdata,Wstrb,Wlast)
+            if self.AXI3:
+                Str += ' wid=%d'%self.Rid
+            self.Queue.append(('w',Str))
 
-        self.Queue.append(('w','force wvalid=0 wdata=0 wstrb=0 wlast=0'))
+        Str = 'force wvalid=0 wdata=0 wstrb=0 wlast=0'
+        if self.AXI3:
+            Str += ' wid=%d'%self.Rid
+        self.Queue.append(('w',Str))
         logs.log_info('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)))
+        self.Rid += 1
             
     def wait(self,Many):
         self.Queue.append(('this','wait %d'%Many))

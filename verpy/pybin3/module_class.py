@@ -844,8 +844,8 @@ class module_class:
             return Name
         if Name[0]=='\\':
             Name=Name[1:]
-        for Char in '/.*':
-             Name = Name.replace(Name,Char,'_')
+        for Char in ' /.*[]':
+             Name = Name.replace(Char,'_')
         if Simple and ('[' in Name):
             Name = Name.replace('[','_')
             Name = Name.replace(']','_')
@@ -877,15 +877,18 @@ class module_class:
             Type = Obj.Type
             for Pin in Obj.conns:
                 Sig = Obj.conns[Pin]
-                Sigi = self.relax_name(Sig,True)
-                Supset = support_set(Sigi)
-                for Sigx in Supset:
-                    if '[' in Sigx:
-                        Sigx  = Sigx[:Sigx.index('[')]
-                    if Sigx not in self.netsTable:
-                        self.netsTable[Sigx] = [(Inst,Type,Pin)]
-                    else:
-                        self.netsTable[Sigx].append((Inst,Type,Pin))
+                if type(Sig) is int:
+                    pass
+                else:
+                    Sigi = self.relax_name(Sig,True)
+                    Supset = support_set(Sigi)
+                    for Sigx in Supset:
+                        if '[' in Sigx:
+                            Sigx  = Sigx[:Sigx.index('[')]
+                        if Sigx not in self.netsTable:
+                            self.netsTable[Sigx] = [(Inst,Type,Pin)]
+                        else:
+                            self.netsTable[Sigx].append((Inst,Type,Pin))
          
     def compute_int(self,Item):
         if type(Item) is int:
