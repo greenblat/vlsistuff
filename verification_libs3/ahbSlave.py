@@ -103,6 +103,7 @@ class ahbSlave(logs.driverClass):
         if (self.tr_peek('hsel')==1)and (self.tr_peek('htrans') in [SEQ,NONSEQ]):
             haddr  = self.tr_peek('haddr')
             hwrite  = self.tr_peek('hwrite')
+            self.haddr = haddr
             if (hwrite) :
                 self.RAM[haddr] = self.tr_peek('hwdata')
                 self.tr_force('hresp',0)

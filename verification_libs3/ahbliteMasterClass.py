@@ -182,6 +182,7 @@ class ahbliteMaster(logs.driverClass):
                         self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('hsize',self.HSIZE),('hsel',1),('hready',1)])
                     else:
                         self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('catch',('hrdata',Addr,'none')),('hsize',self.HSIZE),('hsel',1),('hready',1)])
+                        logs.log_info('CATCHING %x'%Addr)
                 
                 self.seq.append([('hburst',0),('haddr',0),('hwdata',0),('hwrite',0),('htrans',IDLE),('hsize',0),('hsel',self.HSEL),('hready',1)])
 

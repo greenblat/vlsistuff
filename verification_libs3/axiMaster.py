@@ -224,7 +224,7 @@ class axiMasterClass:
             rdatax = rdatax[-msb:]
             logs.log_info('axiM responce rid=%x rlast=%d rdata=%s     %s'%(rid,rlast,rdatax,self.Path))
             if self.readAction:
-                self.readAction(rid,rlast,rdatax)
+                self.readAction(rid,rlast,rdatax,self.READS)
         else:
             self.manageRready(0)
 

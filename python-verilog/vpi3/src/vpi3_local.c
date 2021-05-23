@@ -1094,7 +1094,7 @@ veri_listing(PyObject *self,PyObject *args) {
 int printHierarchyDeep(char *pathstring,int depth,FILE *File) {
     vpiHandle handle,net_iterator, net_handle;
     s_vpi_value pvalue;
-    char deeper[1000],full1[1000],full0[1000];
+    char deeper[10000],full1[10000],full0[10000];
     handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\ncannot find module %s for listing\n",pathstring);
