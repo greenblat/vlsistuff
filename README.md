@@ -1,4 +1,6 @@
 # vlsistuff
+
+
 ideas and eda software for vlsi design 
 moving to python3, some directories were renamed to to have suffix "3" to signify python3 versio.  gradually removing python2 remains.
 
