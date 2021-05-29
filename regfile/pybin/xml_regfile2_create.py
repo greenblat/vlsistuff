@@ -29,8 +29,8 @@ def createXml(Module,Db):
     Pref = ''
     if 'pref' in Db['chip'].Params:
         Pref = Db['chip'].Params['pref']
+
     for Item in Items:
-#        print(Item.Kind,Item.Params)
         Usable=True
         if Item.Kind=='ram':
             Acc = 'ram'
@@ -63,17 +63,17 @@ def createXml(Module,Db):
             Addr = Item.Addr
     #        Fout.write('item %s %x %s\n'%(Item.Kind,Item.Addr,Item.Params))
             if Wid<=32:
-                writeItem(Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount)
+                writeItem(Db,Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount)
             else:
                 Acc0 = Acc
                 Acc = Acc.replace('_pulse','')
                 Run = 0
                 while Wid>32:
-                    writeItem(Item,Fout,Module,Acc,Addr,32,Reset,Desc,Reg+'_%d'%Run,Amount)
+                    writeItem(Db,Item,Fout,Module,Acc,Addr,32,Reset,Desc,Reg+'_%d'%Run,Amount)
                     Addr += 4
                     Run += 1 
                     Wid -= 32
-                writeItem(Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg+'_%d'%Run,Amount)
+                writeItem(Db,Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg+'_%d'%Run,Amount)
             Addr = Item.Addr
             Wid = Item.Params['width']
             if (Wid>BusWidth)and(Wid<=(BusWidth*2)):
@@ -97,9 +97,35 @@ def writable(Acc):
     if 'W' in Acc: return True
     return False
 
+def hasFields(Db,Reg):
+    return Reg in Db['fields']
 
 
-def writeItem(Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount=0):
+def buildFields(Db,Reg):
+    List = Db['fields'][Reg]
+    Res = ''
+    for Item in List:
+        Name = Item.Name
+        if Name != 'gap':
+            Offset,Width = Item.Params['position']
+            Str = FIELD_TEMPLATE.replace('NAME',Item.Name)
+            Str = Str.replace('WIDTH',str(Width))
+            Str = Str.replace('OFFSET',str(Offset))
+            if 'description' in Item.Params:
+                Desc = '<ipxact:description>XXX</ipxact:description>'
+                Desc = Desc.replace('XXX',Item.Params['description'])
+                Str = Str.replace('DESCRIPTION',Desc)
+            else:
+                Str = Str.replace('DESCRIPTION','')
+            if 'reset' in Item.Params:
+                Str = Str.replace('RESET',str(Item.Params['reset']))
+            else:
+                Str = Str.replace('RESET','0')
+            Res += Str
+    return Res
+
+
+def writeItem(Db,Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount=0):
     Reset = str(Reset)
     Desc = str(Desc).replace('.',' ')
     Desc = Desc.replace('"','')
@@ -113,6 +139,19 @@ def writeItem(Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount=0):
         Desc = Desc.replace('"','')
         Str = Str.replace('DESCRIPTION',Desc)
         Fout.write(Str)
+    elif writable(Acc) and hasFields(Db,Reg):
+        Str = REG_FIELDED_TEMPLATE.replace('NAME',Reg)
+        Str = Str.replace('ADDRESS','%x'%Addr)
+        Str = Str.replace('WIDTH','\'h%x'%Wid)
+        Str = Str.replace('RESET',Reset)
+        Str = Str.replace('DESCRIPTION','"%s"'%Desc)
+        Str = Str.replace('USERLOGIC','false')
+        Str = Str.replace('VOLATILE','false')
+        Fields = buildFields(Db,Reg)
+        Fields = Fields.replace('VOLATILE','false')
+        Fields = Fields.replace('USERLOGIC','false')
+        Str = Str.replace('FIELDS',Fields)
+        Fout.write(Str)
     elif writable(Acc):
         Str = REG_TEMPLATE.replace('NAME',Reg)
         Str = Str.replace('ADDRESS','%x'%Addr)
@@ -121,6 +160,20 @@ def writeItem(Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount=0):
         Str = Str.replace('DESCRIPTION','"%s"'%Desc)
         Str = Str.replace('USERLOGIC','false')
         Str = Str.replace('VOLATILE','false')
+        Fout.write(Str)
+    elif ('ro' in Acc) and hasFields(Db,Reg):
+        Str = REG_FIELDED_TEMPLATE.replace('NAME',Reg)
+        Str = Str.replace('ADDRESS','%x'%Addr)
+        Str = Str.replace('WIDTH','\'h%x'%Wid)
+        Str = Str.replace('RESET',Reset)
+        Str = Str.replace('DESCRIPTION','"%s"'%Desc)
+        Str = Str.replace('read-write','read-only')
+        Str = Str.replace('USERLOGIC','true')
+        Str = Str.replace('VOLATILE','true')
+        Fields = buildFields(Db,Reg)
+        Fields = Fields.replace('VOLATILE','true')
+        Fields = Fields.replace('USERLOGIC','true')
+        Str = Str.replace('FIELDS',Fields)
         Fout.write(Str)
     elif 'ro' in Acc:
         Str = REG_TEMPLATE.replace('NAME',Reg)
@@ -252,6 +305,21 @@ REG_USER_LOGIC_TEMPLATE = '''
                 </ipxact:register>
 '''
 
+FIELD_TEMPLATE = '''
+                    <ipxact:field>
+                        <ipxact:name>NAME</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>OFFSET</ipxact:bitOffset>
+                        <ipxact:bitWidth>WIDTH</ipxact:bitWidth>
+                        <ipxact:volatile>VOLATILE</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>RESET</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>USERLOGIC</userLogic>
+                        </ipxact:vendorExtensions>
+                        DESCRIPTION
+                    </ipxact:field>
+'''
+
 REG_TEMPLATE = '''
                <ipxact:register>
                     <ipxact:name>NAME</ipxact:name>
@@ -277,4 +345,18 @@ REG_TEMPLATE = '''
                 </ipxact:register>
 '''
 
+REG_FIELDED_TEMPLATE = '''
+               <ipxact:register>
+                    <ipxact:name>NAME</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'hADDRESS</ipxact:addressOffset>
+                    <ipxact:description>DESCRIPTION</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>VOLATILE</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    FIELDS
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+'''
 

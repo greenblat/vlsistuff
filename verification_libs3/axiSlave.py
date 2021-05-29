@@ -32,11 +32,11 @@ class axiSlaveClass:
     def peek(self,Sig):
         if self.prefix!='': Sig = '%s%s'%(self.prefix,Sig)
         if self.suffix!='': Sig = '%s%s'%(Sig,self.suffix)
-        print('PEEK ',self.Path,Sig,Sig in self.Translates)
+#        print('PEEK ',self.Path,Sig,Sig in self.Translates)
         if Sig in self.Translates: 
             Sig = self.Translates[Sig]
-        else:
-            print('PEEK NO %s %s'%(Sig,list(self.Translates.keys())))
+#        else:
+#            print('PEEK NO %s %s'%(Sig,list(self.Translates.keys())))
         return logs.peek('%s.%s'%(self.Path,Sig))
 
     def force(self,Sig,Val):

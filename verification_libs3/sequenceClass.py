@@ -328,6 +328,7 @@ class sequenceClass:
             BB = makeExpr(wrds[1])
             Val = self.evalExpr(BB)
             if not Val:  return
+            Lbl = wrds[2]
             self.jumpLabel(Lbl)
             return
         elif (wrds[0] == 'force'):

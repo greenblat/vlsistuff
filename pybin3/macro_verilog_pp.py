@@ -12,6 +12,7 @@
     -I Dir     identical to -y
     -o Filename  [file3.v default] the script creates one file with all substitutions
     -split     create directory "tmp" where all modules have their own file called "module".v  if -split has parameter, it will be the dir name.
+    -specify   remove specifies
     -h  print these instructions
 
 verilog style params:
