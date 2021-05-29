@@ -46,6 +46,7 @@ class ahbliteMaster(logs.driverClass):
         self.HSIZE = 2
         self.HPROT = 0
         self.Enable = True
+        self.RDATA = []
 
     def translate(self,Addr):
         if Addr[0] in '0123456789':
@@ -89,6 +90,15 @@ class ahbliteMaster(logs.driverClass):
                 self.read(wrds[1])
         elif wrds[0]=='wait':
             self.wait(eval(wrds[1]))
+        elif wrds[0]=='RD':
+            print('>>>>>>>RD',self.RDATA)
+            Addr = eval(wrds[1])
+            Exps = list(map(eval,wrds[2:]))
+            while Exps!=[]:
+                Ad,Rd = self.RDATA.pop(0)
+                Exp = Exps.pop(0)
+                logs.log_ensure((Ad==Addr)and(Rd == Exp),' AHB RD %x exp %x act %x' % (Addr,Exp,Rd))
+                Addr += 4
         else:
             logs.log_info('AHB ACTION %s failed'%Txt)
 
@@ -144,6 +154,7 @@ class ahbliteMaster(logs.driverClass):
                             logs.log_info('ahb %s read act=0x%x exp=%s addr=0x%x '%(self.Name,X,Exp,Val[1]))
                             logs.log_ensure(X==Exp,'ahb %s read act=0x%x exp=%x addr=0x%x '%(self.Name,X,Exp,Val[1]))
                         else:
+                            self.RDATA.append((Val[1],X))
                             logs.log_info('ahb %s read 0x%x addr=0x%x'%(self.Name,X,Val[1]))
                 elif Sig=='waitUntil':
                     (Net,What) = Val
