@@ -100,7 +100,7 @@ class ahbliteMaster(logs.driverClass):
                 logs.log_ensure((Ad==Addr)and(Rd == Exp),' AHB RD %x exp %x act %x' % (Addr,Exp,Rd))
                 Addr += 4
         else:
-            logs.log_info('AHB ACTION %s failed'%Txt)
+            logs.log_error('AHB ACTION %s failed'%Txt)
 
     def wait(self,Wait):
         self.queue.append(('wait',Wait))
