@@ -107,7 +107,8 @@ def buildFields(Db,Reg):
     for Item in List:
         Name = Item.Name
         if Name != 'gap':
-            Offset,Width = Item.Params['position']
+            _,Offset = Item.Params['position']
+            Width =  Item.Params['width']
             Str = FIELD_TEMPLATE.replace('NAME',Item.Name)
             Str = Str.replace('WIDTH',str(Width))
             Str = Str.replace('OFFSET',str(Offset))
