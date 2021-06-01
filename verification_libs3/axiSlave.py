@@ -10,6 +10,8 @@ import random
 class axiSlaveClass:
     def __init__(self,Path,Monitors,prefix='',suffix=''):
         self.Path = Path
+        if self.Path != '':
+            self.Path = self.Path + '.'
         if Monitors!= -1:
             Monitors.append(self)
         self.arqueue=[]
@@ -37,13 +39,13 @@ class axiSlaveClass:
             Sig = self.Translates[Sig]
 #        else:
 #            print('PEEK NO %s %s'%(Sig,list(self.Translates.keys())))
-        return logs.peek('%s.%s'%(self.Path,Sig))
+        return logs.peek('%s%s'%(self.Path,Sig))
 
     def force(self,Sig,Val):
         if self.prefix!='': Sig = '%s%s'%(self.prefix,Sig)
         if self.suffix!='': Sig = '%s%s'%(Sig,self.suffix)
         if Sig in self.Translates: Sig = self.Translates[Sig]
-        veri.force('%s.%s'%(self.Path,Sig),str(Val))
+        veri.force('%s%s'%(self.Path,Sig),str(Val))
 
     def action(self,Text):
         Wrds = Text.split()
@@ -60,15 +62,22 @@ class axiSlaveClass:
                     if wrd[0]=='@':
                         Addr = int(wrd[1:],16)
                     else:
-                        Addr = self.addWord(Addr,Wrd)
+                        Addr = self.addWord(Addr,int(Wrd,16))
         elif Wrds[0] == 'ram':
             Addr = eval(Wrds[1])
             for Wrd in Wrds[2:]:
-                Addr = self.addWord(Addr,Wrd)
+                Addr = self.addWord(Addr,int(Wrd,16))
+        elif Wrds[0] == 'flood':
+            Addr0 = eval(Wrds[1])
+            Addr1 = eval(Wrds[2])
+            Val   = eval(Wrds[3])
+            for Add in range(Addr0,Addr1,4):
+                self.addWord(Add,Val)
                 
 
-    def addWord(self,Addr,Word):
-        Data = int(wrd,16)
+                
+
+    def addWord(self,Addr,Data):
         self.Ram[Addr] = Data & 0xff
         self.Ram[Addr+1] = (Data>>8) & 0xff
         self.Ram[Addr+2] = (Data>>16) & 0xff
@@ -137,6 +146,7 @@ class axiSlaveClass:
                 
                 
     def readQueue(self,ii,burst,arsize,addr,rid,rlast):
+        if (arsize>4): arsize = 4
         Incr = 1<<arsize
         Mask = ~((1<<arsize)-1)
         if burst==0:

@@ -104,10 +104,8 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
 
     if (Errors>MAXERRORS):
         log_info('max errors reached (%d). bailing out. (MAXERRORS==%d)'%(Errors,MAXERRORS),Which)
-        if finishReason:
-            finishReason('too many errors',Errors+1,Wrongs,Corrects)
-        if veri: veri.finish()
-        sys.exit()   # in icarus, sometimes finish doesnt catch
+        finish('max errors reached')
+        return
 
     if (Text in printed_already):
         return
@@ -145,10 +143,7 @@ def log_wrong(Text,Which=0):
     Flogs[Which].write('@%d: %d vs %d (err=%d):  ___WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     if Wrongs >= MAXWRONGS:
         log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS),Which)
-        if finishReason:
-            finishReason('too many wrongs',Errors,Wrongs+1,Corrects)
-        if veri: veri.finish()
-        sys.exit()   # in icarus, sometimes finish doesnt catch
+        finish('max wrongs reached')
 
 def finish_now(Text='.'):
     global Flog

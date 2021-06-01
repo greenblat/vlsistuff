@@ -8,6 +8,10 @@ def help_main(Env):
     if not os.path.exists('src'): os.mkdir('src')
     createTb(Mod)
 
+    Fout = open('src/%s.v' % Mod.Module,'w')
+    Mod.dump_verilog(Fout)
+    Fout.close()
+
     
     Fval = open('src/values.h','w')
     forcesAndPeeks(Mod,Fval)
@@ -121,7 +125,7 @@ def forcesAndPeeks(Mod,Fval):
                 Fval.write('    if (strcmp(path,"%s")==0) {\n'%(Net))
                 Many = int(0.5+(Wid+31)/32)
                 for ii in range(Many):
-                    Fval.write('        copy8(val,%d); top->%s[%d] = strtol(tmp,NULL,16);\n'%(Many-ii-1,Net,Many-ii-1))
+                    Fval.write('        copy8(val,%d); top->%s[%d] = xstrtol(tmp,NULL,16);\n'%(Many-ii-1,Net,Many-ii-1))
                 Fval.write('        return; }\n')
     Fval.write(STR4)
 
@@ -262,6 +266,15 @@ void copy8(char *Str,int Pos) {
         else tmp[ii]='0';
     }   
     tmp[8]=0;
+}
+
+
+long xstrtol (char *val,int A,int B) { 
+    if ((val[0] == '0')&&(strlen(val)>2)) {
+        if (val[1] == 'b') return strtol(&(val[2]),NULL,2);
+        if (val[1] == 'x') return strtol(&(val[2]),NULL,16);
+    }    
+    return strtol(val,NULL,10);
 }
 
 
