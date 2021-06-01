@@ -15,6 +15,7 @@ if 'PYMONLOG' in os.environ:
 FORCE_WORKS = True
 TRACE = False
 
+MODE = 'verilog'   # other is verilator
 WHERE = ''
 
     
@@ -296,6 +297,7 @@ def intx(Val):
         return int(Val,2)
     except:
         print('ERROR logs.intx got INTX',type(Val),'"%s"'%Val)
+        traceback.print_stack(file=Flogs[0])
         return 99999999
 
 
@@ -312,11 +314,14 @@ def peekBus(Bus,Wid,Base=''):
 
 def peek(Sig):
     X = veri_peek(Sig)
+    if MODE == 'verilator':
+        return int(X,16)
     V  = intx(X)
     return V
 def valid(Sig):
     V  = intx(veri_peek(Sig))
     return V==1
+
 
 def peekList(List,Prefix,Format='hex'):
     if type(List) is str:
@@ -848,8 +853,8 @@ class driverClass:
 
 
 def veri_peek(Sig):
-    if veri: return veri.peek(Sig)
-    return 'x'
+    if not veri: return 'x'
+    return veri.peek(Sig)
 
 def vbits(Txt,Hi,Lo):
     if Lo==0:

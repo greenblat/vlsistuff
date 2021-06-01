@@ -457,14 +457,14 @@ class sequenceClass:
         Wrds = Wrds1[:]
         for ind,Wrd in enumerate(Wrds):
             if (str(Wrd)[0] in '_'+string.ascii_letters)and(Wrd not in ['or','and','not']):
-                if self.exists(Wrd):
+                if Wrd in self.Translates:
+                    self.Defs[Wrd]=self.Translates[Wrd]
+                    Wrds[ind]=self.Translates[Wrd]
+                elif self.exists(Wrd):
                     Val = self.peek(Wrd)
                     self.Defs[Wrd]=Val
                     self.DEFS.append((Wrd,Val))
                     Wrds[ind]=Val
-                elif Wrd in self.Translates:
-                    self.Defs[Wrd]=self.Translates[Wrd]
-                    Wrds[ind]=self.Translates[Wrd]
 
         Txt = ' '.join(map(str,Wrds))
         if Txt == '': return 0
