@@ -51,6 +51,11 @@ class axiSlaveClass:
         Wrds = Text.split()
         if Wrds == []:
             pass
+        elif Wrds[0] == 'set':
+            Addr = eval(Wrds[1])
+            for Wrd in Wrds[2:]:
+                Data = eval(Wrd)
+                Addr = self.addWord(Addr,Data)
         elif Wrds[0] == 'ramfile':
             File = open(Wrds[1])
             lines = File.readlines()
