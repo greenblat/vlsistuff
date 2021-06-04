@@ -27,6 +27,7 @@ def main():
 
 def setupMain(Env):
     params =  logs.parse_args()
+    print('>setupmain>>>>',params)
     Env.systemverilog = '-sv' in params
     Env.params=params
     if (len(params.keys())==1):
@@ -51,7 +52,6 @@ def setupMain(Env):
 
     Env.read_verilog_file=read_verilog_file
     Env.read_gate_level_verilog_file=read_gate_level_verilog_file
-    Env.params=params
     for Fname in Fnames:
         if Env.GateLevelRead:
             Env.read_gate_level_verilog_file(Fname,Env.rundir)
@@ -75,9 +75,10 @@ def run_lexer(Fname,FnameOut):
 
 def read_verilog_file(Fname,RunDir,Env):
     global dbx
+    print('reading0 %s file'%Fname)
     tmpfilename = '/tmp/xyz_%s'%os.getpid()
     Params = { 'fnames':[Fname],'-specify':True,'-o':[tmpfilename]}
-    More = logs.parse_args()
+    More = Env.params
     if '-d' in More:
         Params['-d'] = More['-d']
     macro_verilog_pp.run_main(Params,'00010')
@@ -91,10 +92,8 @@ def read_verilog_file(Fname,RunDir,Env):
     else:
         from vyaccer2 import run_yacc
         import db0 as dbx
-    print('reading %s file'%Fname)
     run_yacc(False,'%s/lex.out'%RunDir,RunDir,Fname)
     Locals = dbx.load_parsed(RunDir)
-    print('locals %s'%(Locals.keys()))
     for Mod in Locals:
         Locals[Mod].cleanZeroNets()
         Locals[Mod].expandInstArrays()
@@ -138,6 +137,7 @@ def do_something(params):
     if ('-help_main' in params):
             lines += ['help_main']
     if (len(lines)>0):
+#        print('LINES',lines,params)
         for line in lines:
             logs.log_info('do line: %s'%line)
             execute_line(line,Env)

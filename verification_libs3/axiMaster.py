@@ -1,5 +1,8 @@
 
 DEMO = '''
+
+BURST: 0 - fixed, 1- incremtning 2-wrapping
+
 axi = axiMaster.axiMasterClass('tb',Monitors)
 
 axi.makeRead(1,16,0x100,4)
@@ -70,9 +73,11 @@ class axiMasterClass:
         elif wrds[0]=='axi4':
             self.AXI3 = Fase
         elif wrds[0]=='write':
+            print('WWWWW',wrds)
             if len(wrds)==3:
                 self.makeWrite(1,1,eval(wrds[1]),self.Size,[eval(wrds[2])])
             elif len(wrds)>=6:
+                print('W6666WWWW',wrds)
                 self.makeWrite(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),list(map(eval,wrds[5:])))
         elif wrds[0]=='read':
             Burst = eval(wrds[1])
@@ -106,6 +111,7 @@ class axiMasterClass:
         self.Rid += 1
 
     def makeWriteWstrb(self,Burst,Len,Address,Size=4,Wstrb='auto',Wdatas=[]):
+        print('BURSTW',Burst,Len,Address)
         if Wstrb == 'auto':
             self.makeWrite(Burst,Len,Address,Size,Wdatas)
             return
@@ -135,6 +141,7 @@ class axiMasterClass:
 
 
     def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
+        print('BURSTW',Burst,Len,Address)
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
         if Len<=0:

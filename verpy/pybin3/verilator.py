@@ -54,6 +54,7 @@ def createTb(Mod):
 
 
 MUSTS = 'cycles errors wrongs panics corrects marker0 marker1 marker2'.split()
+MUSTS += 'tb.cycles tb.errors tb.wrongs tb.panics tb.corrects tb.marker'.split()
 
 
 HELPERS1 = '''
@@ -125,9 +126,9 @@ def forcesAndPeeks(Mod,Fval):
                 Fval.write('    if (strcmp(path,"%s")==0) {\n'%(Net))
                 Many = int(0.5+(Wid+31)/32)
                 for ii in range(Many):
-                    Fval.write('        copy8(val,%d); top->%s[%d] = xstrtol(tmp,NULL,16);\n'%(Many-ii-1,Net,Many-ii-1))
+                    Fval.write('        copy8(val,%d); top->%s[%d] = xstrtol(tmp);\n'%(Many-ii-1,Net,Many-ii-1))
                 Fval.write('        return; }\n')
-    Fval.write(STR4)
+    val.write(STR4)
 
 def makeCpp(Mod):
     Path = logs.getVar('PATH')
@@ -269,7 +270,7 @@ void copy8(char *Str,int Pos) {
 }
 
 
-long xstrtol (char *val,int A,int B) { 
+long xstrtol (char *val) { 
     if ((val[0] == '0')&&(strlen(val)>2)) {
         if (val[1] == 'b') return strtol(&(val[2]),NULL,2);
         if (val[1] == 'x') return strtol(&(val[2]),NULL,16);

@@ -367,16 +367,20 @@ class module_class:
                 self.insts.pop(Inst)
                 
 
-    def dump_verilog(self,Fout,MergeHards=False,Style='new'):
+    def dump_verilog(self,Fout,Flags = {'style':'new','mergehards':False,'endmodule':True}):
+        if 'style' not in Flags: Flags['style'] = 'new'
+        if 'endmodule' not in Flags: Flags['endmodule'] = True
+        if 'mergehards' not in Flags: Flags['mergehards'] = False
+
         logs.setCurrentModule('dump_verilog')
         self.expandInstArrays()
-        if Style=='new':
+        if Flags['style'] == 'new': 
             NOIOS,NOIFS=self.dump_new_style_header(Fout)
         else:
             NOIOS,NOIFS=self.dump_old_style_header(Fout)
 
         Hards,Ordered = [],[]
-        if MergeHards: 
+        if Flags['mergehards'] == True: 
             Hards,Ordered = self.prepareForMerges()
         for Prm in self.includes:
             Fout.write('`include "%s"\n'%(Prm))
@@ -476,7 +480,8 @@ class module_class:
             if Always:
                 dump_always(Always,Fout)
     
-        Fout.write('end%s\n\n'%self.Kind)
+        if Flags['endmodule']:
+            Fout.write('end%s\n\n'%self.Kind)
         
     def prepareForMerges(self):
         Readies = []

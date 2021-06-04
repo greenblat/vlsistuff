@@ -437,10 +437,10 @@ def execute_line(Line,Env):
         String = '%s(Env.Current,Env.Modules,wrds)'%(wrds[0])
         exec(String)
         return
-    print('got here %s'%str(wrds)) 
+#    print('got here %s'%str(wrds)) 
     if len(wrds)==1:
        Done = my_importing(wrds[0],Env,False)
-       print('done %s'%Done)
+#       print('done %s'%Done)
        if Done: return 
 
 
@@ -462,7 +462,6 @@ def my_importing(Fname,Env,Original=True):
         Path = '/'.join(wrds2[:-1])
         Path = os.path.abspath(Path)
         sys.path += [Path]
-    print('>>IMPORTING>>>',sys.path)
 
     what = 'from %s import help_main'%(Fname)
     That = importlib.import_module(Fname)
@@ -470,24 +469,10 @@ def my_importing(Fname,Env,Original=True):
     That = importlib.import_module(Fname)
     print('importing1 "%s"'%Fname)
     help_main = That.help_main
-    print('importing "%s"'%Fname)
+    print('importing2 "%s"'%Fname)
     help_main(Env)
+    print('importing3 "%s"'%Fname)
     return help_main
-#    except:
-#        That = importlib.import_module(Fname)
-#        help_main = That.help_main
-#        help_main(Env)
-#        log_fatal('failed to import "help_main" from %s or -do %s does not exist'%(Fname,Fname))
-#        traceback.print_exc()
-
-#    try:
-#        exec(what)
-#    except:
-#        traceback.print_exc()
-#        if Original:
-#            log_fatal('failed to import "help_main" from %s or -do %s does not exist'%(Fname,Fname))
-#        else:
-#            return False
     if (Env.Current==None):
         Keys = Env.Modules.keys()
         Keys.sort()
