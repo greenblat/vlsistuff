@@ -121,6 +121,11 @@ class hspiceVector(logs.driverClass):
         self.Fout.write('vname %s\n'%Vname)
         self.Fout.write('io    %s\n'%IO)
         self.Fout.write('tunit  ns\n')
+        self.Fout.write('''VOH 1.2
+VIH 1.2
+VOL 0
+VIL 0
+''')
         self.Fout.write('; Tabular  data\n')
                  
         self.Fout1.write('radix %s\n'%Radix1)
