@@ -51,10 +51,12 @@ class axiSlaveClass:
         Wrds = Text.split()
         if Wrds == []:
             pass
-        elif Wrds[0] == 'set':
+        elif Wrds[0] == 'write':
             Addr = eval(Wrds[1])
+            logs.log_info('>>>>>>setWord %x %s'%(Addr,Wrds))
             for Wrd in Wrds[2:]:
                 Data = eval(Wrd)
+                logs.log_info('>>>>>>assWord %x %x'%(Addr,Data))
                 Addr = self.addWord(Addr,Data)
         elif Wrds[0] == 'ramfile':
             File = open(Wrds[1])
@@ -67,7 +69,7 @@ class axiSlaveClass:
                     if wrd[0]=='@':
                         Addr = int(wrd[1:],16)
                     else:
-                        Addr = self.addWord(Addr,int(Wrd,16))
+                        Addr = self.addWord(Addr,int(wrd,16))
         elif Wrds[0] == 'ram':
             Addr = eval(Wrds[1])
             for Wrd in Wrds[2:]:
@@ -78,7 +80,8 @@ class axiSlaveClass:
             Val   = eval(Wrds[3])
             for Add in range(Addr0,Addr1,4):
                 self.addWord(Add,Val)
-                
+        else:
+            logs.log_error('action of axiSlave failed on "%s"  %s' % (Text,Wrds[0]))
 
                 
 
@@ -87,6 +90,7 @@ class axiSlaveClass:
         self.Ram[Addr+1] = (Data>>8) & 0xff
         self.Ram[Addr+2] = (Data>>16) & 0xff
         self.Ram[Addr+3] = (Data>>24) & 0xff
+        logs.log_info('adding %x %x'%(Addr,Data))
         Addr += 4
         return Addr
 

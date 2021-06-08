@@ -68,7 +68,11 @@ class axiMasterClass:
     def action(self,Txt):
         print('ACT',self.Name,Txt)
         wrds = Txt.split()
-        if wrds[0]=='axi3':
+        if wrds[0]=='rid':
+            self.Rid = eval(wrds[1])
+        elif wrds[0]=='size':
+            self.Size = eval(wrds[1])
+        elif wrds[0]=='axi3':
             self.AXI3 = True
         elif wrds[0]=='axi4':
             self.AXI3 = Fase
@@ -83,7 +87,7 @@ class axiMasterClass:
             Burst = eval(wrds[1])
             Len   = eval(wrds[2])
             Addr  = eval(wrds[3])
-            self.makeRead(Burst,Len,Addr,2,3)
+            self.makeRead(Burst,Len,Addr,self.Size,self.Rid)
 # axim read  1 32 0x00045600 4 7
         else:
             logs.log_error('action %s axiMater unrecognized %s'%(self.Name,Txt))
