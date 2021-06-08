@@ -53,11 +53,12 @@ class hspiceVector(logs.driverClass):
         newLine1 = ''
         for Wid1,Wid,Sig in self.Sigs:
             Val = self.peek(Sig)
+            Val1 = self.peekbin(Sig)
             if Val<0: Val = 0
             Str = ' %'+'0%dx'%Wid
             newLine += Str%(Val)
-            Bin = Wid1*'0'+bin(Val)[2:]
-            Bin = Bin[-Wid1:]
+#            Bin = Wid1*'0'+bin(Val)[2:]
+            Bin = Val1[-Wid1:]
             newLine1 += ' %s'%(Bin)
         if newLine != self.lastLine:
             self.Fout.write('%8d %s\n'%(self.Time,newLine))
