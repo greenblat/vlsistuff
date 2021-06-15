@@ -113,7 +113,9 @@ class sequenceClass:
     def definesPreRun(self):
         for Line,_ in self.Sequence:
             wrds = Line.split()
-            if wrds[0] == 'define':
+            if wrds == []:
+                pass
+            elif wrds[0] == 'define':
                 Var = wrds[1]
                 if len(wrds)==3:
                     Val = self.eval(wrds[2])

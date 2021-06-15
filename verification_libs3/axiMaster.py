@@ -29,12 +29,13 @@ class axiMasterClass:
         self.Rid = 1
         self.waiting=0
         self.datawidth = 0
-        self.readAction = False
-        self.READS=[]
+        self.AREADS=[]
+        self.RDATAS=[]
         self.rreadyCount = 0
         self.rreadyOnes = 3
         self.rreadyDeny = 0
         self.rreadyDenys = 10
+        self.ReadyAlways = True
         self.renames={}
         self.prefix=''
         self.suffix=''
@@ -66,9 +67,10 @@ class axiMasterClass:
         Sig = self.rename(Sig)
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
     def action(self,Txt):
-        print('ACT',self.Name,Txt)
         wrds = Txt.split()
-        if wrds[0]=='rid':
+        if wrds[0] == 'ready':
+            self.ReadyAlways = (eval(wrds[1]) != 0)
+        elif wrds[0]=='rid':
             self.Rid = eval(wrds[1])
         elif wrds[0]=='size':
             self.Size = eval(wrds[1])
@@ -89,6 +91,17 @@ class axiMasterClass:
             Addr  = eval(wrds[3])
             self.makeRead(Burst,Len,Addr,self.Size,self.Rid)
 # axim read  1 32 0x00045600 4 7
+        elif wrds[0] in ['readcheck', 'check', 'rdcheck']:
+            Addr = eval(wrds[1])
+            Datas = list(map(eval,wrds[2:]))
+            while (Datas!=[])and(self.RDATAS!=[]):
+                ActAddr,ActData = self.RDATAS.pop(0)
+                ExpData = Datas.pop(0)
+                logs.log_ensure(((Addr == ActAddr) and (ExpData == ActData)), 'RDATA exp = %x %x act = %x %x'%(Addr,ExpData,ActAddr,ActData))
+
+            if Datas!=[]:
+                logs.log_error('not enough RDATAS for this query, leftover addr=%x %s' % (Addr,list(map(hex,Datas))))
+
         else:
             logs.log_error('action %s axiMater unrecognized %s'%(self.Name,Txt))
 
@@ -109,8 +122,7 @@ class axiMasterClass:
         else: 
             self.Rid = 1
         self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
-        if self.readAction:
-            self.READS.append((Len,Address,self.Rid))
+        self.AREADS.append((Len,Address,self.Rid))
         self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
         self.Rid += 1
 
@@ -196,6 +208,10 @@ class axiMasterClass:
         self.runQueue()
 
     def manageRready(self,What):
+        if self.ReadyAlways:
+            self.force('rready',1)
+            return 1
+            
 #        if What==1:
 #            print('>>>',What,self.rreadyCount,self.rreadyDeny,self.peek('rvalid'))
         if What==0:
@@ -234,12 +250,18 @@ class axiMasterClass:
 #            print('MSB "%s" %s    %s'%(msb,type(msb),rdatax))
             rdatax = rdatax[-msb:]
             logs.log_info('axiM responce rid=%x rlast=%d rdata=%s     %s'%(rid,rlast,rdatax,self.Path))
-            if self.readAction:
-                self.readAction(rid,rlast,rdatax,self.READS)
+            self.readAction(rid,rlast,rdata)
         else:
             self.manageRready(0)
 
-
+    def readAction(self,rid,rlast,rdatax):
+        Len,Addr,Rid = self.AREADS[0]
+        if Rid != rid:
+            logs.log_wrong('sent ARID=%d RID=%d'%(Rid,rid))
+        
+        self.RDATAS.append((Addr,rdatax))
+        if rlast == 1:
+            self.AREADS.pop(0)
 
 
     def runQueue(self):

@@ -132,6 +132,11 @@ VIL 0
         self.Fout1.write('vname %s\n'%Vname1)
         self.Fout1.write('io    %s\n'%IO1)
         self.Fout1.write('tunit  ns\n')
+        self.Fout1.write('''VOH 1.2
+VIH 1.2
+VOL 0
+VIL 0
+''')
         self.Fout1.write('; Tabular  data\n')
                  
 

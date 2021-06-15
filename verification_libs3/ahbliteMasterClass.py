@@ -77,6 +77,8 @@ class ahbliteMaster(logs.driverClass):
 
         elif wrds[0]=='enable':
             self.Enable = eval(wrds[1])
+        elif wrds[0]=='busy':
+            self.busyOk = eval(wrds[1])
         elif wrds[0]=='size':
             self.HSIZE = eval(wrds[1])
         elif wrds[0]=='prot':
@@ -91,10 +93,12 @@ class ahbliteMaster(logs.driverClass):
         elif wrds[0]=='wait':
             self.wait(eval(wrds[1]))
         elif wrds[0]=='RD':
-            print('>>>>>>>RD',self.RDATA)
+            if len(wrds)==1:
+                self.RDATA = []
+                return
             Addr = eval(wrds[1])
             Exps = list(map(eval,wrds[2:]))
-            while Exps!=[]:
+            while (Exps!=[])and(self.RDATA!=[]):
                 Ad,Rd = self.RDATA.pop(0)
                 Exp = Exps.pop(0)
                 logs.log_ensure((Ad==Addr)and(Rd == Exp),' AHB RD %x exp %x act %x' % (Addr,Exp,Rd))
@@ -127,6 +131,8 @@ class ahbliteMaster(logs.driverClass):
         return self.force(Sig,Val)
 
     def run(self):
+        veri.force('tb.lenqq',str(len(self.queue)))
+        veri.force('tb.lenq',str(len(self.seq)))
         if not self.Enable:
             return
         if self.waiting>0:
@@ -138,7 +144,7 @@ class ahbliteMaster(logs.driverClass):
             self.tr_force('htrans',0)
             self.tr_force('hburst',0)
             self.tr_force('hwrite',0)
-        elif self.seq!=[]:
+        if self.seq!=[]:
             List = self.seq[0]
             for (Sig,Val) in List:
                 if Sig=='wait':
@@ -164,6 +170,7 @@ class ahbliteMaster(logs.driverClass):
                     self.tr_force(Sig,Val)
             if self.tr_peek('hresp')!=0:
                 self.seq = []
+                print('HRESP %s' % self.tr_peek('hresp'))
                 self.tr_force('hsel',0)
                 self.tr_force('htrans',0)
                 self.tr_force('hburst',0)
@@ -171,9 +178,8 @@ class ahbliteMaster(logs.driverClass):
                 return
             if hreadyout==0: return
             self.seq.pop(0)
-            return
 
-        if self.queue!=[]:
+        while self.queue!=[]:
             What = self.queue.pop(0)
             if What[0]=='wait':
                 self.seq.append([('wait',What[1])])
@@ -185,17 +191,57 @@ class ahbliteMaster(logs.driverClass):
                 Burst = burstcode(What[1])
 
                 self.seq.append([('hburst',Burst),('haddr',What[3]),('hwdata',0),('hwrite',HW),('htrans',NONSEQ),('hsize',self.HSIZE),('hsel',1),('hready',1)])
+                Addrs = []
+                if 'wrap' not in What[1]:
+                    for X in range(burstlen(What[1])):
+                        Addr = What[3]+4*X
+                        Addrs.append(Addr)
+                elif What[1] == 'wrap4':
+                    Low  = What[3] & 0xfffffff0
+                    High = (Low + 0x10)-4
+                    for X in range(burstlen(What[1])):
+                        Addr = What[3]+4*X
+                        if Addr<=High:
+                            Addrs.append(Addr)
+                        else:
+                            Addrs.append(Addr-0x10)
+
+                elif What[1] == 'wrap8':
+                    Low  = What[3] & 0xffffffe0
+                    High = (Low + 0x20)-4
+                    for X in range(burstlen(What[1])):
+                        Addr = What[3]+4*X
+                        if Addr<=High:
+                            Addrs.append(Addr)
+                        else:
+                            Addrs.append(Addr-0x20)
+
+                elif What[1] == 'wrap16':
+                    Low  = What[3] & 0xffffffc0
+                    High = (Low + 0x40) - 4
+                    for X in range(burstlen(What[1])):
+                        Addr = What[3]+4*X
+                        if Addr<=High:
+                            Addrs.append(Addr)
+                        else:
+                            Addrs.append(Addr-0x40)
+#                        logs.log_info('WRAP16 addr=%x run=%x low=%x high=%x    %s' % (What[3],Addr,Low,High,list(map(hex,Addrs))))
+
+
+#                print('ADDRS',What[0],What[1],burstlen(What[1]),Addrs)
+
                 for X in range(burstlen(What[1])):
-                    Addr = What[3]+4*X
+                    Addr = Addrs[X]
                     if (self.busyOk)and(random.randint(0,100)>80):
                         self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',BUSY),('hsize',self.HSIZE),('hsel',1),('hready',1)])
                     if HW==1:
                         self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('hsize',self.HSIZE),('hsel',1),('hready',1)])
                     else:
                         self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('catch',('hrdata',Addr,'none')),('hsize',self.HSIZE),('hsel',1),('hready',1)])
-                        logs.log_info('CATCHING %x'%Addr)
+#                        logs.log_info('CATCHING %x'%Addr)
                 
-                self.seq.append([('hburst',0),('haddr',0),('hwdata',0),('hwrite',0),('htrans',IDLE),('hsize',0),('hsel',self.HSEL),('hready',1)])
+#                self.seq.append([('hburst',0),('haddr',0),('hwdata',0),('hwrite',0),('htrans',IDLE),('hsize',0),('hsel',self.HSEL),('hready',1)])
+                return
 
 
             if What[0]=='write':
