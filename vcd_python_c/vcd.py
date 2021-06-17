@@ -1,6 +1,7 @@
 
 import os,sys,string
-
+New = os.path.expanduser('~/verification_libs3')
+sys.path.append(New)
 import logs
 import veri
 
@@ -11,9 +12,6 @@ def peeklocal(Sig,Base=BASE):
     return logs.peek('%s.%s'%(Base,Sig))
 
 Totals = {'aw':0,'ar':0,'dw':0,'dr':0}
-veri.trace('aaa','5')
-veri.trace('bbb','8')
-veri.trace(CLK,'0')
 def negedge():
     Time = veri.stime()
     awvalid = peeklocal('awvalid')
