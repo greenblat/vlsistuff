@@ -447,6 +447,9 @@ def check_bus_usage(Current,Bus,Wid,Where=0):
     else:
         if Wid1[0]=='double':
             (H1,L1)=Wid1[1]
+        elif Wid1[0]=='packed':
+            H1 = (Wid1[1][0]+1)*(Wid1[1][0]+1)
+            L1 = 0
         else:
             (H1,L1)=Wid1
 

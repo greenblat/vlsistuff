@@ -114,17 +114,23 @@ class sequenceClass:
         if (wrds[0] == 'marker'):
             veri.force('tb.marker',wrds[1])
             return
-        elif (wrds[0] == 'force'):
+       if (wrds[0] == 'peek'):
+            Val = self.peek(wrds[2])
+            Var = wrds[1] 
+            self.Translates[Var] = Val
+            return True
+
+        if (wrds[0] == 'force'):
             self.force(wrds[1],self.eval(wrds[2]))
             return
-        elif wrds[0] in self.agents:
+        if wrds[0] in self.agents:
             if wrds[1]=='notbusy':
                 self.waitNotBusy = wrds[0]
                 return
             Wrds = map(str,map(self.eval,wrds[1:]))
             self.agents[wrds[0]].action(string.join(Wrds,' '))
             return
-        elif (wrds[0] == 'print'):
+        if (wrds[0] == 'print'):
             Res = ''
             for Wrd in wrds[1:]:
                 if self.peek(Wrd):
