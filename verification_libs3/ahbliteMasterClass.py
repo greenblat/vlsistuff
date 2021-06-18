@@ -131,8 +131,9 @@ class ahbliteMaster(logs.driverClass):
         return self.force(Sig,Val)
 
     def run(self):
-        veri.force('tb.lenqq',str(len(self.queue)))
-        veri.force('tb.lenq',str(len(self.seq)))
+        if veri.exists('tb.lenq') == '1':
+            veri.force('tb.lenqq',str(len(self.queue)))
+            veri.force('tb.lenq',str(len(self.seq)))
         if not self.Enable:
             return
         if self.waiting>0:

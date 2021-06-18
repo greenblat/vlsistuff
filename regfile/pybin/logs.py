@@ -671,9 +671,14 @@ def keepSimulationAlive():
 def fnameCell(Fname):
     wrds = Fname.split('/')
     wrd0 = wrds[-1]
-    wrds = wrd0.split('.')
-    X = '.'.join(wrds[:-1])
-    return X
+    Dir = '/'.join(wrds[:-1])
+    if '.' in wrd0:
+        wrds2 = wrd0.split('.')
+        Cell = '.'.join(wrds2[:-1])
+        Ext = wrds2[-1]
+        return Cell,Dir,Ext
+    else:
+        return wrd0,Dir,''
 
 RemovesLater=[]
 def remove_later(Fname):

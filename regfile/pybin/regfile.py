@@ -10,7 +10,13 @@ import regfile_c
 
 def main():
     Fname = sys.argv[1]
-    run(Fname)
+    Cell,Dir,Ext = logs.fnameCell(Fname)
+    if Dir == '': 
+        Dir = '.'
+    if Ext=='':
+        run(Cell,Dir)
+    else:
+        run('%s.%s' % (Cell,Ext),Dir)
 
 def run(Fname,Dirx='.'):
     global Dir
@@ -247,11 +253,6 @@ def treatFields():
             else:
                 WW = '[%s:0]'%(Wid-1)
             Access = RegObj.Params['access']
-#            if 'pulse' not in Access:
-#                if inAccess(Access):
-#                    LINES[7].append('    ,input %s %s'%(WW,RegObj.Name))
-#                else:
-#                    LINES[7].append('    ,output %s %s'%(WW,RegObj.Name))
             Split=False
             EXTERNAL_FIELDS.append(RegObj.Name)
             
@@ -626,13 +627,14 @@ MODULE MODULE (.pclk(pclk),.presetn(presetn)
     .pwrite(pwrite),.paddr(paddr),.psel(psel),.penable(penable)
     ,.prdata(prdata),.prdata_wire(),.pwdata(pwdata),.pstrb(pstrb)
     ,.pready(pready),.pslverr(pselverr)
+    ,.penable(penable)
 '''
 
 
 
 
 HEADER = '''module MODULE (
-    input pclk,input presetn,input pwrite, input pread
+    input pclk,input presetn,input pwrite, input pread, input penable
     ,input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata, output [BUSWID-1:0] prdata_wire
     ,input [WSTRB-1:0] pstrb
     ,input [ADDWID-1:0] paddr ,output reg [BUSWID-1:0] last_wdata
@@ -801,7 +803,7 @@ def bodyDump1(Db,File):
     File.write('endmodule\n')
 
 ROPULSE = '''
-wire REG_rd_sel = pread && (mpaddr=='hADDR);
+wire REG_rd_sel = penable && pread && (mpaddr=='hADDR);
 reg REG_rd_pulse_reg; always @(posedge pclk)  REG_rd_pulse_reg <= REG_rd_sel;
 assign REG_pulse = REG_rd_pulse_reg;
 '''
@@ -1138,6 +1140,7 @@ wire [1023:0] ZEROES = 1024'b0;
 MODULE rgf (.pclk(pclk),.presetn(presetn),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
     ,.pwdata(pwdata),.prdata(prdata),.prdata_wire(prdata_wire)
     ,.pstrb(pstrb),.last_wdata(last_wdata)
+    ,.penable(penable)
 '''
 
 APB2RAM = '''
