@@ -803,9 +803,9 @@ def bodyDump1(Db,File):
     File.write('endmodule\n')
 
 ROPULSE = '''
-wire REG_rd_sel = penable && pread && (mpaddr=='hADDR);
+wire REG_rd_sel = pread && (mpaddr=='hADDR);
 reg REG_rd_pulse_reg; always @(posedge pclk)  REG_rd_pulse_reg <= REG_rd_sel;
-assign REG_pulse = REG_rd_pulse_reg;
+assign REG_pulse = REG_rd_pulse_reg && penable;
 '''
 
 W1CPULSE = '''
