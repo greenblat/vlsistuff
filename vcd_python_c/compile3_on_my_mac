@@ -2,10 +2,10 @@
 
 # this is how i compile on my macbook Pro. for Python3
 
-gcc -g src3/vcd_python2.c  src3/qq64.c  -o vcd_python32 \
+gcc -g src3/vcd_python.c  src3/qq64.c  -o vcd_python3 \
   -I/Library/Frameworks/Python.framework/Versions/3.9/include/python3.9/ \
   -lpython3.9 -L/Library/Frameworks/Python.framework/Versions/3.9/lib \
 
 
-/bin/cp vcd_python32 ~/bin/
+/bin/cp vcd_python3 ~/bin/
 

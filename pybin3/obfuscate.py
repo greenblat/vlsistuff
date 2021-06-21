@@ -37,7 +37,7 @@ def main():
     Defines,Text4 = extractDefines(Text3)
     Wrds = tokenify(Text4)
     Module,Inouts,Wires = externals(Wrds,Prefix)
-    revork(Wrds,Module,Inouts,Wires) 
+    revork(Wrds,Module,Inouts,Wires,Seed) 
     if Dir == '': Dir = '.'
     Ofilename = '%s/%s_fub.%s' % (Dir,Cell,Ext)
     saveWords(Ofilename,Defines,Wrds,Seed)
@@ -58,11 +58,25 @@ def translate(Tok,Module,Inouts,Wires):
 
 
 
-def revork(Wrds,Module,Inouts,Wires):
+def revork(Wrds,Module,Inouts,Wires,Seed):
+    for ind,Wrd in enumerate(Wrds):
+        Wrd = translate(Wrd,Module,Inouts,Wires)
+    X = list(TRANS.keys())
+    random.shuffle(X)
+    random.shuffle(X)
+    if len(X)>0:
+        TRANS[X[0]] = 'oo0%x' % Seed
+    if len(X)>1:
+        TRANS[X[1]] = 'oo1%x' % Seed
+    if len(X)>2:
+        TRANS[X[2]] = 'oo2%x' % Seed
+
+
     for ind,Wrd in enumerate(Wrds):
         Wrd = translate(Wrd,Module,Inouts,Wires)
         Wrds[ind] = Wrd
         
+
 
 #  Defines,Text4 = extractDefines(Text3)
 def  extractDefines(Text):
@@ -79,15 +93,28 @@ def  extractDefines(Text):
 
 def saveWords(Foutname,Defines,Wrds,Seed):
     Fout = open(Foutname, 'w')
-    Fout.write('// %s\n'%(Seed))
+#   Fout.write('// %s\n'%(Seed))
     print('WRDS',len(Wrds))
     Fout.write('%s\n' % Defines)
+    insertSeed(Wrds,Seed)
     while Wrds!=[]:
         Out = ''
         while (len(Out)<128)and(Wrds!=[]):
             Out = Out + ' ' + Wrds.pop(0)
         Fout.write('%s\n' % Out)
     Fout.close()
+
+def insertSeed(Wrds,Seed):
+    Wires = []
+    for ind,Tok in enumerate(Wrds):
+        if Tok == 'wire':
+            Wires.append(Tok)
+        elif Tok == 'reg':
+            Wires.append(Tok)
+        elif Tok == 'logic':
+            Wires.append(Tok)
+    
+
 
 Keywords = '''module posedge negedge endmodule if else input output inout reg wire always for begin end assign'''.split()
 

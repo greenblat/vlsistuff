@@ -822,6 +822,8 @@ class module_class:
                     self.netTable[Bus] = Lbus
                     self.netTable.pop(Key)
 
+    def buildNetTable(self):
+        self.prepareNetTable()
     def prepareNetTable(self):
         netTable={}
         for Inst in self.insts:

@@ -428,7 +428,7 @@ void readfile(fname) char *fname; {
             exit(0);
         }
 
-        if ((run_time-last_time)>10000000.0) {
+        if ((run_time-last_time)>1000000000.0) {
             last_time = run_time;
             printf("TIME %d lines time=%g %d maxusedsigs=%d\n",linenum,run_time,0,maxusedsig);
         }
