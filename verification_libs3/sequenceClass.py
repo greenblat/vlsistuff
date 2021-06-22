@@ -51,6 +51,7 @@ class sequenceClass:
         self.agents={}
         self.Translates = Translates
         self.Translates['rnd'] = self.rnd
+        self.Translates['envir'] = self.envir
         self.Translates['eflash'] = self.eflash
         for (Nickname,Object) in AGENTS:
             self.agents[Nickname]=Object
@@ -77,6 +78,13 @@ class sequenceClass:
             logs.log_error('eflash preloaded, but addr %x is not in there'%Addr)
             return 0
         logs.log_error('no eflash preloaded')
+        return 0
+
+    def envir(self,Txt):
+        if Txt in os.environ:
+            X = os.environ[Txt]
+            return self.eval(X)
+
         return 0
 
     def rnd(self,Low,High=0):
@@ -214,9 +222,13 @@ class sequenceClass:
             Val = eval(Txt,self.Translates)
             return Val
         except:
-            if Bad:
-                logs.log_error('failed eval of "%s"' % str(Txt))
-            return Txt
+            try:
+                Val = self.evalStr(Txt,self.Translates)
+                return Val
+            except:
+                if Bad:
+                    logs.log_error('failed eval of "%s"' % str(Txt))
+                return Txt
 
     def runSons(self):
         if self.Sons==[]: return
@@ -471,7 +483,7 @@ class sequenceClass:
         Txt = ' '.join(map(str,Wrds))
         if Txt == '': return 0
         try:
-            X = eval(Txt,self.Defs)
+            X = eval(Txt,self.Defs,self.Translates)
             return X
         except:
             logs.log_error('evaluation of %s failed'%Txt,0,True,True)
