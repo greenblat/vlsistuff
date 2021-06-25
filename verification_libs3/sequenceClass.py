@@ -53,6 +53,7 @@ class sequenceClass:
         self.Translates['rnd'] = self.rnd
         self.Translates['envir'] = self.envir
         self.Translates['eflash'] = self.eflash
+        self.Translates['peek'] = self.seq_peek
         for (Nickname,Object) in AGENTS:
             self.agents[Nickname]=Object
             Object.Caller = self
@@ -79,6 +80,12 @@ class sequenceClass:
             return 0
         logs.log_error('no eflash preloaded')
         return 0
+
+    def seq_peek(self,Txt):
+        if self.exists(Txt):
+            return self.peek(Txt)
+        return -1
+        
 
     def envir(self,Txt):
         if Txt in os.environ:
@@ -427,9 +434,15 @@ class sequenceClass:
                 if acceptablePath(Wrd) and self.peek(Wrd):
                     Res += ' %s=%s'%(Wrd,self.peek(Wrd))
                 elif Wrd in self.Translates:
-                    Res += str(self.Translates[Wrd])
+                    Trx = self.Translates[Wrd]
+                    if type(Trx) is int:
+                        Res += ' %s' % hex(self.Translates[Wrd])
+                    else:
+                        Res += str(self.Translates[Wrd])
                 elif (Wrd[0] == '('):
                     BB = makeExpr(Wrd)
+                    print('>>>>>>>',BB)
+                    logs.log_info('>>>>>>> %s' % str(BB))
                     Val = self.evalExpr(BB)
                     Res += ' '+str(Val)
                 else:
