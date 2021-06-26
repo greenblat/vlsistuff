@@ -309,7 +309,8 @@ def work():
 #                set_context('width',displayInfo.current_w)
 #                set_context('height',displayInfo.current_h)
             else:
-                print(event.type," type")
+                Pos = pygame.mouse.get_pos()
+                print(event.type," type",event.unicode,event.key,Pos)
         on_draw()
         pygame.display.flip()
         time.sleep(0.2) 
