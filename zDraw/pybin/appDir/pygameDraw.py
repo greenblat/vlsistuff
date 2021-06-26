@@ -170,9 +170,21 @@ def main():
                 ind += 1
             
             
-#    Thr = threading.start_new_thread(execute_terminal_commands,())
+#    Thr = threading.Thread.start(execute_terminal_commands)
+    thread1.start()
     work()
     
+
+class myThread (threading.Thread):
+   def __init__(self, threadID, name, counter):
+      threading.Thread.__init__(self)
+      self.threadID = threadID
+      self.name = name
+      self.counter = counter
+   def run(self):
+    execute_terminal_commands()
+
+thread1 = myThread(1,'xterm',1)
 
 def load_init_file():
     found=False
@@ -391,14 +403,14 @@ def was_execute_terminal_commands():
 
 def execute_terminal_commands():
     while 1:
-        Txt = raw_input('?:')
+        Txt = input('?:')
         wrds = Txt.split()
         if len(wrds)>0:
             use_command_wrds(wrds)
             CommandsHistory.append(Txt)
 
 def do_command_line():
-    Txt = raw_input('?:')
+    Txt = input('?:')
     wrds = Txt.split()
     if len(wrds)==0:
         return
