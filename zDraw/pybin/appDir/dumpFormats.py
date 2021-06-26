@@ -332,14 +332,14 @@ def assembleArgvTypes():
                 WW = string.split(X,'=')
                 Types[WW[0]]=WW[1]
             else:
-                print '-t %s should be of form nmos=nch'%X
+                print('-t %s should be of form nmos=nch'%X)
         elif sys.argv[ind]=='-m':
             X = sys.argv[ind+1]
             if '=' in X:
                 WW = string.split(X,'=')
                 Maxes[WW[0]]=float(WW[1])
             else:
-                print '-m %s should be of form nmos=200'%X
+                print('-m %s should be of form nmos=200'%X)
         ind +=1
     return Types,Maxes
 

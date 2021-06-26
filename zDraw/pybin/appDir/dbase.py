@@ -1,6 +1,6 @@
 
 
-import string,os,sys,math
+import os,sys,math
 from renders import screen2schem,schem2screen
 
 from drawVectorText import make_text_vectors
@@ -61,7 +61,7 @@ def init():
     set_context('lineWidth',1.5)
     set_context('vectorTextWidth',1.0)
     state='idle'
-    lines = string.split(PICTURES,'\n')
+    lines = PICTURES.split('\n')
     Mod=False
     for  line in lines:
         state,Mod=work_on_line(line,state,Mod)
@@ -203,7 +203,7 @@ class InstanceClass:
 
 
     def it_is_me(self,Wire):
-        ww = string.split(Wire,'.')
+        ww = Wire.split('.')
         return ww[0]==self.Inst
         
     def recompute_wires(self):
@@ -302,7 +302,7 @@ class GeomClass:
         elif (self.Kind=='fcircle'):
             render_fcircle(Matrix,self.List[0],self.List[1],get_context('geom_color'))
         elif (self.Kind=='text'):
-            NN = string.replace(self.Name,'|',' ')
+            NN = self.Name.replace('|',' ')
             Color = get_context('geom_color')
             if self.selected:
                 Color='red'
@@ -322,7 +322,7 @@ class GeomClass:
             postscript_aline(File,self.List,get_context('wire_color'))
             Glbs.Svg.x_aline(self.List,get_context('wire_color'))
         else:
-            NN = string.replace(self.Name,'|',' ')
+            NN = self.Name.replace('|',' ')
             set_pscontext(File,'setrgbcolor',get_context('geom_color'))
             Big = make_text_vectors(NN,self.List[0],'left',get_context('geom_text_size'))
             for Seg in Big:
@@ -533,7 +533,7 @@ class PictureClass:
 
         for (Text,Point,Rot,Size,Align) in self.texts:
             if Glbs.useVectorText:
-                NN = string.replace(Text,'|',' ')
+                NN = Text.replace('|',' ')
                 set_pscontext(File,'setrgbcolor',Color)
                 Big = make_text_vectors(NN,Point,Align,Size)
                 for Seg in Big:
@@ -650,10 +650,6 @@ class DetailClass:
         self.wires[Name]=WireClass(self,Name,Start,Stop,List)
 
     def draw(self,Matrix):
-#        print('translate 0,0 -> %s   %s %s '%(world_coord(Matrix,(0,0)),get_context('width'),get_context('height')))
-#        print('translate 0,100 -> %s'%(str(world_coord(Matrix,(0,100)))))
-#        print('translate 100,0 -> %s'%(str(world_coord(Matrix,(100,0)))))
-#        print('translate 100,100 -> %s'%(str(world_coord(Matrix,(100,100)))))
         for Inst in self.instances:
             self.instances[Inst].draw(Matrix)
         for Name in self.geoms:
@@ -720,9 +716,6 @@ class DetailClass:
         Scale = min(Scalex,Scaley)
         Yoff = min(Y0,Y1)*Scale
         self.matrix = [Scale,0,-X0*Scale,0,-Scale,Yoff+get_context('height')]
-#        print('>>>>>matrix', [Scale,0,-X0*Scale,0,Scale,-Yoff])
-#        print('bbox ',BB)
-#        self.matrix = [Scale,0,0,0,Scale,0]
         return self.matrix
 
     def set_matrix(self,Matrix):
@@ -888,14 +881,14 @@ class DetailClass:
 
 
 def point_on_section(Point,Pa,Pb):
-    print 'point_on_section',Point,Pa,Pb
+    print('point_on_section',Point,Pa,Pb)
     return Point
 
 def belongs_together(Wire,Inst):
     if (Inst==Wire):
         return True
     if ('.' in Wire):
-        ww = string.split(Wire,'.')
+        ww = Wire.split('.')
         if (ww[0]==Inst):
             return True
     return False
@@ -903,7 +896,7 @@ def belongs_together(Wire,Inst):
 def load_dbase_string(Big):
     state='idle'
     Mod=False
-    Lines=string.split(Big,'\n')
+    Lines=Big.split('\n')
     for line in Lines:
         state,Mod=work_on_line(line,state,Mod)
     Glbs.graphicsChanged=True
@@ -911,8 +904,8 @@ def load_dbase_string(Big):
 def extract_dir(Fname):
     if '/' not in Fname:
         return '.'
-    ww = string.split(Fname,'/')
-    return string.join(ww[:-1],'/')
+    ww = Fname.split('/')
+    return '/'.join(ww[:-1])
 
 def load_dbase_file(Fname):
     if os.path.exists(Fname):
@@ -935,7 +928,7 @@ def load_dbase_file(Fname):
         load_dbase_file__(File)
         Glbs.graphicsChanged=True
     else:
-        print 'cannot open "%s"'%Fname
+        print('cannot open "%s"'%Fname)
         return False
 
 def load_dbase_file__(File):
@@ -950,7 +943,7 @@ def load_dbase_file__(File):
         state,Mod=work_on_line(line,state,Mod)
 
 def work_on_line(line,state,Mod):
-    wrds = string.split(line)
+    wrds = line.split()
     if (len(wrds)==0):
         return state,Mod
     elif (wrds[0][0]=='#'):
@@ -1048,14 +1041,14 @@ def get_xy(wrds,Default=[0,0]):
     XY = get_param(wrds,'xy',False)
     if not XY:
         return Default
-    XY1 = string.split(XY,',')
+    XY1 = XY.split(',')
     return float(XY1[0]),float(XY1[1])
 
 def get_list(wrds):
     XY = get_param(wrds,'list',False)
     if not XY:
         return []
-    List1 = string.split(XY,',')
+    List1 = XY.split(',')
     res=[]
     while List1!=[]:
         X0=float(List1.pop(0))
@@ -1065,11 +1058,11 @@ def get_list(wrds):
     
 
 def log_warning(Txt):
-    print 'warning! %s'%Txt
+    print('warning! %s'%Txt)
 def log_error(Txt):
-    print 'error! %s'%Txt
+    print('error! %s'%Txt)
 def log_info(Txt):
-    print 'info: %s'%Txt
+    print('info: %s'%Txt)
 
 def bbox_line(List):
     X0=List[0][0]
@@ -1088,7 +1081,7 @@ def bbox_line(List):
     return [(X0,Y0),(X1,Y1)]
 
 def bbox_aline(List):
-    if type(List)!=types.ListType:
+    if type(List) is not list:
         return [(0,0),(1,1)]
     try:
         X0=List[0][0] ; X1=X0
@@ -1105,7 +1098,7 @@ def bbox_aline(List):
     except:
         return [(0,0),(1,1)]
 
-import sys,types
+import sys
 
 K_UP=273
 K_DOWN=274
@@ -1121,7 +1114,7 @@ def use_mousemove(X,Y):
         PP = screen2schem((X,Y))
         Was = get_context('last_group_mouse_selected',PP)
         [_,_,List]=get_context('grouping')
-        if type(List)!=types.ListType:
+        if type(List)is not list:
             log_error('no group defined yet')
             return
             
@@ -1164,15 +1157,15 @@ def use_mousedown(X,Y):
     set_context('last_mouse_selected',(Who,Inst,Psch[0],Psch[1]))
   
     if Who=='instance':
-        print ppoint(Psch),(X,Y),Who,Inst,Glbs.details[Root].instances[Inst].Type,Glbs.details[Root].instances[Inst].Point
+        print(ppoint(Psch),(X,Y),Who,Inst,Glbs.details[Root].instances[Inst].Type,Glbs.details[Root].instances[Inst].Point)
         Kind = Glbs.details[Root].instances[Inst].Type
     elif Who=='wire':
-        print ppoint(Psch),(X,Y),Who,Inst,Glbs.details[Root].wires[Inst].Start,Glbs.details[Root].wires[Inst].End
+        print(ppoint(Psch),(X,Y),Who,Inst,Glbs.details[Root].wires[Inst].Start,Glbs.details[Root].wires[Inst].End)
         Kind = ''
     elif Who=='param':
         Kind = Glbs.details[Root].params[Inst].Value
     else:
-        print ppoint(Psch),(X,Y),Who,Inst
+        print(ppoint(Psch),(X,Y),Who,Inst)
         Kind = '??'
     set_context('banner','%s :mouse at %.2f %.2f %s %s %s: %s'%(Root,X,Y,Who,Kind,Inst,State))
 
@@ -1212,7 +1205,6 @@ def use_keystroke(Uni,Ord,XY):
     Glbs.graphicsChanged=True
     Root=get_context('root')
     State = get_context('state')
-#    print('use_keystroke %s "%s"'%(Ord,Uni))
     if (Uni==''): return
     if (Uni=='t'):
         center_display(X,Y)
@@ -1235,7 +1227,7 @@ def use_keystroke(Uni,Ord,XY):
             Dx,Dy=0,0.1
         if 'grouping' in Glbs.contexts:
             [_,_,List]=get_context('grouping')
-            if type(List)!=types.ListType:
+            if type(List) is not list:
                 log_error('no group defined yet')
                 return
                 
@@ -1283,8 +1275,8 @@ def use_keystroke(Uni,Ord,XY):
             if Glbs.details[Who].is_touched:
                 Touched.append(Who)
         if Touched!=[]:
-            print 'some schems are not saved. %s'%Touched
-            print 'type another Q to exit'
+            print('some schems are not saved. %s'%Touched)
+            print('type another Q to exit')
         else:
             sys.exit()
     elif (Uni in ['r','R','f','F']):
@@ -1297,9 +1289,9 @@ def use_keystroke(Uni,Ord,XY):
                 Glbs.details[Root].geoms[Inst].rotate(Uni)
                 Glbs.details[Root].touched(True)
             else:
-                print ('dont know to rotate "%s"'%Who)
+                print('dont know to rotate "%s"'%Who)
         else:
-            print ('dont know to rotate "%s"'%Who)
+            print('dont know to rotate "%s"'%Who)
 
     elif (Uni=='c'):
         (Who,Inst)= select_object((X,Y))
@@ -1314,7 +1306,7 @@ def use_keystroke(Uni,Ord,XY):
         PP = screen2schem((X,Y))
         if 'grouping' in Glbs.contexts:
             [_,_,List]=get_context('grouping')
-            print 'copying list',List
+            print('copying list',List)
             lx=1000000
             ly=1000000
             for From in List:
@@ -1359,7 +1351,7 @@ def use_keystroke(Uni,Ord,XY):
             load_schematics(Type)
             Glbs.loadStack.append(Root)
     elif (Uni=='H'):
-        print helpString.helpString
+        print(helpString.helpString)
     elif (Uni=='U'):
         if Glbs.loadStack!=[]:
             Root =  Glbs.loadStack.pop(-1)
@@ -1397,7 +1389,7 @@ def use_keystroke(Uni,Ord,XY):
     elif (Uni=='d'):
         if 'grouping' in Glbs.contexts:
             [_,_,List]=get_context('grouping')
-            print 'deleting list',List
+            print('deleting list',List)
             for Who in List:
                 Glbs.details[Root].instances.pop(Who)
                 Glbs.details[Root].wipe_out_instance(Who)
@@ -1413,7 +1405,7 @@ def use_keystroke(Uni,Ord,XY):
                 set_context('deleting',('instance',Inst))
                 set_context('state','deleting inst')
                 Glbs.set_context('banner','%s: deleting inst %s %s'%(Root,Who,Inst))
-                print 'deleting instance %s'%Inst
+                print('deleting instance %s'%Inst)
                 Glbs.details[Root].touched(True)
             elif (Who=='param'):
                 Glbs.details[Root].params[Inst].make_selected(True)
@@ -1434,7 +1426,7 @@ def use_keystroke(Uni,Ord,XY):
                 Glbs.details[Root].touched(True)
                 Glbs.set_context('banner','%s: deleting geom %s %s'%(Root,Who,Inst))
             else:
-                print 'dont know to delete "%s"'%Who
+                print('dont know to delete "%s"'%Who)
     elif (Uni=='q'):
         set_context('state','idle')
         Glbs.graphicsChanged=True
@@ -1502,7 +1494,7 @@ def use_keystroke(Uni,Ord,XY):
                 Glbs.details[Root].geoms.pop(Who)
                 Glbs.details[Root].touched(True)
             elif(Who):
-                print 'dont know to delete "%s"'%Who
+                print('dont know to delete "%s"'%Who)
             unset_context('deleting')
         if ('wiring' in Glbs.contexts): 
             (InstPin0,P0,List)=get_context('wiring')
@@ -1514,7 +1506,7 @@ def use_keystroke(Uni,Ord,XY):
                     
                 Glbs.details[Root].add_wire(wName,InstPin0,InstPin1,[P0]+List+[P1])
                 Glbs.details[Root].touched(True)
-            print 'end wiring',InstPin1,P1,InstPin0,P0,List
+            print('end wiring',InstPin1,P1,InstPin0,P0,List)
             Glbs.details[Root].touched(True)
             Glbs.graphicsChanged=True
             unset_context('wiring')
@@ -1557,10 +1549,10 @@ def use_keystroke(Uni,Ord,XY):
                 Glbs.details[Root].add_param(Inst,Glbs.paramName,Value,(Psch[0]+2,Psch[1]+2))
                 Glbs.details[Root].touched(True)
             else:
-                print 'add params to queue first'
+                print('add params to queue first')
 
         else:
-            print '?? add params to %s %s'%(Who,Inst)
+            print('?? add params to %s %s'%(Who,Inst))
 
     elif (Uni=='T'):
         put_schem_text(X,Y)
@@ -1614,17 +1606,17 @@ def use_keystroke(Uni,Ord,XY):
         Glbs.details[Root].bbox0=False
     elif (Uni=='a'):
         if len(Glbs.adding_queue)==0:
-            print 'add types (pictures) names to queue first'
-            print 'loaded pictures'
+            print('add types (pictures) names to queue first')
+            print('loaded pictures')
             List = Glbs.pictures.keys()
             List += Glbs.loadable_pictures()
             List.sort()
             while List != []:
                 if len(List)<10:
-                    print string.join(List,' ')
+                    print(' '.join(List))
                     List = []
                 else:
-                    print string.join(List[:10],' ')
+                    print(' '.join(List[:10]))
                     List = List[10:]
 
 
@@ -1653,9 +1645,9 @@ def use_keystroke(Uni,Ord,XY):
                 Pics.sort()
                 log_info('known pictures:')
                 while len(Pics)>5:
-                    log_info('  %s'%(string.join(Pics[:5],' ')))
+                    log_info('  %s'%(' '.join(Pics[:5])))
                     Pics = Pics[5:]
-                log_info('  %s'%(string.join(Pics,' ')))
+                log_info('  %s'%(' '.join(Pics)))
     else:
         log_info('key "%s" (%d) not used'%(Uni,ord(Uni)))
 
@@ -1663,7 +1655,7 @@ def put_schem_text(X,Y):
     Spoint = screen2schem((X,Y))
     Root=get_context('root')
     if len(Glbs.adding_queue)==0:
-        print 'add texts to queue first (use "add something" in terminal)'
+        print('add texts to queue first (use "add something" in terminal)')
     else:
        What = Glbs.adding_queue.pop(0)
        Glbs.details[Root].add_geom('text',What,[Spoint])
@@ -1685,7 +1677,6 @@ def center_display(Xw,Yw):
     Root=get_context('root')
     Mat = Glbs.details[Root].matrix
     New = matrix_mult([1,0,Dx,0,1,Dy],Mat)
-#    print('press=%d,%d  half=%d,%d   Del=%d,%d'%(Xw,Yw,W2,H2,Dx,Dy))
     New2 = matrix_mult(Mat,[1,0,Dx,0,1,Dy])
 
     Glbs.details[Root].set_matrix(New2)
@@ -1700,7 +1691,7 @@ def merge_bbox(Bbox0,Bbox1):
     return [(min(X0,X2),min(Y0,Y2)),(max(X1,X3),max(Y1,Y3))]
 
 def get_pin_location(Module,Conn):
-    ww = string.split(Conn,'.')
+    ww = Conn.split('.')
     Mod = Glbs.details[Module]
     if (len(ww)==1):
         return Mod.where_inst(Conn)

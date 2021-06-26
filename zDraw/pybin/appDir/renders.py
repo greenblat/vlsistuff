@@ -1,7 +1,6 @@
 
 
 
-import types
 from pygameGeoms import setLineWidth,draw_line,draw_label,draw_circle,draw_arc,draw_fcircle,draw_frect,draw_rect
 
 def render_line(Matrix,Line,Color):
@@ -37,7 +36,7 @@ def render_arc(Matrix,Point0,Point1,Point2,Color):
     P0 =  world_coord(Matrix,Point0)
     P1 =  world_coord(Matrix,Point1)
     P2 =  world_coord(Matrix,Point2)
-    print 'arc %s %s %s %s'%(P0,P1,P2,Color)
+    print('arc %s %s %s %s'%(P0,P1,P2,Color))
     draw_arc(P0,P1,P2,Color)
     return
 
@@ -128,7 +127,7 @@ def world_coord_fl(Matrix,Point):
     return (X1,Y1)
 def world_coord(Matrix,Point):
     [A,B,C,D,E,F] = Matrix
-    if type(Point)!=types.TupleType:
+    if type(Point) is not tuple:
         return 0,0
     (X0,Y0)=Point
     X1 = int(A*X0+B*Y0+C)
@@ -159,7 +158,8 @@ def translate_mag(Mag,Matrix):
     LLL = [A2,B2,C1,D2,E2,F1]
     return LLL
     
-def translate_move((X,Y),Matrix):
+def translate_move(XY,Matrix):
+    (X,Y) = XY
     return matrix_mult([1,0,X,0,1,Y],Matrix)
 
 def translate_rotate(Rot,Matrix):
@@ -197,7 +197,7 @@ def translate_rotate(Rot,Matrix):
         B2 = 0 - B1
         E2 = 0 - E1
         return [A1,B2,C1,D1,E2,F1]
-    print 'rotation invalid "%s"'%Rot
+    print('rotation invalid "%s"'%Rot)
     return Matrix
 
 

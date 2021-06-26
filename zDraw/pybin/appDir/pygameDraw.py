@@ -1,11 +1,11 @@
 
 WID,HEI = 1200,600
 
-import os,sys,string,types,time
+import os,sys,time
 
 import pygame
 
-import thread
+import threading
 import re
 
 import pygameGeoms
@@ -30,7 +30,7 @@ class cmdxClass(cmd.Cmd):
         print('emptyline')
         return False
     def default(self,Txt):
-        wrds = string.split(Txt)
+        wrds = Txt.split()
         if len(wrds)>0:
             use_command_wrds(wrds)
             CommandsHistory.append(Txt)
@@ -95,13 +95,13 @@ class GlobalsClass:
         if Pic in self.pictures:
             return
         Dirs = self.get_context('pics_lib')
-        if type(Dirs)==types.ListType:
+        if type(Dirs) is list:
             for Dir in Dirs:
                 Fname = '%s/%s.zpic'%(Dir,Pic)
                 if os.path.exists(Fname):
                     dbase.load_dbase_file(Fname)
                     return True
-        elif type(Dirs)==types.StringType:
+        elif type(Dirs) is str:
             Fname = '%s/%s.zpic'%(Dirs,Pic)
             if os.path.exists(Fname):
                 dbase.load_dbase_file(Fname)
@@ -123,7 +123,7 @@ class GlobalsClass:
                         Cell = Fname[:-5]
                         if Cell not in self.pictures:
                             Res.append(Cell)
-        elif type(Dirs)==types.StringType:
+        elif type(Dirs) is str:
             if not os.path.exists(Dirs): 
                 print('no pics directory "%s"'%Dirs)
                 return []
@@ -170,7 +170,7 @@ def main():
                 ind += 1
             
             
-    Thr = thread.start_new_thread(execute_terminal_commands,())
+#    Thr = threading.start_new_thread(execute_terminal_commands,())
     work()
     
 
@@ -193,7 +193,7 @@ def load_init_file():
 
 
 def doesntHaveExtension(Txt):
-    ww = string.split(Txt,'/')
+    ww = Txt.split('/')
     Fname = ww[-1]
     return not (endsWith(Fname,'.zdraw')or endsWith(Fname,'.zpic'))
 def figure_out_the_file(Fname):
@@ -221,7 +221,7 @@ def read_init_file(Fname):
         line = File.readline()
         if (len(line)==0):
             return
-        wrds = string.split(line)
+        wrds = line.split()
         if (len(wrds)>0)and(wrds[0]=='load'):
             Fname = figure_out_the_file(wrds[0])
             if not Fname:
@@ -233,7 +233,7 @@ def read_init_file(Fname):
             Value=wrds[1]
             dbase.log_info('read_init_file set context "%s" "%s"'%(Param,Value))
             if (',') in Value:
-                W1 = string.split(Value,',')
+                W1 = Value.split(',')
                 ll = []
                 for X in W1:
                     ll.append(makenum(X))
@@ -243,7 +243,7 @@ def read_init_file(Fname):
             else:
                 dbase.set_context(Param,Value)
         elif(len(wrds)>0):
-            dbase.log_warning('read_init_file got "%s" . not valid.'%(string.join(wrds,' ')))
+            dbase.log_warning('read_init_file got "%s" . not valid.'%(' '.join(wrds)))
                 
 def makenum(Txt):
     try:
@@ -275,16 +275,14 @@ def work():
                 # change the value to False, to exit the main loop
                 running = False
             elif event.type == 2: # key down
-#                print "  2",Pos,event.key,event.window,event.mod,event.dict
                 Pos = pygame.mouse.get_pos()
                 on_key_press(event.unicode,event.key,Pos)
             elif event.type == 3: # key up
                 pass
             elif event.type == 5: # mouse down
                 on_mouse_press(event.button, [],event.pos)
-                print "  5",event.button,event.pos
             elif event.type == 6: # mouse up
-                print "  6",event.button,event.pos
+                pass
             elif event.type == 4: # mouse move
                 Pos = pygame.mouse.get_pos()
                 on_mouse_move(Pos)
@@ -294,13 +292,12 @@ def work():
                 print('<<<<><<<>',event.h,event.w,event.size)
 #                displayInfo = pygame.display.Info()
 #                dpSize = (displayInfo.current_w, displayInfo.current_h)
-#                print '>>>>>>>>>dpsize',dpSize
                 Glbs.set_context('width',event.w)
                 Glbs.set_context('height',event.h)
 #                set_context('width',displayInfo.current_w)
 #                set_context('height',displayInfo.current_h)
             else:
-                print event.type," type"
+                print(event.type," type")
         on_draw()
         pygame.display.flip()
         time.sleep(0.2) 
@@ -395,22 +392,20 @@ def was_execute_terminal_commands():
 def execute_terminal_commands():
     while 1:
         Txt = raw_input('?:')
-        wrds = string.split(Txt)
+        wrds = Txt.split()
         if len(wrds)>0:
             use_command_wrds(wrds)
             CommandsHistory.append(Txt)
 
 def do_command_line():
     Txt = raw_input('?:')
-    wrds = string.split(Txt)
+    wrds = Txt.split()
     if len(wrds)==0:
         return
     use_command_wrds(wrds)
     do_command_line()
 
 def use_command_wrds(wrds):
-#    if (CmdFile and (len(wrds)!=0)):
-#        CmdFile.write('%s\n'%string.join(wrds,' '))
     if len(wrds)==0:
         return
     if wrds[0]=='history':
@@ -418,7 +413,7 @@ def use_command_wrds(wrds):
             print(LL)
         return
     else:
-        Glbs.history.append(string.join(wrds,' '))
+        Glbs.history.append(' '.join(wrds))
     Root=Glbs.get_context('root')
     if wrds[0] in ['quit','exit']:
         Glbs.details[Root].touched('Q')
@@ -440,7 +435,7 @@ def use_command_wrds(wrds):
         List = Glbs.details.keys()
         List.sort()
         if len(wrds)==1:
-            dbase.log_info('available schematics: %s'%string.join(List,' '))
+            dbase.log_info('available schematics: %s'%' '.join(List))
         elif(wrds[1] in List) :
             Glbs.set_context('root',wrds[1]) 
             Glbs.graphicsChanged=True
@@ -513,7 +508,7 @@ def use_command_wrds(wrds):
             File.close()
 
     elif ('sys' == wrds[0]):
-        os.system('%s\n'%(string.join(wrds[1:],' ')))
+        os.system('%s\n'%(' '.join(wrds[1:])))
     elif 'ls' in wrds[0]:
         if len(wrds)>1:
             Dir = wrds[1]
@@ -546,7 +541,7 @@ def use_command_wrds(wrds):
         if len(wrds)==1:
             print(helpString.helpString)
         else:
-            List = string.split(helpString.helpString,'\n')
+            List = helpString.helpString.split('\n')
             for Str in List:
                 if wrds[1] in Str:
                     print(Str)
@@ -629,7 +624,7 @@ ValidCommandsTxt = ''' add param dump load new delete print save change history 
 '''
 
 
-ValidCommands = string.split(ValidCommandsTxt)
+ValidCommands = ValidCommandsTxt.split()
 ValidCommands.sort()
 
 def matchesCommand(Wrd0):

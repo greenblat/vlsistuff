@@ -1,13 +1,13 @@
 
 
 import pygame
-import types,ctypes
-from PIL import Image
+# from PIL import Image
 
 
 
 def screenShot(Width,Height,Fname):
-    print 'screenShot "%s"  %dx%d'%(Fname,Width,Height)
+    return
+    print('screenShot "%s"  %dx%d'%(Fname,Width,Height))
     glReadBuffer(GL_FRONT)
     pixels = glReadPixels(0,0,Width,Height,GL_RGB,GL_UNSIGNED_BYTE)
     image = Image.fromstring("RGB", (Width,Height), pixels)
@@ -80,7 +80,6 @@ def draw_circle(P0,Radii,Color):
 
 
 def draw_arc(P0,P1,P2,Color):
-#    print 'arc',P0,P1,P2,Color
     return
 
 
@@ -93,7 +92,6 @@ def draw_vertical(X,Y0,Y1,Color):
 
 def draw_label(Text,X,Y,Color,AnchorX='left',FontSize=12):
     (X,Y) = fixCoord((X,Y))
-#    print 'draw label',X,Y,Color,Text
     font = pygame.font.Font('freesansbold.ttf', int(FontSize))
     Color = oglcolor(Color)
     text = font.render(Text, True, Color, (200,200,200))
@@ -118,7 +116,7 @@ def xglcolor(Color):
     return xglcolor('black')
 
 def oglcolor(Color):
-    if type(Color)==types.StringType:
+    if type(Color) is str:
         List = xglcolor(Color)
     else:
         List = Color
@@ -134,7 +132,6 @@ def oglcolor(Color):
 #   glVertex2f(X0,Y0)
 #   glVertex2f(X1,Y0)
 #   glEnd()
-##   print 'draw horizontal',X0,X1,Y0,Color
 
 #def draw_vertical(X,Y0,Y1,Color):
 #   oglcolor(Color)
@@ -142,4 +139,3 @@ def oglcolor(Color):
 #   glVertex2f(X,Y0)
 #   glVertex2f(X,Y1)
 #   glEnd()
-#   print 'draw vert',X,Y1,Y0,Color

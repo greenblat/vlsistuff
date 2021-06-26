@@ -50,7 +50,7 @@ def postscript_opening(File,Schem):
     DDx = abs(Xh-Xl)
     DDy = abs(Yh-Yl)
 
-    print 'high x=%d y=%d low x=%d y=%d'%(Xh,Yh,Xl,Yl)
+    print('high x=%d y=%d low x=%d y=%d'%(Xh,Yh,Xl,Yl))
 
 
 
@@ -72,7 +72,7 @@ def postscript_opening(File,Schem):
     NewD = 0
     NewF = - NewE*Yl
     Pmatrix = [NewA,NewB,NewC,NewD,NewE,NewF]
-    print 'pmatrix %s'%str(Pmatrix)
+    print('pmatrix %s'%str(Pmatrix))
     File.write('%.2f %.2f scale\n'%(Scale*0.8,Scale*0.8))
     File.write('%.2f %.2f translate\n'%(-Xl,-Yl))
     File.write('/Courier findfont 1 scalefont setfont\n')
@@ -92,7 +92,7 @@ def was_postscript_opening(File,Schem):
 
     sizeX = int(DDx*Scale)
     sizeY = int(DDy*Scale)
-    print 'sizexy',sizeX,sizeY,Scale
+    print('sizexy',sizeX,sizeY,Scale)
     PS0 = string.replace(PSOPEN,'XXXX',str(sizeX))
     PS1 = string.replace(PS0,'YYYY',str(sizeY))
     File.write(PS1)
@@ -143,7 +143,7 @@ def was_postscript_opening(File,Schem):
     NewD = 0
     NewF = 60-NewE*Yl
     Pmatrix = [NewA,NewB,NewC,NewD,NewE,NewF]
-    print 'xh=%d xl=%d yh=%d yh=%d'%(Xh,Xl,Yh,Yl)
+    print('xh=%d xl=%d yh=%d yh=%d'%(Xh,Xl,Yh,Yl))
     if (Rot=='yes'):
         File.write('%f %f scale\n'%(Small,Small))
         File.write('90 rotate\n')

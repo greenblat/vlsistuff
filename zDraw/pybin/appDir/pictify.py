@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-import os,sys,string
+import os,sys
 
 def main():
     global Cell
@@ -67,7 +67,6 @@ def remap(XY,Del,Scale):
 
 def output_texts(Fout,Dx,Dy,Scale):
     for Txt,Coords in Texts:
-        print '>>>>',Coords
         X = Coords[0]
         Y = Coords[1]
         X0 = remap(X,Dx,Scale)
@@ -84,7 +83,7 @@ def output_pins(Fout,Dx,Dy,Scale):
         try:
           Pin=LL[2]
         except:
-            print 'error! ilia: you forgot to name a pin  in %s'%Cell
+            print('error! ilia: you forgot to name a pin  in %s'%Cell)
             Pin = 'error'
         X0 = remap(X,Dx,Scale)
         Y0 = remap(Y,Dy,Scale)
@@ -99,23 +98,23 @@ def readfile(File):
         line = File.readline()
         if line=='':
             return
-        wrds = string.split(line)
+        wrds = line.split()
         if len(wrds)==0:
             pass
         elif (wrds[0]=='wire'):
             Coords = wrds[4][5:]
-            List = string.split(Coords,',')
+            List = Coords.split(',')
             Seg = [(float(List[0]),float(List[1])),(float(List[2]),float(List[3]))]
             Segs.append(Seg)
         elif (wrds[0]=='inst')and(wrds[1]=='input'):
             Name =wrds[2]
             Coords = wrds[3][3:]
-            List = string.split(Coords,',')
+            List = Coord.split(',')
             Pins[Name] =['i',List]
         elif (wrds[0]=='inst')and(wrds[1]=='output'):
             Name =wrds[2]
             Coords = wrds[3][3:]
-            List = string.split(Coords,',')
+            List = Coords.split(',')
             Pins[Name] =['o',List]
         elif (wrds[0]=='param')and(wrds[2]=='name'):
             Name = wrds[3]
@@ -125,13 +124,13 @@ def readfile(File):
 ####        geom text qn list=13.6,10.8
             Text = wrds[2]
             Coords = wrds[3][5:]
-            List = string.split(Coords,',')
+            List = Coords.split(',')
             Texts.append((Text,List))
 
 
 def get_cell_name(Fname):
-    ww = string.split(Fname,'/')
-    ww1 = string.split(ww[-1],'.')
+    ww = Fname.split('/')
+    ww1 = ww[-1].split('.')
     return ww1[0]
 
 
