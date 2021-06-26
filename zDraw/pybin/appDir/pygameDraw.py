@@ -115,7 +115,7 @@ class GlobalsClass:
     def loadable_pictures(self):                
         Dirs = self.get_context('pics_lib')
         Res = []
-        if type(Dirs)==types.ListType:
+        if type(Dirs) is list:
             for Dir in Dirs:
                 LL = os.listdir(Dir)
                 for Fname in LL:
@@ -267,7 +267,7 @@ def makenum(Txt):
 
 
 
-
+JUSTPASS = [771,770,4352,32774,32775,32770,32776,32785,32768,32784,32777,32783,32779,32778,32786]
 
 running =True
 import time
@@ -282,26 +282,34 @@ def work():
     while running:
         # event handling, gets all event from the event queue
         for event in pygame.event.get():
+
             # only do something if the event is of type QUIT
-            if event.type == pygame.QUIT:
+            if event.type in JUSTPASS:
+                pass
+            elif event.type == pygame.QUIT:
                 # change the value to False, to exit the main loop
                 running = False
-            elif event.type == 2: # key down
+            elif event.type == pygame.KEYDOWN: # key down
                 Pos = pygame.mouse.get_pos()
-                on_key_press(event.unicode,event.key,Pos)
-            elif event.type == 3: # key up
+                Dict = event.dict
+                if 'text' in Dict:
+                    on_key_press(event.dict['text'],ord(event.dict['text']),Pos)
+                elif 'unicode' in Dict:
+                    on_key_press(event.dict['unicode'],event.dict['key'],Pos)
+                else:
+                    print('error keydown',event.type,event.dict)
+            elif event.type == pygame.KEYUP:
                 pass
-            elif event.type == 5: # mouse down
+            elif event.type == pygame.MOUSEBUTTONDOWN: # mouse down
                 on_mouse_press(event.button, [],event.pos)
-            elif event.type == 6: # mouse up
+            elif event.type == pygame.MOUSEBUTTONUP: # mouse up
                 pass
-            elif event.type == 4: # mouse move
+            elif event.type == pygame.MOUSEMOTION: # mouse move
                 Pos = pygame.mouse.get_pos()
                 on_mouse_move(Pos)
             elif event.type == 1: # focus in/out
                 pass
-            elif event.type == 16: # resize
-                print('<<<<><<<>',event.h,event.w,event.size)
+            elif event.type == pygame.VIDEORESIZE: # resize
 #                displayInfo = pygame.display.Info()
 #                dpSize = (displayInfo.current_w, displayInfo.current_h)
                 Glbs.set_context('width',event.w)
@@ -310,7 +318,7 @@ def work():
 #                set_context('height',displayInfo.current_h)
             else:
                 Pos = pygame.mouse.get_pos()
-                print(event.type," type",event.unicode,event.key,Pos)
+                print(event.type," type",Pos,event.dict)
         on_draw()
         pygame.display.flip()
         time.sleep(0.2) 
@@ -672,6 +680,7 @@ def endsWith(Fname,With):
 
 
 main()
+
 
 
 

@@ -1100,10 +1100,10 @@ def bbox_aline(List):
 
 import sys
 
-K_UP=273
-K_DOWN=274
-K_RIGHT=275
-K_LEFT=276
+K_UP = 1073741906
+K_DOWN = 1073741905
+K_RIGHT= 1073741903
+K_LEFT = 1073741904
 
 def ppoint(PP):
     return '(%.1f,%.1f)'%(PP[0],PP[1])
@@ -1198,14 +1198,15 @@ def duplicate_inst(From,PP):
 
 
 def use_keystroke(Uni,Ord,XY):
+    print('KEY',Uni,Ord,XY)
     X,Y = XY
-    Glbs.lastKeys.append(Uni)
-    while len(Glbs.lastKeys)>3:
-        Glbs.lastKeys.pop(0)
+    if Uni != '':
+        Glbs.lastKeys.append(Uni)
+        while len(Glbs.lastKeys)>3:
+            Glbs.lastKeys.pop(0)
     Glbs.graphicsChanged=True
     Root=get_context('root')
     State = get_context('state')
-    if (Uni==''): return
     if (Uni=='t'):
         center_display(X,Y)
         Glbs.graphicsChanged = True
@@ -1648,6 +1649,9 @@ def use_keystroke(Uni,Ord,XY):
                     log_info('  %s'%(' '.join(Pics[:5])))
                     Pics = Pics[5:]
                 log_info('  %s'%(' '.join(Pics)))
+    elif Uni == '':
+        if Ord not in [0x400000e1]:
+            log_info('key ord (%d) not used'%(Ord))
     else:
         log_info('key "%s" (%d) not used'%(Uni,ord(Uni)))
 

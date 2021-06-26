@@ -1,18 +1,20 @@
 
-
+import sys
+sys.path.append('/opt/homebrew/Cellar/pillow/8.2.0/lib/python3.9/site-packages')
 import pygame
-# from PIL import Image
+from PIL import Image
 
 
 
 def screenShot(Width,Height,Fname):
-    return
     print('screenShot "%s"  %dx%d'%(Fname,Width,Height))
-    glReadBuffer(GL_FRONT)
-    pixels = glReadPixels(0,0,Width,Height,GL_RGB,GL_UNSIGNED_BYTE)
-    image = Image.fromstring("RGB", (Width,Height), pixels)
-    image = image.transpose( Image.FLIP_TOP_BOTTOM)
-    image.save(Fname)
+    screen = Glbs.get_context('screen')
+    pygame.image.save(screen, Fname)
+#    glReadBuffer(GL_FRONT)
+#    pixels = glReadPixels(0,0,Width,Height,GL_RGB,GL_UNSIGNED_BYTE)
+#    image = Image.fromstring("RGB", (Width,Height), pixels)
+#    image = image.transpose( Image.FLIP_TOP_BOTTOM)
+#    image.save(Fname)
 
 
 
