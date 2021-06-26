@@ -1,11 +1,10 @@
 
-import types,string
 Psparams={}
 def set_pscontext(File,Param,Val):
     if (Param in Psparams)and(Psparams[Param]==Val):
         return
     Psparams[Param]=Val
-    if type(Val)==types.ListType:
+    if type(Val) is list:
         for x in Val:
             File.write(' %f'%(x))
         File.write(' %s\n'%(Param))
@@ -60,8 +59,8 @@ def postscript_opening(File,Schem):
     sizeX = int(DDx*Scale)
     sizeY = int(DDy*Scale)
 
-    PS0 = string.replace(PSOPEN,'XXXX',str(sizeX))
-    PS1 = string.replace(PS0,'YYYY',str(sizeY))
+    PS0 = PSOPEN.replace('XXXX',str(sizeX))
+    PS1 = PS0.replace('YYYY',str(sizeY))
     File.write(PS1)
         
     
@@ -93,8 +92,8 @@ def was_postscript_opening(File,Schem):
     sizeX = int(DDx*Scale)
     sizeY = int(DDy*Scale)
     print('sizexy',sizeX,sizeY,Scale)
-    PS0 = string.replace(PSOPEN,'XXXX',str(sizeX))
-    PS1 = string.replace(PS0,'YYYY',str(sizeY))
+    PS0 = PSOPEN.replace('XXXX',str(sizeX))
+    PS1 = PS0.replace('YYYY',str(sizeY))
     File.write(PS1)
         
     

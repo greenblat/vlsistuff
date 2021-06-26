@@ -453,7 +453,7 @@ def use_command_wrds(wrds):
         File.close()
         Glbs.details[Root].touched(False)
     elif wrds[0]=='change':
-        List = Glbs.details.keys()
+        List = list(Glbs.details.keys())
         List.sort()
         if len(wrds)==1:
             dbase.log_info('available schematics: %s'%' '.join(List))
@@ -479,8 +479,8 @@ def use_command_wrds(wrds):
         Glbs.graphicsChanged=True
     elif 'load' in wrds[0]:
         if len(wrds)==1:
-            print('loaded schematics:  %s'%str(Glbs.details.keys()))
-            print('loaded pictures:  %s'%str(Glbs.pictures.keys()))
+            print('loaded schematics:  %s'%str(list(Glbs.details.keys())))
+            print('loaded pictures:  %s'%str(list(Glbs.pictures.keys())))
         else:
             load_schematics(wrds[1])
                     
@@ -574,7 +574,7 @@ def use_command_wrds(wrds):
         print('dont know to %s'%wrds)
 
 def load_schematics(newRoot):
-    List = Glbs.details.keys()
+    List = list(Glbs.details.keys())
     if newRoot in List:
         Glbs.set_context('root',newRoot) 
         Glbs.graphicsChanged=True

@@ -5,6 +5,7 @@
 helpString = '''
     letters on screen (coordinate under mouse):
         Q   - quit now.
+        C   - take snapshot
         t   -  center display under mouse
         m   - start move instance under mouse, it will be moved to where "e" will be pressed.
         a   - add instance (from list cmd "add nand2 nor2 input output ...)

@@ -796,7 +796,7 @@ class DetailClass:
             if close_enough(BB,Point):
                 Type = self.instances[Inst].Type
                 Pic = Glbs.pictures[Type]
-                if (Pic.pins.keys()==[]):
+                if (list(Pic.pins.keys())==[]):
                     return Inst,self.instances[Inst].Point
                 Closest,Best = -1,0
                 Pnt=False
@@ -809,7 +809,11 @@ class DetailClass:
                     elif (Dist<Closest):
                         Closest,Best=Dist,Pin
                         Pnt = Px
+                print('CLOSE',Pic.pins,Inst,Best,Pnt)
+                if Best == 0:
+                    return Inst,Pnt
                 return Inst+'.'+Best,Pnt
+
         for Wire in self.wires:
             List = self.wires[Wire].get_wire_list()
             for i in range(0,len(List)-1):
@@ -910,11 +914,11 @@ def extract_dir(Fname):
 def load_dbase_file(Fname):
     if os.path.exists(Fname):
         File=open(Fname)
-        Bef = Glbs.details.keys()
+        Bef = list(Glbs.details.keys())
         load_dbase_file__(File)
 
         New=[]
-        Aft = Glbs.details.keys()
+        Aft = list(Glbs.details.keys())
         for X in Aft:
             if X not in Bef:
                 New.append(X)
@@ -1500,6 +1504,7 @@ def use_keystroke(Uni,Ord,XY):
         if ('wiring' in Glbs.contexts): 
             (InstPin0,P0,List)=get_context('wiring')
             InstPin1,P1 = Glbs.details[Root].select_pin((X,Y))
+            print('>>>>>',InstPin1,P1,"   ",InstPin0,'p0',P0,'list',List)
             if (InstPin1):
                 wName = Glbs.wireName()
                 while wName in Glbs.details[Root].wires:
@@ -1609,7 +1614,7 @@ def use_keystroke(Uni,Ord,XY):
         if len(Glbs.adding_queue)==0:
             print('add types (pictures) names to queue first')
             print('loaded pictures')
-            List = Glbs.pictures.keys()
+            List = list(Glbs.pictures.keys())
             List += Glbs.loadable_pictures()
             List.sort()
             while List != []:
@@ -1642,7 +1647,7 @@ def use_keystroke(Uni,Ord,XY):
                 log_error('unknown picture type = %s cannot instance'%(What))
                 bad=True
             if bad:
-                Pics = Glbs.pictures.keys()
+                Pics = list(Glbs.pictures.keys())
                 Pics.sort()
                 log_info('known pictures:')
                 while len(Pics)>5:
@@ -1722,7 +1727,7 @@ def point_close_to_section(Point,P0,P1):
     if (P0[0]==P1[0]):    # vertical line
         Dx = abs(P0[0]-Point[0])
         if (Dx<=get_context('proximity')):
-            if (Point[1]>=min(P0[1],P1[1]))and(Point[1]<=(P0[1],P1[1])):
+            if (Point[1]>=min(P0[1],P1[1]))and(Point[1]<=max(P0[1],P1[1])):
                 return True
     elif (P0[1]==P1[1]):    # horizontal line
         Dy = abs(P0[1]-Point[1])

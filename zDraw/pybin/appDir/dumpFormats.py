@@ -106,7 +106,7 @@ class connectivityClass:
                 Wname=Wire
                 
             if '.' in Start:
-                pp = string.split(Start,'.')
+                pp = Start.split('.')
                 Pin = pp[1]
                 Inst=pp[0]
                 if Inst not in self.Conns:
@@ -114,7 +114,7 @@ class connectivityClass:
                 self.Conns[Inst][Pin]=Wname
     
             if '.' in End:
-                pp = string.split(End,'.')
+                pp = End.split('.')
                 Pin = pp[1]
                 Inst=pp[0]
                 if Inst not in self.Conns:
@@ -163,7 +163,7 @@ class connectivityClass:
                         Val1 = make_legal(Val)
                         Str='.%s(%s)'%(Prm,Val1)
                         if Prm!='name': PP.append(Str)
-                    ObjParams = '#(%s)'%(string.join(PP,','))
+                    ObjParams = '#(%s)'%(','.join(PP))
                 else:
                     ObjParams= '#(%d,%d)'%(Obj.Point)
                 File.write('%s %s %s ('%(Obj.Type,ObjParams,Name))
@@ -184,9 +184,9 @@ class connectivityClass:
             if (Obj.Param=='size')and('param' in Obj.Value):
                 Val = Obj.Value[6:-1]
                 if ',' in Val:
-                    xx = string.split(Val,',')
+                    xx = Val.split(',')
                 elif '/' in Val:
-                    xx = string.split(Val,'/')
+                    xx = Val.split('/')
                 else:
                     xx = [Val]
                 for x in xx:
@@ -199,7 +199,7 @@ class connectivityClass:
     def dumpSpice(self,File):
         File.write('* spice of %s\n'%(self.Mod.Module))
         File.write('.subckt %s\n'%self.Mod.Module)
-        mPins = self.Inps.keys()+self.Outs.keys()
+        mPins = list(self.Inps.keys())+list(self.Outs.keys())
         mPins.extend(['gnd','vcc'])
         mPins.sort()
         extParams = self.findSpiceParams()
@@ -253,7 +253,7 @@ class connectivityClass:
                     Pins  = self.Conns[Inst]
                     Pins['vcc']='vcc'
                     Pins['gnd']='gnd'
-                    Keys = Pins.keys()
+                    Keys = list(Pins.keys())
                     Keys.sort()
                     for Pin in Keys:
                         File.write(' %s'%(Pins[Pin]))
@@ -280,9 +280,9 @@ class connectivityClass:
         for Net in self.Outs:
             Mxout = max(Mxout,len(Net))
 
-        inKeys = self.Inps.keys()
+        inKeys = list(self.Inps.keys())
         inKeys.sort()
-        ouKeys = self.Outs.keys()
+        ouKeys = list(self.Outs.keys())
         ouKeys.sort()
         Fout = open('%s.zpic'%Current.Module,'w')
         Fout.write('picture %s\n'%Current.Module)
@@ -329,14 +329,14 @@ def assembleArgvTypes():
         if sys.argv[ind]=='-t':
             X = sys.argv[ind+1]
             if '=' in X:
-                WW = string.split(X,'=')
+                WW = X.split('=')
                 Types[WW[0]]=WW[1]
             else:
                 print('-t %s should be of form nmos=nch'%X)
         elif sys.argv[ind]=='-m':
             X = sys.argv[ind+1]
             if '=' in X:
-                WW = string.split(X,'=')
+                WW = X.split('=')
                 Maxes[WW[0]]=float(WW[1])
             else:
                 print('-m %s should be of form nmos=200'%X)
@@ -348,14 +348,14 @@ def complexWidthAndLenght(Params):
     for Prm,Val in Params:
         if Prm=='size':
             res=''
-            ww = string.split(Val,',')
+            ww = Val.split(',')
             for Wrd in ww:
                 if Wrd[0] in 'npNP':
                     Side=Wrd[0]
-                    xx = string.split(Wrd[1:],'/')
+                    xx = Wrd[1:].split('/')
                 else:
                     Side=''
-                    xx = string.split(Wrd,'/')
+                    xx = Wrd.split('/')
                 if len(xx)==2:
                     W = xx[0]+'e-6'
                     L = xx[1]+'e-6'
@@ -374,7 +374,7 @@ def widthAndLenght(Params):
         if Prm=='size':
             if 'param' in Val:
                 Val = Val[6:-1]
-                xx = string.split(Val,'/')
+                xx = Val.split('/')
                 W=xx[0]
                 L=xx[1]
                 AD = '(%s*%.2e)'%(W,Diff)
@@ -382,7 +382,7 @@ def widthAndLenght(Params):
                 AS = AD
                 PS = PD
                 return 'W=%s L=%s AS=%s AD=%s PD=%s PS=%s'%(W,L,AD,AS,PD,PS)
-            xx = string.split(Val,'/')
+            xx = Val.split('/')
             if len(xx)==2:
                 W = xx[0]+'e-6'
                 L = xx[1]+'e-6'

@@ -84,7 +84,7 @@ def dumpVerilog(Glbs,Root,File):
             Wname=Wire
             
         if '.' in Start:
-            pp = string.split(Start,'.')
+            pp = Start.split('.')
             Pin = pp[1]
             Inst=pp[0]
             if Inst not in Conns:
@@ -92,7 +92,7 @@ def dumpVerilog(Glbs,Root,File):
             Conns[Inst][Pin]=Wname
 
         if '.' in End:
-            pp = string.split(End,'.')
+            pp = End.split('.')
             Pin = pp[1]
             Inst=pp[0]
             if Inst not in Conns:
@@ -123,7 +123,7 @@ def dumpVerilog(Glbs,Root,File):
                     Val1 = make_legal(Val)
                     Str='.%s(%s)'%(Prm,Val1)
                     if Prm!='name': PP.append(Str)
-                ObjParams = '#(%s)'%(string.join(PP,','))
+                ObjParams = '#(%s)'%(','.join(PP))
             else:
                 ObjParams='#(%d,%d)'%(Obj.Point)
 
