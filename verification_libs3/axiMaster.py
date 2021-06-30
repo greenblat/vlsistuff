@@ -43,6 +43,7 @@ class axiMasterClass:
         self.ARVALID = False
         self.WVALID = False
         self.Size = 2
+        self.WSTRB = -1 
         self.AXI3 = False
 
     def onFinish(self):
@@ -77,9 +78,10 @@ class axiMasterClass:
         elif wrds[0]=='axi3':
             self.AXI3 = True
         elif wrds[0]=='axi4':
-            self.AXI3 = Fase
+            self.AXI3 = False
+        elif wrds[0]=='wstrb':
+            self.WSTRB = eval(wrds[1])
         elif wrds[0]=='write':
-            print('WWWWW',wrds)
             if len(wrds)==3:
                 self.makeWrite(1,1,eval(wrds[1]),self.Size,[eval(wrds[2])])
             elif len(wrds)>=6:
@@ -157,7 +159,6 @@ class axiMasterClass:
 
 
     def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
-        print('BURSTW',Burst,Len,Address)
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
         if Len<=0:
@@ -174,6 +175,8 @@ class axiMasterClass:
             else:
                 Wlast = 0
             Wstrb = (1<<(1<<Size))-1
+            if self.WSTRB>0:
+                Wstrb = self.WSTRB
             Str = 'force wvalid=1 wdata=%s wstrb=0x%x wlast=%d'%(Wdata,Wstrb,Wlast)
             if self.AXI3:
                 Str += ' wid=%d'%self.Rid

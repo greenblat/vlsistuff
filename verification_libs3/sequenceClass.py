@@ -376,6 +376,7 @@ class sequenceClass:
 
                     
             BB = makeExpr(wrds[1])
+            print('><>>>>>>',BB)
             Val = self.evalExpr(BB)
             if not Val: 
                 self.Ptr -= 1
@@ -496,6 +497,7 @@ class sequenceClass:
         Txt = ' '.join(map(str,Wrds))
         if Txt == '': return 0
         try:
+            print('>>>>>DEFS',self.Defs)
             X = eval(Txt,self.Defs,self.Translates)
             return X
         except:

@@ -1067,14 +1067,28 @@ veri_finish(PyObject *self,PyObject *args) {
 
 static PyObject*
 veri_toggles(PyObject *self,PyObject *args) {
-    if (!PyArg_ParseTuple(args, ""))
+    char *notestring;
+    if (!PyArg_ParseTuple(args, "s", &notestring))
         return NULL;
-    int ii;
+    int ii,jj=0;
+    char LongString[longestVal];
+    char tmp[1000];
+    sprintf(LongString,"%s = []",notestring);
+    PyRun_SimpleString(LongString);
     for (ii=0; ii<maxsig; ii++) {
-        if (sigs[ii].toggles>0)
-            printf("%d = %8d    %s\n",ii,sigs[ii].toggles,qqia(sigs[ii].fpath));
+        if (sigs[ii].toggles>0) {
+//            printf("%s (%d) code%d = %8d    %s\n",notestring,jj,ii,sigs[ii].toggles,qqia(sigs[ii].fpath));
+            sprintf(tmp,"%s.append(('%s',%d))",notestring,qqia(sigs[ii].fpath),sigs[ii].toggles);
+            PyRun_SimpleString(tmp);
+//            if (strlen(LongString)<(longestVal-1000))
+//                strcat(LongString,tmp);
+            sigs[ii].toggles = 0;
+            jj++;
+        }
     }
-    return Py_BuildValue("i", 1);
+//    strcat(LongString,"'''");
+//    PyRun_SimpleString(LongString);
+    return Py_BuildValue("i", jj);
 }
 
 
