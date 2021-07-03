@@ -128,7 +128,7 @@ def forcesAndPeeks(Mod,Fval):
                 for ii in range(Many):
                     Fval.write('        copy8(val,%d); top->%s[%d] = xstrtol(tmp);\n'%(Many-ii-1,Net,Many-ii-1))
                 Fval.write('        return; }\n')
-    val.write(STR4)
+    Fval.write(STR4)
 
 def makeCpp(Mod):
     Path = logs.getVar('PATH')

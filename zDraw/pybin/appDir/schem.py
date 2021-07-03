@@ -848,6 +848,218 @@ picture mux
   pic_pin s i xy=2,4
   pic_pin o o xy=4,2
 end
+  pic_pin i1 i xy=0,4
+end
+picture nor2
+  pic_aline list=5.8,2,6,2
+  pic_aline list=0,1,1.2,1,1,0.5,3,0.5
+  pic_aline list=0,3,1.2,3,1,3.5,3,3.5
+  pic_aline list=1.2,1,1.3,1.4,1.4,2,1.3,2.6,1.2,3
+  pic_aline list=3,3.5,3.5,3.4,4,3.1,4.5,2.6,5,2
+  pic_aline list=3,0.5,3.5,0.6,4,0.9,4.5,1.4,5,2
+  pic_circle list=5.4,2,5,2
+  pic_fcircle list=2.0,2.9,1.7,2.9
+  pic_pin o1 o xy=6,2
+  pic_pin i2 i xy=0,1
+  pic_pin i1 i xy=0,3
+end
+picture nor3
+  pic_aline list=5.8,2,6,2
+  pic_aline list=0,1,1.2,1,1,0.5,3,0.5
+  pic_aline list=0,3,1.2,3,1,3.5,3,3.5
+  pic_aline list=1.2,1,1.3,1.4,1.4,2,1.3,2.6,1.2,3
+  pic_aline list=3,3.5,3.5,3.4,4,3.1,4.5,2.6,5,2
+  pic_aline list=3,0.5,3.5,0.6,4,0.9,4.5,1.4,5,2
+  pic_aline list=0,2,1.4,2
+  pic_circle list=5.4,2,5,2
+  pic_fcircle list=2.0,2.9,1.7,2.9
+  pic_pin o1 o xy=6,2
+  pic_pin i3 i xy=0,1
+  pic_pin i2 i xy=0,2
+  pic_pin i1 i xy=0,3
+end
+picture nor4
+  pic_aline list=5.8,2,6,2
+  pic_aline list=0,1,1.2,1,1,0.5,3,0.5
+  pic_aline list=0,3,1.2,3,1,3.5,3,3.5
+  pic_aline list=1.2,1,1.3,1.4,1.4,2,1.3,2.6,1.2,3
+  pic_aline list=3,3.5,3.5,3.4,4,3.1,4.5,2.6,5,2
+  pic_aline list=3,0.5,3.5,0.6,4,0.9,4.5,1.4,5,2
+  pic_aline list=0,2,1.4,2
+  pic_aline list=0,0,1,0,1,0.5
+  pic_circle list=5.4,2,5,2
+  pic_fcircle list=2.0,2.9,1.7,2.9
+  pic_pin o1 o xy=6,2
+  pic_pin i4 i xy=0,0
+  pic_pin i3 i xy=0,1
+  pic_pin i2 i xy=0,2
+  pic_pin i1 i xy=0,3
+end
+picture or2
+  pic_aline list=0,1,1.2,1,1,0.5,3,0.5
+  pic_aline list=0,3,1.2,3,1,3.5,3,3.5
+  pic_aline list=1.2,1,1.3,1.4,1.4,2,1.3,2.6,1.2,3
+  pic_aline list=5.0,2,6,2
+  pic_aline list=3,3.5,3.5,3.4,4,3.1,4.5,2.6,5,2
+  pic_aline list=3,0.5,3.5,0.6,4,0.9,4.5,1.4,5,2
+  pic_fcircle list=2.0,2.9,1.7,2.9
+  pic_pin o1 o xy=6,2
+  pic_pin i2 i xy=0,1
+  pic_pin i1 i xy=0,3
+end
+picture or3
+  pic_aline list=0,1,1.2,1,1,0.5,3,0.5
+  pic_aline list=0,3,1.2,3,1,3.5,3,3.5
+  pic_aline list=1.2,1,1.3,1.4,1.4,2,1.3,2.6,1.2,3
+  pic_aline list=5.0,2,6,2
+  pic_aline list=0,2,1.2,2
+  pic_aline list=3,3.5,3.5,3.4,4,3.1,4.5,2.6,5,2
+  pic_aline list=3,0.5,3.5,0.6,4,0.9,4.5,1.4,5,2
+  pic_fcircle list=2.0,2.9,1.7,2.9
+  pic_pin o1 o xy=6,2
+  pic_pin i1 i xy=0,3
+  pic_pin i2 i xy=0,2
+  pic_pin i3 i xy=0,1
+end
+picture or7
+  pic_aline list=0,1,1.2,1,1,0.5,3,0.5
+  pic_aline list=0,3,1.2,3,1,3.5,3,3.5
+  pic_aline list=1.2,1,1.3,1.4,1.4,2,1.3,2.6,1.2,3
+  pic_aline list=5,2,6,2
+  pic_aline list=0,2,1.2,2
+  pic_aline list=3,3.5,3.5,3.4,4,3.1,4.5,2.6,5,2
+  pic_aline list=3,0.5,3.5,0.6,4,0.9,4.5,1.4,5,2
+  pic_aline list=1,0.5,1,0,0,0
+  pic_aline list=1,0,1,-1,0,-1
+  pic_aline list=1,-1,1,-2,0,-2
+  pic_aline list=1,-2,1,-3,0,-3
+  pic_fcircle list=2.0,2.9,1.7,2.9
+  pic_pin o1 o xy=6,2
+  pic_pin i1 i xy=0,3
+  pic_pin i2 i xy=0,2
+  pic_pin i3 i xy=0,1
+  pic_pin i4 i xy=0,0
+  pic_pin i5 i xy=0,-1
+  pic_pin i6 i xy=0,-2
+  pic_pin i7 i xy=0,-3
+end
+picture or6
+  pic_aline list=0,1,1.2,1,1,0.5,3,0.5
+  pic_aline list=0,3,1.2,3,1,3.5,3,3.5
+  pic_aline list=1.2,1,1.3,1.4,1.4,2,1.3,2.6,1.2,3
+  pic_aline list=5,2,6,2
+  pic_aline list=0,2,1.2,2
+  pic_aline list=3,3.5,3.5,3.4,4,3.1,4.5,2.6,5,2
+  pic_aline list=3,0.5,3.5,0.6,4,0.9,4.5,1.4,5,2
+  pic_aline list=1,0.5,1,0,0,0
+  pic_aline list=1,0,1,-1,0,-1
+  pic_aline list=1,-1,1,-2,0,-2
+  pic_fcircle list=2.0,2.9,1.7,2.9
+  pic_pin o1 o xy=6,2
+  pic_pin i1 i xy=0,3
+  pic_pin i2 i xy=0,2
+  pic_pin i3 i xy=0,1
+  pic_pin i4 i xy=0,0
+  pic_pin i5 i xy=0,-1
+  pic_pin i6 i xy=0,-2
+end
+picture or5
+  pic_aline list=0,1,1.2,1,1,0.5,3,0.5
+  pic_aline list=0,3,1.2,3,1,3.5,3,3.5
+  pic_aline list=1.2,1,1.3,1.4,1.4,2,1.3,2.6,1.2,3
+  pic_aline list=5,2,6,2
+  pic_aline list=0,2,1.2,2
+  pic_aline list=3,3.5,3.5,3.4,4,3.1,4.5,2.6,5,2
+  pic_aline list=3,0.5,3.5,0.6,4,0.9,4.5,1.4,5,2
+  pic_aline list=1,0.5,1,0,0,0
+  pic_aline list=1,0,1,-1,0,-1
+  pic_fcircle list=2.0,2.9,1.7,2.9
+  pic_pin o1 o xy=6,2
+  pic_pin i1 i xy=0,3
+  pic_pin i2 i xy=0,2
+  pic_pin i3 i xy=0,1
+  pic_pin i4 i xy=0,0
+  pic_pin i5 i xy=0,-1
+end
+picture or4
+  pic_aline list=0,1,1.2,1,1,0.5,3,0.5
+  pic_aline list=0,3,1.2,3,1,3.5,3,3.5
+  pic_aline list=1.2,1,1.3,1.4,1.4,2,1.3,2.6,1.2,3
+  pic_aline list=5,2,6,2
+  pic_aline list=0,2,1.2,2
+  pic_aline list=3,3.5,3.5,3.4,4,3.1,4.5,2.6,5,2
+  pic_aline list=3,0.5,3.5,0.6,4,0.9,4.5,1.4,5,2
+  pic_aline list=1,0.5,1,0,0,0
+  pic_fcircle list=2.0,2.9,1.7,2.9
+  pic_pin o1 o xy=6,2
+  pic_pin i1 i xy=0,3
+  pic_pin i2 i xy=0,2
+  pic_pin i3 i xy=0,1
+  pic_pin i4 i xy=0,0
+end
+picture xor
+  pic_aline list=5,2,6,2
+  pic_aline list=0,1,1,1
+  pic_aline list=0.6,0.4,1,1,1,3
+  pic_aline list=0.6,3.6,1,3,0,3
+  pic_aline list=3.8,3.4,2.8,3.6,1,3.6,1.4,3,1.4,1,1,0.4,2.8,0.4,3.8,0.6,4.4,1.2,5,2,4.4,2.8,3.8,3.4
+  pic_fcircle list=2.0,3.0,2.3,3.0
+  pic_pin i2 i xy=0,1
+  pic_pin i1 i xy=0,3
+  pic_pin o o xy=6,2
+end
+picture xnor2
+  pic_sub xnor xy=0,0
+end
+picture xor2
+  pic_aline list=5,2,6,2
+  pic_aline list=0,1,1,1
+  pic_aline list=0.6,0.4,1,1,1,3
+  pic_aline list=0.6,3.6,1,3,0,3
+  pic_aline list=3.8,3.4,2.8,3.6,1,3.6,1.4,3,1.4,1,1,0.4,2.8,0.4,3.8,0.6,4.4,1.2,5,2,4.4,2.8,3.8,3.4
+  pic_fcircle list=2.0,3.0,2.3,3.0
+  pic_pin i2 i xy=0,1
+  pic_pin i1 i xy=0,3
+  pic_pin o o xy=6,2
+end
+
+picture xnor
+  pic_aline list=5.8,2,6,2
+  pic_aline list=0,1,1,1
+  pic_aline list=0.6,0.4,1,1,1,3
+  pic_aline list=0.6,3.6,1,3,0,3
+  pic_aline list=3.8,3.4,2.8,3.6,1,3.6,1.4,3,1.4,1,1,0.4,2.8,0.4,3.8,0.6,4.4,1.2,5,2,4.4,2.8,3.8,3.4
+  pic_circle list=5.4,2.0,5.0,2.0
+  pic_fcircle list=2.0,3.0,2.3,3.0
+  pic_pin i2 i xy=0,1
+  pic_pin i1 i xy=0,3
+  pic_pin o o xy=6,2
+end
+picture nmux
+  pic_aline list=3.8,2,4,2
+  pic_aline list=2,3,2,4
+  pic_aline list=0,3,0.6,3
+  pic_aline list=0,1,0.6,1
+  pic_aline list=3,2.4,0.6,3.6,0.6,0.4,3,1.6,3,2.4
+  pic_circle list=3.4,2.0,3.0,2.0
+  pic_fcircle list=1.2,2.6,1.5,2.6
+  pic_pin i0 i xy=0,3
+  pic_pin i1 i xy=0,1
+  pic_pin s i xy=2,4
+  pic_pin o o xy=4,2
+end
+picture mux2
+  pic_aline list=3.0,2,4,2
+  pic_aline list=2,3,2,4
+  pic_aline list=0,3,0.6,3
+  pic_aline list=0,1,0.6,1
+  pic_aline list=3,2.4,0.6,3.6,0.6,0.4,3,1.6,3,2.4
+  pic_fcircle list=1.2,2.6,1.5,2.6
+  pic_pin i0 i xy=0,3
+  pic_pin i1 i xy=0,1
+  pic_pin s i xy=2,4
+  pic_pin o o xy=4,2
+end
 
 picture gatedclk
     pic_aline list=0.5,0.5,0.5,4.5,4.5,4.5,4.5,0.5,0.5,0.5

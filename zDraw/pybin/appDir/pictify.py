@@ -109,7 +109,7 @@ def readfile(File):
         elif (wrds[0]=='inst')and(wrds[1]=='input'):
             Name =wrds[2]
             Coords = wrds[3][3:]
-            List = Coord.split(',')
+            List = Coords.split(',')
             Pins[Name] =['i',List]
         elif (wrds[0]=='inst')and(wrds[1]=='output'):
             Name =wrds[2]

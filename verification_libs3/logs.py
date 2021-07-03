@@ -912,5 +912,39 @@ def ensureExists(Dir,Index):
         while len(Dir)<Index:
             Dir.append(0)
 
+MAIL = {}
+def mailSend(To,From,Subject,Body):
+    if To not in MAIL: 
+        MAIL[To] = {}
+    if From not in MAIL[To]: 
+        MAIL[To][From] = []
+    MAIL[To][From].append((Subject,Body))
+    return
+def mailGet(To,From,Subject):
+    for ToKey in MAIL:
+        if (ToKey == To)or(To == ''):
+            for FromKey in MAIL[ToKey]:
+                if (FromKey == From)or(From == ''):
+                    List = MAIL[ToKey][FromKey]
+                    for ind,(Sub,Body) in enumerate(List):
+                        if (Sub == Subject) or (Subject == ''):
+                            MAIL[ToKey][FromKey].pop(ind)
+                            return (FromKey,Tokey,Sub,Body)
+
+
+def mailMatches(To,From,Subject):
+    Many = 0
+    for ToKey in MAIL:
+        if (ToKey == To)or(To == ''):
+            for FromKey in MAIL[ToKey]:
+                if (FromKey == From)or(From == ''):
+                    List = MAIL[ToKey][FromKey]
+                    for ind,(Sub,Body) in enumerate(List):
+                        if (Sub == Subject) or (Subject == ''):
+                            Many += 1
+    return Many
+
+
+
 
 print('>>>verification_logs loaded')

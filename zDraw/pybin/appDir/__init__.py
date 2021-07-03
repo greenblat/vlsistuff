@@ -1,8 +1,7 @@
 
 import os,sys,string
 
-cwd = os.getcwd()
-sys.path.append(cwd+'/pybin/appDir')
-print(sys.path)
+PATH = __file__.replace('__init__.py','')
+sys.path.append(PATH)
 
 import pygameDraw
