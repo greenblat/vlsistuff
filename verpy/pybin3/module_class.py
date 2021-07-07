@@ -188,10 +188,12 @@ class module_class:
             self.add_conn(Inst2,Pin,Obj.conns[Pin])
 
     def add_inst_conns(self,Type,Inst,List):
+        if Inst == '': Inst = inventInst(Type)
         self.add_inst(Type,Inst)
         self.add_conns(Inst,List)
 
     def add_inst(self,Type,Inst):
+        if Inst == '': Inst = inventInst(Type)
         InstObj = instance_class(Type,Inst)
         self.insts[Inst]=InstObj
         return InstObj

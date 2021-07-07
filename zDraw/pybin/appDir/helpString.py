@@ -46,7 +46,10 @@ helpString = '''
        change schematic      : change to another loaded schematic  (similar to load)
        save : save current schematic (or S from graphics window)
        help : prints this
+       print : creates svg and ps images
        dump : dump verilog
+       verilog : dump verilog
+       spice : dump spice and picture (.zpic)
        quit:  just quit
        sys <shell command>  :  execute shell command , like "open screenshot.ps" or something.
        ls <dir>  : list all schematics in this dir. default is ".". also the system remembers all listed drawings, so "load name" will search all "ls'ed" dirs.

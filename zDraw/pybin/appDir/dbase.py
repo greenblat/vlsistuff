@@ -854,11 +854,11 @@ class DetailClass:
         return False,False
 
     def wipe_out_instance(self,Inst):
-        Keys = self.params.keys()
+        Keys = list(self.params.keys())
         for Param in Keys:
             if self.params[Param].Owner==Inst:
                 self.params.pop(Param)
-        Keys = self.wires.keys()
+        Keys = list(self.wires.keys())
         for Wire in Keys:
             if belongs_together(self.wires[Wire].Start,Inst):
                 self.wires.pop(Wire)
@@ -1184,7 +1184,7 @@ def duplicate_inst(From,PP):
     New.Rot=Obj.Rot
     Glbs.details[Root].touched(True)
     Glbs.graphicsChanged=True
-    Keys = Glbs.details[Root].params.keys()
+    Keys = list(Glbs.details[Root].params.keys())
     for Key in Keys:
         Prm = Glbs.details[Root].params[Key]
         if Prm.Owner==From:
@@ -1202,7 +1202,7 @@ def duplicate_inst(From,PP):
 
 
 def use_keystroke(Uni,Ord,XY):
-    print('KEY',Uni,Ord,XY)
+#    print('KEY',Uni,Ord,XY)
     X,Y = XY
     if Uni != '':
         Glbs.lastKeys.append(Uni)
@@ -1678,7 +1678,7 @@ def center_display(Xw,Yw):
     H = get_context('height')
     H2 = H/2 
     W2 = W/2 
-    print('center_display %s %s screen=%s %s'%(Xw,Yw,W,H))
+#    print('center_display %s %s screen=%s %s'%(Xw,Yw,W,H))
 
     Dx = -(Xw-W2)
     Dy = -(Yw-H2)
@@ -1712,7 +1712,7 @@ def get_pin_location(Module,Conn):
 def select_object(Point):
     SchPoint = screen2schem(Point)
     Root=get_context('root')
-    print('select_object screen=%s schem=%s matrix=%s'%(Point,SchPoint,Glbs.get_context('matrix')))
+#    print('select_object screen=%s schem=%s matrix=%s'%(Point,SchPoint,Glbs.get_context('matrix')))
     return Glbs.details[Root].select_object(SchPoint)
 
 def close_enough(BB,Point):
