@@ -123,7 +123,7 @@ class svgClass:
 
 
     def prtColor(self):
-        Str = 'rgb(%d,%d,%d)'%(int(self.RGB[0]),int(self.RGB[1]),int(self.RGB[2]))
+        Str = 'rgb(%d,%d,%d)'%(min(70,int(self.RGB[0])),min(30,int(self.RGB[1])),min(50,int(self.RGB[2])))
         return Str
 
 

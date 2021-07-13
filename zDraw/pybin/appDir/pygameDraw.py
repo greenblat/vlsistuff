@@ -500,21 +500,22 @@ def use_command_wrds(wrds):
         GG = connectivityClass(Glbs,Root)
         GG.dumpSpice(File)
         File.close()
-    elif ('dump' in wrds[0])or('verilog' in wrds[0]):
+    elif ('dump' in wrds[0])or('verilog' in wrds[0])or('rtl' in wrds[0]):
+        Rtl = 'rtl' in wrds[0]
         if len(wrds)==1:
             Root = Glbs.get_context('root')
             Fname = '%s.v'%(Root)
             File = open(Fname,'w')
             dbase.log_info('writing verilog file "%s.v"'%Root)
             GG = connectivityClass(Glbs,Root)
-            GG.dumpVerilog(File)
+            GG.dumpVerilog(File,Rtl)
             File.close()
         elif len(wrds)==2:
             Fname = wrds[1]
             File = open(Fname,'w')
             Root = Glbs.get_context('root')
             GG = connectivityClass(Glbs,Root)
-            GG.dumpVerilog(File)
+            GG.dumpVerilog(File,Rtl)
             File.close()
         elif len(wrds)==3:
             Fname = wrds[2]
@@ -522,10 +523,10 @@ def use_command_wrds(wrds):
             if wrds[1]=='*':
                 for Name in Glbs.details:
                     GG = connectivityClass(Glbs,Root)
-                    GG.dumpVerilog(File)
+                    GG.dumpVerilog(File,Rtl)
             else:
                 GG = connectivityClass(Glbs,wrds[1])
-                GG.dumpVerilog(File)
+                GG.dumpVerilog(File,Rtl)
             File.close()
 
     elif ('sys' == wrds[0]):

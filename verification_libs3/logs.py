@@ -5,7 +5,8 @@ Errors = 0
 Corrects = 0   
 Wrongs = 0   
 Warnings = 0   
-print_debug_messages=0
+printDebugs = set()
+printCorrects = True
 MAXWRONGS = 2000
 MAXERRORS = 2000
 PYMONLOG = 'pymon.log'
@@ -71,9 +72,20 @@ def finish(Txt):
         if veri: veri.finish()
         sys.exit()
 
-def please_print_debugs():
-    global print_debug_messages
-    print_debug_messages=1
+
+def action(Txt):
+    global printCorrects,printDebugs,MAXWRONGS,MAXERRORS
+    wrds = Txt.split()
+    if 'nocorrects' in wrds: printCorrects = False
+    elif 'corrects' in wrds: printCorrects = True
+
+    if 'nodebugs' in wrds: printDebugs = []
+    elif wrds[0] == 'debugs':
+        printDebugs = set(wrds[1:])
+
+    if 'maxwrongs' in wrds: MAXWRONGS = eval(wrds[1])
+    if 'maxerrors' in wrds: MAXERRORS = eval(wrds[1])
+
 
 def log_time(Why,Which=0):
     log_info('info: %s                                 time=%s'%(Why,time.ctime()),Which)
@@ -193,7 +205,14 @@ def log_write(Text,Which=0):
 #    print('%s'%(Text))
     Flogs[Which].write('%s\n'%(Text))
 
-def log_debug(Text,Which=0):
+def log_debug(Text,Tokens,Which=0):
+    if printDebugs.intersection(set(Tokens.split())) == set(): return
+    if (not Flogs[Which]):
+        Flogs[Which]=open(PYMONLOG+str(Which),'w')
+    print('@%d: debug: %s'%(get_cycles(),Text))
+    Flogs[Which].write('@%d: debug: %s\n'%(get_cycles(),Text))
+
+
     return
 
 def log_info(Text,Which=0):

@@ -137,7 +137,8 @@ class connectivityClass:
                             self.Names[Wire]=Name
                             dones +=1
 
-    def dumpVerilog(self,File):
+
+    def dumpVerilogHeader(self,File):
         File.write('module %s ('%self.Mod.Module)
         Pref=' '
         for Inp in self.Inps:
@@ -150,32 +151,112 @@ class connectivityClass:
             File.write('    %sinout %s\n'%(Pref,Out))
             Pref=','
         File.write(');\n')
+        
+
+    def dumpRtlVerilog(self,File):
         for Inst in self.Mod.instances:
             Obj = self.Mod.instances[Inst]
-            if Inst in self.Names:
-                Name = self.Names[Inst]
+            Type = Obj.Type
+            Obj.conns = {}
+            if Inst in self.Conns:
+                Pins  = self.Conns[Inst]
+                Obj.conns = Pins
+            if Type in ['gnd','vcc','input','output','node','inout']:
+                pass
+            elif Type.startswith('nand'):
+                O,Ins  = typicalConns(Obj.conns,'&')
+                File.write('assign %s = ~(%s);\n' % (O,Ins))
+            elif Type.startswith('and'):
+                O,Ins  = typicalConns(Obj.conns,'&')
+                File.write('assign %s = %s;\n' % (O,Ins))
+            elif Type.startswith('nor'):
+                O,Ins  = typicalConns(Obj.conns,'|')
+                File.write('assign %s = ~(%s);\n' % (O,Ins))
+            elif Type.startswith('or'):
+                O,Ins  = typicalConns(Obj.conns,'|')
+                File.write('assign %s = %s;\n' % (O,Ins))
+            elif Type.startswith('xor'):
+                O,Ins  = typicalConns(Obj.conns,'^')
+                File.write('assign %s = %s;\n' % (O,Ins))
+            elif Type.startswith('xnor'):
+                O,Ins  = typicalConns(Obj.conns,'^')
+                File.write('assign %s = ~(%s);\n' % (O,Ins))
+            elif Type.startswith('inv'):
+                O,Ins  = typicalConns(Obj.conns,'&')
+                File.write('assign %s = ~%s;\n' % (O,Ins))
+            elif Type == 'flop':
+                ensureExists(Obj,Inst,'ck d q')
+                Ck = Obj.conns['ck']
+                D = Obj.conns['d']
+                Q = Obj.conns['q']
+                File.write('reg %s; assign %s = %s;\n' % (Inst,Q,Inst))
+                File.write('always @(posedge %s) %s <= %s;\n' % (Ck,Inst,D))
+            elif Type == 'dffr':
+                ensureExists(Obj,Inst,'ck d q rn')
+                Ck = Obj.conns['ck']
+                D = Obj.conns['d']
+                Q = Obj.conns['q']
+                RN = Obj.conns['rn']
+                File.write('reg %s; assign %s = %s;\n' % (Inst,Q,Inst))
+                File.write('always @(posedge %s or negedge %s) if (!%s) %s <= 0; else %s <= %s;\n' % (Ck,RN,RN,Inst,Inst,D))
+            elif Type == 'dffs':
+                ensureExists(Obj,Inst,'ck d q sn')
+                Ck = Obj.conns['ck']
+                D = Obj.conns['d']
+                Q = Obj.conns['q']
+                SN = Obj.conns['sn']
+                File.write('reg %s; assign %s = %s;\n' % (Inst,Q,Inst))
+                File.write('always @(posedge %s or negedge %s) if (!%s) %s <= 1; else %s <= %s;\n' % (Ck,SN,SN,Inst,Inst,D))
+            elif Type == 'mux2':
+                ensureExists(Obj,Inst,'i0 i1 s o')
+                i0 = Obj.conns['i0']
+                i1 = Obj.conns['i1']
+                s = Obj.conns['s']
+                o = Obj.conns['o']
+                File.write('assign %s = %s ? %s : %s;\n' % (o,s,i1,i0))
+            elif list(Obj.conns.keys()) != []:
+                self.dumpInstance(Inst,File)
             else:
-                Name = Obj.Inst
-            if (Obj.Type not in ['vcc','gnd','antenna','input','output','inout','node'])and('logo' not in Obj.Type)and('ilia' not in Obj.Type):
-                if Inst in self.Params:
-                    PP = []
-                    for Prm,Val in self.Params[Inst]:
-                        Val1 = make_legal(Val)
-                        Str='.%s(%s)'%(Prm,Val1)
-                        if Prm!='name': PP.append(Str)
-                    ObjParams = '#(%s)'%(','.join(PP))
-                else:
-                    ObjParams= '#(%d,%d)'%(Obj.Point)
-                File.write('%s %s %s ('%(Obj.Type,ObjParams,Name))
-                if Inst in self.Conns:
-                    Pref = ''
-                    Pins  = self.Conns[Inst]
-                    for Pin in Pins:
-                        File.write(' %s.%s(%s)\n'%(Pref,Pin,Pins[Pin]))
-                        Pref = ','
-                     
-                File.write(');\n')
+               print('warning! %s ignored for rtl verilog %s %s' % (Type,Inst,Obj.conns)) 
+
+    def dumpVerilog(self,File,Rtl):
+        self.dumpVerilogHeader(File)
+        if Rtl:
+            self.dumpRtlVerilog(File)
+        else:
+            self.dumpGlvVerilog(File)
         File.write('endmodule\n')
+
+    def dumpGlvVerilog(self,File):
+        for Inst in self.Mod.instances:
+            self.dumpInstance(Inst,File)
+
+
+    def dumpInstance(self,Inst,File):
+        Obj = self.Mod.instances[Inst]
+        if Inst in self.Names:
+            Name = self.Names[Inst]
+        else:
+            Name = Obj.Inst
+        if (Obj.Type not in ['vcc','gnd','antenna','input','output','inout','node'])and('logo' not in Obj.Type)and('ilia' not in Obj.Type):
+            if Inst in self.Params:
+                PP = []
+                for Prm,Val in self.Params[Inst]:
+                    Val1 = make_legal(Val)
+                    Str='.%s(%s)'%(Prm,Val1)
+                    if Prm!='name': PP.append(Str)
+                ObjParams = '#(%s)'%(','.join(PP))
+            else:
+                ObjParams= '#(%d,%d)'%(Obj.Point)
+            File.write('%s %s %s ('%(Obj.Type,ObjParams,Name))
+            if Inst in self.Conns:
+                Pref = ''
+                Pins  = self.Conns[Inst]
+                for Pin in Pins:
+                    File.write(' %s.%s(%s)\n'%(Pref,Pin,Pins[Pin]))
+                    Pref = ','
+                 
+            File.write(');\n')
 
     def findSpiceParams(self):
         res=[]
@@ -308,6 +389,35 @@ class connectivityClass:
         Fout.write('end\n')
         Fout.close()
 
+def ensureExists(Obj,Inst,Pins):
+    Pins = Pins.split()
+    for Pin in Pins:
+        if Pin not in Obj.conns:
+            Obj.conns[Pin] = '0'
+            print('ensurePinExists %s / %s  is missing %s pin connection' % (Inst,Obj.Type,Pin))
+
+
+def typicalConns(Conns,Op):
+    Ins = ['','','','','','','','','','']
+    O = ''
+    for Pin in Conns.keys():
+        if Pin[0] == 'o':
+            O = Conns[Pin]
+        elif Pin[0] == 'i':
+            Ind = int(Pin[1:])
+            Ins[Ind]  = Conns[Pin]
+    Ins2 = []
+    for In in Ins:
+        if In == 'vcc':
+            Ins2.append('1')
+        elif In == 'gnd':
+            Ins2.append('0')
+        elif In != '':
+            Ins2.append(In)
+    Bet = ' %s ' % Op
+    Inss = Bet.join(Ins2)
+    return O,Inss
+
 def getBulk(Params,Default):
     for Prm,Val in Params:
         if Prm=='bulk':
@@ -404,7 +514,7 @@ def get_size(Params,Default='10'):
 
 
 def make_legal(Txt):
-    if (Txt[0] in string.letters):
+    if (Txt[0] in string.ascii_letters):
         return Txt
 
     if Txt[0] in string.digits:

@@ -1120,6 +1120,50 @@ pic_text rn xy=1.0,0.8
 pic_text qn xy=2.3,1.1
 end
 
+picture dffs
+pic_pin sn i xy=1.3,0.0
+pic_pin ck i xy=0.0,2.6
+pic_pin d i xy=0.0,1.5
+pic_pin q o xy=4.0,2.7
+pic_pin qn o xy=3.9,1.3
+pic_aline list=0.41,0.72,1.24,0.72
+pic_aline list=1.24,0.72,3.11,0.72
+pic_aline list=3.11,0.72,3.11,1.22
+pic_aline list=3.11,2.68,4.00,2.68
+pic_aline list=3.11,2.68,3.11,3.13
+pic_aline list=3.11,3.13,0.41,3.13
+pic_aline list=1.24,0.72,1.09,0.60
+pic_aline list=0.41,2.60,0.41,0.72
+pic_aline list=3.38,1.03,3.55,1.07
+pic_aline list=3.11,1.38,3.24,1.51
+pic_aline list=3.24,1.51,3.40,1.55
+pic_aline list=3.40,1.55,3.57,1.51
+pic_aline list=3.38,1.03,3.22,1.09
+pic_aline list=1.57,0.49,1.53,0.33
+pic_aline list=1.32,0.25,1.32,0.00
+pic_aline list=0.02,2.60,0.41,2.60
+pic_aline list=1.13,0.29,1.32,0.25
+pic_aline list=0.43,1.46,0.00,1.46
+pic_aline list=0.41,3.13,0.41,2.60
+pic_aline list=1.32,0.25,1.53,0.33
+pic_aline list=1.55,0.62,1.57,0.49
+pic_aline list=3.11,1.22,3.11,2.68
+pic_aline list=1.42,0.72,1.55,0.62
+pic_aline list=3.65,1.38,3.65,1.20
+pic_aline list=3.57,1.51,3.65,1.38
+pic_aline list=3.65,1.30,3.94,1.30
+pic_aline list=3.22,1.09,3.11,1.22
+pic_aline list=3.65,1.20,3.55,1.07
+pic_aline list=1.09,0.43,1.13,0.29
+pic_aline list=1.09,0.43,1.09,0.60
+pic_text ck xy=0.6,2.5
+pic_text d xy=0.5,1.3
+pic_text q xy=2.7,2.4
+pic_text dffs xy=0.5,3.3
+pic_text sn xy=1.0,0.8
+pic_text qn xy=2.3,1.1
+end
+
 
 picture latchr
     pic_aline list=0.5,0.5,0.5,4.5,4.5,4.5,4.5,0.5,0.5,0.5
@@ -1231,6 +1275,109 @@ wire wire11 node_0 output_0 list=5.546819,13.369801,7.297246,13.450522
 param input_0 name inx xy=-4.689649,13.316619
 param output_0 name outx xy=10.102754,12.981766
 param pmos_0 size 10/0.25 xy=5.018424,9.335043
+end
+picture flop
+pic_pin q o xy=3.0,1.0
+pic_pin ck i xy=1.5,2.5
+pic_pin d i xy=0.0,1.0
+pic_aline list=0.59,1.01,0.59,1.90
+pic_aline list=0.59,1.90,1.45,1.90
+pic_aline list=2.37,1.90,1.45,1.90
+pic_aline list=2.37,1.90,2.37,0.98
+pic_aline list=2.37,0.98,2.37,0.00
+pic_aline list=2.37,0.00,0.59,0.00
+pic_aline list=0.59,0.00,0.59,1.01
+pic_aline list=1.45,2.53,1.45,1.90
+pic_aline list=3.00,0.98,2.37,0.98
+pic_aline list=0.00,1.01,0.59,1.01
+pic_text d xy=0.8,0.7
+pic_text q xy=1.9,0.7
+pic_text ck xy=1.1,1.3
+end
+picture less
+pic_pin o1 o xy=2.0,0.7
+pic_pin i1 i xy=0.0,1.1
+pic_pin i2 i xy=0.0,0.3
+pic_aline list=2.00,0.67,1.49,0.67
+pic_aline list=0.02,1.13,0.29,1.13
+pic_aline list=0.00,0.31,0.31,0.31
+pic_aline list=0.31,0.31,0.19,0.67
+pic_aline list=0.29,1.13,0.19,0.67
+pic_aline list=0.29,1.13,0.67,1.42
+pic_aline list=0.67,1.42,1.20,1.42
+pic_aline list=1.20,1.42,1.45,1.06
+pic_aline list=1.45,1.06,1.49,0.67
+pic_aline list=1.49,0.67,1.33,0.17
+pic_aline list=1.33,0.17,0.72,0.00
+pic_aline list=0.72,0.00,0.31,0.31
+pic_aline list=1.01,0.55,0.65,0.82
+pic_aline list=1.08,1.11,0.65,0.82
+end
+picture more
+pic_pin o1 o xy=2.0,0.7
+pic_pin i1 i xy=0.0,1.1
+pic_pin i2 i xy=0.0,0.3
+pic_aline list=2.00,0.67,1.49,0.67
+pic_aline list=0.02,1.13,0.29,1.13
+pic_aline list=0.00,0.31,0.31,0.31
+pic_aline list=0.31,0.31,0.19,0.67
+pic_aline list=0.29,1.13,0.19,0.67
+pic_aline list=0.29,1.13,0.67,1.42
+pic_aline list=0.67,1.42,1.20,1.42
+pic_aline list=1.20,1.42,1.45,1.06
+pic_aline list=1.45,1.06,1.49,0.67
+pic_aline list=1.49,0.67,1.33,0.17
+pic_aline list=1.33,0.17,0.72,0.00
+pic_aline list=0.72,0.00,0.31,0.31
+pic_aline list=0.65,0.51,1.04,0.75
+pic_aline list=0.75,1.11,1.04,0.75
+end
+picture multififo_w1_r2
+pic_aline list=0.5,0,0.5,5.0,5.2,5.0,5.2,0,0.5,0
+pic_line list=0,1.0,0.5,0
+pic_pin clk i xy=0,1.0
+pic_text clk xy=0.6,1.0
+pic_line list=0,2.0,0.5,0
+pic_pin din i xy=0,2.0
+pic_text din xy=0.6,2.0
+pic_line list=0,3.0,0.5,0
+pic_pin reads i xy=0,3.0
+pic_text reads xy=0.6,3.0
+pic_line list=0,4.0,0.5,0
+pic_pin writes i xy=0,4.0
+pic_text writes xy=0.6,4.0
+pic_line list=5.2,1.5,0.5,0
+pic_pin count i xy=5.7,1.5
+pic_text count xy=5.2,1.5 align=right
+pic_line list=5.2,2.5,0.5,0
+pic_pin dout i xy=5.7,2.5
+pic_text dout xy=5.2,2.5 align=right
+pic_line list=5.2,3.5,0.5,0
+pic_pin frees i xy=5.7,3.5
+pic_text frees xy=5.2,3.5 align=right
+pic_text multififo_w1_r2 xy=0.5,5.2
+end
+picture syncfifo
+pic_aline list=0.5,0,0.5,5.0,4.5,5.0,4.5,0,0.5,0
+pic_line list=0,1.0,0.5,0
+pic_pin clk i xy=0,1.0
+pic_text clk xy=0.6,1.0
+pic_line list=0,2.0,0.5,0
+pic_pin din i xy=0,2.0
+pic_text din xy=0.6,2.0
+pic_line list=0,3.0,0.5,0
+pic_pin readout i xy=0,3.0
+pic_text readout xy=0.6,3.0
+pic_line list=0,4.0,0.5,0
+pic_pin vldin i xy=0,4.0
+pic_text vldin xy=0.6,4.0
+pic_line list=4.5,2.0,0.5,0
+pic_pin dout i xy=5.0,2.0
+pic_text dout xy=4.5,2.0 align=right
+pic_line list=4.5,3.0,0.5,0
+pic_pin empty i xy=5.0,3.0
+pic_text empty xy=4.5,3.0 align=right
+pic_text syncfifo xy=0.5,5.2
 end
 
 '''

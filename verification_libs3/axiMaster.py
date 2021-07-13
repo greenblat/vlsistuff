@@ -58,6 +58,9 @@ class axiMasterClass:
             Sig = Sig + self.suffix 
         return Sig
 
+    def peekbin(self,Sig):
+        Sig = self.rename(Sig)
+        return veri.peek('%s.%s'%(self.Path,Sig))
     def peek(self,Sig):
         Sig = self.rename(Sig)
         return logs.peek('%s.%s'%(self.Path,Sig))
@@ -247,19 +250,20 @@ class axiMasterClass:
                 rrr = self.bpeek('rdata')
                 self.datawidth = len(rrr)
             rid = self.peek('rid')
+            widrid = len(self.peekbin('rid'))
             rlast = self.peek('rlast')
             rdatax  = '%032x'%rdata 
             msb  = int(self.datawidth/4) 
 #            print('MSB "%s" %s    %s'%(msb,type(msb),rdatax))
             rdatax = rdatax[-msb:]
             logs.log_info('axiM responce rid=%x rlast=%d rdata=%s     %s'%(rid,rlast,rdatax,self.Path))
-            self.readAction(rid,rlast,rdata)
+            self.readAction(rid,rlast,rdata,widrid)
         else:
             self.manageRready(0)
 
-    def readAction(self,rid,rlast,rdatax):
+    def readAction(self,rid,rlast,rdatax,widrid):
         Len,Addr,Rid = self.AREADS[0]
-        if Rid != rid:
+        if (Rid & ((1<<widrid)-1)) != rid:
             logs.log_wrong('sent ARID=%d RID=%d'%(Rid,rid))
         
         self.RDATAS.append((Addr,rdatax))
