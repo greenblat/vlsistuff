@@ -116,6 +116,7 @@ def write_verilogs(lines):
             state='idle'
         else:
             if (state!='idle'):
+                print('>>>>',wrds)
                 Inst = clean_sig(wrds[0])
                 St = wrds.index('(')
                 En = wrds.index(')')

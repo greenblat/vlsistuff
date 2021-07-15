@@ -1,5 +1,5 @@
 
-
+import logs
 def dumpMod(Mod,Fname):
     Ftmp = open('%s.v' % Fname,'w')
     Mod.dump_verilog(Ftmp)
@@ -12,6 +12,9 @@ def createNewRtl(Mod):
 
 def runNewRtl(Mod):
     Insts = list(Mod.insts.keys())
+    Alwayses0 = {}
+    Alwayses1 = {}
+    Alwayses2 = {}
     for Inst in Insts:
         Obj = Mod.insts[Inst]
         Type = Obj.Type
@@ -20,7 +23,16 @@ def runNewRtl(Mod):
             Dly = [(Dly,Dly)]
         else:
             Dly = ''
-        if Type.startswith('nand'):
+
+        if Type.startswith('nandi'):
+            O,Ins  = typicalConns(Obj.conns,'&',True)
+            Mod.hard_assigns.append((O,('~',Ins),'',Dly))
+            Mod.insts.pop(Inst)
+        elif Type.startswith('andi'):
+            O,Ins  = typicalConns(Obj.conns,'&',True)
+            Mod.hard_assigns.append((O,Ins,'',Dly))
+            Mod.insts.pop(Inst)
+        elif Type.startswith('nand'):
             O,Ins  = typicalConns(Obj.conns,'&')
             Mod.hard_assigns.append((O,('~',Ins),'',Dly))
             Mod.insts.pop(Inst)
@@ -52,23 +64,6 @@ def runNewRtl(Mod):
             O,Ins  = typicalConns(Obj.conns,'&')
             Mod.hard_assigns.append((O,Ins,'',Dly))
             Mod.insts.pop(Inst)
-        elif Type == 'flop':
-            ensureExists(Obj,Inst,'ck d q')
-            Ck = Obj.conns['ck']
-            D = Obj.conns['d']
-            Q = Obj.conns['q']
-        elif Type == 'dffr':
-            ensureExists(Obj,Inst,'ck d q rn')
-            Ck = Obj.conns['ck']
-            D = Obj.conns['d']
-            Q = Obj.conns['q']
-            RN = Obj.conns['rn']
-        elif Type == 'dffs':
-            ensureExists(Obj,Inst,'ck d q sn')
-            Ck = Obj.conns['ck']
-            D = Obj.conns['d']
-            Q = Obj.conns['q']
-            SN = Obj.conns['sn']
         elif Type == 'mux2':
             ensureExists(Obj,Inst,'i0 i1 s o')
             i0 = Obj.conns['i0']
@@ -77,11 +72,70 @@ def runNewRtl(Mod):
             o = Obj.conns['o']
             Mod.hard_assigns.append((O,('question',s,i1,i0),'',Dly))
             Mod.insts.pop(Inst)
+        elif Type == 'mux4':
+            ensureExists(Obj,Inst,'i0 i1 i2 i3 s0 s1 o')
+            i0 = Obj.conns['i0']
+            i1 = Obj.conns['i1']
+            i2 = Obj.conns['i2']
+            i3 = Obj.conns['i3']
+            s0 = Obj.conns['s0']
+            s1 = Obj.conns['s1']
+            o = Obj.conns['o']
+            Mod.hard_assigns.append((O,('question',s1,('question',s0,i3,i2),('question',s0,i1,i0)),'',Dly))
+            Mod.insts.pop(Inst)
+
+        elif Type == 'flop':
+            ensureExists(Obj,Inst,'ck d q')
+            Ck = Obj.conns['ck']
+            D = Obj.conns['d']
+            Q = Obj.conns['q']
+            Mod.add_net(Q,'reg',0)
+            if Ck not in Alwayses0: Alwayses0[Ck] = []
+            Alwayses0[Ck].append((Q,D)) 
+            Mod.insts.pop(Inst)
+
+        elif Type == 'dffr':
+            ensureExists(Obj,Inst,'ck d q rn')
+            Ck = Obj.conns['ck']
+            D = Obj.conns['d']
+            Q = Obj.conns['q']
+            RN = Obj.conns['rn']
+            Mod.add_net(Q,'reg',0)
+            if (Ck,RN) not in Alwayses1: Alwayses1[(Ck,RN)] = []
+            Alwayses1[(Ck,RN)].append((Q,D)) 
+            Mod.insts.pop(Inst)
+        elif Type == 'dffs':
+            ensureExists(Obj,Inst,'ck d q sn')
+            Ck = Obj.conns['ck']
+            D = Obj.conns['d']
+            Q = Obj.conns['q']
+            SN = Obj.conns['sn']
+            Mod.add_net(Q,'reg',0)
+            if (Ck,SN) not in Alwayses2: Alwayses2[(Ck,SN)] = []
+            Alwayses2[(Ck,SN)].append((Q,D)) 
+            Mod.insts.pop(Inst)
         elif list(Obj.conns.keys()) != []:
             pass
         else:
-           print('warning! %s ignored for rtl verilog %s %s' % (Type,Inst,Obj.conns)) 
-
+           logs.log_warning('%s ignored for rtl verilog %s %s' % (Type,Inst,Obj.conns)) 
+    for Ck in Alwayses0:
+        List = Alwayses0[Ck]
+        List2 = ['list']
+        for Q,D in List:
+            List2.append(('<=',Q,D))
+        Mod.alwayses.append((('edge','posedge',Ck),List2,'always'))
+    for Ck,RN in Alwayses1:
+        List = Alwayses1[(Ck,RN)]
+        List2 = ['list']
+        for Q,D in List:
+            List2.append(('<=',Q,D))
+        Mod.alwayses.append((('list',('edge','posedge',Ck),('edge','negedge',RN)),List2,'always'))
+    for Ck,SN in Alwayses2:
+        List = Alwayses2[(Ck,SN)]
+        List2 = ['list']
+        for Q,D in List:
+            List2.append(('<=',Q,D))
+        Mod.alwayses.append((('list',('edge','posedge',Ck),('edge','negedge',SN)),List2,'always'))
 
 
 def ensureExists(Obj,Inst,Pins):
@@ -92,7 +146,7 @@ def ensureExists(Obj,Inst,Pins):
             logs.log_info('ensurePinExists %s / %s  is missing %s pin connection' % (Inst,Obj.Type,Pin))
 
 
-def typicalConns(Conns,Op):
+def typicalConns(Conns,Op,I1inv = False):
     Ins = ['','','','','','','','','','']
     O = ''
     for Pin in Conns.keys():
@@ -100,7 +154,10 @@ def typicalConns(Conns,Op):
             O = Conns[Pin]
         elif Pin[0] == 'i':
             Ind = int(Pin[1:])
-            Ins[Ind]  = Conns[Pin]
+            if I1inv and (Ind == 1):
+                Ins[Ind]  = ('~',Conns[Pin])
+            else:
+                Ins[Ind]  = Conns[Pin]
     Ins2 = [Op]
     for In in Ins:
         if In == 'vcc':

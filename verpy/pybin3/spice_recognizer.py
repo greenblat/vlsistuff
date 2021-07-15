@@ -3,8 +3,8 @@ import string
 import sys
 import logs
 
-PMOS =  ['pdmos_tran','pmos_tran','pmos']
-NMOS =  ['ndmos_tran','nmos_tran','nmos']
+PMOS =  ['pch_25od33mos_tran','pchmos_tran','pdmos_tran','pmos_tran','pmos']
+NMOS =  ['nch_25od33mos_tran','nchmos_tran','ndmos_tran','nmos_tran','nmos']
 VDDRENAMES = [('VDDA','vdd'),('VSSA','vss'),('vdd30_to_dm','vdd'),('vdd33','vdd'),('vdd30','vdd'),('dvss','vss'),('dvddh','vdd'),('dvdd','vdd'),('avddh','vdd'),('avss','vss')]
 VDDS = {}
 

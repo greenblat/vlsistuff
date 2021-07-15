@@ -146,6 +146,7 @@ def runFromLines(lines,FnameOut,Args):
     for X in Code0:
         Big.append(X)
     Fout = open('execme.py','w')
+    Fout.write(FUNCTIONS)
     for LL in Big:
         if LL[-1]!='\n': LL += '\n'
         Fout.write(LL)
@@ -153,7 +154,7 @@ def runFromLines(lines,FnameOut,Args):
     More = ' '.join(Args)
     Work = 'python execme.py "%s" > %s'%(More,FnameOut)
     os.system(Work)
-    os.system('/bin/rm  execme.py')
+#    os.system('/bin/rm  execme.py')
 
 def rework_backs(Str):
     Str1 = Str.replace('\\n','\\\\n')
@@ -448,7 +449,126 @@ def strname():
     N = 'str%d'%StrNum
     StrNum += 1
     return N
-    
+FUNCTIONS = '''
+
+def apb_slave(AWID,DWID):
+    print(\'\'\'
+  ,input [15:0] paddr
+  ,input       penable
+  ,output [31:0] prdata
+  ,output       pready
+  ,input       psel
+  ,output       pslverr
+  ,input [31:0] pwdata
+  ,input       pwrite
+
+    \'\'\')
+
+def axi_wr_master(AWID,DWID,LWID,IDWID):
+    print(\'\'\'
+    ,output [3:0] awid            
+    ,output [31:0] awaddr
+    ,output [7:0] awlen
+    ,output [2:0] awsize
+    ,output [1:0] awburst
+    ,output [3:0] awcache
+    ,output [3:0] awqos
+    ,output [2:0] awprot
+    ,output awvalid
+    ,input awready
+    ,output [127:0] wdata
+    ,output [15:0] wstrb
+    ,output wlast
+    ,output wvalid
+    ,input wready
+    ,input [3:0] bid 
+    ,input [1:0] bresp
+    ,input bvalid
+    ,output bready
+    \'\'\')
+
+def axi_rd_master(AWID,DWID,LWID,IDWID):
+    print(\'\'\'
+    ,output [3:0] arid
+    ,output [31:0] araddr
+    ,output [7:0] arlen
+    ,output [2:0] arsize
+    ,output [1:0] arburst
+    ,output [3:0] arcache
+    ,output [3:0] arqos
+    ,output [2:0] arprot
+    ,output arvalid
+    ,input arready
+    ,input [3:0] rid 
+    ,input [127:0] rdata
+    ,input [1:0] rresp
+    ,input rlast
+    ,input rvalid
+    ,output rready
+    \'\'\')
+
+def axi_master(AWID,DWID,LWID,IDWID):
+    axi_wr_master(AWID,DWID,LWID,IDWID)
+    axi_rd_master(AWID,DWID,LWID,IDWID)
+
+def axi_rd_conn():
+    print(\'\'\'
+    ,arid(arid)
+    ,araddr(araddr)
+    ,arlen(arlen)
+    ,arsize(arsize)
+    ,arburst(arburst)
+    ,arcache(arcache)
+    ,arqos(arqos)
+    ,arprot(arprot)
+    ,arvalid(arvalid)
+    ,arready(arready)
+    ,rid(rid)
+    ,rdata(rdata)
+    ,rresp(rresp)
+    ,rlast(rlast)
+    ,rvalid(rvalid)
+    ,rready(rready)
+    \'\'\')
+
+def axi_wr_conn():
+    print(\'\'\'
+    ,.awid(awid)
+    ,.awaddr(awaddr)
+    ,.awlen(awlen)
+    ,.awsize(awsize)
+    ,.awburst(awburst)
+    ,.awcache(awcache)
+    ,.awqos(awqos)
+    ,.awprot(awprot)
+    ,.awvalid(awvalid)
+    ,.awready(awready)
+    ,.wdata(wdata)
+    ,.wstrb(wstrb)
+    ,.wlast(wlast)
+    ,.wvalid(wvalid)
+    ,.wready(wready)
+    ,.bid (bid )
+    ,.bresp(bresp)
+    ,.bvalid(bvalid)
+    ,.bready(bready)
+    \'\'\')
+
+
+def apb_conn():
+    print(\'\'\'
+    ,.paddr(paddr)
+    ,.penable(penable)
+    ,.prdata(prdata)
+    ,.pready(pready)
+    ,.psel(psel)
+    ,.pslverr(pslverr)
+    ,.pwdata(pwdata)
+    ,.pwrite(pwrite)
+
+    \'\'\')
+
+'''
 
 
 if (__name__ == '__main__'): main()

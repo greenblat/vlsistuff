@@ -114,8 +114,11 @@ class module_class:
                logs.log_error('module %s sig %s got reg wid=%s was=%s'%(Name,Pwid,Wid,self.Module))
             if 'reg' in Pdir:
                 return
+            if Pdir == 'wire':
+                self.nets[Name]='reg',Wid
+                return
             if Pdir!='output':
-               logs.log_error('module %s sig %s got reg but was=%s'%(Name,Pdir,self.Module))
+               logs.log_error('module %s sig %s got reg but was=%s'%(self.Module,Name,Pdir))
                return
             self.nets[Name]='output reg',Wid
             return
@@ -1518,6 +1521,7 @@ def pr_dly(Dly):
     if Dly=='':
         return ''
     res=[]
+    print("DLY",Dly)
     for (A,B) in Dly:
         res.append(pr_expr(B))
     return '#(%s)'%(', '.join(res))

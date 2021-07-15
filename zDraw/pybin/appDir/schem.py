@@ -532,6 +532,20 @@ picture and3
   pic_pin i3 i xy=0,1
   pic_pin i1 i xy=0,3
 end
+picture andi3
+  pic_aline list=0,1,1,1,1,0.5,3.5,0.5
+  pic_aline list=0,3,1,3,1,3.5,3.5,3.5
+  pic_aline list=1,1,1,3
+  pic_aline list=0,2,1,2
+  pic_aline list=5.0,2,6,2
+  pic_fcircle list=1.8,2.9,1.5,2.9
+  pic_aline list=3.5,0.5,4,0.7,4.6,1.1,5,2,4.6,2.8,4.0,3.3,3.5,3.5
+  pic_circle list=0.8,1,1.0,1
+  pic_pin o1 o xy=6,2
+  pic_pin i3 i xy=0,3
+  pic_pin i2 i xy=0,2
+  pic_pin i1 i xy=0,1
+end
 picture and4
   pic_aline list=0,1,1,1,1,0.5,3.5,0.5
   pic_aline list=0,3,1,3,1,3.5,3.5,3.5
@@ -589,6 +603,32 @@ picture nand2
   pic_pin i2 i xy=0,1
   pic_pin i1 i xy=0,3
 end
+picture nandi2
+  pic_aline list=0,1,1,1,1,0.5,3.5,0.5
+  pic_aline list=0,3,1,3,1,3.5,3.5,3.5
+  pic_aline list=1,1,1,3
+  pic_aline list=5.8,2,6,2
+  pic_circle list=5.4,2,5,2
+  pic_fcircle list=1.8,2.9,1.5,2.9
+  pic_aline list=3.5,0.5,4,0.7,4.8,1.1,5,2,4.8,2.8,4.0,3.3,3.5,3.5
+  pic_pin o1 o xy=6,2
+  pic_pin i2 i xy=0,1
+  pic_circle list=1.0,1,0.6,1.0
+  pic_pin i1 i xy=0,3
+end
+picture andi2
+  pic_aline list=0,1,1,1,1,0.5,3.5,0.5
+  pic_aline list=0,3,1,3,1,3.5,3.5,3.5
+  pic_aline list=1,1,1,3
+  pic_aline list=5.0,2,5.5,2
+  pic_fcircle list=1.8,2.9,1.5,2.9
+  pic_aline list=3.5,0.5,4,0.7,4.8,1.1,5,2,4.8,2.8,4.0,3.3,3.5,3.5
+  pic_pin o1 o xy=5.5,2
+  pic_pin i2 i xy=0,1
+  pic_circle list=1.0,1,0.6,1.0
+  pic_pin i1 i xy=0,3
+end
+
 picture nand3
   pic_aline list=0,1,1,1,1,0.5,3.5,0.5
   pic_aline list=0,3,1,3,1,3.5,3.5,3.5
@@ -1058,6 +1098,24 @@ picture mux2
   pic_pin i0 i xy=0,3
   pic_pin i1 i xy=0,1
   pic_pin s i xy=2,4
+  pic_pin o o xy=4,2
+end
+picture mux4
+  pic_aline list=3.0,2,4,2
+  pic_aline list=2,3,2,4
+  pic_aline list=2.8,2.6,2.8,4
+  pic_aline list=0,3.5,0.6,3.5
+  pic_aline list=0,2.5,0.6,2.5
+  pic_aline list=0,1.5,0.6,1.5
+  pic_aline list=0,0.5,0.6,0.5
+  pic_aline list=3,2.4,0.6,3.6,0.6,0.4,3,1.6,3,2.4
+  pic_fcircle list=1.2,2.6,1.5,2.6
+  pic_pin i0 i xy=0,0.5
+  pic_pin i1 i xy=0,1.5
+  pic_pin i2 i xy=0,2.5
+  pic_pin i3 i xy=0,3.5
+  pic_pin s0 i xy=2,4
+  pic_pin s1 i xy=2.8,4
   pic_pin o o xy=4,2
 end
 
