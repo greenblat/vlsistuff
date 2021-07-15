@@ -28,7 +28,7 @@ def render_circle(Matrix,Point0,Point1,Color):
     X0,Y0 =  world_coord(Matrix,Point0)
     X1,Y1 =  world_coord(Matrix,Point1)
     Radii = max(abs(X0-X1),abs(Y0-Y1))
-    draw_circle((X0,Y0),Radii,Color)
+    draw_circle((X0,Y0),Radii,Color,1)
     return
 
 def render_arc(Matrix,Point0,Point1,Point2,Color):
