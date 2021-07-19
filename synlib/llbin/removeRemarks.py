@@ -1,6 +1,6 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 
-import os,sys,string
+import os,sys
 
 def main():
     Fname = sys.argv[1]

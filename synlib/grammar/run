@@ -1,0 +1,8 @@
+#! /bin/csh -f
+
+read_y_output.py yaccs/synlib.yacc
+/bin/mv mysave.py ../llbin/synlib_yacc_table.py
+
+
+
+

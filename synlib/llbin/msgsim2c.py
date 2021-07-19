@@ -1,6 +1,5 @@
 
 
-import string,types
 
 import synlib_functions
 
@@ -77,12 +76,12 @@ def cell_dump_msgsim_c(self,Fcc,pythonConnection):
         bType = self.busses[Bus]['bus_type']
         What = self.Types[bType]
         Width = int(What['bit_width'])
-        print 'bus',Bus,Dir,bType,What
+        print('bus',Bus,Dir,bType,What)
         for ii in range(Width):
             Pin = '%s[%d]'%(Bus,ii)
             self.pins[Pin]={'direction':Dir}
 
-    Pins = self.pins.keys()
+    Pins = list(self.pins.keys())
     if (len(Pins)==1):
         Pin = Pins[0]
         if (self.pins[Pin]['direction']=='output'):
@@ -111,14 +110,14 @@ def cell_dump_msgsim_c(self,Fcc,pythonConnection):
 
     Pins.sort()
     Numpins = len(Pins)
-    print '>>>>>>',Pins,Numpins
-    Fcc.write('//pinsOrder["%s"] =  %s\n'%(self.Name,str(Pins)))  # string.join(Pins,'","')))
+    print('>>>>>>',Pins,Numpins)
+    Fcc.write('//pinsOrder["%s"] =  %s\n'%(self.Name,str(Pins))) 
     Fcc.write('//Pairs %s\n'%str(self.pairs))
 
     Funcs = dumpOutputs(self,Pins)
-    Str0 = string.replace(inMsgString0,'CELL',self.Name)
-    Str1 = string.replace(inMsgString1,'NUM',str(Numpins))
-    Str1 = string.replace(Str1,'CELL',self.Name)
+    Str0 = inMsgString0.replace('CELL',self.Name)
+    Str1 = inMsgString1.replace('NUM',str(Numpins))
+    Str1 = Str1.replace('CELL',self.Name)
     Str0 = Str0+Str1
     if self.ff:
         Str0 += dump_ff(self,Pins)
@@ -152,43 +151,43 @@ def cell_dump_msgsim_c(self,Fcc,pythonConnection):
     Str0 += '    if (!keepMsg) { del_msgs(Msg);}\n'
     Str0 +='}\n'
     if self.singleOutput:
-        Str0 = string.replace(outMsgString1,'CELL',self.Name)
+        Str0 = outMsgString1.replace('CELL',self.Name)
 
     StrC = initString
     if self.singleOutput:
-        StrC = string.replace(StrC,'CELLX_delays','1')
-        StrC = string.replace(StrC,'CELLX_setups','1')
-        StrC = string.replace(StrC,'FIRE','1')
+        StrC = StrC.replace('CELLX_delays','1')
+        StrC = StrC.replace('CELLX_setups','1')
+        StrC = StrC.replace('FIRE','1')
     else:
-        StrC = string.replace(StrC,'FIRE','0')
+        StrC = StrC.replace('FIRE','0')
 
     if pythonConnection:
-        StrC = string.replace(StrC,'CELLX_delays','1')
-        StrC = string.replace(StrC,'CELLX_setups','1')
+        StrC = StrC.replace('CELLX_delays','1')
+        StrC = StrC.replace('CELLX_setups','1')
 
 
-    StrC = string.replace(StrC,'CELLX',self.Name)
-    StrC = string.replace(StrC,'JOB',self.Job)
-    StrC = string.replace(StrC,'NUM',str(Numpins))
+    StrC = StrC.replace('CELLX',self.Name)
+    StrC = StrC.replace('JOB',self.Job)
+    StrC = StrC.replace('NUM',str(Numpins))
 
 
     for ind,Pin in enumerate(Pins):
         if Pin in self.pins:
             Dir = self.pins[Pin]['direction']
-            tmp = string.replace(more0,'NUM',str(ind))
-            tmp = string.replace(tmp,'PIN',Pin)
-            tmp = string.replace(tmp,'DIR',Dir)
+            tmp = more0.replace('NUM',str(ind))
+            tmp = tmp.replace('PIN',Pin)
+            tmp = tmp.replace('DIR',Dir)
             if self.singleOutput:
                 tmp += '    A_msgs *Msgx = (A_msgs *) pp[0].pinMsg;  (*Msgx).Val= %s;\n'%(self.singleFunc)
                 tmp += '     (*Msgx).isWhat = qqai("supply");\n'
             if ('clock' in self.pins[Pin])and(self.pins[Pin]['clock']=='true'):
-                tmp = string.replace(tmp,'JOB','clock')
+                tmp = tmp.replace('JOB','clock')
             elif ('clock_gate_clock_pin' in self.pins[Pin])and(self.pins[Pin]['clock_gate_clock_pin']=='true'):
-                tmp = string.replace(tmp,'JOB','clock')
+                tmp = tmp.replace('JOB','clock')
             elif self.singleOutput:
-                tmp = string.replace(tmp,'JOB','supply')
+                tmp = tmp.replace('JOB','supply')
             else:
-                tmp = string.replace(tmp,'JOB','notspecified')
+                tmp = tmp.replace('JOB','notspecified')
 
             StrC += tmp
             StrC += '// %s\n'%(str(self.pins[Pin]))
@@ -249,13 +248,13 @@ def dump_ff(self,Pins):
         NextInd =  Pins.index('next')
     else:
         NextInd = Pins.index(Next)
-    print "<><>",Next,Nextf,NextInd,Pins
+    print("<><>",Next,Nextf,NextInd,Pins)
     if Preset and (Preset[0]=='!'):
         PresetInd = Pins.index(Preset[1:])
     elif (Preset)and(Preset in Pins):
         PresetInd = Pins.index(Preset)
     elif (Preset):
-        print  'pin "%s" is not a pin of cell %s'%(Preset,self.Name)
+        print( 'pin "%s" is not a pin of cell %s'%(Preset,self.Name))
     if Clear and (Clear[0]=='!'):
         ClearInd = Pins.index(Clear[1:])
     elif (Clear):
@@ -445,34 +444,34 @@ def dump_latch(self,Pins):
 
 
 def dump_statetable(self,Pins):
-    print 'statetable',self.statetable
+    print('statetable',self.statetable)
     Stx = self.statetable[0]
     St0 = Stx[0]
-    Vars = string.replace(St0,'"','')
+    Vars = St0.replace('"','')
     St1 = Stx[1]
-    Vars = string.replace(St0,'"','')
-    Qs   = string.replace(St1,'"','')
-    Vars = string.strip(Vars)
-    Vars = string.split(Vars)
-    Qs = string.strip(Qs)
-    Qs = string.split(Qs)
+    Vars = St0.replace('"','')
+    Qs   = St1.replace('"','')
+    Vars = Vars.strip()
+    Vars = Vars.split()
+    Qs = Qs.strip()
+    Qs = Qs.split()
     Ta2 = self.statetable[1]
     Ta1 = Ta2[0]
-    print '>>>>statetable Qs',Qs,'vars',Vars,self.statetable[1]
+    print('>>>>statetable Qs',Qs,'vars',Vars,self.statetable[1])
     if Ta2[0]=='"':
-        Ta2 = string.replace(Ta2,'"','')
-        Table = string.replace(Ta2,'\\','')
-        Lines = string.split(Table,',')
+        Ta2 = Ta2.replace('"','')
+        Table = Ta2.replace('\\','')
+        Lines = Table.split(',')
     elif Ta1[0]=='table':
         Table = Ta1[1]
         if Table[0]=='"':
             Table=Table[1:]
         if Table[-1]=='"':
             Table=Table[:-1]
-        Table = string.replace(Table,'\\','')
-        Lines = string.split(Table,',')
+        Table = Table.replace('\\','')
+        Lines = Table.split(',')
     else:
-        print 'errors!!! stateable'
+        print('errors!!! stateable')
         return '// state table error'
 
     Str = '// stateable vars=%s qs=%s\n'%(str(Vars),str(Qs))
@@ -483,9 +482,9 @@ def dump_statetable(self,Pins):
             Str += 'char %s = getPinVal(self,%s);\n'%(Var,replacePinNum(Var,Pins))
     Str += ' char %s = \n'%Qs[0]
     for Line in Lines:
-        Line = string.strip(Line)
-        Line = string.replace(Line,':','')
-        LL = string.split(Line)
+        Line = Line.strip()
+        Line = Line.replace(':','')
+        LL = Line.split()
         Expr,New = synlib_functions.match_table(VV,LL,self.Name)
         if New:
             Str += '         (%s) ? %s :\n'%(Expr,New)
@@ -521,9 +520,9 @@ def dumpOutputs(self,Pins):
 def makeCfunc(inFunc,Pins):
     Func = synlib_functions.funcify(inFunc,{})
     Func = synlib_functions.pythonizeFunc(Func)
-    Func = string.replace(Func,'self.pinMsg','(*self).pinMsg')
-    Func = string.replace(Func,'["','[')
-    Func = string.replace(Func,'"]',']')
+    Func = Func.replace('self.pinMsg','(*self).pinMsg')
+    Func = Func.replace('["','[')
+    Func = Func.replace('"]',']')
     Func = replacePinNum(Func,Pins)
     return Func
 
@@ -537,20 +536,20 @@ def pinNum(Pin,Pins):
     if Pin[0]=='!': Pin=Pin[1:]
     if Pin in Pins:
         return Pins.index(Pin)
-    print 'wrong pinNum for "%s" %s'%(Pin,Pins)
+    print('wrong pinNum for "%s" %s'%(Pin,Pins))
     return 0
     
 def replacePinNum(Func,Pins):
-    AA = string.replace(Func,'[',' [ ')
-    AA = string.replace(AA,']',' ] ')
-    wrds = string.split(AA)
+    AA = Func.replace('[',' [ ')
+    AA = AA.replace(']',' ] ')
+    wrds = AA.split()
     for ind,wrd in enumerate(wrds):
         if wrd in Pins:
             pos = Pins.index(wrd)
             wrds[ind]=str(pos)
-    Str = string.join(wrds,' ')
-    Str = string.replace(Str,' [ ','')
-    Str = string.replace(Str,' ] ','')
+    Str = ' '.join(wrds)
+    Str = Str.replace(' [ ','')
+    Str = Str.replace(' ] ','')
     return Str
 
 
@@ -558,7 +557,7 @@ def cell_dump_description(self,Fout,pythonConnection):
     Fout.write('Desc = cellDescClass("%s")\n'%self.Name)
     for Key in self.pairs:
         Fout.write('Desc.properties["%s"] = "%s"\n'%(Key,self.pairs[Key]))
-    Keys = self.pins.keys()
+    Keys = list(self.pins.keys())
     Keys.sort()
     Fout.write('Desc.pinOrder = %s\n'%(str(Keys)))
     for (To,Fr,Kind) in self.arcs:

@@ -1,0 +1,13 @@
+#! /bin/csh -f
+
+llbin/table2c.py synlib_tables
+/bin/cp tables.c src/synlib_tables.c
+
+set FLAGS = '-O3'
+
+gcc src/synlib_tables.c src/nlexer.c -o llbin/synlib_lexer $FLAGS
+gcc src/synlib_tables.c src/nlexer.c -o ../llbin/synlib_lexer $FLAGS
+
+
+
+

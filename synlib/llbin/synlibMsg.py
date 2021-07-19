@@ -1,10 +1,16 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 
 
-import os,sys,string,pickle
+import os,sys,pickle
 import traceback,logs
 
 import msgsim2c
+
+BaseF = __file__
+Xw = BaseF.split('/')
+BASE = '/'.join(Xw[:-1])
+
+
 
 Cells = {}
 Types = {}
@@ -26,13 +32,14 @@ def main():
     if (len(sys.argv)>1):
         Fname = sys.argv[1]
         if os.path.exists(Fname):
-            os.system('/bin/rm lex.out db0.pickle')
-            os.system('llbin/synlib_lexer %s'%Fname)
-            os.system('grep -v eol lex.out > lex.out2')
-            os.system('llbin/synlibyacc.py lex.out2')
-            os.system('llbin/simplify_pickle.py db0.pickle db1.pickle')
+            if os.path.exists('lex.out'):
+                os.system('/bin/rm lex.out db0.pickle')
+            os.system('%s/synlib_lexer -no_eol %s'%(BASE,Fname))
+            os.system('grep -v eol lex.out | sed -e "s/input input/input token/" | sed -e "s/output output/output token/" |sed -e "s/function function/function token/" > lex.out2')
+            os.system('%s/synlibyacc.py lex.out' % BASE)
+            os.system('%s/simplify_pickle.py db0.pickle db1.pickle' % BASE)
         else:
-            print 'file cannot be read "%s"'%Fname
+            print('file cannot be read "%s"'%Fname)
             return
     pythonConnection = '-python' in sys.argv
     load_db0('db1.pickle')
@@ -44,7 +51,7 @@ def main():
         Items = Lib0['Items']
         scan_lib_items(Items)
     else:
-        print 'failed library'
+        print('failed library')
     Fcc=open('msgsim_cells.ccc','w')
     for Cell in Cells:
         Cells[Cell].Types=Types
@@ -75,12 +82,12 @@ def one_lib_item(LL):
     elif (Head=='type'):
         deal_type(LL)
     else:
-        print 'unknown item',Head,LL
+        print('unknown item',Head,LL)
 
 def deal_cell(LL):
     Lb0 = match('cell ( ?Name ) { ?Items }',LL)
     if not Lb0:
-        print 'bad cell %s'%str(LL)
+        print('bad cell %s'%str(LL))
         return
     Name = Lb0['Name']
     Cells[Name]=cellClass(Name)
@@ -90,7 +97,7 @@ def deal_cell(LL):
         if Lb2:
             Cells[Name].pairs[Lb2['Param']]=Lb2['Val']
         else:
-            print 'wrong for deal_cell '
+            print('wrong for deal_cell ')
         return
     for Key in Lb0['Items']:
         LL2 =  DataBase[Key]
@@ -98,7 +105,7 @@ def deal_cell(LL):
         taken=False
         if Lb2:
             taken=True
-            print Lb0['Name'],'cell item ',Lb2['Param'],Lb2['Val']
+            print(Lb0['Name'],'cell item ',Lb2['Param'],Lb2['Val'])
             Cells[Name].pairs[Lb2['Param']]=Lb2['Val']
         Lb2 = match('pin ( ?Pin ) { ?Items }',LL2)
         if not Lb2:
@@ -116,7 +123,7 @@ def deal_cell(LL):
             if len(Items[0])==4:
                 Lb3 = match('?Param : ?Val ;',Items)
                 if Lb3:
-                    Param,Val = (string.replace(Lb3['Param'],'"',''),string.replace(Lb3['Val'],'"',''))
+                    Param,Val = (Lb3['Param'].replace('"',''),Lb3['Val'].replace('"',''))
                     Cells[Name].pins[Pin][Param]=Val
             else:
                  for Thing in Lb2['Items']:
@@ -133,7 +140,7 @@ def deal_cell(LL):
                      elif (LLx[0][0] in knownUselessPinItems):
                          pass
                      else:
-                         print Lb0['Name'],'cell pin unknown',Lb2['Pin'],LLx
+                         print(Lb0['Name'],'cell pin unknown',Lb2['Pin'],LLx)
             
         Lb2 = match('bus ( ?Pin ) { ?Items }',LL2)
         if Lb2:
@@ -148,7 +155,7 @@ def deal_cell(LL):
                 elif (LLx[0][0] in knownUselessPinItems):
                     pass
                 else:
-                    print Lb0['Name'],'cell bus unknown',Lb2['Pin'],LLx
+                    print(Lb0['Name'],'cell bus unknown',Lb2['Pin'],LLx)
             
 
         Lb2 = match('memory ( ) { ?Items }',LL2)
@@ -157,7 +164,7 @@ def deal_cell(LL):
             gather={}
             for Thing in Lb2['Items']:
                 Lparam = getPair(Thing)
-                print Lb0['Name'],'cell memory',Lparam 
+                print(Lb0['Name'],'cell memory',Lparam)
                 gather[Lparam[0]]=Lparam[1]
             Cells[Name].memory = gather
 
@@ -185,13 +192,13 @@ def deal_cell(LL):
             Pair = Lb2['Pair']
             Lines = Pair[2][0]
             Toks = getToks(Lb2['Exprs'])
-            print  'pair',Lines,'toks',Toks
+            print( 'pair',Lines,'toks',Toks)
             Cells[Name].statetable=(Toks,Lines)
 
 
 
         if (not taken):
-            print 'cell item unknown ',LL2
+            print('cell item unknown ',LL2)
 
 def workOnTiming(Name,Pin,LLy):
     Pairs = getPairs(LLy)
@@ -208,19 +215,19 @@ def workOnTiming(Name,Pin,LLy):
 def getToks(List):
     res=[]
     for XX in List:
-        Tok = string.replace(XX[0],'"','')
+        Tok = XX[0].replace('"','')
         if Tok !=',':
             res.append(Tok)
     return res
 
-knownUselessPinItems = string.split('internal_power timing fall_transition rise_transition cell_rise cell_fall rise_constraint fall_constraint')
+knownUselessPinItems = 'internal_power timing fall_transition rise_transition cell_rise cell_fall rise_constraint fall_constraint'.split()
 
 def getPair(Key):
     if Key in DataBase:
         LL2 = DataBase[Key]
         Lb2 = match('?Param : ?Val ;',LL2)
         if Lb2:
-            return (string.replace(Lb2['Param'],'"',''),string.replace(Lb2['Val'],'"',''))
+            return (Lb2['Param'].replace('"',''),Lb2['Val'].replace('"',''))
     return False
 
 
@@ -230,11 +237,11 @@ def getPairs(List):
         Lparam = getPair(Thing)
         LLx = DataBase[Thing]
         if Lparam:
-            res[Lparam[0]] = string.replace(Lparam[1],'"','')
+            res[Lparam[0]] = Lparam[1].replace('"','')
         elif (LLx[0][0] in knownUselessPinItems):
             pass
         else:
-            print 'error! get pair got %s lparam=%s llx=%s'%(str(Thing),Lparam,LLx)
+            print('error! get pair got %s lparam=%s llx=%s'%(str(Thing),Lparam,LLx))
     return res
 
 def getPairs2(List):
@@ -243,12 +250,12 @@ def getPairs2(List):
         Lparam = getPair(Thing)
         LLx = DataBase[Thing]
         if Lparam:
-            Tok = string.replace(Lparam[1],'"','')
+            Tok = Lparam[1].replace('"','')
             res.append((Lparam[0],Tok))
         elif (LLx[0][0] in knownUselessPinItems):
             pass
         else:
-            print 'error! get pair got %s'%str(Thing)
+            print('error! get pair got %s'%str(Thing))
     return res
 
 
@@ -260,15 +267,14 @@ def deal_type(LL):
         LL2 =  DataBase[Key]
         Lb2 = match('?Param : ?Val ;',LL2)
         if Lb2:
-#            print Lb0['Name'],'type lb2',Lb2['Param'],Lb2['Val']
             Types[Type][Lb2['Param']]=Lb2['Val']
         else:
-            print 'bad type thing',LL2
+            print('bad type thing',LL2)
 
 
 def load_db0(Fname):
     global DataBase
-    File = open(Fname)
+    File = open(Fname,'rb')
     DataBase = pickle.load(File) 
 
 
@@ -276,7 +282,7 @@ def match(Pattern,List):
     if (len(List)==2)and(List in DataBase):
         return match(Pattern,DataBase[List])
 
-    Words = string.split(Pattern)
+    Words = Pattern.split()
     if len(Words)!=len(List): return False
 
     res={}
@@ -290,7 +296,7 @@ def match(Pattern,List):
             elif len(Act)==4:
                 res[Key[1:]]=Act[0]
             else:
-                print 'error!'
+                print('error!')
                 return 0
         else:
             return 0
@@ -303,7 +309,7 @@ def dump_dump():
     Fout.close()
 
 
-knownUselessKeys = string.split(''' 
+knownUselessKeys = ''' 
 default_intrinsic_fall default_inout_pin_fall_res default_intrinsic_rise default_slope_rise
 default_output_pin_fall_res default_slope_fall default_inout_pin_rise_res default_output_pin_rise_res
 delay_model revision date comment time_unit
@@ -333,7 +339,7 @@ nom_temperature nom_voltage capacitive_load_unit pulling_resistance_unit
  k_temp_cell_leakage_power k_volt_internal_power k_temp_internal_power
  k_temp_wire_cap k_volt_wire_cap k_temp_wire_res k_volt_wire_res k_temp_pin_cap k_volt_pin_cap
  voltage_map
- ''')
+ '''.split()
 
 
 

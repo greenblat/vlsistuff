@@ -1,9 +1,9 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 '''
  msgsim project: concat cell descriptions into one library file
 '''
 
-import os,sys,string
+import os,sys
 
 libDirectory = 'descriptions'
 
@@ -32,8 +32,8 @@ def copyLibIn(Type,Fout):
         for line in lines:
             Fout.write(line)
     else:
-        print '%s cell missing'%Type
-        print 'make cell_descriptions/%s.py'%Type
+        print('%s cell missing'%Type)
+        print('make cell_descriptions/%s.py'%Type)
         missings += 1
     return missings
 

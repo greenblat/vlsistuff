@@ -1,6 +1,6 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 
-import os,sys,string
+import os,sys
 import pickle
 from synlib_yacc_table import *
 def main():
@@ -33,9 +33,9 @@ def readlexfile(Flexname):
             Lex.append(('$end','$end',-1,-1))
             Lex.append(('$end','$end',-1,-1))
             Flex.close()
-            print '%d lex tokens read'%len(Lex)
+            print('%d lex tokens read'%len(Lex))
             return
-        wrds = string.split(line)
+        wrds = line.split()
         if len(wrds)==0:
             pass
         elif len(wrds)==4:
@@ -45,12 +45,12 @@ def readlexfile(Flexname):
                 wrds[1]=wrds[0]
             Lex.append(tuple(wrds))
         elif (wrds[-3]=='pragma'):
-            Str = string.join(line[1:-4],' ')
+            Str = ' '.join(line[1:-4])
             Lex.append(tuple([Str]+wrds[-3:]))
         elif (line[0]=='"'):
-            Ind = string.index(line[1:],'"')
+            Ind = line[1:].index('"')
             Str = line[:Ind+2]
-            wrds = string.split(line[Ind+2:])
+            wrds = line[Ind+2:].split()
             Lex.append(tuple([Str]+wrds))
         fix_bad_syntax(Lex)
 
@@ -64,7 +64,7 @@ def fix_bad_syntax(Lex):
             Pop = Lex.pop(-1)
             Lex.append((';',';',Line2,0))
             Lex.append(Pop)
-#            print Lex[-1][1],Lex[-2][1],Lex[-3][1],Lex[-4][1],Lex[-1][2],Lex[-2][2],Lex[-3][2],Lex[-4][2]
+#            print(Lex[-1][1],Lex[-2][1],Lex[-3][1],Lex[-4][1],Lex[-1][2],Lex[-2][2],Lex[-3][2],Lex[-4][2])
 
 
 
@@ -74,13 +74,13 @@ def run_machine():
     steps=0
     while (state!=0):
         if (Verbose):
-            print 'stepit state=%s tok=%s stack=%s'%(state,Lex[0],Stack)
+            print('stepit state=%s tok=%s stack=%s'%(state,Lex[0],Stack))
         nextstate = step_machine(state)
         state=nextstate
         steps +=1
         if (steps % 2000)==0:
-            print '%d steps synlibyacc  line=%s '%(steps,Lex[0][2])
-    print 'exit state',state,len(Lex)
+            print('%d steps synlibyacc  line=%s '%(steps,Lex[0][2]))
+    print('exit state',state,len(Lex))
 
 def uniq(What):
     if (What not in Uniques):
@@ -94,9 +94,9 @@ def uniq(What):
 def step_machine(state):
     List = States[state]
     (Tok,Kind,Lnum,Pos)=Lex[0]
-#    print  'yacc tok="%s" kind=%s lnum=%s pos=%s state=%s'%(Tok,Kind,Lnum,Pos,state)
+#    print( 'yacc tok="%s" kind=%s lnum=%s pos=%s state=%s'%(Tok,Kind,Lnum,Pos,state))
     for (Act,Param,Next) in List:
-#        print 'try',Act,Param,Next
+#        print('try',Act,Param,Next)
         if (Act=='shift'):
             if (matches_ok(Tok,Kind,Act,Param)):
                 Stack.append((Tok,Kind,Lnum,Pos,state))
@@ -106,7 +106,7 @@ def step_machine(state):
             Rule=Next
             Name,Wrds = Rules[Rule]
             Wrds=Wrds[:]
-#            print 'reduce action rule=%s name=%s wrds=%s'%(Rule,Name,Wrds)
+#            print('reduce action rule=%s name=%s wrds=%s'%(Rule,Name,Wrds))
             Id = uniq(Name)
 #            Fout.write('reduce %s %d %s\n'%(Name,Id,Stack[-len(Wrds):]))
             if len(Wrds)==0:
@@ -115,7 +115,7 @@ def step_machine(state):
                 addToDb(Name,Id,Stack[-len(Wrds):])
             NST=state
             while Wrds!=[]:
-#                print 'work reduce wrds=%s stack=%s %s %s %s %s %s'%(Wrds,Stack,Lnum,Pos,Rule,Name,Wrds)
+#                print('work reduce wrds=%s stack=%s %s %s %s %s %s'%(Wrds,Stack,Lnum,Pos,Rule,Name,Wrds))
                 TT,KK,Lnum1,Pos1,NST = Stack.pop(-1)
                 Wrds.pop(0)
             Lex.insert(0,(Name,Name,Id,-1))
@@ -127,9 +127,9 @@ def step_machine(state):
                 return Next
         elif Act=='accept':
             return 0
-    print 'error! yaccer: no valid operation act=%s tok=%s kind=%s lnum=%s pos=%s state=%s'%(Act,Tok,Kind,Lnum,Pos,state)
+    print('error! yaccer: no valid operation act=%s tok=%s kind=%s lnum=%s pos=%s state=%s'%(Act,Tok,Kind,Lnum,Pos,state))
     for (T,K,L,P,S) in Stack:
-        print 'stack tok="%s" kind=%s lnum=%s pos=%s state=%s'%(T,K,L,P,S)
+        print('stack tok="%s" kind=%s lnum=%s pos=%s state=%s'%(T,K,L,P,S))
     return False
 
 def addToDb(Name,Id,List):
@@ -149,14 +149,14 @@ def clean_up(List):
 def reportDb():
     for Key in DataBase:
         Fout.write('%s %s\n'%(Key,DataBase[Key]))
-    Outf = open('db0.pickle','w')
+    Outf = open('db0.pickle','wb')
     pickle.dump(DataBase,Outf)
     Outf.close()
 
 
 
 def matches_ok(Tok,Kind,Act,Param):
-#    print 'matches_ok',(Tok==Param)or(Kind==Param),Tok,Kind,Act,Param
+#    print('matches_ok',(Tok==Param)or(Kind==Param),Tok,Kind,Act,Param)
     if (Tok==Param)or(Kind==Param):
         return True
     return False

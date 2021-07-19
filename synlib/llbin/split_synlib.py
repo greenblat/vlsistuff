@@ -1,6 +1,6 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 
-import os,sys,string
+import os,sys
 
 def main():
     Fname = sys.argv[1]
@@ -17,7 +17,6 @@ def readfile(File):
 state0='idle'
 def use_line1(line):
     global state0
-#    print 'state',state0,'/*' in line,'*/' in line,line,
     if state0=='idle':
         if '/*' in line:
             if '*/' in line:
@@ -30,7 +29,6 @@ def use_line1(line):
                 line = line[:ind0]
                 use_line2(line)
                 state0 = 'incomment'
-#                print 'incomment'
         else:
             use_line2(line)
     elif state0=='incomment':
@@ -71,9 +69,9 @@ def use_line2(line):
             Cell = cell_line(line)
             open_cell(Cell,line)
             Opens=1
-NeedSemi = string.split('variable_1 variable_2 timing_sense related_pin tree_type')            
+NeedSemi = 'variable_1 variable_2 timing_sense related_pin tree_type'.split()
 def fix_base_line(line,State):
-    wrds = string.split(line)
+    wrds = line.split()
     if len(wrds)==0: return line
     if doesntEndWithSemcolon(line):
         if wrds[0] in NeedSemi: return line[:-1]+';\n'
@@ -81,14 +79,14 @@ def fix_base_line(line,State):
 
 def doesntEndWithSemcolon(line):
     if ';' not in line: return True
-    wrds = string.split(line)
+    wrds = line.split()
     return wrds[-1][-1]!=';'
 
 
 def open_cell(Cell,line):
     global Fout
     Fout = open('syntmp/%s.lib'%Cell,'w')
-    print 'open %s'%Cell
+    print('open %s'%Cell)
     for line0 in Header:
         Fout.write(line0)
     Fout.write(line)
@@ -99,7 +97,7 @@ def close_cell(line):
     Fout.close()
     
 def has_bad_vibes(line):
-    wrds = string.split(line)
+    wrds = line.split()
     for Pattern in ['pg_pin','ccsn_first_stage','output_voltage_fall','propagated_noise_high','propagated_noise_low','dc_current','ccsn_last_stage','leakage_power','internal_power','output_current_fall','output_current_rise','fall_power','rise_power','receiver_capacitance1_fall','receiver_capacitance1_rise','receiver_capacitance2_rise','receiver_capacitance2_fall','cell_fall','cell_rise','fall_transition','rise_transition','operating_conditions','revision']:
         if Pattern in wrds:
             return True
@@ -114,7 +112,7 @@ def add_cell_line(line):
         X = count_char(line,'{')
         Y = count_char(line,'}')
         Bads =Bads+X-Y
-        print 'hasbadvibes',Bads,X,Y,line,
+        print('hasbadvibes',Bads,X,Y,line)
 
 
 
@@ -132,14 +130,14 @@ def count_char(Str,Char):
             cnt += 1
     return cnt
 def cell_line(line):
-    line1 = string.replace(line,'(',' ( ')
-    line1 = string.replace(line1,')',' ) ')
-    line1 = string.replace(line1,'{',' { ')
-    wrds = string.split(line1)
+    line1 = line.replace('(',' ( ')
+    line1 = line1.replace(')',' ) ')
+    line1 = line1.replace('{',' { ')
+    wrds = line1.split()
     if len(wrds)<5:
         return False
     if (wrds[0]=='cell')and(wrds[1]=='(')and(wrds[3]==')')and(wrds[4]=='{'):
-        return  string.replace(wrds[2],'"','')
+        return  wrds[2].replace('"','')
     return False
 
 

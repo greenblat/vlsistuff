@@ -1,6 +1,6 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 
-import os,sys,string
+import os,sys
 import pickle
 
 def main():
@@ -14,7 +14,7 @@ def main():
     simplify(Fname,Fnameout)
 
 def simplify(Fname,Fnameout):    
-    File = open(Fname)
+    File = open(Fname,'rb')
     dataBase = pickle.load(File)
     File.close()
 
@@ -43,7 +43,7 @@ def simplify(Fname,Fnameout):
                         Used[Item]=True
                         dones += 1
          
-    print 'removed %d items'%len(Used.keys())
+    print('removed %d items'%len(Used.keys()))
     for Key in Used:
         dataBase.pop(Key)
 
@@ -70,10 +70,10 @@ def simplify(Fname,Fnameout):
         dataBase.pop(Key)
 
     checkDataBase("bb",dataBase)
-    print 'removed %d items'%len(Used.keys())
+    print('removed %d items'%len(Used.keys()))
 
     if Fnameout:
-        Outf = open(Fnameout,'w')
+        Outf = open(Fnameout,'wb')
         pickle.dump(dataBase,Outf)
         Outf.close()
     else:
@@ -87,15 +87,15 @@ def checkDataBase(Why,dataBase):
         for Item in List:
             if len(Item)==2:
                 if Item not in dataBase:
-                    print '%s: in key=%s item=%s of list=%s is not in the database'%(Why,Key,Item,List)
+                    print('%s: in key=%s item=%s of list=%s is not in the database'%(Why,Key,Item,List))
             Used[Item]=True
     for Key in dataBase:
         if Key not in Used:
-            print '%s: key=%s is not used in database'%(Why,str(Key))
+            print('%s: key=%s is not used in database'%(Why,str(Key)))
 
 def printIt(Why,dataBase):
     for Key in dataBase:
-        print Why,Key,dataBase[Key]
+        print(Why,Key,dataBase[Key])
 
 
 if __name__ == '__main__':
