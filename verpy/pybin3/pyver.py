@@ -66,6 +66,7 @@ def run_lexer(Fname,FnameOut):
         print('using system verilog parsing')
         os.system('systemverilog_lexer %s %s'%(Fname,FnameOut))
     elif (os.path.exists('%s/verilog_lexer'%(Env.params['execpath']))):
+        print('using plain verilog parsing')
         os.system('%s/verilog_lexer %s %s -no_eol'%(Env.params['execpath'],Fname,FnameOut))
     else:
         print('using slow python  verilog lexer. compile verilog_lexer.c for faster run')

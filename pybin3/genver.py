@@ -152,7 +152,7 @@ def runFromLines(lines,FnameOut,Args):
         Fout.write(LL)
     Fout.close()
     More = ' '.join(Args)
-    Work = 'python execme.py "%s" > %s'%(More,FnameOut)
+    Work = 'python3 execme.py "%s" > %s'%(More,FnameOut)
     os.system(Work)
 #    os.system('/bin/rm  execme.py')
 

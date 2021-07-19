@@ -68,17 +68,17 @@ def draw_rect(X0,Y0,X1,Y1,Color):
     pygame.draw.lines(Screen,Color,Points,glLineWidth)
 
 def draw_xcircle(P0,Radii,Color):
-    draw_circle(P0,Radii,Color)
+    draw_circle(P0,Radii,Color,1)
 
 def draw_fcircle(P0,Radii,Color):
-    draw_circle(P0,Radii,Color)
+    draw_circle(P0,Radii,Color,0)
 
-def draw_circle(P0,Radii,Color):
+def draw_circle(P0,Radii,Color,Width):
     (Radii,Radii0) = fixCoord((Radii,Radii))
     P0 = fixCoord(P0)
     Color = oglcolor(Color)
     Screen = Glbs.get_context('screen')
-    pygame.draw.circle(Screen,Color,P0,Radii)
+    pygame.draw.circle(Screen,Color,P0,Radii,Width)
 
 
 def draw_arc(P0,P1,P2,Color):

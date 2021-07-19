@@ -12,7 +12,7 @@
 %token  strong1  strong0  pull1  pull0  weak1  weak0  highz1  highz0 
 %token fork join
 %token disable
-%token pragma
+%token pragma1 pragma2
 %token plus_range minus_range
 %token floating
 %token power star
@@ -69,7 +69,7 @@ Mstuff :
     | Function
     | Task
     | Define
-    | pragma
+    | Pragma
     | newver
     ;
 
@@ -266,11 +266,12 @@ Statement :
     | Repeat_statement
     | While_statement
     | Dotted ';'
-    | pragma
+    | Pragma
     | assign LSH '=' Expr ';'
     | return token ';'
     ;
 
+Pragma : pragma1 string pragma2 ;
 For_statement : for '(' Soft_assigns ';' Expr ';' Soft_assigns ')' Statement ; 
 Repeat_statement : repeat '(' Expr ')' Statement ; 
 While_statement : while '(' Expr ')' Statement ; 

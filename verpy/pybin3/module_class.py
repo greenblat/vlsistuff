@@ -411,7 +411,7 @@ class module_class:
             (Dir,Wid1,Wid2)=self.mems[Name]
             Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid1),pr_expr(Name),pr_wid(Wid2)))
         for (A,B,C,D) in self.pragmas:
-            Fout.write('(* %s lnum=%s *)\n'%(A,C))
+            Fout.write('(* %s lnum=%s *)\n'%(A[:-1],C[:-1]))
         for Name in self.modports:
             List = self.modports[Name]
             res=[]

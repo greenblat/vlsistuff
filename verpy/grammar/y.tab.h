@@ -114,33 +114,34 @@
      fork = 330,
      join = 331,
      disable = 332,
-     pragma = 333,
-     plus_range = 334,
-     minus_range = 335,
-     floating = 336,
-     power = 337,
-     star = 338,
-     generate = 339,
-     endgenerate = 340,
-     genvar = 341,
-     force = 342,
-     release = 343,
-     xnor = 344,
-     nand = 345,
-     nor = 346,
-     repeat = 347,
-     supply0 = 348,
-     supply1 = 349,
-     newver = 350,
-     return = 351,
-     arith_shift_right = 352,
-     SignedLeft = 353,
-     shift_right = 354,
-     shift_left = 355,
-     Veryequal = 356,
-     noteqeq = 357,
-     StarStar = 358,
-     UNARY_PREC = 359
+     pragma1 = 333,
+     pragma2 = 334,
+     plus_range = 335,
+     minus_range = 336,
+     floating = 337,
+     power = 338,
+     star = 339,
+     generate = 340,
+     endgenerate = 341,
+     genvar = 342,
+     force = 343,
+     release = 344,
+     xnor = 345,
+     nand = 346,
+     nor = 347,
+     repeat = 348,
+     supply0 = 349,
+     supply1 = 350,
+     newver = 351,
+     return = 352,
+     arith_shift_right = 353,
+     SignedLeft = 354,
+     shift_right = 355,
+     shift_left = 356,
+     Veryequal = 357,
+     noteqeq = 358,
+     StarStar = 359,
+     UNARY_PREC = 360
    };
 #endif
 /* Tokens.  */
@@ -219,33 +220,34 @@
 #define fork 330
 #define join 331
 #define disable 332
-#define pragma 333
-#define plus_range 334
-#define minus_range 335
-#define floating 336
-#define power 337
-#define star 338
-#define generate 339
-#define endgenerate 340
-#define genvar 341
-#define force 342
-#define release 343
-#define xnor 344
-#define nand 345
-#define nor 346
-#define repeat 347
-#define supply0 348
-#define supply1 349
-#define newver 350
-#define return 351
-#define arith_shift_right 352
-#define SignedLeft 353
-#define shift_right 354
-#define shift_left 355
-#define Veryequal 356
-#define noteqeq 357
-#define StarStar 358
-#define UNARY_PREC 359
+#define pragma1 333
+#define pragma2 334
+#define plus_range 335
+#define minus_range 336
+#define floating 337
+#define power 338
+#define star 339
+#define generate 340
+#define endgenerate 341
+#define genvar 342
+#define force 343
+#define release 344
+#define xnor 345
+#define nand 346
+#define nor 347
+#define repeat 348
+#define supply0 349
+#define supply1 350
+#define newver 351
+#define return 352
+#define arith_shift_right 353
+#define SignedLeft 354
+#define shift_right 355
+#define shift_left 356
+#define Veryequal 357
+#define noteqeq 358
+#define StarStar 359
+#define UNARY_PREC 360
 
 
 

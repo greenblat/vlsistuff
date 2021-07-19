@@ -127,7 +127,7 @@ def execute_line(Line,Env):
             Fname = '%s.dumpv'%Root
         check_directory_exists(Fname)
         Fout = open(Fname,'w')
-        Env.Current.dump_verilog(Fout,True)
+        Env.Current.dump_verilog(Fout)
         Fout.close()
         return
 

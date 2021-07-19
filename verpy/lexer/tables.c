@@ -196,7 +196,7 @@ void stepit(char Char,char Next) {
               return;
         }
         if (in_string(Char,strx6)&&in_string(Next,strx1)) {
-              action("none","0",Char);
+              action("push","pragma1",Char);
               State=st_pragma1;
               return;
         }
@@ -483,19 +483,19 @@ void stepit(char Char,char Next) {
     } break;
     case st_pragma1: {
         if (in_string(Char,strx6)&&in_string(Next,strx22)) {
-              action("none","0",Char);
+              action("push","string",Char);
               State=st_pragma2;
               return;
         }
         if (in_string(Char,strx1)&&in_string(Next,strx1)) {
-              action("none","0",Char);
+              action("add","0",Char);
               State=st_pragma1;
               return;
         }
     } break;
     case st_pragma2: {
         if (in_string(Char,strx22)&&in_string(Next,strx1)) {
-              action("clear","0",Char);
+              action("push","pragma2",Char);
               State=st_idle;
               return;
         }

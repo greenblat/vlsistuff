@@ -497,7 +497,6 @@ class sequenceClass:
         Txt = ' '.join(map(str,Wrds))
         if Txt == '': return 0
         try:
-            print('>>>>>DEFS',self.Defs)
             X = eval(Txt,self.Defs,self.Translates)
             return X
         except:

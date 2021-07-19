@@ -5,12 +5,9 @@ llbin/table2c.py verilog_tables
 
 set FLAGS = '-O3'
 set FLAGS = '-g'
-gcc src/verilog_tables.c src/nlexer.c -o verilog_lexer $FLAGS
-
-/bin/cp verilog_lexer  ../pybin3/
-/bin/cp verilog_lexer  ../pybin2/
+gcc src/verilog_tables.c src/nlexer.c -o ../pybin3/verilog_lexer $FLAGS
 
 # optional. not required
-/bin/cp verilog_lexer  ~/bin/
+gcc src/verilog_tables.c src/nlexer.c -o ~/bin/verilog_lexer $FLAGS
 
 

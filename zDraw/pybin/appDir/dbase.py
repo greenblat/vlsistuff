@@ -659,10 +659,23 @@ class DetailClass:
         for Key in self.params:
             self.params[Key].draw(Matrix)
 
+    def nodesStats(self):
+        self.NODES = {}
+        for Wire in self.wires:
+            Start = self.wires[Wire].Start
+            End = self.wires[Wire].End
+            if Start not in self.NODES: self.NODES[Start] = 0
+            if End   not in self.NODES: self.NODES[End] = 0
+            self.NODES[Start] += 1
+            self.NODES[End] += 1
 
     def postscript(self,File):
+        self.nodesStats()
         for Inst in self.instances:
-            self.instances[Inst].postscript(File)
+            if (Inst in self.NODES) and (self.instances[Inst].Type == 'node')and(self.NODES[Inst] == 2):
+                pass
+            else:
+                self.instances[Inst].postscript(File)
         for Name in self.geoms:
             self.geoms[Name].postscript(File)
         for Wire in self.wires:
@@ -1118,8 +1131,8 @@ def use_mousemove(X,Y):
         PP = screen2schem((X,Y))
         Was = get_context('last_group_mouse_selected',PP)
         [_,_,List]=get_context('grouping')
-        if type(List)is not list:
-            log_error('no group defined yet')
+        if type(List) is not list:
+            log_error('no group defined yet %s %s' % (type(List),List))
             return
             
         Dx = PP[0]-Was[0]
@@ -1129,6 +1142,7 @@ def use_mousemove(X,Y):
         set_context('last_group_mouse_selected',PP)
         return
 
+    return   # dont jump us
     if 'last_mouse_selected' not in Glbs.contexts: return
     (What,Inst,WasX,WasY) = get_context('last_mouse_selected')
     Root=get_context('root')

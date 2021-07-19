@@ -1082,6 +1082,10 @@ def add_module_item(Item):
         elif Item[0]=='GenFor_statement':
             X = get_statement(Item)
             Current.add_generate(X)
+        elif Item[0]=='Pragma':
+            Str = List[1]
+            add_pragma(Str)
+
         else:
             logs.log_err('untreated(0) "%s" "%s"'%(Item,List))
     elif (len(Item)==4)and(Item[1]=='pragma'):
