@@ -35,7 +35,7 @@ def main():
             if os.path.exists('lex.out'):
                 os.system('/bin/rm lex.out db0.pickle')
             os.system('%s/synlib_lexer -no_eol %s'%(BASE,Fname))
-            os.system('grep -v eol lex.out | sed -e "s/input input/input token/" | sed -e "s/output output/output token/" |sed -e "s/function function/function token/" > lex.out2')
+#            os.system('grep -v eol lex.out | sed -e "s/input input/input token/" | sed -e "s/output output/output token/" |sed -e "s/function function/function token/" > lex.out2')
             os.system('%s/synlibyacc.py lex.out' % BASE)
             os.system('%s/simplify_pickle.py db0.pickle db1.pickle' % BASE)
         else:
@@ -43,6 +43,7 @@ def main():
             return
     pythonConnection = '-python' in sys.argv
     load_db0('db1.pickle')
+    os.system('%s/synlib2v.py db1.pickle' % BASE)
     dump_dump()
     Top = ('Library',1)
     LL = DataBase[Top]
@@ -81,6 +82,8 @@ def one_lib_item(LL):
         deal_cell(LL)
     elif (Head=='type'):
         deal_type(LL)
+    elif Head in ['default_threshold_voltage_group','normalized_driver_waveform','define','driver_model','emulated_driver_ratio']:
+        pass
     else:
         print('unknown item',Head,LL)
 

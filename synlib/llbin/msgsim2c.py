@@ -110,7 +110,6 @@ def cell_dump_msgsim_c(self,Fcc,pythonConnection):
 
     Pins.sort()
     Numpins = len(Pins)
-    print('>>>>>>',Pins,Numpins)
     Fcc.write('//pinsOrder["%s"] =  %s\n'%(self.Name,str(Pins))) 
     Fcc.write('//Pairs %s\n'%str(self.pairs))
 
@@ -457,7 +456,7 @@ def dump_statetable(self,Pins):
     Qs = Qs.split()
     Ta2 = self.statetable[1]
     Ta1 = Ta2[0]
-    print('>>>>statetable Qs',Qs,'vars',Vars,self.statetable[1])
+    print('info statetable Qs',Qs,'vars',Vars,self.statetable[1])
     if Ta2[0]=='"':
         Ta2 = Ta2.replace('"','')
         Table = Ta2.replace('\\','')
@@ -562,7 +561,6 @@ def cell_dump_description(self,Fout,pythonConnection):
     Fout.write('Desc.pinOrder = %s\n'%(str(Keys)))
     for (To,Fr,Kind) in self.arcs:
         Fout.write('Desc.add_arc("%s","%s","%s")\n'%(Fr,To,Kind))
-        
     if len(self.pins.keys())==1:
         Pin = self.pins.keys()[0]
         if (self.pins[Pin]['direction']=='output'):
@@ -590,7 +588,7 @@ def cell_dump_description(self,Fout,pythonConnection):
         Pin = self.pins.keys()[0]
         Dir = self.pins[Pin]['direction']
         try:
-            Func = funcify(self.pins[Pin]['function'])
+            Func = synlib_functions.funcify(self.pins[Pin]['function'])
             if Dir=='output':
                 Fout.write('Desc.set_job("supply%s")\n'%Func)
         except:
@@ -610,7 +608,7 @@ def cell_dump_description(self,Fout,pythonConnection):
             Fout.write('Desc.add_pin("%s","%s")\n'%(Pin,Dir))
         if Dir=='output':
             try:
-                Func = funcify(self.pins[Pin]['function'])
+                Func = synlib_functions.funcify(self.pins[Pin]['function'])
             except:
                 Func='unknown'
             Fout.write('Desc.add_pin_func("%s","%s")\n'%(Pin,Func))
