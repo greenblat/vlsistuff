@@ -1,8 +1,5 @@
 library(slow) {
-    delay_model : table_lookup;
-  in_place_swap_mode : match_footprint;
-  library_features(report_delay_calculation);
-    time_unit : "1ns";
+  time_unit : "1ns";
   voltage_unit : "1V";
   current_unit : "1mA";
   pulling_resistance_unit : "1kohm";
