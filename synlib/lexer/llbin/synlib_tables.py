@@ -58,7 +58,7 @@ Table = [
 
     ,('idle',Digits,Digits,         'number','add',0)
     ,('idle',Digits,'.',            'floating0','add',0)
-    ,('idle',Digits,'e',            'floating0','add',0)
+    ,('idle',Digits,'e',            'floating','add',0)
     ,('idle',Digits,'',             'idle','push','number')
     ,('idle',"'",'b',               'ubin1','add',0)
     ,('idle',"'",'h',               'uhex1','add',0)
@@ -73,6 +73,8 @@ Table = [
     ,('floating',Digits,'e',     'floating','add',0)
     ,('floating','e',Digits,     'floating','add',0)
     ,('floating','e','-',     'floating','add',0)
+    ,('floating','e','+',     'floating','add',0)
+    ,('floating','+',Digits,     'floating','add',0)
     ,('floating','-',Digits,     'floating','add',0)
     ,('floating',Digits,'',         'idle','push','floating')
 
