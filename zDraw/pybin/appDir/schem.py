@@ -735,6 +735,19 @@ picture or2
   pic_pin i2 i xy=0,1
   pic_pin i1 i xy=0,3
 end
+picture ori2
+  pic_aline list=0,1,1.2,1,1,0.5,3,0.5
+  pic_aline list=0,3,1.2,3,1,3.5,3,3.5
+  pic_aline list=1.2,1,1.3,1.4,1.4,2,1.3,2.6,1.2,3
+  pic_aline list=5.0,2,6,2
+  pic_aline list=3,3.5,3.5,3.4,4,3.1,4.5,2.6,5,2
+  pic_aline list=3,0.5,3.5,0.6,4,0.9,4.5,1.4,5,2
+  pic_fcircle list=2.0,2.9,1.7,2.9
+  pic_circle list=1.0,1,0.6,1.0
+  pic_pin o1 o xy=6,2
+  pic_pin i2 i xy=0,1
+  pic_pin i1 i xy=0,3
+end
 picture or3
   pic_aline list=0,1,1.2,1,1,0.5,3,0.5
   pic_aline list=0,3,1.2,3,1,3.5,3,3.5

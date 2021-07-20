@@ -1049,6 +1049,7 @@ def support_set__(Sig,Bussed):
         if Sig[0]=='`': return []
         if Sig[0]=='"': return []
         if Sig in OPS : return []
+        if Sig in '0123456789' : return []
         if Sig in KEYWORDS : return []
         return [Sig]
     if isinstance(Sig,(tuple,list)):

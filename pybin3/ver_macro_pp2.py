@@ -329,9 +329,9 @@ def use_defines_on_line(line,defines):
             ind = line.find('`')
     return line
 
-
+Longs = 0
 def split_into_files(wholelib,dir):
-    global modules
+    global modules,Longs
     state=0
     for line1 in wholelib:
         line = fix_stupid_problems(line1)
@@ -342,7 +342,12 @@ def split_into_files(wholelib,dir):
                 Module = wrds[0]
                 if (Module[-1]==';'):
                     Module = Module[:-1]
-                File=open(dir+'/'+Module+'.v','w')
+                if len(Module)>120:
+                    Modl = 'longmodule%d' % Longs
+                    File=open(dir+'/'+Modl+'.v','w')
+                    Longs += 1
+                else:
+                    File=open(dir+'/'+Module+'.v','w')
                 modules = [Module]+modules
 #               if (not use_defines):
 #                   for (A,B) in pre_defines:
