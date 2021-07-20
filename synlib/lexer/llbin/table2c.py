@@ -1,6 +1,6 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 
-import os,sys,string
+import os,sys
 
 Specific = sys.argv[1]
 Str = 'import %s as tables'%Specific
@@ -31,8 +31,8 @@ def main():
         Fout.write('#define st_%s %d\n'%(State,ind))
 
     for ind,Char0 in  enumerate(Chars0):
-        Char1 = string.replace(Char0,"\\","\\\\")
-        Char1 = string.replace(Char1,'"','\\"')
+        Char1 = Char0.replace("\\","\\\\")
+        Char1 = Char1.replace('"','\\"')
         res=''
         for Chr in Char1:
             if Chr=='\t':
@@ -79,7 +79,7 @@ def  treat_joines(Fout):
 
 
 def  treat_reserveds(Fout):
-    Reserved = string.split(tables.ReservedWordsStr)
+    Reserved = tables.ReservedWordsStr.split()
     Reserved.sort()
     Fout.write('void reserved_words(char *Token,char *tokenType){\n')
     for Word in Reserved:
@@ -93,7 +93,7 @@ def  treat_reserveds(Fout):
 
 def treat_doubles(Fout):
     Doubles = tables.DoubleNames
-    Keys = Doubles.keys()
+    Keys = list(Doubles.keys())
     Keys.sort()
     Fout.write('void doubleNames(char *Token,char *tokenType){\n')
     for Key in Keys:

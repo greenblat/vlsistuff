@@ -58,7 +58,7 @@ Table = [
 
     ,('idle',Digits,Digits,         'number','add',0)
     ,('idle',Digits,'.',            'floating0','add',0)
-#    ,('idle',Digits,"'",            'sizednumber','add',0)
+    ,('idle',Digits,'e',            'floating0','add',0)
     ,('idle',Digits,'',             'idle','push','number')
     ,('idle',"'",'b',               'ubin1','add',0)
     ,('idle',"'",'h',               'uhex1','add',0)
