@@ -1,7 +1,7 @@
 Desc = cellDescClass("CLKBUFX3")
-Desc.properties["cell_leakage_power"] = "653.191290"
 Desc.properties["cell_footprint"] = "clkbuf"
 Desc.properties["area"] = "13.305600"
+Desc.properties["cell_leakage_power"] = "653.191290"
 Desc.pinOrder = ['A', 'Y']
 Desc.add_arc("A","Y","combi")
 Desc.set_job("buf") # A

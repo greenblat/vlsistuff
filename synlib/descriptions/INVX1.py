@@ -1,7 +1,7 @@
 Desc = cellDescClass("INVX1")
-Desc.properties["cell_leakage_power"] = "135.455522"
 Desc.properties["cell_footprint"] = "inv"
 Desc.properties["area"] = "6.652800"
+Desc.properties["cell_leakage_power"] = "135.455522"
 Desc.pinOrder = ['A', 'Y']
 Desc.add_arc("A","Y","combi")
 Desc.set_job("inv") # (!A)

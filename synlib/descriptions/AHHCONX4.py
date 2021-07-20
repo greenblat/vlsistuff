@@ -1,7 +1,7 @@
 Desc = cellDescClass("AHHCONX4")
-Desc.properties["cell_leakage_power"] = "2461.991760"
 Desc.properties["cell_footprint"] = "ahhcon"
 Desc.properties["area"] = "43.243200"
+Desc.properties["cell_leakage_power"] = "2461.991760"
 Desc.pinOrder = ['A', 'CI', 'CON', 'S']
 Desc.add_arc("A","S","combi")
 Desc.add_arc("CI","S","combi")

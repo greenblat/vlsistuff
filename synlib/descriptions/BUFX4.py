@@ -1,7 +1,7 @@
 Desc = cellDescClass("BUFX4")
-Desc.properties["cell_leakage_power"] = "1060.451514"
 Desc.properties["cell_footprint"] = "buf"
 Desc.properties["area"] = "16.632000"
+Desc.properties["cell_leakage_power"] = "1060.451514"
 Desc.pinOrder = ['A', 'Y']
 Desc.add_arc("A","Y","combi")
 Desc.set_job("buf") # A

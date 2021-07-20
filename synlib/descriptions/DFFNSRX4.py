@@ -1,7 +1,7 @@
 Desc = cellDescClass("DFFNSRX4")
-Desc.properties["cell_leakage_power"] = "3723.759540"
 Desc.properties["cell_footprint"] = "dffnsr"
 Desc.properties["area"] = "116.424000"
+Desc.properties["cell_leakage_power"] = "3723.759540"
 Desc.pinOrder = ['CKN', 'D', 'IQ', 'IQN', 'Q', 'QN', 'RN', 'SN', 'next']
 Desc.add_arc("CKN","D","setup_falling")
 Desc.add_arc("CKN","D","hold_falling")
@@ -17,19 +17,19 @@ Desc.add_arc("SN","QN","clear")
 Desc.add_arc("RN","QN","preset")
 Desc.add_param("area",116.424000);
 Desc.add_pin("D","input")
-Desc.add_pin("IQ","output")
-Desc.add_pin_func("IQ","unknown")
 Desc.set_pin_job("CKN","clock")
 Desc.add_pin("CKN","input")
-Desc.add_pin("next","output")
-Desc.add_pin_func("next","unknown")
-Desc.add_pin("Q","output")
-Desc.add_pin_func("Q","unknown")
-Desc.add_pin("IQN","output")
-Desc.add_pin_func("IQN","unknown")
 Desc.add_pin("SN","input")
 Desc.add_pin("RN","input")
+Desc.add_pin("Q","output")
+Desc.add_pin_func("Q","unknown")
 Desc.add_pin("QN","output")
 Desc.add_pin_func("QN","unknown")
+Desc.add_pin("IQ","output")
+Desc.add_pin_func("IQ","unknown")
+Desc.add_pin("IQN","output")
+Desc.add_pin_func("IQN","unknown")
+Desc.add_pin("next","output")
+Desc.add_pin_func("next","unknown")
 Desc.set_job("flipflop")
 CellLib["DFFNSRX4"]=Desc

@@ -1,7 +1,7 @@
 Desc = cellDescClass("CLKINVX4")
-Desc.properties["cell_leakage_power"] = "530.466894"
 Desc.properties["cell_footprint"] = "clkinv"
 Desc.properties["area"] = "13.305600"
+Desc.properties["cell_leakage_power"] = "530.466894"
 Desc.pinOrder = ['A', 'Y']
 Desc.add_arc("A","Y","combi")
 Desc.set_job("inv") # (!A)
