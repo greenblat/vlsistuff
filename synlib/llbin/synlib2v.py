@@ -569,12 +569,21 @@ class cellClass:
 def refactorFunc(Func):
     if type(Func) is str:
         return Func
+    if len(Func) == 1:
+        return refactorFunc(Func[0])
     if len(Func) == 2:
         if Func[0] == '!':
             F1 = refactorFunc(Func[1])
             return [Func[0],F1]
         else:
             print('error(2) posify_negify %s'%str(Func))
+
+    if '!' in Func:
+        Ind = Func.index('!')
+        Func1 = Func[:Ind] + [['!',Func[Ind+1]]]+Func[Ind+2:]
+        return refactorFunc(Func1)
+
+
     if len(Func) == 3:
         F0 = refactorFunc(Func[0])
         F2 = refactorFunc(Func[2])
@@ -588,6 +597,14 @@ def refactorFunc(Func):
         F2 = refactorFunc(Func[2])
         F4 = refactorFunc(Func[4])
         return [F0,Func[1],[F2,Func[3],F4]]
+    if (len(Func) &1) == 1:
+        Func1 = Func[:]
+        F0 = refactorFunc(Func1[0])
+        F2 = refactorFunc(Func1[2])
+        X = [[F0,Func1[1],F2]] + Func1[3:]
+        return refactorFunc(X)
+
+
     print('error(6) refacrorFunc posify_negify %s'%str(Func))
     return 'ERROR','ERROR'
             
@@ -893,6 +910,8 @@ def work_cell_items(Cell,Items):
                     print('error(0) %s work_cell_items %s'%(Cell,List[0]))
             elif (len(List)==7) and (List[0][0] == 'pin'):
                 add_cell_pin(Cell,List)
+            elif (len(List)==7) and (List[0][0] == 'latch'):
+                add_cell_latch(Cell,List)
             elif len(List)==1:
                 if List[0][0]=='Pair':
                     add_cell_pair(Cell,DataBase[List[0]])

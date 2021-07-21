@@ -1451,5 +1451,44 @@ pic_text empty xy=4.5,3.0 align=right
 pic_text syncfifo xy=0.5,5.2
 end
 
+picture cloud
+pic_pin o1 o xy=4.8,2.6
+pic_pin i1 i xy=0.0,2.7
+pic_pin i2 i xy=0.3,1.4
+pic_aline list=1.36,3.80,1.68,4.40
+pic_aline list=1.68,4.40,2.32,4.48
+pic_aline list=2.32,4.48,2.88,4.28
+pic_aline list=2.88,4.28,3.04,3.84
+pic_aline list=3.04,3.84,3.72,3.92
+pic_aline list=3.72,3.92,4.36,3.88
+pic_aline list=4.36,3.88,4.84,3.56
+pic_aline list=4.84,3.56,4.88,3.00
+pic_aline list=4.88,3.00,4.72,2.52
+pic_aline list=4.72,2.52,5.00,2.04
+pic_aline list=5.00,2.04,5.00,1.48
+pic_aline list=5.00,1.48,4.80,0.96
+pic_aline list=4.80,0.96,4.28,0.84
+pic_aline list=4.28,0.84,3.88,0.80
+pic_aline list=3.88,0.80,3.76,0.32
+pic_aline list=3.76,0.32,3.40,0.00
+pic_aline list=3.40,0.00,2.92,0.04
+pic_aline list=2.92,0.04,2.56,0.24
+pic_aline list=2.56,0.24,2.36,0.68
+pic_aline list=2.36,0.68,1.80,0.52
+pic_aline list=1.80,0.52,1.40,0.48
+pic_aline list=1.40,0.48,0.96,0.56
+pic_aline list=0.96,0.56,0.56,0.84
+pic_aline list=0.56,0.84,0.40,1.44
+pic_aline list=0.40,1.44,0.56,1.96
+pic_aline list=0.56,1.96,0.24,2.36
+pic_aline list=0.24,2.36,0.12,2.72
+pic_aline list=0.16,3.08,0.16,3.08
+pic_aline list=0.12,2.72,0.16,3.08
+pic_aline list=0.16,3.08,0.36,3.44
+pic_aline list=0.36,3.44,0.84,3.64
+pic_aline list=0.84,3.64,1.36,3.80
+end
+
+
 '''
 

@@ -36,14 +36,21 @@ List0 =cellifyList(os.listdir('syntmp'),'lib')
 
 makeDir('descriptions')
 List1 = cellifyList(os.listdir('descriptions'),'py')
+List1 = []
 
 for Cell in List0:
     if (Cell not in List1):
+        print('CELL',Cell)
         os.system('llbin/synlibMsg.py syntmp/%s.lib'%(Cell))
         os.system('/bin/rm msgsim_cells.ccc')
         os.system('/bin/mv cell.descriptions descriptions/%s.py'%(Cell))
+        sys.exit()
 
 os.system('llbin/assemblyCellLibrary.py')
+
+
+
+
 
 os.system('/bin/rm yacc.log lex.out db0.pickle ttt.ttt db1.pickle')
 
