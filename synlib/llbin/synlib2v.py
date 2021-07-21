@@ -563,10 +563,7 @@ class cellClass:
                 Func = funcify(Func)
                 Func2 = splitify(Func.split())
                 Func3 = refactorFunc(Func2)
-                print('FUNC3',len(Func3),Func3)
                 posify_negify(Func3,Fout,'p_'+Pin,'n_'+Pin,0)
-#                Fout.write('assign n_%s = %s;\n'%(Pin,Neg))
-#                Fout.write('assign p_%s = %s;\n'%(Pin,Pos))
         Fout.write('endmodule\n')
 
 def refactorFunc(Func):
@@ -599,7 +596,6 @@ def refactorFunc(Func):
 posnegid=0
 def posify_negify(Func,Fout,pPin,nPin,Depth):
     global posnegid
-    print('FUNC',Func)
     if type(Func) is str:
         if (Depth==0):
             Fout.write('assign %s = %s;\n'%(pPin,'p_'+Func))
@@ -657,12 +653,10 @@ def splitify(List):
     while ')' in List:
         ind0 = List.index(')')
         ind1=ind0-1
-        print(ind0,List)
         while List[ind1]!='(':
             ind1 -= 1
         if (ind1==0)and(ind0==(len(List)-1)):
             return List[1:-1]
-        print('>>>',ind1,ind0,List)
         Sub = List[ind1+1:ind0]
         Bef = List[:ind1]
         Aft = List[ind0+1:]
