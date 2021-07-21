@@ -53,6 +53,13 @@ def main():
         scan_lib_items(Items)
     else:
         print('failed library')
+
+    for Cell in Cells:
+        for Prm in Cells[Cell].pairs:
+            Val =  Cells[Cell].pairs[Prm]
+            if (type(Val) is str)and ('"' in Val):
+                Val = Val.replace('"','')
+                Cells[Cell].pairs[Prm] = Val
     Fcc=open('msgsim_cells.ccc','w')
     for Cell in Cells:
         Cells[Cell].Types=Types
@@ -92,7 +99,7 @@ def deal_cell(LL):
     if not Lb0:
         print('bad cell %s'%str(LL))
         return
-    Name = Lb0['Name']
+    Name = Lb0['Name'].replace('"','')
     Cells[Name]=cellClass(Name)
     Items = Lb0['Items']
     if len(Items[0])==4:

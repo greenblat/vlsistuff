@@ -562,14 +562,44 @@ class cellClass:
 
                 Func = funcify(Func)
                 Func2 = splitify(Func.split())
-                posify_negify(Func2,Fout,'p_'+Pin,'n_'+Pin,0)
+                Func3 = refactorFunc(Func2)
+                print('FUNC3',len(Func3),Func3)
+                posify_negify(Func3,Fout,'p_'+Pin,'n_'+Pin,0)
 #                Fout.write('assign n_%s = %s;\n'%(Pin,Neg))
 #                Fout.write('assign p_%s = %s;\n'%(Pin,Pos))
         Fout.write('endmodule\n')
 
+def refactorFunc(Func):
+    if type(Func) is str:
+        return Func
+    if len(Func) == 2:
+        if Func[0] == '!':
+            F1 = refactorFunc(Func[1])
+            return [Func[0],F1]
+        else:
+            print('error(2) posify_negify %s'%str(Func))
+    if len(Func) == 3:
+        F0 = refactorFunc(Func[0])
+        F2 = refactorFunc(Func[2])
+        return [F0,Func[1],F2]
+    if len(Func) == 4:
+        F0 = refactorFunc(Func[0])
+        F3 = refactorFunc(Func[3])
+        return [F0,Func[1],[Func[2],F3]]
+    if len(Func) == 5:
+        F0 = refactorFunc(Func[0])
+        F2 = refactorFunc(Func[2])
+        F4 = refactorFunc(Func[4])
+        return [F0,Func[1],[F2,Func[3],F4]]
+    print('error(6) refacrorFunc posify_negify %s'%str(Func))
+    return 'ERROR','ERROR'
+            
+
+
 posnegid=0
 def posify_negify(Func,Fout,pPin,nPin,Depth):
     global posnegid
+    print('FUNC',Func)
     if type(Func) is str:
         if (Depth==0):
             Fout.write('assign %s = %s;\n'%(pPin,'p_'+Func))
@@ -588,30 +618,39 @@ def posify_negify(Func,Fout,pPin,nPin,Depth):
     if len(Func)==3:
         N0,P0 = posify_negify(Func[0],Fout,pPin,nPin,Depth+1)
         N1,P1 = posify_negify(Func[2],Fout,pPin,nPin,Depth+1)
-        if Depth!=0:
-            PP = 'wire p_wire%d'%posnegid
-            NN = 'wire n_wire%d'%posnegid
-            posnegid+=1
-        else:
-            PP = 'assign %s'%pPin
-            NN = 'assign %s'%nPin
-        if Func[1]=='&&':
-            Fout.write('%s = %s && %s;\n'%(PP,P0,P1))
-            Fout.write('%s = %s || %s;\n'%(NN,N0,N1))
-            return PP,NN
+        return mergePosNeg(Depth,Func[1],N0,P0,N1,P1,pPin,nPin,Fout)
 
-        if Func[1]=='||':
-            Fout.write('%s = %s || %s;\n'%(PP,P0,P1))
-            Fout.write('%s = %s && %s;\n'%(NN,N0,N1))
-            return PP,NN
-
-        if Func[1]=='^':
-            Fout.write('%s = (%s&&%s)||(%s&&%s);\n'%(PP,P0,N1,P1,N0))
-            Fout.write('%s = (%s&&%s)||(%s&&%s);\n'%(NN,P0,N0,P1,N1))
-            return PP,NN
 
     print('error! posify_negify %s'%str(Func))
     return 'ERROR','ERROR'
+
+def mergePosNeg(Depth,Func,N0,P0,N1,P1,pPin,nPin,Fout):
+    global posnegid
+    if Depth!=0:
+        PP = 'wire p_wire%d'%posnegid
+        NN = 'wire n_wire%d'%posnegid
+        PPx = 'p_wire%d'%posnegid
+        NNx = 'n_wire%d'%posnegid
+        posnegid+=1
+    else:
+        PP = 'assign %s'%pPin
+        NN = 'assign %s'%nPin
+        PPx = 'p_wire%d'%posnegid
+        NNx = 'n_wire%d'%posnegid
+    if Func=='&&':
+        Fout.write('%s = %s && %s;\n'%(PP,P0,P1))
+        Fout.write('%s = %s || %s;\n'%(NN,N0,N1))
+        return PPx,NNx
+
+    if Func=='||':
+        Fout.write('%s = %s || %s;\n'%(PP,P0,P1))
+        Fout.write('%s = %s && %s;\n'%(NN,N0,N1))
+        return PPx,NNx
+
+    if Func=='^':
+        Fout.write('%s = (%s&&%s)||(%s&&%s);\n'%(PP,P0,N1,P1,N0))
+        Fout.write('%s = (%s&&%s)||(%s&&%s);\n'%(NN,P0,N0,P1,N1))
+        return PPx,NNx
 
 
 def splitify(List):
