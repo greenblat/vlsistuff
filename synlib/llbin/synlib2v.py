@@ -118,7 +118,7 @@ class cellClass:
 
         self.create_exceptions_and_redundants()
         for Pin in self.pins:
-            Dir = self.pins[Pin]
+            Dir = self.pins[Pin]['direction']
             if Dir in ['input','output']:
                 res.append('%s %s'%(Dir,Pin))
                 if ('clock' not in self.pins[Pin])and(Pin not in self.Exceptions):
@@ -428,7 +428,7 @@ class cellClass:
         ppp={}
         wires = []
         for Pin in self.pins:
-            Dir = self.pins[Pin]
+            Dir = self.pins[Pin]['direction']
             if Dir in ['input','output']:
                 res.append('%s n_%s'%(Dir,Pin))
                 res.append('%s p_%s'%(Dir,Pin))
@@ -1029,7 +1029,7 @@ def work_on_pin_items(Cell,Pin,Items):
         elif Items[0][0] == 'state_function':
             Val = get_expr(Items[2])
             add_cell_pin_pair(Cell,Pin,'state_function',Val)
-        elif Items[0][0] in ['fall_capacitance','max_transition','related_ground_pin','max_capacitance','power_down_function','related_power_pin','timing','rise_capacitance','min_capacitance','clock_gate_clock_pin','clock_gate_enable_pin','internal_node','clock_gate_out_pin','clock_gate_test_pin']:
+        elif Items[0][0] in ['receiver_capacitance','fall_capacitance','max_transition','related_ground_pin','max_capacitance','power_down_function','related_power_pin','timing','rise_capacitance','min_capacitance','clock_gate_clock_pin','clock_gate_enable_pin','internal_node','clock_gate_out_pin','clock_gate_test_pin']:
             pass
         elif Items[0][0] == 'nextstate_type':
             pass

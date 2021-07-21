@@ -227,6 +227,7 @@ def dump_ff(self,Pins):
             Clocked = Var
         if Prm=='next_state':
             Next = Var
+            print('>>next state>>>>>>',Next)
         if Prm=='clear':
             Clear = Var
             if (Clear[0]=='(')and(Clear[-1]==')'):
@@ -238,6 +239,7 @@ def dump_ff(self,Pins):
                 Preset = Preset[1:-1]
             self.PinJobs[Preset]='set'
     Bef = Next
+    print('>>>>>>>>',Next)
     Nextf = makeCfunc(Next,Pins)
     Clockedf = makeCfunc(Clocked,Pins)
     ClockedInd = pinNum(Clocked,Pins)
@@ -245,8 +247,10 @@ def dump_ff(self,Pins):
     RegnInd = pinNum(Regn,Pins)
     if ' ' in Next:
         NextInd =  Pins.index('next')
-    else:
+    elif Next in Pins:
         NextInd = Pins.index(Next)
+    else:
+        NextInd = Pins.index('next')
     print("<><>",Next,Nextf,NextInd,Pins)
     if Preset and (Preset[0]=='!'):
         PresetInd = Pins.index(Preset[1:])

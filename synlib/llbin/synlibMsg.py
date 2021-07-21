@@ -82,7 +82,7 @@ def one_lib_item(LL):
         deal_cell(LL)
     elif (Head=='type'):
         deal_type(LL)
-    elif Head in ['default_threshold_voltage_group','normalized_driver_waveform','define','driver_model','emulated_driver_ratio']:
+    elif Head in ['default_threshold_voltage_group','normalized_driver_waveform','define','driver_model','emulated_driver_ratio','output_current_template']:
         pass
     else:
         print('unknown item',Head,LL)
@@ -223,7 +223,7 @@ def getToks(List):
             res.append(Tok)
     return res
 
-knownUselessPinItems = 'internal_power timing fall_transition rise_transition cell_rise cell_fall rise_constraint fall_constraint'.split()
+knownUselessPinItems = 'receiver_capacitance internal_power timing fall_transition rise_transition cell_rise cell_fall rise_constraint fall_constraint'.split()
 
 def getPair(Key):
     if Key in DataBase:
