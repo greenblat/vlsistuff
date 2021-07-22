@@ -30,6 +30,8 @@ class axiSlaveClass:
         self.wready = 0
         self.bvalid_armed = False
         self.WAITREAD = 4
+        self.WAITWRITE = 5
+        self.busWidth = 8   # in bytes
 
     def peek(self,Sig):
         if self.prefix!='': Sig = '%s%s'%(self.prefix,Sig)
@@ -74,6 +76,12 @@ class axiSlaveClass:
             Addr = eval(Wrds[1])
             for Wrd in Wrds[2:]:
                 Addr = self.addWord(Addr,int(Wrd,16))
+        elif Wrds[0] == 'waitread':
+            self.WAITREAD = int(Wrds[1])
+        elif Wrds[0] == 'waitwrite':
+            self.WAITWRITE = int(Wrds[1])
+        elif Wrds[0] == 'buswidth':
+            self.busWidth = int(Wrds[1])
         elif Wrds[0] == 'flood':
             Addr0 = eval(Wrds[1])
             Addr1 = eval(Wrds[2])
@@ -90,8 +98,25 @@ class axiSlaveClass:
         self.Ram[Addr+1] = (Data>>8) & 0xff
         self.Ram[Addr+2] = (Data>>16) & 0xff
         self.Ram[Addr+3] = (Data>>24) & 0xff
+        if self.busWidth == 8:
+            self.Ram[Addr+4] = (Data >>(8*4)) & 0xff
+            self.Ram[Addr+5] = (Data >>(8*5))  & 0xff
+            self.Ram[Addr+6] = (Data >>(8*6))  & 0xff
+            self.Ram[Addr+7] = (Data >>(8*7))  & 0xff
+
+        if self.busWidth == 16:
+            self.Ram[Addr+8] = (Data >>(8*8)) & 0xff
+            self.Ram[Addr+9] = (Data >>(8*9))  & 0xff
+            self.Ram[Addr+10] = (Data >>(8*10))  & 0xff
+            self.Ram[Addr+11] = (Data >>(8*11))  & 0xff
+            self.Ram[Addr+12] = (Data >>(8*12))  & 0xff
+            self.Ram[Addr+13] = (Data >>(8*13))  & 0xff
+            self.Ram[Addr+14] = (Data >>(8*14))  & 0xff
+            self.Ram[Addr+15] = (Data >>(8*15))  & 0xff
+
+
         logs.log_info('adding %x %x'%(Addr,Data))
-        Addr += 4
+        Addr += self.busWidth
         return Addr
 
     def run(self):
@@ -189,17 +214,17 @@ class axiSlaveClass:
             self.bwaiting -= 1
             self.force('bvalid',0)
         elif self.bqueue!=[]:
-            if self.peek('bready')==0: 
+            bid,bresp = self.bqueue[0]
+            if bid=='wait':
+                self.bwaiting=int(bresp)
                 self.force('bvalid',0)
+                self.bqueue.pop(0)
             else:
-                bid,bresp = self.bqueue.pop(0)
-                if bid=='wait':
-                    self.bwaiting=int(bresp)
-                    self.force('bvalid',0)
-                else:
-                    self.force('bid',bid)
-                    self.force('bresp',bresp)
-                    self.force('bvalid',1)
+                if self.peek('bready')==1: 
+                    self.bqueue.pop(0)
+                self.force('bid',bid)
+                self.force('bresp',bresp)
+                self.force('bvalid',1)
         else:
             self.force('bvalid',0)
 
@@ -220,10 +245,10 @@ class axiSlaveClass:
             self.wready -= 1
             self.force('wready',0)
         else:
-            self.wready = 5
+            self.wready = self.WAITWRITE
             self.force('wready',1)
             
-        if (self.peek('wvalid')==1)and((self.wready==5)):
+        if (self.peek('wvalid')==1)and((self.wready==self.WAITWRITE)):
             logs.log_info('axiSlave <<<<< wready=%d awlen=%d '%(self.wready,self.awlen))
             veri.force('tb.marker','0x77')
             if self.awlen<0:
@@ -245,12 +270,12 @@ class axiSlaveClass:
             if self.awlen==0:
                 self.awlen = -1
                 if wlast!=1:
-                    logs.log_error('axislave %s: %s   no last'%(self.Path,self.prefix))
+                    logs.log_error('axislave %s: prefix=%s   no wlast'%(self.Path,self.prefix))
             else:
                 self.awlen -= 1
 
             if (wlast==1)and(not self.bvalid_armed):
-                self.bqueue.append(('wait',random.randint(50,100)))
+                self.bqueue.append(('wait',10))
                 self.bqueue.append((self.wid,0))
                 self.bvalid_armed = True
         if (self.bvalid_armed):               

@@ -18,7 +18,7 @@ import logs
 import veri
 
 class axiMasterClass:
-    def __init__(self,Path,Monitors,Name='?'):
+    def __init__(self,Path,Monitors,Prefix='',Suffix='',Name='?'):
         self.Path = Path
         if Monitors != -1: Monitors.append(self)
         self.Name=Name
@@ -37,8 +37,8 @@ class axiMasterClass:
         self.rreadyDenys = 10
         self.ReadyAlways = True
         self.renames={}
-        self.prefix=''
-        self.suffix=''
+        self.prefix= Prefix
+        self.suffix= Suffix
         self.AWVALID = False
         self.ARVALID = False
         self.WVALID = False

@@ -464,52 +464,102 @@ def apb_slave(AWID,DWID):
 
     \'\'\')
 
-def axi_wr_master(AWID,DWID,LWID,IDWID):
+def axi_wr_master(PREF,AWID,DWID,LWID,IDWID):
     print(\'\'\'
-    ,output [3:0] awid            
-    ,output [31:0] awaddr
-    ,output [7:0] awlen
-    ,output [2:0] awsize
-    ,output [1:0] awburst
-    ,output [3:0] awcache
-    ,output [3:0] awqos
-    ,output [2:0] awprot
-    ,output awvalid
-    ,input awready
-    ,output [127:0] wdata
-    ,output [15:0] wstrb
-    ,output wlast
-    ,output wvalid
-    ,input wready
-    ,input [3:0] bid 
-    ,input [1:0] bresp
-    ,input bvalid
-    ,output bready
-    \'\'\')
+    ,output [3:0] Pawid            
+    ,output [31:0] Pawaddr
+    ,output [7:0] Pawlen
+    ,output [2:0] Pawsize
+    ,output [1:0] Pawburst
+    ,output [3:0] Pawcache
+    ,output [3:0] Pawqos
+    ,output [2:0] Pawprot
+    ,output Pawvalid
+    ,input Pawready
+    ,output [DWID-1:0] Pwdata
+    ,output [DWID/8-1:0] Pwstrb
+    ,output Pwlast
+    ,output Pwvalid
+    ,input Pwready
+    ,input [3:0] Pbid 
+    ,input [1:0] Pbresp
+    ,input Pbvalid
+    ,output Pbready
+    \'\'\'.replace('P',PREF))
 
-def axi_rd_master(AWID,DWID,LWID,IDWID):
+def axi_rd_master(PREF,AWID,DWID,LWID,IDWID):
     print(\'\'\'
-    ,output [3:0] arid
-    ,output [31:0] araddr
-    ,output [7:0] arlen
-    ,output [2:0] arsize
-    ,output [1:0] arburst
-    ,output [3:0] arcache
-    ,output [3:0] arqos
-    ,output [2:0] arprot
-    ,output arvalid
-    ,input arready
-    ,input [3:0] rid 
-    ,input [127:0] rdata
-    ,input [1:0] rresp
-    ,input rlast
-    ,input rvalid
-    ,output rready
-    \'\'\')
+    ,output [3:0] Parid
+    ,output [31:0] Paraddr
+    ,output [7:0] Parlen
+    ,output [2:0] Parsize
+    ,output [1:0] Parburst
+    ,output [3:0] Parcache
+    ,output [3:0] Parqos
+    ,output [2:0] Parprot
+    ,output Parvalid
+    ,input Parready
+    ,input [3:0] Prid 
+    ,input [DWID-1:0] Prdata
+    ,input [1:0] Prresp
+    ,input Prlast
+    ,input Prvalid
+    ,output Prready
+    \'\'\'.replace('P',PREF))
 
-def axi_master(AWID,DWID,LWID,IDWID):
-    axi_wr_master(AWID,DWID,LWID,IDWID)
-    axi_rd_master(AWID,DWID,LWID,IDWID)
+def axi_wr_slave(PREF='',AWID=32,DWID=64,LWID=8,IDWID=4):
+    print(\'\'\'
+    ,input [3:0] Pawid            
+    ,input [31:0] Pawaddr
+    ,input [7:0] Pawlen
+    ,input [2:0] Pawsize
+    ,input [1:0] Pawburst
+    ,input [3:0] Pawcache
+    ,input [3:0] Pawqos
+    ,input [2:0] Pawprot
+    ,input Pawvalid
+    ,output Pawready
+    ,input [DWID-1:0] Pwdata
+    ,input [DWID/8-1:0] Pwstrb
+    ,input Pwlast
+    ,input Pwvalid
+    ,output Pwready
+    ,output [3:0] Pbid 
+    ,output [1:0] Pbresp
+    ,output Pbvalid
+    ,input Pbready
+    \'\'\'.replace('P',PREF))
+
+def axi_rd_slave(PREF='',AWID=32,DWID=64,LWID=8,IDWID=4):
+    print(\'\'\'
+    ,input [3:0] Parid
+    ,input [31:0] Paraddr
+    ,input [7:0] Parlen
+    ,input [2:0] Parsize
+    ,input [1:0] Parburst
+    ,input [3:0] Parcache
+    ,input [3:0] Parqos
+    ,input [2:0] Parprot
+    ,input Parvalid
+    ,output Parready
+    ,output [3:0] Prid 
+    ,output [DWID-1:0] Prdata
+    ,output [1:0] Prresp
+    ,output Prlast
+    ,output Prvalid
+    ,input Prready
+    \'\'\'.replace('P',PREF))
+
+def axi_slave(PREF='',AWID=32,DWID=64,LWID=8,IDWID=4):
+    axi_wr_slave(PREF,AWID,DWID,LWID,IDWID)
+    axi_rd_slave(PREF,AWID,DWID,LWID,IDWID)
+
+
+
+
+def axi_master(PREF='',AWID=32,DWID=64,LWID=8,IDWID=4):
+    axi_wr_master(PREF,AWID,DWID,LWID,IDWID)
+    axi_rd_master(PREF,AWID,DWID,LWID,IDWID)
 
 def axi_rd_conn():
     print(\'\'\'
@@ -567,6 +617,21 @@ def apb_conn():
     ,.pwrite(pwrite)
 
     \'\'\')
+
+def syncfifo(NAME='syncfifo'):
+    print(\'\'\'
+syncfifo #(.WID(WID),.DEPTH(DEPTH)) NAME (
+    .clk(clk),.rst_n(rst_n)
+    ,.vldin(vldin)
+    ,.din(din)
+    ,.readout(readout)
+    ,.empty(empty)
+    ,.dout(dout)
+    ,.full(full)
+    ,.count(in_count)
+);
+
+    \'\'\'.replace('NAME',NAME))
 
 '''
 

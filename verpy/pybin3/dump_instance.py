@@ -73,6 +73,10 @@ def dump_instance(Mod,Simple=False):
         Fout.write('reg [31:0] panics;   initial panics=0;\n')
         Fout.write('reg [31:0] corrects; initial corrects=0;\n')
         Fout.write('reg [31:0] marker;   initial marker=0;\n')
+        Fout.write('reg [31:0] marker0;   initial marker0=0;\n')
+        Fout.write('reg [31:0] marker1;   initial marker1=0;\n')
+        Fout.write('reg [31:0] marker2;   initial marker2=0;\n')
+        Fout.write('reg [31:0] marker3;   initial marker3=0;\n')
         Fout.write('reg [31:0] Index;   initial Index=0;\n')
 
     for Param in Mod.parameters:
