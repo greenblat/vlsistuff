@@ -1,4 +1,3 @@
-#! /usr/bin/python
 
 import os,sys
 import logs
@@ -62,8 +61,8 @@ def make_schematic(Current,Inps,Outs):
             elif Sig in Inps+Outs:
                 Fout.write('wire www%d %s %s.%s\n'%(www,Sig,Inst,Pin))
                 www += 1
-            elif (Sig not in Conns):
-                Conns[Sig]=[(Inst,Pin)]
+            elif (str(Sig) not in Conns):
+                Conns[str(Sig)]=[(Inst,Pin)]
             else:
                 Conns[Sig].append((Inst,Pin))
     for Sig in Conns:
@@ -103,27 +102,47 @@ def make_picture(Current):
             Mxout = max(Mxout,len(Net))
     Inps.sort()
     Outs.sort()
+    LEFT  = Inps[:]
+    RIGHT = Outs[:]
+    for Prgm in Current.pragmas:
+        wrds = Prgm[0].split()
+        if wrds[0] == 'left':
+            LEFT = wrds[1:-1]
+            LEFT.reverse()
+        if wrds[0] == 'right':
+            RIGHT = wrds[1:-1]
+            RIGHT.reverse()
+
+
     Fout = open('%s.zpic'%Current.Module,'w')
     Fout.write('picture %s\n'%Current.Module)
-    Max = max(len(Inps),len(Outs))
+    Max = max(len(LEFT),len(RIGHT))
     PinSpace=1.0
     H1 = Max*PinSpace + 1.0
     Mxl1 = Mxin+Mxout+1
     Mxl = max(Mxl1,len(Current.Module))
     W1 = max(3,Mxl/2.9)
     Fout.write('pic_aline list=0.5,0,0.5,%.1f,%.1f,%.1f,%.1f,0,0.5,0\n'%(H1,W1,H1,W1))
-    Off = (H1-(len(Inps)-1)*PinSpace)/2
-    for ind,Name in enumerate(Inps):
+    Off = (H1-(len(LEFT)-1)*PinSpace)/2
+
+    
+
+    for ind,Name in enumerate(LEFT):
         Fout.write('pic_line list=0,%.1f,0.5,0\n'%(Off+ind*PinSpace))
-        Fout.write('pic_pin %s i xy=0,%.1f\n'%(Name,Off+ind*PinSpace))
         Fout.write('pic_text %s xy=0.6,%.1f\n'%(Name,Off+ind*PinSpace))
-        
-#    Off = 0.5 + (Max-len(Outs))/2.0
-    Off = (H1-(len(Outs)-1)*PinSpace)/2
-    for ind,Name in enumerate(Outs):
+        if Name in Inps:
+            Fout.write('pic_pin %s i xy=0,%.1f\n'%(Name,Off+ind*PinSpace))
+        else: 
+            Fout.write('pic_pin %s o xy=0,%.1f\n'%(Name,Off+ind*PinSpace))
+
+    Off = (H1-(len(RIGHT)-1)*PinSpace)/2
+    for ind,Name in enumerate(RIGHT):
         Fout.write('pic_line list=%.1f,%.1f,0.5,0\n'%(W1,Off+ind*1))
-        Fout.write('pic_pin %s i xy=%.1f,%.1f\n'%(Name,W1+0.5,Off+ind*1))
         Fout.write('pic_text %s xy=%.1f,%.1f align=right\n'%(Name,W1,Off+ind*1))
+        if Name in Outs:
+            Fout.write('pic_pin %s o xy=%.1f,%.1f\n'%(Name,W1+0.5,Off+ind*1))
+        else:
+            Fout.write('pic_pin %s i xy=%.1f,%.1f\n'%(Name,W1+0.5,Off+ind*1))
     Fout.write('pic_text %s xy=%.1f,%.1f\n'%(Current.Module,0.5,H1+0.2))
     Fout.write('end\n')
     Fout.close()

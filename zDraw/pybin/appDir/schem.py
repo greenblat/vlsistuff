@@ -323,7 +323,7 @@ picture nc
 end
 picture antenna
   pic_aline list=0,0,0.5,0,0.8,0.3,1.2,0,0.8,-0.3,0.5,0
-  pic_pin i i xy=0,0
+  pic_prop primitive xy=0,0
 end
 picture antennab
   pic_aline list=0,0,0.5,0
@@ -1479,14 +1479,39 @@ pic_aline list=1.80,0.52,1.40,0.48
 pic_aline list=1.40,0.48,0.96,0.56
 pic_aline list=0.96,0.56,0.56,0.84
 pic_aline list=0.56,0.84,0.40,1.44
-pic_aline list=0.40,1.44,0.56,1.96
-pic_aline list=0.56,1.96,0.24,2.36
-pic_aline list=0.24,2.36,0.12,2.72
-pic_aline list=0.16,3.08,0.16,3.08
-pic_aline list=0.12,2.72,0.16,3.08
-pic_aline list=0.16,3.08,0.36,3.44
-pic_aline list=0.36,3.44,0.84,3.64
-pic_aline list=0.84,3.64,1.36,3.80
+picture asyncfifo
+pic_aline list=0.5,0,0.5,6.0,4.5,6.0,4.5,0,0.5,0
+pic_line list=0,1.0,0.5,0
+pic_text rst_n xy=0.6,1.0
+pic_pin rst_n i xy=0,1.0
+pic_line list=0,2.0,0.5,0
+pic_text full xy=0.6,2.0
+pic_pin full o xy=0,2.0
+pic_line list=0,3.0,0.5,0
+pic_text din xy=0.6,3.0
+pic_pin din i xy=0,3.0
+pic_line list=0,4.0,0.5,0
+pic_text vldin xy=0.6,4.0
+pic_pin vldin i xy=0,4.0
+pic_line list=0,5.0,0.5,0
+pic_text wclk xy=0.6,5.0
+pic_pin wclk i xy=0,5.0
+pic_line list=4.5,1.0,0.5,0
+pic_text count xy=4.5,1.0 align=right
+pic_pin count o xy=5.0,1.0
+pic_line list=4.5,2.0,0.5,0
+pic_text empty xy=4.5,2.0 align=right
+pic_pin empty o xy=5.0,2.0
+pic_line list=4.5,3.0,0.5,0
+pic_text dout xy=4.5,3.0 align=right
+pic_pin dout o xy=5.0,3.0
+pic_line list=4.5,4.0,0.5,0
+pic_text readout xy=4.5,4.0 align=right
+pic_pin readout i xy=5.0,4.0
+pic_line list=4.5,5.0,0.5,0
+pic_text rclk xy=4.5,5.0 align=right
+pic_pin rclk i xy=5.0,5.0
+pic_text asyncfifo xy=0.5,6.2
 end
 
 

@@ -16,6 +16,7 @@ class connectivityClass:
         self.Outs={}
         self.Inouts={}
         self.Conns={}
+        self.hard_assigns = []
         self.prepares()
     
     def prepares(self):
@@ -58,7 +59,23 @@ class connectivityClass:
             elif Obj.Type=='gnd':
                 self.Names[Inst]='gnd'
                 self.Nodes[Inst]=[]
-                    
+
+        EndPoints = {}                    
+        for Wire in self.Mod.wires:
+            Obj = self.Mod.wires[Wire]
+            Start = Obj.Start
+            End = Obj.End
+            if '.' in Start:
+                if Start not in EndPoints: EndPoints[Start] = []
+                EndPoints[Start].append(Wire)
+            if '.' in End:
+                if End not in EndPoints: EndPoints[End] = []
+                EndPoints[End].append(Wire)
+        for EndP in EndPoints:
+            if len(EndP)>1:
+                self.Nodes[EndP] = EndPoints[EndP]
+
+
         for Wire in self.Mod.wires:
             self.Wnodes[Wire]=[]
             Obj = self.Mod.wires[Wire]
@@ -234,19 +251,23 @@ class connectivityClass:
                print('warning! %s ignored for rtl verilog %s %s' % (Type,Inst,Obj.conns)) 
 
     def dumpVerilog(self,File,Rtl):
-        self.createModuleClass()
-        newRtl.createNewRtl(self.Modx)
-        self.dumpVerilogHeader(File)
         if Rtl:
-            self.dumpRtlVerilog(File)
+            self.createModuleClass()
+            newRtl.createNewRtl(self.Modx)
+            self.Modx.dump_verilog(File)
         else:
+            self.dumpVerilogHeader(File)
             self.dumpGlvVerilog(File)
-        File.write('endmodule\n')
+            File.write('endmodule\n')
 
     def dumpGlvVerilog(self,File):
         for Inst in self.Mod.instances:
             self.dumpInstance(Inst,File)
 
+        for DstSrc in self.hard_assigns:
+            Dst = DstSrc[0]
+            Src = DstSrc[1]
+            File.write('assign %s = %s;\n' % (Dst,Src))
 
     def dumpInstance(self,Inst,File):
         Obj = self.Mod.instances[Inst]
@@ -283,6 +304,15 @@ class connectivityClass:
         for Out in self.Inouts:
             self.Modx.add_sig(Out,'inout',0)
 
+        for Pragma in self.Mod.geoms:
+            Txt = Pragma
+            if '<assign>' in Txt:
+                Txt = Txt[8:]
+                Wrds = Txt.split('=')
+                Dst = Wrds[0]
+                Src = ' '.join(Wrds[1:])
+                self.Modx.add_sig(Dst,'wire',0)
+                self.Modx.hard_assigns.append((Dst,Src,'',''))
         for Inst in self.Mod.instances:
             Obj = self.Mod.instances[Inst]
             Type = Obj.Type

@@ -74,7 +74,9 @@ class module_class:
     def add_sig(self,Name,Dir,Wid):
         if Wid==1: Wid=0
         if (type(Name) is str)and('[' in Name):
-            Name = Name[:Name.index('[')]
+            Bus,Hi,Lo  = parseBus(Name)
+            return self.add_sig(['subbus',Bus,Hi,Lo],Dir,Wid)
+
         if Name=='':
             Name = 'net_%d'%self.inventedNets
             self.inventedNets += 1
@@ -98,8 +100,12 @@ class module_class:
 
 
         if type(Name) is list:
-            logs.log_error('add_sig got listName %s'%str(Name))
+            if Name[0] == 'subbus':
+                self.add_sig(Name[1],Dir,(eval(str(Name[2])),eval(str(Name[3]))))
+            else:
+                logs.log_error('add_sig got list: %s %s %s' % (str(Name),Dir,Wid))
             return
+
         if (Dir=='wire')and(Name in self.nets)and(Wid==0):
             return
         if (Dir=='wire')and(Name not in self.nets)and(type(Wid) is int):
@@ -110,8 +116,10 @@ class module_class:
             return
         if (Dir=='reg')and(Name in self.nets):
             Pdir,Pwid=self.nets[Name]
-            if Pwid!=Wid:
-               logs.log_error('module %s sig %s got reg wid=%s was=%s'%(Name,Pwid,Wid,self.Module))
+            if (type(Wid) is tuple)and(type(Pwid) is tuple):
+                Wid = list(Wid)
+                Wid[0] = max(Pwid[0],Wid[0])
+                Wid[1] = min(Pwid[1],Wid[1])
             if 'reg' in Pdir:
                 return
             if Pdir == 'wire':
@@ -1971,6 +1979,17 @@ def allIn(Sup,Base):
     for A in Sup:
         if A not in Base: return False
     return True
+
+def parseBus(Name):
+    if '[' not in Name: return Name
+    Name = Name.replace('[',' ')
+    Name = Name.replace(']','')
+    Name = Name.replace(':',' ')
+    W3 = Name.split()
+    if len(W3)==3: return [W3[0],eval(W3[1]),eval(W3[2])]
+    if len(W3)==2: return [W3[0],eval(W3[1]),eval(W3[1])]
+    logs.log_error('PARSE BUS %s' % Name)
+    return Name
 
 
 

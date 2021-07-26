@@ -6,9 +6,9 @@ def dumpMod(Mod,Fname):
     Ftmp.close()
 
 def createNewRtl(Mod):
-    dumpMod(Mod,'xxx0')
+#    dumpMod(Mod,'xxx0')
     runNewRtl(Mod)
-    dumpMod(Mod,'xxx1')
+#    dumpMod(Mod,'xxx1')
 
 def runNewRtl(Mod):
     Insts = list(Mod.insts.keys())
@@ -52,6 +52,14 @@ def runNewRtl(Mod):
             O,Ins  = typicalConns(Obj.conns,'^')
             Mod.hard_assigns.append((O,Ins,'',Dly))
             Mod.insts.pop(Inst)
+        elif Type.startswith('less'):
+            O,Ins  = typicalConns(Obj.conns,'^')
+            Mod.hard_assigns.append((O,('<',Ins[1],Ins[2]),'',Dly))
+            Mod.insts.pop(Inst)
+        elif Type.startswith('more'):
+            O,Ins  = typicalConns(Obj.conns,'^')
+            Mod.hard_assigns.append((O,('>',Ins[1],Ins[2]),'',Dly))
+            Mod.insts.pop(Inst)
         elif Type.startswith('xnor'):
             O,Ins  = typicalConns(Obj.conns,'^')
             Mod.hard_assigns.append((O,('~',Ins),'',Dly))
@@ -63,13 +71,14 @@ def runNewRtl(Mod):
         elif Type.startswith('buf'):
             O,Ins  = typicalConns(Obj.conns,'&')
             Mod.hard_assigns.append((O,Ins,'',Dly))
+            equalizeWidth(Mod,O,Ins[0])
             Mod.insts.pop(Inst)
         elif Type == 'mux2':
             ensureExists(Obj,Inst,'i0 i1 s o')
             i0 = Obj.conns['i0']
             i1 = Obj.conns['i1']
             s = Obj.conns['s']
-            o = Obj.conns['o']
+            O = Obj.conns['o']
             Mod.hard_assigns.append((O,('question',s,i1,i0),'',Dly))
             Mod.insts.pop(Inst)
         elif Type == 'mux4':
@@ -80,7 +89,7 @@ def runNewRtl(Mod):
             i3 = Obj.conns['i3']
             s0 = Obj.conns['s0']
             s1 = Obj.conns['s1']
-            o = Obj.conns['o']
+            O = Obj.conns['o']
             Mod.hard_assigns.append((O,('question',s1,('question',s0,i3,i2),('question',s0,i1,i0)),'',Dly))
             Mod.insts.pop(Inst)
 
@@ -92,6 +101,7 @@ def runNewRtl(Mod):
             Mod.add_net(Q,'reg',0)
             if Ck not in Alwayses0: Alwayses0[Ck] = []
             Alwayses0[Ck].append((Q,D)) 
+            equalizeWidth(Mod,Q,D)
             Mod.insts.pop(Inst)
 
         elif Type == 'dffr':
@@ -101,8 +111,15 @@ def runNewRtl(Mod):
             Q = Obj.conns['q']
             RN = Obj.conns['rn']
             Mod.add_net(Q,'reg',0)
+            if 'qn' in Obj.conns:
+                QN = Obj.conns['qn']
+                Mod.add_net(QN,'wire',0)
+                Mod.hard_assigns.append((QN,['~',Q],'',''))
+                
             if (Ck,RN) not in Alwayses1: Alwayses1[(Ck,RN)] = []
             Alwayses1[(Ck,RN)].append((Q,D)) 
+            equalizeWidth(Mod,Q,D)
+            equalizeWidth(Mod,QN,D)
             Mod.insts.pop(Inst)
         elif Type == 'dffs':
             ensureExists(Obj,Inst,'ck d q sn')
@@ -113,6 +130,12 @@ def runNewRtl(Mod):
             Mod.add_net(Q,'reg',0)
             if (Ck,SN) not in Alwayses2: Alwayses2[(Ck,SN)] = []
             Alwayses2[(Ck,SN)].append((Q,D)) 
+            if 'qn' in Obj.conns:
+                QN = Obj.conns['qn']
+                Mod.add_net(QN,'wire',0)
+                Mod.hard_assigns.append((QN,['~',Q],'',''))
+            equalizeWidth(Mod,Q,D)
+            equalizeWidth(Mod,QN,D)
             Mod.insts.pop(Inst)
         elif list(Obj.conns.keys()) != []:
             pass
@@ -137,6 +160,26 @@ def runNewRtl(Mod):
             List2.append(('<=',Q,D))
         Mod.alwayses.append((('list',('edge','posedge',Ck),('edge','negedge',SN)),List2,'always'))
 
+def equalizeWidth(Mod,NetA,NetB):
+    if (type(NetA) is str) and (type(NetB) is str):
+        return
+
+    if (type(NetA) is list) and (type(NetB) is str):
+        if NetA[0] == 'subbus':
+            Wid = eval(NetA[2])-eval(NetA[3])+1
+            Mod.add_sig(NetB,'wire',(Wid-1,0))
+            return
+        if NetA[0] == 'subbit':
+            return
+    if (type(NetA) is str) and (type(NetB) is list):
+        equalizeWidth(Mod,NetB,NetA)
+        return
+
+    if (type(NetA) is list) and (type(NetB) is list):
+        if (NetA[0] == 'subbus') and (NetB[0] == 'subbus'):
+            return
+
+    logs.log_error('failed equalizeWidth %s %s' % (NetA,NetB))
 
 def ensureExists(Obj,Inst,Pins):
     Pins = Pins.split()
