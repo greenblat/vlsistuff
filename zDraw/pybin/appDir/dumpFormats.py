@@ -306,10 +306,13 @@ class connectivityClass:
 
         for Pragma in self.Mod.geoms:
             Txt = Pragma
+            Txt = Txt.replace('"','')
             if '<assign>' in Txt:
                 Txt = Txt[8:]
+                Txt = Txt.strip()
+                Txt = Txt.replace('  ',' ')
                 Wrds = Txt.split('=')
-                Dst = Wrds[0]
+                Dst = Wrds[0].strip()
                 Src = ' '.join(Wrds[1:])
                 self.Modx.add_sig(Dst,'wire',0)
                 self.Modx.hard_assigns.append((Dst,Src,'',''))

@@ -7,6 +7,7 @@ import pygame
 
 import threading
 import re
+import cmd
 
 import pygameGeoms
 import dbase
@@ -176,13 +177,13 @@ def main():
     
 
 class myThread (threading.Thread):
-   def __init__(self, threadID, name, counter):
-      threading.Thread.__init__(self)
-      self.threadID = threadID
-      self.name = name
-      self.counter = counter
-   def run(self):
-    execute_terminal_commands()
+    def __init__(self, threadID, name, counter):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+        self.counter = counter
+    def run(self):
+        execute_terminal_commands()
 
 thread1 = myThread(1,'xterm',1)
 
@@ -400,31 +401,36 @@ def on_draw():
 CommandsHistory=[]
 
 
-def was_execute_terminal_commands():
-    Glbs.IntrLoop = cmdxClass()
-    Glbs.IntrLoop.prompt='?:'
-    Glbs.IntrLoop.cmdloop('hello')
-
-
-
+#def was_execute_terminal_commands():
+#    Glbs.IntrLoop = cmdxClass()
+#    Glbs.IntrLoop.prompt='?:'
+#    Glbs.IntrLoop.cmdloop('hello')
+#
 
 
 
 def execute_terminal_commands():
+    Intr = cmdxClass()
+    Intr.prompt='?:'
+    Intr.cmdloop('hello')
+
+
+
+def execute_terminal_commands__():
     while 1:
         Txt = input('?:')
-        wrds = Txt.split()
+        wrds = dbase.splitLine(Txt)
         if len(wrds)>0:
             use_command_wrds(wrds)
             CommandsHistory.append(Txt)
 
-def do_command_line():
-    Txt = input('?:')
-    wrds = Txt.split()
-    if len(wrds)==0:
-        return
-    use_command_wrds(wrds)
-    do_command_line()
+#def do_command_line():
+#    Txt = input('?:')
+#    wrds = Txt.split()
+#    if len(wrds)==0:
+#        return
+#    use_command_wrds(wrds)
+#    do_command_line()
 
 def use_command_wrds(wrds):
     if len(wrds)==0:

@@ -958,9 +958,29 @@ def load_dbase_file__(File):
         if (len(line)==0):
             return
         state,Mod=work_on_line(line,state,Mod)
+def splitLine(line):
+    wrds = line.split()
+    Wrds = []
+    state = 'idle'
+    for Wrd in wrds:
+        if (state=='idle'):
+            if (Wrd[0] == '"')and(Wrd[-1]!='"'):
+                Token = Wrd
+                state = 'work'
+            else:
+                Wrds.append(Wrd)
+        elif (state=='work'):
+            Token += ' '+Wrd
+            if Wrd[-1]=='"':
+                Wrds.append(Token)
+                Token = ''
+                state = 'idle'
+    if state == 'work':
+        Wrds.append(Token)
+    return Wrds
 
 def work_on_line(line,state,Mod):
-    wrds = line.split()
+    wrds = splitLine(line)
     if (len(wrds)==0):
         return state,Mod
     elif (wrds[0][0]=='#'):
