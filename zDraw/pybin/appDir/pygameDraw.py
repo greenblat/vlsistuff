@@ -31,7 +31,7 @@ class cmdxClass(cmd.Cmd):
         print('emptyline')
         return False
     def default(self,Txt):
-        wrds = Txt.split()
+        wrds = dbase.splitLine(Txt)
         if len(wrds)>0:
             use_command_wrds(wrds)
             CommandsHistory.append(Txt)
@@ -494,6 +494,7 @@ def use_command_wrds(wrds):
         Glbs.adding_queue.extend(wrds[1:])
     elif 'name' in wrds[0]:
         Glbs.paramName='name'
+        print('NAME',wrds)
         Glbs.params_queue.extend(wrds[1:])
     elif 'param' in wrds[0]:
         Glbs.paramName=wrds[1]

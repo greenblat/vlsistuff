@@ -1,4 +1,4 @@
-#! /usr/bin/env python3.8
+#! /usr/bin/env python3
 
 HelpString = '''
     invocation: mWave.py  <csvfile> <ctrfile>

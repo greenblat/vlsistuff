@@ -8,7 +8,18 @@ def dumpMod(Mod,Fname):
 def createNewRtl(Mod):
 #    dumpMod(Mod,'xxx0')
     runNewRtl(Mod)
+    runInstances(Mod)
 #    dumpMod(Mod,'xxx1')
+
+def runInstances(Mod):
+    Insts = list(Mod.insts.keys())
+    for Inst in Insts:
+        Obj = Mod.insts[Inst]
+        Type = Obj.Type
+        Params = Obj.params
+        if 'type' in Params:
+            Obj.Type = Params['type']
+            Obj.params.pop('type')
 
 def runNewRtl(Mod):
     Insts = list(Mod.insts.keys())
@@ -42,7 +53,7 @@ def runNewRtl(Mod):
             Mod.insts.pop(Inst)
         elif Type.startswith('nor'):
             O,Ins  = typicalConns(Obj.conns,'|')
-            Mod.hard_assigns.append((O,('~',Ins,'',Dly)))
+            Mod.hard_assigns.append((O,('~',Ins),'',Dly))
             Mod.insts.pop(Inst)
         elif Type.startswith('or'):
             O,Ins  = typicalConns(Obj.conns,'|')
@@ -113,13 +124,16 @@ def runNewRtl(Mod):
             Mod.add_net(Q,'reg',0)
             if 'qn' in Obj.conns:
                 QN = Obj.conns['qn']
-                Mod.add_net(QN,'wire',0)
-                Mod.hard_assigns.append((QN,['~',Q],'',''))
+                if (QN != ''):
+                    Mod.add_net(QN,'wire',0)
+                    Mod.hard_assigns.append((QN,['~',Q],'',''))
                 
             if (Ck,RN) not in Alwayses1: Alwayses1[(Ck,RN)] = []
-            Alwayses1[(Ck,RN)].append((Q,D)) 
+            Alwayses1[(Ck,RN)].append((Q,D,0)) 
             equalizeWidth(Mod,Q,D)
-            equalizeWidth(Mod,QN,D)
+
+            if ('qn' in Obj.conns)and(QN != ''):
+                equalizeWidth(Mod,QN,D)
             Mod.insts.pop(Inst)
         elif Type == 'dffs':
             ensureExists(Obj,Inst,'ck d q sn')
@@ -128,14 +142,16 @@ def runNewRtl(Mod):
             Q = Obj.conns['q']
             SN = Obj.conns['sn']
             Mod.add_net(Q,'reg',0)
-            if (Ck,SN) not in Alwayses2: Alwayses2[(Ck,SN)] = []
-            Alwayses2[(Ck,SN)].append((Q,D)) 
+            if (Ck,SN) not in Alwayses1: Alwayses1[(Ck,SN)] = []
+            Alwayses1[(Ck,SN)].append((Q,D,1)) 
             if 'qn' in Obj.conns:
                 QN = Obj.conns['qn']
-                Mod.add_net(QN,'wire',0)
-                Mod.hard_assigns.append((QN,['~',Q],'',''))
+                if (QN != ''):
+                    Mod.add_net(QN,'wire',0)
+                    Mod.hard_assigns.append((QN,['~',Q],'',''))
             equalizeWidth(Mod,Q,D)
-            equalizeWidth(Mod,QN,D)
+            if ('qn' in Obj.conns) and (QN != ''):
+                equalizeWidth(Mod,QN,D)
             Mod.insts.pop(Inst)
         elif list(Obj.conns.keys()) != []:
             pass
@@ -150,15 +166,12 @@ def runNewRtl(Mod):
     for Ck,RN in Alwayses1:
         List = Alwayses1[(Ck,RN)]
         List2 = ['list']
-        for Q,D in List:
+        for Q,D,_ in List:
             List2.append(('<=',Q,D))
-        Mod.alwayses.append((('list',('edge','posedge',Ck),('edge','negedge',RN)),List2,'always'))
-    for Ck,SN in Alwayses2:
-        List = Alwayses2[(Ck,SN)]
-        List2 = ['list']
-        for Q,D in List:
-            List2.append(('<=',Q,D))
-        Mod.alwayses.append((('list',('edge','posedge',Ck),('edge','negedge',SN)),List2,'always'))
+        ListRst = ['list']
+        for Q,_,Df in List:
+            ListRst.append(('<=',Q,Df))
+        Mod.alwayses.append((('list',('edge','posedge',Ck),('edge','negedge',RN)),['ifelse',('!',RN),ListRst,List2],'always'))
 
 def equalizeWidth(Mod,NetA,NetB):
     if (type(NetA) is str) and (type(NetB) is str):

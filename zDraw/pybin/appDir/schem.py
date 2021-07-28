@@ -901,8 +901,6 @@ picture mux
   pic_pin s i xy=2,4
   pic_pin o o xy=4,2
 end
-  pic_pin i1 i xy=0,4
-end
 picture nor2
   pic_aline list=5.8,2,6,2
   pic_aline list=0,1,1.2,1,1,0.5,3,0.5
@@ -1403,6 +1401,16 @@ pic_aline list=0.72,0.00,0.31,0.31
 pic_aline list=0.65,0.51,1.04,0.75
 pic_aline list=0.75,1.11,1.04,0.75
 end
+
+
+picture arrow_tip
+pic_aline list=0.0,1.0,2.5,1.0
+pic_aline list=2.0,1,1.5,1.5
+pic_aline list=2.0,1,1.5,0.5
+pic_pin i1 i xy=0.0,1.0
+pic_pin o1 o xy=2.5,1.0
+end
+
 picture multififo_w1_r2
 pic_aline list=0.5,0,0.5,5.0,5.2,5.0,5.2,0,0.5,0
 pic_line list=0,1.0,0.5,0
@@ -1451,7 +1459,7 @@ pic_text empty xy=4.5,3.0 align=right
 pic_text syncfifo xy=0.5,5.2
 end
 
-picture cloud
+picture cloud_old
 pic_pin o1 o xy=4.8,2.6
 pic_pin i1 i xy=0.0,2.7
 pic_pin i2 i xy=0.3,1.4
@@ -1479,6 +1487,47 @@ pic_aline list=1.80,0.52,1.40,0.48
 pic_aline list=1.40,0.48,0.96,0.56
 pic_aline list=0.96,0.56,0.56,0.84
 pic_aline list=0.56,0.84,0.40,1.44
+end
+
+picture cloud
+pic_pin o1 o xy=2.9,1.5
+pic_pin i1 i xy=0.0,1.6
+pic_pin i2 i xy=0.2,0.9
+pic_aline list=0.82,2.28,1.01,2.64
+pic_aline list=1.01,2.64,1.39,2.69
+pic_aline list=1.39,2.69,1.73,2.57
+pic_aline list=1.73,2.57,1.82,2.30
+pic_aline list=1.82,2.30,2.23,2.35
+pic_aline list=2.23,2.35,2.62,2.33
+pic_aline list=2.62,2.33,2.90,2.14
+pic_aline list=2.90,2.14,2.93,1.80
+pic_aline list=2.93,1.80,2.83,1.51
+pic_aline list=2.83,1.51,3.00,1.22
+pic_aline list=3.00,1.22,3.00,0.89
+pic_aline list=3.00,0.89,2.88,0.58
+pic_aline list=2.88,0.58,2.57,0.50
+pic_aline list=2.57,0.50,2.33,0.48
+pic_aline list=2.33,0.48,2.26,0.19
+pic_aline list=2.26,0.19,2.04,0.00
+pic_aline list=2.04,0.00,1.75,0.02
+pic_aline list=1.75,0.02,1.54,0.14
+pic_aline list=1.54,0.14,1.42,0.41
+pic_aline list=1.42,0.41,1.08,0.31
+pic_aline list=1.08,0.31,0.84,0.29
+pic_aline list=0.84,0.29,0.58,0.34
+pic_aline list=0.58,0.34,0.34,0.50
+pic_aline list=0.34,0.50,0.24,0.86
+pic_aline list=0.24,0.86,0.34,1.18
+pic_aline list=0.34,1.18,0.14,1.42
+pic_aline list=0.14,1.42,0.07,1.63
+pic_aline list=0.10,1.85,0.10,1.85
+pic_aline list=0.07,1.63,0.10,1.85
+pic_aline list=0.10,1.85,0.22,2.06
+pic_aline list=0.22,2.06,0.50,2.18
+pic_aline list=0.50,2.18,0.82,2.28
+end
+
+
 picture asyncfifo
 pic_aline list=0.5,0,0.5,6.0,4.5,6.0,4.5,0,0.5,0
 pic_line list=0,1.0,0.5,0
@@ -1513,6 +1562,9 @@ pic_text rclk xy=4.5,5.0 align=right
 pic_pin rclk i xy=5.0,5.0
 pic_text asyncfifo xy=0.5,6.2
 end
+
+
+
 
 
 '''

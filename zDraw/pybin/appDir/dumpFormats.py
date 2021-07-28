@@ -17,7 +17,9 @@ class connectivityClass:
         self.Inouts={}
         self.Conns={}
         self.hard_assigns = []
+        self.Glbs = Glbs
         self.prepares()
+        self.emptyConns()
     
     def prepares(self):
         for Key in self.Mod.params:
@@ -139,7 +141,20 @@ class connectivityClass:
                 if Inst not in self.Conns:
                     self.Conns[Inst]={}
                 self.Conns[Inst][Pin]=Wname
-    
+
+    def emptyConns(self): 
+        for Inst in self.Mod.instances:
+            Obj = self.Mod.instances[Inst]
+            Pic = Obj.Type
+            if (Pic in ['antenna','vcc','gnd','input','output','node'])or('logo' in Obj.Type):
+                pass
+            elif Pic in self.Glbs.pictures:
+                Pins = self.Glbs.pictures[Pic].pins
+                for Pin in Pins:
+                    if Pin not in self.Conns[Inst]:
+                        self.Conns[Inst][Pin]=''
+                    
+
     def spread_the_joy(self):
         dones=1
         while dones:
@@ -180,75 +195,75 @@ class connectivityClass:
             for (Prm,Val) in Params:
                 if Prm=='delay': return '#(%s) ' % Val
         return ''
-    def dumpRtlVerilog(self,File):
-        for Inst in self.Mod.instances:
-            Obj = self.Mod.instances[Inst]
-            Type = Obj.Type
-            Obj.conns = {}
-            Dly = self.getDelay(Inst)
-            if Inst in self.Conns:
-                Pins  = self.Conns[Inst]
-                Obj.conns = Pins
-            if Type in ['gnd','vcc','input','output','node','inout']:
-                pass
-            elif Type.startswith('nand'):
-                O,Ins  = typicalConns(Obj.conns,'&')
-                File.write('assign %s%s = ~(%s);\n' % (Dly,O,Ins))
-            elif Type.startswith('and'):
-                O,Ins  = typicalConns(Obj.conns,'&')
-                File.write('assign %s%s = %s;\n' % (Dly,O,Ins))
-            elif Type.startswith('nor'):
-                O,Ins  = typicalConns(Obj.conns,'|')
-                File.write('assign %s%s = ~(%s);\n' % (Dly,O,Ins))
-            elif Type.startswith('or'):
-                O,Ins  = typicalConns(Obj.conns,'|')
-                File.write('assign %s%s = %s;\n' % (Dly,O,Ins))
-            elif Type.startswith('xor'):
-                O,Ins  = typicalConns(Obj.conns,'^')
-                File.write('assign %s%s = %s;\n' % (Dly,O,Ins))
-            elif Type.startswith('xnor'):
-                O,Ins  = typicalConns(Obj.conns,'^')
-                File.write('assign %s%s = ~(%s);\n' % (Dly,O,Ins))
-            elif Type.startswith('inv'):
-                O,Ins  = typicalConns(Obj.conns,'&')
-                File.write('assign %s%s = ~%s;\n' % (Dly,O,Ins))
-            elif Type.startswith('buf'):
-                O,Ins  = typicalConns(Obj.conns,'&')
-                File.write('assign %s%s = %s;\n' % (Dly,O,Ins))
-            elif Type == 'flop':
-                ensureExists(Obj,Inst,'ck d q')
-                Ck = Obj.conns['ck']
-                D = Obj.conns['d']
-                Q = Obj.conns['q']
-                File.write('reg %s; assign %s%s = %s;\n' % (Inst,Dly,Q,Inst))
-                File.write('always @(posedge %s) %s <= %s;\n' % (Ck,Inst,D))
-            elif Type == 'dffr':
-                ensureExists(Obj,Inst,'ck d q rn')
-                Ck = Obj.conns['ck']
-                D = Obj.conns['d']
-                Q = Obj.conns['q']
-                RN = Obj.conns['rn']
-                File.write('reg %s; assign %s%s = %s;\n' % (Inst,Dly,Q,Inst))
-                File.write('always @(posedge %s or negedge %s) if (!%s) %s <= 0; else %s <= %s;\n' % (Ck,RN,RN,Inst,Inst,D))
-            elif Type == 'dffs':
-                ensureExists(Obj,Inst,'ck d q sn')
-                Ck = Obj.conns['ck']
-                D = Obj.conns['d']
-                Q = Obj.conns['q']
-                SN = Obj.conns['sn']
-                File.write('reg %s; assign %s%s = %s;\n' % (Inst,Dly,Q,Inst))
-                File.write('always @(posedge %s or negedge %s) if (!%s) %s <= 1; else %s <= %s;\n' % (Ck,SN,SN,Inst,Inst,D))
-            elif Type == 'mux2':
-                ensureExists(Obj,Inst,'i0 i1 s o')
-                i0 = Obj.conns['i0']
-                i1 = Obj.conns['i1']
-                s = Obj.conns['s']
-                o = Obj.conns['o']
-                File.write('assign %s%s = %s ? %s : %s;\n' % (Dly,o,s,i1,i0))
-            elif list(Obj.conns.keys()) != []:
-                self.dumpInstance(Inst,File)
-            else:
-               print('warning! %s ignored for rtl verilog %s %s' % (Type,Inst,Obj.conns)) 
+##     def dumpRtlVerilog(self,File):
+##         for Inst in self.Mod.instances:
+##             Obj = self.Mod.instances[Inst]
+##             Type = Obj.Type
+##             Obj.conns = {}
+##             Dly = self.getDelay(Inst)
+##             if Inst in self.Conns:
+##                 Pins  = self.Conns[Inst]
+##                 Obj.conns = Pins
+##             if Type in ['gnd','vcc','input','output','node','inout']:
+##                 pass
+##             elif Type.startswith('nand'):
+##                 O,Ins  = typicalConns(Obj.conns,'&')
+##                 File.write('assign %s%s = ~(%s);\n' % (Dly,O,Ins))
+##             elif Type.startswith('and'):
+##                 O,Ins  = typicalConns(Obj.conns,'&')
+##                 File.write('assign %s%s = %s;\n' % (Dly,O,Ins))
+##             elif Type.startswith('nor'):
+##                 O,Ins  = typicalConns(Obj.conns,'|')
+##                 File.write('assign %s%s = ~(%s);\n' % (Dly,O,Ins))
+##             elif Type.startswith('or'):
+##                 O,Ins  = typicalConns(Obj.conns,'|')
+##                 File.write('assign %s%s = %s;\n' % (Dly,O,Ins))
+##             elif Type.startswith('xor'):
+##                 O,Ins  = typicalConns(Obj.conns,'^')
+##                 File.write('assign %s%s = %s;\n' % (Dly,O,Ins))
+##             elif Type.startswith('xnor'):
+##                 O,Ins  = typicalConns(Obj.conns,'^')
+##                 File.write('assign %s%s = ~(%s);\n' % (Dly,O,Ins))
+##             elif Type.startswith('inv'):
+##                 O,Ins  = typicalConns(Obj.conns,'&')
+##                 File.write('assign %s%s = ~%s;\n' % (Dly,O,Ins))
+##             elif Type.startswith('buf'):
+##                 O,Ins  = typicalConns(Obj.conns,'&')
+##                 File.write('assign %s%s = %s;\n' % (Dly,O,Ins))
+##             elif Type == 'flop':
+##                 ensureExists(Obj,Inst,'ck d q')
+##                 Ck = Obj.conns['ck']
+##                 D = Obj.conns['d']
+##                 Q = Obj.conns['q']
+##                 File.write('reg %s; assign %s%s = %s;\n' % (Inst,Dly,Q,Inst))
+##                 File.write('always @(posedge %s) %s <= %s;\n' % (Ck,Inst,D))
+##             elif Type == 'dffr':
+##                 ensureExists(Obj,Inst,'ck d q rn')
+##                 Ck = Obj.conns['ck']
+##                 D = Obj.conns['d']
+##                 Q = Obj.conns['q']
+##                 RN = Obj.conns['rn']
+##                 File.write('reg %s; assign %s%s = %s;\n' % (Inst,Dly,Q,Inst))
+##                 File.write('always @(posedge %s or negedge %s) if (!%s) %s <= 0; else %s <= %s;\n' % (Ck,RN,RN,Inst,Inst,D))
+##             elif Type == 'dffs':
+##                 ensureExists(Obj,Inst,'ck d q sn')
+##                 Ck = Obj.conns['ck']
+##                 D = Obj.conns['d']
+##                 Q = Obj.conns['q']
+##                 SN = Obj.conns['sn']
+##                 File.write('reg %s; assign %s%s = %s;\n' % (Inst,Dly,Q,Inst))
+##                 File.write('always @(posedge %s or negedge %s) if (!%s) %s <= 1; else %s <= %s;\n' % (Ck,SN,SN,Inst,Inst,D))
+##             elif Type == 'mux2':
+##                 ensureExists(Obj,Inst,'i0 i1 s o')
+##                 i0 = Obj.conns['i0']
+##                 i1 = Obj.conns['i1']
+##                 s = Obj.conns['s']
+##                 o = Obj.conns['o']
+##                 File.write('assign %s%s = %s ? %s : %s;\n' % (Dly,o,s,i1,i0))
+##             elif list(Obj.conns.keys()) != []:
+##                 self.dumpInstance(Inst,File)
+##             else:
+##                print('warning! %s ignored for rtl verilog %s %s' % (Type,Inst,Obj.conns)) 
 
     def dumpVerilog(self,File,Rtl):
         if Rtl:

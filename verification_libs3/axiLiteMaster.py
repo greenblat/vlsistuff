@@ -30,19 +30,61 @@ class axiLiteMasterClass:
         self.Queue2=[]
         self.waiting=0
         self.bwaiting=0
+
         self.Translates={}
         self.Prefix = ''
+        self.Suffix = ''
         self.Defines={}
+        self.renames = {}
         self.Comments=[]
+        self.Size = 2
+        self.Wstrb = 0xf
+
+    def eval(self,Txt):
+        if type(Txt) is int: return Txt
+        try:
+            return eval(Txt,self.Translates,self.renames)
+        except:
+            logs.log_error('eval of "%s" in axiLiteMasterClass failed' % Txt)
+            return 0
+
+    def onFinish(self):
+        return
+
+    def rename(self,Sig):
+        if Sig in self.renames:
+            return self.renames[Sig]
+
+        if self.Prefix:
+            Sig = self.Prefix + Sig 
+        if self.Suffix:
+            Sig = Sig + self.Suffix 
+        if Sig in self.Translates: Sig = self.Translates[Sig]
+        return Sig 
+
+
+
 
     def peek(self,Sig):
-        if self.Prefix!='': Sig = '%s%s'%(self.Prefix,Sig)
-        if Sig in self.Translates: Sig = self.Translates[Sig]
+        Sig = self.rename(Sig)
         return logs.peek('%s.%s'%(self.Path,Sig))
     def force(self,Sig,Val):
-        if self.Prefix!='': Sig = '%s%s'%(self.Prefix,Sig)
-        if Sig in self.Translates: Sig = self.Translates[Sig]
+        Sig = self.rename(Sig)
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
+
+    def action(self,Txt):
+        wrds = Txt.split()
+        if wrds[0] == 'read':
+            self.read(self.eval(wrds[1]),self.Size)
+        elif wrds[0] == 'write':
+            self.write(self.eval(wrds[1]),self.eval(wrds[2]),self.Wstrb)
+        elif wrds[0] == 'size':
+            self.Size = self.eval(wrds[1])
+        elif wrds[0] == 'wstrb':
+            self.Wstrb = self.eval(wrds[1])
+
+
+
 
     def read(self,Address,Size=4,Queue=1):
         if Queue==1:
@@ -53,20 +95,6 @@ class axiLiteMasterClass:
             self.Queue2.append('force arvalid=1 araddr=%s'%(Address))
             self.Queue2.append('force arvalid=0 araddr=0 rready=1')
             self.Comments.append('addr=%x'%Address)
-
-    def wait(self,Many):
-        self.Queue.append('wait %s'%Many)
-    def finish(self,Many):
-        self.Queue.append('wait %s'%Many)
-        self.Queue.append('finish')
-
-    def print(self,Text,Queue=1):
-        if Queue==1:
-            self.Queue.append('print %s'%(Text))
-        elif Queue==2:
-            self.Queue2.append('print %s'%(Text))
-        else:
-            logs.log_error('QUEUE can be 1 or 2, not "%s"'%Queue)
 
     def write(self,Address,Wdata,Wstrb=0xff,Queue=1):
         if Queue==1:
@@ -81,6 +109,20 @@ class axiLiteMasterClass:
             self.Queue2.append('force wvalid=0 wdata=0 wstrb=0')
         else:
             logs.log_error('QUEUE can be 1 or 2, not "%s"'%Queue)
+
+    def wait(self,Many):
+        self.Queue.append('wait %s'%Many)
+    def finish(self,Many):
+        self.Queue.append('wait %s'%Many)
+        self.Queue.append('finish')
+    def print(self,Text,Queue=1):
+        if Queue==1:
+            self.Queue.append('print %s'%(Text))
+        elif Queue==2:
+            self.Queue2.append('print %s'%(Text))
+        else:
+            logs.log_error('QUEUE can be 1 or 2, not "%s"'%Queue)
+
 
 
     def run(self):

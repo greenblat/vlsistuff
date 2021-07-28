@@ -222,6 +222,7 @@ class sequenceClass:
     def eval(self,Txt,Bad=False):
         if type(Txt) is int:
             return Txt
+
         if Txt in self.Translates:
             return self.eval(self.Translates[Txt])
 
