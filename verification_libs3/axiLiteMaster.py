@@ -66,8 +66,9 @@ class axiLiteMasterClass:
 
 
     def peek(self,Sig):
-        Sig = self.rename(Sig)
-        return logs.peek('%s.%s'%(self.Path,Sig))
+        Tsig = self.rename(Sig)
+        Val =  logs.peek('%s.%s'%(self.Path,Tsig))
+        return Val
     def force(self,Sig,Val):
         Sig = self.rename(Sig)
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
@@ -88,20 +89,23 @@ class axiLiteMasterClass:
 
     def read(self,Address,Size=4,Queue=1):
         if Queue==1:
-            self.Queue.append('force arvalid=1 araddr=%s'%(Address))
+            self.Queue.append('check arready==1')
+            self.Queue.append('force_cond arready  arvalid=1 araddr=%s'%(Address))
             self.Queue.append('force arvalid=0 araddr=0 rready=1')
             self.Comments.append('addr=%x'%Address)
         elif Queue==2:
-            self.Queue2.append('force arvalid=1 araddr=%s'%(Address))
+            self.Queue2.append('force_cond arready  arvalid=1 araddr=%s'%(Address))
             self.Queue2.append('force arvalid=0 araddr=0 rready=1')
             self.Comments.append('addr=%x'%Address)
 
     def write(self,Address,Wdata,Wstrb=0xff,Queue=1):
         if Queue==1:
+            self.Queue.append('check awready==1')
             self.Queue.append('force awvalid=1 awaddr=%s'%(Address))
-            self.Queue.append('force_cond awready awvalid=0 awaddr=0')
-            self.Queue.append('force wvalid=1 wdata=%s wstrb=%s '%(Wdata,Wstrb))
-            self.Queue.append('force_cond wready wvalid=0 wdata=0 wstrb=0')
+            self.Queue.append('force awvalid=0 awaddr=0')
+            self.Queue.append('check wready==1')
+            self.Queue.append('force wvalid=1 wdata=%s wstrb=%s wlast=1 '%(Wdata,Wstrb))
+            self.Queue.append('force wvalid=0 wdata=0 wstrb=0')
         elif Queue==2:
             self.Queue2.append('force awvalid=1 awaddr=%s'%(Address))
             self.Queue2.append('force awvalid=0 awaddr=0')
@@ -123,6 +127,13 @@ class axiLiteMasterClass:
         else:
             logs.log_error('QUEUE can be 1 or 2, not "%s"'%Queue)
 
+
+    def busy(self):
+        if self.Queue!=[]: return True
+        if self.Queue2!=[]: return True
+        if self.waiting>0: return True
+        if self.bwaiting>0: return True
+        return False
 
 
     def run(self):
@@ -209,6 +220,17 @@ class axiLiteMasterClass:
                 Var = ww[0]
                 Val = self.evalit(ww[1])
                 self.force(Var,Val)
+        elif (wrds[0]=='check'):
+            Vars = extractVars(wrds[1])
+            Dir = {}
+            for Var in Vars:
+                Val = self.peek(Var)
+                Dir[Var]=Val
+            X = eval(wrds[1],Dir)
+            if (not X):
+                self.Queue.insert(0,Cmd)
+                return
+
         elif (wrds[0]=='force'):
             for wrd in wrds[1:]:
                 ww = wrd.split('=')
@@ -256,4 +278,14 @@ class axiLiteMasterClass:
                 Addr = self.evalit(wrds[1])
                 self.makeRead(Addr)
 
-                                    
+def extractVars(Txt):
+    Vars = []
+    for Chr in '=()&|+-*^':
+        Txt = Txt.replace(Chr,' ')
+    Wrds = Txt.split()
+    for Wrd in Wrds:
+        if Wrd[0] in '0123456789':
+            pass
+        else:
+            Vars.append(Wrd)
+    return Vars
