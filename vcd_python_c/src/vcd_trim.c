@@ -330,7 +330,7 @@ void readVcdFile(fname) char *fname; {
                 } else if ((line[0]=='z')||(line[0]=='x')||(line[0]=='0')||(line[0]=='1'))  {
                     Code = intcode(&(s1[1]));
                     if (usefuls[Code]) {
-                        printf("code %d %s         |%s|",Code,s1,line);
+//                        printf("code %d %s         |%s|",Code,s1,line);
                         push(line,9);
                     }
                 }
