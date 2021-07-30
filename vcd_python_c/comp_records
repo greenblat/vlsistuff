@@ -7,6 +7,7 @@ gcc src/vcd_trim.c -o vcd_trim -O3 -std=c99
 gcc src/vcd_cut_time.c -o vcd_cut_time -O3 -std=c99
 
 
+gcc src/vcd_trim.c -o ~/bin/vcd_trim -O3 -std=c99
 
 /bin/cp vcd_records ~/bin/
 /bin/cp vcd_trim ~/bin/

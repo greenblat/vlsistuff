@@ -112,9 +112,19 @@ char line12[1000];
 char line13[1000];
 char line14[1000];
 char line15[1000];
+char line16[1000];
+char line17[1000];
+char line18[1000];
+char line19[1000];
+char line20[1000];
 
 
 void flush() {
+    if (line20[0]) fprintf(Fout,"%s",line20);
+    if (line19[0]) fprintf(Fout,"%s",line19);
+    if (line18[0]) fprintf(Fout,"%s",line18);
+    if (line17[0]) fprintf(Fout,"%s",line17);
+    if (line16[0]) fprintf(Fout,"%s",line16);
     if (line15[0]) fprintf(Fout,"%s",line15);
     if (line14[0]) fprintf(Fout,"%s",line14);
     if (line13[0]) fprintf(Fout,"%s",line13);
@@ -147,16 +157,26 @@ void flush() {
     line13[0]=0;
     line14[0]=0;
     line15[0]=0;
+    line16[0]=0;
+    line17[0]=0;
+    line18[0]=0;
+    line19[0]=0;
+    line20[0]=0;
 //    fprintf(Fout,"flush\n");
 }
 int depth=0;
 void pushline(char *line) {
     depth += 1;
-    if (line15[0]) {
-        printf("overflow %s",line15);
+    if (line20[0]) {
+        printf("overflow %s",line20);
         exit(0);
     }
 
+    strcpy(line20,line19);
+    strcpy(line19,line18);
+    strcpy(line18,line17);
+    strcpy(line17,line16);
+    strcpy(line16,line15);
     strcpy(line15,line14);
     strcpy(line14,line13);
     strcpy(line13,line12);
@@ -192,12 +212,18 @@ void popline() {
     strcpy(line12,line13);
     strcpy(line13,line14);
     strcpy(line14,line15);
+    strcpy(line15,line16);
+    strcpy(line16,line17);
+    strcpy(line17,line18);
+    strcpy(line18,line19);
+    strcpy(line19,line20);
 
-    line15[0]=0;
+    line20[0]=0;
 }
 
 
 void push(char *line,int Mode) {
+//    printf("PUSHLINE mode=%d depth %d line %s\n",Mode,depth,line);
     if (Mode==0) {
         flush();
         fprintf(Fout,"%s",line);
@@ -304,7 +330,7 @@ void readVcdFile(fname) char *fname; {
                 } else if ((line[0]=='z')||(line[0]=='x')||(line[0]=='0')||(line[0]=='1'))  {
                     Code = intcode(&(s1[1]));
                     if (usefuls[Code]) {
-//                        printf("code %d %s         %s",Code,s1,line);
+                        printf("code %d %s         |%s|",Code,s1,line);
                         push(line,9);
                     }
                 }
@@ -370,10 +396,11 @@ void readFilterFile(char *fname) {
         i=sscanf(line,"%s %s %s %s %s %s %s",s1,s2,s3,s4,s5,s6,s7);
         linenum ++;
 
-        if ((i==4)&&((strcmp(s1,"reg")==0)||(strcmp(s1,"record")==0))) {
-            Code = intcode(s3);
+        if ((strcmp(s1,"$var")==0) && ((strcmp(s2,"reg")==0)||(strcmp(s2,"wire")==0)||(strcmp(s2,"integer")==0))) {
+            Code = intcode(s4);
             if (Code<maxsignals) {
                 usefuls[Code]=1;
+                printf("USEFULL s4=%s code=%d   |%s|\n",s4,Code,line);
                 dones ++;
             }
         }
@@ -382,6 +409,7 @@ void readFilterFile(char *fname) {
 
     
     
+
 
 
 
