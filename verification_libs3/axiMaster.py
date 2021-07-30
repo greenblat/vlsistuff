@@ -46,6 +46,9 @@ class axiMasterClass:
         self.WSTRB = -1 
         self.AXI3 = False
 
+    def cannot_find_sig(self,Sig):
+        logs.log_error('CANNOT FIND SIG %s' % Sig)
+
     def onFinish(self):
         return
     def rename(self,Sig):

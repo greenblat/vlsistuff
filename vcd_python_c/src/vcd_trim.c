@@ -372,13 +372,10 @@ void readFilterFile(char *fname) {
 
         if ((i==4)&&((strcmp(s1,"reg")==0)||(strcmp(s1,"record")==0))) {
             Code = intcode(s3);
-            if (Code>=maxsignals) {
-                printf("fatal. too many signals (%d>=%d)\n",Code,maxsignals);
-                exit(0);
+            if (Code<maxsignals) {
+                usefuls[Code]=1;
+                dones ++;
             }
-            usefuls[Code]=1;
-//            printf("code %d useful %s    %s",Code,s3,line);
-            dones ++;
         }
     }
 }
