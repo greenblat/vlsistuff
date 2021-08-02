@@ -254,6 +254,7 @@ class axiSlaveClass:
             if self.awlen<0:
                 if len(self.awqueue)==0:
                     logs.log_error('axiSlave awqueue empty and wvalid is on')
+                    self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = -1,-1,-1,-1,0
                 else:
                     self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = self.awqueue.pop(0)
             wstrb = self.peek('wstrb')

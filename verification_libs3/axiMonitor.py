@@ -5,7 +5,8 @@ import logs
 
 class axiMonitorClass:
     def __init__(self,Path,Monitors,dataWidth=4,Renames={},Prefix='',Suffix=''):
-        Monitors.append(self)
+        if Monitors != -1:
+            Monitors.append(self)
         self.dataWidth = dataWidth
         self.Logs = 3
         self.Path = Path
@@ -35,6 +36,7 @@ class axiMonitorClass:
         return logs.peek('%s%s' % (self.Path,Net))
 
     def onFinish(self):
+        logs.log_info('ONFINISH OF AXIMONITOR')
         if self.AWQUEUE != []:
             logs.log_error('onFinish axi monitor AWQUEUE not empty',self.Logs)
         if self.ARQUEUE != []:
@@ -108,8 +110,8 @@ class axiMonitorClass:
             Resp = self.peek('rresp')
             Rid = self.peek('rid')
             (Addr,Len,Size,Burst,Id) = self.ARQUEUE[0]
-            Exp = self.load(self.RADDR)
-            logs.log_ensure(Exp==Data,'READ ad=%x exp=%x act=%x last=%d rid %d<>%d' % (self.RADDR,Exp,Data,Last,Rid,Id),self.Logs)
+            Valids,Exp = self.load(self.RADDR)
+            logs.log_ensure((Exp & Valids)==(Data & Valids),'READ ad=%x exp=%x act=%x last=%d rid %d<>%d' % (self.RADDR,Exp,Data,Last,Rid,Id),self.Logs)
             if Burst != 0:
                 self.RADDR += self.dataWidth
             if Last:
@@ -128,13 +130,15 @@ class axiMonitorClass:
             Addr += 1
     def load(self,Addr):
         Res = 0
+        Valids = 0
 #        logs.log_info('XXX Addr=%x RAM = %s' % (Addr,list(map(hex,self.RAM.keys()))))
         for JJ in range(self.dataWidth):
             Ad = Addr + JJ
             if Ad in self.RAM:
                 Val = self.RAM[Ad]
                 Res += (Val<<(8*JJ))
-        return Res
+                Valids += (0xff<<(8*JJ))
+        return Valids,Res
 
 
 
