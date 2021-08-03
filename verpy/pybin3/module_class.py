@@ -73,6 +73,8 @@ class module_class:
         self.add_sig(Name,Dir,Wid)
     def add_sig(self,Name,Dir,Wid):
         if Wid==1: Wid=0
+        if (type(Name) is str)and('{' in Name):
+            return
         if (type(Name) is str)and('[' in Name):
             Bus,Hi,Lo  = parseBus(Name)
             return self.add_sig(['subbus',Bus,Hi,Lo],Dir,Wid)

@@ -1,8 +1,8 @@
 
 import sys
-sys.path.append('/opt/homebrew/Cellar/pillow/8.2.0/lib/python3.9/site-packages')
+# sys.path.append('/opt/homebrew/Cellar/pillow/8.2.0/lib/python3.9/site-packages')
 import pygame
-from PIL import Image
+# from PIL import Image
 
 
 

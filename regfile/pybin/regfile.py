@@ -519,6 +519,7 @@ def assignAddresses():
             Name= getPrm(Reg,'names',['err'])[0]
             LINES[5].append('%s = 0x%x'%(Name,Addr))
             LINES[5].append('ADDR_MAP["%s"] = 0x%x'%(Name,Addr))
+            LINES[5].append('WIDTH_MAP["%s"] = %d'%(Name,advanceAddr(Reg)))
         Addr += int(advanceAddr(Reg))
         Reg.HADDR = Addr
     Chip.Addr = Addr
@@ -1112,6 +1113,7 @@ def dumpDefines():
     File = open('%s/%s_defs.py'%(Dir,Module),'w')
     File2 = open('%s/%s_inc.seq'%(Dir,Module),'w')
     File.write('ADDR_MAP = {}\n')
+    File.write('WIDTH_MAP = {}\n')
     for Line in LINES[5]:
         File.write('%s\n'%(Line))
     File.close()

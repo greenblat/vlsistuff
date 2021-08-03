@@ -3,6 +3,7 @@ import string,os,sys
 
 import module_class
 import newRtl
+import logs
 
 class connectivityClass:
     def __init__(self,Glbs,Root):
@@ -30,6 +31,7 @@ class connectivityClass:
                 self.Params[Obj.Owner]=[(Obj.Param,Obj.Value)]
             else:
                 self.Params[Obj.Owner].append((Obj.Param,Obj.Value))
+
         for Inst in self.Mod.instances:
             Obj = self.Mod.instances[Inst]
             if Obj.Type=='input':
@@ -61,6 +63,21 @@ class connectivityClass:
             elif Obj.Type=='gnd':
                 self.Names[Inst]='gnd'
                 self.Nodes[Inst]=[]
+            elif Inst in self.Params:
+                Params = self.Params[Inst]
+                ind = 0
+                while ind < len(Params):
+                    (Prm,Val) = Params[ind]
+                    if Prm == 'conns':
+                        if Inst not in self.Conns:
+                            self.Conns[Inst]={}
+                        LL = Val.split(',')
+                        for Pair in LL:
+                            PinNet = Pair.split('=')
+                            self.Conns[Inst][PinNet[0]] = PinNet[1]
+                        Params.pop(ind)
+                    else:
+                        ind += 1
 
         EndPoints = {}                    
         for Wire in self.Mod.wires:

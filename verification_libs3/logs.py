@@ -832,6 +832,9 @@ class driverClass:
     def peekbin(self,Sig):
         return veri.peek('%s%s'%(self.Path,Sig))
 
+    def valid(self,Sig):
+        X = self.peek(Sig)
+        return (X>0)
     def peek(self,Sig):
         return peek('%s%s'%(self.Path,Sig))
     def peekbit(self,Sig,Ind):

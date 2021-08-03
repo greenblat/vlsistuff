@@ -13,7 +13,7 @@ axi.wait(100)
 # def makeWriteWstrb(self,Burst,Len,Address,Size=4,Wstrb='auto',Wdatas=[]):
 # def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
 
-import os,sys,string,types
+import os,sys
 import logs
 import veri
 

@@ -277,12 +277,12 @@ class WireClass:
         return self.bbox0
 
 class GeomClass:
-    def __init__(self,Kind,Name,List):
+    def __init__(self,Kind,Name,List,Rot):
         self.Name=Name
         self.Kind=Kind
         self.List=List[:]
         self.bbox0=False
-        self.Rot='r0'
+        self.Rot=Rot
         self.selected=False
 
     def origin(self):
@@ -351,7 +351,7 @@ class GeomClass:
             File.write('list=%.1f,%.1f'%(self.List[0][0],self.List[0][1]))
             for (X,Y) in self.List[1:]:
                 File.write(',%.1f,%.1f'%(X,Y))
-        File.write('\n')
+        File.write(' rot=%s\n' % self.Rot)
         return
 
     def rotate(self,What):
@@ -387,20 +387,23 @@ class ParamClass:
         PrmSize = Glbs.get_context('param_text_size')
         if PrmSize==0:
             PrmSize=self.Size
+#        Mat2 = translate_rotate(self.Rot,UnitMatrix)
+#        Mat3 = matrix_mult(Mat2,Matrix)
+        Mat3 = instmatrix(1,self.Point,self.Rot,Matrix)
         if self.Param in Glbs.get_context('shyParams') and Glbs.useShyParams:
             if (self.Param=='name')and(self.Value=='$inst'):
                 Value = self.Owner
             else:
                 Value = self.Value
-            render_text(Matrix,Value,self.Point,self.Rot,PrmSize,Color,'left')
+            render_text(Mat3,Value,[0,0],'r0',PrmSize,Color,'left')
         else:
-            render_text(Matrix,'%s=%s'%(self.Param,self.Value),self.Point,self.Rot,PrmSize,Color,'left')
+            render_text(Mat3,'%s=%s'%(self.Param,self.Value),[0,0],'r0',PrmSize,Color,'left')
         if self.Father.drawBoxes:
             Bbox = self.bbox()
             X0,Y0=Bbox[0]
             X1,Y1=Bbox[1]
             List = [(X0,Y0),(X0,Y1),(X1,Y1),(X1,Y0),(X0,Y0)]
-            render_aline(Matrix,List,get_context('geom_color'))
+            render_aline(Mat3,List,get_context('geom_color'))
 
 
     def postscript(self,File):
@@ -412,11 +415,13 @@ class ParamClass:
         else:
             Value = self.Value
 
+        Mat3 = instmatrix(1,self.Point,self.Rot,UnitMatrix)
         if Glbs.useVectorText:
             set_pscontext(File,'setrgbcolor',get_context('param_color'))
             Big = make_text_vectors(Value,self.Point,'left',PrmSize)
             for Seg in Big:
-                postscript_aline(File,Seg,False)
+                Line2 = translate_aline(Mat3,Seg)
+                postscript_aline(File,Line2,False)
                 Glbs.Svg.x_aline(Seg)
         else:
             postscript_text(File,Value,self.Point,self.Rot,get_context('param_color'),PrmSize)
@@ -432,12 +437,18 @@ class ParamClass:
         self.bbox0=[self.Point,(self.Point[0]+(Size*len(self.Value))/3,self.Point[1]+Size)]
         return self.bbox0
     def save(self,File):
-        File.write('param %s %s %s xy=%.1f,%.1f\n'%(self.Owner,self.Param,self.Value,self.Point[0],self.Point[1]))
+        File.write('param %s %s %s xy=%.1f,%.1f rot=%s\n'%(self.Owner,self.Param,self.Value,self.Point[0],self.Point[1],self.Rot))
         return
     def make_selected(self,What):
         self.selected=What
     def move(self,Dx,Dy):
         self.Point = self.Point[0]+Dx,self.Point[1]+Dy
+        self.bbox0=False
+
+    def rotate(self,What):
+        NewRot = merge_rot(self.Rot,What)
+        print('>>>>>> %s %s %s %s' % (self.Rot,NewRot,self.Owner,self.Param))
+        self.Rot=NewRot
         self.bbox0=False
 
 
@@ -639,8 +650,8 @@ class DetailClass:
         self.instances[Inst]=InstanceClass(self,Type,Inst,Point,Rot)
         return self.instances[Inst]
 
-    def add_geom(self,Kind,Name,List):
-        self.geoms[Name]=GeomClass(Kind,Name,List)
+    def add_geom(self,Kind,Name,List,Rot):
+        self.geoms[Name]=GeomClass(Kind,Name,List,Rot)
         self.geoms[Name].Father=self
 
     def add_param(self,Owner,Param,Value,Point=(0,0),Rot='r0'):
@@ -1016,7 +1027,8 @@ def work_on_line(line,state,Mod):
             Kind=wrds[1]
             Name=wrds[2]
             List = get_list(wrds[3:])
-            Mod.add_geom(Kind,Name,List)
+            Rot = get_param(wrds[4:],'rot','r0')
+            Mod.add_geom(Kind,Name,List,Rot)
         elif (wrds[0]=='param'):
             Owner=wrds[1]
             Param=wrds[2]
@@ -1326,6 +1338,9 @@ def use_keystroke(Uni,Ord,XY):
                 Glbs.details[Root].touched(True)
             elif (Who=='geom'):
                 Glbs.details[Root].geoms[Inst].rotate(Uni)
+                Glbs.details[Root].touched(True)
+            elif (Who=='param'):
+                Glbs.details[Root].params[Inst].rotate(Uni)
                 Glbs.details[Root].touched(True)
             else:
                 print('dont know to rotate "%s"'%Who)

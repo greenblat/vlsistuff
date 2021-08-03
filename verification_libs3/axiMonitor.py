@@ -109,12 +109,15 @@ class axiMonitorClass:
             Last = self.peek('rlast')
             Resp = self.peek('rresp')
             Rid = self.peek('rid')
+            if self.ARQUEUE == []:
+                logs.log_error('RVALID and ARQUEUE is empty data=%x rid=%x' % (Data,Rid))
+                return
             (Addr,Len,Size,Burst,Id) = self.ARQUEUE[0]
             Valids,Exp = self.load(self.RADDR)
             logs.log_ensure((Exp & Valids)==(Data & Valids),'READ ad=%x exp=%x act=%x last=%d rid %d<>%d' % (self.RADDR,Exp,Data,Last,Rid,Id),self.Logs)
             if Burst != 0:
                 self.RADDR += self.dataWidth
-            if Last:
+            if Last == 1:
                 self.ARQUEUE.pop(0)
                 if self.ARQUEUE == []:
                     self.RADDR = -1
