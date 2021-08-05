@@ -416,12 +416,16 @@ class ParamClass:
             Value = self.Value
 
         Mat3 = instmatrix(1,self.Point,self.Rot,UnitMatrix)
+#        Mat4 = instmatrix(1,self.Point,self.Rot,Matrix)
+#        Mat5 = instmatrix(1,[0,0],self.Rot,UnitMatrix)
         if Glbs.useVectorText:
             set_pscontext(File,'setrgbcolor',get_context('param_color'))
-            Big = make_text_vectors(Value,self.Point,'left',PrmSize)
+            Big = make_text_vectors(Value,[0,0],'left',PrmSize)
             for Seg in Big:
                 Line2 = translate_aline(Mat3,Seg)
-                postscript_aline(File,Line2,False)
+                postscript_aline(File,Line2,'red')
+#                Line2 = translate_aline(UnitMatrix,Seg)
+#                postscript_aline(File,Line2,False)
                 Glbs.Svg.x_aline(Seg)
         else:
             postscript_text(File,Value,self.Point,self.Rot,get_context('param_color'),PrmSize)
