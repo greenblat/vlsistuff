@@ -47,7 +47,7 @@ char strx1[]="";
 char strx2[]="/";
 char strx3[]="\\";
 char strx4[]=" ";
-char strx5[]="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789_?.,[]{}#@()~%^;:/+-*~-=!<>&|^=<>&|";
+char strx5[]="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789_?.,[]{}#@()~%^;:/+-*~-=!<>&|^=<>&|$";
 char strx6[]="*";
 char strx7[]="`";
 char strx8[]="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
@@ -78,7 +78,7 @@ char strx32[]="^=<>&|";
 char strx33[]="\"";
 char strx34[]="?.,[]{}#@()~%^;:/+-*";
 int State=st_idle;
-void stepit(char Char,char Next) {
+void stepit(char Char,char Next,int Lnum) {
 //    printf("state=%d char=|%c| next=|%c|\n",State,Char,Next);
     switch (State) {
     case st_backline: {
@@ -648,7 +648,7 @@ void stepit(char Char,char Next) {
         }
     } break;
     }
-    printf("no action!!!! |%x| <%c> |%x| <%c> state=%d \n",Char,Char,Next,Next,State);
+    printf("no action!!!! line %d |%x| <%c> |%x| <%c> state=%d \n",Lnum,Char,Char,Next,Next,State);
 }
 void reserved_words(char *Token,char *tokenType){
     if (strcmp(Token,"_priority")==0) {strcpy(tokenType,"_priority"); return; }

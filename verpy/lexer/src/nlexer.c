@@ -13,7 +13,7 @@ int  tokenPtr=0;
 int lineNum=0;
 int charNum=0;
 int skipLine=0;
-void stepit(char A,char B);
+void stepit(char A,char B,int Lnum);
 void read_in_file();
 void reserved_words(char *Token,char *tokenType);
 void doubleNames(char *Token,char *newType);
@@ -193,9 +193,9 @@ void read_in_file() {
             } else if ((i>0)&&(line[i-1]==0x5c)&&(line[i]==0xa)) {
                 nop=0;
             } else if ((i>0)&&(line[i+1]==0x5c)) {
-                stepit(line[i],line[i+3]);
+                stepit(line[i],line[i+3],lineNum);
             } else 
-                stepit(line[i],line[i+1]);
+                stepit(line[i],line[i+1],lineNum);
         }    
         skipLine=0;
         if ((!noEol) && EOL_FLAG()) {

@@ -43,7 +43,7 @@ Doubles2 = '^=<>&|'
 Spaces = '\t \n'
 AnyChar = Letters+Digits+Spaces+'_'+Singles+Doubles+"`',\\"
 
-Multi = Alphas+Singles+Doubles+Doubles2
+Multi = Alphas+Singles+Doubles+Doubles2+'$'
 
 
 Table = [

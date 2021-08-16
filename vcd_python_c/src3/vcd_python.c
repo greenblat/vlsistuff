@@ -572,6 +572,8 @@ char temp[1000];
 char temp2[1000];
 int widthx;
 
+long Kind = 0;
+
 void do_var(long n) {
     switch (instate) {
         case 1:
@@ -591,7 +593,7 @@ void do_var(long n) {
                 ||(n==qqai("time"))
                 ||(n==qqai("event"))
                 ||(n==qqai("port"))
-            ) break;
+            ) Kind = n; break;
             shouldbe("wire",n); break;
         case 2:
             widthx = atoi(qqia(n));
@@ -601,10 +603,10 @@ void do_var(long n) {
         case 4:
             bus=n; break;
         case 5:
-            if (n==qqai("$end")) { state=Idle;record(code,bus,widthx);}
+            if (n==qqai("$end")) { state=Idle;record(code,bus,widthx,Kind);}
             else {
                 if (n==qqai("[-1]")) {
-                    record(code,bus,widthx);
+                    record(code,bus,widthx,Kind);
                 } else {
                     strcpy(temp,qqia(n));
                     if (temp[0]=='[') {
@@ -612,13 +614,13 @@ void do_var(long n) {
                         for (j=1;(temp[j]&&(temp[j]!=':'));j++);
                         if (temp[j-1]==']') {
                             sprintf(temp,"%s%s",qqia(bus),qqia(n));
-                            record(code,qqai(temp),widthx);
+                            record(code,qqai(temp),widthx,Kind);
                         } else if (temp[j]==':') {
                             strcpy(temp2,&(temp[1]));
                             temp2[j-1]=0;
                             strcpy(temp2,&(temp[j+1]));
                             temp2[strlen(temp2)-1]=0;
-                            record(code,bus,widthx);
+                            record(code,bus,widthx,Kind);
                         }
                     }
                 }
@@ -821,14 +823,14 @@ void do_value(char *strx,int forReal) {
 
 long zerox = -1;
 
-void record(long code,long bus,int width) {
+void record(long code,long bus,int width, long Kind) {
     char temp[1000];
     char fullname[1000];
     int ind,i,pcode;
     psig = intcode(qqia(code));
     if (psig>=maxsig) {
         printf("sigs code is larger then array, recompile (%s,%s,%d)\n",qqia(bus),qqia(code),psig);
-        exit(1);
+        return;
     }
     if (psig>maxusedsig)
         maxusedsig = psig;
@@ -847,7 +849,7 @@ void record(long code,long bus,int width) {
     }
     qqsa(FullName,psig);
     if (psig==0) zerox = FullName;
-    fprintf(Frecords,"record psig=%d sig=%s code=%s full=%s\n",psig,qqia(bus),qqia(code),fullname);
+    fprintf(Frecords,"record psig=%d sig=%s code=%s kind=%s full=%s\n",psig,qqia(bus),qqia(code),qqia(Kind),fullname);
 }
 
 void shouldbe(char *st,long n) {

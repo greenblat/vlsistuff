@@ -426,7 +426,7 @@ class ParamClass:
                 postscript_aline(File,Line2,'red')
 #                Line2 = translate_aline(UnitMatrix,Seg)
 #                postscript_aline(File,Line2,False)
-                Glbs.Svg.x_aline(Seg)
+                Glbs.Svg.x_aline(Line2)
         else:
             postscript_text(File,Value,self.Point,self.Rot,get_context('param_color'),PrmSize)
 
@@ -654,7 +654,7 @@ class DetailClass:
         self.instances[Inst]=InstanceClass(self,Type,Inst,Point,Rot)
         return self.instances[Inst]
 
-    def add_geom(self,Kind,Name,List,Rot):
+    def add_geom(self,Kind,Name,List,Rot='r0'):
         self.geoms[Name]=GeomClass(Kind,Name,List,Rot)
         self.geoms[Name].Father=self
 

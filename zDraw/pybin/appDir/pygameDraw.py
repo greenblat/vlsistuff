@@ -32,6 +32,7 @@ class cmdxClass(cmd.Cmd):
         return False
     def default(self,Txt):
         wrds = dbase.splitLine(Txt)
+        print('>>>>',wrds)
         if len(wrds)>0:
             use_command_wrds(wrds)
             CommandsHistory.append(Txt)

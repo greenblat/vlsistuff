@@ -45,7 +45,7 @@ def main():
         CharSets[Char0]='strx%d'%ind
 
     Fout.write('int State=st_idle;\n')
-    Fout.write('void stepit(char Char,char Next) {\n')
+    Fout.write('void stepit(char Char,char Next,int Lnum) {\n')
     Fout.write('//    printf("state=%d char=|%c| next=|%c|\\n",State,Char,Next);\n')
     Fout.write('    switch (State) {\n')
     for State in States:
@@ -61,7 +61,7 @@ def main():
                 Fout.write('        }\n')
         Fout.write('    } break;\n')
     Fout.write('    }\n')
-    Fout.write('    printf("no action!!!! |%x| <%c> |%x| <%c> state=%d \\n",Char,Char,Next,Next,State);\n')
+    Fout.write('    printf("no action!!!! line %d |%x| <%c> |%x| <%c> state=%d \\n",Lnum,Char,Char,Next,Next,State);\n')
     Fout.write('}\n')
     treat_reserveds(Fout)
     treat_doubles(Fout)

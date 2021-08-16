@@ -6,5 +6,8 @@ gcc -g src3/vcd_python.c  src3/qq64.c  -o vcd_python3 \
   -I/Library/Frameworks/Python.framework/Versions/3.9/include/python3.9/ \
   -lpython3.9 -L/Library/Frameworks/Python.framework/Versions/3.9/lib \
 
+gcc -g src3/vcd_python.c  src3/qq64.c  -o ~/bin/vcd_python3 \
+  -I/Library/Frameworks/Python.framework/Versions/3.9/include/python3.9/ \
+  -lpython3.9 -L/Library/Frameworks/Python.framework/Versions/3.9/lib \
 
 

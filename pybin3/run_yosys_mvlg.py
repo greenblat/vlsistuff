@@ -18,7 +18,7 @@ hierarchy -check -top  TOP
 check;
 write_verilog -noattr aa0.glv
 proc; opt; fsm; opt; memory; opt
-opt_rmdff;
+## opt_rmdff;
 opt_merge;
 opt_expr;
 write_verilog -noattr aa1.glv
@@ -31,7 +31,7 @@ write_verilog -noattr aa2.glv
 dfflibmap -liberty LIB_DFF
 abc -liberty  LIB_ABC
 
-opt_rmdff;
+## opt_rmdff;
 opt_merge;
 opt_expr -full;
 clean
@@ -104,7 +104,8 @@ def main():
     Finc.write(INC)
     Finc.close()
 #    os.system('/usr/local//Cellar/yosys/0.9_2/bin/yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
-    os.system('yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
+    os.system('~/external_software/tmp/yosys/yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
+#    os.system('yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
 
 helpString = '''
     run_yosys_mvlg.py module.mvlg   [ -flat] [ -top TOP] [-abc ABCLIB] [-dff DFFLIB]

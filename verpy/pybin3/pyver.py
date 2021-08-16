@@ -82,11 +82,13 @@ def read_verilog_file(Fname,RunDir,Env):
     More = Env.params
     if '-d' in More:
         Params['-d'] = More['-d']
+    if '-y' in More:
+        Params['-y'] = More['-y']
     macro_verilog_pp.run_main(Params,'00010')
 
 
     run_lexer(tmpfilename,'%s/lex.out'%RunDir)
-    os.system('/bin/rm %s'%tmpfilename)
+    os.system('/bin/mv %s .'%tmpfilename)
     if Env.systemverilog:
         from vyaccer3 import run_yacc
         import db1 as dbx

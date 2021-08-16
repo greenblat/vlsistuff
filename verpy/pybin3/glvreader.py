@@ -227,6 +227,7 @@ body0    input       wire0   set_input
 body0    output      wire0   set_output
 body0    inout       wire0   set_inout
 body0    wire        wire0   set_wire
+body0    reg        wire0   set_wire
 body0    endmodule   idle   none
 wire0    [           width0 push
 wire0    token       wire1 add_wire

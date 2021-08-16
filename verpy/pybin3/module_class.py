@@ -1037,6 +1037,7 @@ OPS =  ['**','~^','^','=','>=','=>','*','/','<','>','+','-','~','!','&','&&','<=
 KEYWORDS = ('sub_slice sub_slicebit taskcall functioncall named_begin unsigned if for ifelse edge posedge negedge list case casex casez default double_sub wait #').split()
 
 def support_set(Sig,Bussed=True):
+#    traceback.print_stack(None,None,logs.Flogs[0])
     Set = support_set__(Sig,Bussed)
     Set.sort()
     ind=0
@@ -1121,7 +1122,7 @@ def support_set__(Sig,Bussed):
         return res
 
 
-    logs.log_err('untreated support set expr %s'%(str(Sig)))
+    logs.log_err('(1124) untreated support set expr %s'%(str(Sig)))
     return []
 
 

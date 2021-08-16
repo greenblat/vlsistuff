@@ -367,6 +367,11 @@ def check_src_expr(Current,Item):
         if (len(Item)==1):
             check_src_expr(Current,Item[0])
             return
+        if (Item[0] in ['bin','dig','hex']):
+            return
+        if ((len(Item)==3) and (Item[0] == '=')):
+            check_src_expr(Current,Item[2])
+            return
         if (Item[0]=='for'):
             check_src_expr(Current,Item[1])
             check_src_expr(Current,Item[2])
