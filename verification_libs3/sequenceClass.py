@@ -66,6 +66,12 @@ class sequenceClass:
         self.Sons = []
         self.Seed = 0
 
+    def restart(self):
+        self.Ptr = 0
+        # do i need to restart more items???
+
+
+
     def newone(self,Seq,Name):
         New = sequenceClass(self.Path,-1,'',self.agents,self.Translates)
         New.Sequence = Seq
