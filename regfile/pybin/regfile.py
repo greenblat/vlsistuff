@@ -886,7 +886,7 @@ def treatReg(Reg):
             LINES[4].append(Str)
 
         treatPrdata(Reg,Wid,Name)
-    elif ('rw' in Access)or('wr' in Access):
+    elif ('rw' in Access)or('wr' in Access) or ('wo' in Access):
         Line = '    ,output reg %s %s'%(widi(Wid),Name)
         LINES[0].append(Line)
         lastAddr = Reg.Addr
@@ -905,7 +905,8 @@ def treatReg(Reg):
             Str = STR.replace('REG',Name)
             Str = Str.replace('ADDR',hex(lastAddr)[2:])
             LINES[4].append(Str)
-        treatPrdata(Reg,Wid,Name)
+        if 'wo' not in Access:
+            treatPrdata(Reg,Wid,Name)
         if Wid<32:
             Line = '        if (mpaddr == \'h%x) %s <= (%s & ~mask[%d:0]) | (wdata[%d:0] & mask[%d:0]);'%(Reg.Addr,Name,Name,Wid-1,Wid-1,Wid-1)
             LINES[3].append(Line)
@@ -1009,7 +1010,7 @@ def treatArray(Reg):
         Str = Str.replace('HADDR',hex(Reg.HADDR)[2:])
         LINES[4].append(Str)
 
-    elif ('wr' in Access)or('rw' in Access):
+    elif ('wr' in Access)or('rw' in Access) or ('wo' in Access):
         Line = '    ,output reg [%d:0] [%d:0] %s'%(Dep-1,Wid-1,Name)
         LINES[0].append(Line)
         Ad = Reg.Addr
@@ -1259,6 +1260,7 @@ def enclosingModule(Temp,Finst):
 def  outAccess(Access):
     if 'rw' in Access: return True
     if 'wr' in Access: return True
+    if 'wo' in Access: return True
     return False
 def  inAccess(Access):
     if 'ro' in Access: return True

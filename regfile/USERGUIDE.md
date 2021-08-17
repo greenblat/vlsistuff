@@ -24,7 +24,7 @@ First line in any register definition file is chip line.
 
 ## REG parameters
   **width (or wid)** is register width. It can be any number, including big numbers like 500. In case there are fields, wid parameter is not required.
- **access**  can be rw (or wr) , ro , rw_pulse, ro_pulse,  w1c or external
+ **access**  can be rw (or wr) , ro , rw_pulse, ro_pulse,  w1c or external,  added now also "wo" : for encryption keys, which you dont want to be read by software.
       **access=w1c** is clear on write ones. Incoming read-only bus sets (by ORing with register)) bits in flipflop register. reading it does nothing. writing to it will clear all bits active in PWDATA.
       **access=external**  output read/write pulsed strobes, dataout and datain. It is "DIY register".
  **description** Has either no spaces, or enclosed in "..." .
