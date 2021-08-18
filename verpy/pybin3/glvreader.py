@@ -262,6 +262,8 @@ conn2    dig         conn3 set_conn0
 conn2    )           inst3 finish_conn_empty
 conn2    {           curly0 set_state_conn3 push
 conn3    )           inst3 finish_conn
+conn3    }           conn3 none
+conn3    ,           conn2 none
 conn3    [           width0 push
 inst3    ,           inst2 none
 inst3    )           inst4 none
@@ -272,6 +274,7 @@ curly0   bin         curly1 add_curly
 curly0   hex         curly1 add_curly
 curly0   uhex        curly1 add_curly
 curly0   dig         curly1 add_curly
+curly0   {           curly0 none
 curly0   }           pop check_curly_bus
 curly1   ,           curly0 check_curly_bus0
 curly1   }           pop check_curly_bus
