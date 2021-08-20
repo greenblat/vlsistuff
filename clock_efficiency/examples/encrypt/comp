@@ -1,0 +1,8 @@
+ #! /bin/csh -f
+ 
+
+iverilog  -Wtimescale  -o tb.vvp -g2012 tb.v \
+    rtl_$1/encrypt_piped.v  \
+
+
+

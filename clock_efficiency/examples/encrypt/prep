@@ -1,0 +1,11 @@
+#! /bin/csh -f
+
+cd rtl_before; genver.py encrypt_piped.vvv ; cd ..
+cd rtl_after; genver.py encrypt_piped.vvv ; cd ..
+pyver.py rtl_$1/encrypt_piped.v -do clock_efficiency_rtl
+
+
+/bin/rm xyz*
+/bin/rm rtl_before/execme.py
+/bin/rm rtl_after/execme.py
+

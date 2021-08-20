@@ -1,0 +1,41 @@
+
+#STAGES = 13
+
+module encrypt_piped (input clk, input rst_n
+    ,input [31:0] datain
+    ,input [127:0] key
+    ,input vldin
+
+    ,output vldout
+    ,output [31:0] encrypted
+);
+
+localparam CONST = 32'h4cfedf05;
+reg [<>STAGES-1<>:0] vlds;
+reg [31:0] stage0;
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        stage0 <= 0;
+        vlds[0] <= 0;
+    end else begin
+        stage0 <= datain ^ CONST;
+        vlds[0] <= vldin;
+    end
+end
+
+#for II in range(1,STAGES):
+#    JJ = II-1
+#    LL = (II % 4)*32
+#    KK = LL + 31
+wire [31:0] tmpII = (stageJJ ^ key[KK:LL]) + (stageJJ[0] ? CONST : 0);
+reg [31:0] stageII;    
+always @(posedge clk) begin
+    stageII <=  {tmpII[II:0],tmpII[31:<>II+1<>]};
+    vlds[II] <= vlds[JJ];
+end 
+#
+assign vldout = vlds[<>STAGES-1<>];
+assign encrypted = stage<>STAGES-1<>;
+
+endmodule
+

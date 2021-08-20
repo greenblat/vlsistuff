@@ -1,0 +1,15 @@
+#! /bin/csh -f
+#this is icarus compilation stage
+
+
+pyver.py  rtl/uartx2.v -do clock_efficiency_rtl -do clean
+pyver.py  rtl/uartx2_modified.v -do clock_efficiency_rtl -do clean
+
+
+iverilog -otb.vvp rtl/uartx2.v rtl/tb.v rtl/uartx2_modified.v
+
+
+/bin/rm xyz*
+
+
+

@@ -1,0 +1,16 @@
+#! /bin/csh -f
+
+prep before
+comp before
+simv
+/bin/mv pymon.log0 before.log
+
+
+prep after
+comp after
+simv
+/bin/mv pymon.log0 after.log
+
+
+
+

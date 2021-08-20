@@ -1,0 +1,8 @@
+#! /bin/csh -f
+
+comp
+
+vvp -M../../../python-verilog/vpi3 -mvpi3_mini tb.vvp
+
+
+

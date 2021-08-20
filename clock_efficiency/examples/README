@@ -1,0 +1,11 @@
+
+ecnrypt is a very simple pipelined encryptor. Dont use it for encryption!
+there is before and after versions.
+to run it, do "run" script
+
+uart example has two uarts, one original and second modified.
+the log file shows some improvement.
+to run it, do "run" script
+
+
+
