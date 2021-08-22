@@ -967,6 +967,60 @@ def mailMatches(To,From,Subject):
     return Many
 
 
+def computeWidth(Wid,Defines):
+    if Wid in ['0',0]: return 1
+    if type(Wid) is int: return Wid
+    if type(Wid) is tuple:
+        if len(Wid)==2:
+            Hi = compute_int(Wid[0],Defines)
+            Lo = compute_int(Wid[1],Defines)
+            if (type(Hi) is int)and(type(Lo) is int):
+                WW = Hi-Lo+1
+                return WW
+    if Wid[0] == 'packed':
+        Hi = compute_int(Wid[1][0],Defines)
+        Lo = compute_int(Wid[1][1],Defines)
+        Many = abs(Hi-Lo)+1
+        Hi = compute_int(Wid[2][0],Defines)
+        Lo = compute_int(Wid[2][1],Defines)
+        One = abs(Hi-Lo)+1
+        return Many*One
+
+    log_error('computeWidth got "%s"'%(str(Wid)))
+    return 1
+
+def compute_int(Item,Defines):
+    if type(Item) is int:
+        return Item
+    if type(Item) is str:
+        if Item[0] in '0123456789':
+            return int(Item)
+        if Item in Defines:
+            return compute_int(Defines[Item],Defines)
+
+    if type(Item) is list:
+        if Item[0] in ['-','+','*','/']:
+            A = compute_int(Item[1],Defines)
+            B = compute_int(Item[2],Defines)
+            try:
+                return int(eval('%s%s%s'%(A,Item[0],B)))
+            except:
+                return [Item[0],A,B]
+        if Item[0] in ['dig']:
+            return compute_int(Item[2],Defines)
+        if Item[0] in ['functioncall']:
+            if Item[1]=='$clog2':
+                Val = compute_int(Item[2][0],Defines)
+                Wid = len(bin(int(Val)+1))-2
+                return Wid
+        if Item[0] == 'subbit':
+            return 1
+    return 0
+
+
+
+
+
 
 
 print('>>>verification_logs loaded')

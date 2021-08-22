@@ -3,75 +3,140 @@
 import logs
 import matches
 
-DB = {}
-SRC = {}
-def help_main(Env):
-    Mod = Env.Current
-    work(Mod)
-#    report(Mod)
-    produceCode(Mod)
+Holders = {}
+Widths = []
+class holderClass:
+    def __init__(self,Path,Module):
+        self.DB = {}
+        self.SRC = {}
+        self.Path = Path
+        self.Module = Module
 
-def produceCode(Mod):
+
+
+def help_main(Env):
+    if 'clk' in Env.params:
+        Clocks = Env.params['clk']
+    else:
+        Clocks = []
+    Mod = Env.Current
+    Holders[Mod.Module] = holderClass([],Mod.Module)
+    Holders[Mod.Module].Clocks = Clocks
+    work(Env,Mod,[],Clocks)
+#    report(Mod)
     File = open('%s_efficiency.py' % (Mod.Module),'w')
     File.write(HEADER.replace('MODULE',Mod.Module))
-    logs.log_info('CLOCKS: %s' % str(list(DB.keys())))
-    for Clk in DB:
+    for Module in Holders:
+        Modx = Env.Modules[Module]
+        produceCode(Modx,File)
+    File.write('\n\nWIDTH = {}\n')
+    for Line in Widths:
+        File.write(Line)
+    File.close()            
+
+def produceCode(Mod,File):
+    holder = Holders[Mod.Module]
+    Name = Mod.Module
+    Path = holder.Path
+    logs.log_info('CLOCKS: %s %s' % (Name,str(list(holder.DB.keys()))))
+    for Clk in holder.DB:
         if Clk.startswith('p.'):
-            File.write('    def run_posedge_%s(self):\n' % Clk[2:])
-            File.write('        self.Touched = []\n')
-            File.write('        self.Peeked = {}\n')
-            File.write('        self.peekedBus = {}\n')
-#            File.write('        if self.posedge("%s"):\n' % Clk[2:])
+            File.write('    def run_%s_posedge_%s(self,Path):\n' % (Name,Clk[2:]))
+            if Path == []:
+                File.write('        self.Touched = []\n')
+                File.write('        self.Peeked = {}\n')
+                File.write('        self.peekedBus = {}\n')
+            Edge = 'posedge'
         elif Clk.startswith('n.'):
-            File.write('    def run_negedge_%s(self):\n' % Clk[2:])
-            File.write('        self.Touched = []\n')
-            File.write('        self.Peeked = {}\n')
-            File.write('        self.peekedBus = {}\n')
-#            File.write('        if self.negedge("%s"):\n' % Clk[2:])
+            File.write('    def run_%s_negedge_%s(self,Path):\n' % (Name,Clk[2:]))
+            if Path == []:
+                File.write('        self.Touched = []\n')
+                File.write('        self.Peeked = {}\n')
+                File.write('        self.peekedBus = {}\n')
+            Edge = 'negedge'
         else:
-            logs.log_error('WTF clk=%s' % Clk)
-#            File.write('        if self.posedge("%s"):\n' % Clk[2:])
-        for Flop in DB[Clk]:
-            List = DB[Clk][Flop]
-            Rework = reworkExpr(List)
+            logs.log_error('WTF %s clk=%s' % (Name,Clk))
+            Edge = 'posedge'
+        for Inst in Mod.insts:
+            Type = Mod.insts[Inst].Type
+            if Type in Holders:
+                File.write('        self.run_%s_%s_%s(%s)\n' % (Type,Edge,Clk[2:],Holders[Type].Path))
+            
+        for Flop in holder.DB[Clk]:
+            List = holder.DB[Clk][Flop]
+            Rework = reworkExpr(List,Path)
             File.write('        Vld = self.evaluate_valid(%s)\n' % (Rework))
             File.write('        if (Vld):\n')
-            File.write('            Changed = self.changed("%s")\n' % (Flop))
+            File.write('            Changed = self.changed("%s")\n' % (path(Path,Flop)))
             File.write('            if Changed:\n')
-            File.write('                self.increment_work("%s")\n' % (Flop))
+            File.write('                self.increment_work("%s")\n' % (path(Path,Flop)))
             File.write('            else:\n')
-            File.write('                self.increment_waste("%s")\n' % (Flop))
-#            File.write('        else:\n')
-            if SRC[Flop] != []:
-                File.write('        if self.changed_input("%s",%s):\n' % (Flop,SRC[Flop]))
-                File.write('            self.increment_dropped("%s")\n' % (Flop))
-    File.write('\n\nWIDTH = {}\n')
-    for Clk in DB:
-        for Flop in DB[Clk]:
+            File.write('                self.increment_waste("%s")\n' % (path(Path,Flop)))
+            if holder.SRC[Flop] != []:
+                Rework2 = reworkExpr(holder.SRC[Flop],Path)
+                File.write('        if self.changed_input("%s",%s):\n' % (path(Path,Flop),Rework2))
+                File.write('            self.increment_dropped("%s")\n' % (path(Path,Flop)))
+    for Clk in holder.DB:
+        for Flop in holder.DB[Clk]:
             if '[' in Flop:
                 Width = 1
             else:
                 Dir,Wid = Mod.nets[Flop]
                 Width = Mod.computeWidth(Wid)
-            File.write('WIDTH["%s"] = %d\n' % (Flop,Width))
-    File.close()            
+            Widths.append('WIDTH["%s"] = %d\n' % (path(Path,Flop),Width))
+
+
+def path(Path,Flop):
+    Tog = Path+[Flop]
+    return '.'.join(Tog)
     
-def reworkExpr(List):
-    if List == [True]: return True
-    if len(List) == 1:
-        return reworkExpr(List[0])
+def reworkExpr(List,Path):
+    if type(List) == bool: return List
     if type(List) == str:
-        return '"%s"' % List
+        if (List in '|| | & && ~ ! + - == > < !='.split()):
+            return List
+        return '"%s"' % path(Path,List)
+    if type(List) is int: return True
+    if len(List) == 1:
+        return reworkExpr(List[0],Path)
     if type(List[0]) == list:
-        return ['||']+List
-    return List        
+        LL = ['||']
+        for Item in List:
+            Fx = reworkExpr(Item,Path)
+            LL.append(Fx)
+        return LL
+    LL = []
+    for Item in List:
+        Fx = reworkExpr(Item,Path)
+        LL.append(Fx)
+    return LL
 
 def report(Mod):
-    for Key in DB:
+    hld = Holders[Mod.Module]
+    for Key in hld.DB:
         logs.log_info('KEY %s %s' % (Key,DB[Key]))
 
+def work(Env,Mod,Path,Clocks):
+    workThis(Mod,Path,Clocks)
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        Env.try_and_load_module(Obj.Type,Env)
+        if Obj.Type in Env.Modules:
+            SonMod = Env.Modules[Obj.Type]
+            Clocks2 = []
+            Clocks3 = {}
+            for Pin in Obj.conns:
+                if  Obj.conns[Pin] in Clocks:
+                    Clocks2.append(Pin)
+                    Clocks3[Obj.conns[Pin]] = Pin
+            if Clocks2 != []:
+                Holders[SonMod.Module] = holderClass(Path+[Inst],SonMod.Module)
+                Holders[SonMod.Module].Clocks = Clocks3
+                work(Env,SonMod,Path+[Inst],Clocks2)
 
-def work(Mod):
+
+
+def workThis(Mod,Path,Clocks):
     for Always in Mod.alwayses:
         Head,Body,AlwaysKind = Always
         Vars = []
@@ -86,54 +151,62 @@ def work(Mod):
         else:
             logs.log_error('failed head match on %s' % str(Head))
 
-        if (Vars!=[]): analyzeBody(Mod,Body,Vars,True)
+        if (Vars!=[]): analyzeBody(Mod,Path,Body,Vars,True)
 
-def analyzeBody(Mod,Body,Head,Cond):
+
+
+
+
+def analyzeBody(Mod,Path,Body,Head,Cond):
     if Body[0] == '<=':
         Dest = Body[1]
         Src = Body[2]
-        record(Mod,Dest,Head,Cond,Src)
+        record(Mod,Path,Dest,Head,Cond,Src)
     elif Body[0] == 'if':
         Plus = Body[1]
-        analyzeBody(Mod,Body[2],Head,('&&',Plus,Cond))
+        analyzeBody(Mod,Path,Body[2],Head,('&&',Plus,Cond))
     elif Body[0] == 'ifelse':
         Yes = Body[1]
-        analyzeBody(Mod,Body[2],Head,('&&',Yes,Cond))
-        analyzeBody(Mod,Body[3],Head,('&&',('!',Yes),Cond))
+        analyzeBody(Mod,Path,Body[2],Head,('&&',Yes,Cond))
+        analyzeBody(Mod,Path,Body[3],Head,('&&',('!',Yes),Cond))
     elif Body[0] == 'list':
         for Item in Body[1:]:
-            analyzeBody(Mod,Item,Head,Cond)
+            analyzeBody(Mod,Path,Item,Head,Cond)
             
     else:
         logs.log_error('BODY %s' % str(Body))
 
 
-def record(Mod,Flops,Head,Cond,Src):
+def record(Mod,Path,Flops,Head,Cond,Src):
     if (len(Flops)>1)and(Flops[0] == 'subbit'):
         Flops = '%s[%s]' % (Flops[1],Flops[2])
+    if (len(Flops)>1)and(Flops[0] == 'subbus'):
+        Flops = Flops[1]
     Cond0 = simplifyCond(Mod,Cond)
 
 
     for Clk in Head:
         if type(Flops) is list:
             for Flop in Flops:
-                addRecord(Mod,Clk,Flop,Cond0,Src)
+                addRecord(Mod,Path,Clk,Flop,Cond0,Src)
         else:
-            addRecord(Mod,Clk,Flops,Cond0,Src)
+            addRecord(Mod,Path,Clk,Flops,Cond0,Src)
 
-def addRecord(Mod,Clk,Flop,Cond0,Src):
-    if Clk not in DB: DB[Clk] = {}
-    if Flop not in DB[Clk] : DB[Clk][Flop] = []
-    DB[Clk][Flop].append(Cond0)
+def addRecord(Mod,Path,Clk,Flop,Cond0,Src):
+    if type(Flop) is not str: return
+    hld = Holders[Mod.Module]
+    if Clk not in hld.DB: hld.DB[Clk] = {}
+    if Flop not in hld.DB[Clk] : hld.DB[Clk][Flop] = []
+    hld.DB[Clk][Flop].append(Cond0)
 
-    if Flop not in SRC:
-        SRC[Flop] = []
+    if Flop not in hld.SRC:
+        hld.SRC[Flop] = []
     if isConstant(Src):
         pass
     else:
         Src1 = simplifyCond(Mod,Src)
-        if Src1 not in SRC[Flop]:
-             SRC[Flop].append(Src1)
+        if Src1 not in hld.SRC[Flop]:
+             hld.SRC[Flop].append(Src1)
 
 def isConstant(Src):
     if type(Src) is int: return True
@@ -147,11 +220,11 @@ def simplifyCond(Mod,Cond,Consts=False):
     if Cond[0] == 'subbit':
         return '%s[%s]' % (Cond[1],Cond[2])
     if Cond[0] == 'subbus':
-        return '%s[%s:%s]' % (Cond[1],Cond[2][0],Cond[2][1])
+        return Cond[1]
     if Cond[-1] == True:
         return simplifyCond(Mod,Cond[1])
 
-    if Cond[0] in ['hex','bin']:
+    if Cond[0] in ['hex','bin','dig']:
         return Cond
 
     if Cond[0] == 'question':
@@ -171,7 +244,7 @@ def simplifyCond(Mod,Cond,Consts=False):
     if matches.matches(Cond,['~|','?']):
         X =  simplifyCond(Mod,matches.Varsx[0])
         return ['!',['|',X]]
-    if Cond[0] in ['<','>','*','+','-','curly','^','&&','||','|','&','==','!=']:
+    if Cond[0] in ['>=','>>','<<','<','>','*','+','-','curly','^','&&','||','|','&','==','!=']:
         Res = [Cond[0]]
         for Item in Cond[1:]:
             X = simplifyCond(Mod,Item)
@@ -227,7 +300,7 @@ class MODULE_efficiency(logs.driverClass):
                 Wrds = Expr.split()
                 if len(Wrds)==2:
                     return 1
-                Wid = eval(Wrds[1])-eval(Wrds[2])+1
+                Wid = logs.computeWidth(Wrds[1],{})-logs.computeWidth(Wrds[2],{})+1
                 return Wid
 
 
@@ -251,10 +324,7 @@ class MODULE_efficiency(logs.driverClass):
             self.peekedBus[Expr] = Val
             return Val
         if type(Expr) is int: return Expr 
-        if Expr[0] == 'bin':
-            if type(Expr[2]) is int: return Expr[2]
-            return int(Expr[2])
-        if Expr[0] == 'hex':
+        if Expr[0] in ['hex','dig','bin']:
             if type(Expr[2]) is int: return Expr[2]
             return int(Expr[2])
         if Expr[0] == 'question':
@@ -294,7 +364,15 @@ class MODULE_efficiency(logs.driverClass):
             A = self.evaluateExpr(Expr[1])
             B = self.evaluateExpr(Expr[2])
             return A*B
+        if Expr[0] == '>>':
+            A = self.evaluateExpr(Expr[1])
+            B = self.evaluateExpr(Expr[2])
+            return A>>B
 
+        if Expr[0] == '<<':
+            A = self.evaluateExpr(Expr[1])
+            B = self.evaluateExpr(Expr[2])
+            return A<<B
         if Expr[0] == '+':
             A = self.evaluateExpr(Expr[1])
             B = self.evaluateExpr(Expr[2])
@@ -410,6 +488,7 @@ class MODULE_efficiency(logs.driverClass):
     def evaluate_valid(self,List):
         if type(List) is bool: return List
         if type(List) is str:
+            List = List.replace('"','')
             if '[' in List:
                 Bus,Ind = subbit(List)
                 if Bus not in self.Peeked:
@@ -449,7 +528,7 @@ class MODULE_efficiency(logs.driverClass):
             Dropped += self.Counters[Sig][2] * WIDTH[Sig]
         logs.log_info('-----------------------------------------------------------------')
         logs.log_info('Total for MODULE:      used=%d wasted=%d dropped=%d' % (Used,Wasted,Dropped-Used))
-        logs.log_info('-----------------------------------------------------------------\\\n\\\n')
+        logs.log_info('-----------------------------------------------------------------\\\n\\n')
         
     def run(self):
         self.Touched = []

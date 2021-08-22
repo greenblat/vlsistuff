@@ -1846,6 +1846,9 @@ def get_expr(Item):
             if List[0][1]=='udig':    
                 X = List[0][0].split("'d")
                 if len(X)==2:
+                    if X[0] == '':
+                        return ['dig',32,X[1]]
+
                     return ['dig',X[0],X[1]]
                 else:
                     return ['dig',32,X[0]]

@@ -6,9 +6,11 @@
 Each flop in an ASIC chip has a clock input. Usually this clock is a leaf of a clock tree (or one of the trees).
 On edge (+ or -), this flop samples the data input "D" and transfers the new value to output "Q". If "D" causes a change in the "Q" it is a useful clock cycle. If clock pulses, but "Q" doesn't change it is wasted cycle. If "D" changes and clock doesn't pulse it is a dropped change.
 
-Efficiency is defined the ratio between "usefull" clocks and total number of clocks reaching the flop.
+<img src="clocktree.svg" alt="clocktree" style="zoom:50%;" />
+
+Efficiency is defined the ratio between "useful" clocks and total number of clocks reaching the flop.
 Most new designs have elaborate clock gating. If the clock tree is disabled early or in many branches, we save power.
-Clocktree power consumption is relatilvely significant, and to save battery, It is desirable to increase the ratio.
+Clock-tree power consumption is relatively significant, and to save battery, It is desirable to increase the ratio.
 The way to do it, is rewrite RTL, so more flops will have enables.
 
 Also considering  the  number of "D" changes, when there is no clock. It means we waste energy toggling the "D" without using it.

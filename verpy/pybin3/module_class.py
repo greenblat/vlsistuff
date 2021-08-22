@@ -997,6 +997,15 @@ class module_class:
                 if (type(Hi) is int)and(type(Lo) is int):
                     WW = Hi-Lo+1
                     return WW
+        if Wid[0] == 'packed':
+            Hi = self.compute_int(Wid[1][0])
+            Lo = self.compute_int(Wid[1][1])
+            Many = abs(Hi-Lo)+1
+            Hi = self.compute_int(Wid[2][0])
+            Lo = self.compute_int(Wid[2][1])
+            One = abs(Hi-Lo)+1
+            return Many*One
+
         logs.log_error('computeWidth got "%s"'%(str(Wid)))
         return 1
 
