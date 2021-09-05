@@ -926,7 +926,7 @@ class module_class:
                 return self.compute_int(X)
     
         if type(Item) is list:
-            if Item[0] in ['-','+','*','/']:
+            if Item[0] in ['-','+','*','/','==']:
                 A = self.compute_int(Item[1])
                 B = self.compute_int(Item[2])
                 try:
@@ -1009,6 +1009,24 @@ class module_class:
         logs.log_error('computeWidth got "%s"'%(str(Wid)))
         return 1
 
+    def createCode(self,Code):
+        if len(Code)==1:
+            self.createCode(Code[0])
+        elif (Code[0] == 'named_begin'):
+            self.createCode(Code[2])
+        elif (Code[0] == 'list'):
+            for Item in Code[1:]:
+                self.createCode(Item)
+        elif (Code[0] == 'declare'):
+            self.nets[Code[2]] = Code[1],Code[3]
+        elif (Code[0] == 'always'):
+            self.alwayses.append((Code[1][0],Code[2],'always'))
+        elif (Code[0] == 'assigns'):
+            self.createCode(Code[1])
+        elif (Code[0] == '='):
+            self.hard_assigns.append((Code[1],Code[2],'',''))
+        else:                
+            logs.log_error('done know to create code from %s' % (str(Code)))
         
 
 def dump_always(Always,Fout):
@@ -1196,7 +1214,6 @@ class instance_class:
         else:
             try2 = ('\n%s,'%Pref).join(res)
             Fout.write('%s);%s\n'%(try2,Comment))
-
 
             
 

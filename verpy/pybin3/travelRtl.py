@@ -18,7 +18,7 @@ BACKWARD = {}
 def help_main(Env):
     Mod = Env.Current
     bringAll(Mod,Env)
-
+    resolveGenerates(Mod,Env)
     buildTable(Mod,'',Env)
     createOutputs(Mod)
     createStartsAndEnds(Mod)
@@ -30,6 +30,29 @@ STARTS = {}
 ENDS = {}
 OUTPUTS = {}
 INPUTS = {}
+
+def resolveGenerates(Mod,Env):
+    print('GENENE',Mod.generates)
+    Ind = 0 
+    while Ind<len(Mod.generates):
+        Gen = Mod.generates[Ind]
+        if Gen[0] == 'ifelse':
+            Mod.generates.pop(Ind)
+            Ind -= 1
+            Cond = Gen[1]
+            Yes = Gen[2]
+            No = Gen[3]
+            Vld = Mod.compute_int(Cond)
+            if Vld:
+                Mod.createCode(Yes)
+            else:
+                Mod.createCode(No)
+        Ind += 1
+    for Inst in Mod.insts:
+        Type = Mod.insts[Inst].Type
+        if Type in Env.Modules:
+            resolveGenerates(Env.Modules[Type],Env)
+
 
 def createOutputs(Mod):
     for Net in Mod.nets:
