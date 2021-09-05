@@ -30,6 +30,7 @@ class svgClass:
 
     def close(self):
         self.File.write('</svg>\n')
+        self.File.close()
 
 
     def prtx(self,X):

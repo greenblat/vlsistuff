@@ -58,7 +58,7 @@ def execute_line(Line,Env):
         print(Skeleton)
         return
     if (wrds[0]=='clean'):
-        os.system('/bin/rm yacc.log lex.out db0.pickle database.dump')
+        os.system('/bin/rm yacc.log lex.out db0.pickle database.dump xyz_*')
         return
     if (wrds[0]=='set'):
         params[wrds[1]]=wrds[2]

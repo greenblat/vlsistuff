@@ -69,6 +69,7 @@ class apbDriver:
 
 
     def busy(self):
+#        logs.log_info('q1 %d q0 %d seq1 %d seq0 %d %s' % (len(self.queue1),len(self.queue0),len(self.seq1),len(self.seq0),self.seq0))
         if self.queue1!=[]: return True
         if self.queue0!=[]: return True
         if self.seq0!=[]: return True

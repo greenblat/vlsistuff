@@ -1967,13 +1967,14 @@ def get_expr(Item):
         logs.log_err('bad get_expr %s %s %s'%(Item,len(List),List))
         traceback.print_stack(None,None,logs.Flogs[0])
         return 0
+
     if len(Item)==3:
             if Item[0]=='dig':
-                return ['dig',Item[1],Item[1]]
+                return ['dig',Item[1],Item[2]]
             if Item[0]=='hex':
-                return ['hex',Item[1],Item[1]]
+                return ['hex',Item[1],Item[2]]
             if Item[0]=='bin':
-                return ['bin',Item[1],Item[1]]
+                return ['bin',Item[1],Item[2]]
     if len(Item)==4:
         if (Item[1]=='floating'):
             return float(Item[0])

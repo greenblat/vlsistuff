@@ -30,7 +30,7 @@ class axiSlaveClass:
         self.wready = 0
         self.bvalid_armed = False
         self.WAITREAD = 4
-        self.WAITWRITE = 5
+        self.WAITWRITE = 0
         self.busWidth = 8   # in bytes
 
     def peek(self,Sig):
@@ -178,6 +178,11 @@ class axiSlaveClass:
             self.readQueue(arlen,arburst,arsize,araddr,arid,1)
             self.rqueue.append('pop')
                 
+            LastAddr = (araddr + (arlen+1)*(1<<arsize))-1
+            LastPage = LastAddr & 0xffffe000
+            FirstPage = araddr & 0xffffe000
+            if (FirstPage != LastPage):
+                logs.log_error('CROSSING 4K read araddr=%x arlen=%x arsize=%x' % (araddr,arlen,arsize))
                 
     def readQueue(self,ii,burst,arsize,addr,rid,rlast):
         if (arsize>4): arsize = 4
@@ -229,7 +234,7 @@ class axiSlaveClass:
             self.force('bvalid',0)
 
         if len(self.awqueue)>4:
-            self.force('awready',0)
+            self.force('awready',1)
         elif self.peek('awvalid')==1:
             self.force('awready',1)
             awburst=self.peek('awburst')
@@ -239,17 +244,22 @@ class axiSlaveClass:
             awburst=self.peek('awburst')
             awsize=self.peek('awsize')
             self.awqueue.append((awburst,awaddr,awlen,awid,awsize))
+            LastAddr = (awaddr + (awlen+1)*(1<<awsize))-1
+            LastPage = LastAddr & 0xffffe000
+            FirstPage = awaddr & 0xffffe000
+            if (FirstPage != LastPage):
+                logs.log_error('CROSSING 4K write awaddr=%x awlen=%x awsize=%x' % (awaddr,awlen,awsize))
             logs.log_info('axiSlave >>>awvalid %x %x %x %x %x'%(awburst,awaddr,awlen,awid,awsize))
 
-        if self.wready>0:
-            self.wready -= 1
-            self.force('wready',0)
-        else:
-            self.wready = self.WAITWRITE
-            self.force('wready',1)
+#        if self.wready>0:
+#            self.wready -= 1
+#            self.force('wready',1)
+#        else:
+#            self.wready = self.WAITWRITE
+        self.force('wready',1)
+        self.wready = 0
             
         if (self.peek('wvalid')==1)and((self.wready==self.WAITWRITE)):
-            logs.log_info('axiSlave <<<<< wready=%d awlen=%d '%(self.wready,self.awlen))
             veri.force('tb.marker','0x77')
             if self.awlen<0:
                 if len(self.awqueue)==0:
@@ -257,6 +267,7 @@ class axiSlaveClass:
                     self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = -1,-1,-1,-1,0
                 else:
                     self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = self.awqueue.pop(0)
+#            logs.log_info('axiSlave <<<<< awaddr=%x wready=%d awlen=%d '%(self.awaddr,self.wready,self.awlen))
             wstrb = self.peek('wstrb')
             wlast = self.peek('wlast')
             wdata = self.peek('wdata')
@@ -271,7 +282,7 @@ class axiSlaveClass:
             if self.awlen==0:
                 self.awlen = -1
                 if wlast!=1:
-                    logs.log_error('axislave %s: prefix=%s   no wlast'%(self.Path,self.prefix))
+                    logs.log_error('axiSlave %s: prefix=%s addr=%x   no wlast'%(self.Path,self.prefix,self.awaddr))
             else:
                 self.awlen -= 1
 

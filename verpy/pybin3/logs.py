@@ -14,7 +14,7 @@ PYMONLOG = 'pymon.log'
 WHERE = ''
 
     
-Flogs = [False,False,False,False]
+Flogs = [False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False]
 
 
 import time

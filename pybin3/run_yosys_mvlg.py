@@ -9,8 +9,8 @@ LIB_DFF = '/Users/ilia/clients/libs/synth_libs/dff28.lib'
 LIB_ABC = '/Users/ilia/clients/yosys_libs/scmetro_abc.lib'
 LIB_DFF = '/Users/ilia/clients/yosys_libs/scmetro_dff.lib'
 
-LIB_ABC = '/Users/ilia/clients/yosys_libs/basic2.lib'
-LIB_DFF = '/Users/ilia/clients/yosys_libs/basic2.lib'
+LIB_ABC = '/Users/ilia/clients/yosys_libs/basic_no_timing.lib'
+LIB_DFF = '/Users/ilia/clients/yosys_libs/basic_no_timing.lib'
 
 INCFILE = '''
 read_verilog -sv ALLRTL
@@ -36,6 +36,13 @@ opt_merge;
 opt_expr -full;
 clean
 write_verilog -noattr  TOP.glv
+
+# flatten;
+# opt_merge;
+# opt_expr -full;
+# clean
+# write_verilog -noattr  TOP.flatglv
+
 
 '''
 

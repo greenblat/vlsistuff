@@ -173,7 +173,7 @@ class module_class:
     def add_parameter(self,Name,Expr):
         self.parameters[Name]=Expr
     def add_localparam(self,Name,Expr):
-#        logs.log_info('localparam %s %s'%(Name,Expr))
+        logs.log_info('adding localparam %s %s'%(Name,Expr))
         self.localparams[Name]=Expr
     def add_hard_assign(self,Dst,Src,Strength='',Delay=''):
         if (Dst =='')or(Dst==False):

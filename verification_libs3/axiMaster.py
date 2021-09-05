@@ -101,6 +101,9 @@ class axiMasterClass:
 # axim read  1 32 0x00045600 4 7
         elif wrds[0] in ['readcheck', 'check', 'rdcheck']:
             Addr = eval(wrds[1])
+            if len(wrds)<3:
+                logs.log_error('CHECK axi master line needs at least 3 params "check address data"')
+                return
             Datas = list(map(eval,wrds[2:]))
             while (Datas!=[])and(self.RDATAS!=[]):
                 ActAddr,ActData = self.RDATAS.pop(0)
@@ -255,19 +258,22 @@ class axiMasterClass:
             rid = self.peek('rid')
             widrid = len(self.peekbin('rid'))
             rlast = self.peek('rlast')
+            rresp = self.peek('rresp')
             rdatax  = '%032x'%rdata 
             msb  = int(self.datawidth/4) 
 #            print('MSB "%s" %s    %s'%(msb,type(msb),rdatax))
             rdatax = rdatax[-msb:]
-            logs.log_info('axiM responce rid=%x rlast=%d rdata=%s     %s'%(rid,rlast,rdatax,self.Path))
-            self.readAction(rid,rlast,rdata,widrid)
+            logs.log_info('axiM responce rid=%x rlast=%d rdata=%s rresp=%s     %s'%(rid,rlast,rdatax,rresp,self.Path))
+            self.readAction(rid,rlast,rdata,widrid,rresp)
         else:
             self.manageRready(0)
 
-    def readAction(self,rid,rlast,rdatax,widrid):
+    def readAction(self,rid,rlast,rdatax,widrid,rresp):
         Len,Addr,Rid = self.AREADS[0]
         if (Rid & ((1<<widrid)-1)) != rid:
             logs.log_wrong('sent ARID=%d RID=%d'%(Rid,rid))
+        if rresp!=0:
+            logs.log_wrong('RRESP came back %s  ADDR=%a  rid=%sd'%(rresp,Addr,Rid))
         
         self.RDATAS.append((Addr,rdatax))
         if rlast == 1:
