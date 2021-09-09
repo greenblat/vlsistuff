@@ -47,6 +47,7 @@ class ahbliteMaster(logs.driverClass):
         self.HPROT = 0
         self.Enable = True
         self.RDATA = []
+        self.HWD = 1
 
     def translate(self,Addr):
         if Addr[0] in '0123456789':
@@ -130,6 +131,11 @@ class ahbliteMaster(logs.driverClass):
             Sig = self.translations[Sig]
         return self.force(Sig,Val)
 
+    def hwdata(self):
+        self.HWD += 1
+        Res = self.HWD + (random.randint(0x1000,0xffff)<<16)
+        return  hex(Res)
+        
     def run(self):
         if veri.exists('tb.lenq') == '1':
             veri.force('tb.lenqq',str(len(self.queue)))
@@ -191,7 +197,7 @@ class ahbliteMaster(logs.driverClass):
 
                 Burst = burstcode(What[1])
 
-                self.seq.append([('hburst',Burst),('haddr',What[3]),('hwdata',0),('hwrite',HW),('htrans',NONSEQ),('hsize',self.HSIZE),('hsel',1),('hready',1)])
+                self.seq.append([('hburst',Burst),('haddr',What[3]),('hwdata',0),('hwrite',HW),('htrans',NONSEQ),('hsize',self.HSIZE),('hsel',1)])
                 Addrs = []
                 if 'wrap' not in What[1]:
                     for X in range(burstlen(What[1])):
@@ -230,31 +236,36 @@ class ahbliteMaster(logs.driverClass):
 
 
 #                print('ADDRS',What[0],What[1],burstlen(What[1]),Addrs)
-
-                for X in range(burstlen(What[1])):
-                    Addr = Addrs[X]
-                    if (self.busyOk)and(random.randint(0,100)>80):
-                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',BUSY),('hsize',self.HSIZE),('hsel',1),('hready',1)])
+                for X in range(burstlen(What[1])-1):
+                    Addr = Addrs[X+1]
+                    Eff = Addrs[X]
+#                    if (self.busyOk)and(random.randint(0,100)>80):
+#                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',BUSY),('hsize',self.HSIZE),('hsel',1)])
                     if HW==1:
-                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('hsize',self.HSIZE),('hsel',1),('hready',1)])
+                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',self.hwdata()),('hwrite',HW),('htrans',SEQ),('hsize',self.HSIZE),('hsel',1)])
                     else:
-                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('catch',('hrdata',Addr,'none')),('hsize',self.HSIZE),('hsel',1),('hready',1)])
-#                        logs.log_info('CATCHING %x'%Addr)
+                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('catch',('hrdata',Eff,'none')),('hsize',self.HSIZE),('hsel',1)])
                 
-#                self.seq.append([('hburst',0),('haddr',0),('hwdata',0),('hwrite',0),('htrans',IDLE),('hsize',0),('hsel',self.HSEL),('hready',1)])
+                Eff = Addrs[X+1]
+                if HW==1:
+                    HWDATA = self.hwdata()
+                    self.seq.append([('hburst',0),('haddr',0),('hwdata',HWDATA),('hwrite',0),('htrans',IDLE),('hsize',0),('hsel',0)])
+                else:
+                    self.seq.append([('hburst',0),('haddr',0),('hwdata',0),('hwrite',0),('htrans',IDLE),('catch',('hrdata',Eff,'none')),('hsize',0),('hsel',0)])
                 return
 
 
             if What[0]=='write':
-                self.seq.append([('haddr',What[1]),('hwdata',What[2]),('hwrite',1),('htrans',2),('hsize',self.HSIZE),('hsel',1),('hready',1)])
-                self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('hsel',self.HSEL),('hready',1)])
+                self.seq.append([('haddr',What[1]),('hwdata',0),('hwrite',1),('htrans',2),('hsize',self.HSIZE),('hsel',1)])
+                self.seq.append([('haddr',0),('hwdata',What[2]),('hwrite',0),('htrans',0),('hsize',0),('hsel',0)])
+                self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('hsel',0)])
                 self.seq.append([('waitUntil',('hreadyout',1))])
                 return
 
             if What[0]=='read':
                 
-                self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hready',1),('hsize',self.HSIZE)])
-                self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('catch',('hrdata',What[1],What[2])),('hsel',self.HSEL),('hready',1)])
+                self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hsize',self.HSIZE)])
+                self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('catch',('hrdata',What[1],What[2])),('hsel',self.HSEL)])
                 self.seq.append([('waitUntil',('hreadyout',1))])
                 return
 

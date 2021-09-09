@@ -123,38 +123,40 @@ def buildTable(Mod,Path,Env):
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
         Type = Obj.Type
-        Son = Env.Modules[Type]
-        for Pin in Obj.conns:
-            Nets = support_set(Obj.conns[Pin],False)
-            Dir,_ = Son.nets[Pin]
-            if 'output' in Dir:
-                for Net in Nets:
-                    recordTable(Path+'.'+Inst+'.'+Pin,Path+'.'+Net)
-            elif 'input' in Dir:
-                for Net in Nets:
-                    recordTable(Path+'.'+Net,Path+'.'+Inst+'.'+Pin)
-            else:
-                logs.log_error('strange dir %s of %s in %s' % (Dir,Pin,Type))
+        if Type in Env.Modules:
+            Son = Env.Modules[Type]
+            for Pin in Obj.conns:
+                Nets = support_set(Obj.conns[Pin],False)
+                Dir,_ = Son.nets[Pin]
+                if 'output' in Dir:
+                    for Net in Nets:
+                        recordTable(Path+'.'+Inst+'.'+Pin,Path+'.'+Net)
+                elif 'input' in Dir:
+                    for Net in Nets:
+                        recordTable(Path+'.'+Net,Path+'.'+Inst+'.'+Pin)
+                else:
+                    logs.log_error('strange dir %s of %s in %s' % (Dir,Pin,Type))
                 
     for When,Body,_  in Mod.alwayses:
-        if combiAlways(When):
+        if combiAlways(When,Mod.Module):
             scanBody(Body,[],Path)
 
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
         Type = Obj.Type
-        Son = Env.Modules[Type]
-        buildTable(Son,Path+'.'+Inst,Env)
+        if Type in Env.Modules:
+            Son = Env.Modules[Type]
+            buildTable(Son,Path+'.'+Inst,Env)
     
 
 
 
-def combiAlways(When):
+def combiAlways(When,Module):
     if When == '*': return True
     if When[0] == 'edge': return False
     if When[0] == 'list':
-        return combiAlways(When[1])
-    logs.log_error('combiAlways failed on "%s"' % str(When))
+        return combiAlways(When[1],Module)
+    logs.log_error('combiAlways failed on "%s" in %s' % (When,Module))
     return False
 
 def scanBody(Body,Conds,Path):
