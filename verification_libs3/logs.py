@@ -13,6 +13,13 @@ PYMONLOG = 'pymon.log'
 if 'PYMONLOG' in os.environ:
     PYMONLOG = os.environ['PYMONLOG']
 
+def pymonname(Fname):
+    global PYMONLOG
+    PYMONLOG = Fname + '.log'
+    Flogs[0]=open(PYMONLOG+'0','w')
+
+
+
 FORCE_WORKS = True
 TRACE = False
 
@@ -38,11 +45,11 @@ except:
 
 finishCycles = 0
 
-def pymonFileName(logFileName):
-    global Flog
-    if Flog:
-        Flog.close()
-    Flog = open(logFileName,'w')
+#def pymonFileName(logFileName):
+#    global Flog
+#    if Flog:
+#        Flog.close()
+#    Flog = open(logFileName,'w')
 
 
 noCycles=False
