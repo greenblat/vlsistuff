@@ -42,7 +42,7 @@ class ahbliteMaster(logs.driverClass):
         self.waiting=0
         self.HSEL = 1
         self.translations=Translations
-        self.busyOk = True
+        self.busyOk = 0
         self.HSIZE = 2
         self.HPROT = 0
         self.Enable = True
@@ -131,8 +131,8 @@ class ahbliteMaster(logs.driverClass):
             Sig = self.translations[Sig]
         return self.force(Sig,Val)
 
-    def hwdata(self):
-        self.HWD += 1
+    def hwdata(self,Incr=1):
+        self.HWD += Incr
         Res = self.HWD + (random.randint(0x1000,0xffff)<<16)
         return  hex(Res)
         
@@ -236,19 +236,25 @@ class ahbliteMaster(logs.driverClass):
 
 
 #                print('ADDRS',What[0],What[1],burstlen(What[1]),Addrs)
+                INCR = 1
                 for X in range(burstlen(What[1])-1):
                     Addr = Addrs[X+1]
                     Eff = Addrs[X]
-#                    if (self.busyOk)and(random.randint(0,100)>80):
-#                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',BUSY),('hsize',self.HSIZE),('hsel',1)])
+                    if self.busyOk and (self.busyOk  == X) and(X>0):
+                        if HW == 1:
+                            self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',self.hwdata()),('hwrite',HW),('htrans',BUSY),('hsize',self.HSIZE),('hsel',1)])
+                        else:
+                            self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',BUSY),('hsize',self.HSIZE),('hsel',1)])
+                        INCR = 0
                     if HW==1:
-                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',self.hwdata()),('hwrite',HW),('htrans',SEQ),('hsize',self.HSIZE),('hsel',1)])
+                        self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',self.hwdata(INCR)),('hwrite',HW),('htrans',SEQ),('hsize',self.HSIZE),('hsel',1)])
                     else:
                         self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('catch',('hrdata',Eff,'none')),('hsize',self.HSIZE),('hsel',1)])
+                    INCR = 1
                 
                 Eff = Addrs[X+1]
                 if HW==1:
-                    HWDATA = self.hwdata()
+                    HWDATA = self.hwdata(INCR)
                     self.seq.append([('hburst',0),('haddr',0),('hwdata',HWDATA),('hwrite',0),('htrans',IDLE),('hsize',0),('hsel',0)])
                 else:
                     self.seq.append([('hburst',0),('haddr',0),('hwdata',0),('hwrite',0),('htrans',IDLE),('catch',('hrdata',Eff,'none')),('hsize',0),('hsel',0)])
