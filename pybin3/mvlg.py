@@ -83,6 +83,9 @@ class scanClass:
                 ww.pop(ind-1)
                 ww.pop(ind-1)
             Path = '/'.join(ww)
+        if (Path[0] == '/')and os.path.islink(Path):
+            return os.path.realpath(Path)
+            
         return Path
 
     def weed_out_doubles(self):
@@ -179,7 +182,13 @@ def replace_setenvs(line):
     if '$' not in line:
         return line
     Keys = os.environ.keys()
+    Keys2 = []
     for Key in Keys:
+        Keys2.append((len(Key),Key))
+    Keys2.sort()
+    Keys2.reverse()
+
+    for _,Key in Keys2:
         if '$%s'%Key in line:
             line = line.replace('$%s'%Key,os.environ[Key])
             line = line.replace('//','/')
@@ -241,5 +250,6 @@ def run(Fname,outFname):
 
 if (__name__ == '__main__'):
     main()
+
 
 

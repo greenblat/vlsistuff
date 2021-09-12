@@ -210,7 +210,7 @@ class axiSlaveClass:
 #                logs.log_info('axiSlave addr not in ram %x %s %d %s'%(Add,AA,Incr,rdata))
             rdata = AA + rdata
         self.rqueue.append((rlast,rid,rdata))
-        logs.log_info('axiSlave taken from ram %d bytes  rdata=%s addr=%08x'%(takenram,rdata,Addr))
+        logs.log_info('axiSlave taken from ram %d bytes  rdata=%s addr=%08x rid=%x'%(takenram,rdata,Addr,rid))
 
 
 
