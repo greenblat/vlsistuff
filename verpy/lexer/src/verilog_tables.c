@@ -663,7 +663,7 @@ void reserved_words(char *Token,char *tokenType){
     if (strcmp(Token,"`undef")==0) {strcpy(tokenType,"`undef"); return; }
     if (strcmp(Token,"always")==0) {strcpy(tokenType,"always"); return; }
     if (strcmp(Token,"always_comb")==0) {strcpy(tokenType,"always_comb"); return; }
-    if (strcmp(Token,"always_ff")==0) {strcpy(tokenType,"always_ff"); return; }
+    if (strcmp(Token,"always_ff")==0) {strcpy(tokenType,"always"); return; }
     if (strcmp(Token,"always_latch")==0) {strcpy(tokenType,"always_latch"); return; }
     if (strcmp(Token,"assert")==0) {strcpy(tokenType,"assert"); return; }
     if (strcmp(Token,"assign")==0) {strcpy(tokenType,"assign"); return; }

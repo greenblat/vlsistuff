@@ -134,14 +134,15 @@
      supply1 = 350,
      newver = 351,
      return = 352,
-     arith_shift_right = 353,
-     SignedLeft = 354,
-     shift_right = 355,
-     shift_left = 356,
-     Veryequal = 357,
-     noteqeq = 358,
-     StarStar = 359,
-     UNARY_PREC = 360
+     always_comb = 353,
+     arith_shift_right = 354,
+     SignedLeft = 355,
+     shift_right = 356,
+     shift_left = 357,
+     Veryequal = 358,
+     noteqeq = 359,
+     StarStar = 360,
+     UNARY_PREC = 361
    };
 #endif
 /* Tokens.  */
@@ -240,14 +241,15 @@
 #define supply1 350
 #define newver 351
 #define return 352
-#define arith_shift_right 353
-#define SignedLeft 354
-#define shift_right 355
-#define shift_left 356
-#define Veryequal 357
-#define noteqeq 358
-#define StarStar 359
-#define UNARY_PREC 360
+#define always_comb 353
+#define arith_shift_right 354
+#define SignedLeft 355
+#define shift_right 356
+#define shift_left 357
+#define Veryequal 358
+#define noteqeq 359
+#define StarStar 360
+#define UNARY_PREC 361
 
 
 

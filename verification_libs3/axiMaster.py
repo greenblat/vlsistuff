@@ -30,7 +30,7 @@ class axiMasterClass:
         self.waiting=0
         self.datawidth = 0
         self.AREADS=[]
-        self.RDATAS=[]
+        self.RDATAS={}
         self.rreadyCount = 0
         self.rreadyOnes = 3
         self.rreadyDeny = 0
@@ -105,16 +105,21 @@ class axiMasterClass:
                 logs.log_error('CHECK axi master line needs at least 3 params "check address data"')
                 return
             Datas = list(map(eval,wrds[2:]))
-            while (Datas!=[])and(self.RDATAS!=[]):
-                ActAddr,ActData = self.RDATAS.pop(0)
-                ExpData = Datas.pop(0)
-                logs.log_ensure(((Addr == ActAddr) and (ExpData == ActData)), 'RDATA exp = %x %x act = %x %x'%(Addr,ExpData,ActAddr,ActData))
+            if Addr in self.RDATAS:
+                Exps = self.RDATAS.pop(Addr)
+                while (Datas!=[])and(Exps!=[]):
+                    ExpData = Exps.pop(0)
+                    ActData = Datas.pop(0)
+                    logs.log_ensure(ExpData == ActData, 'RDATA addr=%x exp = %x act = %x'%(Addr,ExpData,ActData))
+
+            else:
+                logs.log_error('address %x is not registred in RDATAS' % Addr)
 
             if Datas!=[]:
                 logs.log_error('not enough RDATAS for this query, leftover addr=%x %s' % (Addr,list(map(hex,Datas))))
 
         else:
-            logs.log_error('action %s axiMater unrecognized %s'%(self.Name,Txt))
+            logs.log_error('action %s axiMaster unrecognized %s'%(self.Name,Txt))
 
 #    def makeRead(self,Burst,Len,Address,Size=4,Rid='none'):
             
@@ -275,7 +280,10 @@ class axiMasterClass:
         if rresp!=0:
             logs.log_wrong('RRESP came back %s  ADDR=%a  rid=%sd'%(rresp,Addr,Rid))
         
-        self.RDATAS.append((Addr,rdatax))
+        if Addr in self.RDATAS:
+            self.RDATAS[Addr].append(rdatax)
+        else:
+            self.RDATAS[Addr] = [rdatax]
         if rlast == 1:
             self.AREADS.pop(0)
 

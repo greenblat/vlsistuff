@@ -22,6 +22,7 @@
 %token supply0 supply1
 %token newver
 %token return
+%token always_comb
 
 %right '?' ':' 
 %left '|' 
@@ -156,7 +157,8 @@ Pair : token '=' Expr ;
 
 head_params : head_params ',' head_param | head_param ;
 head_param : 
-      parameter token '=' Expr 
+      localparam token '=' Expr 
+    | parameter token '=' Expr 
     | parameter Width token '=' Expr 
     | token '=' Expr 
     ;
@@ -191,7 +193,7 @@ PrmAssign :  '.' token '(' Expr ')' | '.' token ;
 InstParams : '#' '(' Exprs ')' | '#' number | '#' floating | '#' token | '#' '(' Prms_list ')' | '#' '(' ')'  ;
 
 
-Always : always Statement | always When Statement ;
+Always : always_comb Statement | always Statement | always When Statement ;
 
 
 Generate : generate GenStatements  endgenerate ;
