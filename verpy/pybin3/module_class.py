@@ -189,7 +189,7 @@ class module_class:
             if '[' in Net:
                 Net = Net[:Net.index('[')]
             if (not myExtras(Net))and(Net not in self.nets)and(Net not in self.parameters)and(Net[0] not in '0123456789')and(Net not in self.localparams)and(Net not in self.genvars):
-                logs.log_err('net %s used before defined (%s)'%(Net,Net in self.nets))
+                logs.log_err('%s: net %s used before defined (%s)'%(self.Module,Net,Net in self.nets))
                 logs.log_info('defined localparams %s %s '%(list(self.localparams.keys())[:10],list(self.parameters.keys())[:10]))
                 traceback.print_stack(None,None,logs.Flogs[0])
 
@@ -372,12 +372,12 @@ class module_class:
                             New.conns[Pin] = Sig
                         elif Sig[0] in ['subbus']:
                             New.conns[Pin] = ('subbit',Sig[1],Ind)
-                        elif Sig[0] in ['subbit','subbus','hdig']:
+                        elif Sig[0] in ['subbit','subbus','hdig','bin']:
                             New.conns[Pin] = Sig
                         elif (type(Sig) is list)and(Sig[0] == 'curly'):
                             New.conns[Pin] = Sig[Ind+1]
                         else:
-                            logs.log_error('expand %s %s %d -> %s  %s'%(Inst,Obj.Type,Wid,type(Sig),Sig[0]))
+                            logs.log_error('%s expand %s %s %d -> %s  %s'%(Mod.Module,Inst,Obj.Type,Wid,type(Sig),Sig))
 
                 self.insts.pop(Inst)
                 
@@ -1083,6 +1083,7 @@ def support_set__(Sig,Bussed):
     if (Sig=='$signed'):              return []
     if (Sig=='$random'):              return []
     if type(Sig) is int:    return []
+    if type(Sig) is float:    return []
     if type(Sig) is str: 
         if Sig[0]=='`': return []
         if Sig[0]=='"': return []
@@ -1149,7 +1150,7 @@ def support_set__(Sig,Bussed):
         return res
 
 
-    logs.log_err('(1124) untreated support set expr %s'%(str(Sig)))
+    logs.log_err('(1124) untreated support set expr %s %s'%(type(Sig),str(Sig)))
     return []
 
 
@@ -1976,7 +1977,7 @@ def is_external_dir(Dir):
 
 
 def myExtras(Token):
-    return Token in 'wait # $high $signed empty_begin_end unique_case $display'.split()
+    return Token in '$realtime $stime wait # $high $signed empty_begin_end unique_case $display'.split()
 
 def evalz(What):
     try:

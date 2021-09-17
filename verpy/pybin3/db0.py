@@ -336,6 +336,7 @@ def getTypeDefWid(Kind):
     
     if Kind=='logic': return 1
     if Kind=='integer': return 32
+    if Kind=='real': return 64
 
 
 
