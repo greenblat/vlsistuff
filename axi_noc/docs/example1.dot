@@ -1,0 +1,15 @@
+
+digraph example1 {
+    
+mst0 -> joiner0 ;
+mst1 -> splitter0 ;
+splitter0 -> joiner0 ;
+splitter0 -> slv4;
+splitter0 -> slv5;
+splitter0 -> slv6;
+joiner0 -> splitter1;
+splitter1 -> slv0;
+splitter1 -> slv1;
+splitter1 -> slv2;
+splitter1 -> slv3;
+}

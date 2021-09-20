@@ -8,8 +8,9 @@ import random
 
 
 class axiSlaveClass:
-    def __init__(self,Path,Monitors,prefix='',suffix=''):
+    def __init__(self,Path,Monitors,prefix='',suffix='',Name='slv no name'):
         self.Path = Path
+        self.Name = Name
         if self.Path != '':
             self.Path = self.Path + '.'
         if Monitors!= -1:
@@ -19,6 +20,7 @@ class axiSlaveClass:
         self.rqueue=[]
         self.awlen = -1
         self.wid = -1
+        self.bqueue0=[]
         self.bqueue=[]
         self.waitread=0
         self.bwaiting=0
@@ -28,7 +30,6 @@ class axiSlaveClass:
         self.Translates = {}
         self.Ram = {}
         self.wready = 0
-        self.bvalid_armed = False
         self.WAITREAD = 4
         self.WAITWRITE = 0
         self.busWidth = 8   # in bytes
@@ -89,7 +90,7 @@ class axiSlaveClass:
             for Add in range(Addr0,Addr1,4):
                 self.addWord(Add,Val)
         else:
-            logs.log_error('action of axiSlave failed on "%s"  %s' % (Text,Wrds[0]))
+            logs.log_error('action of axiSlave "%s" failed on "%s"  %s' % (self.Name,Text,Wrds[0]))
 
                 
 
@@ -182,7 +183,7 @@ class axiSlaveClass:
             LastPage = LastAddr & 0xffffe000
             FirstPage = araddr & 0xffffe000
             if (FirstPage != LastPage):
-                logs.log_error('CROSSING 4K read araddr=%x arlen=%x arsize=%x' % (araddr,arlen,arsize))
+                logs.log_error('slave %s CROSSING 4K read araddr=%x arlen=%x arsize=%x' % (self.Name,araddr,arlen,arsize))
                 
     def readQueue(self,ii,burst,arsize,addr,rid,rlast):
         if (arsize>4): arsize = 4
@@ -215,6 +216,7 @@ class axiSlaveClass:
 
 
     def writing(self):
+#        logs.log_info('BVALID wait=%d bqueue=%s ' % (self.bwaiting,self.bqueue))
         if self.bwaiting>0:
             self.bwaiting -= 1
             self.force('bvalid',0)
@@ -248,14 +250,10 @@ class axiSlaveClass:
             LastPage = LastAddr & 0xffffe000
             FirstPage = awaddr & 0xffffe000
             if (FirstPage != LastPage):
-                logs.log_error('CROSSING 4K write awaddr=%x awlen=%x awsize=%x' % (awaddr,awlen,awsize))
-            logs.log_info('axiSlave >>>awvalid %x %x %x %x %x'%(awburst,awaddr,awlen,awid,awsize))
+                logs.log_error('slave %s CROSSING 4K write awaddr=%x awlen=%x awsize=%x' % (self.Name,awaddr,awlen,awsize))
+            logs.log_info('axiSlave %s >>>awvalid %x %x %x %x %x'%(self.Name,awburst,awaddr,awlen,awid,awsize))
+            self.bqueue0.append(awid)
 
-#        if self.wready>0:
-#            self.wready -= 1
-#            self.force('wready',1)
-#        else:
-#            self.wready = self.WAITWRITE
         self.force('wready',1)
         self.wready = 0
             
@@ -263,7 +261,7 @@ class axiSlaveClass:
             veri.force('tb.marker','0x77')
             if self.awlen<0:
                 if len(self.awqueue)==0:
-                    logs.log_error('axiSlave awqueue empty and wvalid is on')
+                    logs.log_error('axiSlave "%s" awqueue empty and wvalid is on' % self.Name)
                     self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = -1,-1,-1,-1,0
                 else:
                     self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = self.awqueue.pop(0)
@@ -271,29 +269,26 @@ class axiSlaveClass:
             wstrb = self.peek('wstrb')
             wlast = self.peek('wlast')
             wdata = self.peek('wdata')
-            logs.log_info('axiSlave write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=%x'%(wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata))
+            logs.log_info('axiSlave %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=%x'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata))
 
             for ii in range(16):
                 if ((wstrb>>ii)&1)==1:
                     Byte = (wdata>>(ii*8))& 0xff
                     self.Ram[self.awaddr+ii]=Byte
-#                    logs.log_info('axiSlave write to  ram %x '%(self.awaddr+ii))
+#                    logs.log_info('axiSlave %s write to  ram %x '%(self.Name,self.awaddr+ii))
             self.awaddr += 1<<self.awsize
             if self.awlen==0:
                 self.awlen = -1
                 if wlast!=1:
-                    logs.log_error('axiSlave %s: prefix=%s addr=%x   no wlast'%(self.Path,self.prefix,self.awaddr))
+                    logs.log_error('axiSlave "%s" %s: prefix=%s addr=%x   no wlast'%(self.Name,self.Path,self.prefix,self.awaddr))
             else:
                 self.awlen -= 1
 
-            if (wlast==1)and(not self.bvalid_armed):
+            if (wlast==1):
+#                logs.log_info('BQUEUE0 %s' % (self.bqueue0))
                 self.bqueue.append(('wait',10))
-                self.bqueue.append((self.wid,0))
-                self.bvalid_armed = True
-        if (self.bvalid_armed):               
-            wlast = self.peek('wlast')
-            if (wlast==0): 
-                self.bvalid_armed = False
+                self.bqueue.append((self.bqueue0.pop(0),0))
+#                logs.log_info('BQUEUE %s' % (self.bqueue))
 
 
 

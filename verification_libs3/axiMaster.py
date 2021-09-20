@@ -79,6 +79,8 @@ class axiMasterClass:
             self.ReadyAlways = (eval(wrds[1]) != 0)
         elif wrds[0]=='rid':
             self.Rid = eval(wrds[1])
+        elif wrds[0]=='wait':
+            self.wait(eval(wrds[1]))
         elif wrds[0]=='size':
             self.Size = eval(wrds[1])
         elif wrds[0]=='axi3':
@@ -93,6 +95,8 @@ class axiMasterClass:
             elif len(wrds)>=6:
                 print('W6666WWWW',wrds)
                 self.makeWrite(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),list(map(eval,wrds[5:])))
+            else:
+                logs.log_error('axiMaster %s write got not enough words in command (%s)' % (self.Name,wrds))
         elif wrds[0]=='read':
             Burst = eval(wrds[1])
             Len   = eval(wrds[2])
@@ -142,43 +146,17 @@ class axiMasterClass:
         self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
         self.Rid += 1
 
-    def makeWriteWstrb(self,Burst,Len,Address,Size=4,Wstrb='auto',Wdatas=[]):
-        print('BURSTW',Burst,Len,Address)
-        if Wstrb == 'auto':
-            self.makeWrite(Burst,Len,Address,Size,Wdatas)
-            return
-        self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
-        self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
-        for ii in range(Len):
-            if len(Wdatas)==0:
-                Wdata = '0x%08x%08x%08x%08x'%(self.Rid+0x1000*ii,0x100+self.Rid+0x1000*ii,0x200+self.Rid+0x1000*ii,0x300+self.Rid+0x1000*ii)
-            else:
-                Wdata = Wdatas.pop(0)
-                if type(Wdata) is not str:
-                    Wdata = hex(Wdatas.pop(0))
-            if ii==(Len-1):
-                Wlast=1
-            else:
-                Wlast = 0
-            Str = 'force wvalid=1 wdata=%s wstrb=0x%x wlast=%d'%(Wdata,Wstrb,Wlast)
-            if self.AXI3:
-                Str += ' wid=%d'%self.Rid
-            self.Queue.append(('w',Str))
-
-        Str = 'force wvalid=0 wdata=0 wstrb=0 wlast=0'
-        if self.AXI3:
-            Str += ' wid=%d'%self.Rid
-        self.Queue.append(('w',Str))
-        self.Rid += 1
-
 
     def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
+        logs.log_info('makeWrite %x %x %x %x %s' % (Burst,Len,Address,Size,Wdatas))
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
         if Len<=0:
             logs.log_warning('axiMaster %s got len=%d for write'%(self.Name,Len))
         for ii in range(Len):
-            if len(Wdatas)==0:
+            if type(Wdatas) is int:
+                Wdata = Wdatas
+            elif len(Wdatas)==0:
                 Wdata = '0x%08x%08x%08x%08x'%(self.Rid+0x1000*ii,0x100+self.Rid+0x1000*ii,0x200+self.Rid+0x1000*ii,0x300+self.Rid+0x1000*ii)
             elif (type(Wdatas[0]) is str):
                 Wdata = Wdatas.pop(0)
@@ -274,6 +252,10 @@ class axiMasterClass:
             self.manageRready(0)
 
     def readAction(self,rid,rlast,rdatax,widrid,rresp):
+        if self.AREADS == []:
+            logs.log_error('READ ACTION %s and no AREADS' % (self.Name))
+            return
+            
         Len,Addr,Rid = self.AREADS[0]
         if (Rid & ((1<<widrid)-1)) != rid:
             logs.log_wrong('sent ARID=%d RID=%d'%(Rid,rid))
@@ -322,8 +304,8 @@ class axiMasterClass:
                 self.force(Var,Val)
        
     def runB(self):
-#        logs.log_info('runB %s %s peek %s %s'%(self.peek('bvalid'),self.peek('bready'),logs.peek('tb.ext_bvalid'),logs.peek('tb.ext_bready')))
         if self.peek('bvalid')==1:
+            logs.log_info('BVALID %s bid=%x bresp=%x' % (self.Name,self.peek('bid'),self.peek('bresp')))
             self.force('bready','1')
         else:
             self.force('bready','0')
@@ -356,7 +338,6 @@ class axiMasterClass:
             return
         Cmd = self.awQueue.pop(0)
         wrds = Cmd.split()
-        print('runAw',wrds)
         if wrds==[]:
             pass
         elif (wrds[0]=='force'):

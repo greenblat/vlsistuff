@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" version="1.1" viewBox="208 265 328 197" width="328" height="197">
+  <defs>
+    <font-face font-family="Helvetica Neue" font-size="16" panose-1="2 0 5 3 0 0 0 2 0 4" units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0" x-height="517" cap-height="714" ascent="951.9958" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="HelveticaNeue"/>
+      </font-face-src>
+    </font-face>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -4 10 8" markerWidth="10" markerHeight="8" color="black">
+      <g>
+        <path d="M 8 0 L 0 -3 L 0 3 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.18.5\n2021-09-20 22:34:47 +0000</metadata>
+  <g id="Canvas_1" fill="none" stroke-dasharray="none" fill-opacity="1" stroke-opacity="1" stroke="none">
+    <title>Canvas 1</title>
+    <g id="Canvas_1_Layer_1">
+      <title>Layer 1</title>
+      <g id="Graphic_2">
+        <ellipse cx="361.5" cy="356.5" rx="41.5000663129287" ry="39.5000631171249" fill="aqua"/>
+        <ellipse cx="361.5" cy="356.5" rx="41.5000663129287" ry="39.5000631171249" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(333.3 347.276)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="2.7200008" y="15">Splitter</tspan>
+        </text>
+      </g>
+      <g id="Graphic_3">
+        <rect x="209" y="328.5" width="68" height="56" fill="#ff8080"/>
+        <rect x="209" y="328.5" width="68" height="56" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(214 347.276)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="4.256" y="15">Master</tspan>
+        </text>
+      </g>
+      <g id="Graphic_4">
+        <rect x="467" y="266" width="68" height="42" fill="#ffff80"/>
+        <rect x="467" y="266" width="68" height="42" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(472 277.776)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="13.592" y="15">Slv0</tspan>
+        </text>
+      </g>
+      <g id="Graphic_5">
+        <rect x="467" y="317" width="68" height="42" fill="#ffff80"/>
+        <rect x="467" y="317" width="68" height="42" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(472 328.776)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="13.592" y="15">Slv1</tspan>
+        </text>
+      </g>
+      <g id="Graphic_6">
+        <rect x="467" y="368" width="68" height="42" fill="#ffff80"/>
+        <rect x="467" y="368" width="68" height="42" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(472 379.776)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="13.592" y="15">Slv2</tspan>
+        </text>
+      </g>
+      <g id="Graphic_7">
+        <rect x="467" y="419" width="68" height="42" fill="#ffff80"/>
+        <rect x="467" y="419" width="68" height="42" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(472 430.776)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="13.592" y="15">Slv3</tspan>
+        </text>
+      </g>
+      <g id="Line_8">
+        <line x1="395.94824" y1="334.45966" x2="458.6608" y2="294.3355" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_9">
+        <line x1="402.60526" y1="351.04876" x2="457.1859" y2="343.81047" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_10">
+        <line x1="401.09364" y1="368.3614" x2="457.5164" y2="385.2644" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_11">
+        <line x1="393.8196" y1="381.28318" x2="459.14386" y2="431.3749" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_13">
+        <line x1="277" y1="356.5" x2="310.09998" y2="356.5" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+    </g>
+  </g>
+</svg>

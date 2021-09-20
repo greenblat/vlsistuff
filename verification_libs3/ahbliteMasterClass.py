@@ -48,6 +48,7 @@ class ahbliteMaster(logs.driverClass):
         self.Enable = True
         self.RDATA = []
         self.HWD = 1
+        self.PWDATA = []
 
     def translate(self,Addr):
         if Addr[0] in '0123456789':
@@ -93,6 +94,9 @@ class ahbliteMaster(logs.driverClass):
                 self.read(wrds[1])
         elif wrds[0]=='wait':
             self.wait(eval(wrds[1]))
+        elif wrds[0]=='wdata':
+            Exps = list(map(eval,wrds[1:]))
+            self.PWDATA.extend(Exps)
         elif wrds[0]=='RD':
             if len(wrds)==1:
                 self.RDATA = []
@@ -129,9 +133,12 @@ class ahbliteMaster(logs.driverClass):
     def tr_force(self,Sig,Val):
         if  Sig in self.translations:
             Sig = self.translations[Sig]
+        if Sig == '' : return
         return self.force(Sig,Val)
 
     def hwdata(self,Incr=1):
+        if self.PWDATA!= []:
+            return hex(self.PWDATA.pop(0))
         self.HWD += Incr
         Res = self.HWD + (random.randint(0x1000,0xffff)<<16)
         return  hex(Res)

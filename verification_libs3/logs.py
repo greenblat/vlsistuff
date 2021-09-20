@@ -15,6 +15,9 @@ if 'PYMONLOG' in os.environ:
 
 def pymonname(Fname):
     global PYMONLOG
+    if (len(Fname)>100) and (Fname[0] in '01'):
+        Fname = bin2str(Fname)
+        
     PYMONLOG = Fname + '.log'
     Flogs[0]=open(PYMONLOG+'0','w')
 

@@ -141,6 +141,11 @@ def dump_instance(Mod,Simple=False):
 PLUSARG = '''
 reg [1023:0] testname;
 initial begin
+    if ($value$plusargs("LOG=%s",testname)) begin 
+        $python("pymonname()",testname);
+    end 
+
+
     if ($value$plusargs("SEQ=%s",testname)) begin 
          $display(" Running SEQ= %s.",testname); 
     end else begin
@@ -230,6 +235,11 @@ GIVEUP_TIMEOUT = 1000    # how many cycles to run before retirment.
 
 import sequenceClass
 seq = sequenceClass.sequenceClass('tb',Monitors,'',[])
+
+
+def pymonname(Name):
+    logs.pymonname(Name)
+
 
 
 def sequence(TestName):
