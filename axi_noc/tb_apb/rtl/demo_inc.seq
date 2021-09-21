@@ -1,0 +1,8 @@
+define key0 0x0
+define WIDTH_MAP["key0"] 16
+define key1 0x10
+define WIDTH_MAP["key1"] 16
+define limits0 0x20
+define WIDTH_MAP["limits0"] 32
+define limits1 0x40
+define WIDTH_MAP["limits1"] 32

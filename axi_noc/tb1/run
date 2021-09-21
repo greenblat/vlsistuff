@@ -1,0 +1,9 @@
+#! /bin/csh -f
+
+/bin/rm tb.vvp
+comp
+
+simv +SEQ=test0.seq +LOG=test0
+
+
+

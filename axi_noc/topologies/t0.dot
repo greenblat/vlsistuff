@@ -1,0 +1,59 @@
+
+
+digraph test0 {
+
+mst0 -> split0 ;
+split0 -> merge0 ;
+split0 -> merge1 ;
+split0 -> merge2 ;
+split0 -> merge3 ;
+
+mst1 -> split1 ;
+split1 -> merge0 ;
+split1 -> merge1 ;
+split1 -> merge2 ;
+split1 -> merge3 ;
+
+mst2 -> split2 ;
+split2 -> merge0 ;
+split2 -> merge1 ;
+split2 -> merge2 ;
+split2 -> merge3 ;
+
+mst3 -> split3 ;
+split3 -> merge0 ;
+split3 -> merge1 ;
+split3 -> merge2 ;
+split3 -> merge3 ;
+
+
+
+
+
+merge0 -> split4 ;
+merge1 -> split5 ;
+merge2 -> split6 ;
+merge3 -> split7 ;
+
+split4 -> slv0 ;
+split4 -> slv1 ;
+split4 -> slv2 ;
+split4 -> slv3 ;
+
+split5 -> slv4 ;
+split5 -> slv5 ;
+split5 -> slv6 ;
+split5 -> slv7 ;
+
+split6 -> slv8 ;
+split6 -> slv9 ;
+split6 -> slv10 ;
+split6 -> slv11 ;
+
+split7 -> slv12 ;
+split7 -> slv13 ;
+split7 -> slv14 ;
+split7 -> slv15 ;
+
+}
+

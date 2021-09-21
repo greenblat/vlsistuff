@@ -1,0 +1,20 @@
+
+
+wait 10
+
+
+ma wstrb 0xff
+mb wstrb 0xff
+mc wstrb 0xff
+md wstrb 0xff
+ma write 1 8 0x100 3 0x11111111
+mb write 1 8 0x200 3 0x22222222
+mc write 1 8 0x300 3 0x33333333
+md write 1 8 0x400 3 0x44444444
+wait 100
+ma read 1 8 0x100 
+mb read 1 8 0x200 
+mc read 1 8 0x300 
+md read 1 8 0x400 
+wait 100
+finish

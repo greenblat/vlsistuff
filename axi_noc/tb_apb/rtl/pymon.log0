@@ -1,0 +1,9 @@
+@0: info: fnames: ['demo.v']
+@0: info: exit state 0 1
+@0: info: addmodule demo (dict_keys(['demo']))
+@0: info: addmodule demo_ram (dict_keys(['demo', 'demo_ram']))
+@0: info: do line: dump_instance
+@0: info: do line: clean
+@0: info: info: exiting.py has 0 errors, 0 wrongs,  0 corrects and 0 warnings logged
+
+                                 time=Mon Sep 20 15:04:19 2021

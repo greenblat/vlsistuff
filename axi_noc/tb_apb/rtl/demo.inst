@@ -1,0 +1,11 @@
+
+demo demo (.pclk(pclk),.presetn(presetn)
+    .pwrite(pwrite),.paddr(paddr),.psel(psel),.penable(penable)
+    ,.prdata(prdata),.prdata_wire(),.pwdata(pwdata),.pstrb(pstrb)
+    ,.pready(pready),.pslverr(pselverr)
+    ,.penable(penable)
+    ,.key0(key0)
+    ,.key1(key1)
+    ,.limits0(limits0)
+    ,.limits1(limits1)
+);

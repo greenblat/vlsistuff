@@ -1,0 +1,9 @@
+
+
+chip demo  bus=apb addrwid=20 width=32 reset=async empty=0xdeadbeaf 
+reg   key0 width=128 access=rw desc="key for 64 bit encryptions"
+reg   key1 width=128 access=rw desc="key for 64 bit encryptions"
+array limits0 width=20 depth=8 access=rw desc=" 8 low limit regs"
+array limits1 width=20 depth=8 access=rw desc=" 8 high limit regs"
+
+end

@@ -1,0 +1,54 @@
+
+
+
+wait 10
+ma write 1 1 0x00001000 3 0x11112222
+mb write 1 1 0x40001000 3 0x11112222
+mc write 1 1 0x80001000 3 0x11112222
+md write 1 1 0xc0001000 3 0x11112222
+
+ma write 1 1 0x10001000 3 0x11112222
+mb write 1 1 0x50001000 3 0x11112222
+mc write 1 1 0x90001000 3 0x11112222
+md write 1 1 0xd0001000 3 0x11112222
+
+wait 100
+
+drv round0
+wait 100
+drv round0
+wait 100
+drv round0
+wait 100
+drv round0
+wait 100
+drv round0
+wait 100
+drv round0
+wait 100
+drv round0
+wait 100
+drv round0
+wait 100
+drv round0
+wait 100
+drv round0
+wait 100
+drv round0
+wait 100
+drv round0
+wait 100
+drv round0
+wait 100
+wait 100
+ma waitNotBusy
+mb waitNotBusy
+mc waitNotBusy
+md waitNotBusy
+wait 100
+
+
+
+finish
+
+

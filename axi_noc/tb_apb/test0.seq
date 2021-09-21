@@ -1,0 +1,16 @@
+
+
+
+print RUNNING
+wait 10
+mst write 1 1 0x0 3 0x123456789abcdef0
+wait 10
+mst write 1 2 0x8 3 0x9988776655443322 0x1122334455667788
+wait 20
+mst read 1 1 0x0 3 
+wait 20
+mst read 1 2 0x8 3 
+wait 20
+finish
+
+

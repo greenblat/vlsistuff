@@ -1,0 +1,11 @@
+ #! /bin/csh -f
+ 
+
+iverilog  -Wtimescale  -o tb.vvp -g2012 tb.v \
+    ../rtl/axi2apb.v  \
+    ../rtl/syncfifo_sampled.v  \
+    rtl/demo.v \
+
+
+
+

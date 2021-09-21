@@ -1,0 +1,5 @@
+kind,access,width,pos,name,reset,addr,desc
+reg,rw,128, ,key0, ,0x0,"key for 64 bit encryptions"
+reg,rw,128, ,key1, ,0x10,"key for 64 bit encryptions"
+array,rw,20, ,limits0, ,0x20," 8 low limit regs"
+array,rw,20, ,limits1, ,0x40," 8 high limit regs"

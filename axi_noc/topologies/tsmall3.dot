@@ -1,0 +1,24 @@
+
+
+
+digraph tsmall3 {
+
+mst0 -> merge0 ;
+mst1 -> merge0 ;
+mst2 -> merge1 ;
+mst3 -> merge1 ;
+merge0 -> merge2 ;
+merge1 -> merge2 ;
+merge2 -> split0;
+split0 -> slv0 ;
+split0 -> slv1 ;
+split0 -> slv2 ;
+split0 -> split1 ;
+
+split1 -> slv3 ;
+split1 -> slv4 ;
+split1 -> slv5 ;
+split1 -> slv6 ;
+
+}
+

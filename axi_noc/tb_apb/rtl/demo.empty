@@ -1,0 +1,29 @@
+module demo (
+     input [19:0] paddr
+    ,input    pclk
+    ,input    penable
+    ,input    presetn
+    ,input    psel
+    ,input [3:0] pstrb
+    ,input [31:0] pwdata
+    ,input    pwrite
+    ,output reg [127:0] key0
+    ,output reg [127:0] key1
+    ,output reg [7:0][19:0] limits0
+    ,output reg [7:0][19:0] limits1
+    ,output reg [31:0] prdata
+    ,output reg [31:0] prdata_wire
+    ,output reg    pready
+    ,output reg    pslverr
+);
+initial begin
+    key0 = 0;
+    key1 = 0;
+    limits0 = 0;
+    limits1 = 0;
+    prdata = 0;
+    prdata_wire = 0;
+    pready = 0;
+    pslverr = 0;
+end
+endmodule

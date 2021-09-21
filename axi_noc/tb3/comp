@@ -1,0 +1,19 @@
+#! /bin/csh -f
+
+../llbin/makeNoc.py ../topologies/t0.dot
+
+iverilog -o tb.vvp  -g2012  \
+    tb.v \
+    test0_noc.v \
+    ../rtl/axi_4_merger.v \
+    ../rtl/axi_4_splitter.v \
+    ../rtl/axi_wr_4_merger.v \
+    ../rtl/axi_wr_4_splitter.v \
+    ../rtl/axi_rd_4_merger.v \
+    ../rtl/axi_rd_4_splitter.v \
+    ../rtl/syncfifo.v \
+    ../rtl/syncfifo_sampled.v \
+    ../rtl/axi2ram.v \
+
+
+

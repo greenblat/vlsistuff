@@ -1,0 +1,11 @@
+ #! /bin/csh -f
+ 
+
+iverilog  -Wtimescale  -o tb.vvp -g2012 tb.v \
+    ../rtl/axi_4_splitter.v  \
+    ../rtl/axi_rd_4_splitter.v  \
+    ../rtl/axi_wr_4_splitter.v  \
+    ../rtl/syncfifo_sampled.v  \
+
+
+

@@ -1,0 +1,13 @@
+
+wait 10
+mst write 1 1 0x1000 3 0x1111222233334444
+wait 10
+mst write 1 8 0x2000 3 0x5566778899001122
+wait 50
+mst read 1 1 0x1000 3 
+wait 50
+mst read 1 8 0x2000 3 
+wait 50
+mst read 2 8 0x2010 3 
+wait 50
+finish
