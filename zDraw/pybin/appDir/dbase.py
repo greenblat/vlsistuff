@@ -1496,7 +1496,7 @@ def use_keystroke(Uni,Ord,XY):
             elif (What=='param'):
                 Glbs.details[Root].params[Who].make_selected(False)
             unset_context('moving')
-        if 'deleting' in Glbs.contexts:
+        elif 'deleting' in Glbs.contexts:
             (What,Who)=get_context('deleting')
             Root=get_context('root')
             if (What=='instance'):
@@ -1508,7 +1508,7 @@ def use_keystroke(Uni,Ord,XY):
             elif (What=='geom'):
                 Glbs.details[Root].geoms[Who].make_selected(False)
             unset_context('deleting')
-        if 'grouping' in Glbs.contexts:
+        elif 'grouping' in Glbs.contexts:
             unset_context('grouping')
 
     elif (Uni=='e'):
@@ -1645,6 +1645,36 @@ def use_keystroke(Uni,Ord,XY):
         Glbs.details[Root].save(File)
         File.close()
         Glbs.details[Root].touched(False)
+
+    elif (Uni in ['l']):
+        (Who,Inst)= select_object((X,Y))
+        PP = screen2schem((X,Y))
+        if (Who):
+            if (Who=='instance'):
+                Root=get_context('root')
+#                Glbs.details[Root].instances[Inst].make_selected(True)
+                Me = Glbs.details[Root].instances[Inst]
+                Wires = Glbs.details[Root].wires
+                Others = []
+                for Wire in Wires:
+                    WW = Wires[Wire]
+                    Start=WW.Start
+                    End=WW.End
+                    if Inst == Start:
+                        Others.append(WW.List[1])
+                        Others.append(WW.List[-2])
+                    elif Inst == End:
+                        Others.append(WW.List[-2])
+                        Others.append(WW.List[1])
+                Points = []
+                for Px in Others:
+                    Dist = distance(Px,Me.Point)
+                    if Dist> 0.001:
+                        Points.append(Px)
+
+                print('MORE WORK - divide into Verticals and Horizontals ALIGN %s (%s) %s  %s    list  %s' % (Who,Inst,Me.Type,Me.Point,Points))
+            else:
+                print('align works only on some instances (%s) %s ' % (Who,Inst))
 
     elif (Uni in ['v','g','i','o']):
         if Uni=='v':

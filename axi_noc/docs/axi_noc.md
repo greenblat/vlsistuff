@@ -51,18 +51,12 @@ We define and implement a limited set of building blocks.  For the first version
 
 
 1. splitter module has one incoming AXI port and up to four outgoing. Each incoming burst is routed to approprite out port.
-
 2. merger module has up to four incoming ports and single outgoing port.
-
 3. clock changer module is inserted between two different clock domains.
-
 4. axi2ram module is demo module to connect ram to this noc.
-
 5. axi2apb module is translation to apb slaves.
-
-6. (planned) change AXI width module. e.g. from 128 to 64 and back.
-
-   Keep in mind, that AXI is two way street. Modules have to keep tabs on what going through the in order to route response correctly back. All nodules introduce a clock delay between ports.
+6. (planned) change AXI width module. e.g. from 128 to 64 and back. Keep in mind, that AXI is two way street. Modules have to keep tabs on what going through the in order to route response correctly back. All nodules introduce a clock delay between ports.
+7. (planned) SERDES. Optimizing serializer of the traffic. Full AXI is handful bunch of wires. The traffix can be made thinner busses.
 
 ##  Connecting the dots
 Here is an example of simplest master and 4 slaves
@@ -71,7 +65,7 @@ Here is an example of simplest master and 4 slaves
 
 Here is example of non-symmetric network.
 
-![axinoc2](/Users/ilia/research/axi_noc/docs/axinoc2.svg)
+<img src="axinoc2.svg" alt="axinoc2" style="zoom:80%;" />
 
 Example of APB and ClockChanger.
 
@@ -122,7 +116,14 @@ In my AXI NOC we may utilize the READ channel of AXI to convey messages from sla
 Another painful aspect is error reporting. In AXI, errors (bresp and rresp) come back to a hapless master. Usually there is no idea what to do with them. In best case, it just raises interrupt.
 In RINGS, All errors arrived to a predefined  master, called the ANCHOR.  There was one place to deal with system errors. The error messages arrived at fifo attached to the ANCHOR and it could deal with them at it's own pace. Similar idea is good to implement here.
 
+Adding SER-DES option.  Serialize AXI bus to any requested wire width and reconstruct it on the other end..
 
 
 
+## What's missing
 
+1. Currently, Fixed priority in service. Will be made round robin or something.
+2. Some modules are in development stage:  clock and width changers.
+3. Not enough verification. Ongoing.
+4. Not going to add AHB interfaces. You probably have them already. If not, good for You.
+5. Not going to build it in VHDL. Enough weapons as it is.
