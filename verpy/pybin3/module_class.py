@@ -1061,7 +1061,7 @@ def dump_always(Always,Fout):
     return ''
 
 OPS =  ['~|','**','~^','^','=','>=','=>','*','/','<','>','+','-','~','!','&','&&','<=','>>','>>>','<<','||','==','!=','|','!==','===']
-KEYWORDS = ('sub_slice sub_slicebit taskcall functioncall named_begin unsigned if for ifelse edge posedge negedge list case casex casez default double_sub wait #').split()
+KEYWORDS = ('while else sub_slice sub_slicebit taskcall functioncall named_begin unsigned if for ifelse edge posedge negedge list case casex casez default double_sub wait #').split()
 
 def support_set(Sig,Bussed=True):
 #    traceback.print_stack(None,None,logs.Flogs[0])

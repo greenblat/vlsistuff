@@ -18,7 +18,7 @@ import logs
 import veri
 
 class axiMasterClass:
-    def __init__(self,Path,Monitors,Prefix='',Suffix='',Name='?'):
+    def __init__(self,Path,Monitors,Prefix='',Suffix='',Name='"no given name"'):
         self.Path = Path
         if Monitors != -1: Monitors.append(self)
         self.Name=Name
@@ -45,12 +45,15 @@ class axiMasterClass:
         self.Size = 2
         self.WSTRB = -1 
         self.AXI3 = False
+        self.Bscore = []
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig)
 
     def onFinish(self):
-        return
+        if self.Bscore != []:
+            logs.log_error('BVALID: some BID left in BIF queue: %s' % (self.Bscore))
+
     def rename(self,Sig):
         if Sig in self.renames:
             return self.renames[Sig]
@@ -93,7 +96,6 @@ class axiMasterClass:
             if len(wrds)==3:
                 self.makeWrite(1,1,eval(wrds[1]),self.Size,[eval(wrds[2])])
             elif len(wrds)>=6:
-                print('W6666WWWW',wrds)
                 self.makeWrite(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),list(map(eval,wrds[5:])))
             else:
                 logs.log_error('axiMaster %s write got not enough words in command (%s)' % (self.Name,wrds))
@@ -117,7 +119,7 @@ class axiMasterClass:
                     logs.log_ensure(ExpData == ActData, 'RDATA addr=%x exp = %x act = %x'%(Addr,ExpData,ActData))
 
             else:
-                logs.log_error('address %x is not registred in RDATAS' % Addr)
+                logs.log_error('address %x is not registred in RDATAS %s' % (Addr,list(map(hex,self.RDATAS.keys()))))
 
             if Datas!=[]:
                 logs.log_error('not enough RDATAS for this query, leftover addr=%x %s' % (Addr,list(map(hex,Datas))))
@@ -151,6 +153,7 @@ class axiMasterClass:
         logs.log_info('makeWrite %x %x %x %x %s' % (Burst,Len,Address,Size,Wdatas))
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
+        self.Bscore.append((self.Rid,Address))
         if Len<=0:
             logs.log_warning('axiMaster %s got len=%d for write'%(self.Name,Len))
         for ii in range(Len):
@@ -268,7 +271,7 @@ class axiMasterClass:
             self.RDATAS[Addr] = [rdatax]
         if rlast == 1:
             self.AREADS.pop(0)
-
+        logs.log_info('ADDRDATAS %s   %s' % (hex(Addr), list(map(hex,self.RDATAS.keys()))))
 
     def runQueue(self):
 #        print('\n\n\n\ 0 RUNQ',self.Queue)
@@ -303,9 +306,20 @@ class axiMasterClass:
                 Val = eval(ww[1])
                 self.force(Var,Val)
        
+    
     def runB(self):
         if self.peek('bvalid')==1:
-            logs.log_info('BVALID %s bid=%x bresp=%x' % (self.Name,self.peek('bid'),self.peek('bresp')))
+            Bid = self.peek('bid')
+            ii = 0;
+            while ii < len(self.Bscore):
+                if self.Bscore[ii][0] == Bid:
+                    logs.log_correct('BVALID %s bid=%x bresp=%x' % (self.Name,Bid,self.peek('bresp')))
+                    self.Bscore.pop(ii)
+                    ii = 10000
+                else:
+                    ii += 1
+            if (ii!=10000):
+                logs.log_error('BVALID %s not found bid=%x bresp=%x' % (self.Name,Bid,self.peek('bresp')))
             self.force('bready','1')
         else:
             self.force('bready','0')

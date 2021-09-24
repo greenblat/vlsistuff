@@ -8,7 +8,7 @@ import traceback
 from scan_rtl import  scan_statements,is_edged_timing,get_sensitivity_list,compute1
 from extract_expr_nets import extract_sigs
 from rtl_width import get_width,get_width2
-from module_class import pexpr
+from module_class import pexpr,support_set
 from executes import try_and_load_module
 
 
@@ -23,6 +23,7 @@ def help_main(Env):
     check_instance_connections(Env,Env.Current)
     create_drive_table(Env.Current)
     look_for_loops(Env.Current)
+    look_for_short_loops(Env.Current)
     check_cases(Env.Current)
 
 def load_sons(Env):
@@ -51,6 +52,21 @@ def add_drives(Dst,Src):
     else:
         InvTableDrives[Src] = [Dst]
 
+EdgeTableDrives={}
+InvEdgeTableDrives={}
+def add_edged_drives(Dst,Src):
+    if Dst not in EdgeTableDrives:
+        EdgeTableDrives[Dst]=[]
+    if type(Src)is list:
+        for X in Src:
+            add_edged_drives(Dst,X)
+        return
+    if Src not in EdgeTableDrives[Dst]:
+        EdgeTableDrives[Dst].append(Src)
+    if Src in InvEdgeTableDrives:
+        InvEdgeTableDrives[Src].append(Dst)
+    else:
+        InvEdgeTableDrives[Src] = [Dst]
 
 def compatible_width(Dst,Src,Current):
     Wsrc1,Wsrc0 = get_width2(Src,Current)
@@ -79,6 +95,8 @@ def create_always_drive_tables(Current):
         if len(Always) in [2,3]:
             if not is_edged_timing(Always[0]):
                 scan_statements(Current,Always[1],drive_assist1,[[]],[])
+            else:
+                scan_statements(Current,Always[1],drive_assist2,[[]],[])
         else:
             logs.log_err('unrecognized always %d'%(len(Always)))
 
@@ -89,10 +107,32 @@ def drive_assist1(Current,Item,Params,Stack):
     if Item[0] == '=':
         Dsts = extract_sigs(Item[1])
         Srcs = extract_sigs(Item[2])
+        Stcks = support_set(Stack)
         for Dst in Dsts:
-            for Src in Srcs:
+            for Src in Srcs+Stcks:
                  add_drives(Dst,Src)
+    if Item[0] == '<=':
+        logs.log_error('"<=" assign in combi always %s' % str(Item))
         
+
+
+def drive_assist2(Current,Item,Params,Stack):
+    Sofar = Params[0]
+    if not Item:
+        return
+    if Item[0] == '<=':
+        Dsts = extract_sigs(Item[1])
+        Srcs = extract_sigs(Item[2])
+        for Dst in Dsts:
+            Stcks = support_set(Stack)
+            for Src in Srcs+Stcks:
+                add_edged_drives(Dst,Src)
+    if Item[0] == '=':
+        logs.log_error('"=" assign in edged always %s' % str(Item))
+        
+
+
+
 Transitionals=[]
 Loops=[]
 
@@ -109,6 +149,15 @@ def run_transitional(Sig,Sofar,Path):
             run_transitional(X,Sofar,Path+[X])
     
 
+def look_for_short_loops(Current):
+    for Dst in EdgeTableDrives:
+        Srcs = EdgeTableDrives[Dst]
+        for Src in Srcs:
+            if Src in TableDrives:
+                List = TableDrives[Src]
+                if Dst in List:
+                    logs.log_err('SHORT LOOP %s %s (through edged always)'%(Dst,Src))
+                    
 
 
 def look_for_loops(Current):
@@ -361,8 +410,8 @@ Driven={}
 Mentioned={}
 def check_src_expr(Current,Item):
     if type(Item)is tuple:
-        if Item[0]=='*':
-            return
+        if Item[0]=='*': return
+        if Item[0]=='dotted': return
     if type(Item)is list:
         if (len(Item)==1):
             check_src_expr(Current,Item[0])
@@ -428,6 +477,8 @@ def check_src_expr(Current,Item):
             return 
     elif (type(Item)is str):
         if Item in ['*','default']:
+            return
+        if Item[0] in ['"']:
             return
         if (Item not in Current.nets)and(Item not in Current.parameters)and(Item not in Current.localparams):
             logs.log_err('item %s not defined'%(str(Item)))

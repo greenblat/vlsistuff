@@ -20,12 +20,12 @@ I say "used to" because they are being swallowed and not sure to exist on the ma
 All apps create ugly unreadable RTL code. My guess it is on purpose to make it look sophisticated and 
 hard to implement Yourself. 
 
-There is also open-source (like OpenSoC) but for me it is "תפסת מרובה לא תפסת" syndrom.
+There is also open-source (like OpenSoC) but for me it is "תפסת מרובה לא תפסת" syndrom. For non Hebrew readers - it approximately translates to " there is no value in exces". 
 
 My rings-inspired NOC is still great, but it is scary to conventional designer and their managers. 
 This is the reason i thought of AXI NOC from scratch. 
 Recently,  projects i came across in companies i work for, could benefit from simple NOC that 
-doesn't require a dedicated person cooking the ( Arteris Sonics netSpeed )  for the duration of the project and beyond. About hardships of these commercial solutions You can read in my older Linky-Dinky post.  And anyway,  most of them are not that relevant.
+doesn't require a dedicated person cooking the ( Arteris Sonics netSpeed )  for the duration of the project and beyond. About hardships of these commercial solutions You can read in my older Linky-Dinky post.  And anyway,  most of them are not that relevant or alive.
 
 ## The setup of AXI NOC
 
@@ -98,7 +98,7 @@ Usually NOC route traffic based on transaction address.
 The steering of the writes and reads is based on pre compiled address tables.
 We do the opposite.
 Merger modules don't have any address sensitivity. Only splitter modules must decide which output port to use.
-The simple solution:  take two msb bits of address and uses them as index to decide where to send the transaction. Then downstream shift the address two bits left. So the next decision point have fresh two bits.
+The simple solution:  take two msb bits of address and use them as index to decide where to send the transaction. On selected downstream port the address is  shifted two bits left. So the next decision point have fresh two bits.
 The software in masters, should be aware of this shifting, and configuration script, adds "shift value" for each slave. This number is used by connection to slave to shift the address back. If the slave is 3 layers from master, it will receive address shifted six buts right.
 
 CPU software gets a table of addresses for each slave,  adapted for each master CPU. In all NOCs it is pretty much the same.
@@ -106,17 +106,25 @@ If this addressing will be too confusing, we may switch back to more conservativ
 
 ## What is the status
 in my github, clone:  https://github.com/greenblat/vlsistuff.git
-there is directory called axi_noc. All is (will be shortly) there.  Including building block RTLs and few demos.
+there is directory called axi_noc. All is (will be shortly)  there.  Including building block RTLs and few demos.
 
 
 ## What's next?
-One of the advantages and key features of ring based (no masters nor slaves, but all modules can listen and talk) was it's totality - meaning ALL interaction of any module with SOC was through the NOC. No out of band and no dedicated interrupt wires. All messaging between servers and clients was done by NOC.
-In my AXI NOC we may utilize the READ channel of AXI to convey messages from slaves back to masters.  Thus replacing ad-hoc interrupt contraptions.
+- One of the advantages and key features of ring based (no masters nor slaves, but all modules can listen and talk) was it's totality - meaning ALL interaction of any module with SOC was through the NOC. No out of band and no dedicated interrupt wires. All messaging between servers and clients was done by NOC.
+  In my AXI NOC we may utilize the READ channel of AXI to convey messages from slaves back to masters.  Thus replacing ad-hoc interrupt contraptions.
 
-Another painful aspect is error reporting. In AXI, errors (bresp and rresp) come back to a hapless master. Usually there is no idea what to do with them. In best case, it just raises interrupt.
-In RINGS, All errors arrived to a predefined  master, called the ANCHOR.  There was one place to deal with system errors. The error messages arrived at fifo attached to the ANCHOR and it could deal with them at it's own pace. Similar idea is good to implement here.
+- Another painful aspect is error reporting. In AXI, errors (bresp and rresp) come back to a hapless master. Usually there is no idea what to do with them. In best case, it just raises interrupt.
+  In RINGS, All errors arrived to a predefined  master, called the ANCHOR.  There was one place to deal with system errors. The error messages arrived at fifo attached to the ANCHOR and it could deal with them at it's own pace. Similar idea is good to implement here.
 
-Adding SER-DES option.  Serialize AXI bus to any requested wire width and reconstruct it on the other end..
+- Adding SER-DES option.  Serialize AXI bus to any requested wire width and reconstruct it on the other end..
+
+- Adding Safety features:
+
+1. Policeman. Keeping traffic legal.
+2. ECC options. Not trivial
+3. Encryption / Decryption on critical links
+
+
 
 
 
@@ -124,6 +132,6 @@ Adding SER-DES option.  Serialize AXI bus to any requested wire width and recons
 
 1. Currently, Fixed priority in service. Will be made round robin or something.
 2. Some modules are in development stage:  clock and width changers.
-3. Not enough verification. Ongoing.
+3. Not enough verification. Ongoing. But overall it is operational.
 4. Not going to add AHB interfaces. You probably have them already. If not, good for You.
 5. Not going to build it in VHDL. Enough weapons as it is.
