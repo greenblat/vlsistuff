@@ -112,7 +112,7 @@ class axiMasterClass:
                 return
             Datas = list(map(eval,wrds[2:]))
             if Addr in self.RDATAS:
-                Exps = self.RDATAS.pop(Addr)
+                Exps = self.RDATAS[Addr]
                 while (Datas!=[])and(Exps!=[]):
                     ExpData = Exps.pop(0)
                     ActData = Datas.pop(0)
@@ -271,7 +271,7 @@ class axiMasterClass:
             self.RDATAS[Addr] = [rdatax]
         if rlast == 1:
             self.AREADS.pop(0)
-        logs.log_info('ADDRDATAS %s   %s' % (hex(Addr), list(map(hex,self.RDATAS.keys()))))
+        logs.log_info('ADDRDATAS %s len=%d  %s' % (hex(Addr), len(self.RDATAS[Addr]),list(map(hex,self.RDATAS.keys()))))
 
     def runQueue(self):
 #        print('\n\n\n\ 0 RUNQ',self.Queue)

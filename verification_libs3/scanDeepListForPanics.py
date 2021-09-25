@@ -46,7 +46,7 @@ def work2(File):
             Net = wrds[1]
             ww = Net.split('.')
             Panic = ww[-1]
-            if logs.startsWith(Panic,'panic'):
+            if Panic.startswith('panic'):
                 Fout.write('    panics += monitorPanic("%s.%s")\n'%(Path,Panic))
         elif (wrds[0]=='arr:'):
             pass
@@ -59,7 +59,7 @@ import veri
 def monitorPanic(Net):
     Val = logs.peek(Net)
     if Val!=0:
-        logs.log_error('monitorPanic activated on %s'%Net)
+        logs.log_error('PANIC activated on %s %s'%(Net,veri.peek(Net)))
         return 1
     return 0
 

@@ -25,6 +25,7 @@ def help_main(Env):
     look_for_loops(Env.Current)
     look_for_short_loops(Env.Current)
     check_cases(Env.Current)
+    logs.report_errx(Env.Current.Module)
 
 def load_sons(Env):
     Current = Env.Current
@@ -84,7 +85,7 @@ def create_drive_table(Current):
         Dsts = extract_sigs(Dst1)
         Srcs = extract_sigs(Src1)
         if not compatible_width(Dst1,Src1,Current):
-            logs.log_err('diff width hard_assign (%d) != (%d)  %s <= %s ;'%(get_width(Dst1,Current),get_width(Src1,Current),pexpr(Dst1),pexpr(Src1)))
+            logs.log_errx(1,'diff width hard_assign (%d) != (%d)  %s <= %s ;'%(get_width(Dst1,Current),get_width(Src1,Current),pexpr(Dst1),pexpr(Src1)))
         for Dst in Dsts:
             for Src in Srcs:
                  add_drives(Dst,Src)
@@ -112,7 +113,7 @@ def drive_assist1(Current,Item,Params,Stack):
             for Src in Srcs+Stcks:
                  add_drives(Dst,Src)
     if Item[0] == '<=':
-        logs.log_error('"<=" assign in combi always %s' % str(Item))
+        logs.log_errx(113,'"<=" assign in combi always %s' % str(Item))
         
 
 
@@ -128,7 +129,7 @@ def drive_assist2(Current,Item,Params,Stack):
             for Src in Srcs+Stcks:
                 add_edged_drives(Dst,Src)
     if Item[0] == '=':
-        logs.log_error('"=" assign in edged always %s' % str(Item))
+        logs.log_errx(112,'"=" assign in edged always %s' % str(Item))
         
 
 
@@ -156,7 +157,7 @@ def look_for_short_loops(Current):
             if Src in TableDrives:
                 List = TableDrives[Src]
                 if Dst in List:
-                    logs.log_err('SHORT LOOP %s %s (through edged always)'%(Dst,Src))
+                    logs.log_errx(100,'SHORT LOOP %s %s (through edged always)'%(Dst,Src))
                     
 
 
@@ -173,7 +174,7 @@ def look_for_loops(Current):
         if Str not in LoopDir:
             LoopDir[Str]=Loop2
     for Str in LoopDir:
-        logs.log_err('LOOP %s'%str(Str))
+        logs.log_errx(101,'LOOP %s'%str(Str))
 
 
 def get_just_loop(Loop):
@@ -251,15 +252,15 @@ def check_usage_driven(Current):
             UU += 1
 
         if (len(DD)>1):
-           logs.log_err('net %s (%s) is overdriven %s '%(Net,Dir,DD))
+           logs.log_errx(2,'net %s (%s) is overdriven %s '%(Net,Dir,DD))
         if (len(DD)>0)and(UU==0)and(Net not in Mentioned):
-           logs.log_err('net %s (%s) is driven, but not used '%(Net,Dir))
+           logs.log_errx(3,'net %s (%s) is driven, but not used '%(Net,Dir))
         if (DD==[])and(UU>0)and(Net not in Mentioned):
-           logs.log_err('net %s (%s) is not driven, but used '%(Net,Dir))
+           logs.log_errx(102,'net %s (%s) is not driven, but used '%(Net,Dir))
         if (DD==[])and(UU==0):
-           logs.log_err('net %s (%s) is neither driven, nor used '%(Net,Dir))
+           logs.log_errx(4,'net %s (%s) is neither driven, nor used '%(Net,Dir))
         if (Net in Mentioned)and(DD==[])and(UU==0):
-           logs.log_err('net %s (%s) dangles from instance '%(Net,Dir))
+           logs.log_errx(5,'net %s (%s) dangles from instance '%(Net,Dir))
 
 
 
@@ -295,7 +296,7 @@ def checker1(Current,Item,Params,Stack):
         check_double_dst(Current,Item[1],Params[2])
         check_dst_expr(Current,Item[1])
         check_src_expr(Current,Item[2])
-        logs.log_err('wrong assign %s prms=%s item=%s'%(Item,Params,Item))
+        logs.log_errx(8,'wrong assign %s prms=%s item=%s'%(Item,Params,Item))
     elif Item[0] == Params[0]:
         Dst=Item[1]
         Src=Item[2]
@@ -303,7 +304,7 @@ def checker1(Current,Item,Params,Stack):
         check_dst_expr(Current,Dst)
         check_src_expr(Current,Src)
         if not compatible_width(Dst,Src,Current):
-            logs.log_err('diff width soft_assign (%s!=%s) %s   <= %s;'%(get_width(Dst,Current),get_width(Src,Current),pexpr(Dst),pexpr(Src)))
+            logs.log_errx(7,'diff width soft_assign (%s!=%s) %s   <= %s;'%(get_width(Dst,Current),get_width(Src,Current),pexpr(Dst),pexpr(Src)))
 #        if (Item[0]=='<='):
 #            make_sure_simple_src(Current,Item)
         
@@ -318,7 +319,7 @@ def make_sure_simple_src(Current,Item):
             LL = map(simple_curly,Src[1:])
             if not (False in LL):
                 return
-    logs.log_err('<= assign is not simple %s'%(Item))
+    logs.log_errx(10,'<= assign is not simple %s'%(Item))
 
 def simple_curly(Item):
     if type(Item)is list:
@@ -340,7 +341,7 @@ def check_double_dst(Current,Dst,AlwInd):
         for Sig in Dsts:
             if Sig in AlwaysAssign:
                 if AlwInd!=AlwaysAssign[Sig]:
-                    logs.log_err('var %s assigned in two alwayses'%Sig)
+                    logs.log_errx(103,'var %s assigned in two alwayses'%Sig)
             else:
                 AlwaysAssign[Sig]=AlwInd
 
@@ -357,11 +358,11 @@ def check_dst_expr(Current,Item,MustBeReg=True):
             Data = Current.nets[Item]
             incr_driven(Item,'rtl')
             if MustBeReg and (Data[0] not in ['reg','integer','output reg','output wire']):
-                logs.log_err('check dst of %s failed on bad kind %s'%(Item,Data[0]))
+                logs.log_errx(104,'check dst of %s failed on bad kind %s'%(Item,Data[0]))
             if not MustBeReg and (Data[0] not in ['wire','output','output wire']):
-                logs.log_err('check dst of %s failed on bad kind %s'%(Item,Data[0]))
+                logs.log_errx(104,'check dst of %s failed on bad kind %s'%(Item,Data[0]))
         else:
-            logs.log_err('check dst failed on net %s'%(Item))
+            logs.log_errx(11,'check dst failed on net %s'%(Item))
         return
     if type(Item) is list:
         if Item[0]=='curly':
@@ -377,13 +378,13 @@ def check_dst_expr(Current,Item,MustBeReg=True):
             incr_driven(Bus,'subbus')
             Wid = Item[2]
             if Bus not in Current.nets:
-                logs.log_err('check dst failed on  bus %s'%(Bus))
+                logs.log_errx(11,'check dst failed on  bus %s'%(Bus))
             Data = Current.nets[Bus]
             check_bus_usage(Current,Bus,Wid)
             if MustBeReg and (Data[0] not in ['reg','integer','output reg','output wire']):
-                logs.log_err('check dst of %s failed on bad kind %s'%(Bus,Data[0]))
+                logs.log_errx(104,'check dst of %s failed on bad kind %s'%(Bus,Data[0]))
             if not MustBeReg and (Data[0] not in ['wire','output','output wire']):
-                logs.log_err('check dst of %s failed on bad kind %s'%(Bus,Data[0]))
+                logs.log_errx(104,'check dst of %s failed on bad kind %s'%(Bus,Data[0]))
             return
         if Item[0]=='subbit':
             Bus = Item[1]
@@ -393,13 +394,13 @@ def check_dst_expr(Current,Item,MustBeReg=True):
                 Data = Current.nets[Bus]
                 check_bus_usage(Current,Bus,(Wid,Wid))
                 if MustBeReg and (Data[0] not in ['reg','integer','output reg','output wire']):
-                    logs.log_err('check dst of %s failed on bad kind %s'%(Bus,Data[0]))
+                    logs.log_errx(104,'check dst of %s failed on bad kind %s'%(Bus,Data[0]))
                 if not MustBeReg and (Data[0] not in ['wire','output','output wire']):
-                    logs.log_err('check dst of %s failed on bad kind %s'%(Bus,Data[0]))
+                    logs.log_errx(104,'check dst of %s failed on bad kind %s'%(Bus,Data[0]))
                 return
             if (Bus in Current.mems):
                 return
-            logs.log_err('check dst failed on  bus "%s"'%(Bus))
+            logs.log_errx(11,'check dst failed on  bus "%s"'%(Bus))
             return
 
     logs.log_err('check dst untreated %s'%(str(Item)))
@@ -481,7 +482,7 @@ def check_src_expr(Current,Item):
         if Item[0] in ['"']:
             return
         if (Item not in Current.nets)and(Item not in Current.parameters)and(Item not in Current.localparams):
-            logs.log_err('item %s not defined'%(str(Item)))
+            logs.log_errx(20,'item %s not defined'%(str(Item)))
         Used[Item]=1
         return
     elif (type(Item)is int):
@@ -492,14 +493,14 @@ def check_bus_usage(Current,Bus,Wid,Where=0):
     if Bus in Current.mems:
         return
     if Bus not in Current.nets:
-        logs.log_err('check_bus_usage failed on %s not defined (line=%d)'%(Bus,Where))
+        logs.log_errx(106,'check_bus_usage failed on %s not defined (line=%d)'%(Bus,Where))
         return
 
     Data = Current.nets[Bus]
     Wid1 = Data[1]
     (H,L)=Wid
     if type(Wid1)is not tuple:
-        logs.log_err('check_bus_usage failed on %s[%s:%s]'%(Bus,Wid[0],Wid[1]))
+        logs.log_errx(107,'check_bus_usage failed on %s[%s:%s]'%(Bus,Wid[0],Wid[1]))
     else:
         if Wid1[0]=='double':
             (H1,L1)=Wid1[1]
@@ -514,14 +515,14 @@ def check_bus_usage(Current,Bus,Wid,Where=0):
     HH1 = compute1(H1,Current)
     LL1 = compute1(L1,Current)
     if (type(HH1) is int)and(type(HH)is int)and(HH>HH1):
-        logs.log_err('check_bus_usage.0 failed on %s[%s:%s]'%(Bus,Wid[0],Wid[1]))
+        logs.log_errx(108,'check_bus_usage.0 failed on %s[%s:%s]'%(Bus,Wid[0],Wid[1]))
     if (type(HH1) is int)and(type(LL)is int)and(LL>HH1):
-        logs.log_err('check_bus_usage.1 failed on %s[%s:%s]'%(Bus,Wid[0],Wid[1]))
+        logs.log_errx(109,'check_bus_usage.1 failed on %s[%s:%s]'%(Bus,Wid[0],Wid[1]))
 
     if (type(LL1) is int)and(type(LL)is int)and(LL<LL1):
-        logs.log_err('check_bus_usage.2 failed on %s[%s:%s]'%(Bus,Wid[0],Wid[1]))
+        logs.log_errx(110,'check_bus_usage.2 failed on %s[%s:%s]'%(Bus,Wid[0],Wid[1]))
     if (type(LL1) is int)and(type(HH)is int)and(HH<LL1):
-        logs.log_err('check_bus_usage.3 failed on %s[%s:%s]'%(Bus,Wid[0],Wid[1]))
+        logs.log_errx(111,'check_bus_usage.3 failed on %s[%s:%s]'%(Bus,Wid[0],Wid[1]))
 
 
 def check_cases(Current):
@@ -552,11 +553,11 @@ def check_instance_connections(Env,Current):
             Ins.sort()
             for Ext in Exts:
                 if Ext not in Ins:
-                    logs.log_err('pin %s of %s %s is not connected in %s'%(Ext,Inst,Type,Current.Module))
+                    logs.log_errx(21,'pin %s of %s %s is not connected in %s'%(Ext,Inst,Type,Current.Module))
 
             for In in Ins:
                 if In not in Exts:
-                    logs.log_err('connection to pin=%s of %s %s is not signal in  module=%s'%(In,Inst,Type,Current.Module))
+                    logs.log_errx(113,'connection to pin=%s of %s %s is not signal in  module=%s'%(In,Inst,Type,Current.Module))
 
 
 

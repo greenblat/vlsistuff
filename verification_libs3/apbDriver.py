@@ -263,6 +263,11 @@ class apbDriver:
             if List[0][0]=='lock':
                 if (apbDriver.bus_locked) and (apbDriver.bus_locked!=self):  return
         
+        if self.seq0==[]:
+            self.force(self.rename('psel'),0)
+            self.force(self.rename('pwrite'),0)
+            self.force(self.rename('penable'),0)
+            
         if self.seq0!=[]:
             AA0 = self.seq0[0][0]
             if (len(AA0)==3)and(AA0[0]=='conditional'):

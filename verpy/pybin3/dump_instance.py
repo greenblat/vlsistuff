@@ -56,6 +56,7 @@ PREPARE_STRING = '''
     /bin/rm db0.pickle
     /bin/rm yacc.log
     /bin/rm database.dump
+    /bin/rm xyz*
 
 '''
 

@@ -80,6 +80,20 @@ def log_fatal(Text,Which=0):
 
 def log_error(Text,Which=0,Tb=True,Pstack=False):
     log_err(Text,Which,Tb,Pstack)
+ERRS = {}
+def log_errx(Kind,Text,Which=0,Tb=True,Pstack=False):
+    if Kind not in ERRS:
+        ERRS[Kind] = []
+    ERRS[Kind].append(Text)
+def report_errx(Module):
+    Keys = list(ERRS.keys())
+    Keys.sort()
+    Keys.reverse()
+    for Key in Keys:
+        List = ERRS[Key]
+        for Txt in List:
+            log_err('___E%03d  %s    @%s' % (Key,Txt,Module))
+    
 def log_err(Text,Which=0,Tb=True,Pstack=False):
     global Errors,printed_already
     if (not Flogs[Which]):
