@@ -1557,7 +1557,7 @@ def use_keystroke(Uni,Ord,XY):
         if ('wiring' in Glbs.contexts): 
             (InstPin0,P0,List)=get_context('wiring')
             InstPin1,P1 = Glbs.details[Root].select_pin((X,Y))
-            print('>>>>>',InstPin1,P1,"   ",InstPin0,'p0',P0,'list',List)
+#            print('>>>>>',InstPin1,P1,"   ",InstPin0,'p0',P0,'list',List)
             if (InstPin1):
                 wName = Glbs.wireName()
                 while wName in Glbs.details[Root].wires:
@@ -1596,7 +1596,14 @@ def use_keystroke(Uni,Ord,XY):
         if 'wiring' in Glbs.contexts:
             (InstPin,Point,List)=get_context('wiring')
             Psch = screen2schem((X,Y))
-            set_context('wiring',(InstPin,Point,List+[Psch]))
+            Inst = Glbs.details[Root].invent_inst_name('node')
+            wName = Glbs.wireName()
+            while wName in Glbs.details[Root].wires:
+                wName = Glbs.wireName()
+            Glbs.details[Root].add_wire(wName,InstPin,Inst,[Point]+List+[Psch])
+            Glbs.details[Root].add_instance('node',Inst,Psch)
+            Glbs.details[Root].touched(True)
+            set_context('wiring',(Inst,Psch,[]))
 
     elif (Uni=='p'):
         Root=get_context('root')
