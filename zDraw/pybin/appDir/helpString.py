@@ -4,19 +4,17 @@
 
 helpString = '''
     letters on screen (coordinate under mouse):
-        Q   - quit now.
-        C   - take snapshot
         t   -  center display under mouse
         m   - start move instance under mouse, it will be moved to where "e" will be pressed.
         a   - add instance (from list cmd "add nand2 nor2 input output ...)
         p   - add param (from list cmd "params name=xxx size=n2,p3)
         w   - start wire from nearest pin 
-        .   - make bend in wire being added
+        .   - make bend in wire being added (it adds node and continues).
         d   - delete whatever under mouse.
         e   - end (end wire or end move or end deleting)
         q   - abort current action (moving,wiring,deleting,grouping)
         c   - copy instance under mouse
-        s   - add new instance from copying.
+        s   - add new instance from copying (paste).
         arrows (right,left,up,down) - move instance under mouse a little bit
         r,R  - rotate instance
         f,F  - flip instance
@@ -29,8 +27,10 @@ helpString = '''
         T    - add text geometry. the text comes from "add aaabbbbccc" typed in terminal window before.
         D    - go down in hierarchy. point the mouse to subcircuit instance.
         U    - get back up. return from "D" 
+        C   - take screen snapshot and save it in PNG file.
+        Q   - (temporarily out of order) quit now
 
-        pressing and moving mouse while holding it down - will drag selected or group 
+        (removed on purpose) pressing and moving mouse while holding it down - will drag selected or group 
 
     commands in text window (original terminal):
         V     - flip:  fonts drawn vs fonts system
@@ -49,6 +49,7 @@ helpString = '''
        print : creates svg and ps images
        dump : dump verilog
        verilog : dump verilog
+       rtl : dump rtl verilog
        spice : dump spice and picture (.zpic)
        quit:  just quit
        sys <shell command>  :  execute shell command , like "open screenshot.ps" or something.

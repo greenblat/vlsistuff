@@ -27,6 +27,10 @@ class cmdxClass(cmd.Cmd):
         stopRunning()
         sys.exit()
         return True 
+    def do_help(self,aaa):
+        print(helpString.helpString)
+
+
     def emptyline(self):
         print('emptyline')
         return False

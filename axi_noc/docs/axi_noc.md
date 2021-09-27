@@ -135,3 +135,37 @@ there is directory called axi_noc. All is (will be shortly)  there.  Including b
 3. Not enough verification. Ongoing. But overall it is operational.
 4. Not going to add AHB interfaces. You probably have them already. If not, good for You.
 5. Not going to build it in VHDL. Enough weapons as it is.
+
+## Issues and Objections (thanks to Rony)
+
+As with any new idea, there are level one objects and issues. Here is the first batch (feel free to raise more)
+
+1. Compliance to AXI.   Answer: Verification.  And keep in mind, commercial solutions also have bugs. Especially when You configure them.   The extra bonus You get using Arteris/Sonics/netspeed/Others:  someone to blame.  Hefty price to pay.
+
+2. Do you provide a custom model to simulate high level behavior?
+
+   QOS is for losers. Do You do something with that, other than finding hapless junior to play with it?
+
+3. Timing closure 
+
+   Serious issue. All "LEGO" bricks cut combi paths. Either inputs or outputs of all modules are flops. Memories are not part of the project. Synchronizers dont cause timing problems. 
+
+4. Several NOCs in one chip
+
+    All axiNoc interfaces are AXI. So no problem connecting several "pages" together.  If another NOC is present - same AXI connection.
+
+5. Custom features : ECC, Firewalls and setera.
+
+   The idea is to integrate them in the package. 
+
+6. DFT?
+
+   what about it? What help other vendors provide?
+
+7. Risk in using new axiNoc.
+
+   Every ASIC endevour has high risks. Using easy to verify and debug axiNoc doesn't contribute significantly to risk, but usually reduces duration. Using commercial solutions carries same risk because of complexity of configuration and opaquiness of the resulting RTL.
+
+8. Industry standards.
+
+   Love this one. Accelera standards usually stink. The reason they are so popular is because they are popular and  clueless management  buy into them.
