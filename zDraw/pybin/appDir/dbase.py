@@ -1,6 +1,6 @@
 
 
-import os,sys,math
+import os,sys,math,copy
 from renders import screen2schem,schem2screen
 
 from drawVectorText import make_text_vectors
@@ -29,7 +29,8 @@ def set_context(Param,Value):
     if (Param=='state')and(Value=='idle'):
         Glbs.set_context('banner',Glbs.Banner)
 def unset_context(Param):
-    Glbs.contexts.pop(Param)
+    if Param in Glbs.contexts:
+        Glbs.contexts.pop(Param)
 
 from renders import matrix_inverse
 from schem import PICTURES
@@ -644,6 +645,25 @@ class DetailClass:
         self.matrix=False
         self.is_touched=False
         self.drawBoxes=False
+
+    def copy(self):
+        Copy = DetailClass(self.Module)
+        Copy.bbox0 = self.bbox0
+        Copy.matrix = self.matrix
+        Copy.is_touched = False
+        Copy.drawBoxes =  False
+        Copy.params = copy.deepcopy(self.params)
+        Copy.wires = copy.deepcopy(self.wires)
+        Copy.instances = copy.deepcopy(self.instances)
+        Copy.geoms = copy.deepcopy(self.geoms)
+        return Copy
+
+    def isDiff(self,Other):
+        if self.params != Other.params: return True
+        if self.wires != Other.wires: return True
+        if self.instances != Other.instances: return True
+        if self.geoms != Other.geoms: return True
+        return False
 
     def touched(self,What):
         self.is_touched=What
@@ -1288,6 +1308,7 @@ def use_keystroke(Uni,Ord,XY):
                 
             Glbs.details[Root].move_group(List,Dx,Dy)
             Glbs.details[Root].touched(True)
+            Glbs.undoValid = True
             return
 
 
@@ -1297,12 +1318,15 @@ def use_keystroke(Uni,Ord,XY):
             if (Who=='instance'):
                 Glbs.details[Root].instances[Inst].move(Dx,Dy)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             elif (Who=='geom'):
                 Glbs.details[Root].geoms[Inst].move(Dx,Dy)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             elif (Who=='param'):
                 Glbs.details[Root].params[Inst].move(Dx,Dy)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             else:
                 log_error('dont know(2) to move who="%s" inst="%s"'%(Who,Inst))
     elif (Ord<128)and(((len(str(Uni))==1)and(str(Uni) in '123456789'))or(Uni in ['Z','z'])):
@@ -1340,12 +1364,15 @@ def use_keystroke(Uni,Ord,XY):
             if (Who=='instance'):
                 Glbs.details[Root].instances[Inst].rotate(Uni)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             elif (Who=='geom'):
                 Glbs.details[Root].geoms[Inst].rotate(Uni)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             elif (Who=='param'):
                 Glbs.details[Root].params[Inst].rotate(Uni)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             else:
                 print('dont know to rotate "%s"'%Who)
         else:
@@ -1380,12 +1407,14 @@ def use_keystroke(Uni,Ord,XY):
 
 
             Glbs.details[Root].touched(True)
+            Glbs.undoValid = True
             unset_context('grouping')
         elif ('copying' in Glbs.contexts):
             What,Info=get_context('copying')
             if What=='type':
                 Type,From=Info
                 duplicate_inst(From,PP)
+                Glbs.undoValid = True
             elif What=='param':
                 (Who,Inst)= select_object((X,Y))
                 if Who=='instance':
@@ -1398,6 +1427,7 @@ def use_keystroke(Uni,Ord,XY):
                     Xx = Nx + (Px-Ox)
                     Yy = Ny + (Py-Oy)
                     Glbs.details[Root].add_param(Inst,Prm.Param,Prm.Value,(Xx,Yy),Prm.Rot)
+                    Glbs.undoValid = True
     elif (Uni=='B'):
         Glbs.details[Root].drawBoxes = not Glbs.details[Root].drawBoxes
         Glbs.graphicsChanged=True
@@ -1414,7 +1444,32 @@ def use_keystroke(Uni,Ord,XY):
         if Glbs.loadStack!=[]:
             Root =  Glbs.loadStack.pop(-1)
             load_schematics(Root)
+    elif (Uni=='X'):    # undo
+        if len(Glbs.undoStack)>1:
+            set_context('state','idle')
+            unset_context('moving')
+            unset_context('deleting') 
+            unset_context('grouping')
+            Glbs.redoStack.append(Glbs.details[Root].copy())
+            Glbs.undoStack.pop(-1)
+            Glbs.details[Root] = Glbs.undoStack.pop(-1)
+            Glbs.details[Root].is_touched = False
+            Glbs.graphicsChanged=True
+        else: 
+            log_info('at the first change %s' % Root)
             
+    elif (Uni=='Y'):    # redo
+        if len(Glbs.redoStack)>1:
+            set_context('state','idle')
+            unset_context('moving')
+            unset_context('deleting') 
+            unset_context('grouping')
+            Glbs.undoStack.append(Glbs.details[Root].copy())
+            Glbs.details[Root] = Glbs.redoStack.pop(-1)
+            Glbs.details[Root].is_touched = False
+            Glbs.graphicsChanged=True
+        else: 
+            log_info('at the first change %s' % Root)
         
     elif (Uni=='m'):
         if 'grouping' in Glbs.contexts:
@@ -1522,6 +1577,7 @@ def use_keystroke(Uni,Ord,XY):
             if (What=='instance'):
                 Glbs.details[Root].instances[Who].move(PP[0]-WasX,PP[1]-WasY)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
                 Glbs.details[Root].instances[Who].make_selected(False)
 #                for Key in Glbs.details[Root].params:
 #                    if Glbs.details[Root].params[Key].Owner==Who:
@@ -1531,10 +1587,12 @@ def use_keystroke(Uni,Ord,XY):
                 Glbs.details[Root].params[Who].move(PP[0]-WasX,PP[1]-WasY)
                 Glbs.details[Root].params[Who].make_selected(False)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             elif (What=='geom'):
                 Glbs.details[Root].geoms[Who].move(PP[0]-WasX,PP[1]-WasY)
                 Glbs.details[Root].geoms[Who].make_selected(False)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             unset_context('moving')
         if 'deleting' in Glbs.contexts:
             (What,Who)=get_context('deleting')
@@ -1542,15 +1600,19 @@ def use_keystroke(Uni,Ord,XY):
                 Glbs.details[Root].instances.pop(Who)
                 Glbs.details[Root].wipe_out_instance(Who)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             elif (What=='param'):
                 Glbs.details[Root].params.pop(Who)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             elif (What=='wire'):
                 Glbs.details[Root].wires.pop(Who)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             elif (What=='geom'):
                 Glbs.details[Root].geoms.pop(Who)
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             elif(Who):
                 print('dont know to delete "%s"'%Who)
             unset_context('deleting')
@@ -1565,8 +1627,10 @@ def use_keystroke(Uni,Ord,XY):
                     
                 Glbs.details[Root].add_wire(wName,InstPin0,InstPin1,[P0]+List+[P1])
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             print('end wiring',InstPin1,P1,InstPin0,P0,List)
             Glbs.details[Root].touched(True)
+            Glbs.undoValid = True
             Glbs.graphicsChanged=True
             unset_context('wiring')
         if ('grouping' in Glbs.contexts): 
@@ -1592,6 +1656,7 @@ def use_keystroke(Uni,Ord,XY):
         Inst = Glbs.details[Root].invent_inst_name('node')
         Glbs.details[Root].add_instance('node',Inst,Psch)
         Glbs.details[Root].touched(True)
+        Glbs.undoValid = True
     elif (Uni=='.'):
         if 'wiring' in Glbs.contexts:
             (InstPin,Point,List)=get_context('wiring')
@@ -1604,6 +1669,7 @@ def use_keystroke(Uni,Ord,XY):
             Glbs.details[Root].add_instance('node',Inst,Psch)
             Glbs.details[Root].touched(True)
             set_context('wiring',(Inst,Psch,[]))
+            Glbs.undoValid = True
 
     elif (Uni=='p'):
         Root=get_context('root')
@@ -1614,6 +1680,7 @@ def use_keystroke(Uni,Ord,XY):
                 Value = Glbs.params_queue.pop(0)
                 Glbs.details[Root].add_param(Inst,Glbs.paramName,Value,(Psch[0]+2,Psch[1]+2))
                 Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
             else:
                 print('add params to queue first')
 
@@ -1622,6 +1689,7 @@ def use_keystroke(Uni,Ord,XY):
 
     elif (Uni=='T'):
         put_schem_text(X,Y)
+        Glbs.undoValid = True
     elif (Uni=='G'):
         if 'moving' in Glbs.contexts:
             log_error('no grouping while in moving. press "q" first.')
@@ -1652,6 +1720,7 @@ def use_keystroke(Uni,Ord,XY):
         Glbs.details[Root].save(File)
         File.close()
         Glbs.details[Root].touched(False)
+        Glbs.undoValid = False
 
     elif (Uni in ['l']):
         (Who,Inst)= select_object((X,Y))
@@ -1700,6 +1769,7 @@ def use_keystroke(Uni,Ord,XY):
         Y+=0.5
         Glbs.details[Root].touched(True)
         Glbs.details[Root].bbox0=False
+        Glbs.undoValid = True
     elif (Uni=='a'):
         if len(Glbs.adding_queue)==0:
             print('add types (pictures) names to queue first')
@@ -1733,6 +1803,7 @@ def use_keystroke(Uni,Ord,XY):
                 Y+=0.5
                 Glbs.details[Root].touched(True)
                 Glbs.details[Root].bbox0=False
+                Glbs.undoValid = True
             else:
                 log_error('unknown picture type = %s cannot instance'%(What))
                 bad=True

@@ -75,6 +75,9 @@ class GlobalsClass:
         self.loadStack=[]
         self.wratio = 1.0
         self.hratio = 1.0
+        self.undoStack = []
+        self.redoStack = []
+        self.undoValid = False
 
     def wireName(self):
         self.wireNumName += 1
@@ -336,7 +339,6 @@ def on_mouse_move(XY):
     X,Y = XY
     dbase.use_mousemove(X,Y)
     Glbs.graphicsChanged=True
-#    on_draw()
 
 def on_resize(width,height):
     Glbs.width=width
@@ -347,7 +349,6 @@ def on_resize(width,height):
     Glbs.set_context('width',width)
     Glbs.set_context('height',height)
     Glbs.graphicsChanged=True
-#    on_draw()
 
 def update_graphics():
 #    glViewport(0,0,Glbs.width,Glbs.height)
@@ -385,20 +386,19 @@ def on_draw():
     if not Glbs.graphicsChanged:
         return
     update_graphics()
+    Root=Glbs.get_context('root')
+    if (Glbs.undoValid):  #  or (Glbs.undoStack == []) or (Glbs.details[Root].isDiff(Glbs.undoStack[-1])):
+        print('>>>',len(Glbs.undoStack))
+        Glbs.undoStack.append(Glbs.details[Root].copy())
+        Glbs.undoValid = False
     initFun()
     Screen = Glbs.get_context('screen')
     Screen.fill((255,255,255))
-#    pygameGeoms.draw_frect(4,4,Glbs.width-4,Glbs.height-4,'yellow')
     WW,HH = int(Glbs.width*Glbs.wratio),int(Glbs.height*Glbs.hratio)
-#    pygameGeoms.draw_label(Glbs.get_context('banner',Glbs.Banner),(WW+Glbs.panelOffset)/2,HH-15,'magenta','center',13)
-#    pygameGeoms.draw_horizontal(0,WW,HH-30,'magenta')
     pygameGeoms.draw_label(Glbs.get_context('banner',Glbs.Banner),200,15,'magenta','center',13)
     pygameGeoms.draw_horizontal(0,WW,20,'magenta')
     pygameGeoms.oglcolor('black')
-#    glutSolidSphere(200.0,20,30)
     dbase.pdraw_current()
-#    pygame.display.flip()
-#    glFlush()
 
 
 
@@ -488,6 +488,8 @@ def use_command_wrds(wrds):
         Glbs.set_context('root',Root)
         Glbs.details[Root] = dbase.DetailClass(Root)
         Glbs.graphicsChanged=True
+        Glbs.undoStack = []
+        Glbs.redoStack = []
     elif 'load' in wrds[0]:
         if len(wrds)==1:
             print('loaded schematics:  %s'%str(list(Glbs.details.keys())))
@@ -591,10 +593,14 @@ def load_schematics(newRoot):
     if newRoot in List:
         Glbs.set_context('root',newRoot) 
         Glbs.graphicsChanged=True
+        Glbs.undoStack = []
+        Glbs.redoStack = []
     else:
         Fname = figure_out_the_file(newRoot)
         if Fname:
             dbase.load_dbase_file(Fname)
+            Glbs.undoStack = []
+            Glbs.redoStack = []
         else:
             dbase.log_error('file "%s" cant be read'%newRoot)
             return
@@ -611,7 +617,6 @@ def on_mouse_press(button, modifiers,xy):
     Glbs.Msy=y
 #    Glbs.graphicsChanged=True
     dbase.use_mousedown(x,y)
-#    on_draw()
 
 def on_key_press(Chr,Ord,xy):
 #    if (Chr=='Q'):   # Q key
@@ -620,7 +625,6 @@ def on_key_press(Chr,Ord,xy):
         dbase.log_info(helpString.helpString)
     else:
         dbase.use_keystroke(Chr,Ord,xy)
-#    on_draw()
 
 def on_special_press(Chr,x,y):
     dbase.use_keystroke(Chr,x,y)

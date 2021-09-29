@@ -34,6 +34,15 @@ class axiSlaveClass:
         self.WAITWRITE = 0
         self.busWidth = 8   # in bytes
 
+    def busy(self):
+        if self.arqueue!=[]: return True
+        if self.awqueue!=[]: return True
+        if self.rqueue!=[]: return True
+        if self.bqueue!=[]: return True
+        if self.bqueue0!=[]: return True
+
+        return False
+
     def peek(self,Sig):
         if self.prefix!='': Sig = '%s%s'%(self.prefix,Sig)
         if self.suffix!='': Sig = '%s%s'%(Sig,self.suffix)

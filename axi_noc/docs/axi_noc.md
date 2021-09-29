@@ -40,7 +40,7 @@ Complications and restrictions:
 5. AXI in standard has 4 busses without clear job, that 90% of designs don't know what to do with them: size, prot, cache and qos. In this design, instead, i allocate "extras" bus with configurable width. Do with it whatever.
 6. Cut combi paths into manageable timing pieces, layout friendly, latency of clock here and clock there is not a problem. 
 7. QOS is for losers.
-8. Keep it simple, focused. I dont expect it to save the world or make coffee. My cat can do that.
+8. Keep it simple, focused. Debuggable. Humanly understanble.  I dont expect it to save the world or make coffee. My cat can do that.
 <img src="mycat.jpg" alt="mycat" style="zoom:33%;" />
 
 
@@ -131,7 +131,7 @@ there is directory called axi_noc. All is (will be shortly)  there.  Including b
 ## What's missing
 
 1. Currently, Fixed priority in service. Will be made round robin or something.
-2. Some modules are in development stage:  clock and width changers.
+2. Some modules are in development stage and are empty in GIT:  clock and width changers.
 3. Not enough verification. Ongoing. But overall it is operational.
 4. Not going to add AHB interfaces. You probably have them already. If not, good for You.
 5. Not going to build it in VHDL. Enough weapons as it is.
