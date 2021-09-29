@@ -146,7 +146,8 @@ class axiMasterClass:
         self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.AREADS.append((Len,Address,self.Rid))
         self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
-        self.Rid += 1
+        Mask = (1<<len(self.peekbin('arid')))-1
+        self.Rid = Mask & (1+self.Rid)
 
 
     def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
@@ -182,7 +183,8 @@ class axiMasterClass:
             Str += ' wid=%d'%self.Rid
         self.Queue.append(('w',Str))
         logs.log_info('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)))
-        self.Rid += 1
+        Mask = (1<<len(self.peekbin('awid')))-1
+        self.Rid = Mask & (1+self.Rid)
             
     def wait(self,Many):
         self.Queue.append(('this','wait %d'%Many))

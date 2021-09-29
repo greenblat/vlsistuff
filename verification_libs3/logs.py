@@ -115,7 +115,7 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Errors +=1  
-    Flogs[Which].write('@%d: %s %d ___ERROR: %s\n'%(get_cycles(),WHERE,Errors,Text))
+    Flogs[Which].write('@%d: %s %d (%d,%d) ___ERROR: %s\n'%(get_cycles(),WHERE,Errors,Wrongs,Corrects,Text))
     if Pstack:
         traceback.print_stack(file=Flogs[Which])
         
