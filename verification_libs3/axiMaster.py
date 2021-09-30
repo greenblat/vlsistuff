@@ -151,6 +151,9 @@ class axiMasterClass:
 
 
     def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
+        if Len==0: 
+            logs.log_error('axiMaster %s makeWrite got zero length request at addr=%x ' % (self.Name,Address))
+            return
         logs.log_info('makeWrite %x %x %x %x %s' % (Burst,Len,Address,Size,Wdatas))
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))

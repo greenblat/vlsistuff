@@ -296,6 +296,9 @@ class axiSlaveClass:
             if (wlast==1):
 #                logs.log_info('BQUEUE0 %s' % (self.bqueue0))
                 self.bqueue.append(('wait',10))
+                if self.bqueue0 == []:
+                    logs.log_error('BQUEUE0 is empty, more lasts than awvalids')
+                    self.bqueue0.append(0)
                 self.bqueue.append((self.bqueue0.pop(0),0))
 #                logs.log_info('BQUEUE %s' % (self.bqueue))
 
