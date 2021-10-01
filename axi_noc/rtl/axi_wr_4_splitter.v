@@ -113,6 +113,7 @@ syncfifo_sampled #(AWIDE,4) aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(awvalid && a
     ,.dout(active_aw_entry)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_aw_fifo)
 );
 assign awready = !aw_full;
 
@@ -128,6 +129,7 @@ syncfifo_sampled #(DWID+WSTRB+1,8) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid
     ,.dout({work_wdata,work_wstrb,work_wlast})
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_w_fifo)
 );
 assign wready = !w_full;
 
@@ -148,6 +150,7 @@ syncfifo_sampled #(3,8) order_fifo (.clk(clk),.rst_n(rst_n),.vldin(readout_aw_fi
     ,.dout(whosnow)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_order_fifo)
 );
 assign wready = !w_full;
 
@@ -164,7 +167,7 @@ wire b_start = !aw_empty && (work_awaddr[31:30] == 1);
 wire c_start = !aw_empty && (work_awaddr[31:30] == 2);
 wire d_start = !aw_empty && (work_awaddr[31:30] == 3);
 
-assign readout_aw_fifo = !aw_empty && (
+assign readout_aw_fifo = !order_fifo_full && !aw_empty && (
     (a_start && a_awready) || 
     (b_start && b_awready) || 
     (c_start && c_awready) ||
@@ -206,20 +209,21 @@ assign b_bready = !b_full && !a_bvalid;
 assign c_bready = !b_full && !a_bvalid && !b_bvalid;
 assign d_bready = !b_full && !a_bvalid && !b_bvalid && !c_bvalid;
 
-wire [IDWID+2-1:0] b_entry = 
-    a_bvalid  ? {a_bid,a_bresp} :
-    b_bvalid  ? {b_bid,b_bresp} :
-    c_bvalid  ? {c_bid,c_bresp} :
-    d_bvalid  ? {d_bid,d_bresp} :
+wire [IDWID+2+2-1:0] b_entry = 
+    a_bvalid  ? {a_bid,a_bresp,2'b00} :
+    b_bvalid  ? {b_bid,b_bresp,2'b01} :
+    c_bvalid  ? {c_bid,c_bresp,2'b10} :
+    d_bvalid  ? {d_bid,d_bresp,2'b11} :
     0;
     
-
-syncfifo_sampled #(IDWID+2,8) b_fifo (.clk(clk),.rst_n(rst_n)
+wire [1:0] bowner;
+syncfifo_sampled #(IDWID+2+2,8) b_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(b_vldin)
     ,.din(b_entry)
     ,.empty(b_empty),.full(b_full)
-    ,.readout(bready) ,.dout({bid,bresp})
+    ,.readout(bready) ,.dout({bid,bresp,bowner})
     ,.count() ,.softreset(1'b0)
+    ,.overflow(panic_b_fifo)
 );
 assign bvalid = !b_empty;
 
@@ -247,6 +251,28 @@ assign a_awid = work_awid;
 assign b_awid = work_awid;
 assign c_awid = work_awid;
 assign d_awid = work_awid;
+
+
+reg [7:0] a_bcount,b_bcount,c_bcount,d_bcount;
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        a_bcount <= 0;b_bcount <= 0;c_bcount <= 0;d_bcount <= 0;
+    end else begin
+        if (a_awvalid && a_awready && !((bowner==0)&&bvalid&&bready)) a_bcount <= a_bcount+1;
+        else if (!(a_awvalid && a_awready) && ((bowner==0)&&bvalid&&bready)) a_bcount <= a_bcount-1;
+
+        if (b_awvalid && b_awready && !((bowner==1)&&bvalid&&bready)) b_bcount <= b_bcount+1;
+        else if (!(b_awvalid && b_awready) && ((bowner==1)&&bvalid&&bready)) b_bcount <= b_bcount-1;
+
+        if (c_awvalid && c_awready && !((bowner==2)&&bvalid&&bready)) c_bcount <= c_bcount+1;
+        else if (!(c_awvalid && c_awready) && ((bowner==2)&&bvalid&&bready)) c_bcount <= c_bcount-1;
+
+        if (d_awvalid && d_awready && !((bowner==3)&&bvalid&&bready)) d_bcount <= d_bcount+1;
+        else if (!(d_awvalid && d_awready) && ((bowner==3)&&bvalid&&bready)) d_bcount <= d_bcount-1;
+    end
+end
+
+
 
 endmodule
 

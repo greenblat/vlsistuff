@@ -10,7 +10,7 @@ cycles=0
 GIVEUP_TIMEOUT = 10000    # how many cycles to run before retirment. 
 
 
-
+import panics
 import axiMaster
 import axiSlave
 
@@ -100,4 +100,5 @@ def negedge():
         veri.listing('tb','100','deep.list')
     if (cycles>30):
         for Mon in Monitors: Mon.run()
+        panics.monitorPanics()
 

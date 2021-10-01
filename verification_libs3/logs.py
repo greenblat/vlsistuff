@@ -64,7 +64,9 @@ def get_cycles():
         return 0
     else:
         Now =  peek('%scycles'%TB)
-        if Now<0: noCycles=True
+        if (Now<0) and ((not veri) or (veri.stime()>10)): 
+            noCycles=True
+            log_info('NO CYCLES')
     if (finishCycles>0)and(finishCycles<=Now):
         if veri: veri.finish()
         sys.exit()

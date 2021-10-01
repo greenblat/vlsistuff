@@ -148,6 +148,7 @@ syncfifo_sampled #(AWIDE,4) aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(awvalid && a
     ,.dout(active_aw_entry)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_aw_fifo)
 );
 assign awready = !aw_full;
 
@@ -158,6 +159,7 @@ syncfifo_sampled #(4,4) b_fifo (.clk(clk),.rst_n(rst_n),.vldin(run_last && worki
     ,.dout(bid)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_b_fifo)
 );
 assign bresp = 0;
 assign wready = !w_full;
@@ -172,6 +174,7 @@ syncfifo_sampled #(1+8+64,4) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid && wr
     ,.dout({work_wlast,work_wstrb,work_wdata})
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_w_fifo)
 );
 
 assign readout_aw_fifo = ipwrite && work_wlast && working_w;
@@ -186,6 +189,7 @@ syncfifo_sampled #(ARIDE,4) ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(arvalid && a
     ,.dout(active_ar_entry)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_ar_fifo)
 );
 assign arready = !ar_full;
 assign {work_arid,work_arburst,work_arlen,work_araddr} = active_ar_entry;
@@ -198,6 +202,7 @@ syncfifo_sampled #(1+4+64,4) r_fifo (.clk(clk),.rst_n(rst_n),.vldin(pushr)
     ,.dout({rdata,rid,rlast})
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_r_fifo)
 );
 
 

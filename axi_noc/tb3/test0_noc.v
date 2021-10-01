@@ -3097,4 +3097,23 @@ axi_4_splitter split7 (
     ,.d_wvalid(slv15_wvalid)
 
 );
+
+
+reg [1023:0] testname;
+initial begin
+   if ($value$plusargs("LOG=%s",testname)) begin 
+        $python("pymonname()",testname);
+    end  
+
+
+    if ($value$plusargs("SEQ=%s",testname)) begin 
+         $display(" Running SEQ= %s.",testname); 
+    end else begin
+        testname = 0; 
+        $display(" default test");
+    end  
+    #10; 
+    if (testname!=0) $python("sequence()",testname);
+end 
 endmodule
+

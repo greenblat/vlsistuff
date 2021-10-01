@@ -122,7 +122,35 @@ syncfifo_sampled #(AWIDE,4) a_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(a_awvalid 
     ,.dout(a_active_aw_entry)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_a_aw_fifo)
 );
+reg [7:0] a_b_count,b_b_count,c_b_count,d_b_count;
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        a_b_count <= 0;
+        b_b_count <= 0;
+        c_b_count <= 0;
+        d_b_count <= 0;
+    end else begin
+
+        if (a_awvalid && a_awready && !(a_bvalid && a_bready)) a_b_count <= a_b_count + 1;
+        else if (a_bvalid && a_bready && !(a_awvalid && a_awready)) a_b_count <= a_b_count - 1;
+
+        if (awready && readout_b_aw_fifo && !(b_bvalid && b_bready)) b_b_count <= b_b_count + 1;
+        else if (b_bvalid && b_bready && !(awready && readout_b_aw_fifo)) b_b_count <= b_b_count - 1;
+
+        if (awready && readout_c_aw_fifo && !(c_bvalid && c_bready)) c_b_count <= c_b_count + 1;
+        else if (c_bvalid && c_bready && !(awready && readout_c_aw_fifo)) c_b_count <= c_b_count - 1;
+
+        if (awready && readout_d_aw_fifo && !(d_bvalid && d_bready)) d_b_count <= d_b_count + 1;
+        else if (d_bvalid && d_bready && !(awready && readout_d_aw_fifo)) d_b_count <= d_b_count - 1;
+
+    end
+end
+
+
+
+
 syncfifo_sampled #(AWIDE,4) b_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(b_awvalid && b_awready)
     ,.din(new_b_aw_entry)
     ,.empty(b_aw_empty),.full(b_aw_full)
@@ -130,6 +158,7 @@ syncfifo_sampled #(AWIDE,4) b_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(b_awvalid 
     ,.dout(b_active_aw_entry)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_b_aw_fifo)
 );
 syncfifo_sampled #(AWIDE,4) c_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(c_awvalid && c_awready)
     ,.din(new_c_aw_entry)
@@ -138,6 +167,7 @@ syncfifo_sampled #(AWIDE,4) c_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(c_awvalid 
     ,.dout(c_active_aw_entry)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_c_aw_fifo)
 );
 syncfifo_sampled #(AWIDE,4) d_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(d_awvalid && d_awready)
     ,.din(new_d_aw_entry)
@@ -146,6 +176,7 @@ syncfifo_sampled #(AWIDE,4) d_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(d_awvalid 
     ,.dout(d_active_aw_entry)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_d_aw_fifo)
 );
 
 reg working_a,working_b,working_c,working_d;
@@ -202,10 +233,12 @@ assign awid =
     0;
 
 
-assign readout_a_aw_fifo = idling && !a_aw_empty;
-assign readout_b_aw_fifo = idling && a_aw_empty && !b_aw_empty;
-assign readout_c_aw_fifo = idling && a_aw_empty && b_aw_empty && !c_aw_empty;
-assign readout_d_aw_fifo = idling && a_aw_empty && b_aw_empty && c_aw_empty && !d_aw_empty;
+//wire bs_are_full = a_b_full || b_b_full || c_b_full || d_b_full;
+wire bs_are_full = (a_b_count>=8) || b_b_full || c_b_full || d_b_full;
+assign readout_a_aw_fifo = idling && (a_b_count<8) && !a_aw_empty;
+assign readout_b_aw_fifo = idling && !b_b_full && a_aw_empty && !b_aw_empty;
+assign readout_c_aw_fifo = idling && !c_b_full && a_aw_empty && b_aw_empty && !c_aw_empty;
+assign readout_d_aw_fifo = idling && !d_b_full && a_aw_empty && b_aw_empty && c_aw_empty && !d_aw_empty;
 
 wire working = working_a || working_b || working_c || working_d;
 assign finished_transaction = wready && wvalid && wlast && working;
@@ -215,42 +248,37 @@ syncfifo_sampled #(IDWID,8) a_b_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(readout_a_aw_fifo)
     ,.din(orig_wid)
     ,.empty(a_b_empty),.full(a_b_full)
-    ,.readout(a_bready) ,.dout(x_a_bid)
+    ,.readout(bvalid && (bid==1)) ,.dout(x_a_bid)
     ,.count() ,.softreset(1'b0)
+    ,.overflow(panic_a_b_fifo)
 );
 
 syncfifo_sampled #(IDWID,8) b_b_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(readout_b_aw_fifo)
     ,.din(orig_wid)
-    ,.empty(a_b_empty),.full(a_b_full)
-    ,.readout(a_bready) ,.dout(x_b_bid)
+    ,.empty(b_b_empty),.full(b_b_full)
+    ,.readout(bvalid && (bid==2)) ,.dout(x_b_bid)
     ,.count() ,.softreset(1'b0)
+    ,.overflow(panic_b_b_fifo)
 );
 
 syncfifo_sampled #(IDWID,8) c_b_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(readout_c_aw_fifo)
     ,.din(orig_wid)
     ,.empty(c_b_empty),.full(c_b_full)
-    ,.readout(c_bready) ,.dout(x_c_bid)
+    ,.readout(bvalid && (bid==3)) ,.dout(x_c_bid)
     ,.count() ,.softreset(1'b0)
+    ,.overflow(panic_c_b_fifo)
 );
 syncfifo_sampled #(IDWID,8) d_b_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(readout_d_aw_fifo)
     ,.din(orig_wid)
     ,.empty(d_b_empty),.full(d_b_full)
-    ,.readout(d_bready) ,.dout(x_d_bid)
+    ,.readout(bvalid && (bid==4)) ,.dout(x_d_bid)
     ,.count() ,.softreset(1'b0)
+    ,.overflow(panic_d_b_fifo)
 );
 
-assign a_bvalid  = bvalid  && (bid==1);
-assign b_bvalid  = bvalid  && (bid==2);
-assign c_bvalid  = bvalid  && (bid==3);
-assign d_bvalid  = bvalid  && (bid==4);
-
-assign a_bresp   = (bid == 1) ? bresp :   0;
-assign b_bresp   = (bid == 2) ? bresp :   0;
-assign c_bresp   = (bid == 3) ? bresp :   0;
-assign d_bresp   = (bid == 4) ? bresp :   0;
 
 wire b_out_empty,b_out_full;
 assign bready  =  !b_out_full;
@@ -273,6 +301,7 @@ syncfifo_sampled #(IDWID+IDWID+2,2) b_out_fifo (.clk(clk),.rst_n(rst_n)
     ,.empty(b_out_empty),.full(b_out_full)
     ,.readout(y_bready) ,.dout({y_bid,inbid,inbresp})
     ,.count() ,.softreset(1'b0)
+    ,.overflow(panic_b_out_fifo)
 );
 
 assign a_bid = y_bid;
@@ -308,14 +337,15 @@ wire x_wlast   =
     : working_c ? c_wlast
     : working_d ? d_wlast : 0 ;
 
-wire x_wvalid  = 
+wire x_wvalid  = !bs_are_full && ( 
        (working_a && a_wvalid)  
     || (working_b && b_wvalid) 
     || (working_c && c_wvalid)
-    || (working_d && d_wvalid) ;
+    || (working_d && d_wvalid)
+);
 
 wire d_out_empty,d_out_full;
-wire x_wready = !d_out_full;
+wire x_wready = !d_out_full && !bs_are_full;
 assign a_wready  = working_a ? x_wready :  0;
 assign b_wready  = working_b ? x_wready :  0;
 assign c_wready  = working_c ? x_wready :  0;
@@ -325,14 +355,15 @@ assign awvalid = readout_a_aw_fifo || readout_b_aw_fifo || readout_c_aw_fifo || 
 
 
 syncfifo_sampled #(DWID+WSTRB+1,2) d_out_fifo (.clk(clk),.rst_n(rst_n)
-    ,.vldin(x_wvalid)
+    ,.vldin(x_wvalid && !d_out_full)
     ,.din({x_wdata,x_wlast,x_wstrb})
     ,.empty(d_out_empty),.full(d_out_full)
     ,.readout(wready) ,.dout({wdata,wlast,wstrb})
     ,.count() ,.softreset(1'b0)
+    ,.overflow(panic_d_out_fifo)
 );
 
-assign wvalid = !d_out_empty;
+assign wvalid = !d_out_empty && !bs_are_full;
 
 endmodule
 

@@ -174,6 +174,7 @@ syncfifo_sampled #(IDWID,8) a_ids_fifo (.clk(clk),.rst_n(rst_n),.vldin(take_a &&
     ,.dout(a_rid)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_a_ids_fifo)
 );
 
 syncfifo_sampled #(IDWID,8) b_ids_fifo (.clk(clk),.rst_n(rst_n),.vldin(take_b && arvalid && arready)
@@ -183,6 +184,7 @@ syncfifo_sampled #(IDWID,8) b_ids_fifo (.clk(clk),.rst_n(rst_n),.vldin(take_b &&
     ,.dout(b_rid)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_b_ids_fifo)
 );
 
 syncfifo_sampled #(IDWID,8) c_ids_fifo (.clk(clk),.rst_n(rst_n),.vldin(take_c && arvalid && arready)
@@ -192,6 +194,7 @@ syncfifo_sampled #(IDWID,8) c_ids_fifo (.clk(clk),.rst_n(rst_n),.vldin(take_c &&
     ,.dout(c_rid)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_c_ids_fifo)
 );
 syncfifo_sampled #(IDWID,8) d_ids_fifo (.clk(clk),.rst_n(rst_n),.vldin(take_d && arvalid && arready)
     ,.din(orig_arid)
@@ -200,6 +203,7 @@ syncfifo_sampled #(IDWID,8) d_ids_fifo (.clk(clk),.rst_n(rst_n),.vldin(take_d &&
     ,.dout(d_rid)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_d_ids_fifo)
 );
 
 assign a_rvalid =  !a_ids_empty && rvalid && (rid == id5);

@@ -17,6 +17,7 @@ class axiSlaveClass:
             Monitors.append(self)
         self.arqueue=[]
         self.awqueue=[]
+        self.wqueue=[]
         self.rqueue=[]
         self.awlen = -1
         self.wid = -1
@@ -28,32 +29,40 @@ class axiSlaveClass:
         self.prefix = prefix
         self.suffix = suffix
         self.Translates = {}
+        self.Fixed = {}
         self.Ram = {}
         self.wready = 0
         self.WAITREAD = 4
         self.WAITWRITE = 0
         self.busWidth = 8   # in bytes
+        self.Passive = False
 
     def busy(self):
         if self.arqueue!=[]: return True
         if self.awqueue!=[]: return True
+        if self.wqueue!=[]: return True
         if self.rqueue!=[]: return True
         if self.bqueue!=[]: return True
         if self.bqueue0!=[]: return True
 
         return False
+    def busyWhy(self):
+        logs.log_info('%s: SLV Busy ar=%d aw=%d w=%d r=%d b=%d b0=%d ' % (self.Name,len(self.arqueue),len(self.awqueue),len(self.wqueue),len(self.rqueue),len(self.bqueue),len(self.bqueue0)))
+        if self.wqueue!=[]:
+            logs.log_info('WQUEUE %x %x %x' % self.wqueue[0])
+        if self.awqueue!=[]:
+            logs.log_info('AWQUEUE %x %x %x %x %x' % self.awqueue[0])
 
     def peek(self,Sig):
+        if Sig in self.Fixed: return self.Fixed[Sig]
         if self.prefix!='': Sig = '%s%s'%(self.prefix,Sig)
         if self.suffix!='': Sig = '%s%s'%(Sig,self.suffix)
-#        print('PEEK ',self.Path,Sig,Sig in self.Translates)
         if Sig in self.Translates: 
             Sig = self.Translates[Sig]
-#        else:
-#            print('PEEK NO %s %s'%(Sig,list(self.Translates.keys())))
         return logs.peek('%s%s'%(self.Path,Sig))
 
     def force(self,Sig,Val):
+        if self.Passive: return
         if self.prefix!='': Sig = '%s%s'%(self.prefix,Sig)
         if self.suffix!='': Sig = '%s%s'%(Sig,self.suffix)
         if Sig in self.Translates: Sig = self.Translates[Sig]
@@ -63,6 +72,10 @@ class axiSlaveClass:
         Wrds = Text.split()
         if Wrds == []:
             pass
+        elif Wrds[0] == 'passive':
+            self.Passive = True
+        elif Wrds[0] == 'active':
+            self.Passive = False
         elif Wrds[0] == 'write':
             Addr = eval(Wrds[1])
             logs.log_info('>>>>>>setWord %x %s'%(Addr,Wrds))
@@ -246,6 +259,8 @@ class axiSlaveClass:
 
         if len(self.awqueue)>4:
             self.force('awready',1)
+        elif self.Passive and (self.peek('awready')==0):
+            pass
         elif self.peek('awvalid')==1:
             self.force('awready',1)
             awburst=self.peek('awburst')
@@ -265,41 +280,44 @@ class axiSlaveClass:
 
         self.force('wready',1)
         self.wready = 0
-            
-        if (self.peek('wvalid')==1)and((self.wready==self.WAITWRITE)):
-            veri.force('tb.marker','0x77')
-            if self.awlen<0:
-                if len(self.awqueue)==0:
-                    logs.log_error('axiSlave "%s" awqueue empty and wvalid is on' % self.Name)
-                    self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = -1,-1,-1,-1,0
-                else:
-                    self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = self.awqueue.pop(0)
-#            logs.log_info('axiSlave <<<<< awaddr=%x wready=%d awlen=%d '%(self.awaddr,self.wready,self.awlen))
+
+        if self.Passive and (self.peek('wready')==0):
+            pass
+        elif (self.peek('wvalid')==1)and(self.peek('wready') == 1):
             wstrb = self.peek('wstrb')
             wlast = self.peek('wlast')
             wdata = self.peek('wdata')
-            logs.log_info('axiSlave %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=%x'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata))
+            self.wqueue.append((wdata,wlast,wstrb))
+            logs.log_info('ADDWQUEUE %x %x %x' % (wdata,wlast,wstrb))
 
-            for ii in range(16):
-                if ((wstrb>>ii)&1)==1:
-                    Byte = (wdata>>(ii*8))& 0xff
-                    self.Ram[self.awaddr+ii]=Byte
+        if len(self.wqueue) == 0: return    
+        if (self.awlen<0) and (len(self.awqueue) == 0): return    
+        if self.awlen<0:
+            self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = self.awqueue.pop(0)
+        (wdata,wlast,wstrb) = self.wqueue.pop(0)
+        logs.log_info('axiSlave %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=%x'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata))
+        for ii in range(16):
+            if ((wstrb>>ii)&1)==1:
+                Byte = (wdata>>(ii*8))& 0xff
+                self.Ram[self.awaddr+ii]=Byte
 #                    logs.log_info('axiSlave %s write to  ram %x '%(self.Name,self.awaddr+ii))
-            self.awaddr += 1<<self.awsize
-            if self.awlen==0:
-                self.awlen = -1
-                if wlast!=1:
-                    logs.log_error('axiSlave "%s" %s: prefix=%s addr=%x   no wlast'%(self.Name,self.Path,self.prefix,self.awaddr))
-            else:
-                self.awlen -= 1
+        self.awaddr += 1<<self.awsize
+        if self.Passive and (self.peek('wready')==0):
+            pass
+        elif self.awlen==0:
+            self.awlen = -1
+            if wlast!=1:
+                logs.log_error('axiSlave "%s" %s: prefix=%s addr=%x   no wlast'%(self.Name,self.Path,self.prefix,self.awaddr))
+        else:
+            self.awlen -= 1
 
-            if (wlast==1):
+        if (wlast==1):
 #                logs.log_info('BQUEUE0 %s' % (self.bqueue0))
-                self.bqueue.append(('wait',10))
-                if self.bqueue0 == []:
-                    logs.log_error('BQUEUE0 is empty, more lasts than awvalids')
-                    self.bqueue0.append(0)
-                self.bqueue.append((self.bqueue0.pop(0),0))
+            self.bqueue.append(('wait',10))
+            if self.bqueue0 == []:
+                logs.log_error('axiSlave %s: BQUEUE0 is empty, more lasts than awvalids' % self.Name)
+                self.bqueue0.append(0)
+            self.bqueue.append((self.bqueue0.pop(0),0))
 #                logs.log_info('BQUEUE %s' % (self.bqueue))
 
 

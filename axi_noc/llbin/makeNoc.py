@@ -12,11 +12,15 @@ def main():
     if not Module: return
     runSm(Wrds)
 
-    for Item in Items:
-        Obj = Items[Item]
-        print('ITEM',Obj.Kind,Obj.Name,Obj.Inputs,' OUT',Obj.Outputs)
+#    for Item in Items:
+#        Obj = Items[Item]
+#        print('ITEM',Obj.Kind,Obj.Name,Obj.Inputs,' OUT',Obj.Outputs)
 
-    createCode(Module)
+    Slvs,Msts = createCode(Module)
+    createInstance(Module,Slvs,Msts)
+
+
+
 def work0(Wrds):
     if Wrds[0] != 'digraph': 
         print('error! digraph "%s"' % Wrds[0])
@@ -100,7 +104,10 @@ def record(Src,Dst):
     elif Src.startswith('merge'):
         if Src not in Items:
             Items[Src] = itemClass('merger',Src)
-        if Dst.startswith('split'):
+        if Dst.startswith('slv'):
+            Slaves[Dst] = Src
+            Items[Src].Outputs.append(Dst)
+        elif Dst.startswith('split'):
             Items[Src].Outputs.append(Dst)
             if Dst not in Items:
                 Items[Dst] = itemClass('splitter',Dst)
@@ -152,8 +159,16 @@ def createCode(Module):
             Fout.write(Str)
         elif Obj.Kind == 'merger':
             Str = MERGER.replace('NAME',Obj.Name)
-            Str = Str.replace('OUT',Obj.Name+'_'+Obj.Outputs[0])
-            defineWires(Fout,Obj.Name+'_'+Obj.Outputs[0])
+            Dst = Obj.Outputs[0]
+            if Obj.Outputs == []:
+                print('merger %s has no output' % (Obj.Name))
+            elif len(Obj.Outputs)>1:
+                print('merger %s has too many outputs' % (Obj.Name))
+            elif Dst.startswith('slv'):
+                Str = Str.replace('OUT',Dst)
+            else:
+                Str = Str.replace('OUT',Obj.Name+'_'+Obj.Outputs[0])
+                defineWires(Fout,Obj.Name+'_'+Obj.Outputs[0])
             for ind,Dst in enumerate(Obj.Inputs):
                 BEF = ['AA','BB','CC','DD'][ind]
                 Str = Str.replace(BEF,Dst+'_'+Obj.Name)
@@ -162,8 +177,212 @@ def createCode(Module):
             Fout.write(Str)
 
 
+    Fout.write(FOOTER)
+    Fout.close()
+    return Slvs,Msts
+
+FOOTER = '''
+
+reg [1023:0] testname;
+initial begin
+   if ($value$plusargs("LOG=%s",testname)) begin 
+        $python("pymonname()",testname);
+    end  
+
+
+    if ($value$plusargs("SEQ=%s",testname)) begin 
+         $display(" Running SEQ= %s.",testname); 
+    end else begin
+        testname = 0; 
+        $display(" default test");
+    end  
+    #10; 
+    if (testname!=0) $python("sequence()",testname);
+end 
+endmodule
+
+'''
+
+
+
+INSTHEADER = '''
+`timescale 1ns/1ps
+module tb;
+parameter IDWID=4; parameter DWID=64; parameter EXTRAS=8; parameter WSTRB=DWID/8;
+
+reg [31:0] cycles;   initial cycles=0;
+reg [31:0] errors;   initial errors=0;
+reg [31:0] wrongs;   initial wrongs=0;
+reg [31:0] panics;   initial panics=0;
+reg [31:0] corrects; initial corrects=0;
+reg [31:0] marker;   initial marker=0;
+reg [31:0] marker0;   initial marker0=0;
+reg [31:0] marker1;   initial marker1=0;
+reg [31:0] marker2;   initial marker2=0;
+reg [31:0] marker3;   initial marker3=0;
+reg [31:0] Index;   initial Index=0;
+
+
+
+reg clk; reg rst_n;
+always begin
+    clk = 0;
+    #10;
+    clk = 1;
+    #3;
+    $python("negedge()");
+    #7;
+end
+initial begin
+    $dumpvars(0,tb);
+    rst_n = 0;
+    #100;
+    rst_n = 1;
+end
+'''
+
+
+def createInstance(Module,Slvs,Msts):
+    Fout = open('%s_tb.v' % Module,'w')
+    Fout.write(INSTHEADER.replace('MODULE',Module))
+    for Slv in Slvs:
+        Str = REGINST.replace('PRT',Slv) 
+        Fout.write(Str)
+        Str = WIREINST.replace('PRT',Slv) 
+        Str = Str.replace('MOU','wire')
+        Str = Str.replace('MIN','reg')
+        Fout.write(Str)
+        Fout.write('initial %s_arready = 0;\n' % Slv)
+        Fout.write('initial %s_awready = 0;\n' % Slv)
+        Fout.write('initial %s_rvalid = 0;\n' % Slv)
+        Fout.write('initial %s_bvalid = 0;\n' % Slv)
+    for Mst in Msts:
+        Str = REGINST.replace('PRT',Mst) 
+        Fout.write(Str)
+        Str = WIREINST.replace('PRT',Mst) 
+        Str = Str.replace('MOU','reg')
+        Str = Str.replace('MIN','wire')
+        Fout.write(Str)
+        Fout.write('initial %s_bready = 0;\n' % Mst)
+        Fout.write('initial %s_wvalid = 0;\n' % Mst)
+        Fout.write('initial %s_arvalid = 0;\n' % Mst)
+        Fout.write('initial %s_awvalid = 0;\n' % Mst)
+        Fout.write('initial %s_rready = 0;\n' % Mst)
+
+    Fout.write('%s %s_noc ( .clk(clk),.rst_n(rst_n)\n' % (Module,Module))
+    for Slv in Slvs:
+        Str = SLVIF.replace('SLV',Slv)
+        Fout.write(Str)
+    for Mst in Msts:
+        Str = MSTIF.replace('MST',Mst)
+        Fout.write(Str)
+    Fout.write(');\n')
     Fout.write('endmodule\n')
     Fout.close()
+
+
+MSTIF = '''
+    ,.MST_araddr(MST_araddr[31:0])
+    ,.MST_arburst(MST_arburst[1:0])
+    ,.MST_arextras(MST_arextras[(EXTRAS - 1):0])
+    ,.MST_arid(MST_arid[(IDWID - 1):0])
+    ,.MST_arlen(MST_arlen[7:0])
+    ,.MST_arready(MST_arready)
+    ,.MST_arvalid(MST_arvalid)
+    ,.MST_awaddr(MST_awaddr[31:0])
+    ,.MST_awburst(MST_awburst[1:0])
+    ,.MST_awextras(MST_awextras[(EXTRAS - 1):0])
+    ,.MST_awid(MST_awid[(IDWID - 1):0])
+    ,.MST_awlen(MST_awlen[7:0])
+    ,.MST_awready(MST_awready)
+    ,.MST_awvalid(MST_awvalid)
+    ,.MST_bid(MST_bid[(IDWID - 1):0])
+    ,.MST_bready(MST_bready)
+    ,.MST_bresp(MST_bresp[1:0])
+    ,.MST_bvalid(MST_bvalid)
+    ,.MST_rdata(MST_rdata[(DWID - 1):0])
+    ,.MST_rid(MST_rid[(IDWID - 1):0])
+    ,.MST_rlast(MST_rlast)
+    ,.MST_rready(MST_rready)
+    ,.MST_rresp(MST_rresp[1:0])
+    ,.MST_rvalid(MST_rvalid)
+    ,.MST_wdata(MST_wdata[(DWID - 1):0])
+    ,.MST_wlast(MST_wlast)
+    ,.MST_wready(MST_wready)
+    ,.MST_wstrb(MST_wstrb[(WSTRB - 1):0])
+    ,.MST_wvalid(MST_wvalid)
+'''
+SLVIF = '''
+    ,.SLV_araddr(SLV_araddr[31:0])
+    ,.SLV_arburst(SLV_arburst[1:0])
+    ,.SLV_arextras(SLV_arextras[(EXTRAS - 1):0])
+    ,.SLV_arid(SLV_arid[(IDWID - 1):0])
+    ,.SLV_arlen(SLV_arlen[7:0])
+    ,.SLV_arready(SLV_arready)
+    ,.SLV_arvalid(SLV_arvalid)
+    ,.SLV_awaddr(SLV_awaddr[31:0])
+    ,.SLV_awburst(SLV_awburst[1:0])
+    ,.SLV_awextras(SLV_awextras[(EXTRAS - 1):0])
+    ,.SLV_awid(SLV_awid[(IDWID - 1):0])
+    ,.SLV_awlen(SLV_awlen[7:0])
+    ,.SLV_awready(SLV_awready)
+    ,.SLV_awvalid(SLV_awvalid)
+    ,.SLV_bid(SLV_bid[(IDWID - 1):0])
+    ,.SLV_bready(SLV_bready)
+    ,.SLV_bresp(SLV_bresp[1:0])
+    ,.SLV_bvalid(SLV_bvalid)
+    ,.SLV_rdata(SLV_rdata[(DWID - 1):0])
+    ,.SLV_rid(SLV_rid[(IDWID - 1):0])
+    ,.SLV_rlast(SLV_rlast)
+    ,.SLV_rready(SLV_rready)
+    ,.SLV_rresp(SLV_rresp[1:0])
+    ,.SLV_rvalid(SLV_rvalid)
+    ,.SLV_wdata(SLV_wdata[(DWID - 1):0])
+    ,.SLV_wlast(SLV_wlast)
+    ,.SLV_wready(SLV_wready)
+    ,.SLV_wstrb(SLV_wstrb[(WSTRB - 1):0])
+    ,.SLV_wvalid(SLV_wvalid)
+
+'''
+
+REGINST = '''
+reg  [2:0] PRT_awsize ; initial PRT_awsize = 0;
+reg  [2:0] PRT_arsize ; initial PRT_arsize = 0;
+'''
+WIREINST = '''
+MOU  [IDWID-1:0] PRT_arid ;
+MOU  [31:0] PRT_araddr ;
+MOU  [7:0] PRT_arlen ;
+MOU  [EXTRAS-1:0] PRT_arextras ;
+MOU  [1:0] PRT_arburst ;
+MOU  PRT_arvalid ;
+MIN  PRT_arready ;
+MIN  [IDWID-1:0] PRT_rid ;
+MIN  [DWID-1:0] PRT_rdata ;
+MIN  [1:0] PRT_rresp ;
+MIN  PRT_rlast ;
+MIN  PRT_rvalid ;
+MOU  PRT_rready ;
+
+MOU  [IDWID-1:0] PRT_awid ;
+MOU  [31:0] PRT_awaddr ;
+MOU  [7:0] PRT_awlen ;
+MOU  [EXTRAS-1:0] PRT_awextras ;
+MOU  [1:0] PRT_awburst ;
+MOU  PRT_awvalid ;
+MIN  PRT_awready ;
+MOU  [DWID-1:0] PRT_wdata ;
+MOU  [WSTRB-1:0] PRT_wstrb ;
+MOU  PRT_wlast ;
+MOU  PRT_wvalid ;
+MIN  PRT_wready ;
+MIN  [IDWID-1:0] PRT_bid ;
+MIN  [1:0] PRT_bresp ;
+MIN  PRT_bvalid ;
+MOU  PRT_bready ;
+
+'''
+
 
 PREFS = []
 def defineWires(Fout,Pref):

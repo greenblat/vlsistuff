@@ -523,6 +523,12 @@ class sequenceClass:
             else:
                 logs.log_info('no  %s.onFinish() found , add "    def onFinish(self):" to the agent'%Agent)
 
+            if 'busy' in dir(Obj):
+                Busy = Obj.busy()
+                if Busy and (Obj.Name != 'main'):
+                    logs.log_error('agent "%s" "%s" stayed busy to the end' % (Agent,Obj.Name))
+                    if 'busyWhy' in dir(Obj):
+                        Obj.busyWhy()
 
 def makeExpr(Txt):
     for Chr in '&|<>=()!+-*/':

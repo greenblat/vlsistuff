@@ -52,7 +52,9 @@ class axiMasterClass:
 
     def onFinish(self):
         if self.Bscore != []:
-            logs.log_error('BVALID: some BID left in BIF queue: %s' % (self.Bscore))
+            logs.log_error('BVALID: some (%d) BID left in BID queue' % (len(self.Bscore)))
+            for ii in range(min(10,len(self.Bscore))):
+                logs.log_info('    leftover in BID %x %x' % (self.Bscore[ii]))
 
     def rename(self,Sig):
         if Sig in self.renames:
@@ -165,6 +167,7 @@ class axiMasterClass:
                 Wdata = Wdatas
             elif len(Wdatas)==0:
                 Wdata = '0x%08x%08x%08x%08x'%(self.Rid+0x1000*ii,0x100+self.Rid+0x1000*ii,0x200+self.Rid+0x1000*ii,0x300+self.Rid+0x1000*ii)
+                Wdata = Address + ii * 0x8
             elif (type(Wdatas[0]) is str):
                 Wdata = Wdatas.pop(0)
             else:

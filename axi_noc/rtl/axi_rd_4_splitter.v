@@ -95,6 +95,7 @@ syncfifo_sampled #(ARIDE,4) ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(arvalid && a
     ,.dout(active_ar_entry)
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_ar_fifo)
 );
 assign arready = !ar_full;
 
@@ -166,13 +167,14 @@ assign b_rready = !r_full && !a_rvalid;
 assign c_rready = !r_full && !a_rvalid && !b_rvalid;
 assign d_rready = !r_full && !a_rvalid && !b_rvalid && !c_rvalid ;
 
-syncfifo_sampled #(DWID+4+2+1,8) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(r_vldin)
+syncfifo_sampled #(DWID+4+2+1,8) r_fifo (.clk(clk),.rst_n(rst_n),.vldin(r_vldin)
     ,.din(r_new_entry)
     ,.empty(r_empty),.full(r_full)
     ,.readout(rready)
     ,.dout({rlast,rresp,rid,rdata})
     ,.count()
     ,.softreset(1'b0)
+    ,.overflow(panic_r_fifo)
 );
 assign rvalid = !r_empty;
 
