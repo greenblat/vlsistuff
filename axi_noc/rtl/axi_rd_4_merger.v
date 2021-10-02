@@ -111,6 +111,7 @@ syncfifo #(AWIDE,2) a_ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(a_arvalid && a_arr
     ,.readout(take_a && arready)
     ,.dout(a_active_ar_entry)
     ,.count()
+    ,.softreset(1'b0)
 );
 syncfifo #(AWIDE,2) b_ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(b_arvalid && b_arready)
     ,.din(new_b_ar_entry)
@@ -118,6 +119,7 @@ syncfifo #(AWIDE,2) b_ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(b_arvalid && b_arr
     ,.readout(take_b && arready)
     ,.dout(b_active_ar_entry)
     ,.count()
+    ,.softreset(1'b0)
 );
 
 syncfifo #(AWIDE,2) c_ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(c_arvalid && c_arready)
@@ -126,6 +128,7 @@ syncfifo #(AWIDE,2) c_ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(c_arvalid && c_arr
     ,.readout(take_c && arready)
     ,.dout(c_active_ar_entry)
     ,.count()
+    ,.softreset(1'b0)
 );
 
 syncfifo #(AWIDE,2) d_ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(d_arvalid && d_arready)
@@ -134,6 +137,7 @@ syncfifo #(AWIDE,2) d_ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(d_arvalid && d_arr
     ,.readout(take_d && arready)
     ,.dout(d_active_ar_entry)
     ,.count()
+    ,.softreset(1'b0)
 );
 
 

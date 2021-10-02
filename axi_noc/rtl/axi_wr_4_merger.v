@@ -115,26 +115,26 @@ wire [AWIDE-1:0] d_active_aw_entry;
 
 wire readout_a_aw_fifo,readout_b_aw_fifo,readout_c_aw_fifo,readout_d_aw_fifo;
 
-reg [7:0] a_b_count,b_b_count,c_b_count,d_b_count;
+reg [7:0] a_bcount,b_bcount,c_bcount,d_bcount;
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        a_b_count <= 0;
-        b_b_count <= 0;
-        c_b_count <= 0;
-        d_b_count <= 0;
+        a_bcount <= 0;
+        b_bcount <= 0;
+        c_bcount <= 0;
+        d_bcount <= 0;
     end else begin
 
-        if (a_awvalid && a_awready && !(a_bvalid && a_bready)) a_b_count <= a_b_count + 1;
-        else if (a_bvalid && a_bready && !(a_awvalid && a_awready)) a_b_count <= a_b_count - 1;
+        if (a_awvalid && a_awready && !(a_bvalid && a_bready)) a_bcount <= a_bcount + 1;
+        else if (a_bvalid && a_bready && !(a_awvalid && a_awready)) a_bcount <= a_bcount - 1;
 
-        if (awready && readout_b_aw_fifo && !(b_bvalid && b_bready)) b_b_count <= b_b_count + 1;
-        else if (b_bvalid && b_bready && !(awready && readout_b_aw_fifo)) b_b_count <= b_b_count - 1;
+        if (awready && readout_b_aw_fifo && !(b_bvalid && b_bready)) b_bcount <= b_bcount + 1;
+        else if (b_bvalid && b_bready && !(awready && readout_b_aw_fifo)) b_bcount <= b_bcount - 1;
 
-        if (awready && readout_c_aw_fifo && !(c_bvalid && c_bready)) c_b_count <= c_b_count + 1;
-        else if (c_bvalid && c_bready && !(awready && readout_c_aw_fifo)) c_b_count <= c_b_count - 1;
+        if (awready && readout_c_aw_fifo && !(c_bvalid && c_bready)) c_bcount <= c_bcount + 1;
+        else if (c_bvalid && c_bready && !(awready && readout_c_aw_fifo)) c_bcount <= c_bcount - 1;
 
-        if (awready && readout_d_aw_fifo && !(d_bvalid && d_bready)) d_b_count <= d_b_count + 1;
-        else if (d_bvalid && d_bready && !(awready && readout_d_aw_fifo)) d_b_count <= d_b_count - 1;
+        if (awready && readout_d_aw_fifo && !(d_bvalid && d_bready)) d_bcount <= d_bcount + 1;
+        else if (d_bvalid && d_bready && !(awready && readout_d_aw_fifo)) d_bcount <= d_bcount - 1;
 
     end
 end
@@ -189,47 +189,11 @@ syncfifo #(4,4) work_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(awvalid && awready)
     ,.softreset(1'b0)
     ,.overflow(panic_work_aw_fifo)
 );
-assign {working_d,working_c,working_b,working_a} = work_aw_empty ? 0 : workings;
+assign {working_d,working_c,working_b,working_a} = ((wvalid && wlast )|| work_aw_empty) ? 0 : workings;
 
 
 
 
-// wire finished_transaction;
-//wire idling =  !working_a && !working_b && !working_c && !working_d;
-//always @(posedge clk or negedge rst_n) begin
-//    if (!rst_n) begin
-//        working_a <= 0;
-//        working_b <= 0;
-//        working_c <= 0;
-//        working_d <= 0;
-//    end else begin
-//        if (!a_aw_empty && idling) begin
-//            working_a <= 1;
-//        end else if (!b_aw_empty && idling) begin
-//            working_b <= 1;
-//        end else if (!c_aw_empty && idling) begin
-//            working_c <= 1;
-//        end else if (!d_aw_empty && idling) begin
-//            working_d <= 1;
-//        end else if (working_a) begin
-//            if (finished_transaction) begin
-//                working_a <= 0;
-//            end
-//        end else if (working_b) begin
-//            if (finished_transaction) begin
-//                working_b <= 0;
-//            end
-//        end else if (working_c) begin
-//            if (finished_transaction) begin
-//                working_c <= 0;
-//            end
-//        end else if (working_d) begin
-//            if (finished_transaction) begin
-//                working_d <= 0;
-//            end
-//        end
-//    end
-//end
 
 wire [3:0] orig_wid;
 assign {orig_wid ,awaddr ,awlen ,awextras ,awburst} = 
@@ -248,13 +212,14 @@ assign awid =
 
 
 //wire bs_are_full = a_b_full || b_b_full || c_b_full || d_b_full;
-wire bs_are_full = (a_b_count>=8) || b_b_full || c_b_full || d_b_full;
-assign readout_a_aw_fifo = !work_aw_full && awready && (a_b_count<8) && !a_aw_empty;
-assign readout_b_aw_fifo = !work_aw_full && awready && (b_b_count<8) && a_aw_empty && !b_aw_empty;
-assign readout_c_aw_fifo = !work_aw_full && awready && (c_b_count<8) && a_aw_empty && b_aw_empty && !c_aw_empty;
-assign readout_d_aw_fifo = !work_aw_full && awready && (d_b_count<8) && a_aw_empty && b_aw_empty && c_aw_empty && !d_aw_empty;
+wire bs_are_full = (a_bcount>=8) || b_b_full || c_b_full || d_b_full;
+assign readout_a_aw_fifo = !work_aw_full && awready && (a_bcount<8) && !a_aw_empty;
+assign readout_b_aw_fifo = !work_aw_full && awready && (b_bcount<8) && a_aw_empty && !b_aw_empty;
+assign readout_c_aw_fifo = !work_aw_full && awready && (c_bcount<8) && a_aw_empty && b_aw_empty && !c_aw_empty;
+assign readout_d_aw_fifo = !work_aw_full && awready && (d_bcount<8) && a_aw_empty && b_aw_empty && c_aw_empty && !d_aw_empty;
 
-wire working = working_a || working_b || working_c || working_d;
+wire panic_readout = (0+readout_a_aw_fifo+readout_b_aw_fifo+readout_c_aw_fifo+readout_d_aw_fifo)>1;
+// wire working = working_a || working_b || working_c || working_d;
 // assign finished_transaction = wready && wvalid && wlast && working;
 
 wire [IDWID-1:0] x_a_bid,x_b_bid,x_c_bid,x_d_bid;
@@ -334,6 +299,7 @@ assign c_bvalid = !b_out_empty && (inbid==3);
 assign d_bvalid = !b_out_empty && (inbid==4);
 
 assign y_bready = 
+    b_out_empty ? 0 :
     (inbid==1) ? a_bready :
     (inbid==2) ? b_bready :
     (inbid==3) ? c_bready :
@@ -372,7 +338,7 @@ syncfifo_sampled #(DWID+WSTRB+1,2) d_out_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(x_wvalid && !d_out_full)
     ,.din({x_wdata,x_wlast,x_wstrb})
     ,.empty(d_out_empty),.full(d_out_full)
-    ,.readout(wready) ,.dout({wdata,wlast,wstrb})
+    ,.readout(wready && !d_out_empty) ,.dout({wdata,wlast,wstrb})
     ,.count() ,.softreset(1'b0)
     ,.overflow(panic_d_out_fifo)
 );
@@ -390,6 +356,13 @@ always @(posedge clk or negedge rst_n) begin
             outstanding_ws <= outstanding_ws + 1;
     end
 end
+
+wire panic_acount = (a_bcount==0) && (a_bvalid && a_bready);
+wire panic_bcount = (b_bcount==0) && (b_bvalid && b_bready);
+wire panic_ccount = (c_bcount==0) && (c_bvalid && c_bready);
+wire panic_dcount = (d_bcount==0) && (d_bvalid && d_bready);
+
+
 
 endmodule
 

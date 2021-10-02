@@ -86,7 +86,7 @@ def monitorStuffs():
     panics=0
 '''
 FOOTER='''
-    veri.force('tb.panics',str(panics))
+    veri.force('tb.Panics',str(panics))
 '''
 
 if __name__ == '__main__':

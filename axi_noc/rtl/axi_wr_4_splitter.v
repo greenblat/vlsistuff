@@ -146,7 +146,7 @@ wire order_fifo_empty,order_fifo_full;
 syncfifo_sampled #(3,8) order_fifo (.clk(clk),.rst_n(rst_n),.vldin(readout_aw_fifo)
     ,.din(whosnext)
     ,.empty(order_fifo_empty),.full(order_fifo_full)
-    ,.readout(finished_transaction)
+    ,.readout(finished_transaction && !order_fifo_empty)
     ,.dout(whosnow)
     ,.count()
     ,.softreset(1'b0)
@@ -198,30 +198,83 @@ assign c_wstrb = work_wstrb;
 assign d_wstrb = work_wstrb;
 
 
+wire back_bid_a_fifo_empty,back_bid_a_fifo_full;
+wire [IDWID-1:0] x_a_bid;
+wire [1:0] x_a_bresp;
+syncfifo #(IDWID+2,2) back_bid_a_fifo (.clk(clk),.rst_n(rst_n)
+    ,.vldin(a_bvalid && !back_bid_a_fifo_full)
+    ,.din({a_bid,a_bresp})
+    ,.empty(back_bid_a_fifo_empty),.full(back_bid_a_fifo_full)
+    ,.readout(readout_back_bid_a_fifo) ,.dout({x_a_bid,x_a_bresp})
+    ,.count() ,.softreset(1'b0)
+    ,.overflow()
+);
+
+wire back_bid_b_fifo_empty,back_bid_b_fifo_full;
+wire [IDWID-1:0] x_b_bid;
+wire [1:0] x_b_bresp;
+syncfifo #(IDWID+2,2) back_bid_b_fifo (.clk(clk),.rst_n(rst_n)
+    ,.vldin(b_bvalid && !back_bid_b_fifo_full)
+    ,.din({b_bid,b_bresp})
+    ,.empty(back_bid_b_fifo_empty),.full(back_bid_b_fifo_full)
+    ,.readout(readout_back_bid_b_fifo) ,.dout({x_b_bid,x_b_bresp})
+    ,.count() ,.softreset(1'b0)
+    ,.overflow()
+);
+
+
+wire back_bid_c_fifo_empty,back_bid_c_fifo_full;
+wire [IDWID-1:0] x_c_bid;
+wire [1:0] x_c_bresp;
+syncfifo #(IDWID+2,2) back_bid_c_fifo (.clk(clk),.rst_n(rst_n)
+    ,.vldin(c_bvalid && !back_bid_c_fifo_full)
+    ,.din({c_bid,c_bresp})
+    ,.empty(back_bid_c_fifo_empty),.full(back_bid_c_fifo_full)
+    ,.readout(readout_back_bid_c_fifo) ,.dout({x_c_bid,x_c_bresp})
+    ,.count() ,.softreset(1'b0)
+    ,.overflow()
+);
+
+wire back_bid_d_fifo_empty,back_bid_d_fifo_full;
+wire [IDWID-1:0] x_d_bid;
+wire [1:0] x_d_bresp;
+syncfifo #(IDWID+2,2) back_bid_d_fifo (.clk(clk),.rst_n(rst_n)
+    ,.vldin(d_bvalid && !back_bid_d_fifo_full)
+    ,.din({d_bid,d_bresp})
+    ,.empty(back_bid_d_fifo_empty),.full(back_bid_d_fifo_full)
+    ,.readout(readout_back_bid_d_fifo) ,.dout({x_d_bid,x_d_bresp})
+    ,.count() ,.softreset(1'b0)
+    ,.overflow()
+);
+assign a_bready = !back_bid_a_fifo_full;
+assign b_bready = !back_bid_b_fifo_full;
+assign c_bready = !back_bid_c_fifo_full;
+assign d_bready = !back_bid_d_fifo_full;
+
+
+assign readout_back_bid_a_fifo =  b_vldin && !back_bid_a_fifo_empty;
+assign readout_back_bid_b_fifo =  b_vldin && !back_bid_b_fifo_empty && back_bid_a_fifo_empty;
+assign readout_back_bid_c_fifo =  b_vldin && !back_bid_c_fifo_empty && back_bid_a_fifo_empty && back_bid_b_fifo_empty;
+assign readout_back_bid_d_fifo =  b_vldin && !back_bid_d_fifo_empty && back_bid_a_fifo_empty && back_bid_b_fifo_empty && back_bid_c_fifo_empty;
 
 
 
 
-
-wire b_vldin = a_bvalid || b_bvalid || c_bvalid || d_bvalid;
-assign a_bready = !b_full;
-assign b_bready = !b_full && !a_bvalid;
-assign c_bready = !b_full && !a_bvalid && !b_bvalid;
-assign d_bready = !b_full && !a_bvalid && !b_bvalid && !c_bvalid;
+wire b_vldin = !b_full && (!back_bid_a_fifo_empty || !back_bid_b_fifo_empty || !back_bid_c_fifo_empty || !back_bid_d_fifo_empty);
 
 wire [IDWID+2+2-1:0] b_entry = 
-    a_bvalid  ? {a_bid,a_bresp,2'b00} :
-    b_bvalid  ? {b_bid,b_bresp,2'b01} :
-    c_bvalid  ? {c_bid,c_bresp,2'b10} :
-    d_bvalid  ? {d_bid,d_bresp,2'b11} :
+    !back_bid_a_fifo_empty  ? {x_a_bid,x_a_bresp,2'b00} :
+    !back_bid_b_fifo_empty  ? {x_b_bid,x_b_bresp,2'b01} :
+    !back_bid_c_fifo_empty  ? {x_c_bid,x_c_bresp,2'b10} :
+    !back_bid_d_fifo_empty  ? {x_d_bid,x_d_bresp,2'b11} :
     0;
     
 wire [1:0] bowner;
-syncfifo_sampled #(IDWID+2+2,8) b_fifo (.clk(clk),.rst_n(rst_n)
+syncfifo_sampled #(IDWID+2+2,4) b_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(b_vldin)
     ,.din(b_entry)
     ,.empty(b_empty),.full(b_full)
-    ,.readout(bready) ,.dout({bid,bresp,bowner})
+    ,.readout(bready && !b_empty) ,.dout({bid,bresp,bowner})
     ,.count() ,.softreset(1'b0)
     ,.overflow(panic_b_fifo)
 );

@@ -238,7 +238,7 @@ class axiSlaveClass:
 
 
     def writing(self):
-#        logs.log_info('BVALID wait=%d bqueue=%s ' % (self.bwaiting,self.bqueue))
+#        logs.log_info('BVALID %s wait=%d bqueue=%s ready=%d' % (self.Name,self.bwaiting,self.bqueue,self.peek('bready')))
         if self.bwaiting>0:
             self.bwaiting -= 1
             self.force('bvalid',0)
@@ -277,6 +277,8 @@ class axiSlaveClass:
                 logs.log_error('slave %s CROSSING 4K write awaddr=%x awlen=%x awsize=%x' % (self.Name,awaddr,awlen,awsize))
             logs.log_info('axiSlave %s >>>awvalid %x %x %x %x %x'%(self.Name,awburst,awaddr,awlen,awid,awsize))
             self.bqueue0.append(awid)
+        else:
+            self.force('awready',1)
 
         self.force('wready',1)
         self.wready = 0
@@ -313,7 +315,7 @@ class axiSlaveClass:
 
         if (wlast==1):
 #                logs.log_info('BQUEUE0 %s' % (self.bqueue0))
-            self.bqueue.append(('wait',10))
+            self.bqueue.append(('wait',2))
             if self.bqueue0 == []:
                 logs.log_error('axiSlave %s: BQUEUE0 is empty, more lasts than awvalids' % self.Name)
                 self.bqueue0.append(0)

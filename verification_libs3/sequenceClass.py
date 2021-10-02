@@ -278,7 +278,7 @@ class sequenceClass:
         self.Ptr += 1
         if '#' in Line: Line = Line[:Line.index('#')]
         if '//' in Line: Line = Line[:Line.index('//')]
-        logs.log_write('sequence: %s'%Line,7)
+        logs.log_write('sequence: %s'%Line,'seq')
         wrds = Line.split()
         if len(wrds)==0: return True
         if wrds[0] == 'seed':

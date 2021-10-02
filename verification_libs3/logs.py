@@ -30,7 +30,7 @@ MODE = 'verilog'   # other is verilator
 WHERE = ''
 
     
-Flogs = [False,False,False,False,False,False,False,False]
+Flogs = {}
 
 
 import time
@@ -114,8 +114,9 @@ def log_error(Text,Which=0,Tb=True,Pstack=False):
     log_err(Text,Which,Tb,Pstack)
 def log_err(Text,Which=0,Tb=True,Pstack=False):
     global Errors,printed_already
-    if (not Flogs[Which]):
-        Flogs[Which]=open(PYMONLOG+str(Which),'w')
+    openFlog(Which)
+#    if (not Flogs[Which]):
+#        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Errors +=1  
     Flogs[Which].write('@%d: %s %d (%d,%d) ___ERROR: %s\n'%(get_cycles(),WHERE,Errors,Wrongs,Corrects,Text))
     if Pstack:
@@ -139,8 +140,9 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
 
 def log_correct(Text,Which=0,Print=True):
     global Corrects
-    if (not Flogs[Which]):
-        Flogs[Which]=open(PYMONLOG+str(Which),'w')
+    openFlog(Which)
+#    if (not Flogs[Which]):
+#        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Corrects += 1
     if TRACE: veri.force('tracer.corrects',str(Corrects))
     elif veri: veri.force('%scorrects'%TB,str(Corrects))
@@ -162,8 +164,9 @@ def log_wrong(Text,Which=0):
     Wrongs += 1
     if TRACE: veri.force('tracer.wrongs',str(Wrongs))
     elif veri: veri.force('%swrongs'%TB,str(Wrongs))
-    if (not Flogs[Which]):
-        Flogs[Which]=open(PYMONLOG+str(Which),'w')
+    openFlog(Which)
+#    if (not Flogs[Which]):
+#        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: %d vs %d (err=%d):  ___WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     Flogs[Which].write('@%d: %d vs %d (err=%d):  ___WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     if Wrongs >= MAXWRONGS:
@@ -199,28 +202,27 @@ def status(Text):
         Text =  '@%d: %s: wrongs=%d vs corrects=%d errors=%d warnings=%d: on %s'%(get_cycles(),Now,Wrongs,Corrects,Errors,Warnings,Text)
     log_info(Text)
 
+def openFlog(Which):
+    if Which not in Flogs:
+        Flogs[Which]= open(PYMONLOG+str(Which),'w')
 
 def log_warning(Text,Which=0):
     global Warnings,printed_already,Flog
     if (Text in printed_already):
         return
-    if (not Flogs[Which]):
-        Flogs[Which]= open(PYMONLOG+str(Which),'w')
+    openFlog(Which)
     print('%d: warning: %s'%(Warnings,Text))
     Flogs[Which].write('%d: warning: %s\n'%(Warnings,Text))
     printed_already[Text]=1
     Warnings +=1  
 
 def log_write(Text,Which=0):
-    if (not Flogs[Which]):
-        Flogs[Which]=open(PYMONLOG+str(Which),'w')
-#    print('%s'%(Text))
+    openFlog(Which)
     Flogs[Which].write('%s\n'%(Text))
 
 def log_debug(Text,Tokens,Which=0):
     if printDebugs.intersection(set(Tokens.split())) == set(): return
-    if (not Flogs[Which]):
-        Flogs[Which]=open(PYMONLOG+str(Which),'w')
+    openFlog(Which)
     print('@%d: debug: %s'%(get_cycles(),Text))
     Flogs[Which].write('@%d: debug: %s\n'%(get_cycles(),Text))
 
@@ -228,31 +230,13 @@ def log_debug(Text,Tokens,Which=0):
     return
 
 def log_info(Text,Which=0):
-    if (not Flogs[Which]):
-        Flogs[Which]=open(PYMONLOG+str(Which),'w')
+    openFlog(Which)
     print('@%d: info: %s'%(get_cycles(),Text))
     Flogs[Which].write('@%d: info: %s\n'%(get_cycles(),Text))
 
 def log_finfo(Text,File):
     File.write('@%d: info: %s\n'%(get_cycles(),Text))
 
-def log_info2(Text):
-    global Flog2
-    if (not Flog2):
-        Flog2=open(PYMONLOG+'2','w')
-    Flog2.write('@%d:     %s\n'%(get_cycles(),Text))
-
-def log_info3(Text):
-    global Flog3
-    if (not Flog3):
-        Flog3=open(PYMONLOG+'3','w')
-    Flog3.write('@%d:     %s\n'%(get_cycles(),Text))
-
-def log_info4(Text):
-    global Flog4
-    if (not Flog4):
-        Flog4=open(PYMONLOG+'4','w')
-    Flog4.write('@%d:     %s\n'%(get_cycles(),Text))
 
 INFOX = {}
 def log_infox(Text,Where,Print=False):
@@ -517,7 +501,7 @@ def panicFinish(Reason,ContinueFor=20):
 
 def closeLogs():
     for X in Flogs:
-        if X: X.flush()
+        Flogs[X].flush()
 
 
       
@@ -814,7 +798,7 @@ def str2hex(Txt):
 #class anyClas(driverClass):
 #    driverClass.__init__(self,Path,Monitors)
 class driverClass:
-    def __init__(self,Path,Monitors):
+    def __init__(self,Path,Monitors,Prefix='',Name=''):
         if (Monitors!=-1): Monitors.append(self)
         if Path == '':
             self.Path = Path
@@ -822,18 +806,27 @@ class driverClass:
             self.Path = Path
         else:
             self.Path = Path + '.'
-
+        self.Prefix = Prefix
+        self.Name = Name
         self.state='idle'
         self.waiting  = 0 
         self.edges = {}
 
-    def exists(self,Val):
-        Full = peek('%s%s'%(self.Path,Sig))
+    def fullname(self,Sig):
+        Fname = '%s%s%s' % (self.Path,self.Prefix,Sig)
+        return Fname
+        
+
+
+
+    def exists(self,Sig):
+        Full = self.fullname(Sig)
         X = veri.exists(Full)
-        return Full == '1'
+        return X == '1'
 
     def force(self,Sig,Val):
-        if veri: veri.force('%s%s'%(self.Path,Sig),str(Val))
+        Full = self.fullname(Sig)
+        if veri: veri.force(Full,str(Val))
 
     def forceAscii(self,Sig,Txt,Len):
         Res = '0x'
@@ -842,21 +835,26 @@ class driverClass:
             Res += Chr
         self.force(Sig,Res)
     def peekbin(self,Sig):
-        return veri.peek('%s%s'%(self.Path,Sig))
+        Full = self.fullname(Sig)
+        return veri.peek(Full)
 
     def valid(self,Sig):
         X = self.peek(Sig)
         return (X>0)
     def peek(self,Sig):
-        return peek('%s%s'%(self.Path,Sig))
+        Full = self.fullname(Sig)
+        return peek(Full)
     def peekbit(self,Sig,Ind):
-        X = peek('%s%s'%(self.Path,Sig))
+        Full = self.fullname(Sig)
+        X = peek(Full)
         Bit = (X>>Ind)&1
         return Bit
     def peeksigned(self,Sig):
-        return peeksigned('%s%s'%(self.Path,Sig))
+        Full = self.fullname(Sig)
+        return peeksigned(Full)
     def peekfloat(self,Sig):
-        return peek_float('%s%s'%(self.Path,Sig))
+        Full = self.fullname(Sig)
+        return peek_float(Full)
 
     def valid(self,Sig):
         return self.peek(Sig)==1

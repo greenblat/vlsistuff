@@ -216,7 +216,7 @@ parameter IDWID=4; parameter DWID=64; parameter EXTRAS=8; parameter WSTRB=DWID/8
 reg [31:0] cycles;   initial cycles=0;
 reg [31:0] errors;   initial errors=0;
 reg [31:0] wrongs;   initial wrongs=0;
-reg [31:0] panics;   initial panics=0;
+reg [31:0] Panics;   initial Panics=0;
 reg [31:0] corrects; initial corrects=0;
 reg [31:0] marker;   initial marker=0;
 reg [31:0] marker0;   initial marker0=0;
@@ -234,7 +234,9 @@ always begin
     clk = 1;
     #3;
     $python("negedge()");
-    #7;
+    #3;
+    $python("auxs()");
+    #4;
 end
 initial begin
     $dumpvars(0,tb);
@@ -272,7 +274,7 @@ def createInstance(Module,Slvs,Msts):
         Fout.write('initial %s_awvalid = 0;\n' % Mst)
         Fout.write('initial %s_rready = 0;\n' % Mst)
 
-    Fout.write('%s %s_noc ( .clk(clk),.rst_n(rst_n)\n' % (Module,Module))
+    Fout.write('%s dut ( .clk(clk),.rst_n(rst_n)\n' % (Module))
     for Slv in Slvs:
         Str = SLVIF.replace('SLV',Slv)
         Fout.write(Str)

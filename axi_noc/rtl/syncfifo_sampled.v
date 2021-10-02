@@ -13,6 +13,8 @@ assign   full = count == DEPTH;
 wire [AWID1:0] next_rptr = (readout && !empty) ? ((rptr==(DEPTH1)) ? 0 : (rptr + 1'b1)) : rptr;
 always @(posedge clk) dout <= (empty || ((count==1)&&readout)) ? din : fifos[next_rptr];
 assign overflow = vldin && full;
+wire panic_overflow = overflow;
+wire panic_underflow = readout && empty;
 always @(posedge clk) begin
     if (vldin && !full) begin
         fifos[wptr] <= din;

@@ -170,7 +170,7 @@ assign d_rready = !r_full && !a_rvalid && !b_rvalid && !c_rvalid ;
 syncfifo_sampled #(DWID+4+2+1,8) r_fifo (.clk(clk),.rst_n(rst_n),.vldin(r_vldin)
     ,.din(r_new_entry)
     ,.empty(r_empty),.full(r_full)
-    ,.readout(rready)
+    ,.readout(rready && !r_empty)
     ,.dout({rlast,rresp,rid,rdata})
     ,.count()
     ,.softreset(1'b0)

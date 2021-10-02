@@ -17,7 +17,8 @@ reg [AWID1:0] wptr,rptr;
 assign   empty = int_count == 0;
 assign   full = int_count == DEPTH;
 assign   dout = fifos[rptr];
-wire panic = vldin && full;
+wire panic_in = vldin && full;
+wire panic_out = readout && empty;
 always @(posedge clk) begin
     if (vldin && !full) begin
         fifos[wptr] <= din;

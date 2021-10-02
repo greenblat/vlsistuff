@@ -55,6 +55,9 @@ class axiMasterClass:
             logs.log_error('BVALID: some (%d) BID left in BID queue' % (len(self.Bscore)))
             for ii in range(min(10,len(self.Bscore))):
                 logs.log_info('    leftover in BID %x %x' % (self.Bscore[ii]))
+        elif self.busy():
+            logs.log_error('%s finished busy status' % (self.Name))
+            
 
     def rename(self,Sig):
         if Sig in self.renames:
@@ -138,6 +141,7 @@ class axiMasterClass:
         if self.arQueue!=[]: return True
         if self.awQueue!=[]: return True
         if self.wQueue!=[]: return True
+        if self.Bscore!=[]: return True
         return False
 
     def makeRead(self,Burst,Len,Address,Size=4,Rid='none'):
@@ -318,16 +322,20 @@ class axiMasterClass:
     def runB(self):
         if self.peek('bvalid')==1:
             Bid = self.peek('bid')
-            ii = 0;
-            while ii < len(self.Bscore):
-                if self.Bscore[ii][0] == Bid:
-                    logs.log_correct('BVALID %s bid=%x bresp=%x' % (self.Name,Bid,self.peek('bresp')))
-                    self.Bscore.pop(ii)
-                    ii = 10000
-                else:
-                    ii += 1
-            if (ii!=10000):
-                logs.log_error('BVALID %s not found bid=%x bresp=%x' % (self.Name,Bid,self.peek('bresp')))
+            Bresp = self.peek('bresp')
+            if self.Bscore == []:
+                logs.log_error('BVALID %s arrived to empty expectant queue bid=%x bresp=%x' % (self.Name,Bid,Bresp))
+            else:                
+                ii = 0;
+                while ii < len(self.Bscore):
+                    if self.Bscore[ii][0] == Bid:
+                        logs.log_correct('BVALID %s bid=%x bresp=%x' % (self.Name,Bid,Bresp))
+                        self.Bscore.pop(ii)
+                        ii = 10000
+                    else:
+                        ii += 1
+                if (ii!=10000):
+                    logs.log_error('BVALID %s not found bid=%x bresp=%x lenqueue=%d' % (self.Name,Bid,Bresp,len(self.Bscore)))
             self.force('bready','1')
         else:
             self.force('bready','0')
