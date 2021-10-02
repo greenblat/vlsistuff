@@ -9,45 +9,63 @@ import logs
 
 
 def main():
-    if len(sys.argv)==1:
-        Fname = 'deep.list'
-    else:
+    if len(sys.argv)>1:
         Fname = sys.argv[1]
-    work(Fname)
+    else:
+        Fname = 'deep.list'
 
-def work(Fname):
+    if len(sys.argv)>2:
+        Prefix = sys.argv[2]
+    else:
+        Prefix = 'panic'
+
+
+
+    work(Fname,Prefix)
+
+def work(Fname,Prefix):
     if not os.path.exists(Fname):
         print('cannot open "%s" file, if parameter not given, i look for "deep.list" file.'%Fname)
         return
     
     File = open(Fname)
-    work2(File)
+    Fout,List = work2(File,Prefix)
+    work3(Fout,List)
     File.close()
+    Fout.close()
 
-def work2(File):
-    Fout = open('panics.py','w')
+def work3(Fout,List):
+    Fout.write('def snapshot():\n')
+    for Net in List:
+        Str = '    logs.log_info("SNP %x  XXX" % logs.peek("XXX"))\n'
+        Str = Str.replace('XXX',Net)
+        Fout.write(Str)
+
+
+
+def work2(File,Prefix):
+    Fout = open('%ss.py' % Prefix,'w')
     Fout.write(HEADER)
+    List = []
     while 1:
         line = File.readline()
         if line=='':
             Fout.write(FOOTER)
-            Fout.close()
-            return
+            return Fout,List
         wrds = line.split()
         if len(wrds)==0:
             pass
         elif (wrds[0]=='son:'):
             pass
-        elif (wrds[0]=='reg:'):
-            pass
         elif (wrds[0]=='module:'):
             Path = wrds[2]
-        elif (wrds[0]=='net:'):
+        elif (wrds[0] in ['reg:','net:']):
             Net = wrds[1]
             ww = Net.split('.')
             Panic = ww[-1]
-            if Panic.startswith('panic'):
-                Fout.write('    panics += monitorPanic("%s.%s")\n'%(Path,Panic))
+            if Panic.startswith(Prefix) or Panic.endswith(Prefix):
+                Fout.write('    %ss += monitorStuff("%s.%s")\n'%(Prefix,Path,Panic))
+                List.append("%s.%s" % (Path,Panic))
         elif (wrds[0]=='arr:'):
             pass
         else:
@@ -56,7 +74,7 @@ def work2(File):
 HEADER='''
 import logs
 import veri
-def monitorPanic(Net):
+def monitorStuff(Net):
     Val = logs.peek(Net)
     if Val!=0:
         logs.log_error('PANIC activated on %s %s'%(Net,veri.peek(Net)))
@@ -64,7 +82,7 @@ def monitorPanic(Net):
     return 0
 
 
-def monitorPanics():
+def monitorStuffs():
     panics=0
 '''
 FOOTER='''

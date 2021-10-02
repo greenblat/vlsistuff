@@ -4,9 +4,10 @@ module syncfifo #(parameter WID = 32, parameter DEPTH=8, parameter AWID = $clog2
     ,input vldin, input [WID-1:0] din, output full
     ,input readout, output [WID-1:0] dout, output empty
     ,output [15:0] count
+    ,input softreset
+    ,output overflow
 );
 
-wire softreset = 1'b0;
 reg [AWID:0] int_count;
 assign count = int_count;
 parameter DEPTH1 = DEPTH-1;
@@ -22,6 +23,7 @@ always @(posedge clk) begin
         fifos[wptr] <= din;
     end 
 end
+assign overflow = vldin && full;
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         wptr <= 0; rptr <= 0; int_count<=0;

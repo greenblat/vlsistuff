@@ -169,10 +169,13 @@ def createCode(Module):
             else:
                 Str = Str.replace('OUT',Obj.Name+'_'+Obj.Outputs[0])
                 defineWires(Fout,Obj.Name+'_'+Obj.Outputs[0])
-            for ind,Dst in enumerate(Obj.Inputs):
+            for ind,Src in enumerate(Obj.Inputs):
                 BEF = ['AA','BB','CC','DD'][ind]
-                Str = Str.replace(BEF,Dst+'_'+Obj.Name)
-                defineWires(Fout,Dst+'_'+Obj.Name)
+                if Src.startswith('mst'):
+                    Str = Str.replace(BEF,Src)
+                else:
+                    Str = Str.replace(BEF,Src+'_'+Obj.Name)
+                    defineWires(Fout,Src+'_'+Obj.Name)
 
             Fout.write(Str)
 
