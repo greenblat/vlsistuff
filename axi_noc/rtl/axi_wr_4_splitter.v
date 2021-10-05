@@ -102,7 +102,7 @@ module axi_wr_4_splitter #(parameter EXTRAS = 8, parameter IDWID=4, parameter DW
 );
 
 localparam AWIDE = IDWID + 32 + 8 + EXTRAS + 2;
-wire [AWIDE-1:0] new_aw_entry =   { awid ,awaddr ,awlen ,awextras ,awburst };
+wire [AWIDE-1:0] new_aw_entry =   { awid ,awlen ,awextras ,awburst,awaddr };
 wire aw_empty,aw_full;
 wire [AWIDE-1:0] active_aw_entry;
 wire readout_aw_fifo;
@@ -123,10 +123,10 @@ wire [DWID-1:0] work_wdata;
 wire [WSTRB-1:0] work_wstrb;
 wire work_wlast;
 syncfifo_sampled #(DWID+WSTRB+1,8) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid && wready)
-    ,.din({wdata,wstrb,wlast})
+    ,.din({wstrb,wlast,wdata})
     ,.empty(w_empty),.full(w_full)
     ,.readout(readout_w_fifo)
-    ,.dout({work_wdata,work_wstrb,work_wlast})
+    ,.dout({work_wstrb,work_wlast,work_wdata})
     ,.count()
     ,.softreset(1'b0)
     ,.overflow(panic_w_fifo)
@@ -160,7 +160,7 @@ wire [31:0] work_awaddr;
 wire [7:0] work_awlen;
 wire [EXTRAS-1:0] work_awextras;
 wire [1:0] work_awburst;
-assign {work_awid ,work_awaddr ,work_awlen ,work_awextras ,work_awburst} = active_aw_entry ;
+assign {work_awid ,work_awlen ,work_awextras ,work_awburst,work_awaddr} = active_aw_entry ;
 
 wire a_start = !aw_empty && (work_awaddr[31:30] == 0);
 wire b_start = !aw_empty && (work_awaddr[31:30] == 1);
@@ -173,29 +173,29 @@ assign readout_aw_fifo = !order_fifo_full && !aw_empty && (
     (c_start && c_awready) ||
     (d_start && d_awready)  
 );
-assign a_awvalid = a_start;
-assign b_awvalid = b_start;
-assign c_awvalid = c_start;
-assign d_awvalid = d_start;
+assign a_awvalid = a_start && !order_fifo_full;
+assign b_awvalid = b_start && !order_fifo_full;
+assign c_awvalid = c_start && !order_fifo_full;
+assign d_awvalid = d_start && !order_fifo_full;
 
-assign a_wvalid = (whosnow==1) && !w_empty ;
-assign b_wvalid = (whosnow==2) && !w_empty ;
-assign c_wvalid = (whosnow==3) && !w_empty ;
-assign d_wvalid = (whosnow==4) && !w_empty ;
+assign a_wvalid = !order_fifo_empty && (whosnow==1) && !w_empty ;
+assign b_wvalid = !order_fifo_empty && (whosnow==2) && !w_empty ;
+assign c_wvalid = !order_fifo_empty && (whosnow==3) && !w_empty ;
+assign d_wvalid = !order_fifo_empty && (whosnow==4) && !w_empty ;
 
 assign a_wdata = a_wvalid ? work_wdata : 0;
 assign b_wdata = b_wvalid ? work_wdata : 0;
 assign c_wdata = c_wvalid ? work_wdata : 0;
 assign d_wdata = d_wvalid ? work_wdata : 0;
 
-assign a_wlast = work_wlast;
-assign b_wlast = work_wlast;
-assign c_wlast = work_wlast;
-assign d_wlast = work_wlast;
-assign a_wstrb = work_wstrb;
-assign b_wstrb = work_wstrb;
-assign c_wstrb = work_wstrb;
-assign d_wstrb = work_wstrb;
+assign a_wlast = a_wvalid ? work_wlast :0;
+assign b_wlast = b_wvalid ? work_wlast :0;
+assign c_wlast = c_wvalid ? work_wlast :0;
+assign d_wlast = d_wvalid ? work_wlast :0;
+assign a_wstrb = a_wvalid ? work_wstrb :0;
+assign b_wstrb = b_wvalid ? work_wstrb :0;
+assign c_wstrb = c_wvalid ? work_wstrb :0;
+assign d_wstrb = d_wvalid ? work_wstrb :0;
 
 
 wire back_bid_a_fifo_empty,back_bid_a_fifo_full;
@@ -280,30 +280,30 @@ syncfifo_sampled #(IDWID+2+2,4) b_fifo (.clk(clk),.rst_n(rst_n)
 );
 assign bvalid = !b_empty;
 
-assign a_awaddr = {work_awaddr[29:0],2'b0};
-assign b_awaddr = {work_awaddr[29:0],2'b0};
-assign c_awaddr = {work_awaddr[29:0],2'b0};
-assign d_awaddr = {work_awaddr[29:0],2'b0};
+assign a_awaddr = a_awvalid ?  {work_awaddr[29:0],2'b0} : 0;
+assign b_awaddr = b_awvalid ?  {work_awaddr[29:0],2'b0} : 0;
+assign c_awaddr = c_awvalid ?  {work_awaddr[29:0],2'b0} : 0;
+assign d_awaddr = d_awvalid ?  {work_awaddr[29:0],2'b0} : 0;
 
-assign a_awlen = work_awlen;
-assign b_awlen = work_awlen;
-assign c_awlen = work_awlen;
-assign d_awlen = work_awlen;
+assign a_awlen = a_awvalid ?  work_awlen : 0;
+assign b_awlen = b_awvalid ?  work_awlen : 0;
+assign c_awlen = c_awvalid ?  work_awlen : 0;
+assign d_awlen = d_awvalid ?  work_awlen : 0;
 
-assign a_awextras = work_awextras;
-assign b_awextras = work_awextras;
-assign c_awextras = work_awextras;
-assign d_awextras = work_awextras;
+assign a_awextras = a_awvalid ?  work_awextras : 0;
+assign b_awextras = b_awvalid ?  work_awextras : 0;
+assign c_awextras = c_awvalid ?  work_awextras : 0;
+assign d_awextras = d_awvalid ?  work_awextras : 0;
 
-assign a_awburst = work_awburst;
-assign b_awburst = work_awburst;
-assign c_awburst = work_awburst;
-assign d_awburst = work_awburst;
+assign a_awburst = a_awvalid ?  work_awburst : 0;
+assign b_awburst = b_awvalid ?  work_awburst : 0;
+assign c_awburst = c_awvalid ?  work_awburst : 0;
+assign d_awburst = d_awvalid ?  work_awburst : 0;
 
-assign a_awid = work_awid;
-assign b_awid = work_awid;
-assign c_awid = work_awid;
-assign d_awid = work_awid;
+assign a_awid = a_awvalid ?  work_awid : 0;
+assign b_awid = b_awvalid ?  work_awid : 0;
+assign c_awid = c_awvalid ?  work_awid : 0;
+assign d_awid = d_awvalid ?  work_awid : 0;
 
 
 reg [7:0] a_bcount,b_bcount,c_bcount,d_bcount;

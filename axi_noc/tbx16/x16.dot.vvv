@@ -1,0 +1,44 @@
+#import random
+
+
+digraph x16 {
+
+
+#for YY in range(4):
+#    for  XX in range(4):
+#        II = XX+YY*4
+#        JJ = YY*4
+mstII -> splitII ;
+splitII -> mergeJJ ;
+splitII -> merge<>JJ+1<> ;
+splitII -> merge<>JJ+2<> ;
+splitII -> merge<>JJ+3<> ;
+#
+
+
+#for II in range(16):
+mergeII       -> split<>100+II<> ;
+#
+
+
+#MERGES0 = list(range(16))+list(range(16))+list(range(16))+list(range(16))
+#random.shuffle(MERGES0)
+
+#for II in range(16):
+#    USED = []
+#    for JJ in range(4):
+#        KK = 0 
+#        while MERGES0[KK] in USED:
+#            KK += 1
+#        USED.append(MERGES0[KK])
+#        M0 = MERGES0.pop(KK)
+split<>100+II<>  -> merge<>200+M0<> ;
+#
+
+
+#for II in range(16):
+merge<>200+II<> -> slaveII ;
+#
+
+}
+

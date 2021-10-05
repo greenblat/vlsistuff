@@ -1,0 +1,19 @@
+
+drv address 0x1000
+drv lens   1 2 3 4 8
+wait 10
+drv masters  0 1 2 3
+drv address 0xc0000500 0x80000030 0x40000500 0x00000030 
+drv rd_enable
+wait 1000
+drv rd_disable
+wait 1000
+mst0 waitNotBusy 10000
+mst1 waitNotBusy 10000
+mst2 waitNotBusy 10000
+mst3 waitNotBusy 10000
+wait 300
+finish
+
+
+

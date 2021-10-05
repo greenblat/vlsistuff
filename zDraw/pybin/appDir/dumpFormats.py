@@ -4,6 +4,7 @@ import string,os,sys
 import module_class
 import newRtl
 import logs
+import dumpClassiq
 
 class connectivityClass:
     def __init__(self,Glbs,Root):
@@ -282,8 +283,10 @@ class connectivityClass:
 ##             else:
 ##                print('warning! %s ignored for rtl verilog %s %s' % (Type,Inst,Obj.conns)) 
 
-    def dumpVerilog(self,File,Rtl):
-        if Rtl:
+    def dumpVerilog(self,File,Rtl,Classiq):
+        if Classiq:
+            dumpClassiq.dumpClassiq(self,self.Mod,File)
+        elif Rtl:
             self.createModuleClass()
             newRtl.createNewRtl(self.Modx)
             self.Modx.dump_verilog(File)
@@ -317,6 +320,7 @@ class connectivityClass:
                 ObjParams = '#(%s)'%(','.join(PP))
             else:
                 ObjParams= '#(%d,%d)'%(Obj.Point)
+                ObjParams= ''
             File.write('%s %s %s ('%(Obj.Type,ObjParams,Name))
             if Inst in self.Conns:
                 Pref = ''

@@ -163,6 +163,7 @@ def main():
         if Fname[0]=='-':
             was_minus=True
         if not was_minus:
+            Fname = figure_out_the_file(Fname)
             if os.path.exists(Fname):
                 dbase.load_dbase_file(Fname)
             else:
@@ -217,7 +218,11 @@ def doesntHaveExtension(Txt):
     ww = Txt.split('/')
     Fname = ww[-1]
     return not (endsWith(Fname,'.zdraw')or endsWith(Fname,'.zpic'))
+
+
 def figure_out_the_file(Fname):
+    Fname  = os.path.expanduser(Fname)
+    Fname  = os.path.abspath(Fname)
     if os.path.exists(Fname):
         return Fname
     if doesntHaveExtension(Fname):
@@ -454,15 +459,28 @@ def use_command_wrds(wrds):
         stopRunning()
         sys.exit()
     elif wrds[0]=='save':
-        if Root in Glbs.associated_dir:
+        if len(wrds)>1:
+            WW = wrds[1].split('/')
+            if WW[-1].startswith(Root):
+                if '.zdraw' not in WW[1]:
+                    Fname =   wrds[1]+'.zdraw'
+                Fname =  wrds[1]
+            else:
+                Fname =  wrds[1]+'/'+Root+'.zdraw'
+            Fname  = os.path.expanduser(Fname) 
+            Fname  = os.path.abspath(Fname) 
+        elif Root in Glbs.associated_dir:
             Fname = '%s/%s.zdraw'%(Glbs.associated_dir[Root],Root)
         else:
             Fname = '%s.zdraw'%Root
         dbase.log_info('saving %s to %s file'%(Root,Fname))
-        File = open(Fname,'w')
-        Glbs.details[Root].save(File)
-        File.close()
-        Glbs.details[Root].touched(False)
+        try:
+            File = open(Fname,'w')
+            Glbs.details[Root].save(File)
+            File.close()
+            Glbs.details[Root].touched(False)
+        except:
+            dbase.log_info('Failed to open "%s" for saving' % Fname)
     elif wrds[0]=='change':
         List = list(Glbs.details.keys())
         List.sort()
@@ -514,22 +532,23 @@ def use_command_wrds(wrds):
         GG = connectivityClass(Glbs,Root)
         GG.dumpSpice(File)
         File.close()
-    elif ('dump' in wrds[0])or('verilog' in wrds[0])or('rtl' in wrds[0]):
+    elif ('dump' in wrds[0])or('verilog' in wrds[0])or('rtl' in wrds[0])or('classiq' in wrds[0]):
         Rtl = 'rtl' in wrds[0]
+        Classiq = 'classiq' in wrds[0]
         if len(wrds)==1:
             Root = Glbs.get_context('root')
             Fname = '%s.v'%(Root)
             File = open(Fname,'w')
             dbase.log_info('writing verilog file "%s.v"'%Root)
             GG = connectivityClass(Glbs,Root)
-            GG.dumpVerilog(File,Rtl)
+            GG.dumpVerilog(File,Rtl,Classiq)
             File.close()
         elif len(wrds)==2:
             Fname = wrds[1]
             File = open(Fname,'w')
             Root = Glbs.get_context('root')
             GG = connectivityClass(Glbs,Root)
-            GG.dumpVerilog(File,Rtl)
+            GG.dumpVerilog(File,Rtl,Classiq)
             File.close()
         elif len(wrds)==3:
             Fname = wrds[2]
@@ -537,10 +556,10 @@ def use_command_wrds(wrds):
             if wrds[1]=='*':
                 for Name in Glbs.details:
                     GG = connectivityClass(Glbs,Root)
-                    GG.dumpVerilog(File,Rtl)
+                    GG.dumpVerilog(File,Rtl,Classiq)
             else:
                 GG = connectivityClass(Glbs,wrds[1])
-                GG.dumpVerilog(File,Rtl)
+                GG.dumpVerilog(File,Rtl,Classiq)
             File.close()
 
     elif ('sys' == wrds[0]):

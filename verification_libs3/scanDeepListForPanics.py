@@ -26,6 +26,10 @@ def main():
 def work(Fname,Prefix):
     if not os.path.exists(Fname):
         print('cannot open "%s" file, if parameter not given, i look for "deep.list" file.'%Fname)
+        Fout = open('%ss.py' % Prefix,'w')
+        Fout.write(EmptyPanics)
+        Fout.close()
+
         return
     
     File = open(Fname)
@@ -88,6 +92,15 @@ def monitorStuffs():
 FOOTER='''
     veri.force('tb.Panics',str(panics))
 '''
+
+EmptyPanics = '''
+def monitorStuffs():
+    return
+
+'''
+
+
+
 
 if __name__ == '__main__':
     main()

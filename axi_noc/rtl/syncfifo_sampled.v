@@ -47,4 +47,18 @@ always @(posedge clk or negedge rst_n) begin
         empty <= (next_count == 0);
     end 
 end
+
+
+always @(posedge clk) begin
+     #1; 
+     if (rst_n == 1) begin
+         if (vldin)  $display("@%d  VLDIN %m cnt=%d  %h",tb.cycles,count,din);
+         if (readout)  $display("@%d  READOUT %m cnt=%d  %h",tb.cycles,count,dout);
+     end 
+end
+
+
+
+
+
 endmodule

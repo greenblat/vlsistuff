@@ -7,7 +7,7 @@ sys.path.append('%s/verification_libs3'%NewName)
 import logs
 Monitors=[]
 cycles=0
-GIVEUP_TIMEOUT = 1000    # how many cycles to run before retirment. 
+GIVEUP_TIMEOUT = 10000    # how many cycles to run before retirment. 
 
 
 import axiMaster
@@ -18,7 +18,7 @@ mb = axiMaster.axiMasterClass('tb',Monitors,'b_','','MB')
 mc = axiMaster.axiMasterClass('tb',Monitors,'c_','','MC')
 md = axiMaster.axiMasterClass('tb',Monitors,'d_','','MD')
 
-slv = axiSlave.axiSlaveClass('tb',Monitors)
+slv = axiSlave.axiSlaveClass('tb',Monitors,'','','SLV')
 
 import sequenceClass
 seq = sequenceClass.sequenceClass('tb',Monitors,'',[('ma',ma),('mb',mb),('mc',mc),('md',md),('slv',slv)])

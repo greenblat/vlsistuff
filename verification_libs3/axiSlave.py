@@ -153,11 +153,16 @@ class axiSlaveClass:
             self.waitread -= 1
             self.idleread()
             return
-        if self.peek('rready')==0: 
-            self.idleread()
-            return
         if self.rqueue==[]: 
             self.idleread()
+            return
+        if self.peek('rready')==0: 
+            (rlast,rid,rdata) = self.rqueue[0]
+            self.force('rvalid',1)
+            self.force('rlast',rlast)
+            self.force('rid',rid)
+            self.force('rresp',0)
+            self.force('rdata',rdata)
             return
         if self.rqueue[0]=='pop':
             self.rqueue.pop(0)
@@ -225,12 +230,9 @@ class axiSlaveClass:
             if Add in self.Ram:
                 AA = '%02x'%(self.Ram[Add])
                 takenram += 1
-#                logs.log_info('axiSlave addr in ram %x %s %d %s'%(Add,AA,Incr,rdata))
             else:
-#                AA = '%02x'%(0xff)
                 AA = '%02x'%(self.bytex)
                 self.bytex = (self.bytex+1) & 0xff
-#                logs.log_info('axiSlave addr not in ram %x %s %d %s'%(Add,AA,Incr,rdata))
             rdata = AA + rdata
         self.rqueue.append((rlast,rid,rdata))
         logs.log_info('axiSlave taken from ram %d bytes  rdata=%s addr=%08x rid=%x'%(takenram,rdata,Addr,rid))

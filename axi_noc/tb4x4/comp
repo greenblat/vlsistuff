@@ -1,0 +1,21 @@
+#! /bin/csh -f
+
+../llbin/makeNoc.py x4x4.dot
+
+dot  x4x4.dot -Tsvg -o x4x4.svg
+
+iverilog -o tb.vvp  -g2012  \
+    x4x4_tb.v \
+    x4x4_noc.v \
+    ../rtl/axi_4_merger.v \
+    ../rtl/axi_4_splitter.v \
+    ../rtl/axi_wr_4_merger.v \
+    ../rtl/axi_wr_4_splitter.v \
+    ../rtl/axi_rd_4_merger.v \
+    ../rtl/axi_rd_4_splitter.v \
+    ../rtl/syncfifo.v \
+    ../rtl/syncfifo_sampled.v \
+    ../rtl/axi2ram.v \
+
+
+

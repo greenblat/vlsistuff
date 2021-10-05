@@ -1,0 +1,37 @@
+
+
+
+
+digraph x4x4 {
+
+mst0 -> splitter0 ;
+mst1 -> splitter1 ;
+mst2 -> splitter2 ;
+mst3 -> splitter3 ;
+
+splitter0 -> merger0 ;
+splitter1 -> merger0 ;
+splitter2 -> merger0 ;
+splitter3 -> merger0 ;
+
+splitter0 -> merger1 ;
+splitter1 -> merger1 ;
+splitter2 -> merger1 ;
+splitter3 -> merger1 ;
+
+splitter0 -> merger2 ;
+splitter1 -> merger2 ;
+splitter2 -> merger2 ;
+splitter3 -> merger2 ;
+
+splitter0 -> merger3 ;
+splitter1 -> merger3 ;
+splitter2 -> merger3 ;
+splitter3 -> merger3 ;
+
+merger0 -> slv0 ;
+merger1 -> slv1 ;
+merger2 -> slv2 ;
+merger3 -> slv3 ;
+
+}

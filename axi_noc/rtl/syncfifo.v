@@ -46,13 +46,13 @@ always @(posedge clk or negedge rst_n) begin
     end 
 end
 
-// always @(posedge clk) begin
-//     #1;
-//     if (rst_n == 1) begin
-//         if (vldin === 1'bx)  $display("VLDIN X %m");
-//         if (readout === 1'bx) $display("READOUT X %m");
-//     end
-// end
+always @(posedge clk) begin
+     #1;
+     if (rst_n == 1) begin
+         if (vldin)  $display("@%d  VLDIN %m cnt=%d  %h",tb.cycles,count,din);
+         if (readout)  $display("@%d  READOUT %m cnt=%d  %h",tb.cycles,count,dout);
+     end
+end
 endmodule
 
 

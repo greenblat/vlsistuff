@@ -65,6 +65,7 @@ class sequenceClass:
         self.Subs = {}
         self.Sons = []
         self.Seed = 0
+        self.onFinishes = False
 
     def restart(self):
         self.Ptr = 0
@@ -311,7 +312,7 @@ class sequenceClass:
         if wrds[0] == 'finish':
             logs.log_info('finishing on sequence')
             self.agentsFinish()
-            logs.finish('\033[0m\b sequence %s seed=%d '%(self.testFileName,self.Seed))
+            logs.finish('sequence %s seed=%d '%(self.testFileName,self.Seed))
             sys.exit()
         if (wrds[0] == 'marker'):
             veri.force('%s.marker'%TB,wrds[1])
@@ -513,6 +514,8 @@ class sequenceClass:
             return 0
 
     def agentsFinish(self):
+        if self.onFinishes:
+            self.onFinishes()
         for Agent in self.agents:
             Obj = self.agents[Agent]
             if 'onFinish' in dir(Obj):

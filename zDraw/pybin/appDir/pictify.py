@@ -18,6 +18,11 @@ def main():
     Fout.write('end\n')
     Fout.close()
 
+def pictify():
+    return
+
+
+
 
 def make_limits(Max):
     MinX=999999
@@ -136,5 +141,5 @@ def get_cell_name(Fname):
 
 
 
-
-main()
+if __name__ == '__main__':
+    main()

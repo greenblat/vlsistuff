@@ -1,0 +1,12 @@
+#! /bin/csh -f
+set TEST = test1
+comp
+~/verification_libs3/scanDeepListForPanics.py
+~/verification_libs3/scanDeepListForPanics.py deep.list count
+
+
+simv +SEQ=$TEST.seq +LOG=$TEST
+
+
+
+

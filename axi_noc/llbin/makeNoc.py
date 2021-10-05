@@ -144,6 +144,12 @@ def createCode(Module):
         Obj = Items[Item]
         if Obj.Kind == 'splitter':
             Str = SPLITTER.replace('NAME',Obj.Name)
+            if len(Obj.Inputs)!= 1:
+                print('Error! splitter %s must have just one input "%s"' % (Obj.Name,Obj.Inputs))
+                sys.exit()
+            if (len(Obj.Outputs)>4)or(len(Obj.Outputs)<2):
+                print('Error! splitter %s must have outputs 2,3 or 4 "%s"' % (Obj.Name,Obj.Outputs))
+                sys.exit()
             if Obj.Inputs[0].startswith('mst'):
                 Str = Str.replace('IN',Obj.Inputs[0])
             else:
@@ -161,9 +167,11 @@ def createCode(Module):
             Str = MERGER.replace('NAME',Obj.Name)
             Dst = Obj.Outputs[0]
             if Obj.Outputs == []:
-                print('merger %s has no output' % (Obj.Name))
-            elif len(Obj.Outputs)>1:
-                print('merger %s has too many outputs' % (Obj.Name))
+                print('Error! merger %s has no output' % (Obj.Name))
+                sys.exit()
+            elif len(Obj.Outputs)!=1:
+                print('Error! merger %s can have only  one output' % (Obj.Name))
+                sys.exit()
             elif Dst.startswith('slv'):
                 Str = Str.replace('OUT',Dst)
             else:

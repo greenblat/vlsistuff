@@ -84,13 +84,13 @@ module axi_rd_4_merger #(parameter IDWID=4,parameter DWID=64, parameter EXTRAS=8
 
 
 wire a_ar_full,a_ar_empty;
-assign a_arready = !a_ar_full;
+assign a_arready = !a_ar_full && (a_rcount < 8);
 wire b_ar_full,b_ar_empty;
-assign b_arready = !b_ar_full;
+assign b_arready = !b_ar_full && (b_rcount < 8);
 wire c_ar_full,c_ar_empty;
-assign c_arready = !c_ar_full;
+assign c_arready = !c_ar_full && (c_rcount < 8);
 wire d_ar_full,d_ar_empty;
-assign d_arready = !d_ar_full;
+assign d_arready = !d_ar_full && (d_rcount < 8);
 
 localparam AWIDE = IDWID + 32 + 8 + EXTRAS + IDWID;
 wire [AWIDE-1:0] new_a_ar_entry = { a_araddr ,a_arlen ,a_arextras ,a_arburst ,a_arid };
@@ -216,24 +216,49 @@ assign c_rvalid =  !c_ids_empty && rvalid && (rid == id7);
 assign d_rvalid =  !d_ids_empty && rvalid && (rid == id8);
 
 
-assign a_rdata = rdata;
-assign b_rdata = rdata;
-assign c_rdata = rdata;
-assign d_rdata = rdata;
+assign a_rdata = a_rvalid ? rdata : 0;
+assign b_rdata = b_rvalid ? rdata : 0;
+assign c_rdata = c_rvalid ? rdata : 0;
+assign d_rdata = d_rvalid ? rdata : 0;
 
-assign a_rresp = rresp;
-assign b_rresp = rresp;
-assign c_rresp = rresp;
-assign d_rresp = rresp;
+assign a_rresp = a_rvalid ? rresp : 0;
+assign b_rresp = b_rvalid ? rresp : 0;
+assign c_rresp = c_rvalid ? rresp : 0;
+assign d_rresp = d_rvalid ? rresp : 0;
 
-assign a_rlast = rlast;
-assign b_rlast = rlast;
-assign c_rlast = rlast;
-assign d_rlast = rlast;
+assign a_rlast = a_rvalid ? rlast : 0;
+assign b_rlast = b_rvalid ? rlast : 0;
+assign c_rlast = c_rvalid ? rlast : 0;
+assign d_rlast = d_rvalid ? rlast : 0;
 
 assign rready = d_rvalid ? d_rready : c_rvalid ? c_rready : b_rvalid ? b_rready : a_rready;
 
+reg [4:0] a_rcount,b_rcount,c_rcount,d_rcount;
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        a_rcount <=0; b_rcount <=0; c_rcount <=0; d_rcount <=0; 
+    end else begin
+        if ((a_arvalid && a_arready) && !(a_rvalid && a_rlast && a_rready)) 
+            a_rcount <= a_rcount + 1;
+        else if (!(a_arvalid && a_arready) &&  (a_rvalid && a_rlast && a_rready)) 
+            a_rcount <= a_rcount - 1;
 
+        if ((b_arvalid && b_arready) && !(b_rvalid && b_rlast && b_rready)) 
+            b_rcount <= b_rcount + 1;
+        else if (!(b_arvalid && b_arready) &&  (b_rvalid && b_rlast && b_rready)) 
+            b_rcount <= b_rcount - 1;
+
+        if ((c_arvalid && c_arready) && !(c_rvalid && c_rlast && c_rready)) 
+            c_rcount <= c_rcount + 1;
+        else if (!(c_arvalid && c_arready) &&  (c_rvalid && c_rlast && c_rready)) 
+            c_rcount <= c_rcount - 1;
+
+        if ((d_arvalid && d_arready) && !(d_rvalid && d_rlast && d_rready)) 
+            d_rcount <= d_rcount + 1;
+        else if (!(d_arvalid && d_arready) &&  (d_rvalid && d_rlast && d_rready)) 
+            d_rcount <= d_rcount - 1;
+    end
+end
 endmodule
 
 

@@ -1,0 +1,48 @@
+
+
+
+
+
+digraph x16x4 {
+
+mst0 -> merger0 ;
+mst1 -> merger0 ;
+mst2 -> merger0 ;
+mst3 -> merger0 ;
+
+mst4 -> merger1 ;
+mst5 -> merger1 ;
+mst6 -> merger1 ;
+mst7 -> merger1 ;
+
+mst8  -> merger2 ;
+mst9  -> merger2 ;
+mst10 -> merger2 ;
+mst11 -> merger2 ;
+
+mst12 -> merger3 ;
+mst13 -> merger3 ;
+mst14 -> merger3 ;
+mst15 -> merger3 ;
+
+
+
+merger0 -> merger4 ;
+merger1 -> merger4 ;
+merger2 -> merger4 ;
+merger3 -> merger4 ;
+
+
+merger4 -> splitter0 ;
+
+splitter0 -> slv0 ;
+splitter0 -> slv1 ;
+splitter0 -> slv2 ;
+splitter0 -> slv3 ;
+
+
+
+
+}
+
+

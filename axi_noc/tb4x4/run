@@ -1,0 +1,11 @@
+#! /bin/csh -f
+
+comp
+~/verification_libs3/scanDeepListForPanics.py 
+~/verification_libs3/scanDeepListForPanics.py deep.list count
+
+simv +SEQ=test0.seq +LOG=test0
+
+
+
+

@@ -1,0 +1,11 @@
+
+tb*/__pycache__
+tb0/*
+tb1/*
+tb2/*
+tb3/*
+*/verilog.dump
+*/tb.vvp
+*/*.log*
+*/dump.vcd
+

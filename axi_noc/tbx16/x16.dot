@@ -1,0 +1,309 @@
+
+
+digraph x16 {
+
+
+
+mst0 -> split0 ;
+split0 -> merge0 ;
+split0 -> merge1 ;
+split0 -> merge2 ;
+split0 -> merge3 ;
+
+mst1 -> split1 ;
+split1 -> merge0 ;
+split1 -> merge1 ;
+split1 -> merge2 ;
+split1 -> merge3 ;
+
+mst2 -> split2 ;
+split2 -> merge0 ;
+split2 -> merge1 ;
+split2 -> merge2 ;
+split2 -> merge3 ;
+
+mst3 -> split3 ;
+split3 -> merge0 ;
+split3 -> merge1 ;
+split3 -> merge2 ;
+split3 -> merge3 ;
+
+mst4 -> split4 ;
+split4 -> merge4 ;
+split4 -> merge5 ;
+split4 -> merge6 ;
+split4 -> merge7 ;
+
+mst5 -> split5 ;
+split5 -> merge4 ;
+split5 -> merge5 ;
+split5 -> merge6 ;
+split5 -> merge7 ;
+
+mst6 -> split6 ;
+split6 -> merge4 ;
+split6 -> merge5 ;
+split6 -> merge6 ;
+split6 -> merge7 ;
+
+mst7 -> split7 ;
+split7 -> merge4 ;
+split7 -> merge5 ;
+split7 -> merge6 ;
+split7 -> merge7 ;
+
+mst8 -> split8 ;
+split8 -> merge8 ;
+split8 -> merge9 ;
+split8 -> merge10 ;
+split8 -> merge11 ;
+
+mst9 -> split9 ;
+split9 -> merge8 ;
+split9 -> merge9 ;
+split9 -> merge10 ;
+split9 -> merge11 ;
+
+mst10 -> split10 ;
+split10 -> merge8 ;
+split10 -> merge9 ;
+split10 -> merge10 ;
+split10 -> merge11 ;
+
+mst11 -> split11 ;
+split11 -> merge8 ;
+split11 -> merge9 ;
+split11 -> merge10 ;
+split11 -> merge11 ;
+
+mst12 -> split12 ;
+split12 -> merge12 ;
+split12 -> merge13 ;
+split12 -> merge14 ;
+split12 -> merge15 ;
+
+mst13 -> split13 ;
+split13 -> merge12 ;
+split13 -> merge13 ;
+split13 -> merge14 ;
+split13 -> merge15 ;
+
+mst14 -> split14 ;
+split14 -> merge12 ;
+split14 -> merge13 ;
+split14 -> merge14 ;
+split14 -> merge15 ;
+
+mst15 -> split15 ;
+split15 -> merge12 ;
+split15 -> merge13 ;
+split15 -> merge14 ;
+split15 -> merge15 ;
+
+
+
+
+merge0       -> split100 ;
+
+merge1       -> split101 ;
+
+merge2       -> split102 ;
+
+merge3       -> split103 ;
+
+merge4       -> split104 ;
+
+merge5       -> split105 ;
+
+merge6       -> split106 ;
+
+merge7       -> split107 ;
+
+merge8       -> split108 ;
+
+merge9       -> split109 ;
+
+merge10       -> split110 ;
+
+merge11       -> split111 ;
+
+merge12       -> split112 ;
+
+merge13       -> split113 ;
+
+merge14       -> split114 ;
+
+merge15       -> split115 ;
+
+
+
+
+
+
+split100  -> merge208 ;
+
+split100  -> merge211 ;
+
+split100  -> merge212 ;
+
+split100  -> merge206 ;
+
+split101  -> merge203 ;
+
+split101  -> merge201 ;
+
+split101  -> merge212 ;
+
+split101  -> merge209 ;
+
+split102  -> merge201 ;
+
+split102  -> merge200 ;
+
+split102  -> merge207 ;
+
+split102  -> merge205 ;
+
+split103  -> merge200 ;
+
+split103  -> merge207 ;
+
+split103  -> merge206 ;
+
+split103  -> merge203 ;
+
+split104  -> merge209 ;
+
+split104  -> merge206 ;
+
+split104  -> merge213 ;
+
+split104  -> merge214 ;
+
+split105  -> merge213 ;
+
+split105  -> merge204 ;
+
+split105  -> merge208 ;
+
+split105  -> merge212 ;
+
+split106  -> merge213 ;
+
+split106  -> merge205 ;
+
+split106  -> merge211 ;
+
+split106  -> merge204 ;
+
+split107  -> merge210 ;
+
+split107  -> merge202 ;
+
+split107  -> merge207 ;
+
+split107  -> merge211 ;
+
+split108  -> merge211 ;
+
+split108  -> merge202 ;
+
+split108  -> merge205 ;
+
+split108  -> merge200 ;
+
+split109  -> merge215 ;
+
+split109  -> merge209 ;
+
+split109  -> merge204 ;
+
+split109  -> merge203 ;
+
+split110  -> merge215 ;
+
+split110  -> merge203 ;
+
+split110  -> merge209 ;
+
+split110  -> merge214 ;
+
+split111  -> merge213 ;
+
+split111  -> merge200 ;
+
+split111  -> merge202 ;
+
+split111  -> merge214 ;
+
+split112  -> merge215 ;
+
+split112  -> merge202 ;
+
+split112  -> merge201 ;
+
+split112  -> merge210 ;
+
+split113  -> merge201 ;
+
+split113  -> merge206 ;
+
+split113  -> merge212 ;
+
+split113  -> merge205 ;
+
+split114  -> merge208 ;
+
+split114  -> merge210 ;
+
+split114  -> merge215 ;
+
+split114  -> merge204 ;
+
+split115  -> merge210 ;
+
+split115  -> merge207 ;
+
+split115  -> merge214 ;
+
+split115  -> merge208 ;
+
+
+
+
+merge200 -> slv0 ;
+
+merge201 -> slv1 ;
+
+merge202 -> slv2 ;
+
+merge203 -> slv3 ;
+
+merge204 -> slv4 ;
+
+merge205 -> slv5 ;
+
+merge206 -> slv6 ;
+
+merge207 -> slv7 ;
+
+merge208 -> slv8 ;
+
+merge209 -> slv9 ;
+
+merge210 -> slv10 ;
+
+merge211 -> slv11 ;
+
+merge212 -> slv12 ;
+
+merge213 -> slv13 ;
+
+merge214 -> slv14 ;
+
+merge215 -> slv15 ;
+
+
+}
+
+
