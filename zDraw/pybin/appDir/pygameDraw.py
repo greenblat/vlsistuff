@@ -18,6 +18,7 @@ import renders
 import helpString 
 from dumpFormats import connectivityClass
 import drawVectorText
+import pictify
 
 import cmd  
 class cmdxClass(cmd.Cmd):
@@ -532,6 +533,26 @@ def use_command_wrds(wrds):
         GG = connectivityClass(Glbs,Root)
         GG.dumpSpice(File)
         File.close()
+    elif 'picture' in wrds[0]:
+        if len(wrds)==1:
+            Fname = '%s.zpic'%(Root)
+        elif len(wrds)>=1:
+            Fname = os.path.expanduser(Fname)
+            Fname = os.path.abspath(Fname)
+            ww = Fname.split('/')
+            if ww[-1] == Root:
+                Fname = Fname + '.zpic'
+                ww = Fname.split('/')
+            if ww[-1] not in [Root,Root+'.zpic']:
+                Fname = Fname + '/'+Root+'.zpic'
+        try:
+            File = open(Fname,'w')
+        except:
+            log_error('failed to open zpic file for writing "%s" ' % Fname)
+            File = False
+        if File:
+            pictify.pictify(Glbs,Root,File)
+
     elif ('dump' in wrds[0])or('verilog' in wrds[0])or('rtl' in wrds[0])or('classiq' in wrds[0]):
         Rtl = 'rtl' in wrds[0]
         Classiq = 'classiq' in wrds[0]

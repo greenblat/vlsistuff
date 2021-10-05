@@ -18,8 +18,9 @@ def main():
     Fout.write('end\n')
     Fout.close()
 
-def pictify():
-    return
+def pictify(Glbs,Root,File):
+    File.write('// placeholder for %s.zpic generation\n' % Root)
+    File.close()
 
 
 
