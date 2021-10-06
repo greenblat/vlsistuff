@@ -47,6 +47,7 @@ helpString = '''
        change schematic      : change to another loaded schematic  (similar to load)
        save : save current schematic (or S from graphics window)
        save LongFileName : save current schematic  to specified zdraw file, or directory. file name must be of current root or not mentioned.
+       rename <newName>   : will duplicate current detail and You start editing new version. load can be bring You to original one.
        help : prints this
        print : creates svg and ps images
        dump : dump verilog
@@ -59,7 +60,10 @@ helpString = '''
        all commands can be abreviated to the shortest unique string
 
     invocation:
-        iDraw.py   [<schem_fname> <schem_fname> ...]   [-do [dump|quit] ]
+        zDraw.py   [<schem_fname> <schem_fname> ...]   [-do [dump|quit] ]
+        -do quit  will quit
+        zDraw.py schem.py -do spice -do quit : will load schematic, dump it to spice and quit, without opening graphics. 
+        -include <CommandsFile>  : will execute lines in file, as if typed from terminal. dont put quit in it.
 
 
     special notes:

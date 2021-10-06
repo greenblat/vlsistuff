@@ -19,6 +19,7 @@ import helpString
 from dumpFormats import connectivityClass
 import drawVectorText
 import pictify
+import copy
 
 import cmd  
 class cmdxClass(cmd.Cmd):
@@ -176,6 +177,11 @@ def main():
                 What = sys.argv[ind]
                 use_command_wrds([What])
                 ind += 1
+            elif Fname in ['-source','-include']:
+                ind += 1
+                What = sys.argv[ind]
+                use_command_wrds(['include',What])
+                ind += 1
             else:
                 dbase.log_error('"%s" not known'%sys.argv[ind])
                 ind += 1
@@ -255,10 +261,15 @@ def read_init_file(Fname):
                 dbase.log_error('file "%s" cant be read'%Fname)
             else:
                 dbase.load_dbase_file(Fname)
+        elif (len(wrds)>=2)and(wrds[0] == 'pics_lib'):
+            Was = dbase.get_context('pics_lib')
+            for wrd in wrds[1:]:
+                Was.append(wrd)
+            dbase.set_context('pics_lib',Was) 
         elif (len(wrds)==2):
             Param = wrds[0]
             Value=wrds[1]
-            dbase.log_info('read_init_file set context "%s" "%s"'%(Param,Value))
+#            dbase.log_info('read_init_file set context "%s" "%s"'%(Param,Value))
             if (',') in Value:
                 W1 = Value.split(',')
                 ll = []
@@ -453,12 +464,48 @@ def use_command_wrds(wrds):
     else:
         Glbs.history.append(' '.join(wrds))
     Root=Glbs.get_context('root')
-    if wrds[0] in ['quit','exit']:
+    if wrds[0] in ['source','include']:
+        Fname  = os.path.expanduser(wrds[1]) 
+        Fname  = os.path.abspath(Fname) 
+        try: 
+            Lines = open(Fname).readlines()
+            for line in Lines:
+                wrds0 = line.split()
+                use_command_wrds(wrds0)
+        except:
+            print('failed to open include file "%s" ' % Fname)
+
+    elif wrds[0] in ['quit','exit']:
         Glbs.details[Root].touched('Q')
         Glbs.pleaseExit=True
         Glbs.finished=True
         stopRunning()
         sys.exit()
+    elif wrds[0] in ['zpicslib','picslib']:
+        Dirs = Glbs.get_context('pics_lib')
+        if type(Dirs) is str:
+            Dirs = [Dirs]
+        for Wrd in wrds[1:]:
+            Fname  = os.path.expanduser(Wrd) 
+            Fname  = os.path.abspath(Fname) 
+            if os.path.exists(Fname):
+                if Fname not in Dirs:
+                    Dirs.append(Fname)
+            else:
+                print('Failed to add "%s" to legal paths, as it cannot be opened' % Fname)
+        Glbs.set_context('pics_lib',Dirs)
+        print('PICSLIBS: %s' % str(Dirs))
+
+
+    elif wrds[0]=='rename':
+        New = wrds[1]
+        Glbs.details[New] = copy.deepcopy(Glbs.details[Root])
+        Glbs.details[New].Module = New
+        Glbs.set_context('root',New)
+        Glbs.graphicsChanged=True
+        Glbs.undoStack = []
+        Glbs.redoStack = []
+        
     elif wrds[0]=='save':
         if len(wrds)>1:
             WW = wrds[1].split('/')
@@ -555,23 +602,23 @@ def use_command_wrds(wrds):
                 File.write('%s %s\n' % (Param,Glbs.contexts[Param]))
             pictify.pictify(Glbs,Root,File)
 
-    elif ('dump' in wrds[0])or('verilog' in wrds[0])or('rtl' in wrds[0])or('classiq' in wrds[0]):
+    elif ('dump' in wrds[0])or('verilog' in wrds[0])or('rtl' in wrds[0])or('user' in wrds[0]):
         Rtl = 'rtl' in wrds[0]
-        Classiq = 'classiq' in wrds[0]
+        User = 'user' in wrds[0]
         if len(wrds)==1:
             Root = Glbs.get_context('root')
             Fname = '%s.v'%(Root)
             File = open(Fname,'w')
             dbase.log_info('writing verilog file "%s.v"'%Root)
             GG = connectivityClass(Glbs,Root)
-            GG.dumpVerilog(File,Rtl,Classiq)
+            GG.dumpVerilog(File,Rtl,User)
             File.close()
         elif len(wrds)==2:
             Fname = wrds[1]
             File = open(Fname,'w')
             Root = Glbs.get_context('root')
             GG = connectivityClass(Glbs,Root)
-            GG.dumpVerilog(File,Rtl,Classiq)
+            GG.dumpVerilog(File,Rtl,User)
             File.close()
         elif len(wrds)==3:
             Fname = wrds[2]
@@ -579,10 +626,10 @@ def use_command_wrds(wrds):
             if wrds[1]=='*':
                 for Name in Glbs.details:
                     GG = connectivityClass(Glbs,Root)
-                    GG.dumpVerilog(File,Rtl,Classiq)
+                    GG.dumpVerilog(File,Rtl,User)
             else:
                 GG = connectivityClass(Glbs,wrds[1])
-                GG.dumpVerilog(File,Rtl,Classiq)
+                GG.dumpVerilog(File,Rtl,User)
             File.close()
 
     elif ('sys' == wrds[0]):
