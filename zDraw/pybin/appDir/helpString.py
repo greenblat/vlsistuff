@@ -64,6 +64,38 @@ helpString = '''
 
     special notes:
         if parameter name given with value "$inst" - it will display the instanse name.
+
+
+    .zdrawrc file
+        It can be put in your home dir (~) or current dir or both.
+        the format is simple. each line has two tokens.
+        first token is parameter name, second is parameter value.
+        Any system config param can be overwritten, but here are
+        Some usefull ones:
+
+        pics_lib  /home/global_user/zpic_lib
+        pics_lib  ~/myprivate_zpics
+
+        backgroundColor white
+        screen_proximity 10.0
+        linewidth 1.0 
+        wire_color 0,255,0
+        pic_color 255,255,0
+        param_color 0,150,150
+        geom_color 0,0,255
+        instance_color 150,150,0
+        pic_text_size 0.15
+        param_text_size 0
+        geom_text_size 1.0 
+        grid 0.1 
+        shyParams name,size
+        lineWidth 1.5 
+        vectorTextWidth 1.0 
+
+
+
+
+
 '''
 
 

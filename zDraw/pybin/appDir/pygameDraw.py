@@ -199,20 +199,20 @@ thread1 = myThread(1,'xterm',1)
 
 def load_init_file():
     found=False
-    homepath = '%s/.pyzdraw'%(os.path.expanduser('~'))
-    herepath = '%s/.pyzdraw'%(os.path.abspath('.'))
+    homepath = '%s/.zdrawrc'%(os.path.expanduser('~'))
+    herepath = '%s/.zdrawrc'%(os.path.abspath('.'))
     print('home %s'%homepath)
     print('here %s'%herepath)
     if os.path.exists(homepath):
         read_init_file(homepath)
-        dbase.log_info('home dir .pyzdraw loaded')
+        dbase.log_info('home dir .zdrawrc loaded')
         found=True
     if os.path.exists(herepath):
         read_init_file(herepath)
-        dbase.log_info('pwd dir .pyzdraw loaded')
+        dbase.log_info('pwd dir .zdrawrc loaded')
         found=True
     if not found:
-        dbase.log_warning('no .pyzdraw loaded')
+        dbase.log_warning('no .zdrawrc loaded')
 
 
 def doesntHaveExtension(Txt):
@@ -551,6 +551,8 @@ def use_command_wrds(wrds):
             log_error('failed to open zpic file for writing "%s" ' % Fname)
             File = False
         if File:
+            for Param in Glbs.contexts:
+                File.write('%s %s\n' % (Param,Glbs.contexts[Param]))
             pictify.pictify(Glbs,Root,File)
 
     elif ('dump' in wrds[0])or('verilog' in wrds[0])or('rtl' in wrds[0])or('classiq' in wrds[0]):
