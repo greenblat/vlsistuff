@@ -598,8 +598,6 @@ def use_command_wrds(wrds):
             log_error('failed to open zpic file for writing "%s" ' % Fname)
             File = False
         if File:
-            for Param in Glbs.contexts:
-                File.write('%s %s\n' % (Param,Glbs.contexts[Param]))
             pictify.pictify(Glbs,Root,File)
 
     elif ('dump' in wrds[0])or('verilog' in wrds[0])or('rtl' in wrds[0])or('user' in wrds[0]):

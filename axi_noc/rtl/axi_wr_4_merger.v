@@ -187,10 +187,11 @@ wire eligible_c = !c_aw_empty && !c_win_fifo_empty;
 wire eligible_d = !d_aw_empty && !d_win_fifo_empty;
 
 wire all_idle = !working_a && !working_b && !working_c && !working_d;
-wire start_a = eligible_a && (all_idle) && awready && wready && (a_bcount<8);
-wire start_b = eligible_b && (all_idle) && awready && wready && (b_bcount<8);
-wire start_c = eligible_c && (all_idle) && awready && wready && (c_bcount<8);
-wire start_d = eligible_d && (all_idle) && awready && wready && (d_bcount<8);
+wire a_winner,b_winner,c_winner,d_winner;
+wire start_a = eligible_a && (all_idle) && awready && wready && (a_bcount<8) && a_winner;
+wire start_b = eligible_b && (all_idle) && awready && wready && (b_bcount<8) && b_winner;
+wire start_c = eligible_c && (all_idle) && awready && wready && (c_bcount<8) && c_winner;
+wire start_d = eligible_d && (all_idle) && awready && wready && (d_bcount<8) && d_winner;
 
 wire longer_a = a_active_aw_entry[7+32:32] != 0;
 wire longer_b = b_active_aw_entry[7+32:32] != 0;
@@ -225,6 +226,49 @@ assign readout_c_aw_fifo =  start_c && !start_b && !start_a;
 assign readout_d_aw_fifo =  start_d && !start_c && !start_b && !start_a;
 
 
+wire [7:0] a_pri_count,v_pri_count,c_pri_count,d_pri_count;
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        a_pri_count <= 0;v_pri_count <= 0;c_pri_count <= 0;d_pri_count <= 0;
+    end else begin
+        if (readout_a_aw_fifo) 
+            a_pri_count <= 0;
+        else if (eligible_a) 
+            a_pri_count <= a_pri_count + (a_pri_count<255);
+
+        if (readout_b_aw_fifo) 
+            b_pri_count <= 0;
+        else if (eligible_a) 
+            b_pri_count <= b_pri_count + (b_pri_count<255);
+
+        if (readout_c_aw_fifo) 
+            c_pri_count <= 0;
+        else if (eligible_a) 
+            c_pri_count <= c_pri_count + (c_pri_count<255);
+
+        if (readout_d_aw_fifo) 
+            d_pri_count <= 0;
+        else if (eligible_a) 
+            d_pri_count <= d_pri_count + (d_pri_count<255);
+        else 
+            d_pri_count <= 0;
+    end
+end
+
+wire a_greater_than_b = a_pri_count >= b_pri_count;
+
+wire a_greater_than_c = a_pri_count >= c_pri_count;
+wire a_greater_than_d = a_pri_count >= d_pri_count;
+
+wire b_greater_than_c = b_pri_count >= c_pri_count;
+wire b_greater_than_d = b_pri_count >= d_pri_count;
+
+wire c_greater_than_d = c_pri_count >= d_pri_count;
+
+assign a_winner = (a_pri_count>0) && a_greater_than_b && a_greater_than_c && a_greater_than_d ;
+assign b_winner = (b_pri_count>0) && !a_winner  && b_greater_than_c && b_greater_than_d ;
+assign c_winner = (c_pri_count>0) && !a_winner && !b_winner && c_greater_than_d ;
+assign d_winner = (d_pri_count>0) && !a_winner && !b_winner && !c_winner;
 
 
 wire [3:0] orig_wid;
@@ -394,17 +438,6 @@ assign wvalid = readout_a_win_fifo || readout_b_win_fifo || readout_c_win_fifo |
 assign awvalid = readout_a_aw_fifo || readout_b_aw_fifo || readout_c_aw_fifo || readout_d_aw_fifo;
 
 
-reg [4:0] outstanding_ws;
-always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-        outstanding_ws <= 16;
-    end  else begin
-        if (awvalid && awready && !(wvalid && wlast && wready))
-            outstanding_ws <= outstanding_ws - 1;
-        else if (!(awvalid && awready) && (wvalid && wlast && wready))
-            outstanding_ws <= outstanding_ws + 1;
-    end
-end
 
 wire panic_acount = (a_bcount==0) && (a_bvalid && a_bready);
 wire panic_bcount = (b_bcount==0) && (b_bvalid && b_bready);

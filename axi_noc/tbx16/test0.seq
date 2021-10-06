@@ -9,9 +9,9 @@ mst0 read 1 1 0x1000 3
 wait 100
 drv masters 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
 drv address 0xc0000500 0x80006000  0x00070000 0x40500000
-drv enable
+drv wr_enable
 wait 10000
-drv disable
+drv wr_disable
 wait 1000
 mst0 waitNotBusy 10000
 mst1 waitNotBusy 10000
