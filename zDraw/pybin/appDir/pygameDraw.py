@@ -20,6 +20,7 @@ from dumpFormats import connectivityClass
 import drawVectorText
 import pictify
 import copy
+import logs
 
 import cmd  
 class cmdxClass(cmd.Cmd):
@@ -30,7 +31,7 @@ class cmdxClass(cmd.Cmd):
         sys.exit()
         return True 
     def do_help(self,aaa):
-        print(helpString.helpString)
+        logs.log_info(helpString.helpString)
 
 
     def emptyline(self):
@@ -38,7 +39,6 @@ class cmdxClass(cmd.Cmd):
         return False
     def default(self,Txt):
         wrds = dbase.splitLine(Txt)
-        print('>>>>',wrds)
         if len(wrds)>0:
             use_command_wrds(wrds)
             CommandsHistory.append(Txt)
@@ -136,7 +136,7 @@ class GlobalsClass:
                             Res.append(Cell)
         elif type(Dirs) is str:
             if not os.path.exists(Dirs): 
-                print('no pics directory "%s"'%Dirs)
+                logs.log_warning('no pics directory "%s"'%Dirs)
                 return []
             LL = os.listdir(Dirs)
             for Fname in LL:
@@ -169,7 +169,7 @@ def main():
             if os.path.exists(Fname):
                 dbase.load_dbase_file(Fname)
             else:
-                dbase.log_error('file "%s" cant be read'%Fname)
+                logs.log_error('file "%s" cant be read'%Fname)
             ind += 1
         else:
             if Fname=='-do':
@@ -183,7 +183,7 @@ def main():
                 use_command_wrds(['include',What])
                 ind += 1
             else:
-                dbase.log_error('"%s" not known'%sys.argv[ind])
+                logs.log_error('"%s" not known'%sys.argv[ind])
                 ind += 1
             
             
@@ -207,18 +207,18 @@ def load_init_file():
     found=False
     homepath = '%s/.zdrawrc'%(os.path.expanduser('~'))
     herepath = '%s/.zdrawrc'%(os.path.abspath('.'))
-    print('home %s'%homepath)
-    print('here %s'%herepath)
+    logs.log_info('home %s'%homepath)
+    logs.log_info('here %s'%herepath)
     if os.path.exists(homepath):
         read_init_file(homepath)
-        dbase.log_info('home dir .zdrawrc loaded')
+        logs.log_info('home dir .zdrawrc loaded')
         found=True
     if os.path.exists(herepath):
         read_init_file(herepath)
-        dbase.log_info('pwd dir .zdrawrc loaded')
+        logs.log_info('pwd dir .zdrawrc loaded')
         found=True
     if not found:
-        dbase.log_warning('no .zdrawrc loaded')
+        logs.log_warning('no .zdrawrc loaded')
 
 
 def doesntHaveExtension(Txt):
@@ -258,7 +258,7 @@ def read_init_file(Fname):
         if (len(wrds)>0)and(wrds[0]=='load'):
             Fname = figure_out_the_file(wrds[0])
             if not Fname:
-                dbase.log_error('file "%s" cant be read'%Fname)
+                logs.log_error('file "%s" cant be read'%Fname)
             else:
                 dbase.load_dbase_file(Fname)
         elif (len(wrds)>=2)and(wrds[0] == 'pics_lib'):
@@ -269,7 +269,7 @@ def read_init_file(Fname):
         elif (len(wrds)==2):
             Param = wrds[0]
             Value=wrds[1]
-#            dbase.log_info('read_init_file set context "%s" "%s"'%(Param,Value))
+#            logs.log_info('read_init_file set context "%s" "%s"'%(Param,Value))
             if (',') in Value:
                 W1 = Value.split(',')
                 ll = []
@@ -281,7 +281,7 @@ def read_init_file(Fname):
             else:
                 dbase.set_context(Param,Value)
         elif(len(wrds)>0):
-            dbase.log_warning('read_init_file got "%s" . not valid.'%(' '.join(wrds)))
+            logs.log_warning('read_init_file got "%s" . not valid.'%(' '.join(wrds)))
                 
 def makenum(Txt):
     try:
@@ -473,7 +473,7 @@ def use_command_wrds(wrds):
                 wrds0 = line.split()
                 use_command_wrds(wrds0)
         except:
-            print('failed to open include file "%s" ' % Fname)
+            logs.log_error('failed to open include file "%s" ' % Fname)
 
     elif wrds[0] in ['quit','exit']:
         Glbs.details[Root].touched('Q')
@@ -492,7 +492,7 @@ def use_command_wrds(wrds):
                 if Fname not in Dirs:
                     Dirs.append(Fname)
             else:
-                print('Failed to add "%s" to legal paths, as it cannot be opened' % Fname)
+               logs.log_errorprint('Failed to add "%s" to legal paths, as it cannot be opened' % Fname)
         Glbs.set_context('pics_lib',Dirs)
         print('PICSLIBS: %s' % str(Dirs))
 
@@ -521,24 +521,24 @@ def use_command_wrds(wrds):
             Fname = '%s/%s.zdraw'%(Glbs.associated_dir[Root],Root)
         else:
             Fname = '%s.zdraw'%Root
-        dbase.log_info('saving %s to %s file'%(Root,Fname))
+        logs.log_info('saving %s to %s file'%(Root,Fname))
         try:
             File = open(Fname,'w')
             Glbs.details[Root].save(File)
             File.close()
             Glbs.details[Root].touched(False)
         except:
-            dbase.log_info('Failed to open "%s" for saving' % Fname)
+            logs.log_info('Failed to open "%s" for saving' % Fname)
     elif wrds[0]=='change':
         List = list(Glbs.details.keys())
         List.sort()
         if len(wrds)==1:
-            dbase.log_info('available schematics: %s'%' '.join(List))
+            logs.log_info('available schematics: %s'%' '.join(List))
         elif(wrds[1] in List) :
             Glbs.set_context('root',wrds[1]) 
             Glbs.graphicsChanged=True
         else:
-            print('"%s" is not loaded. use new to open new drawing'%wrds[1])
+            logs.log_error('"%s" is not loaded. use new to open new drawing'%wrds[1])
     elif wrds[0]=='delete':
         if (Root!='opening'):
              Glbs.details.pop(Root)
@@ -558,8 +558,8 @@ def use_command_wrds(wrds):
         Glbs.redoStack = []
     elif 'load' in wrds[0]:
         if len(wrds)==1:
-            print('loaded schematics:  %s'%str(list(Glbs.details.keys())))
-            print('loaded pictures:  %s'%str(list(Glbs.pictures.keys())))
+            logs.log_info('loaded schematics:  %s'%str(list(Glbs.details.keys())))
+            logs.log_info('loaded pictures:  %s'%str(list(Glbs.pictures.keys())))
         else:
             load_schematics(wrds[1])
                     
@@ -567,7 +567,6 @@ def use_command_wrds(wrds):
         Glbs.adding_queue.extend(wrds[1:])
     elif 'name' in wrds[0]:
         Glbs.paramName='name'
-        print('NAME',wrds)
         Glbs.params_queue.extend(wrds[1:])
     elif 'param' in wrds[0]:
         Glbs.paramName=wrds[1]
@@ -576,7 +575,7 @@ def use_command_wrds(wrds):
         Root = Glbs.get_context('root')
         Fname = '%s.cir'%(Root)
         File = open(Fname,'w')
-        dbase.log_info('writing spice file "%s.cir"'%Root)
+        logs.log_info('writing spice file "%s.cir"'%Root)
         GG = connectivityClass(Glbs,Root)
         GG.dumpSpice(File)
         File.close()
@@ -607,7 +606,7 @@ def use_command_wrds(wrds):
             Root = Glbs.get_context('root')
             Fname = '%s.v'%(Root)
             File = open(Fname,'w')
-            dbase.log_info('writing verilog file "%s.v"'%Root)
+            logs.log_info('writing verilog file "%s.v"'%Root)
             GG = connectivityClass(Glbs,Root)
             GG.dumpVerilog(File,Rtl,User)
             File.close()
@@ -638,7 +637,7 @@ def use_command_wrds(wrds):
         else:
             Dir = '.'
         if not os.path.exists(Dir):
-            print('no such directory "%s"'%Dir)
+            logs.log_warning('no such directory "%s"'%Dir)
             return
 
         LL = os.listdir(Dir)
@@ -652,8 +651,8 @@ def use_command_wrds(wrds):
         for Cell in L1+L2:
             Glbs.listed[Cell] = Dir
 
-        print('schematics in "%s"  %s'%(Dir,L1))
-        print('pictures   in "%s"  %s'%(Dir,L2))
+        logs.log_info('schematics in "%s"  %s'%(Dir,L1))
+        logs.log_info('pictures   in "%s"  %s'%(Dir,L2))
                 
     elif (len(wrds)==3)and(wrds[1]=='='):
         Glbs.set_context(wrds[0],makenum(wrds[2]))
@@ -662,18 +661,18 @@ def use_command_wrds(wrds):
             print(Key,Glbs.contexts[Key])
     elif 'help' in wrds[0]:
         if len(wrds)==1:
-            print(helpString.helpString)
+            logs.log_info(helpString.helpString)
         else:
             List = helpString.helpString.split('\n')
             for Str in List:
                 if wrds[1] in Str:
-                    print(Str)
+                    logs.log_info(Str)
     elif matchesCommand(wrds[0]):
         Comm = matchesCommand(wrds[0])
         wrds[0]=Comm
         use_command_wrds(wrds)
     else:
-        print('dont know to %s'%wrds)
+        logs.log_error('dont know to %s'%wrds)
 
 def load_schematics(newRoot):
     List = list(Glbs.details.keys())
@@ -689,7 +688,7 @@ def load_schematics(newRoot):
             Glbs.undoStack = []
             Glbs.redoStack = []
         else:
-            dbase.log_error('file "%s" cant be read'%newRoot)
+            logs.log_error('file "%s" cant be read'%newRoot)
             return
             
 
@@ -709,7 +708,7 @@ def on_key_press(Chr,Ord,xy):
 #    if (Chr=='Q'):   # Q key
 #        sys.exit()
     if (Chr=='h'):
-        dbase.log_info(helpString.helpString)
+        logs.log_info(helpString.helpString)
     else:
         dbase.use_keystroke(Chr,Ord,xy)
 
@@ -719,6 +718,7 @@ def on_special_press(Chr,x,y):
 def timerFun(Value):
     if (Glbs.finished or Glbs.pleaseExit):
         stopRunning()
+        logs.flushLogs()
         sys.exit()
     if Glbs.graphicsChanged:
         on_draw()
@@ -735,13 +735,13 @@ def open_command_file():
             try:
                 return open(Fname,'w')
             except:
-                print('failed to open command trace file  (%s)'%Fname)
+                logs.log_error('failed to open command trace file  (%s)'%Fname)
                 return 0
         Cnt +=1
 
 
 def printScreen():
-    print('print screen - not yet.')
+    logs.log_warning('print screen - not yet.')
 
 
 ValidCommandsTxt = ''' add param dump load new delete print save change history help quit exit variables
@@ -760,9 +760,9 @@ def matchesCommand(Wrd0):
     if len(res)==1:
         return res[0]
     if len(res)>1:
-        print('ambigious command %s matches %s'%(Wrd0,res))
+        logs.log_warning('ambigious command %s matches %s'%(Wrd0,res))
     elif len(res)==0:
-        print('valid cmds: %s'%ValidCommands)
+       logs.log_info('valid cmds: %s'%ValidCommands)
 
     return False
 

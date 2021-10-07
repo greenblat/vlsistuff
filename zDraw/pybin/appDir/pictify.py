@@ -35,7 +35,8 @@ def pictify(Glbs,Root,File):
     Inps = {}
     Outs = {}
     Inouts = {}
-    File.write(' %s \n' % str(Names))
+    LongestIn = 0
+    LongestOut = 0
     for Inst in Mod.instances:
         Obj = Mod.instances[Inst]
         Point = Obj.Point
@@ -45,15 +46,19 @@ def pictify(Glbs,Root,File):
             nInps +=1
             if Inst in Names:
                 Inps[Names[Inst]]= Inst,Point,Rot
+                LongestIn = max(LongestIn,len(Names[Inst]))
             else:
                 Inps[Inst]=Inst,Point,Rot
                 Names[Inst]=Inst
+                LongestIn = max(LongestIn,len(Inst))
         elif Obj.Type=='output':
             nOuts +=1
             if Inst in Names:
                 Outs[Names[Inst]]=Inst,Point,Rot
+                LongestOut = max(LongestOut,len(Names[Inst]))
             else:
                 Outs[Inst]=Inst
+                LongestOut = max(LongestOut,len(Inst))
                 Names[Inst]=Inst,Point,Rot
         elif Obj.Type=='inout':
             if Inst in Names:
@@ -78,20 +83,21 @@ def pictify(Glbs,Root,File):
         Y0 = min(Y0,Point[1]) 
         Y1 = max(Y1,Point[1]) 
 
+    Xspan = 2+(LongestIn+LongestOut+len(Module)) * 0.3
 
-    ScaleX = 5.0/(X1-X0)
+    ScaleX = Xspan/(X1-X0)
     ScaleY = 1.0/(Y1-Y0) * max(nInps,nOuts)
     Scale = max(ScaleX,ScaleY)
-
-    MaxIn = -5
+    print('xspan=%s scalex=%s scaley=%s' % (Xspan,ScaleX,ScaleY))
+    MaxIn = -100
     MinOu = 1005
     MaxY  = -100
     for Inp in Inps:
         Point = list(Inps[Inp][1])
         Point[0] -= X0
         Point[1] -= Y0
-        Point[0] *= Scale
-        Point[1] *= Scale
+        Point[0] *= ScaleX
+        Point[1] *= ScaleY
         Point[0] = int(Point[0] * 10)/10.0
         Point[1] = int(Point[1] * 10)/10.0
         MaxIn = max(MaxIn,Point[0])
@@ -102,8 +108,8 @@ def pictify(Glbs,Root,File):
         Point = list(Outs[Out][1])
         Point[0] -= X0
         Point[1] -= Y0
-        Point[0] *= Scale
-        Point[1] *= Scale
+        Point[0] *= ScaleX
+        Point[1] *= ScaleY
         Point[0] = int(Point[0] * 10)/10.0
         Point[1] = int(Point[1] * 10)/10.0
         MinOu = min(MinOu,Point[0])
@@ -124,8 +130,8 @@ def pictify(Glbs,Root,File):
     for Out in Outs:
         Out,Point,Rot = Outs[Out]
         File.write('pic_aline list=%s,%s,%s,%s\n' % (Point[0],Point[1],MinOu-0.3,Point[1]))
-        File.write('pic_text %s xy=%s,%s\n' % (Out,MinOu-1,Point[1]))
-    Half = (MaxIn + MinOu)/2 - 1.0
+        File.write('pic_text %s xy=%s,%s\n' % (Out,MinOu-0.3-(len(Out)*0.3),Point[1]))
+    Half = (MaxIn + MinOu)/2 - len(Module)*0.3
     File.write('pic_text %s xy=%s,%s\n' % (Module,Half, MaxY/2))
 
 

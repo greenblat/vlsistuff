@@ -6,6 +6,7 @@ from renders import screen2schem,schem2screen
 from drawVectorText import make_text_vectors
 from pygameGeoms import screenShot
 import helpString
+import logs
 
 UnitMatrix = [1,0,0,0,1,0]
 
@@ -92,7 +93,7 @@ from svgClass import svgClass
 def postscript_current():
     Root=get_context('root')
     File = open('%s.ps'%Root,'w')
-    log_info('writing postscript file "%s.ps"'%Root)
+    logs.log_info('writing postscript file "%s.ps"'%Root)
     sizeX,sizeY,Scale = postscript_opening(File,Glbs.details[Root])
     [(Xl,Yl),(Xh,Yh)]=Glbs.details[Root].bbox()
     Svg  = svgClass('%s.svg'%Root,False)
@@ -138,7 +139,7 @@ class InstanceClass:
         elif Glbs.try_load_picture(self.Type):
             Glbs.pictures[self.Type].draw(Mat3,Color)
         else:
-            log_error('no picture of %s'%self.Type)
+            logs.log_error('no picture of %s'%self.Type)
         if self.Father.drawBoxes:
             Bbox = self.bbox()
             X0,Y0=Bbox[0]
@@ -169,7 +170,7 @@ class InstanceClass:
             if Ok:
                 return self.bbox()
             else:
-                log_error('could not bbox "%s". using some default'%(self.Type))
+                logs.log_error('could not bbox "%s". using some default'%(self.Type))
                 self.bbox0 = [self.Point,(self.Point[0]+1,self.Point[1]+1)]
                 return self.bbox0
         self.bbox0=[self.Point,self.Point]
@@ -310,7 +311,7 @@ class GeomClass:
             Mat3 = instmatrix(1,self.List[0],self.Rot,Matrix)
             render_text(Mat3,NN,[0,0],'r0',get_context('geom_text_size'),Color,'left')
         else:
-            log_error('unknown geom kind = %s'%(self.Kind))
+            logs.log_error('unknown geom kind = %s'%(self.Kind))
         if self.Father.drawBoxes:
             Bbox = self.bbox()
             X0,Y0=Bbox[0]
@@ -338,7 +339,7 @@ class GeomClass:
         elif self.Kind in ['text']:
             self.bbox0=[self.List[0],(self.List[0][0]+0.5,self.List[0][1]+0.5)]
         else:
-            log_error('bbox failed on geom %s %s'%(self.Kind,self.Name))
+            logs.log_error('bbox failed on geom %s %s'%(self.Kind,self.Name))
             self.bbox0=[(0,0),(1,1)]
         return self.bbox0
     def move(self,Dx,Dy):
@@ -382,7 +383,7 @@ class ParamClass:
                 P2 = Owner.origin()
                 render_aline(Matrix,[self.Point,P2],RED_COLOR)
             else:
-                log_error('orphan param %s, orphan of %s'%(self.Param,self.Owner))
+                logs.log_error('orphan param %s, orphan of %s'%(self.Param,self.Owner))
         else:
             Color = get_context('param_color')
         PrmSize = Glbs.get_context('param_text_size')
@@ -511,7 +512,7 @@ class PictureClass:
             elif (Which=='aline'):
                 render_aline(Matrix,List,Color)
             else:
-                log_error('missing pygame pic geom %s in %s'%(Which,self.Picture))
+                logs.log_error('missing pygame pic geom %s in %s'%(Which,self.Picture))
     def postscript(self,File,Matrix,Color):
         if Color=='none':    
             Color = get_context('pic_color')
@@ -545,7 +546,7 @@ class PictureClass:
                 postscript_aline(File,Line2,Color)
                 Glbs.Svg.x_aline(Line2,Color)
             else:
-                log_error('missing postscript pic geom %s in %s'%(Which,self.Picture))
+                logs.log_error('missing postscript pic geom %s in %s'%(Which,self.Picture))
 
         for (Text,Point,Rot,Size,Align) in self.texts:
             if Glbs.useVectorText:
@@ -609,7 +610,7 @@ class PictureClass:
 
 
         if (not self.bbox0):
-            log_error('picture %s failed to build bbox'%(self.Picture))
+            logs.log_error('picture %s failed to build bbox'%(self.Picture))
             self.bbox0=[(-1,-1),(1,1)]
         return self.bbox0
 
@@ -804,14 +805,14 @@ class DetailClass:
 
     def where_inst(self,Inst):
         if Inst not in self.instances:
-            log_error('unknown instance %s'%(Inst))
+            logs.log_error('unknown instance %s'%(Inst))
             return
         P0 = self.instances[Inst].Point
         return P0
 
     def where_pin(self,Inst,Pin):
         if Inst not in self.instances:
-            log_error('unknown instance %s'%(Inst))
+            logs.log_error('unknown instance %s'%(Inst))
             return
         P0 = self.instances[Inst].Point
         Rot = self.instances[Inst].Rot
@@ -831,10 +832,10 @@ class DetailClass:
                 P1 = world_coord_fl(Mat2,P0)
                 return P1
             else:
-                log_error('no pin %s picture of %s'%(Pin,Type))
+                logs.log_error('no pin %s picture of %s'%(Pin,Type))
                 return (0,0)
         else:
-            log_error('no picture of %s'%Type)
+            logs.log_error('no picture of %s'%Type)
             return (0,0)
 
     def select_pin(self,ScrPoint):
@@ -1099,7 +1100,7 @@ def work_on_line(line,state,Mod):
         elif (wrds[0]=='end'):
             state='idle'
         else:
-            log_error('unknown line in file %s'%(line))
+            logs.log_error('unknown line in file %s'%(line))
     return state,Mod
 
 def get_param(wrds,Param,Default):
@@ -1130,12 +1131,6 @@ def get_list(wrds):
     return res
     
 
-def log_warning(Txt):
-    print('warning! %s'%Txt)
-def log_error(Txt):
-    print('error! %s'%Txt)
-def log_info(Txt):
-    print('info: %s'%Txt)
 
 def bbox_line(List):
     X0=List[0][0]
@@ -1188,7 +1183,7 @@ def use_mousemove(X,Y):
         Was = get_context('last_group_mouse_selected',PP)
         [_,_,List]=get_context('grouping')
         if type(List) is not list:
-            log_error('no group defined yet %s %s' % (type(List),List))
+            logs.log_error('no group defined yet %s %s' % (type(List),List))
             return
             
         Dx = PP[0]-Was[0]
@@ -1218,7 +1213,7 @@ def use_mousemove(X,Y):
         Glbs.details[Root].geoms[Inst].make_selected(False)
         Glbs.details[Root].touched(True)
     elif (What):
-        log_error('dont know(4) to move "%s"'%What)
+        logs.log_error('dont know(4) to move "%s"'%What)
         if 'last_mouse_selected' in Glbs.contexts:
             Glbs.contexts.pop('last_mouse_selected')
     set_context('last_mouse_selected',(What,Inst,PP[0],PP[1]))
@@ -1303,7 +1298,7 @@ def use_keystroke(Uni,Ord,XY):
         if 'grouping' in Glbs.contexts:
             [_,_,List]=get_context('grouping')
             if type(List) is not list:
-                log_error('no group defined yet')
+                logs.log_error('no group defined yet')
                 return
                 
             Glbs.details[Root].move_group(List,Dx,Dy)
@@ -1328,7 +1323,7 @@ def use_keystroke(Uni,Ord,XY):
                 Glbs.details[Root].touched(True)
                 Glbs.undoValid = True
             else:
-                log_error('dont know(2) to move who="%s" inst="%s"'%(Who,Inst))
+                logs.log_error('dont know(2) to move who="%s" inst="%s"'%(Who,Inst))
     elif (Ord<128)and(((len(str(Uni))==1)and(str(Uni) in '123456789'))or(Uni in ['Z','z'])):
         if (Uni=='Z'):
             Uni=2
@@ -1456,7 +1451,7 @@ def use_keystroke(Uni,Ord,XY):
             Glbs.details[Root].is_touched = False
             Glbs.graphicsChanged=True
         else: 
-            log_info('at the first change %s' % Root)
+            logs.log_info('at the first change %s' % Root)
             
     elif (Uni=='Y'):    # redo
         if len(Glbs.redoStack)>1:
@@ -1469,11 +1464,11 @@ def use_keystroke(Uni,Ord,XY):
             Glbs.details[Root].is_touched = False
             Glbs.graphicsChanged=True
         else: 
-            log_info('at the first change %s' % Root)
+            logs.log_info('at the first change %s' % Root)
         
     elif (Uni=='m'):
         if 'grouping' in Glbs.contexts:
-            log_error('no moving, while grouping. press "q" first')
+            logs.log_error('no moving, while grouping. press "q" first')
             return
         (Who,Inst)= select_object((X,Y))
         PP = screen2schem((X,Y))
@@ -1498,7 +1493,7 @@ def use_keystroke(Uni,Ord,XY):
                 Glbs.details[Root].touched(True)
             else:
                 Glbs.set_context('banner','%s: dont know(5) to move who="%s" %s'%(Root,Who,Inst))
-                log_info('dont know(3) to move "%s %s"'%(Who,Inst))
+                logs.log_info('dont know(3) to move "%s %s"'%(Who,Inst))
     elif (Uni=='d'):
         if 'grouping' in Glbs.contexts:
             [_,_,List]=get_context('grouping')
@@ -1692,7 +1687,7 @@ def use_keystroke(Uni,Ord,XY):
         Glbs.undoValid = True
     elif (Uni=='G'):
         if 'moving' in Glbs.contexts:
-            log_error('no grouping while in moving. press "q" first.')
+            logs.log_error('no grouping while in moving. press "q" first.')
             return
         if ('grouping' not in Glbs.contexts):
             Psch = screen2schem((X,Y))
@@ -1715,7 +1710,7 @@ def use_keystroke(Uni,Ord,XY):
             Fname = '%s/%s.zdraw'%(Glbs.associated_dir[Root],Root)
         else:
             Fname = '%s.zdraw'%Root
-        log_info('saving %s to %s file'%(Root,Fname))
+        logs.log_info('saving %s to %s file'%(Root,Fname))
         File = open(Fname,'w')
         Glbs.details[Root].save(File)
         File.close()
@@ -1805,21 +1800,21 @@ def use_keystroke(Uni,Ord,XY):
                 Glbs.details[Root].bbox0=False
                 Glbs.undoValid = True
             else:
-                log_error('unknown picture type = %s cannot instance'%(What))
+                logs.log_error('unknown picture type = %s cannot instance'%(What))
                 bad=True
             if bad:
                 Pics = list(Glbs.pictures.keys())
                 Pics.sort()
-                log_info('known pictures:')
+                logs.log_info('known pictures:')
                 while len(Pics)>5:
-                    log_info('  %s'%(' '.join(Pics[:5])))
+                    logs.log_info('  %s'%(' '.join(Pics[:5])))
                     Pics = Pics[5:]
-                log_info('  %s'%(' '.join(Pics)))
+                logs.log_info('  %s'%(' '.join(Pics)))
     elif Uni == '':
         if Ord not in [0x400000e1]:
-            log_info('key ord (%d) not used'%(Ord))
+            logs.log_info('key ord (%d) not used'%(Ord))
     else:
-        log_info('key "%s" (%d) not used'%(Uni,ord(Uni)))
+        logs.log_info('key "%s" (%d) not used'%(Uni,ord(Uni)))
 
 def put_schem_text(X,Y):
     Spoint = screen2schem((X,Y))
@@ -1867,7 +1862,7 @@ def get_pin_location(Module,Conn):
         return Mod.where_inst(Conn)
     elif (len(ww)==2):
         return Mod.where_pin(ww[0],ww[1])
-    log_error('bogus connection %s'%(Conn))
+    logs.log_error('bogus connection %s'%(Conn))
     return (0,0)
 
 def select_object(Point):

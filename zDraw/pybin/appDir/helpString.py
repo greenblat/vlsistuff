@@ -57,6 +57,9 @@ helpString = '''
        quit:  just quit
        sys <shell command>  :  execute shell command , like "open screenshot.ps" or something.
        ls <dir>  : list all schematics in this dir. default is ".". also the system remembers all listed drawings, so "load name" will search all "ls'ed" dirs.
+       picture  : will create a picture out of current detail.
+       picture directoryname : will put the picture there.
+
        all commands can be abreviated to the shortest unique string
 
     invocation:
