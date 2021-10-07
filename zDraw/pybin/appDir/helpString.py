@@ -68,6 +68,9 @@ helpString = '''
         zDraw.py schem.py -do spice -do quit : will load schematic, dump it to spice and quit, without opening graphics. 
         -include <CommandsFile>  : will execute lines in file, as if typed from terminal. dont put quit in it.
 
+    pymon.log0 : is log file, recording all comands and errors in Your session.
+
+
 
     special notes:
         if parameter name given with value "$inst" - it will display the instanse name.

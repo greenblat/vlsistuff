@@ -1,7 +1,7 @@
 
 WID,HEI = 1200,600
 
-import os,sys,time
+import os,sys,time,traceback
 
 import pygame
 
@@ -80,6 +80,7 @@ class GlobalsClass:
         self.undoStack = []
         self.redoStack = []
         self.undoValid = False
+        self.imported = {}
 
     def wireName(self):
         self.wireNumName += 1
@@ -106,21 +107,24 @@ class GlobalsClass:
         if Pic in self.pictures:
             return
         Dirs = self.get_context('pics_lib')
-        if type(Dirs) is list:
-            for Dir in Dirs:
-                Fname = '%s/%s.zpic'%(Dir,Pic)
+        for Extension in ['zlib','zpic']:
+            if type(Dirs) is list:
+                for Dir in Dirs:
+                    Fname = '%s/%s.%s'%(Dir,Pic,Extension)
+                    if os.path.exists(Fname):
+                        dbase.load_dbase_file(Fname)
+                        return True
+
+            elif type(Dirs) is str:
+                Fname = '%s/%s.%s'%(Dirs,Pic,Extension)
                 if os.path.exists(Fname):
                     dbase.load_dbase_file(Fname)
                     return True
-        elif type(Dirs) is str:
-            Fname = '%s/%s.zpic'%(Dirs,Pic)
+
+            Fname = '%s.%s'%(Pic,Extension)
             if os.path.exists(Fname):
                 dbase.load_dbase_file(Fname)
                 return True
-        Fname = '%s.zpic'%(Pic)
-        if os.path.exists(Fname):
-            dbase.load_dbase_file(Fname)
-            return True
         return False
 
     def loadable_pictures(self):                
@@ -154,8 +158,6 @@ renders.Glbs = Glbs
 drawVectorText.Glbs=Glbs
 
 def main():
-#    global CmdFile
-#    CmdFile = open_command_file()
     dbase.init()
     load_init_file()
     was_minus=False
@@ -165,11 +167,16 @@ def main():
         if Fname[0]=='-':
             was_minus=True
         if not was_minus:
-            Fname = figure_out_the_file(Fname)
-            if os.path.exists(Fname):
-                dbase.load_dbase_file(Fname)
-            else:
+            Fnamex = figure_out_the_file(Fname)
+            if not Fnamex:
                 logs.log_error('file "%s" cant be read'%Fname)
+            elif not Fnamex.endswith('.zdraw'):
+                logs.log_error('file "%s" should have extension zdraw'%Fnamex)
+            elif os.path.exists(Fnamex):
+                logs.log_info('file "%s" read'%Fnamex)
+                dbase.load_dbase_file(Fnamex)
+            else:
+                logs.log_error('file "%s" cant be read'%Fnamex)
             ind += 1
         else:
             if Fname=='-do':
@@ -235,6 +242,8 @@ def figure_out_the_file(Fname):
     if doesntHaveExtension(Fname):
         if os.path.exists(Fname+'.zdraw'):
             return  Fname+'.zdraw'
+        if os.path.exists(Fname+'.zlib'):
+            return Fname+'.zlib'
         if os.path.exists(Fname+'.zpic'):
             return Fname+'.zpic'
     if Fname in Glbs.listed:
@@ -455,6 +464,14 @@ def execute_terminal_commands__():
 #    do_command_line()
 
 def use_command_wrds(wrds):
+    try:
+        __use_command_wrds(wrds)
+    except Exception:
+        logs.log_error('command "%s" kinda crashed it' % ' '.join(wrds))
+        X = sys.exc_info()
+        traceback.print_exception(etype=X[0],value=X[1],tb=X[2])
+
+def __use_command_wrds(wrds):
     if len(wrds)==0:
         return
     if wrds[0]=='history':
@@ -464,7 +481,22 @@ def use_command_wrds(wrds):
     else:
         Glbs.history.append(' '.join(wrds))
     Root=Glbs.get_context('root')
-    if wrds[0] in ['source','include']:
+
+    if wrds[0] in Glbs.imported:
+        print('imported',wrds[0],Glbs.imported[wrds[0]])
+        Glbs.imported[wrds[0]](wrds)
+        print('afterimported',wrds[0],Glbs.imported[wrds[0]])
+    elif wrds[0] in ['import']:
+        Fname  = os.path.expanduser(wrds[1]) 
+        Fname  = os.path.abspath(Fname) 
+        if not Fname.endswith('.py'):
+            logs.log_error('import expect filename ending with .py')
+        else:
+            Command,Function = my_importing(Fname)
+            if Command:
+                Glbs.imported[Command] = Function
+
+    elif wrds[0] in ['source','include']:
         Fname  = os.path.expanduser(wrds[1]) 
         Fname  = os.path.abspath(Fname) 
         try: 
@@ -550,21 +582,27 @@ def use_command_wrds(wrds):
     elif wrds[0] in ['plot','print']:
         dbase.postscript_current()
     elif 'new' in wrds[0]:
-        Root = wrds[1]
-        Glbs.set_context('root',Root)
-        Glbs.details[Root] = dbase.DetailClass(Root)
-        Glbs.graphicsChanged=True
-        Glbs.undoStack = []
-        Glbs.redoStack = []
+        if len(wrds) != 2:
+            logs.log_error('new needs schematic name')
+        else:
+            Root = wrds[1]
+            Glbs.set_context('root',Root)
+            Glbs.details[Root] = dbase.DetailClass(Root)
+            Glbs.graphicsChanged=True
+            Glbs.undoStack = []
+            Glbs.redoStack = []
     elif 'load' in wrds[0]:
         if len(wrds)==1:
             logs.log_info('loaded schematics:  %s'%str(list(Glbs.details.keys())))
-            logs.log_info('loaded pictures:  %s'%str(list(Glbs.pictures.keys())))
+#            logs.log_info('loaded pictures:  %s'%str(list(Glbs.pictures.keys())))
         else:
             load_schematics(wrds[1])
                     
     elif 'add' in wrds[0]:
-        Glbs.adding_queue.extend(wrds[1:])
+        if len(wrds)==1:
+            logs.log_info('loaded pictures:  %s'%str(list(Glbs.pictures.keys())))
+        else:
+            Glbs.adding_queue.extend(wrds[1:])
     elif 'name' in wrds[0]:
         Glbs.paramName='name'
         Glbs.params_queue.extend(wrds[1:])
@@ -579,7 +617,7 @@ def use_command_wrds(wrds):
         GG = connectivityClass(Glbs,Root)
         GG.dumpSpice(File)
         File.close()
-    elif 'picture' in wrds[0]:
+    elif wrds[0] in ['zlib','picture']:
         if len(wrds)==1:
             Fname = '%s.zpic'%(Root)
         elif len(wrds)>=1:
@@ -692,6 +730,30 @@ def load_schematics(newRoot):
             return
             
 
+import importlib
+def my_importing(Fname):
+    sys.path += ['.']
+    Orig = Fname
+    if (len(Fname)>2)and(Fname[-3:]=='.py'):
+        Fname = Fname[:-3]
+    if ('/' in Fname):
+        wrds2 = Fname.split('/')
+        Fname = wrds2[-1]
+        Path = '/'.join(wrds2[:-1])
+        Path = os.path.abspath(Path)
+        sys.path += [Path]
+
+    That = importlib.import_module(Fname)
+    print('importing0 "%s"'%Fname)
+    That = importlib.import_module(Fname)
+    print('importing1 "%s"'%Fname)
+    if 'run' in dir(That):
+        run = That.run
+        That.Glbs = Glbs
+        return Fname,run
+    else:
+        logs.log_error('in imported file "%s" You need to have "run(yada-yada-yada)" function' % (Fname))
+        return False,False
 
 from renders import screen2schem
 dbase.load_schematics = load_schematics
@@ -727,24 +789,13 @@ def timerFun(Value):
 
 
 
-def open_command_file():
-    Cnt = 1
-    while True:
-        Fname = 'cmd.%d'%Cnt
-        if not os.path.exists(Fname):
-            try:
-                return open(Fname,'w')
-            except:
-                logs.log_error('failed to open command trace file  (%s)'%Fname)
-                return 0
-        Cnt +=1
 
 
 def printScreen():
     logs.log_warning('print screen - not yet.')
 
 
-ValidCommandsTxt = ''' add param dump load new delete print save change history help quit exit variables
+ValidCommandsTxt = ''' add param dump load new delete print save change history help quit exit variables zlib picture include source ls
     verilog spice plot
 '''
 

@@ -57,7 +57,7 @@ def pictify(Glbs,Root,File):
                 Outs[Names[Inst]]=Inst,Point,Rot
                 LongestOut = max(LongestOut,len(Names[Inst]))
             else:
-                Outs[Inst]=Inst
+                Outs[Inst]=Inst,Point,Rot
                 LongestOut = max(LongestOut,len(Inst))
                 Names[Inst]=Inst,Point,Rot
         elif Obj.Type=='inout':
@@ -75,7 +75,6 @@ def pictify(Glbs,Root,File):
         X1 = max(X1,Point[0]) 
         Y0 = min(Y0,Point[1]) 
         Y1 = max(Y1,Point[1]) 
-
     for Out in Outs:
         Point = Outs[Out][1]
         X0 = min(X0,Point[0]) 
@@ -102,7 +101,7 @@ def pictify(Glbs,Root,File):
         Point[1] = int(Point[1] * 10)/10.0
         MaxIn = max(MaxIn,Point[0])
         MaxY = max(MaxY,Point[1])
-        File.write('pic_pin %s i xy=%s,%s\n' % (Inp,Point[0],Point[1]))
+        File.write('pic_pin %s i xy=%s,%s\n' % (nobus(Inp),Point[0],Point[1]))
         Inps[Inp] = Inp,Point,Inps[Inp][2]
     for Out in Outs:
         Point = list(Outs[Out][1])
@@ -114,7 +113,7 @@ def pictify(Glbs,Root,File):
         Point[1] = int(Point[1] * 10)/10.0
         MinOu = min(MinOu,Point[0])
         MaxY = max(MaxY,Point[1])
-        File.write('pic_pin %s o xy=%s,%s\n' % (Out,Point[0],Point[1]))
+        File.write('pic_pin %s o xy=%s,%s\n' % (nobus(Out),Point[0],Point[1]))
         Outs[Out] = Out,Point,Outs[Out][2]
 
     File.write('pic_aline list=%s,-0.5,%s,%s\n' % (MaxIn+0.3,MaxIn+0.3,MaxY+0.5))
@@ -138,6 +137,10 @@ def pictify(Glbs,Root,File):
     File.write('end\n')
     File.close()
 
+def nobus(Txt):
+    if '[' in Txt:
+        return Txt[:Txt.index('[')]
+    return Txt
 
 
 
