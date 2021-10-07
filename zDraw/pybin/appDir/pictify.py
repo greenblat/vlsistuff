@@ -1,7 +1,8 @@
 #! /usr/bin/python
 
 import os,sys
-
+import logs
+Plus = 1.5
 def main():
     global Cell
     Fname = sys.argv[1]
@@ -37,101 +38,79 @@ def pictify(Glbs,Root,File):
     Inouts = {}
     LongestIn = 0
     LongestOut = 0
+    LposIn,LposOut = [],[]
+    nInps,nOuts = 0,0
     for Inst in Mod.instances:
         Obj = Mod.instances[Inst]
         Point = Obj.Point
         Rot   = Obj.Rot
-        nInps,nOuts = 0,0
         if Obj.Type=='input':
             nInps +=1
             if Inst in Names:
                 Inps[Names[Inst]]= Inst,Point,Rot
                 LongestIn = max(LongestIn,len(Names[Inst]))
+                LposIn.append((Point[1],Names[Inst]))
             else:
                 Inps[Inst]=Inst,Point,Rot
                 Names[Inst]=Inst
                 LongestIn = max(LongestIn,len(Inst))
+                LposIn.append((Point[1],Names[Inst]))
         elif Obj.Type=='output':
             nOuts +=1
             if Inst in Names:
                 Outs[Names[Inst]]=Inst,Point,Rot
                 LongestOut = max(LongestOut,len(Names[Inst]))
+                LposOut.append((Point[1],Names[Inst]))
             else:
                 Outs[Inst]=Inst,Point,Rot
                 LongestOut = max(LongestOut,len(Inst))
                 Names[Inst]=Inst,Point,Rot
+                LposOut.append((Point[1],Names[Inst]))
         elif Obj.Type=='inout':
             if Inst in Names:
                 Inouts[Names[Inst]]=Inst,Point,Rot
+                LposOut.append((Point[1],Names[Inst]))
             else:
                 Inouts[Inst]=Inst,Point,Rot
                 Names[Inst]=Inst
+                LposOut.append((Point[1],Names[Inst]))
     
-    X0,Y0 = 1000,1000
-    X1,Y1 = -1000,-1000
-    for Inp in Inps:
-        Point = Inps[Inp][1]
-        X0 = min(X0,Point[0]) 
-        X1 = max(X1,Point[0]) 
-        Y0 = min(Y0,Point[1]) 
-        Y1 = max(Y1,Point[1]) 
-    for Out in Outs:
-        Point = Outs[Out][1]
-        X0 = min(X0,Point[0]) 
-        X1 = max(X1,Point[0]) 
-        Y0 = min(Y0,Point[1]) 
-        Y1 = max(Y1,Point[1]) 
+    Max = Plus+max(len(LposIn),len(LposOut))
+    Xspan = Plus+(LongestIn+LongestOut+len(Module)) * 0.3
+    LposOut.sort()
+    LposIn.sort()
+    while len(LposOut)<Max:
+        LposOut.append((False,False))
+        LposOut.insert(0,(False,False))
 
-    Xspan = 2+(LongestIn+LongestOut+len(Module)) * 0.3
+    while len(LposIn)<Max:
+        LposIn.append((False,False))
+        LposIn.insert(0,(False,False))
 
-    ScaleX = Xspan/(X1-X0)
-    ScaleY = 1.0/(Y1-Y0) * max(nInps,nOuts)
-    Scale = max(ScaleX,ScaleY)
-    print('xspan=%s scalex=%s scaley=%s' % (Xspan,ScaleX,ScaleY))
-    MaxIn = -100
-    MinOu = 1005
-    MaxY  = -100
-    for Inp in Inps:
-        Point = list(Inps[Inp][1])
-        Point[0] -= X0
-        Point[1] -= Y0
-        Point[0] *= ScaleX
-        Point[1] *= ScaleY
-        Point[0] = int(Point[0] * 10)/10.0
-        Point[1] = int(Point[1] * 10)/10.0
-        MaxIn = max(MaxIn,Point[0])
-        MaxY = max(MaxY,Point[1])
-        File.write('pic_pin %s i xy=%s,%s\n' % (nobus(Inp),Point[0],Point[1]))
-        Inps[Inp] = Inp,Point,Inps[Inp][2]
-    for Out in Outs:
-        Point = list(Outs[Out][1])
-        Point[0] -= X0
-        Point[1] -= Y0
-        Point[0] *= ScaleX
-        Point[1] *= ScaleY
-        Point[0] = int(Point[0] * 10)/10.0
-        Point[1] = int(Point[1] * 10)/10.0
-        MinOu = min(MinOu,Point[0])
-        MaxY = max(MaxY,Point[1])
-        File.write('pic_pin %s o xy=%s,%s\n' % (nobus(Out),Point[0],Point[1]))
-        Outs[Out] = Out,Point,Outs[Out][2]
+    print('POSIN',LposIn)
+    print('POSOUT',LposOut)
+    for ind,(_,Inp) in enumerate(LposIn):
+        if Inp:
+            File.write('pic_pin %s i xy=0,%s\n' % (nobus(Inp),ind*Plus))
+            File.write('pic_aline list=0,%s,0.3,%s\n' % (ind*Plus,ind*Plus))
+            File.write('pic_text %s xy=%s,%s\n' % (nobus(Inp),0.4,ind*Plus-0.2))
 
-    File.write('pic_aline list=%s,-0.5,%s,%s\n' % (MaxIn+0.3,MaxIn+0.3,MaxY+0.5))
-    File.write('pic_aline list=%s,-0.5,%s,%s\n' % (MinOu-0.3,MinOu-0.3,MaxY+0.5))
-    File.write('pic_aline list=%s,%s,%s,%s\n' % (MaxIn+0.3,-0.5,MinOu-0.3,-0.5))
-    File.write('pic_aline list=%s,%s,%s,%s\n' % (MaxIn+0.3,MaxY+0.5,MinOu-0.3,MaxY+0.5))
+    Right = 0.3+Xspan
+    for ind,(_,Out) in enumerate(LposOut):
+        if Out:
+            File.write('pic_pin %s i xy=%s,%s\n' % (nobus(Out),Right+0.3,ind*Plus))
+            File.write('pic_aline list=%s,%s,%s,%s\n' % (Right,ind*Plus,Right+0.3,ind*Plus))
+            File.write('pic_text %s xy=%s,%s\n' % (nobus(Out),Right-0.3-(len(Out)*0.3),ind*Plus-0.2))
 
-    for Inp in Inps:
-        Inp,Point,Rot = Inps[Inp]
-        File.write('pic_aline list=%s,%s,%s,%s\n' % (Point[0],Point[1],MaxIn+0.3,Point[1]))
-        File.write('pic_text %s xy=%s,%s\n' % (Inp,MaxIn+0.4,Point[1]))
+## verticals
+    File.write('pic_aline list=0.3,-0.5,0.3,%s\n' % (Max*Plus-1))
+    File.write('pic_aline list=%f,-0.5,%f,%s\n' % (Right,Right,Max*Plus-1))
+## horizontals
+    File.write('pic_aline list=%s,%s,%s,%s\n' % (0.3,-0.5,Right,-0.5))
+    File.write('pic_aline list=%s,%s,%s,%s\n' % (0.3,Max*Plus-1,Right,Max*Plus-1))
 
-    for Out in Outs:
-        Out,Point,Rot = Outs[Out]
-        File.write('pic_aline list=%s,%s,%s,%s\n' % (Point[0],Point[1],MinOu-0.3,Point[1]))
-        File.write('pic_text %s xy=%s,%s\n' % (Out,MinOu-0.3-(len(Out)*0.3),Point[1]))
-    Half = (MaxIn + MinOu)/2 - len(Module)*0.3
-    File.write('pic_text %s xy=%s,%s\n' % (Module,Half, MaxY/2))
+    Half = Right/2 - (len(Module)/2)*0.3
+    File.write('pic_text %s xy=%s,%s\n' % (Module,Half, Max/Plus))
 
 
     File.write('end\n')
@@ -259,6 +238,15 @@ def get_cell_name(Fname):
     ww1 = ww[-1].split('.')
     return ww1[0]
 
+
+def putOnGrid(Glbs,Point):
+    Grid = Glbs.get_context('grid')
+    X0 = int( 0.5 + (Point[0] / Grid))
+    X1 = X0 * Grid 
+    Y0 = int( 0.5 + (Point[1] / Grid))
+    Y1 = Y0 * Grid 
+    logs.log_info('Point %f %f   %f %f' % (Point[0],Point[1],X1,Y1))
+    return X1,Y1
 
 
 

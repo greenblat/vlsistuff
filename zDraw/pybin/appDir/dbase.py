@@ -58,7 +58,7 @@ def init():
     set_context('param_text_size',0)
     set_context('geom_text_size',1.0)
     set_context('banner','iDraw: greenblat@mac.com +972-54-4927322')
-    set_context('grid',0.1)
+    set_context('grid',0.5)
     set_context('shyParams',['name','size'])
     set_context('lineWidth',1.5)
     set_context('vectorTextWidth',1.0)
@@ -189,7 +189,8 @@ class InstanceClass:
         Y0 = grid_it(self.Point[1])
         X1 = X0+Dx
         Y1 = Y0+Dy
-        self.Point = X1,Y1
+        X2,Y2 = putOnGrid((X1,Y1))
+        self.Point = X2,Y2
         self.bbox0=False
         self.recompute_wires()
         Root=get_context('root')
@@ -870,6 +871,7 @@ class DetailClass:
                     Pnew = point_on_section(Point,List[i],List[i+1])
                     Root=get_context('root')
                     Nnst = Glbs.details[Root].invent_inst_name('node')
+                    Pnew = putOnGrid(Pnew)
                     Glbs.details[Root].add_instance('node',Nnst,Pnew)
                     Stop = self.wires[Wire].End
                     self.wires[Wire].End=Nnst
@@ -1287,14 +1289,15 @@ def use_keystroke(Uni,Ord,XY):
         if 'last_mouse_selected' in Glbs.contexts:
             Glbs.contexts.pop('last_mouse_selected')
     elif (Ord in [ K_RIGHT,K_LEFT,K_UP,K_DOWN]):
+        Grid = get_context('grid')
         if (Ord==K_RIGHT):
-            Dx,Dy=0.1,0
+            Dx,Dy=Grid,0
         elif (Ord==K_LEFT):
-            Dx,Dy=-0.1,0
+            Dx,Dy=-Grid,0
         elif (Ord==K_DOWN):
-            Dx,Dy=0,-0.1
+            Dx,Dy=0,-Grid
         elif (Ord==K_UP):
-            Dx,Dy=0,0.1
+            Dx,Dy=0,Grid
         if 'grouping' in Glbs.contexts:
             [_,_,List]=get_context('grouping')
             if type(List) is not list:
@@ -1408,6 +1411,7 @@ def use_keystroke(Uni,Ord,XY):
             What,Info=get_context('copying')
             if What=='type':
                 Type,From=Info
+                PP = putOnGrid(PP)
                 duplicate_inst(From,PP)
                 Glbs.undoValid = True
             elif What=='param':
@@ -1566,6 +1570,7 @@ def use_keystroke(Uni,Ord,XY):
         Glbs.set_context('banner',Glbs.Banner)
         Glbs.graphicsChanged=True
         PP = screen2schem((X,Y))
+        PP = putOnGrid(PP)
         if 'moving' in Glbs.contexts:
             (What,Who,WasX,WasY)=get_context('moving')
             Root=get_context('root')
@@ -1647,7 +1652,7 @@ def use_keystroke(Uni,Ord,XY):
     elif (Uni=='n'):
         Root=get_context('root')
         Psch = screen2schem((X,Y))
-        PP = schem2screen(Psch)
+        Psch = putOnGrid(Psch)
         Inst = Glbs.details[Root].invent_inst_name('node')
         Glbs.details[Root].add_instance('node',Inst,Psch)
         Glbs.details[Root].touched(True)
@@ -1656,6 +1661,7 @@ def use_keystroke(Uni,Ord,XY):
         if 'wiring' in Glbs.contexts:
             (InstPin,Point,List)=get_context('wiring')
             Psch = screen2schem((X,Y))
+            Psch = putOnGrid(Psch)
             Inst = Glbs.details[Root].invent_inst_name('node')
             wName = Glbs.wireName()
             while wName in Glbs.details[Root].wires:
@@ -1759,6 +1765,7 @@ def use_keystroke(Uni,Ord,XY):
         Root=get_context('root')
         Inst = Glbs.details[Root].invent_inst_name(What)
         Spoint = screen2schem((X,Y))
+        Spoint = putOnGrid(Spoint)
         Glbs.details[Root].add_instance(What,Inst,Spoint)
         X+=0.5
         Y+=0.5
@@ -1793,6 +1800,7 @@ def use_keystroke(Uni,Ord,XY):
                 Root=get_context('root')
                 Inst = Glbs.details[Root].invent_inst_name(What)
                 Spoint = screen2schem((X,Y))
+                Spoint = putOnGrid(Spoint)
                 Glbs.details[Root].add_instance(What,Inst,Spoint)
                 X+=0.5
                 Y+=0.5
@@ -2067,7 +2075,14 @@ def circle_index(Center,Point):
                 Bind = ii
     return Bind
 
-
+def putOnGrid(Point):
+    Grid = get_context('grid')
+    X0 = int( 0.5 + (Point[0] / Grid))
+    X1 = X0 * Grid
+    Y0 = int( 0.5 + (Point[1] / Grid))
+    Y1 = Y0 * Grid
+    logs.log_info('Point %f %f   %f %f' % (Point[0],Point[1],X1,Y1))
+    return X1,Y1
 
 
 CIRCLE_TABLE = [(0,0)]*40

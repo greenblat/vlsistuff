@@ -51,7 +51,7 @@ picture output
   pic_prop primitive xy=0,0
 end
 picture node
-  pic_fcircle list=0,0,0.3,0
+  pic_fcircle list=0,0,0.2,0
   pic_prop primitive xy=0,0
 end
 picture vcc
