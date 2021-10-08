@@ -65,6 +65,22 @@ helpString = '''
                                it can be "geom_text_size = 1"  to change text size of free texts. (1 i just an example, 0.5 is also fine and so all "reasonable" numbers)
         variables          : will print all current values of context variables. Even the ones You nto supposed to mess with.
 
+        import <userCode>.py   : allows dynamic load of your code. To use for reports or special format dumps. Ask me about it. It needs more explaining.
+                                 
+        example of import:
+            Suppose You wrote python file dox.py with contents, like this:
+            def run(wrds):
+                print(wrds)
+                print(Glbs.contexts)
+        to use it, in terminal type:
+            import  dox.py  # notice - You must specify .py in filename (unlike pure python)
+            dox aaa bbb     #  dox import must have run(wrds) definition. This function is run, wrds are splitted string activated it.
+
+            this, unless errors, wil lprint the activation words and also all context variables of Glbs (class of all things in zDraw).
+
+
+
+
        all commands can be abreviated to the shortest unique string
 
     invocation:

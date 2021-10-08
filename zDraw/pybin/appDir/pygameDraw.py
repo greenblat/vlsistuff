@@ -484,9 +484,7 @@ def __use_command_wrds(wrds):
     Root=Glbs.get_context('root')
 
     if wrds[0] in Glbs.imported:
-        print('imported',wrds[0],Glbs.imported[wrds[0]])
         Glbs.imported[wrds[0]](wrds)
-        print('afterimported',wrds[0],Glbs.imported[wrds[0]])
     elif wrds[0] in ['import']:
         Fname  = os.path.expanduser(wrds[1]) 
         Fname  = os.path.abspath(Fname) 
