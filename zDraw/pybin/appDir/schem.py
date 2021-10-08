@@ -1308,43 +1308,45 @@ end
 
 
 schematic opening
-inst corner_logo cr0 xy=-4.557265,-17.990503 rot=r90
-inst corner_logo cr1 xy=56.865324,30.056947 rot=r270
-inst cmos cmos_0 xy=14.821728,6.027391 rot=r90
-inst input input_0 xy=0.149668,13.801899
-inst vcc vcc_1 xy=5.644065,5.681861 rot=r180
-inst node node_2 xy=1.122127,18.566952
-inst inv inv1 xy=24.667806,10.777968
-inst node node_0 xy=5.546819,13.369801
-inst nand2 nand2_0 xy=24.080433,6.822802
-inst gnd gnd_1 xy=5.455081,22.262298 rot=fr180
-inst node node_1 xy=0.490028,9.863438
-inst nmos nmos_0 xy=5.487522,20.761788 rot=fr270
-inst nand2 nd2 xy=23.833808,15.340361
-inst nor3 nor3_0 xy=24.000167,2.545893
-inst pmos pmos_0 xy=5.575278,7.838383 rot=r90
-inst inout inout_0 xy=14.931054,3.202089 rot=r90
-inst output output_0 xy=7.297246,13.450522
-inst gnd gnd_0 xy=14.681071,11.606034 rot=r180
-geom text greenblat@mac.com|+972-54-4927322 list=-3.0,-11.0
-geom text examples|of|drawing|with|some|instances list=-3.0,-9.0
-geom text for|basics,|type|help|in|terminal list=-3.0,-13.0
-wire wire0 vcc_1 pmos_0.i list=5.644065,5.681861,5.575278,7.838383
-wire wire1 node_2 input_0 list=1.122127,18.566952,0.149668,13.801899
-wire wire2 input_0 node_1 list=0.149668,13.801899,0.490028,9.863438
-wire wire3 node_0 nmos_0.o list=5.546819,13.369801,5.487522,16.761788
-wire wire4 inout_0 cmos_0.i list=14.931054,3.202089,14.821728,6.027391
-wire wire5 node_1 pmos_0.g list=0.490028,9.863438,3.575278,9.838383
-wire wire6 cmos_0.c nand2_0.i2 list=16.821728,8.027391,24.080433,7.822802
-wire wire7 node_2 nmos_0.g list=1.122127,18.566952,3.487522,18.761788
-wire wire8 gnd_1 nmos_0.i list=5.455081,22.262298,5.487522,20.761788
-wire wire9 node_0 pmos_0.o list=5.546819,13.369801,5.575278,11.838383
-wire wire10 cmos_0.o gnd_0 list=14.821728,10.027391,14.681071,11.606034
-wire wire11 node_0 output_0 list=5.546819,13.369801,7.297246,13.450522
-param input_0 name inx xy=-4.689649,13.316619
-param output_0 name outx xy=10.102754,12.981766
-param pmos_0 size 10/0.25 xy=5.018424,9.335043
+inst corner_logo cr0 xy=-4.0,-17.0 rot=r90
+inst corner_logo cr1 xy=57.0,29.5 rot=r270
+inst cmos cmos_0 xy=15.5,6.0 rot=r90
+inst input input_0 xy=1.0,14.0
+inst vcc vcc_1 xy=5.5,5.5 rot=r180
+inst node node_2 xy=1.0,19.0
+inst inv inv1 xy=25.0,11.0
+inst node node_0 xy=5.5,13.0
+inst nand2 nand2_0 xy=24.5,7.0
+inst gnd gnd_1 xy=5.5,22.5 rot=fr180
+inst node node_1 xy=1.0,9.5
+inst nmos nmos_0 xy=5.5,21.0 rot=fr270
+inst nand2 nd2 xy=24.5,15.5
+inst nor3 nor3_0 xy=24.5,2.5
+inst pmos pmos_0 xy=5.5,7.5 rot=r90
+inst inout inout_0 xy=15.5,3.0 rot=r90
+inst output output_0 xy=7.5,13.0
+inst gnd gnd_0 xy=15.5,11.5 rot=r180
+geom text greenblat@mac.com|+972-54-4927322 list=-0.5,-3.5 rot=r0
+geom text examples|of|drawing|with|some|instances list=-0.3,-7.1 rot=r0
+geom text for|basics,|type|help|in|terminal list=-0.5,-10.0 rot=r0
+geom text or|type|new|<some|name> list=-0.5,-13.0 rot=r0
+wire wire0 vcc_1 pmos_0.i list=5.5,5.5,5.5,7.5
+wire wire1 node_2 input_0 list=1.0,19.0,1.0,14.0
+wire wire2 input_0 node_1 list=1.0,14.0,1.0,9.5
+wire wire3 node_0 nmos_0.o list=5.5,13.0,5.5,17.0
+wire wire4 inout_0 cmos_0.i list=15.5,3.0,15.5,6.0
+wire wire5 node_1 pmos_0.g list=1.0,9.5,3.5,9.5
+wire wire6 cmos_0.c nand2_0.i2 list=17.5,8.0,24.5,8.0
+wire wire7 node_2 nmos_0.g list=1.0,19.0,3.5,19.0
+wire wire8 gnd_1 nmos_0.i list=5.5,22.5,5.5,21.0
+wire wire9 node_0 pmos_0.o list=5.5,13.0,5.5,11.5
+wire wire10 cmos_0.o gnd_0 list=15.5,10.0,15.5,11.5
+wire wire11 node_0 output_0 list=5.5,13.0,7.5,13.0
+param input_0 name inx xy=-3.7,13.3 rot=r0
+param output_0 name outx xy=10.1,12.5 rot=r0
+param pmos_0 size 10/0.25 xy=5.5,8.8 rot=r0
 end
+
 picture flop
 pic_pin q o xy=3.0,1.0
 pic_pin ck i xy=1.5,2.5

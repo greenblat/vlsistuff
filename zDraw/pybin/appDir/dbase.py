@@ -83,6 +83,7 @@ def pdraw_current():
     Root=get_context('root')
     Matrix = Glbs.details[Root].get_matrix()
     set_context('matrix',Matrix)
+    Glbs.details[Root].drawGrid(Matrix)
     Glbs.details[Root].draw(Matrix)
     if (Glbs.details[Root].is_touched=='Q'):
         render_text(UnitMatrix,'Dont You want to save first? (another Q will exit)',(100,100),'r0',5,RED_COLOR,'left')
@@ -104,7 +105,7 @@ def postscript_current():
     Svg.close()
     File.close()
 
-from renders import render_line, render_aline,render_circle,render_text,compute_matrix,translate_mag,translate_rotate,translate_move,matrix_mult,render_fcircle,render_arc,world_coord_fl,world_coord,render_frect,render_rect
+from renders import render_line, render_aline,render_circle,render_text,compute_matrix,translate_mag,translate_rotate,translate_move,matrix_mult,render_fcircle,render_arc,world_coord_fl,world_coord,render_frect,render_rect, render_dashed_aline
 
 
 
@@ -685,6 +686,22 @@ class DetailClass:
         self.params[Key]=ParamClass(self,Owner,Param,Value,Point,Rot)
     def add_wire(self,Name,Start,Stop,List):
         self.wires[Name]=WireClass(self,Name,Start,Stop,List)
+
+    def drawGrid(self,Matrix):
+        if not get_context('drawGrid'): return 
+        [(X0,Y0),(X1,Y1)] = self.bbox()
+        X0 = int(X0)-10
+        X1 = int(X1)+10
+        Y0 = int(Y0)-10
+        Y1 = int(Y1)+10
+        Step = int(get_context('grid') * 4)
+        for II in range(X0,X1,Step):
+            render_dashed_aline(Matrix,[(II,Y0),(II,Y1)],[210,210,210],3)
+        for II in range(Y0,Y1,Step):
+            render_dashed_aline(Matrix,[(X0,II),(X1,II)],[210,210,210],3)
+            
+
+
 
     def draw(self,Matrix):
         for Inst in self.instances:

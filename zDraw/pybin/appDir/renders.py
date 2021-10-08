@@ -1,7 +1,7 @@
 
 
 
-from pygameGeoms import setLineWidth,draw_line,draw_label,draw_circle,draw_arc,draw_fcircle,draw_frect,draw_rect
+from pygameGeoms import setLineWidth,draw_line,draw_label,draw_circle,draw_arc,draw_fcircle,draw_frect,draw_rect,draw_dashed_line
 
 def render_line(Matrix,Line,Color):
     setLineWidth(Glbs.get_context('lineWidth'))
@@ -15,6 +15,13 @@ def render_line(Matrix,Line,Color):
         draw_line((X2,Y2),(X3,Y3),Color)
         X0=X1
         Y0=Y1
+
+def render_dashed_aline(Matrix,Line,Color,Dash=10):
+    setLineWidth(Glbs.get_context('lineWidth'))
+    for i in range(len(Line)-1):
+        P0 =  world_coord(Matrix,Line[i])
+        P1 =  world_coord(Matrix,Line[i+1])
+        draw_dashed_line(P0,P1,Color,Dash)
 
 def render_aline(Matrix,Line,Color):
     setLineWidth(Glbs.get_context('lineWidth'))

@@ -38,13 +38,50 @@ def draw_segment(P0,P1):
    P1 = fixCoord(P1)
    draw_line(P0,P1,'black')
 
+def draw_dashed_line(P0,P1,Color,dash_length=10):
+    P0f = fixCoord(P0)
+    P1f = fixCoord(P1)
+    Color = oglcolor(Color)
+    Screen = Glbs.get_context('screen')
+
+    x1, y1 = P0f
+    x2, y2 = P1f
+    dl = dash_length
+
+    if (x1 == x2):
+        ycoords = [y for y in range(y1, y2, dl if y1 < y2 else -dl)]
+        xcoords = [x1] * len(ycoords)
+    elif (y1 == y2):
+        xcoords = [x for x in range(x1, x2, dl if x1 < x2 else -dl)]
+        ycoords = [y1] * len(xcoords)
+    else:
+        a = abs(x2 - x1)
+        b = abs(y2 - y1)
+        c = round(math.sqrt(a**2 + b**2))
+        dx = dl * a / c
+        dy = dl * b / c
+
+#        xcoords = [x for x in numpy.arange(x1, x2, dx if x1 < x2 else -dx)]
+#        ycoords = [y for y in numpy.arange(y1, y2, dy if y1 < y2 else -dy)]
+
+    next_coords = list(zip(xcoords[1::2], ycoords[1::2]))
+    last_coords = list(zip(xcoords[0::2], ycoords[0::2]))
+    for (x1, y1), (x2, y2) in zip(next_coords, last_coords):
+        start = (round(x1), round(y1))
+        end = (round(x2), round(y2))
+        pygame.draw.line(Screen, Color, start, end, glLineWidth)
+
+
+
+
+
+
 def draw_line(P0,P1,Color):
-   P0f = fixCoord(P0)
-   P1f = fixCoord(P1)
-   Color = oglcolor(Color)
-   Screen = Glbs.get_context('screen')
-#   print(Screen,Color,P0f,P1f,glLineWidth)
-   pygame.draw.line(Screen,Color,P0f,P1f,glLineWidth)
+    P0f = fixCoord(P0)
+    P1f = fixCoord(P1)
+    Color = oglcolor(Color)
+    Screen = Glbs.get_context('screen')
+    pygame.draw.line(Screen,Color,P0f,P1f,glLineWidth)
 
 def draw_long_line(Points,Color):
     Color = oglcolor(Color)

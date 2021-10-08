@@ -36,17 +36,18 @@ helpString = '''
     commands in text window (original terminal):
         V     - flip:  fonts drawn vs fonts system
        param  size n2,p3  p15/4 .....   : add any kind param to params queue, will be used by "p" on screen.
-       name   name1 name2 name3 ...   : add name params to queue. use "p" on screen to connect them to instances.
-       add      nor2 nor3 input output                : add types to queue, will be used by "a" on screen.
+       name   name1 name2 name3 ...   : (sugar coating for param name) add name params to queue. use "p" on screen to connect them to instances.
+       add       : empty "add"will print all options of known instances.
+       add      nor2 nor3 input output                : add types to queue, will be used by "a" on screen. also used by "T" - free text placer.
        load <filename>                                : load zdraw file
        load         : without filename will just list all loaded schematics and pictures.
        load <schemname> : will display schematic if it loaded, or try to load it from "ls'ed" directories.
        new <schemname>                                : create new schematic
        delete                                        : delete current schematic from editor
        change        : (no params) list loaded schematics, 
-       change schematic      : change to another loaded schematic  (similar to load)
+       change <schematic>      : change to another loaded schematic  (similar to load)
        save : save current schematic (or S from graphics window)
-       save LongFileName : save current schematic  to specified zdraw file, or directory. file name must be of current root or not mentioned.
+       save <LongFileName> : save current schematic  to specified zdraw file, or directory. file name must be of current root or not mentioned.
        rename <newName>   : will duplicate current detail and You start editing new version. load can be bring You to original one.
        help : prints this
        print : creates svg and ps images
@@ -57,8 +58,12 @@ helpString = '''
        quit:  just quit
        sys <shell command>  :  execute shell command , like "open screenshot.ps" or something.
        ls <dir>  : list all schematics in this dir. default is ".". also the system remembers all listed drawings, so "load name" will search all "ls'ed" dirs.
-       picture  : will create a picture out of current detail.
-       picture directoryname : will put the picture there.
+       zlib  : will create a picture out of current detail.
+       zlib <directoryname> : will put the picture there.
+       <variable> = <value>      : way to change context variables. it can be "drawGrid = 0" to turn off the grid display, or  "drawGrid = 1" to turn it back on.
+                               it can be "grid = 1"  or "grid = 0.5" (default) to set placement grid. Notice that grid in dashed lines on screen is each four "grid" values.
+                               it can be "geom_text_size = 1"  to change text size of free texts. (1 i just an example, 0.5 is also fine and so all "reasonable" numbers)
+        variables          : will print all current values of context variables. Even the ones You nto supposed to mess with.
 
        all commands can be abreviated to the shortest unique string
 
@@ -97,7 +102,7 @@ helpString = '''
         pic_text_size 0.15
         param_text_size 0
         geom_text_size 1.0 
-        grid 0.1 
+        grid 0.5 
         shyParams name,size
         lineWidth 1.5 
         vectorTextWidth 1.0 

@@ -1,4 +1,5 @@
 
+VERSION = '08oct2021'
 WID,HEI = 1200,600
 
 import os,sys,time,traceback
@@ -52,7 +53,7 @@ class GlobalsClass:
 
     def reset(self):
         self.history=[]
-        self.Banner='iDraw: greenblat@mac.com +972-54-4927322'
+        self.Banner='Draw: greenblat@mac.com +972-54-4927322  v:%s' % VERSION
         self.finished=False
         self.INIT = (WID,HEI)
         self.width=self.INIT[0]
@@ -81,6 +82,7 @@ class GlobalsClass:
         self.redoStack = []
         self.undoValid = False
         self.imported = {}
+        self.drawGrid = 0
 
     def wireName(self):
         self.wireNumName += 1
@@ -156,7 +158,6 @@ dbase.Glbs = Glbs
 pygameGeoms.Glbs = Glbs
 renders.Glbs = Glbs
 drawVectorText.Glbs=Glbs
-
 def main():
     dbase.init()
     load_init_file()
@@ -309,7 +310,7 @@ import time
 def work():
     global running
     pygame.init()
-    pygame.display.set_caption("zDraw")
+    pygame.display.set_caption("zDraw ver %s" % VERSION)
     screen = pygame.display.set_mode((WID,HEI),pygame.RESIZABLE)
     screen.fill((255,255,255))
 #    screen.blit(pygame.transform.rotate(screen, 180), (0, 0))
