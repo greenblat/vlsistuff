@@ -265,6 +265,7 @@ def read_init_file(Fname):
         line = File.readline()
         if (len(line)==0):
             return
+        line = line.replace('=',' = ')
         wrds = line.split()
         if (len(wrds)>0)and(wrds[0]=='load'):
             Fname = figure_out_the_file(wrds[0])
@@ -452,6 +453,7 @@ def execute_terminal_commands():
 def execute_terminal_commands__():
     while 1:
         Txt = input('?:')
+        Txt = Txt.replace('=',' ')
         wrds = dbase.splitLine(Txt)
         if len(wrds)>0:
             use_command_wrds(wrds)

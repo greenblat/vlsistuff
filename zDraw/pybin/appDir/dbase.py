@@ -105,7 +105,7 @@ def postscript_current():
     Svg.close()
     File.close()
 
-from renders import render_line, render_aline,render_circle,render_text,compute_matrix,translate_mag,translate_rotate,translate_move,matrix_mult,render_fcircle,render_arc,world_coord_fl,world_coord,render_frect,render_rect, render_dashed_aline
+from renders import render_line, render_aline,render_circle,render_text,compute_matrix,translate_mag,translate_rotate,translate_move,matrix_mult,render_fcircle,render_arc,world_coord_fl,world_coord,render_frect,render_rect, render_dashed_aline,render_point
 
 
 
@@ -186,11 +186,12 @@ class InstanceClass:
         return self.bbox0
 
     def move(self,Dx,Dy):
-        X0 = grid_it(self.Point[0])
-        Y0 = grid_it(self.Point[1])
+        X0 = self.Point[0]
+        Y0 = self.Point[1]
         X1 = X0+Dx
         Y1 = Y0+Dy
         X2,Y2 = putOnGrid((X1,Y1))
+        print('move %s : dxdy=%f,%f point %f,%f x1y1 = %f,%f x2y2 = %f %f' % (self.Inst,Dx,Dy,X0,Y0,X1,Y1,X2,Y2))
         self.Point = X2,Y2
         self.bbox0=False
         self.recompute_wires()
@@ -455,7 +456,6 @@ class ParamClass:
 
     def rotate(self,What):
         NewRot = merge_rot(self.Rot,What)
-        print('>>>>>> %s %s %s %s' % (self.Rot,NewRot,self.Owner,self.Param))
         self.Rot=NewRot
         self.bbox0=False
 
@@ -483,6 +483,7 @@ class PictureClass:
         for Line in self.lines:
             render_line(Matrix,Line,Color)
         for (Text,Point,Rot,Size,Align) in self.texts:
+            Size = get_context('pic_text_size')
             render_text(Matrix,Text,Point,Rot,Size,Color,Align)
         for ((X0,Y0),(X1,Y1)) in self.circles:
             render_circle(Matrix,(X0,Y0),(X1,Y1),Color)
@@ -694,13 +695,19 @@ class DetailClass:
         X1 = int(X1)+10
         Y0 = int(Y0)-10
         Y1 = int(Y1)+10
-        Step = int(get_context('grid') * 4)
-        for II in range(X0,X1,Step):
-            render_dashed_aline(Matrix,[(II,Y0),(II,Y1)],[210,210,210],3)
-        for II in range(Y0,Y1,Step):
-            render_dashed_aline(Matrix,[(X0,II),(X1,II)],[210,210,210],3)
-            
-
+        if get_context('drawGrid') == 1:
+            Step = int(get_context('grid') * 4)
+            for II in range(X0,X1,Step):
+                render_dashed_aline(Matrix,[(II,Y0),(II,Y1)],[210,210,210],3)
+            for II in range(Y0,Y1,Step):
+                render_dashed_aline(Matrix,[(X0,II),(X1,II)],[210,210,210],3)
+        elif get_context('drawGrid') == 2:
+            Step = 1
+            for XX in range(X0,X1,Step):
+                for YY in range(Y0,Y1,Step):
+                    render_point(Matrix,(XX,YY),[200,200,200]) 
+        else:
+            logs.log_error('drawGrid should be in [0,1,2] not %s' % get_context('drawGrid'))
 
 
     def draw(self,Matrix):
@@ -1314,6 +1321,7 @@ def use_keystroke(Uni,Ord,XY):
             Glbs.contexts.pop('last_mouse_selected')
     elif (Ord in [ K_RIGHT,K_LEFT,K_UP,K_DOWN]):
         Grid = get_context('grid')
+        Grid += 0.2
         if (Ord==K_RIGHT):
             Dx,Dy=Grid,0
         elif (Ord==K_LEFT):
@@ -1335,6 +1343,7 @@ def use_keystroke(Uni,Ord,XY):
 
 
         (Who,Inst)= select_object((X,Y))
+        print('>>>>>>>>',Who,Inst)
         if (Who):
             Glbs.graphicsChanged=True
             if (Who=='instance'):
@@ -2129,11 +2138,19 @@ def circle_index(Center,Point):
 
 def putOnGrid(Point):
     Grid = get_context('grid')
-    X0 = int( 0.5 + (Point[0] / Grid))
-    X1 = X0 * Grid
-    Y0 = int( 0.5 + (Point[1] / Grid))
-    Y1 = Y0 * Grid
-    logs.log_info('Point %f %f   %f %f' % (Point[0],Point[1],X1,Y1))
+    if Point[0]>=0:
+        X0 = int( 0.5 + (Point[0] / Grid))
+        X1 = X0 * Grid
+    else:
+        X0 = int( -0.5 + (Point[0] / Grid))
+        X1 = X0 * Grid
+    if Point[1]>=0:
+        Y0 = int( 0.5 + (Point[1] / Grid))
+        Y1 = Y0 * Grid
+    else:
+        Y0 = int( -0.5 + (Point[1] / Grid))
+        Y1 = Y0 * Grid
+    logs.log_info('put on grid: Point %f %f ->   %f %f' % (Point[0],Point[1],X1,Y1))
     return X1,Y1
 
 

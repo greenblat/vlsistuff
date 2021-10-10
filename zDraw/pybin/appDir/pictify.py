@@ -2,7 +2,7 @@
 
 import os,sys
 import logs
-Plus = 1.5
+Plus = 2.0
 def main():
     global Cell
     Fname = sys.argv[1]

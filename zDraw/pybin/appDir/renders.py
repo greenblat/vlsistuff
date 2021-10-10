@@ -3,6 +3,11 @@
 
 from pygameGeoms import setLineWidth,draw_line,draw_label,draw_circle,draw_arc,draw_fcircle,draw_frect,draw_rect,draw_dashed_line
 
+def render_point(Matrix,Point,Color):
+    X,Y = Point
+    render_aline(Matrix,[(X-0.05,Y),(X+0.05,Y)],Color)
+    render_aline(Matrix,[(X,Y-0.05),(X,Y+0.05)],Color)
+
 def render_line(Matrix,Line,Color):
     setLineWidth(Glbs.get_context('lineWidth'))
     X0=Line[0][0]
