@@ -21,6 +21,7 @@ class jtagDriverClass(logs.driverClass):
         self.waiting = 0
         self.RATE = 10
         self.Catch = 0
+        self.CHECKS = []
 
     def onFinish(self):
         return
@@ -48,7 +49,6 @@ class jtagDriverClass(logs.driverClass):
         elif wrds[0] == 'dr':
             Len = self.eval(wrds[1])
             Dr = self.eval(wrds[2])
-            logs.log_info('DDDDDR %s %s %s %s'%(type(Len),type(Dr),Len,Dr))
             self.sendDr(Dr,Len)
 
         elif wrds[0] == 'dr1':
@@ -68,12 +68,15 @@ class jtagDriverClass(logs.driverClass):
                 Tms = 0
             self.sendIdle(Len,Tms)
         elif wrds[0] == 'check':
-            logs.log_ensure((self.RR==self.eval(wrds[1])),'JTAG CHECK exp=%x act=%x'%(self.eval(wrds[1]),self.RR))
+            if self.CHECKS==[]:
+                logs.log_error('check failed in empty. exp=%x' % (self.eval(wrds[1])))
+            else:
+                Act = self.CHECKS.pop(0)
+                logs.log_ensure((Act==self.eval(wrds[1])),'JTAG CHECK(%d) exp=%x act=%x'%(len(self.CHECKS),self.eval(wrds[1]),Act))
         else:
             logs.log_error('action text %s is not recognized'%(Txt))
 
     def run(self):
-        veri.force('tb.marker6',str(self.waiting))
         if self.waiting:
             self.waiting -= 1
             return
@@ -104,6 +107,7 @@ class jtagDriverClass(logs.driverClass):
         elif self.state=='step0':
             self.force(self.jtck,1)
             self.state='step1'
+
         elif self.state=='step1':
             self.force(self.jtck,0)
             self.state='idle'
@@ -112,7 +116,7 @@ class jtagDriverClass(logs.driverClass):
     def catching(self):
         if self.Catch==1:
             self.responce = str(self.peek(self.jtdo))+self.responce
-            veri.force('tb.marker7',str(1+len(self.responce)))
+#            veri.force('tb.marker0',str(self.peek(self.jtdo)))
         elif self.Catch=='x':
             self.responce = 'X'+self.responce
         elif self.responce!='':
@@ -125,6 +129,7 @@ class jtagDriverClass(logs.driverClass):
                 logs.log_info('jtag RES 0x%x %s %s %s (x) %s lastir=(%s)'%(self.RR,self.responce,Cmd,Val,Len,Len))
             if self.callback:
                 self.callback(logs.intx(self.responce),Cmd,Val,Len)
+            self.CHECKS.append(logs.intx(self.responce))
             self.responce=''
         else:
             self.responce=''
@@ -159,7 +164,6 @@ class jtagDriverClass(logs.driverClass):
     def sendIr(self,Ir,irLen=8):
         self.queue.extend([(0,0,0),(1,0,0),(1,0,0),(0,0,0),(0,0,0)])
         irString = make_bin_i(Ir,irLen)
-        logs.log_info('irString %s'%(irString))
         for Bit in irString[:-1]:
             self.queue.append((0,int(Bit),1))
         self.queue.append((1,int(irString[-1]),1))

@@ -1,5 +1,5 @@
 #! /bin/csh -f
-set TEST = test0
+set TEST = test2
 comp
 ~/verification_libs3/scanDeepListForPanics.py
 ~/verification_libs3/scanDeepListForPanics.py deep.list count

@@ -20,7 +20,7 @@ I say "used to" because they are being swallowed and not sure to exist on the ma
 All apps create ugly unreadable RTL code. My guess it is on purpose to make it look sophisticated and 
 hard to implement Yourself. 
 
-There is also open-source (like OpenSoC) but for me it is "תפסת מרובה לא תפסת" syndrom. For non Hebrew readers - it approximately translates to " there is no value in exces". 
+There is also open-source (like OpenSoC) but for me it is "תפסת מרובה לא תפסת" syndrom. For non Hebrew readers - it approximately translates to " there is no value in excess". 
 
 My rings-inspired NOC is still great, but it is scary to conventional designer and their managers. 
 This is the reason i thought of AXI NOC from scratch. 
@@ -106,7 +106,7 @@ If this addressing will be too confusing, we may switch back to more conservativ
 
 ## What is the status
 in my github, clone:  https://github.com/greenblat/vlsistuff.git
-there is directory called axi_noc. All is (will be shortly)  there.  Including building block RTLs and few demos.
+there is directory called axi_noc. All is  there.  Including building block RTLs and few demos. The demos cover major verification issues.
 
 
 ## What's next?
@@ -123,6 +123,7 @@ there is directory called axi_noc. All is (will be shortly)  there.  Including b
 1. Policeman. Keeping traffic legal.
 2. ECC options. Not trivial
 3. Encryption / Decryption on critical links
+4. Breaker of long bursts into small bursts (to make fairness easy)
 
 
 
@@ -130,9 +131,8 @@ there is directory called axi_noc. All is (will be shortly)  there.  Including b
 
 ## What's missing
 
-1. Currently, Fixed priority in service. Will be made round robin or something.
 2. Some modules are in development stage and are empty in GIT:  clock and width changers.
-3. Not enough verification. Ongoing. But overall it is operational.
+3. Internal verificationcovers most of it. Working on external verification (by external party).
 4. Not going to add AHB interfaces. You probably have them already. If not, good for You.
 5. Not going to build it in VHDL. Enough weapons as it is.
 
