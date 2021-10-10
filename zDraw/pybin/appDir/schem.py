@@ -105,7 +105,9 @@ pic_aline list=0,0.0,0.62,0.5
 pic_aline list=0,2.0,0.7,1.6
 pic_aline list=2.5,1,4,1
 pic_circle list=1.5,1.0,0.5,1.0
-pic_text  {} xy=1.5,1.0
+pic_text  {} xy=1.8,1.0
+pic_text  msb xy=0.8,1.3
+pic_text  lsb xy=0.8,0.5
 end
 
 picture action

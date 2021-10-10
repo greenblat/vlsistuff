@@ -310,7 +310,13 @@ class connectivityClass:
             Name = self.Names[Inst]
         else:
             Name = Obj.Inst
-        if (Obj.Type not in ['vcc','gnd','antenna','input','output','inout','node'])and('logo' not in Obj.Type)and('ilia' not in Obj.Type):
+        if Obj.Type == 'concat':
+            OO = self.Conns[Inst]['o']
+            I0 = self.Conns[Inst]['i0']
+            I1 = self.Conns[Inst]['i1']
+            File.write('assign %s = {%s,%s};\n' % (OO,I1,I0))
+
+        elif (Obj.Type not in ['vcc','gnd','antenna','input','output','inout','node'])and('logo' not in Obj.Type)and('ilia' not in Obj.Type):
             if Inst in self.Params:
                 PP = []
                 for Prm,Val in self.Params[Inst]:
