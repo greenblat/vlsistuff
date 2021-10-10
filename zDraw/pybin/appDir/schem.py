@@ -97,6 +97,17 @@ pic_aline list=3.5,1,4,1
 pic_circle list=2.0,1.0,0.5,1.0
 end
 
+picture concat 
+pic_pin o o xy=4,1
+pic_pin i0 i xy=0,0.0
+pic_pin i1 i xy=0,2.0
+pic_aline list=0,0.0,0.62,0.5
+pic_aline list=0,2.0,0.7,1.6
+pic_aline list=2.5,1,4,1
+pic_circle list=1.5,1.0,0.5,1.0
+pic_text  {} xy=1.5,1.0
+end
+
 picture action
   pic_aline list=-0.7,-0.7,0.7,0.7
   pic_aline list=-0.7,0.7,0.7,-0.7

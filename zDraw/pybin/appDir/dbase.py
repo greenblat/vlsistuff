@@ -1241,21 +1241,28 @@ def use_mousedown(X,Y):
     Root=get_context('root')
     State = get_context('state')
     (Who,Inst)= select_object((X,Y))
+    More = ''
+    for Key in Glbs.details[Root].params:
+        if Glbs.details[Root].params[Key].Owner==Inst:
+            Prm = Glbs.details[Root].params[Key].Param
+            Vlu = Glbs.details[Root].params[Key].Value
+            More += ' %s=%s' % (Prm,Vlu)
     Psch = screen2schem((X,Y))
     set_context('last_mouse_selected',(Who,Inst,Psch[0],Psch[1]))
   
     if Who=='instance':
-        print(ppoint(Psch),(X,Y),Who,Inst,Glbs.details[Root].instances[Inst].Type,Glbs.details[Root].instances[Inst].Point)
+        print(ppoint(Psch),(X,Y),Who,Inst,Glbs.details[Root].instances[Inst].Type,Glbs.details[Root].instances[Inst].Point,More)
         Kind = Glbs.details[Root].instances[Inst].Type
     elif Who=='wire':
-        print(ppoint(Psch),(X,Y),Who,Inst,Glbs.details[Root].wires[Inst].Start,Glbs.details[Root].wires[Inst].End)
+        print(ppoint(Psch),(X,Y),Who,Inst,Glbs.details[Root].wires[Inst].Start,Glbs.details[Root].wires[Inst].End,More)
         Kind = ''
     elif Who=='param':
         Kind = Glbs.details[Root].params[Inst].Value
+        print(ppoint(Psch),(X,Y),Who,Inst,Kind,More)
     else:
-        print(ppoint(Psch),(X,Y),Who,Inst)
+        print(ppoint(Psch),(X,Y),Who,Inst,More)
         Kind = '??'
-    set_context('banner','%s :mouse at %.2f %.2f %s %s %s: %s'%(Root,X,Y,Who,Kind,Inst,State))
+    set_context('banner','%s :mouse at %.2f %.2f %s %s %s %s: %s'%(Root,X,Y,Who,Kind,Inst,More,State))
 
 
 def duplicate_inst(From,PP):
@@ -1829,25 +1836,53 @@ def use_keystroke(Uni,Ord,XY):
                 bad=True
             if bad:
                 Pics = list(Glbs.pictures.keys())
+                Pics += Glbs.loadable_pictures()
                 Pics.sort()
-                logs.log_info('known pictures:')
-                while len(Pics)>5:
-                    logs.log_info('  %s'%(' '.join(Pics[:5])))
-                    Pics = Pics[5:]
-                logs.log_info('  %s'%(' '.join(Pics)))
+                Matches = []
+                for Pic in Pics:
+                    if Pic.startswith(What):
+                        Matches.append(Pic)
+                logs.log_info('matching pictures:')
+                while len(Matches)>5:
+                    logs.log_info('  %s'%(' '.join(Matches[:5])))
+                    Matches = Matches[5:]
+                logs.log_info('  %s'%(' '.join(Matches)))
     elif Uni == '':
         if Ord not in [0x400000e1]:
             logs.log_info('key ord (%d) not used'%(Ord))
     else:
         logs.log_info('key "%s" (%d) not used'%(Uni,ord(Uni)))
 
+
+def findMatches(What):
+    Pics = list(Glbs.pictures.keys())
+    Pics += Glbs.loadable_pictures()
+    Pics.sort()
+    if What in Pics: return [What]
+    if What == '': return Pics
+    Matches = []
+    for Pic in Pics:
+        if Pic.startswith(What):
+            Matches.append(Pic)
+    logs.log_info('matching pictures:')
+    Keep = Matches[:]
+    while len(Matches)>5:
+        logs.log_info('  %s'%(' '.join(Matches[:5])))
+        Matches = Matches[5:]
+    logs.log_info('  %s'%(' '.join(Matches)))
+    return Keep
+
+
+
+
+
 def put_schem_text(X,Y):
     Spoint = screen2schem((X,Y))
     Root=get_context('root')
-    if len(Glbs.adding_queue)==0:
-        print('add texts to queue first (use "add something" in terminal)')
+    if len(Glbs.adding_text_queue)==0:
+        print('add texts to text queue first (use "text something" in terminal)')
     else:
-       What = Glbs.adding_queue.pop(0)
+       What = Glbs.adding_text_queue.pop(0)
        Glbs.details[Root].add_geom('text',What,[Spoint])
        Glbs.details[Root].touched(True)
        Glbs.details[Root].bbox0=False

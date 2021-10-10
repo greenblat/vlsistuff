@@ -64,6 +64,7 @@ class GlobalsClass:
         self.pictures={}
         self.contexts={}
         self.adding_queue=[]
+        self.adding_text_queue=[]
         self.params_queue=[]
         self.paramName='name'
         self.wireNumName=0
@@ -597,11 +598,23 @@ def __use_command_wrds(wrds):
         else:
             load_schematics(wrds[1])
                     
+    elif wrds[0] == 'text':
+        Glbs.adding_text_queue.extend(wrds[1:])
+
     elif 'add' in wrds[0]:
+        List = dbase.findMatches('')
         if len(wrds)==1:
-            logs.log_info('loaded pictures:  %s'%str(list(Glbs.pictures.keys())))
+            logs.log_info('loaded pictures:  %s'%str(List))
         else:
-            Glbs.adding_queue.extend(wrds[1:])
+            for Wrd in wrds[1:]:
+                if Wrd in List:
+                    Glbs.adding_queue.append(Wrd)
+                else:
+                    Match = dbase.findMatches(Wrd)
+                    if len(Match) == 1:
+                        Glbs.adding_queue.extend(Match)
+                    else:
+                        logs.log_error('add of "%s" failed,. not found or found several: "%s"' % (Wrd,str(Match)))
     elif 'name' in wrds[0]:
         Glbs.paramName='name'
         Glbs.params_queue.extend(wrds[1:])
@@ -684,6 +697,8 @@ def __use_command_wrds(wrds):
             if ('.zdraw' in Fname):
                 L1.append(Fname)
             elif ('.zpic' in Fname):
+                L2.append(Fname)
+            elif ('.zlib' in Fname):
                 L2.append(Fname)
         for Cell in L1+L2:
             Glbs.listed[Cell] = Dir
@@ -795,7 +810,7 @@ def printScreen():
 
 
 ValidCommandsTxt = ''' add param dump load new delete print save change history help quit exit variables zlib picture include source ls
-    verilog spice plot
+    verilog spice plot text
 '''
 
 
