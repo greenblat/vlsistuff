@@ -77,7 +77,8 @@ helpString = '''
             dox aaa bbb     #  dox import must have run(wrds) definition. This function is run, wrds are splitted string activated it.
 
             this, unless errors, wil lprint the activation words and also all context variables of Glbs (class of all things in zDraw).
-
+            
+            ** import dox.py ** can also be added to .zdrawrc
 
 
 

@@ -273,6 +273,8 @@ def read_init_file(Fname):
                 logs.log_error('file "%s" cant be read'%Fname)
             else:
                 dbase.load_dbase_file(Fname)
+        elif (len(wrds)>=2)and(wrds[0] == 'import'):
+            import_command(wrds[1])
         elif (len(wrds)>=2)and(wrds[0] == 'pics_lib'):
             Was = dbase.get_context('pics_lib')
             for wrd in wrds[1:]:
@@ -475,6 +477,16 @@ def use_command_wrds(wrds):
         X = sys.exc_info()
         traceback.print_exception(etype=X[0],value=X[1],tb=X[2])
 
+def import_command(Fname):
+    Fname  = os.path.expanduser(Fname) 
+    Fname  = os.path.abspath(Fname) 
+    if not Fname.endswith('.py'):
+        logs.log_error('import expect filename ending with .py')
+    else:
+        Command,Function = my_importing(Fname)
+        if Command:
+            Glbs.imported[Command] = Function
+
 def __use_command_wrds(wrds):
     if len(wrds)==0:
         return
@@ -489,14 +501,15 @@ def __use_command_wrds(wrds):
     if wrds[0] in Glbs.imported:
         Glbs.imported[wrds[0]](wrds)
     elif wrds[0] in ['import']:
-        Fname  = os.path.expanduser(wrds[1]) 
-        Fname  = os.path.abspath(Fname) 
-        if not Fname.endswith('.py'):
-            logs.log_error('import expect filename ending with .py')
-        else:
-            Command,Function = my_importing(Fname)
-            if Command:
-                Glbs.imported[Command] = Function
+        import_command(wrds[1])
+#        Fname  = os.path.expanduser(wrds[1]) 
+#        Fname  = os.path.abspath(Fname) 
+#        if not Fname.endswith('.py'):
+#            logs.log_error('import expect filename ending with .py')
+#        else:
+#            Command,Function = my_importing(Fname)
+#            if Command:
+#                Glbs.imported[Command] = Function
 
     elif wrds[0] in ['source','include']:
         Fname  = os.path.expanduser(wrds[1]) 
