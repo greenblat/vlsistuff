@@ -782,6 +782,13 @@ class DetailClass:
         if (X1==X0):
             Scalex=100
         else:
+            Dx = (X1-X0)/10
+            X0 -= Dx
+            X1 += Dx
+            Dy = (Y1-Y0)/10
+            Y0 -= Dy
+            Y1 += Dy
+
             Scalex = 0.90 * get_context('width')/(X1-X0)
         if (Y1==Y0):
             Scaley=100
@@ -1203,6 +1210,7 @@ def ppoint(PP):
     return '(%.1f,%.1f)'%(PP[0],PP[1])
 
 def use_mousemove(X,Y):
+    return
     if 'grouping' in Glbs.contexts:
         Root=get_context('root')
         PP = screen2schem((X,Y))
@@ -1270,7 +1278,9 @@ def use_mousedown(X,Y):
         print(ppoint(Psch),(X,Y),Who,Inst,More)
         Kind = '??'
     set_context('banner','%s :mouse at %.2f %.2f %s %s %s %s: %s'%(Root,X,Y,Who,Kind,Inst,More,State))
-
+    if get_context('grouping') and (Who == 'instance'):
+        [_,_,List] = get_context('grouping')
+        set_context('grouping',[0,0,List+[Inst]])
 
 def duplicate_inst(From,PP):
     Root=get_context('root')
@@ -1667,12 +1677,15 @@ def use_keystroke(Uni,Ord,XY):
             Glbs.graphicsChanged=True
             unset_context('wiring')
         if ('grouping' in Glbs.contexts): 
-            [P0,_,_] = get_context('grouping')
-            Psch = screen2schem((X,Y))
-            set_context('grouping',[P0,Psch,_])
-            Included = Glbs.details[Root].select_enclosed(P0,Psch)  
-            set_context('grouping',[P0,Psch,Included])
-            Glbs.set_context('banner','%s: grouping (%d)'%(Root,len(Included)))
+            [P0,P1,List] = get_context('grouping')
+            if (not P0) and (not P1):
+                set_context('grouping',[P0,P1,List])
+            else:
+                Psch = screen2schem((X,Y))
+                set_context('grouping',[P0,Psch,_])
+                Included = Glbs.details[Root].select_enclosed(P0,Psch)  
+                set_context('grouping',[P0,Psch,Included])
+                Glbs.set_context('banner','%s: grouping (%d)'%(Root,len(Included)))
 
     elif (Uni=='w'):
         Root=get_context('root')
@@ -1730,7 +1743,7 @@ def use_keystroke(Uni,Ord,XY):
             return
         if ('grouping' not in Glbs.contexts):
             Psch = screen2schem((X,Y))
-            set_context('grouping',[Psch,0,0])
+            set_context('grouping',[Psch,0,[]])
             set_context('state','group')
             set_context('banner','%s : start grouping'%(Root))
         else:
@@ -2150,7 +2163,7 @@ def putOnGrid(Point):
     else:
         Y0 = int( -0.5 + (Point[1] / Grid))
         Y1 = Y0 * Grid
-    logs.log_info('put on grid: Point %f %f ->   %f %f' % (Point[0],Point[1],X1,Y1))
+#    logs.log_info('put on grid: Point %f %f ->   %f %f' % (Point[0],Point[1],X1,Y1))
     return X1,Y1
 
 

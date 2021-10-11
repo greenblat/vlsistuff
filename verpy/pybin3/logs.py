@@ -106,6 +106,7 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
     if Tb:
         veri.force('%s.errors'%TB,str(Errors))
 
+    Flogs[Which].flush()
 
     if (Errors>MAXERRORS):
         log_info('max errors reached (%d). bailing out. (MAXERRORS==%d)'%(Errors,MAXERRORS),Which)
@@ -177,6 +178,7 @@ def log_warning(Text,Which=0):
     Flogs[Which].write('%d: warning: %s\n'%(Warnings,Text))
     printed_already[Text]=1
     Warnings +=1  
+    Flogs[Which].flush()
 
 def log_write(Text,Which=0):
     if (not Flogs[Which]):
@@ -188,6 +190,7 @@ def log_info(Text,Which=0):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: info: %s'%(get_cycles(),Text))
     Flogs[Which].write('@%d: info: %s\n'%(get_cycles(),Text))
+    Flogs[Which].flush()
 
 def log_finfo(Text,File):
     File.write('@%d: info: %s\n'%(get_cycles(),Text))
