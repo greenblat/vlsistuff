@@ -521,6 +521,8 @@ def __use_command_wrds(wrds):
                 use_command_wrds(wrds0)
         except:
             logs.log_error('failed to open include file "%s" ' % Fname)
+            X = sys.exc_info()
+            traceback.print_exception(etype=X[0],value=X[1],tb=X[2])
 
     elif wrds[0] in ['quit','exit']:
         Glbs.details[Root].touched('Q')

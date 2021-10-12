@@ -190,6 +190,9 @@ class sequenceClass:
                     pass
                 elif (wrds[0]=='include'):
                     Fname = wrds[1]
+                    Fname = os.path.expanduser(Fname)
+                    Fname = os.path.expandvars(Fname)
+                    Fname = os.path.abspath(Fname)
                     Found = False
                     if os.path.exists(Fname):
                         Lines = open(Fname).readlines()
@@ -384,7 +387,6 @@ class sequenceClass:
 
                     
             BB = makeExpr(wrds[1])
-            print('><>>>>>>',BB)
             Val = self.evalExpr(BB)
             if not Val: 
                 self.Ptr -= 1

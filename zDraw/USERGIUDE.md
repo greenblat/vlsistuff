@@ -2,7 +2,12 @@
 
 # zDraw schematic editor
 
+simple but full schematic editor. written entirely in Python (using pygame for display). it is “VIM” of schematic editors - has neither baggage nor hidden agenda. Schematic file is humanly readable and easily parseable. Has built in translator to verilog, spice and to neutral format. ready-made icons exist for logic gates , transistors and simple spice building blocks. Has helper scripts to create new icons out of verilog modules and also out of handmade icons.
 
+# basics
+invoking xDraw.py opens graphics window. Commands are entered from orginal terminal window. Grpahics related commands are entered by punching a keyboard key with mouse over 
+required location. For example, striking letter "d" over nand2 instance will paint the instance red  (selected) and then You can strike either 'e' (like end) to really delete or "q" (like quit) to cancel.
+Many single letters are useful in graphics window.
 
 ## letters on screen (coordinate under mouse):
 
@@ -25,7 +30,8 @@
 |        n    | add instance of node (connection of wires), if it falls on wire - wire gets splitted at this point. |
 |        v g  | add instance of VCC (v) or GND (g) |
 |        G    | start group (end (char "e") will close the group and select all participants), to exit group use "q" |
-                you can move it around with arrows, or "s" to duplicate it at mouse position. |
+|             |  Using mousedown on instances - adds them to group |
+|             |  you can move the group around with arrows, or "s" to duplicate it at mouse position. |
 |        V    | flip:  fonts drawn vs fonts system |
 |        B    | flip:  show/hide bounding boxes. usefull for my debug, not so much for You. |
 |        T    | add text geometry. the text comes from "add aaabbbbccc" typed in terminal window before. |
@@ -34,6 +40,7 @@
 |        C   | take screen snapshot and save it in PNG file. |
 |        Q   | (temporarily out of order) quit now |
 |        X   | undo. new feature. use with caution. |
+|        Y   | redo. new feature. use with caution. |
 
 ## commands in text window (original terminal):
 
@@ -45,7 +52,7 @@
 |       param  size n2,p3  p15/4 .....   | add any kind param to params queue, will be used by "p" on screen. |
 |       name   name1 name2 name3 ...   | (sugar coating for param name) add name params to queue. use "p" on screen to connect them to instances. |
 |       add       | empty "add"will print all options of known instances. |
-|       add      nor2 nor3 input output   | add types to queue, will be used by "a" on screen. also used by "T" - free text placer. |
+|       add      nor2 nor3 | add types to queue, will be used by "a" on screen. also used by "T" - free text placer. |
 |       load <filename>                   | load zdraw file |
 |       load         | without filename will just list all loaded schematics and pictures. |
 |       load <schemname> | will display schematic if it loaded, or try to load it from "ls'ed" directories. |
@@ -75,22 +82,20 @@
 
 ## import
 
-​        example of import:
-​            Suppose You wrote python file dox.py with contents, like this:
-​            def run(wrds):
-​                print(wrds)
-​                print(Glbs.contexts)
-​        to use it, in terminal type:
-​            import  dox.py  # notice - You must specify .py in filename (unlike pure python)
-​            dox aaa bbb     #  dox import must have run(wrds) definition. This function is run, wrds are splitted string activated it.
-
+example of import:
+Suppose You wrote python file dox.py with contents, like this:
+            def run(wrds):
+                print(wrds)
+                print(Glbs.contexts)
+to use it, in terminal type:
+            import  dox.py  // notice - You must specify .py in filename (unlike pure python)
+            dox aaa bbb     //  dox import must have run(wrds) definition. This function is run, wrds are splitted string activated it.
             this, unless errors, wil lprint the activation words and also all context variables of Glbs (class of all things in zDraw).
-            
-            ** import dox.py ** can also be added to .zdrawrc
+** import dox.py ** can also be added to .zdrawrc
 
 
 
-       all commands can be abreviated to the shortest unique string
+all commands can be abreviated to the shortest unique string
 
 ## invocation:
 
