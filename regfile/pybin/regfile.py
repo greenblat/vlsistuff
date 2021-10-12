@@ -778,7 +778,7 @@ def bodyDump1(Db,File):
             logs.log_error('#empty of chip (default value for cases) is not a legal integer "%s"'%(Default))
             Default='0; // BAD DEFAULT %s'%Default
             
-    File.write("    32'h%s;\n"%Default)
+    File.write("    %d'h%s;\n" % (Buswid,Default))
     Str = STRING1.replace('RAMS',Db['chip'].RAMS)
     Str = Str.replace('BUSWID',str(Buswid))
     Str = Str.replace('ADDWID',str(Addwid))
@@ -865,24 +865,28 @@ assign REG_wr_pulse = pwrite && (mpaddr>='hLADDR) && (mpaddr < 'hHADDR);
 
 
 def treatPrdata(Reg,Wid,Name):
-    if (Wid<32):
-        Line = '    (mpaddr == \'h%x) ? %s :'%(Reg.Addr,expandBits(Name,Wid,32))
+    busWid = Db['chip'].Params['width']
+    Jump = busWid//8
+    if (Wid<busWid):
+        Line = '    (mpaddr == \'h%x) ? %s :'%(Reg.Addr,expandBits(Name,Wid,busWid))
         LINES[1].append(Line)
     else:
         Wid1 = Wid
         Ad = Reg.Addr
-        Hi,Lo = 31,0
+        Hi,Lo = busWid-1,0
         while Wid1>0:
-            Line = '    (mpaddr == \'h%x) ? %s :'%(Ad,expandBits('%s[%d:%d]'%(Name,Hi,Lo),min(Wid1,32),32))
-            Wid1 -= 32
-            Ad += 4
-            Lo += 32
-            Hi = min(Wid-1,Hi+32)
+            Line = '    (mpaddr == \'h%x) ? %s :'%(Ad,expandBits('%s[%d:%d]'%(Name,Hi,Lo),min(Wid1,busWid),busWid))
+            Wid1 -= busWid
+            Ad += Jump
+            Lo += busWid
+            Hi = min(Wid-1,Hi+busWid)
             LINES[1].append(Line)
 
 def treatReg(Reg):
+    busWid = Db['chip'].Params['width']
+    Jump = busWid//8
     Access= getPrm(Reg,'access','rw')
-    Wid= getPrm(Reg,'width',32)
+    Wid= getPrm(Reg,'width',busWid)
     Reset= getPrm(Reg,'reset',0)
     Default= getPrm(Reg,'default',0)
     if (Reset==0)and(Default!=0): Reset=Default
@@ -893,9 +897,9 @@ def treatReg(Reg):
         if 'pulse' in Access:
             lastAddr = Reg.Addr
             Wid2 = Wid
-            while Wid2>32:
-                lastAddr += 4
-                Wid2 -= 32
+            while Wid2>busWid:
+                lastAddr += Jump
+                Wid2 -= busWid
             Line = '    ,output %s_pulse'%(Name)
             LINES[0].append(Line)
             if 'ready' in Reg.Params:
@@ -914,9 +918,9 @@ def treatReg(Reg):
         LINES[0].append(Line)
         lastAddr = Reg.Addr
         Wid2 = Wid
-        while Wid2>32:
-            lastAddr += 4
-            Wid2 -= 32
+        while Wid2>busWid:
+            lastAddr += Jump
+            Wid2 -= busWid
         if 'pulse' in Access:
             Line = '    ,output %s_pulse'%(Name)
             LINES[0].append(Line)
@@ -930,23 +934,23 @@ def treatReg(Reg):
             LINES[4].append(Str)
         if 'wo' not in Access:
             treatPrdata(Reg,Wid,Name)
-        if Wid<32:
+        if Wid<busWid:
             Line = '        if (mpaddr == \'h%x) %s <= (%s & ~mask[%d:0]) | (wdata[%d:0] & mask[%d:0]);'%(Reg.Addr,Name,Name,Wid-1,Wid-1,Wid-1)
             LINES[3].append(Line)
-        elif Wid==32:
+        elif Wid==busWid:
             Line = '        if (mpaddr == \'h%x) %s <= (%s & ~mask) | (wdata & mask);'%(Reg.Addr,Name,Name)
             LINES[3].append(Line)
         else:
             Wid1 = Wid
             Ad = Reg.Addr
-            Hi,Lo = 31,0
+            Hi,Lo = busWid-1,0
             while Wid1>0:
                 Line = '        if (mpaddr == \'h%x) %s[%d:%d] <= (%s[%d:%d] & ~mask) | (wdata & mask);'%(Ad,Name,Hi,Lo,Name,Hi,Lo)
                 LINES[3].append(Line)
-                Ad += 4
-                Lo += 32
-                Wid1 -= 32
-                Hi = min(Wid-1,Hi+32)
+                Ad += Jump
+                Lo += busWid
+                Wid1 -= busWid
+                Hi = min(Wid-1,Hi+busWid)
 
 
         Line = '        %s <= %d\'h%x;'%(Name,Wid,Reset)
@@ -971,7 +975,7 @@ def treatReg(Reg):
             Line2 = '    reg %s %s_int;'%(widi(Wid),Name)
             Line3 = 'assign %s_out_reg = %s_int;'%(Name,Name)
             Str = W1C.replace('NAME',Name)
-            if Wid>32:
+            if Wid>busWid:
                 logs.log_error('#%d: W1C registers (%s : %sbits) are not geared for width>32. please split'%(Reg.Lnum,Name,Wid))
             Str = Str.replace('WID',str(Wid-1))
             RST = getPrm(Db['chip'],'reset','async')
@@ -1049,8 +1053,9 @@ def treatArray(Reg):
         Line = '    ,input [%d:0] [%d:0] %s'%(Dep-1,Wid-1,Name)
         LINES[0].append(Line)
     Ad = Reg.Addr
+    busWid = Db['chip'].Params['width']
     for Ind in range(Dep):
-        Line = '    (mpaddr == \'h%x) ? %s :'%(Ad,expandBits(Name+'[%d]'%Ind,Wid,32))
+        Line = '    (mpaddr == \'h%x) ? %s :'%(Ad,expandBits(Name+'[%d]'%Ind,Wid,busWid))
         Ad += simpleAdvanceAddr(Reg)
         LINES[1].append(Line)
     return
