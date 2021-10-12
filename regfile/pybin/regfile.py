@@ -647,8 +647,11 @@ wire [ADDWID-1:0] mpaddr = (pread||pwrite) ? mpaddr0  : 0;
 assign prdata_wire =
 '''
 
+PSTRB1 = '{8{pstrb}}';
+PSTRB2 = '{{8{pstrb[1]}},{8{pstrb[0]}}}';
 PSTRB4 = '{{8{pstrb[3]}},{8{pstrb[2]}},{8{pstrb[1]}},{8{pstrb[0]}}}';
 PSTRB8 = '{{8{pstrb[7]}},{8{pstrb[6]}},{8{pstrb[5]}},{8{pstrb[4]}},{8{pstrb[3]}},{8{pstrb[2]}},{8{pstrb[1]}},{8{pstrb[0]}}}';
+PSTRB16 = '{{8{pstrb[15]}},{8{pstrb[14]}},{8{pstrb[13]}},{8{pstrb[12]}},{8{pstrb[11]}},{8{pstrb[10]}},{8{pstrb[9]}},{8{pstrb[8]}}' + PSTRB8;
 
 
 STRING1 = '''
@@ -724,9 +727,19 @@ def bodyDump0(Db):
 def bodyDump1(Db,File):
     Base = getPrm(Db['chip'],'base',0)
     X = logs.neededBits(Db['chip'].Addr-Base)
-    Mask = ((1<<X)-1) & 0xfffc
     Buswid = Db['chip'].Params['width']
     Addwid = Db['chip'].Params['addrwid']
+    if Buswid == 128:
+        Mask = ((1<<X)-1) & 0xfffc
+    elif Buswid == 64:
+        Mask = ((1<<X)-1) & 0xfffc
+    elif Buswid == 32:
+        Mask = ((1<<X)-1) & 0xfffc
+    elif Buswid == 16:
+        Mask = ((1<<X)-1) & 0xfffe
+    elif Buswid == 8:
+        Mask = ((1<<X)-1) & 0xffff
+
     if Buswid==128: Wstrb=16
     elif Buswid==64: Wstrb=8
     elif Buswid==32: Wstrb=4
@@ -770,10 +783,16 @@ def bodyDump1(Db,File):
     Str = Str.replace('BUSWID',str(Buswid))
     Str = Str.replace('ADDWID',str(Addwid))
     Str = Str.replace('WSTRB',str(Wstrb))
+    if Buswid==128:
+        Str = Str.replace('PSTRB',PSTRB16)
     if Buswid==64:
         Str = Str.replace('PSTRB',PSTRB8)
-    if Buswid==32:
+    elif Buswid==32:
         Str = Str.replace('PSTRB',PSTRB4)
+    elif Buswid==16:
+        Str = Str.replace('PSTRB',PSTRB2)
+    elif Buswid==8:
+        Str = Str.replace('PSTRB',PSTRB1)
 
     Str = Db['chip'].RAMS_WIRES + '\n' + Str
     RST = getPrm(Db['chip'],'reset','async')
