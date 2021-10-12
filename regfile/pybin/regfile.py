@@ -687,6 +687,8 @@ def dumpRam(Postfix,File):
     if Buswid==128: Wstrb=16
     elif Buswid==64: Wstrb=8
     elif Buswid==32: Wstrb=4
+    elif Buswid==16: Wstrb=2
+    elif Buswid==8: Wstrb=1
     else:
         logs.log_error('BUSWIDTH is %d , allowed values are 32,64,128'%Buswid)
         Wstrb = 4
@@ -728,6 +730,8 @@ def bodyDump1(Db,File):
     if Buswid==128: Wstrb=16
     elif Buswid==64: Wstrb=8
     elif Buswid==32: Wstrb=4
+    elif Buswid==16: Wstrb=2
+    elif Buswid==8: Wstrb=1
     else:
         logs.log_error('#%d: BUSWIDTH is %d , allowed values are 32,64,128'%(Reg.Lnum,Buswid))
         Wstrb = 4
