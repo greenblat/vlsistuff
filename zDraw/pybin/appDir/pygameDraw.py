@@ -15,6 +15,7 @@ import dbase
 dbase.WID = WID
 dbase.HEI = HEI
 import renders
+import pickle
 
 import helpString 
 from dumpFormats import connectivityClass
@@ -561,6 +562,17 @@ def __use_command_wrds(wrds):
         __use_command_wrds(wrds)
         __use_command_wrds(['print'])
         __use_command_wrds(['verilog'])
+        __use_command_wrds(['pickle'])
+
+    elif wrds[0]=='pickle':
+        Schem = Glbs.details[Root]
+        Fout = open('%s.pickle' % Root,'wb')
+        logs.log_info('pickle %s' % Schem)
+        pickle.dump(Schem,Fout)
+        Fout.close()
+
+
+
 
     elif wrds[0]=='save':
         if len(wrds)>1:

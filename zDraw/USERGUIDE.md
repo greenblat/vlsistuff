@@ -70,6 +70,7 @@ Many single letters are useful in graphics window.
 |       verilog | dump verilog |
 |       rtl | dump rtl verilog |
 |       spice | dump spice and picture (.zpic) |
+|       pickle | dump pickled version of current scheme (useful for special apps) |
 |       quit |  just quit, same exit. |
 |       sys <shell command>  |  execute shell command , like "open screenshot.ps" or something. |
 |       ls <dir>  | list all schematics in this dir. default is ".". also the system remembers all listed drawings, so "load name" will search all "ls'ed" dirs. |
