@@ -43,7 +43,7 @@ module axi2apb #(parameter IDWID=4,parameter DWID=64, parameter WSTRB = DWID/8, 
 
     ,output psel
     ,output [31:0] paddr
-    ,output reg penable
+    ,output penable
     ,output pwrite
     ,output [31:0] pwdata
     ,input pready
@@ -70,7 +70,7 @@ wire [7:0] work_arlen;
 wire [31:0] work_awaddr,work_araddr;
 wire [1:0] work_awburst;
 wire [IDWID-1:0] work_arid;
-reg [1:0] work_arburst;
+wire [1:0] work_arburst;
 wire w_full;
 wire r_full;
 wire run_rlast = (run_len == 1) && working_r;
@@ -154,7 +154,7 @@ assign awready = !aw_full;
 
 syncfifo_sampled #(4,4) b_fifo (.clk(clk),.rst_n(rst_n),.vldin(run_last && working_w)
     ,.din(run_rid)
-    ,.empty(b_empty),.full(b_full)
+    ,.empty(b_empty),.full(panic_b_full)
     ,.readout(bready)
     ,.dout(bid)
     ,.count()
@@ -177,6 +177,7 @@ syncfifo_sampled #(1+8+64,4) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid && wr
     ,.overflow(panic_w_fifo)
 );
 
+wire ipwrite;
 assign readout_aw_fifo = ipwrite && work_wlast && working_w;
 wire readout_ar_fifo = working_r && run_rlast &&  pushr;
 localparam ARIDE = IDWID+2+8+32;

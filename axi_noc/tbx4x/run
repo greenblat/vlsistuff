@@ -1,5 +1,6 @@
 #! /bin/csh -f
 set TEST = test1
+set TEST = test0
 /bin/rm tb.vvp
 comp
 ~/verification_libs3/scanDeepListForPanics.py 

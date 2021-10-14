@@ -123,7 +123,7 @@ helpString = '''
         shyParams name,size
         lineWidth 1.5 
         vectorTextWidth 1.0 
-
+        wire_direction [0,1] :   do we put small circle on wire end
 
 
 

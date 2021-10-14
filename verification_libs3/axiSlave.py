@@ -156,23 +156,26 @@ class axiSlaveClass:
         if self.rqueue==[]: 
             self.idleread()
             return
-        if self.peek('rready')==0: 
-            (rlast,rid,rdata) = self.rqueue[0]
-            self.force('rvalid',1)
-            self.force('rlast',rlast)
-            self.force('rid',rid)
-            self.force('rresp',0)
-            self.force('rdata',rdata)
-            return
         if self.rqueue[0]=='pop':
             self.rqueue.pop(0)
             self.arqueue.pop(0)
             self.idleread()
             return
+        if self.peek('rready')==0: 
+            (rlast,rid,rdata) = self.rqueue[0]
+            if rlast=='wait':
+                self.waitread=1
+                self.idleread()
+            else:
+                self.force('rvalid',1)
+                self.force('rlast',rlast)
+                self.force('rid',rid)
+                self.force('rresp',0)
+                self.force('rdata','0x'+rdata)
+            return
         (rlast,rid,rdata) = self.rqueue.pop(0)
         if rlast=='wait':
-            self.waitread=rid
-            logs.log_info('axiSlave waitread %s'%rid)
+            self.waitread=1
             self.idleread()
             return
 

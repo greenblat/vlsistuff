@@ -140,11 +140,11 @@ special notes:
         param_text_size 0
         geom_text_size 1.0 
         grid 0.5 
-        shyParams name,size
+        shyParams name,size    : parameters that show only the value (and not param=value)
         lineWidth 1.5 
         vectorTextWidth 1.0 
-
-
+    
+        wire_direction [0,1]   : do we put small circle on wires end (as indication of the direction).
 
 
 

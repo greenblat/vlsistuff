@@ -69,6 +69,7 @@ class GlobalsClass:
         self.paramName='name'
         self.wireNumName=0
         self.set_context('backgroundColor','white')
+        self.set_context('wire_direction',1)
         self.associated_dir={}
         self.useVectorText=True
         self.useShyParams=True
@@ -555,6 +556,12 @@ def __use_command_wrds(wrds):
         Glbs.undoStack = []
         Glbs.redoStack = []
         
+    elif wrds[0]=='Save':
+        wrds[0] = 'save'
+        __use_command_wrds(wrds)
+        __use_command_wrds(['print'])
+        __use_command_wrds(['verilog'])
+
     elif wrds[0]=='save':
         if len(wrds)>1:
             WW = wrds[1].split('/')

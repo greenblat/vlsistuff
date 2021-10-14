@@ -24,6 +24,7 @@ def help_main(Env):
     create_drive_table(Env.Current)
     look_for_loops(Env.Current)
     look_for_short_loops(Env.Current)
+    look_for_pass_throughs(Env.Current)
     check_cases(Env.Current)
     logs.report_errx(Env.Current.Module)
 
@@ -160,6 +161,22 @@ def look_for_short_loops(Current):
                     logs.log_errx(100,'SHORT LOOP %s %s (through edged always)'%(Dst,Src))
                     
 
+def look_for_pass_throughs(Mod):
+    for List in Transitionals:
+        LOUT = []
+        In,Out = False,False
+        for Sig in List:
+            if Mod.is_input(Sig): 
+                In = True
+                LOUT.append((Sig,'i'))
+            elif Mod.is_output(Sig): 
+                Out = True
+                LOUT.append((Sig,'o'))
+            else:
+                LOUT.append((Sig,'x'))
+        if In and Out:
+            logs.log_errx(500,'PASS THROUGH %s' % str(LOUT))
+
 
 def look_for_loops(Current):
     List = list(TableDrives.keys())
@@ -253,7 +270,7 @@ def check_usage_driven(Current):
 
         if (len(DD)>1):
            logs.log_errx(2,'net %s (%s) is overdriven %s '%(Net,Dir,DD))
-        if (len(DD)>0)and(UU==0)and(Net not in Mentioned):
+        if (len(DD)>0)and(UU==0)and(Net not in Mentioned)and(not Net.startswith('panic')):
            logs.log_errx(3,'net %s (%s) is driven, but not used '%(Net,Dir))
         if (DD==[])and(UU>0)and(Net not in Mentioned):
            logs.log_errx(102,'net %s (%s) is not driven, but used '%(Net,Dir))

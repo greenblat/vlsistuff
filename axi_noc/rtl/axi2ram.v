@@ -47,7 +47,7 @@ reg [31:0] run_addr;
 reg [1:0] run_burst;
 reg [8:0] run_len;
 wire run_last = run_len == 1;
-reg [IDWID-1:0] run_rid;
+reg [IDWID-1:0] run_id;
 wire [IDWID-1:0] work_awid;
 wire [7:0] work_arlen;
 wire [31:0] work_awaddr,work_araddr;
@@ -83,7 +83,7 @@ always @(posedge clk or negedge rst_n) begin
         run_addr <= 0;
         run_burst <= 0;
         run_len <= 0;
-        run_rid <= 0;
+        run_id <= 0;
     end else begin
         if (!working_r && !working_w) begin
             if (!ar_empty) begin
@@ -91,13 +91,13 @@ always @(posedge clk or negedge rst_n) begin
                 run_addr <= work_araddr & 32'hffff_fff8;
                 run_burst <= work_arburst;
                 run_len <= work_arlen+1;
-                run_rid <= work_arid;
+                run_id <= work_arid;
             end else if (!aw_empty) begin
                 working_w <= 1;
                 run_addr <= work_awaddr;
                 run_burst <= work_awburst;
                 run_len <= work_awlen+1;
-                run_rid <= work_awid;
+                run_id <= work_awid;
             end
         end else if (working_r && !r_full) begin
             run_addr <= next_addr;
@@ -133,16 +133,17 @@ syncfifo_sampled #(AWIDE,4) aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(awvalid && a
     ,.overflow(panic_aw_fifo)
 );
 assign awready = !aw_full;
-
+wire [IDWID-1:0] x_bid;
 syncfifo_sampled #(4,4) b_fifo (.clk(clk),.rst_n(rst_n),.vldin(run_last && working_w)
-    ,.din(run_rid)
+    ,.din(run_id)
     ,.empty(b_empty),.full(b_full)
     ,.readout(bready)
-    ,.dout(bid)
+    ,.dout(x_bid)
     ,.count()
     ,.softreset(1'b0)
     ,.overflow(panic_b_fifo)
 );
+assign bid = x_bid;
 assign bresp = 0;
 assign wready = !w_full;
 assign bvalid = !b_empty;
@@ -180,7 +181,7 @@ reg [63:0] ram [0:(1<<RAMSIZE)-1];
 reg [63:0] prdata; 
 reg pread_dly; always @(posedge clk) pread_dly <= pread;
 syncfifo_sampled #(1+4+64,4) r_fifo (.clk(clk),.rst_n(rst_n),.vldin(pread_dly)
-    ,.din({prdata,run_rid,run_rlast})
+    ,.din({prdata,run_id,run_rlast})
     ,.empty(r_empty),.full(r_full)
     ,.readout(rready)
     ,.dout({rdata,rid,rlast})

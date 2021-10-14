@@ -133,7 +133,7 @@ syncfifo_sampled #(DWID+WSTRB+1,8) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid
 );
 assign wready = !w_full;
 
-
+wire a_start,b_start,c_start,d_start;
 wire [2:0] whosnext = 
     a_start ? 1 :
     b_start ? 2 :
@@ -162,10 +162,10 @@ wire [EXTRAS-1:0] work_awextras;
 wire [1:0] work_awburst;
 assign {work_awid ,work_awlen ,work_awextras ,work_awburst,work_awaddr} = active_aw_entry ;
 
-wire a_start = !aw_empty && (work_awaddr[31:30] == 0);
-wire b_start = !aw_empty && (work_awaddr[31:30] == 1);
-wire c_start = !aw_empty && (work_awaddr[31:30] == 2);
-wire d_start = !aw_empty && (work_awaddr[31:30] == 3);
+assign a_start = !aw_empty && (work_awaddr[31:30] == 0);
+assign b_start = !aw_empty && (work_awaddr[31:30] == 1);
+assign c_start = !aw_empty && (work_awaddr[31:30] == 2);
+assign d_start = !aw_empty && (work_awaddr[31:30] == 3);
 
 assign readout_aw_fifo = !order_fifo_full && !aw_empty && (
     (a_start && a_awready) || 
@@ -251,7 +251,7 @@ assign b_bready = !back_bid_b_fifo_full;
 assign c_bready = !back_bid_c_fifo_full;
 assign d_bready = !back_bid_d_fifo_full;
 
-
+wire b_vldin;
 assign readout_back_bid_a_fifo =  b_vldin && !back_bid_a_fifo_empty;
 assign readout_back_bid_b_fifo =  b_vldin && !back_bid_b_fifo_empty && back_bid_a_fifo_empty;
 assign readout_back_bid_c_fifo =  b_vldin && !back_bid_c_fifo_empty && back_bid_a_fifo_empty && back_bid_b_fifo_empty;
@@ -260,7 +260,8 @@ assign readout_back_bid_d_fifo =  b_vldin && !back_bid_d_fifo_empty && back_bid_
 
 
 
-wire b_vldin = !b_full && (!back_bid_a_fifo_empty || !back_bid_b_fifo_empty || !back_bid_c_fifo_empty || !back_bid_d_fifo_empty);
+wire b_full;
+assign b_vldin = !b_full && (!back_bid_a_fifo_empty || !back_bid_b_fifo_empty || !back_bid_c_fifo_empty || !back_bid_d_fifo_empty);
 
 wire [IDWID+2+2-1:0] b_entry = 
     !back_bid_a_fifo_empty  ? {x_a_bid,x_a_bresp,2'b00} :

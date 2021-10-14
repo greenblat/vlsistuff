@@ -48,22 +48,22 @@ def pictify(Glbs,Root,File):
             nInps +=1
             if Inst in Names:
                 Inps[Names[Inst]]= Inst,Point,Rot
-                LongestIn = max(LongestIn,len(Names[Inst]))
+                LongestIn = max(LongestIn,len(nobus(Names[Inst])))
                 LposIn.append((Point[1],Names[Inst]))
             else:
                 Inps[Inst]=Inst,Point,Rot
                 Names[Inst]=Inst
-                LongestIn = max(LongestIn,len(Inst))
+                LongestIn = max(LongestIn,len(nobus(Inst)))
                 LposIn.append((Point[1],Names[Inst]))
         elif Obj.Type=='output':
             nOuts +=1
             if Inst in Names:
                 Outs[Names[Inst]]=Inst,Point,Rot
-                LongestOut = max(LongestOut,len(Names[Inst]))
+                LongestOut = max(LongestOut,len(nobus(Names[Inst])))
                 LposOut.append((Point[1],Names[Inst]))
             else:
                 Outs[Inst]=Inst,Point,Rot
-                LongestOut = max(LongestOut,len(Inst))
+                LongestOut = max(LongestOut,len(nobus(Inst)))
                 Names[Inst]=Inst,Point,Rot
                 LposOut.append((Point[1],Names[Inst]))
         elif Obj.Type=='inout':
@@ -100,7 +100,7 @@ def pictify(Glbs,Root,File):
         if Out:
             File.write('pic_pin %s i xy=%s,%s\n' % (nobus(Out),Right+0.3,ind*Plus))
             File.write('pic_aline list=%s,%s,%s,%s\n' % (Right,ind*Plus,Right+0.3,ind*Plus))
-            File.write('pic_text %s xy=%s,%s\n' % (nobus(Out),Right-0.3-(len(Out)*0.3),ind*Plus-0.2))
+            File.write('pic_text %s xy=%s,%s\n' % (nobus(Out),Right-0.3-(len(nobus(Out))*0.3),ind*Plus-0.2))
 
 ## verticals
     File.write('pic_aline list=0.3,-0.5,0.3,%s\n' % (Max*Plus-1))

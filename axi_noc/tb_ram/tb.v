@@ -11,27 +11,21 @@ reg [31:0] marker1;   initial marker1=0;
 reg [31:0] marker2;   initial marker2=0;
 reg [31:0] marker3;   initial marker3=0;
 reg [31:0] Index;   initial Index=0;
+wire [2:0] awsize = 3;
+wire [2:0] arsize = 3;
 parameter IDWID = 4;
 parameter DWID = 64;
 reg [31:0] araddr;
 reg [1:0] arburst;
-reg [3:0] arcache;
 reg [(IDWID - 1):0] arid;
 reg [7:0] arlen;
-reg [2:0] arprot;
-reg [3:0] arqos;
 wire  arready;
-reg [2:0] arsize;
 reg  arvalid;
 reg [31:0] awaddr;
 reg [1:0] awburst;
-reg [3:0] awcache;
 reg [3:0] awid;
 reg [7:0] awlen;
-reg [2:0] awprot;
-reg [3:0] awqos;
 wire  awready;
-reg [2:0] awsize;
 reg  awvalid;
 wire [(IDWID - 1):0] bid;
 reg  bready;
@@ -64,21 +58,13 @@ initial begin
     $dumpvars(0,tb);
     araddr = 0;
     arburst = 0;
-    arcache = 0;
     arid = 0;
     arlen = 0;
-    arprot = 0;
-    arqos = 0;
-    arsize = 0;
     arvalid = 0;
     awaddr = 0;
     awburst = 0;
-    awcache = 0;
     awid = 0;
     awlen = 0;
-    awprot = 0;
-    awqos = 0;
-    awsize = 0;
     awvalid = 0;
     bready = 0;
     clk = 0;
@@ -94,23 +80,15 @@ end
 axi2ram dut (
      .araddr(araddr[31:0])
     ,.arburst(arburst[1:0])
-    ,.arcache(arcache[3:0])
     ,.arid(arid[(IDWID - 1):0])
     ,.arlen(arlen[7:0])
-    ,.arprot(arprot[2:0])
-    ,.arqos(arqos[3:0])
     ,.arready(arready)
-    ,.arsize(arsize[2:0])
     ,.arvalid(arvalid)
     ,.awaddr(awaddr[31:0])
     ,.awburst(awburst[1:0])
-    ,.awcache(awcache[3:0])
     ,.awid(awid[3:0])
     ,.awlen(awlen[7:0])
-    ,.awprot(awprot[2:0])
-    ,.awqos(awqos[3:0])
     ,.awready(awready)
-    ,.awsize(awsize[2:0])
     ,.awvalid(awvalid)
     ,.bid(bid[(IDWID - 1):0])
     ,.bready(bready)

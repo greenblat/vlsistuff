@@ -164,6 +164,7 @@ class connectivityClass:
         for Inst in self.Mod.instances:
             Obj = self.Mod.instances[Inst]
             Pic = Obj.Type
+            if Inst not in self.Conns: self.Conns[Inst] = {}
             if (Pic in ['antenna','vcc','gnd','input','output','node'])or('logo' in Obj.Type):
                 pass
             elif Pic in self.Glbs.pictures:

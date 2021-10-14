@@ -94,7 +94,7 @@ from svgClass import svgClass
 def postscript_current():
     Root=get_context('root')
     File = open('%s.ps'%Root,'w')
-    logs.log_info('writing postscript file "%s.ps"'%Root)
+    logs.log_info('writing postscript file "%s.ps" and svg file "%s.svg" '% (Root,Root))
     sizeX,sizeY,Scale = postscript_opening(File,Glbs.details[Root])
     [(Xl,Yl),(Xh,Yh)]=Glbs.details[Root].bbox()
     Svg  = svgClass('%s.svg'%Root,False)
@@ -258,11 +258,21 @@ class WireClass:
         else:
             Color=get_context('wire_color')
         render_aline(Matrix,self.List,Color)
+        if get_context('wire_direction'):
+            Last = self.List[-1]
+            render_circle(Matrix,Last,(Last[0],Last[1]+0.2),Color)
+
 
     def postscript(self,File):
         self.get_wire_list()
-        postscript_aline(File,self.List,get_context('wire_color'))
-        Glbs.Svg.x_aline(self.List,get_context('wire_color'))
+        Color = get_context('wire_color')
+        postscript_aline(File,self.List,Color)
+        Glbs.Svg.x_aline(self.List,Color)
+
+        if get_context('wire_direction'):
+            Last = self.List[-1]
+            postscript_circle(File,Last,(Last[0],Last[1]+0.2),Color)
+            Glbs.Svg.x_circle(Last,(Last[0],Last[1]+0.2),Color)
 
 
     def save(self,File):

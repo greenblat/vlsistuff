@@ -118,12 +118,8 @@ wire readout_a_aw_fifo,readout_b_aw_fifo,readout_c_aw_fifo,readout_d_aw_fifo;
 reg [7:0] a_bcount,b_bcount,c_bcount,d_bcount;
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        a_bcount <= 0;
-        b_bcount <= 0;
-        c_bcount <= 0;
-        d_bcount <= 0;
+        a_bcount <= 0; b_bcount <= 0; c_bcount <= 0; d_bcount <= 0;
     end else begin
-
         if (a_awvalid && a_awready && !(a_bvalid && a_bready)) a_bcount <= a_bcount + 1;
         else if (a_bvalid && a_bready && !(a_awvalid && a_awready)) a_bcount <= a_bcount - 1;
 
@@ -178,6 +174,11 @@ syncfifo #(AWIDE,2) d_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(d_awvalid && d_awr
     ,.overflow(panic_d_aw_fifo)
 );
 
+wire a_win_fifo_empty,a_win_fifo_full;
+wire b_win_fifo_empty,b_win_fifo_full;
+wire c_win_fifo_empty,c_win_fifo_full;
+wire d_win_fifo_empty,d_win_fifo_full;
+
 reg working_a,working_b,working_c,working_d;
 wire burst_end = wvalid && wready && wlast;
 
@@ -226,10 +227,10 @@ assign readout_c_aw_fifo =  start_c && !start_b && !start_a;
 assign readout_d_aw_fifo =  start_d && !start_c && !start_b && !start_a;
 
 
-wire [7:0] a_pri_count,v_pri_count,c_pri_count,d_pri_count;
+reg [7:0] a_pri_count,b_pri_count,c_pri_count,d_pri_count;
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        a_pri_count <= 0;v_pri_count <= 0;c_pri_count <= 0;d_pri_count <= 0;
+        a_pri_count <= 0;b_pri_count <= 0;c_pri_count <= 0;d_pri_count <= 0;
     end else begin
         if (readout_a_aw_fifo) 
             a_pri_count <= 0;
@@ -238,17 +239,17 @@ always @(posedge clk or negedge rst_n) begin
 
         if (readout_b_aw_fifo) 
             b_pri_count <= 0;
-        else if (eligible_a) 
+        else if (eligible_b) 
             b_pri_count <= b_pri_count + (b_pri_count<255);
 
         if (readout_c_aw_fifo) 
             c_pri_count <= 0;
-        else if (eligible_a) 
+        else if (eligible_c) 
             c_pri_count <= c_pri_count + (c_pri_count<255);
 
         if (readout_d_aw_fifo) 
             d_pri_count <= 0;
-        else if (eligible_a) 
+        else if (eligible_d) 
             d_pri_count <= d_pri_count + (d_pri_count<255);
         else 
             d_pri_count <= 0;
@@ -286,10 +287,6 @@ assign awid =
     (readout_d_aw_fifo) ? 4 :
     0;
 
-wire a_win_fifo_empty,a_win_fifo_full;
-wire b_win_fifo_empty,b_win_fifo_full;
-wire c_win_fifo_empty,c_win_fifo_full;
-wire d_win_fifo_empty,d_win_fifo_full;
 
 
 wire panic_readout = (0+readout_a_aw_fifo+readout_b_aw_fifo+readout_c_aw_fifo+readout_d_aw_fifo)>1;
@@ -298,7 +295,7 @@ wire [IDWID-1:0] x_a_bid,x_b_bid,x_c_bid,x_d_bid;
 syncfifo_sampled #(IDWID,8) a_b_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(readout_a_aw_fifo)
     ,.din(orig_wid)
-    ,.empty(a_b_empty),.full(a_b_full)
+    ,.empty(),.full()
     ,.readout(bvalid && (bid==1)) ,.dout(x_a_bid)
     ,.count() ,.softreset(1'b0)
     ,.overflow(panic_a_b_fifo)
@@ -307,7 +304,7 @@ syncfifo_sampled #(IDWID,8) a_b_fifo (.clk(clk),.rst_n(rst_n)
 syncfifo_sampled #(IDWID,8) b_b_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(readout_b_aw_fifo)
     ,.din(orig_wid)
-    ,.empty(b_b_empty),.full(b_b_full)
+    ,.empty(),.full()
     ,.readout(bvalid && (bid==2)) ,.dout(x_b_bid)
     ,.count() ,.softreset(1'b0)
     ,.overflow(panic_b_b_fifo)
@@ -316,7 +313,7 @@ syncfifo_sampled #(IDWID,8) b_b_fifo (.clk(clk),.rst_n(rst_n)
 syncfifo_sampled #(IDWID,8) c_b_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(readout_c_aw_fifo)
     ,.din(orig_wid)
-    ,.empty(c_b_empty),.full(c_b_full)
+    ,.empty(),.full()
     ,.readout(bvalid && (bid==3)) ,.dout(x_c_bid)
     ,.count() ,.softreset(1'b0)
     ,.overflow(panic_c_b_fifo)
@@ -324,7 +321,7 @@ syncfifo_sampled #(IDWID,8) c_b_fifo (.clk(clk),.rst_n(rst_n)
 syncfifo_sampled #(IDWID,8) d_b_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(readout_d_aw_fifo)
     ,.din(orig_wid)
-    ,.empty(d_b_empty),.full(d_b_full)
+    ,.empty(),.full()
     ,.readout(bvalid && (bid==4)) ,.dout(x_d_bid)
     ,.count() ,.softreset(1'b0)
     ,.overflow(panic_d_b_fifo)
