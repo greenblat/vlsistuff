@@ -62,6 +62,7 @@ Many single letters are useful in graphics window.
 |       change <schematic>  | change to another loaded schematic  (similar to load) |
 |       save | save current schematic (or S from graphics window) |
 |       save <LongFileName> | save current schematic  to specified zdraw file, or directory. file name must be of current root or not mentioned. |
+|       Save  | just like save, but also prints and dumps verilog |
 |       rename <newName>   | will duplicate current detail and You start editing new version. load can be bring You to original one. |
 |       help | prints this |
 |       print | creates svg and ps images |

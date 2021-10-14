@@ -47,6 +47,7 @@ helpString = '''
        change        : (no params) list loaded schematics, 
        change <schematic>      : change to another loaded schematic  (similar to load)
        save : save current schematic (or S from graphics window)
+       Save : save current schematic and also do print (.ps and .svg)  and verilog dump
        save <LongFileName> : save current schematic  to specified zdraw file, or directory. file name must be of current root or not mentioned.
        rename <newName>   : will duplicate current detail and You start editing new version. load can be bring You to original one.
        help : prints this
