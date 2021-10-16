@@ -283,7 +283,7 @@ class axiMasterClass:
             self.RDATAS[Addr] = [rdatax]
         if rlast == 1:
             self.AREADS.pop(0)
-        logs.log_info('ADDRDATAS %s len=%d  %s' % (hex(Addr), len(self.RDATAS[Addr]),list(map(hex,self.RDATAS.keys()))))
+#        logs.log_info('ADDRDATAS %s len=%d  %s' % (hex(Addr), len(self.RDATAS[Addr]),list(map(hex,self.RDATAS.keys()))))
 
     def runQueue(self):
 #        print('\n\n\n\ 0 RUNQ',self.Queue)

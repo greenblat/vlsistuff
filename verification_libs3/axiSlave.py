@@ -243,6 +243,14 @@ class axiSlaveClass:
 
 
     def writing(self):
+        if self.Name == 'SLV0':
+            veri.force('tb.marker0',str(self.awlen & 0xffff))
+        if self.Name == 'SLV1':
+            veri.force('tb.marker1',str(self.awlen & 0xffff))
+        if self.Name == 'SLV2':
+            veri.force('tb.marker2',str(self.awlen & 0xffff))
+        if self.Name == 'SLV3':
+            veri.force('tb.marker3',str(self.awlen & 0xffff))
 #        logs.log_info('BVALID %s wait=%d bqueue=%s ready=%d' % (self.Name,self.bwaiting,self.bqueue,self.peek('bready')))
         if self.bwaiting>0:
             self.bwaiting -= 1
@@ -262,7 +270,7 @@ class axiSlaveClass:
         else:
             self.force('bvalid',0)
 
-        if len(self.awqueue)>4:
+        if len(self.awqueue)>1000:
             self.force('awready',1)
         elif self.Passive and (self.peek('awready')==0):
             pass
@@ -295,14 +303,14 @@ class axiSlaveClass:
             wlast = self.peek('wlast')
             wdata = self.peek('wdata')
             self.wqueue.append((wdata,wlast,wstrb))
-            logs.log_info('ADDWQUEUE %x %x %x' % (wdata,wlast,wstrb))
+            logs.log_info('ADDWQUEUE %x %x %x' % (wdata,wlast,wstrb),self.Name)
 
         if len(self.wqueue) == 0: return    
         if (self.awlen<0) and (len(self.awqueue) == 0): return    
         if self.awlen<0:
             self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = self.awqueue.pop(0)
         (wdata,wlast,wstrb) = self.wqueue.pop(0)
-        logs.log_info('axiSlave %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=%x'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata))
+        logs.log_info('axiSlave %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=0x%x 0d%d'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata,wdata),self.Name)
         for ii in range(16):
             if ((wstrb>>ii)&1)==1:
                 Byte = (wdata>>(ii*8))& 0xff
@@ -314,9 +322,12 @@ class axiSlaveClass:
         elif self.awlen==0:
             self.awlen = -1
             if wlast!=1:
-                logs.log_error('axiSlave "%s" %s: prefix=%s addr=%x   no wlast'%(self.Name,self.Path,self.prefix,self.awaddr))
+                logs.log_error('axiSlave "%s" %s: prefix=%s addr=%x   no wlast wdata=%d'%(self.Name,self.Path,self.prefix,self.awaddr,wdata))
         else:
             self.awlen -= 1
+            if (wlast==1):
+                if self.awqueue!=[]: self.awqueue.pop(0)
+                self.awlen = -1
 
         if (wlast==1):
 #                logs.log_info('BQUEUE0 %s' % (self.bqueue0))
@@ -326,6 +337,5 @@ class axiSlaveClass:
                 self.bqueue0.append(0)
             self.bqueue.append((self.bqueue0.pop(0),0))
 #                logs.log_info('BQUEUE %s' % (self.bqueue))
-
 
 

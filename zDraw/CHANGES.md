@@ -22,4 +22,8 @@
 11oct2021:
     - added "import cucu.py" to .zdrawrc
     - made "0" leave empty frame around detail.
+14oct2021
+    - added wire_direction context to put little circle at the end of a wire.
+    - added pickle command
+    - added Save command : does save, verilog,print and pickle.
 

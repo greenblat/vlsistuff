@@ -1,0 +1,19 @@
+#! /bin/csh -f
+ 
+set PRV = /Users/ilia/vlsimine
+set PUB = /Users/ilia/vlsistuff
+
+iverilog  -Wtimescale  -o tb.vvp -g2012 \
+    clk_tb.v  \
+    clk_noc.v  \
+    $PRV/axi_noc/rtl/axi2clock.v \
+    $PRV/asyncfifo/rtl/async5fifo.v \
+    $PRV/asyncfifo/rtl/async_stage.v \
+    $PRV/asyncfifo/rtl/level_sync.v \
+    $PUB/axi_noc/rtl/axi_4_splitter.v \
+    $PUB/axi_noc/rtl/axi_rd_4_splitter.v \
+    $PUB/axi_noc/rtl/axi_wr_4_splitter.v \
+    $PUB/axi_noc/rtl/syncfifo.v \
+    $PUB/axi_noc/rtl/syncfifo_sampled.v \
+
+

@@ -8,6 +8,7 @@ class axiMonitorClass:
         if Monitors != -1:
             Monitors.append(self)
         self.dataWidth = dataWidth
+        self.Name = 'mon1'
         self.Logs = 3
         self.Path = Path
         self.Renames = Renames
@@ -19,6 +20,7 @@ class axiMonitorClass:
         self.RAM = {}
         self.BEXPECT = []
         self.WADDR = -1
+        self.WLEN = -1
         self.RADDR = []
 
     def cannot_find_sig(self,Sig):
@@ -69,17 +71,20 @@ class axiMonitorClass:
             Last = self.peek('wlast')
             (Addr,Len,Size,Burst,Id) = self.AWQUEUE[0]
             self.store(self.WADDR,Data,Wstrb)
-            logs.log_info('WRITE ad=%x data=%x wstrb=%x' % (self.WADDR,Data,Wstrb),self.Logs)
+            logs.log_info('AXIMON %s WRITE ad=%x wlen=%d data=0x%x (%d) wstrb=%x' % (self.Name,self.WADDR,self.WLEN,Data,Data,Wstrb),self.Logs)
             if Burst == 1:
                 self.WADDR += self.dataWidth
+            self.WLEN -= 1
 
             if Last == 1:
                 (Addr,Len,Size,Burst,Id) = self.AWQUEUE.pop(0)
                 self.BEXPECT.append(Id)
                 if self.AWQUEUE == []:
                     self.WADDR = -1
+                    self.WLEN = -1
                 else:
                     self.WADDR = self.AWQUEUE[0][0]
+                    self.WLEN = self.AWQUEUE[0][1]
 
     def mon_b(self):
         if (self.peek('bvalid') == 1)and(self.peek('bready') == 1):

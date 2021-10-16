@@ -1,0 +1,39 @@
+
+
+seed 0x1234567
+force clock0_HALFPERIOD  15
+force clock1_HALFPERIOD  27
+force clk_HALFPERIOD  19
+
+mst0 read 1 4 0x00001000 3
+wait 100 
+mst0 read 1 4 0x80001000 3
+wait 100 
+mst0 read 1 4 0xc0001000 3
+wait 100 
+mst0 read 1 4 0x40001000 3
+wait 300
+
+drv address 0x1000
+drv lens   1 2 3 4
+wait 10
+mst0 wstrb 0xff
+mst0 write 1 1 0x1000 3 0xaaabbbcccddd
+wait 100
+mst0 read 1 1 0x1000 3
+wait 100
+drv masters 0 
+drv address 0xc0000500 0x10000500 0x20000500  0x30000500 0x40000500 0x50000500 0x60000500 0x70000500 0x80000500 0x90000500 0xa0000500 0xb0000500 0xc0000500 0xd0000500 0xe0000500 0xf0000500
+drv wr_enable
+wait 1000
+drv wr_disable
+wait 1000
+drv rd_enable
+wait 1000
+drv rd_disable
+wait 1000
+mst0 waitNotBusy 10000
+wait 100
+finish
+
+

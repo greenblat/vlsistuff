@@ -1,0 +1,10 @@
+2.gtkw
+3.gtkw
+__pycache__/*
+deep.list
+dump.vcd
+dumpver.v
+pymon.log0
+tb.vvp
+test0.log*
+ver.log

@@ -1,0 +1,16 @@
+
+
+
+digraph clk {
+
+mst0 -> split0 ;
+split0 -> clock0 ;
+split0 -> clock1 ;
+split0 -> slv2 ;
+split0 -> slv3 ;
+
+clock0  -> slv0 ;
+clock1  -> slv1 ;
+
+}
+

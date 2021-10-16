@@ -1,6 +1,7 @@
 
 import sys,types,string,os
 import traceback
+import random
 Errors = 0   
 Corrects = 0   
 Wrongs = 0   
@@ -12,6 +13,10 @@ MAXERRORS = 2000
 PYMONLOG = 'pymon.log'
 if 'PYMONLOG' in os.environ:
     PYMONLOG = os.environ['PYMONLOG']
+
+
+
+
 
 def pymonname(Fname):
     global PYMONLOG
@@ -88,6 +93,7 @@ def finish(Txt):
 def action(Txt):
     global printCorrects,printDebugs,MAXWRONGS,MAXERRORS
     wrds = Txt.split()
+    if wrds == []: return
     if 'nocorrects' in wrds: printCorrects = False
     elif 'corrects' in wrds: printCorrects = True
 
@@ -97,6 +103,7 @@ def action(Txt):
 
     if 'maxwrongs' in wrds: MAXWRONGS = eval(wrds[1])
     if 'maxerrors' in wrds: MAXERRORS = eval(wrds[1])
+    if wrds[0] == 'seed': random.seed(eval(wrds[1]))
 
 
 def log_time(Why,Which=0):

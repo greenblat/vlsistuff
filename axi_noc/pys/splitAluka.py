@@ -32,6 +32,7 @@ class splitAlukaClass(logs.driverClass):
             self.workAW.append((Port,Awlen,Awlen,Awid,NextAwaddr,Awaddr))
             self.workAW0.append((Port,Awlen,Awlen,Awid,NextAwaddr,Awaddr))
             self.Bids[Port].append(Awid)
+            logs.log_info('>ALUKA>>>>> %s' % Awaddr)
             
         if self.valid('wvalid') and self.valid('wready'):
             Wdata = self.peek('wdata')

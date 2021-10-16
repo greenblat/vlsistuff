@@ -58,7 +58,7 @@ def runSm(Wrds):
                 print('error! exp=; act=%s at %d' % (Wrd,ind))
                 return
             state = 'idle'
-Masters,Slaves = {},{}
+Masters,Slaves,Clocks = {},{},{}
 class itemClass:
     def __init__(self,Kind,Name):
         self.Kind = Kind
@@ -85,6 +85,31 @@ def record(Src,Dst):
             Items[Src].Outputs.append(Dst)
             if Dst not in Items:
                 Items[Dst] = itemClass('splitter',Dst)
+            Items[Dst].Inputs.append(Src)
+        elif Dst.startswith('clock'):
+            Items[Src].Outputs.append(Dst)
+            if Dst not in Items:
+                Items[Dst] = itemClass('clocker',Dst)
+            Items[Dst].Inputs.append(Src)
+        else:
+            print('error! record %s -> %s' % ( Src,Dst))
+
+    elif Src.startswith('clock'):
+        Clocks[Src] = True
+        if Src not in Items:
+            Items[Src] = itemClass('clocker',Src)
+        if Dst.startswith('slv'):
+            Slaves[Dst] = Src
+            Items[Src].Outputs.append(Dst)
+        elif Dst.startswith('split'):
+            Items[Src].Outputs.append(Dst)
+            if Dst not in Items:
+                Items[Dst] = itemClass('splitter',Dst)
+            Items[Dst].Inputs.append(Src)
+        elif Dst.startswith('merge'):
+            Items[Src].Outputs.append(Dst)
+            if Dst not in Items:
+                Items[Dst] = itemClass('merger',Dst)
             Items[Dst].Inputs.append(Src)
         else:
             print('error! record %s -> %s' % ( Src,Dst))
@@ -138,8 +163,10 @@ def createCode(Module):
     for Mst in Msts: 
         Mstport = MASTERPORT.replace('PRT',Mst)
         Fout.write(Mstport)
-    Fout.write(');\n')
+    for Clk in Clocks.keys():
+        Fout.write('    ,input %s\n' % Clk)
 
+    Fout.write(');\n')
     for Item in Items:
         Obj = Items[Item]
         if Obj.Kind == 'splitter':
@@ -184,13 +211,43 @@ def createCode(Module):
                 else:
                     Str = Str.replace(BEF,Src+'_'+Obj.Name)
                     defineWires(Fout,Src+'_'+Obj.Name)
-
             Fout.write(Str)
+        elif Obj.Kind == 'clocker':
+            Str = CLOCKER.replace('NAME',Obj.Name)
+            Str = Str.replace('INCLOCK','clk')      # temporary solution
+            Str = Str.replace('OUCLOCK',Obj.Name)   # temporary solution
+            Dst = Obj.Outputs[0]
+            Src = Obj.Inputs[0]
+            if Obj.Outputs == []:
+                print('Error! clocker %s has no output' % (Obj.Name))
+                sys.exit()
+            elif len(Obj.Outputs)!=1:
+                print('Error! clocker %s can have only  one output' % (Obj.Name))
+                sys.exit()
+            elif len(Obj.Inputs)!=1:
+                print('Error! clocker %s can have only  one input' % (Obj.Name))
+                sys.exit()
+            elif Dst.startswith('slv'):
+                Str = Str.replace('BB',Dst)
+            else:
+                Str = Str.replace('BB',Obj.Name+'_'+Obj.Outputs[0])
+                defineWires(Fout,Obj.Name+'_'+Obj.Outputs[0])
+            if Src.startswith('mst'):
+                Str = Str.replace('AA',Src)
+            else:
+                Str = Str.replace('AA',Src+'_'+Obj.Name)
+                defineWires(Fout,Src+'_'+Obj.Name)
+            Fout.write(Str)
+        else:
+            print('ERROR! object %s of %s kind is not trreated' % (Obj.Name,Obj.Kind))
 
 
-    Fout.write(FOOTER)
+    Fout.write('endmodule\n')
     Fout.close()
     return Slvs,Msts
+
+
+
 
 FOOTER = '''
 
@@ -236,15 +293,16 @@ reg [31:0] Index;   initial Index=0;
 
 
 reg clk; reg rst_n;
+integer clk_HALFPERIOD = 100;
 always begin
     clk = 0;
-    #10;
+    #(clk_HALFPERIOD);
     clk = 1;
     #3;
     $python("negedge()");
     #3;
     $python("auxs()");
-    #4;
+    #(clk_HALFPERIOD-6);
 end
 initial begin
     $dumpvars(0,tb);
@@ -253,11 +311,29 @@ initial begin
     rst_n = 1;
 end
 '''
+MORE_CLOCKS = '''
+
+integer CLOCK_HALFPERIOD = 100;
+always begin
+    CLOCK = 0;
+    #(CLOCK_HALFPERIOD);
+    CLOCK = 1;
+    #(3);
+    $python("CLOCK_negedge()");
+    #(4);
+    $python("CLOCK_auxs()");
+    #(CLOCK_HALFPERIOD-7);
+end
+'''
 
 
 def createInstance(Module,Slvs,Msts):
     Fout = open('%s_tb.v' % Module,'w')
     Fout.write(INSTHEADER.replace('MODULE',Module))
+    for Clk in Clocks:
+        Fout.write('\n\nreg %s; initial %s = 0;\n' % (Clk,Clk))
+        Str = MORE_CLOCKS.replace('CLOCK',Clk)
+        Fout.write(Str)
     for Slv in Slvs:
         Str = REGINST.replace('PRT',Slv) 
         Fout.write(Str)
@@ -283,6 +359,8 @@ def createInstance(Module,Slvs,Msts):
         Fout.write('initial %s_rready = 0;\n' % Mst)
 
     Fout.write('%s dut ( .clk(clk),.rst_n(rst_n)\n' % (Module))
+    for Clk in Clocks:
+        Fout.write('   ,.%s(%s)\n' % (Clk,Clk))
     for Slv in Slvs:
         Str = SLVIF.replace('SLV',Slv)
         Fout.write(Str)
@@ -290,7 +368,7 @@ def createInstance(Module,Slvs,Msts):
         Str = MSTIF.replace('MST',Mst)
         Fout.write(Str)
     Fout.write(');\n')
-    Fout.write('endmodule\n')
+    Fout.write(FOOTER)
     Fout.close()
 
 
@@ -819,6 +897,76 @@ axi_4_merger NAME (
     ,.d_wready(DD_wready)
     ,.d_wstrb(DD_wstrb[(WSTRB - 1):0])
     ,.d_wvalid(DD_wvalid)
+);
+
+'''
+
+CLOCKER = '''
+axi2clock axi_NAME (
+     .in_clk(INCLOCK),.rst_n(rst_n)
+    ,.ou_clk(OUCLOCK)
+
+
+    ,.in_araddr(AA_araddr[31:0])
+    ,.in_arburst(AA_arburst[1:0])
+    ,.in_arextras(AA_arextras[(EXTRAS - 1):0])
+    ,.in_arid(AA_arid[(IDWID - 1):0])
+    ,.in_arlen(AA_arlen[7:0])
+    ,.in_arready(AA_arready)
+    ,.in_arvalid(AA_arvalid)
+    ,.in_awaddr(AA_awaddr[31:0])
+    ,.in_awburst(AA_awburst[1:0])
+    ,.in_awextras(AA_awextras[(EXTRAS - 1):0])
+    ,.in_awid(AA_awid[(IDWID - 1):0])
+    ,.in_awlen(AA_awlen[7:0])
+    ,.in_awready(AA_awready)
+    ,.in_awvalid(AA_awvalid)
+    ,.in_bid(AA_bid[(IDWID - 1):0])
+    ,.in_bready(AA_bready)
+    ,.in_bresp(AA_bresp[1:0])
+    ,.in_bvalid(AA_bvalid)
+    ,.in_rdata(AA_rdata[(DWID - 1):0])
+    ,.in_rid(AA_rid[(IDWID - 1):0])
+    ,.in_rlast(AA_rlast)
+    ,.in_rready(AA_rready)
+    ,.in_rresp(AA_rresp[1:0])
+    ,.in_rvalid(AA_rvalid)
+    ,.in_wdata(AA_wdata[(DWID - 1):0])
+    ,.in_wlast(AA_wlast)
+    ,.in_wready(AA_wready)
+    ,.in_wstrb(AA_wstrb[(WSTRB - 1):0])
+    ,.in_wvalid(AA_wvalid)
+
+    ,.ou_araddr(BB_araddr[31:0])
+    ,.ou_arburst(BB_arburst[1:0])
+    ,.ou_arextras(BB_arextras[(EXTRAS - 1):0])
+    ,.ou_arid(BB_arid[(IDWID - 1):0])
+    ,.ou_arlen(BB_arlen[7:0])
+    ,.ou_arready(BB_arready)
+    ,.ou_arvalid(BB_arvalid)
+    ,.ou_awaddr(BB_awaddr[31:0])
+    ,.ou_awburst(BB_awburst[1:0])
+    ,.ou_awextras(BB_awextras[(EXTRAS - 1):0])
+    ,.ou_awid(BB_awid[(IDWID - 1):0])
+    ,.ou_awlen(BB_awlen[7:0])
+    ,.ou_awready(BB_awready)
+    ,.ou_awvalid(BB_awvalid)
+    ,.ou_bid(BB_bid[(IDWID - 1):0])
+    ,.ou_bready(BB_bready)
+    ,.ou_bresp(BB_bresp[1:0])
+    ,.ou_bvalid(BB_bvalid)
+    ,.ou_rdata(BB_rdata[(DWID - 1):0])
+    ,.ou_rid(BB_rid[(IDWID - 1):0])
+    ,.ou_rlast(BB_rlast)
+    ,.ou_rready(BB_rready)
+    ,.ou_rresp(BB_rresp[1:0])
+    ,.ou_rvalid(BB_rvalid)
+    ,.ou_wdata(BB_wdata[(DWID - 1):0])
+    ,.ou_wlast(BB_wlast)
+    ,.ou_wready(BB_wready)
+    ,.ou_wstrb(BB_wstrb[(WSTRB - 1):0])
+    ,.ou_wvalid(BB_wvalid)
+
 );
 
 '''

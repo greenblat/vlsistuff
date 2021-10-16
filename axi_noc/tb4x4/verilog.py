@@ -107,7 +107,7 @@ class driverMonitor(logs.driverClass):
                 self.Addresses.append(eval(X))
             logs.log_info('ADDRESSES %s' % (list(map(hex,self.Addresses))))
         else:
-            logs.log_error('ACTION inrecognized "%s" ' % Txt)
+            logs.log_error('ACTION unrecognized "%s" ' % Txt)
     def onFinish(self):
         counts.snapshot()
 

@@ -86,7 +86,10 @@ class ahbliteMaster(logs.driverClass):
         elif wrds[0]=='prot':
             self.HPROT = eval(wrds[1])
         elif wrds[0]=='write':
-            self.write(wrds[1],wrds[2])
+            if len(wrds)<3:
+                self.write(wrds[1],wrds[1])
+            else:
+                self.write(wrds[1],wrds[2])
         elif wrds[0]=='read':
             if len(wrds)>2: 
                 self.read(wrds[1],wrds[2])
