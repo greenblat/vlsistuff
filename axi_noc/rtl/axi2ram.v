@@ -1,14 +1,15 @@
 // add address generator;
 
 
-module axi2ram #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/8, parameter RAMSIZE=10)(
+module axi2ram #(parameter AWID=32,parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/8, parameter RAMSIZE=16)(
 
     input clk, input rst_n
 
 
     ,input [IDWID-1:0] arid
-    ,input [31:0] araddr
+    ,input [AWID-1:0] araddr
     ,input [7:0] arlen
+    ,input [2:0] arsize
     ,input [1:0] arburst
     ,input arvalid
     ,output arready
@@ -20,8 +21,9 @@ module axi2ram #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/8, pa
     ,input rready
 
     ,input [3:0] awid
-    ,input [31:0] awaddr
+    ,input [AWID-1:0] awaddr
     ,input [7:0] awlen
+    ,input [2:0] awsize
     ,input [1:0] awburst
     ,input awvalid
     ,output awready
@@ -43,14 +45,17 @@ wire ar_empty,aw_empty;
 reg working_r,working_w;
 
 wire [7:0] work_awlen;
-reg [31:0] run_addr;
+wire [2:0] work_awsize;
+reg [AWID-1:0] run_addr;
 reg [1:0] run_burst;
 reg [8:0] run_len;
+reg [2:0] run_size;
 wire run_last = run_len == 1;
 reg [IDWID-1:0] run_id;
 wire [IDWID-1:0] work_awid;
 wire [7:0] work_arlen;
-wire [31:0] work_awaddr,work_araddr;
+wire [2:0] work_arsize;
+wire [AWID-1:0] work_awaddr,work_araddr;
 wire [1:0] work_awburst;
 wire [IDWID-1:0] work_arid;
 reg [1:0] work_arburst;
@@ -68,8 +73,13 @@ wire [31:0] wrapmask =
     (work_arlen ==63) ? 32'hffff_fe00 :
     32'hffff_fc00 ;
 
+wire [3:0] addr_jump = 
+    (run_size == 0) ? 1 :
+    (run_size == 1) ? 2 :
+    (run_size == 2) ? 4 :
+    (run_size == 3) ? 8 : 0;
 
-wire [31:0] next_addr = 
+wire [AWID-1:0] next_addr = 
     (run_burst == 0) ? run_addr :
     (run_burst == 1) ? (run_addr+8) :
     (run_burst == 2) ? (run_addr & wrapmask) + ((run_addr + 8) & ~wrapmask) :
@@ -83,6 +93,7 @@ always @(posedge clk or negedge rst_n) begin
         run_addr <= 0;
         run_burst <= 0;
         run_len <= 0;
+        run_size <= 0;
         run_id <= 0;
     end else begin
         if (!working_r && !working_w) begin
@@ -91,12 +102,14 @@ always @(posedge clk or negedge rst_n) begin
                 run_addr <= work_araddr & 32'hffff_fff8;
                 run_burst <= work_arburst;
                 run_len <= work_arlen+1;
+                run_size <= work_arsize;
                 run_id <= work_arid;
             end else if (!aw_empty) begin
                 working_w <= 1;
                 run_addr <= work_awaddr;
                 run_burst <= work_awburst;
                 run_len <= work_awlen+1;
+                run_size <= work_awsize;
                 run_id <= work_awid;
             end
         end else if (working_r && !r_full) begin
@@ -117,11 +130,11 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 
-localparam AWIDE =  IDWID + 32 + 8  +2;
-wire [AWIDE-1:0] new_aw_entry =   {   awid ,awaddr ,awlen , awburst };
+localparam AWIDE =  3 + IDWID + 32 + 8  +2;
+wire [AWIDE-1:0] new_aw_entry =   {awsize, awid ,awaddr ,awlen , awburst };
 wire aw_full;
 wire [AWIDE-1:0] active_aw_entry;
-assign {   work_awid ,work_awaddr ,work_awlen , work_awburst } = active_aw_entry;
+assign {work_awsize,  work_awid ,work_awaddr ,work_awlen , work_awburst } = active_aw_entry;
 wire readout_aw_fifo;
 syncfifo_sampled #(AWIDE,4) aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(awvalid && awready)
     ,.din(new_aw_entry)
@@ -162,8 +175,8 @@ syncfifo_sampled #(1+8+64,4) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid && wr
 
 assign readout_aw_fifo = pwrite && work_wlast && working_w;
 wire readout_ar_fifo = working_r && run_rlast &&  pread_dly;
-localparam ARIDE = IDWID+2+8+32;
-wire [ARIDE-1:0] new_ar_entry =  {arid,arburst,arlen,araddr};
+localparam ARIDE = 3+IDWID+2+8+32;
+wire [ARIDE-1:0] new_ar_entry =  {arsize,arid,arburst,arlen,araddr};
  wire [ARIDE-1:0]  active_ar_entry;
 syncfifo_sampled #(ARIDE,4) ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(arvalid && arready)
     ,.din(new_ar_entry)
@@ -175,7 +188,7 @@ syncfifo_sampled #(ARIDE,4) ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(arvalid && a
     ,.overflow(panic_ar_fifo)
 );
 assign arready = !ar_full;
-assign {work_arid,work_arburst,work_arlen,work_araddr} = active_ar_entry;
+assign {work_arsize,work_arid,work_arburst,work_arlen,work_araddr} = active_ar_entry;
 
 reg [63:0] ram [0:(1<<RAMSIZE)-1];
 reg [63:0] prdata; 
@@ -217,7 +230,7 @@ always @(posedge clk) if (pread) begin
     prdata <= ram[run_addr>>3];
     $display("RAM READ addr=%h data=%h", run_addr,ram[run_addr>>3]);
 end
-assign rresp = (run_addr>>3)>=(1<<RAMSIZE);
+assign rresp = (run_size>3) || ((run_addr>>3)>=(1<<RAMSIZE));
 
 
 

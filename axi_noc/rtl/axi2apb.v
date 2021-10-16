@@ -10,6 +10,7 @@ module axi2apb #(parameter IDWID=4,parameter DWID=64, parameter WSTRB = DWID/8, 
     ,input [IDWID-1:0] arid
     ,input [31:0] araddr
     ,input [7:0] arlen
+    ,input [2:0] arsize
     ,input [EXTRAS-1:0] arextras
     ,input [1:0] arburst
     ,input arvalid
@@ -24,6 +25,7 @@ module axi2apb #(parameter IDWID=4,parameter DWID=64, parameter WSTRB = DWID/8, 
     ,input [3:0] awid
     ,input [31:0] awaddr
     ,input [7:0] awlen
+    ,input [2:0] awsize
     ,input [EXTRAS-1:0] awextras
     ,input [1:0] awburst
     ,input awvalid
@@ -86,14 +88,16 @@ wire [31:0] wrapmask =
     32'hffff_fc00 ;
 
 
+wire [3:0] addr_jump = 1 << run_size;
 wire [31:0] next_addr = 
     (run_burst == 0) ? run_addr :
-    (run_burst == 1) ? (run_addr+8) :
-    (run_burst == 2) ? (run_addr & wrapmask) + ((run_addr + 8) & ~wrapmask) :
+    (run_burst == 1) ? (run_addr+addr_jump) :
+    (run_burst == 2) ? (run_addr & wrapmask) + ((run_addr + addr_jump) & ~wrapmask) :
     0;
 
 
 wire pushr;
+reg [2:0] run_size;
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         working_r <= 0;
@@ -102,6 +106,7 @@ always @(posedge clk or negedge rst_n) begin
         run_burst <= 0;
         run_len <= 0;
         run_rid <= 0;
+        run_size <= 0;
     end else begin
         if (!working_r && !working_w) begin
             if (!ar_empty) begin
@@ -109,12 +114,14 @@ always @(posedge clk or negedge rst_n) begin
                 run_addr <= work_araddr & 32'hffff_fff8;
                 run_burst <= work_arburst;
                 run_len <= work_arlen+1;
+                run_size <= work_arsize;
                 run_rid <= work_arid;
             end else if (!aw_empty) begin
                 working_w <= 1;
                 run_addr <= work_awaddr;
                 run_burst <= work_awburst;
                 run_len <= work_awlen+1;
+                run_size <= work_awsize;
                 run_rid <= work_awid;
             end
         end else if (working_r && !r_full && pready && (pstate==3)) begin
@@ -135,11 +142,12 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 
-localparam AWIDE =  IDWID + 32 + 8  +2;
-wire [AWIDE-1:0] new_aw_entry =   {   awid ,awaddr ,awlen , awburst };
+localparam AWIDE =  3+IDWID + 32 + 8  +2;
+wire [AWIDE-1:0] new_aw_entry =   {awsize,   awid ,awaddr ,awlen , awburst };
 wire aw_full;
 wire [AWIDE-1:0] active_aw_entry;
-assign {   work_awid ,work_awaddr ,work_awlen , work_awburst } = active_aw_entry;
+wire [2:0] work_awsize;
+assign {   work_awsize,work_awid ,work_awaddr ,work_awlen , work_awburst } = active_aw_entry;
 wire readout_aw_fifo;
 syncfifo_sampled #(AWIDE,4) aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(awvalid && awready)
     ,.din(new_aw_entry)
@@ -180,9 +188,9 @@ syncfifo_sampled #(1+8+64,4) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid && wr
 wire ipwrite;
 assign readout_aw_fifo = ipwrite && work_wlast && working_w;
 wire readout_ar_fifo = working_r && run_rlast &&  pushr;
-localparam ARIDE = IDWID+2+8+32;
-wire [ARIDE-1:0] new_ar_entry =  {arid,arburst,arlen,araddr};
- wire [ARIDE-1:0]  active_ar_entry;
+localparam ARIDE = 3+IDWID+2+8+32;
+wire [ARIDE-1:0] new_ar_entry =  {arsize,arid,arburst,arlen,araddr};
+wire [ARIDE-1:0]  active_ar_entry;
 syncfifo_sampled #(ARIDE,4) ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(arvalid && arready)
     ,.din(new_ar_entry)
     ,.empty(ar_empty),.full(ar_full)
@@ -193,7 +201,8 @@ syncfifo_sampled #(ARIDE,4) ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(arvalid && a
     ,.overflow(panic_ar_fifo)
 );
 assign arready = !ar_full;
-assign {work_arid,work_arburst,work_arlen,work_araddr} = active_ar_entry;
+wire [2:0] work_arsize;
+assign {work_arsize,work_arid,work_arburst,work_arlen,work_araddr} = active_ar_entry;
 
 reg [31:0] lowrdata;
 syncfifo_sampled #(1+4+64,4) r_fifo (.clk(clk),.rst_n(rst_n),.vldin(pushr)
@@ -242,12 +251,19 @@ assign rvalid= !r_empty;
 
 assign ipwrite = !aw_empty && !w_empty && working_w && (pstate==0);
 
+wire [3:0] paddr_jump = 
+    (run_size == 0) ? 1 :
+    (run_size == 1) ? 2 :
+    (run_size == 2) ? 4 :
+    (run_size == 3) ? 4 :
+    0;
+
 assign paddr = 
     (pstate == 0) ? run_addr :
-    (pstate == 2) ? (run_addr+4) :
-    (pstate == 3) ? (run_addr+4) :
-    (pstate == 9) ? (run_addr+4) :
-    (pstate == 10) ? (run_addr+4) :
+    (pstate == 2) ? (run_addr+paddr_jump) :
+    (pstate == 3) ? (run_addr+paddr_jump) :
+    (pstate == 9) ? (run_addr+paddr_jump) :
+    (pstate == 10) ? (run_addr+paddr_jump) :
     run_addr;
 
 assign pwdata =  

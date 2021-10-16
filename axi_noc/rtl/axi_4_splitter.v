@@ -3,13 +3,14 @@
 
 
 
-module axi_4_splitter #(parameter EXTRAS = 8,parameter IDWID=4, parameter DWID=64, parameter WSTRB=DWID/8)(
+module axi_4_splitter #(parameter AWID=32, parameter EXTRAS = 8,parameter IDWID=4, parameter DWID=64, parameter WSTRB=DWID/8)(
 
      input clk, input rst_n
 
     ,input [IDWID-1:0] arid
-    ,input [31:0] araddr
+    ,input [AWID-1:0] araddr
     ,input [7:0] arlen
+    ,input [2:0] arsize
     ,input [EXTRAS-1:0] arextras
     ,input [1:0] arburst
     ,input arvalid
@@ -22,8 +23,9 @@ module axi_4_splitter #(parameter EXTRAS = 8,parameter IDWID=4, parameter DWID=6
     ,input rready
 
     ,input [3:0] awid
-    ,input [31:0] awaddr
+    ,input [AWID-1:0] awaddr
     ,input [7:0] awlen
+    ,input [2:0] awsize
     ,input [EXTRAS-1:0] awextras
     ,input [1:0] awburst
     ,input awvalid
@@ -39,8 +41,9 @@ module axi_4_splitter #(parameter EXTRAS = 8,parameter IDWID=4, parameter DWID=6
     ,input bready
 
     ,output [IDWID-1:0] a_arid
-    ,output [31:0] a_araddr
+    ,output [AWID-1:0] a_araddr
     ,output [7:0] a_arlen
+    ,output [2:0] a_arsize
     ,output [EXTRAS-1:0] a_arextras
     ,output [1:0] a_arburst
     ,output a_arvalid
@@ -54,8 +57,9 @@ module axi_4_splitter #(parameter EXTRAS = 8,parameter IDWID=4, parameter DWID=6
 
 
     ,output [IDWID-1:0] b_arid
-    ,output [31:0] b_araddr
+    ,output [AWID-1:0] b_araddr
     ,output [7:0] b_arlen
+    ,output [2:0] b_arsize
     ,output [EXTRAS-1:0] b_arextras
     ,output [1:0] b_arburst
     ,output b_arvalid
@@ -68,8 +72,9 @@ module axi_4_splitter #(parameter EXTRAS = 8,parameter IDWID=4, parameter DWID=6
     ,output b_rready
 
     ,output [IDWID-1:0] c_arid
-    ,output [31:0] c_araddr
+    ,output [AWID-1:0] c_araddr
     ,output [7:0] c_arlen
+    ,output [2:0] c_arsize
     ,output [EXTRAS-1:0] c_arextras
     ,output [1:0] c_arburst
     ,output c_arvalid
@@ -83,8 +88,9 @@ module axi_4_splitter #(parameter EXTRAS = 8,parameter IDWID=4, parameter DWID=6
 
 
     ,output [IDWID-1:0] d_arid
-    ,output [31:0] d_araddr
+    ,output [AWID-1:0] d_araddr
     ,output [7:0] d_arlen
+    ,output [2:0] d_arsize
     ,output [EXTRAS-1:0] d_arextras
     ,output [1:0] d_arburst
     ,output d_arvalid
@@ -101,8 +107,9 @@ module axi_4_splitter #(parameter EXTRAS = 8,parameter IDWID=4, parameter DWID=6
 
 
     ,output [IDWID-1:0] a_awid
-    ,output [31:0] a_awaddr
+    ,output [AWID-1:0] a_awaddr
     ,output [7:0] a_awlen
+    ,output [2:0] a_awsize
     ,output [EXTRAS-1:0] a_awextras
     ,output [1:0] a_awburst
     ,output a_awvalid
@@ -118,8 +125,9 @@ module axi_4_splitter #(parameter EXTRAS = 8,parameter IDWID=4, parameter DWID=6
     ,output a_bready
 
     ,output [IDWID-1:0] b_awid
-    ,output [31:0] b_awaddr
+    ,output [AWID-1:0] b_awaddr
     ,output [7:0] b_awlen
+    ,output [2:0] b_awsize
     ,output [EXTRAS-1:0] b_awextras
     ,output [1:0] b_awburst
     ,output b_awvalid
@@ -136,8 +144,9 @@ module axi_4_splitter #(parameter EXTRAS = 8,parameter IDWID=4, parameter DWID=6
 
 
     ,output [IDWID-1:0] c_awid
-    ,output [31:0] c_awaddr
+    ,output [AWID-1:0] c_awaddr
     ,output [7:0] c_awlen
+    ,output [2:0] c_awsize
     ,output [EXTRAS-1:0] c_awextras
     ,output [1:0] c_awburst
     ,output c_awvalid
@@ -153,8 +162,9 @@ module axi_4_splitter #(parameter EXTRAS = 8,parameter IDWID=4, parameter DWID=6
     ,output c_bready
 
     ,output [IDWID-1:0] d_awid
-    ,output [31:0] d_awaddr
+    ,output [AWID-1:0] d_awaddr
     ,output [7:0] d_awlen
+    ,output [2:0] d_awsize
     ,output [EXTRAS-1:0] d_awextras
     ,output [1:0] d_awburst
     ,output d_awvalid
@@ -174,13 +184,14 @@ module axi_4_splitter #(parameter EXTRAS = 8,parameter IDWID=4, parameter DWID=6
 
 );
 
-axi_wr_4_splitter  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_splitter (
+axi_wr_4_splitter  #(.AWID(AWID),.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_splitter (
      .clk(clk) ,.rst_n(rst_n)
 
-    ,.awaddr(awaddr[31:0])
+    ,.awaddr(awaddr[AWID-1:0])
     ,.awburst(awburst[1:0])
     ,.awid(awid[3:0])
     ,.awlen(awlen[7:0])
+    ,.awsize(awsize)
     ,.awready(awready)
     ,.awextras(awextras[EXTRAS-1:0])
     ,.awvalid(awvalid)
@@ -194,10 +205,11 @@ axi_wr_4_splitter  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_splitte
     ,.wstrb(wstrb[(WSTRB - 1):0])
     ,.wvalid(wvalid)
 
-    ,.a_awaddr(a_awaddr[31:0])
+    ,.a_awaddr(a_awaddr[AWID-1:0])
     ,.a_awburst(a_awburst[1:0])
     ,.a_awid(a_awid[(IDWID - 1):0])
     ,.a_awlen(a_awlen[7:0])
+    ,.a_awsize(a_awsize)
     ,.a_awready(a_awready)
     ,.a_awextras(a_awextras[EXTRAS-1:0])
     ,.a_awvalid(a_awvalid)
@@ -212,10 +224,11 @@ axi_wr_4_splitter  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_splitte
     ,.a_wvalid(a_wvalid)
 
 
-    ,.b_awaddr(b_awaddr[31:0])
+    ,.b_awaddr(b_awaddr[AWID-1:0])
     ,.b_awburst(b_awburst[1:0])
     ,.b_awid(b_awid[(IDWID - 1):0])
     ,.b_awlen(b_awlen[7:0])
+    ,.b_awsize(b_awsize)
     ,.b_awready(b_awready)
     ,.b_awextras(b_awextras[EXTRAS-1:0])
     ,.b_awvalid(b_awvalid)
@@ -229,10 +242,11 @@ axi_wr_4_splitter  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_splitte
     ,.b_wstrb(b_wstrb[(WSTRB - 1):0])
     ,.b_wvalid(b_wvalid)
 
-    ,.c_awaddr(c_awaddr[31:0])
+    ,.c_awaddr(c_awaddr[AWID-1:0])
     ,.c_awburst(c_awburst[1:0])
     ,.c_awid(c_awid[(IDWID - 1):0])
     ,.c_awlen(c_awlen[7:0])
+    ,.c_awsize(c_awsize)
     ,.c_awready(c_awready)
     ,.c_awextras(c_awextras[EXTRAS-1:0])
     ,.c_awvalid(c_awvalid)
@@ -246,10 +260,11 @@ axi_wr_4_splitter  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_splitte
     ,.c_wstrb(c_wstrb[(WSTRB - 1):0])
     ,.c_wvalid(c_wvalid)
 
-    ,.d_awaddr(d_awaddr[31:0])
+    ,.d_awaddr(d_awaddr[AWID-1:0])
     ,.d_awburst(d_awburst[1:0])
     ,.d_awid(d_awid[(IDWID - 1):0])
     ,.d_awlen(d_awlen[7:0])
+    ,.d_awsize(d_awsize)
     ,.d_awready(d_awready)
     ,.d_awextras(d_awextras[EXTRAS-1:0])
     ,.d_awvalid(d_awvalid)
@@ -266,13 +281,14 @@ axi_wr_4_splitter  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_splitte
 );
 
 
-axi_rd_4_splitter  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_4_splitter (
+axi_rd_4_splitter  #(.AWID(AWID),.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_4_splitter (
      .clk(clk) ,.rst_n(rst_n)
 
-    ,.araddr(araddr[31:0])
+    ,.araddr(araddr[AWID-1:0])
     ,.arburst(arburst[1:0])
     ,.arid(arid[(IDWID - 1):0])
     ,.arlen(arlen[7:0])
+    ,.arsize(arsize)
     ,.arready(arready)
     ,.arextras(arextras[EXTRAS-1:0])
     ,.arvalid(arvalid)
@@ -283,10 +299,11 @@ axi_rd_4_splitter  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_4_splitte
     ,.rresp(rresp[1:0])
     ,.rvalid(rvalid)
 
-    ,.a_araddr(a_araddr[31:0])
+    ,.a_araddr(a_araddr[AWID-1:0])
     ,.a_arburst(a_arburst[1:0])
     ,.a_arid(a_arid[(IDWID - 1):0])
     ,.a_arlen(a_arlen[7:0])
+    ,.a_arsize(a_arsize)
     ,.a_arready(a_arready)
     ,.a_arextras(a_arextras[EXTRAS-1:0])
     ,.a_arvalid(a_arvalid)
@@ -297,10 +314,11 @@ axi_rd_4_splitter  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_4_splitte
     ,.a_rresp(a_rresp[1:0])
     ,.a_rvalid(a_rvalid)
 
-    ,.b_araddr(b_araddr[31:0])
+    ,.b_araddr(b_araddr[AWID-1:0])
     ,.b_arburst(b_arburst[1:0])
     ,.b_arid(b_arid[(IDWID - 1):0])
     ,.b_arlen(b_arlen[7:0])
+    ,.b_arsize(b_arsize)
     ,.b_arready(b_arready)
     ,.b_arextras(b_arextras[EXTRAS-1:0])
     ,.b_arvalid(b_arvalid)
@@ -311,10 +329,11 @@ axi_rd_4_splitter  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_4_splitte
     ,.b_rresp(b_rresp[1:0])
     ,.b_rvalid(b_rvalid)
 
-    ,.c_araddr(c_araddr[31:0])
+    ,.c_araddr(c_araddr[AWID-1:0])
     ,.c_arburst(c_arburst[1:0])
     ,.c_arid(c_arid[(IDWID - 1):0])
     ,.c_arlen(c_arlen[7:0])
+    ,.c_arsize(c_arsize)
     ,.c_arready(c_arready)
     ,.c_arextras(c_arextras[EXTRAS-1:0])
     ,.c_arvalid(c_arvalid)
@@ -325,10 +344,11 @@ axi_rd_4_splitter  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_4_splitte
     ,.c_rresp(c_rresp[1:0])
     ,.c_rvalid(c_rvalid)
 
-    ,.d_araddr(d_araddr[31:0])
+    ,.d_araddr(d_araddr[AWID-1:0])
     ,.d_arburst(d_arburst[1:0])
     ,.d_arid(d_arid[(IDWID - 1):0])
     ,.d_arlen(d_arlen[7:0])
+    ,.d_arsize(d_arsize)
     ,.d_arready(d_arready)
     ,.d_arextras(d_arextras[EXTRAS-1:0])
     ,.d_arvalid(d_arvalid)

@@ -376,15 +376,17 @@ MSTIF = '''
     ,.MST_araddr(MST_araddr[31:0])
     ,.MST_arburst(MST_arburst[1:0])
     ,.MST_arextras(MST_arextras[(EXTRAS - 1):0])
-    ,.MST_arid(MST_arid[(IDWID - 1):0])
-    ,.MST_arlen(MST_arlen[7:0])
+    ,.MST_arid(MST_arid)
+    ,.MST_arlen(MST_arlen)
+    ,.MST_arsize(MST_arsize)
     ,.MST_arready(MST_arready)
     ,.MST_arvalid(MST_arvalid)
     ,.MST_awaddr(MST_awaddr[31:0])
     ,.MST_awburst(MST_awburst[1:0])
     ,.MST_awextras(MST_awextras[(EXTRAS - 1):0])
     ,.MST_awid(MST_awid[(IDWID - 1):0])
-    ,.MST_awlen(MST_awlen[7:0])
+    ,.MST_awlen(MST_awlen)
+    ,.MST_awsize(MST_awsize)
     ,.MST_awready(MST_awready)
     ,.MST_awvalid(MST_awvalid)
     ,.MST_bid(MST_bid[(IDWID - 1):0])
@@ -407,15 +409,17 @@ SLVIF = '''
     ,.SLV_araddr(SLV_araddr[31:0])
     ,.SLV_arburst(SLV_arburst[1:0])
     ,.SLV_arextras(SLV_arextras[(EXTRAS - 1):0])
-    ,.SLV_arid(SLV_arid[(IDWID - 1):0])
-    ,.SLV_arlen(SLV_arlen[7:0])
+    ,.SLV_arid(SLV_arid)
+    ,.SLV_arlen(SLV_arlen)
+    ,.SLV_arsize(SLV_arsize)
     ,.SLV_arready(SLV_arready)
     ,.SLV_arvalid(SLV_arvalid)
     ,.SLV_awaddr(SLV_awaddr[31:0])
     ,.SLV_awburst(SLV_awburst[1:0])
     ,.SLV_awextras(SLV_awextras[(EXTRAS - 1):0])
     ,.SLV_awid(SLV_awid[(IDWID - 1):0])
-    ,.SLV_awlen(SLV_awlen[7:0])
+    ,.SLV_awlen(SLV_awlen)
+    ,.SLV_awsize(SLV_awsize)
     ,.SLV_awready(SLV_awready)
     ,.SLV_awvalid(SLV_awvalid)
     ,.SLV_bid(SLV_bid[(IDWID - 1):0])
@@ -437,13 +441,14 @@ SLVIF = '''
 '''
 
 REGINST = '''
-reg  [2:0] PRT_awsize ; initial PRT_awsize = 0;
-reg  [2:0] PRT_arsize ; initial PRT_arsize = 0;
+// reg  [2:0] PRT_awsize ; initial PRT_awsize = 0;
+// reg  [2:0] PRT_arsize ; initial PRT_arsize = 0;
 '''
 WIREINST = '''
 MOU  [IDWID-1:0] PRT_arid ;
 MOU  [31:0] PRT_araddr ;
 MOU  [7:0] PRT_arlen ;
+MOU  [2:0] PRT_arsize ;
 MOU  [EXTRAS-1:0] PRT_arextras ;
 MOU  [1:0] PRT_arburst ;
 MOU  PRT_arvalid ;
@@ -458,6 +463,7 @@ MOU  PRT_rready ;
 MOU  [IDWID-1:0] PRT_awid ;
 MOU  [31:0] PRT_awaddr ;
 MOU  [7:0] PRT_awlen ;
+MOU  [2:0] PRT_awsize ;
 MOU  [EXTRAS-1:0] PRT_awextras ;
 MOU  [1:0] PRT_awburst ;
 MOU  PRT_awvalid ;
@@ -492,6 +498,7 @@ SLAVEPORT = '''
     ,output [IDWID-1:0] PRT_arid
     ,output [31:0] PRT_araddr
     ,output [7:0] PRT_arlen
+    ,output [2:0] PRT_arsize
     ,output [EXTRAS-1:0] PRT_arextras
     ,output [1:0] PRT_arburst
     ,output PRT_arvalid
@@ -506,6 +513,7 @@ SLAVEPORT = '''
     ,output [IDWID-1:0] PRT_awid
     ,output [31:0] PRT_awaddr
     ,output [7:0] PRT_awlen
+    ,output [2:0] PRT_awsize
     ,output [EXTRAS-1:0] PRT_awextras
     ,output [1:0] PRT_awburst
     ,output PRT_awvalid
@@ -525,6 +533,7 @@ MASTERPORT = '''
     ,input [IDWID-1:0] PRT_arid
     ,input [31:0] PRT_araddr
     ,input [7:0] PRT_arlen
+    ,input [2:0] PRT_arsize
     ,input [EXTRAS-1:0] PRT_arextras
     ,input [1:0] PRT_arburst
     ,input PRT_arvalid
@@ -539,6 +548,7 @@ MASTERPORT = '''
     ,input [IDWID-1:0] PRT_awid
     ,input [31:0] PRT_awaddr
     ,input [7:0] PRT_awlen
+    ,input [2:0] PRT_awsize
     ,input [EXTRAS-1:0] PRT_awextras
     ,input [1:0] PRT_awburst
     ,input PRT_awvalid
@@ -558,6 +568,7 @@ WIREPORT = '''
 wire [IDWID-1:0] PRT_arid ;
 wire [31:0] PRT_araddr ;
 wire [7:0] PRT_arlen ;
+wire [2:0] PRT_arsize ;
 wire [EXTRAS-1:0] PRT_arextras ;
 wire [1:0] PRT_arburst ;
 wire PRT_arvalid ;
@@ -572,6 +583,7 @@ wire PRT_rready ;
 wire [IDWID-1:0] PRT_awid ;
 wire [31:0] PRT_awaddr ;
 wire [7:0] PRT_awlen ;
+wire [2:0] PRT_awsize ;
 wire [EXTRAS-1:0] PRT_awextras ;
 wire [1:0] PRT_awburst ;
 wire PRT_awvalid ;
@@ -597,15 +609,17 @@ axi_4_splitter NAME (
     ,.araddr(IN_araddr[31:0])
     ,.arburst(IN_arburst[1:0])
     ,.arextras(IN_arextras[(EXTRAS - 1):0])
-    ,.arid(IN_arid[(IDWID - 1):0])
-    ,.arlen(IN_arlen[7:0])
+    ,.arid(IN_arid)
+    ,.arlen(IN_arlen)
+    ,.arsize(IN_arsize)
     ,.arready(IN_arready)
     ,.arvalid(IN_arvalid)
     ,.awaddr(IN_awaddr[31:0])
     ,.awburst(IN_awburst[1:0])
     ,.awextras(IN_awextras[(EXTRAS - 1):0])
-    ,.awid(IN_awid[3:0])
-    ,.awlen(IN_awlen[7:0])
+    ,.awid(IN_awid)
+    ,.awlen(IN_awlen)
+    ,.awsize(IN_awsize)
     ,.awready(IN_awready)
     ,.awvalid(IN_awvalid)
     ,.bid(IN_bid[(IDWID - 1):0])
@@ -627,15 +641,17 @@ axi_4_splitter NAME (
     ,.a_araddr(AA_araddr[31:0])
     ,.a_arburst(AA_arburst[1:0])
     ,.a_arextras(AA_arextras[(EXTRAS - 1):0])
-    ,.a_arid(AA_arid[(IDWID - 1):0])
-    ,.a_arlen(AA_arlen[7:0])
+    ,.a_arid(AA_arid)
+    ,.a_arlen(AA_arlen)
+    ,.a_arsize(AA_arsize)
     ,.a_arready(AA_arready)
     ,.a_arvalid(AA_arvalid)
     ,.a_awaddr(AA_awaddr[31:0])
     ,.a_awburst(AA_awburst[1:0])
     ,.a_awextras(AA_awextras[(EXTRAS - 1):0])
-    ,.a_awid(AA_awid[(IDWID - 1):0])
-    ,.a_awlen(AA_awlen[7:0])
+    ,.a_awid(AA_awid)
+    ,.a_awlen(AA_awlen)
+    ,.a_awsize(AA_awsize)
     ,.a_awready(AA_awready)
     ,.a_awvalid(AA_awvalid)
     ,.a_bid(AA_bid[(IDWID - 1):0])
@@ -656,15 +672,17 @@ axi_4_splitter NAME (
     ,.b_araddr(BB_araddr[31:0])
     ,.b_arburst(BB_arburst[1:0])
     ,.b_arextras(BB_arextras[(EXTRAS - 1):0])
-    ,.b_arid(BB_arid[(IDWID - 1):0])
-    ,.b_arlen(BB_arlen[7:0])
+    ,.b_arid(BB_arid)
+    ,.b_arlen(BB_arlen)
+    ,.b_arsize(BB_arsize)
     ,.b_arready(BB_arready)
     ,.b_arvalid(BB_arvalid)
     ,.b_awaddr(BB_awaddr[31:0])
     ,.b_awburst(BB_awburst[1:0])
     ,.b_awextras(BB_awextras[(EXTRAS - 1):0])
-    ,.b_awid(BB_awid[(IDWID - 1):0])
-    ,.b_awlen(BB_awlen[7:0])
+    ,.b_awid(BB_awid)
+    ,.b_awlen(BB_awlen)
+    ,.b_awsize(BB_awsize)
     ,.b_awready(BB_awready)
     ,.b_awvalid(BB_awvalid)
     ,.b_bid(BB_bid[(IDWID - 1):0])
@@ -685,15 +703,17 @@ axi_4_splitter NAME (
     ,.c_araddr(CC_araddr[31:0])
     ,.c_arburst(CC_arburst[1:0])
     ,.c_arextras(CC_arextras[(EXTRAS - 1):0])
-    ,.c_arid(CC_arid[(IDWID - 1):0])
-    ,.c_arlen(CC_arlen[7:0])
+    ,.c_arid(CC_arid)
+    ,.c_arlen(CC_arlen)
+    ,.c_arsize(CC_arsize)
     ,.c_arready(CC_arready)
     ,.c_arvalid(CC_arvalid)
     ,.c_awaddr(CC_awaddr[31:0])
     ,.c_awburst(CC_awburst[1:0])
     ,.c_awextras(CC_awextras[(EXTRAS - 1):0])
-    ,.c_awid(CC_awid[(IDWID - 1):0])
-    ,.c_awlen(CC_awlen[7:0])
+    ,.c_awid(CC_awid)
+    ,.c_awlen(CC_awlen)
+    ,.c_awsize(CC_awsize)
     ,.c_awready(CC_awready)
     ,.c_awvalid(CC_awvalid)
     ,.c_bid(CC_bid[(IDWID - 1):0])
@@ -716,13 +736,15 @@ axi_4_splitter NAME (
     ,.d_arextras(DD_arextras[(EXTRAS - 1):0])
     ,.d_arid(DD_arid[(IDWID - 1):0])
     ,.d_arlen(DD_arlen[7:0])
+    ,.d_arsize(DD_arsize)
     ,.d_arready(DD_arready)
     ,.d_arvalid(DD_arvalid)
     ,.d_awaddr(DD_awaddr[31:0])
     ,.d_awburst(DD_awburst[1:0])
     ,.d_awextras(DD_awextras[(EXTRAS - 1):0])
-    ,.d_awid(DD_awid[(IDWID - 1):0])
-    ,.d_awlen(DD_awlen[7:0])
+    ,.d_awid(DD_awid)
+    ,.d_awlen(DD_awlen)
+    ,.d_awsize(DD_awsize)
     ,.d_awready(DD_awready)
     ,.d_awvalid(DD_awvalid)
     ,.d_bid(DD_bid[(IDWID - 1):0])
@@ -750,15 +772,17 @@ axi_4_merger NAME (
     ,.araddr(OUT_araddr[31:0])
     ,.arburst(OUT_arburst[1:0])
     ,.arextras(OUT_arextras[(EXTRAS - 1):0])
-    ,.arid(OUT_arid[(IDWID - 1):0])
-    ,.arlen(OUT_arlen[7:0])
+    ,.arid(OUT_arid)
+    ,.arlen(OUT_arlen)
+    ,.arsize(OUT_arsize)
     ,.arready(OUT_arready)
     ,.arvalid(OUT_arvalid)
     ,.awaddr(OUT_awaddr[31:0])
     ,.awburst(OUT_awburst[1:0])
     ,.awextras(OUT_awextras[(EXTRAS - 1):0])
-    ,.awid(OUT_awid[3:0])
-    ,.awlen(OUT_awlen[7:0])
+    ,.awid(OUT_awid)
+    ,.awlen(OUT_awlen)
+    ,.awsize(OUT_awsize)
     ,.awready(OUT_awready)
     ,.awvalid(OUT_awvalid)
     ,.bid(OUT_bid[(IDWID - 1):0])
@@ -781,15 +805,17 @@ axi_4_merger NAME (
     ,.a_araddr(AA_araddr[31:0])
     ,.a_arburst(AA_arburst[1:0])
     ,.a_arextras(AA_arextras[(EXTRAS - 1):0])
-    ,.a_arid(AA_arid[(IDWID - 1):0])
-    ,.a_arlen(AA_arlen[7:0])
+    ,.a_arid(AA_arid)
+    ,.a_arlen(AA_arlen)
+    ,.a_arsize(AA_arsize)
     ,.a_arready(AA_arready)
     ,.a_arvalid(AA_arvalid)
     ,.a_awaddr(AA_awaddr[31:0])
     ,.a_awburst(AA_awburst[1:0])
     ,.a_awextras(AA_awextras[(EXTRAS - 1):0])
-    ,.a_awid(AA_awid[(IDWID - 1):0])
-    ,.a_awlen(AA_awlen[7:0])
+    ,.a_awid(AA_awid)
+    ,.a_awlen(AA_awlen)
+    ,.a_awsize(AA_awsize)
     ,.a_awready(AA_awready)
     ,.a_awvalid(AA_awvalid)
     ,.a_bid(AA_bid[(IDWID - 1):0])
@@ -811,15 +837,17 @@ axi_4_merger NAME (
     ,.b_araddr(BB_araddr[31:0])
     ,.b_arburst(BB_arburst[1:0])
     ,.b_arextras(BB_arextras[(EXTRAS - 1):0])
-    ,.b_arid(BB_arid[(IDWID - 1):0])
-    ,.b_arlen(BB_arlen[7:0])
+    ,.b_arid(BB_arid)
+    ,.b_arlen(BB_arlen)
+    ,.b_arsize(BB_arsize)
     ,.b_arready(BB_arready)
     ,.b_arvalid(BB_arvalid)
     ,.b_awaddr(BB_awaddr[31:0])
     ,.b_awburst(BB_awburst[1:0])
     ,.b_awextras(BB_awextras[(EXTRAS - 1):0])
-    ,.b_awid(BB_awid[(IDWID - 1):0])
-    ,.b_awlen(BB_awlen[7:0])
+    ,.b_awid(BB_awid)
+    ,.b_awlen(BB_awlen)
+    ,.b_awsize(BB_awsize)
     ,.b_awready(BB_awready)
     ,.b_awvalid(BB_awvalid)
     ,.b_bid(BB_bid[(IDWID - 1):0])
@@ -841,15 +869,17 @@ axi_4_merger NAME (
     ,.c_araddr(CC_araddr[31:0])
     ,.c_arburst(CC_arburst[1:0])
     ,.c_arextras(CC_arextras[(EXTRAS - 1):0])
-    ,.c_arid(CC_arid[(IDWID - 1):0])
-    ,.c_arlen(CC_arlen[7:0])
+    ,.c_arid(CC_arid)
+    ,.c_arlen(CC_arlen)
+    ,.c_arsize(CC_arsize)
     ,.c_arready(CC_arready)
     ,.c_arvalid(CC_arvalid)
     ,.c_awaddr(CC_awaddr[31:0])
     ,.c_awburst(CC_awburst[1:0])
     ,.c_awextras(CC_awextras[(EXTRAS - 1):0])
-    ,.c_awid(CC_awid[(IDWID - 1):0])
-    ,.c_awlen(CC_awlen[7:0])
+    ,.c_awid(CC_awid)
+    ,.c_awlen(CC_awlen)
+    ,.c_awsize(CC_awsize)
     ,.c_awready(CC_awready)
     ,.c_awvalid(CC_awvalid)
     ,.c_bid(CC_bid[(IDWID - 1):0])
@@ -871,15 +901,17 @@ axi_4_merger NAME (
     ,.d_araddr(DD_araddr[31:0])
     ,.d_arburst(DD_arburst[1:0])
     ,.d_arextras(DD_arextras[(EXTRAS - 1):0])
-    ,.d_arid(DD_arid[(IDWID - 1):0])
-    ,.d_arlen(DD_arlen[7:0])
+    ,.d_arid(DD_arid)
+    ,.d_arlen(DD_arlen)
+    ,.d_arsize(DD_arsize)
     ,.d_arready(DD_arready)
     ,.d_arvalid(DD_arvalid)
     ,.d_awaddr(DD_awaddr[31:0])
     ,.d_awburst(DD_awburst[1:0])
     ,.d_awextras(DD_awextras[(EXTRAS - 1):0])
-    ,.d_awid(DD_awid[(IDWID - 1):0])
-    ,.d_awlen(DD_awlen[7:0])
+    ,.d_awid(DD_awid)
+    ,.d_awlen(DD_awlen)
+    ,.d_awsize(DD_awsize)
     ,.d_awready(DD_awready)
     ,.d_awvalid(DD_awvalid)
     ,.d_bid(DD_bid[(IDWID - 1):0])
@@ -910,15 +942,17 @@ axi2clock axi_NAME (
     ,.in_araddr(AA_araddr[31:0])
     ,.in_arburst(AA_arburst[1:0])
     ,.in_arextras(AA_arextras[(EXTRAS - 1):0])
-    ,.in_arid(AA_arid[(IDWID - 1):0])
-    ,.in_arlen(AA_arlen[7:0])
+    ,.in_arid(AA_arid)
+    ,.in_arlen(AA_arlen)
+    ,.in_arsize(AA_arsize)
     ,.in_arready(AA_arready)
     ,.in_arvalid(AA_arvalid)
     ,.in_awaddr(AA_awaddr[31:0])
     ,.in_awburst(AA_awburst[1:0])
     ,.in_awextras(AA_awextras[(EXTRAS - 1):0])
-    ,.in_awid(AA_awid[(IDWID - 1):0])
-    ,.in_awlen(AA_awlen[7:0])
+    ,.in_awid(AA_awid)
+    ,.in_awlen(AA_awlen)
+    ,.in_awsize(AA_awsize)
     ,.in_awready(AA_awready)
     ,.in_awvalid(AA_awvalid)
     ,.in_bid(AA_bid[(IDWID - 1):0])
@@ -942,13 +976,15 @@ axi2clock axi_NAME (
     ,.ou_arextras(BB_arextras[(EXTRAS - 1):0])
     ,.ou_arid(BB_arid[(IDWID - 1):0])
     ,.ou_arlen(BB_arlen[7:0])
+    ,.ou_arsize(BB_arsize)
     ,.ou_arready(BB_arready)
     ,.ou_arvalid(BB_arvalid)
     ,.ou_awaddr(BB_awaddr[31:0])
     ,.ou_awburst(BB_awburst[1:0])
     ,.ou_awextras(BB_awextras[(EXTRAS - 1):0])
-    ,.ou_awid(BB_awid[(IDWID - 1):0])
-    ,.ou_awlen(BB_awlen[7:0])
+    ,.ou_awid(BB_awid)
+    ,.ou_awlen(BB_awlen)
+    ,.ou_awsize(BB_awsize)
     ,.ou_awready(BB_awready)
     ,.ou_awvalid(BB_awvalid)
     ,.ou_bid(BB_bid[(IDWID - 1):0])

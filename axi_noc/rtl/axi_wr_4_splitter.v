@@ -1,12 +1,13 @@
 
-module axi_wr_4_splitter #(parameter EXTRAS = 8, parameter IDWID=4, parameter DWID=64, parameter WSTRB=DWID/8) (
+module axi_wr_4_splitter #(parameter AWID=32, parameter EXTRAS = 8, parameter IDWID=4, parameter DWID=64, parameter WSTRB=DWID/8) (
     input clk, input rst_n
 
 
 // A port
     ,output [IDWID-1:0] a_awid
-    ,output [31:0] a_awaddr
+    ,output [AWID-1:0] a_awaddr
     ,output [7:0] a_awlen
+    ,output [2:0] a_awsize
     ,output [1:0] a_awburst
     ,output [EXTRAS-1:0] a_awextras
     ,output a_awvalid
@@ -25,8 +26,9 @@ module axi_wr_4_splitter #(parameter EXTRAS = 8, parameter IDWID=4, parameter DW
 
 // B port
     ,output [IDWID-1:0] b_awid
-    ,output [31:0] b_awaddr
+    ,output [AWID-1:0] b_awaddr
     ,output [7:0] b_awlen
+    ,output [2:0] b_awsize
     ,output [EXTRAS-1:0] b_awextras
     ,output [1:0] b_awburst
     ,output b_awvalid
@@ -44,8 +46,9 @@ module axi_wr_4_splitter #(parameter EXTRAS = 8, parameter IDWID=4, parameter DW
 
 // C port
     ,output [IDWID-1:0] c_awid
-    ,output [31:0] c_awaddr
+    ,output [AWID-1:0] c_awaddr
     ,output [7:0] c_awlen
+    ,output [2:0] c_awsize
     ,output [EXTRAS-1:0] c_awextras
     ,output [1:0] c_awburst
     ,output c_awvalid
@@ -63,8 +66,9 @@ module axi_wr_4_splitter #(parameter EXTRAS = 8, parameter IDWID=4, parameter DW
 
 // D port
     ,output [IDWID-1:0] d_awid
-    ,output [31:0] d_awaddr
+    ,output [AWID-1:0] d_awaddr
     ,output [7:0] d_awlen
+    ,output [2:0] d_awsize
     ,output [EXTRAS-1:0] d_awextras
     ,output [1:0] d_awburst
     ,output d_awvalid
@@ -83,8 +87,9 @@ module axi_wr_4_splitter #(parameter EXTRAS = 8, parameter IDWID=4, parameter DW
 
 
     ,input [3:0] awid
-    ,input [31:0] awaddr
+    ,input [AWID-1:0] awaddr
     ,input [7:0] awlen
+    ,input [2:0] awsize
     ,input [EXTRAS-1:0] awextras
     ,input [1:0] awburst
     ,input awvalid
@@ -101,8 +106,8 @@ module axi_wr_4_splitter #(parameter EXTRAS = 8, parameter IDWID=4, parameter DW
 
 );
 
-localparam AWIDE = IDWID + 32 + 8 + EXTRAS + 2;
-wire [AWIDE-1:0] new_aw_entry =   { awid ,awlen ,awextras ,awburst,awaddr };
+localparam AWIDE = 3 + IDWID + AWID + 8 + EXTRAS + 2;
+wire [AWIDE-1:0] new_aw_entry =   { awsize, awid ,awlen ,awextras ,awburst,awaddr };
 wire aw_empty,aw_full;
 wire [AWIDE-1:0] active_aw_entry;
 wire readout_aw_fifo;
@@ -156,16 +161,17 @@ assign wready = !w_full;
 
 
 wire [3:0] work_awid;
-wire [31:0] work_awaddr;
+wire [AWID-1:0] work_awaddr;
 wire [7:0] work_awlen;
+wire [2:0] work_awsize;
 wire [EXTRAS-1:0] work_awextras;
 wire [1:0] work_awburst;
-assign {work_awid ,work_awlen ,work_awextras ,work_awburst,work_awaddr} = active_aw_entry ;
+assign {work_awsize, work_awid ,work_awlen ,work_awextras ,work_awburst,work_awaddr} = active_aw_entry ;
 
-assign a_start = !aw_empty && (work_awaddr[31:30] == 0);
-assign b_start = !aw_empty && (work_awaddr[31:30] == 1);
-assign c_start = !aw_empty && (work_awaddr[31:30] == 2);
-assign d_start = !aw_empty && (work_awaddr[31:30] == 3);
+assign a_start = !aw_empty && (work_awaddr[AWID-1:AWID-2] == 0);
+assign b_start = !aw_empty && (work_awaddr[AWID-1:AWID-2] == 1);
+assign c_start = !aw_empty && (work_awaddr[AWID-1:AWID-2] == 2);
+assign d_start = !aw_empty && (work_awaddr[AWID-1:AWID-2] == 3);
 
 assign readout_aw_fifo = !order_fifo_full && !aw_empty && (
     (a_start && a_awready) || 
@@ -281,15 +287,20 @@ syncfifo_sampled #(IDWID+2+2,4) b_fifo (.clk(clk),.rst_n(rst_n)
 );
 assign bvalid = !b_empty;
 
-assign a_awaddr = a_awvalid ?  {work_awaddr[29:0],2'b0} : 0;
-assign b_awaddr = b_awvalid ?  {work_awaddr[29:0],2'b0} : 0;
-assign c_awaddr = c_awvalid ?  {work_awaddr[29:0],2'b0} : 0;
-assign d_awaddr = d_awvalid ?  {work_awaddr[29:0],2'b0} : 0;
+assign a_awaddr = a_awvalid ?  {work_awaddr[AWID-3:0],2'b0} : 0;
+assign b_awaddr = b_awvalid ?  {work_awaddr[AWID-3:0],2'b0} : 0;
+assign c_awaddr = c_awvalid ?  {work_awaddr[AWID-3:0],2'b0} : 0;
+assign d_awaddr = d_awvalid ?  {work_awaddr[AWID-3:0],2'b0} : 0;
 
 assign a_awlen = a_awvalid ?  work_awlen : 0;
 assign b_awlen = b_awvalid ?  work_awlen : 0;
 assign c_awlen = c_awvalid ?  work_awlen : 0;
 assign d_awlen = d_awvalid ?  work_awlen : 0;
+
+assign a_awsize = a_awvalid ?  work_awsize : 0;
+assign b_awsize = b_awvalid ?  work_awsize : 0;
+assign c_awsize = c_awvalid ?  work_awsize : 0;
+assign d_awsize = d_awvalid ?  work_awsize : 0;
 
 assign a_awextras = a_awvalid ?  work_awextras : 0;
 assign b_awextras = b_awvalid ?  work_awextras : 0;

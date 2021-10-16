@@ -1,13 +1,14 @@
 
 
 
-module axi_rd_4_merger #(parameter IDWID=4,parameter DWID=64, parameter EXTRAS=8)(
+module axi_rd_4_merger #(parameter AWID=32, parameter IDWID=4,parameter DWID=64, parameter EXTRAS=8)(
 
      input clk, input rst_n
 
     ,input [IDWID-1:0] a_arid
-    ,input [31:0] a_araddr
+    ,input [AWID-1:0] a_araddr
     ,input [7:0] a_arlen
+    ,input [2:0] a_arsize
     ,input [EXTRAS-1:0] a_arextras
     ,input [1:0] a_arburst
     ,input a_arvalid
@@ -22,8 +23,9 @@ module axi_rd_4_merger #(parameter IDWID=4,parameter DWID=64, parameter EXTRAS=8
 
 
     ,input [IDWID-1:0] b_arid
-    ,input [31:0] b_araddr
+    ,input [AWID-1:0] b_araddr
     ,input [7:0] b_arlen
+    ,input [2:0] b_arsize
     ,input [EXTRAS-1:0] b_arextras
     ,input [1:0] b_arburst
     ,input b_arvalid
@@ -37,8 +39,9 @@ module axi_rd_4_merger #(parameter IDWID=4,parameter DWID=64, parameter EXTRAS=8
 
 
     ,input [IDWID-1:0] c_arid
-    ,input [31:0] c_araddr
+    ,input [AWID-1:0] c_araddr
     ,input [7:0] c_arlen
+    ,input [2:0] c_arsize
     ,input [EXTRAS-1:0] c_arextras
     ,input [1:0] c_arburst
     ,input c_arvalid
@@ -51,8 +54,9 @@ module axi_rd_4_merger #(parameter IDWID=4,parameter DWID=64, parameter EXTRAS=8
     ,input c_rready
 
     ,input [IDWID-1:0] d_arid
-    ,input [31:0] d_araddr
+    ,input [AWID-1:0] d_araddr
     ,input [7:0] d_arlen
+    ,input [2:0] d_arsize
     ,input [EXTRAS-1:0] d_arextras
     ,input [1:0] d_arburst
     ,input d_arvalid
@@ -66,8 +70,9 @@ module axi_rd_4_merger #(parameter IDWID=4,parameter DWID=64, parameter EXTRAS=8
 
 
     ,output [IDWID-1:0] arid
-    ,output [31:0] araddr
+    ,output [AWID-1:0] araddr
     ,output [7:0] arlen
+    ,output [2:0] arsize
     ,output [EXTRAS-1:0] arextras
     ,output [1:0] arburst
     ,output arvalid
@@ -93,11 +98,11 @@ assign c_arready = !c_ar_full && (c_rcount < 8);
 wire d_ar_full,d_ar_empty;
 assign d_arready = !d_ar_full && (d_rcount < 8);
 
-localparam AWIDE = 32 + 8 + EXTRAS + 2+ IDWID;
-wire [AWIDE-1:0] new_a_ar_entry = { a_araddr ,a_arlen ,a_arextras ,a_arburst ,a_arid };
-wire [AWIDE-1:0] new_b_ar_entry = { b_araddr ,b_arlen ,b_arextras ,b_arburst ,b_arid };
-wire [AWIDE-1:0] new_c_ar_entry = { c_araddr ,c_arlen ,c_arextras ,c_arburst ,c_arid };
-wire [AWIDE-1:0] new_d_ar_entry = { d_araddr ,d_arlen ,d_arextras ,d_arburst ,d_arid };
+localparam AWIDE = 3 + AWID + 8 + EXTRAS + 2+ IDWID;
+wire [AWIDE-1:0] new_a_ar_entry = { a_arsize, a_araddr ,a_arlen ,a_arextras ,a_arburst ,a_arid };
+wire [AWIDE-1:0] new_b_ar_entry = { b_arsize, b_araddr ,b_arlen ,b_arextras ,b_arburst ,b_arid };
+wire [AWIDE-1:0] new_c_ar_entry = { c_arsize, c_araddr ,c_arlen ,c_arextras ,c_arburst ,c_arid };
+wire [AWIDE-1:0] new_d_ar_entry = { d_arsize, d_araddr ,d_arlen ,d_arextras ,d_arburst ,d_arid };
 
 
 wire [AWIDE-1:0] a_active_ar_entry;
@@ -157,7 +162,7 @@ assign take_d = !d_ar_empty && !d_ids_full && !take_a && !take_b && !take_c;
 assign arvalid = take_a || take_b || take_c || take_d;
 
 wire [IDWID-1:0] orig_arid;
-assign {araddr ,arlen ,arextras ,arburst, arid,orig_arid} = 
+assign {arsize, araddr ,arlen ,arextras ,arburst, arid,orig_arid} = 
     (take_a) ? {a_active_ar_entry[AWIDE-1:IDWID],id5,a_active_ar_entry[IDWID-1:0]} :
     (take_b) ? {b_active_ar_entry[AWIDE-1:IDWID],id6,b_active_ar_entry[IDWID-1:0]} :
     (take_c) ? {c_active_ar_entry[AWIDE-1:IDWID],id7,c_active_ar_entry[IDWID-1:0]} :

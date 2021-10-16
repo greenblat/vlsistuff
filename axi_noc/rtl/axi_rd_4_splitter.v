@@ -1,14 +1,15 @@
 
 
 
-module axi_rd_4_splitter #(parameter EXTRAS=8, parameter IDWID=4, parameter DWID=64)(
+module axi_rd_4_splitter #(parameter AWID=32,parameter EXTRAS=8, parameter IDWID=4, parameter DWID=64)(
 
     input clk, input rst_n
 
 
     ,output [IDWID-1:0] a_arid
-    ,output [31:0] a_araddr
+    ,output [AWID-1:0] a_araddr
     ,output [7:0] a_arlen
+    ,output [2:0] a_arsize
     ,output [EXTRAS-1:0] a_arextras
     ,output [1:0] a_arburst
     ,output a_arvalid
@@ -23,8 +24,9 @@ module axi_rd_4_splitter #(parameter EXTRAS=8, parameter IDWID=4, parameter DWID
 
 
     ,output [IDWID-1:0] b_arid
-    ,output [31:0] b_araddr
+    ,output [AWID-1:0] b_araddr
     ,output [7:0] b_arlen
+    ,output [2:0] b_arsize
     ,output [EXTRAS-1:0] b_arextras
     ,output [1:0] b_arburst
     ,output b_arvalid
@@ -38,8 +40,9 @@ module axi_rd_4_splitter #(parameter EXTRAS=8, parameter IDWID=4, parameter DWID
 
 
     ,output [IDWID-1:0] c_arid
-    ,output [31:0] c_araddr
+    ,output [AWID-1:0] c_araddr
     ,output [7:0] c_arlen
+    ,output [2:0] c_arsize
     ,output [EXTRAS-1:0] c_arextras
     ,output [1:0] c_arburst
     ,output c_arvalid
@@ -52,8 +55,9 @@ module axi_rd_4_splitter #(parameter EXTRAS=8, parameter IDWID=4, parameter DWID
     ,output c_rready
 
     ,output [IDWID-1:0] d_arid
-    ,output [31:0] d_araddr
+    ,output [AWID-1:0] d_araddr
     ,output [7:0] d_arlen
+    ,output [2:0] d_arsize
     ,output [EXTRAS-1:0] d_arextras
     ,output [1:0] d_arburst
     ,output d_arvalid
@@ -68,8 +72,9 @@ module axi_rd_4_splitter #(parameter EXTRAS=8, parameter IDWID=4, parameter DWID
 
 
     ,input [IDWID-1:0] arid
-    ,input [31:0] araddr
+    ,input [AWID-1:0] araddr
     ,input [7:0] arlen
+    ,input [2:0] arsize
     ,input [EXTRAS-1:0] arextras
     ,input [1:0] arburst
     ,input arvalid
@@ -83,8 +88,8 @@ module axi_rd_4_splitter #(parameter EXTRAS=8, parameter IDWID=4, parameter DWID
 );
 
 
-localparam ARIDE = IDWID + 32 + 8 + EXTRAS + 2;
-wire [ARIDE-1:0] new_ar_entry =   { arid ,araddr ,arlen ,arextras ,arburst };
+localparam ARIDE = 3 + IDWID + AWID + 8 + EXTRAS + 2;
+wire [ARIDE-1:0] new_ar_entry =   { arsize, arid ,araddr ,arlen ,arextras ,arburst };
 wire ar_empty,ar_full,r_full,a_r_full,b_r_full,c_r_full,d_r_full;
 wire [ARIDE-1:0] active_ar_entry;
 wire readout_ar_fifo;
@@ -102,16 +107,17 @@ assign arready = !ar_full;
 
 
 wire [3:0] work_arid;
-wire [31:0] work_araddr;
+wire [AWID-1:0] work_araddr;
 wire [7:0] work_arlen;
 wire [EXTRAS-1:0] work_arextras;
 wire [1:0] work_arburst;
-assign {work_arid ,work_araddr ,work_arlen ,work_arextras ,work_arburst} = ar_empty ? 0 : active_ar_entry ;
+wire [3:0] work_arsize;
+assign {work_arsize, work_arid ,work_araddr ,work_arlen ,work_arextras ,work_arburst} = ar_empty ? 0 : active_ar_entry ;
 
-wire a_start = work_araddr[31:30] == 0;
-wire b_start = work_araddr[31:30] == 1;
-wire c_start = work_araddr[31:30] == 2;
-wire d_start = work_araddr[31:30] == 3;
+wire a_start = work_araddr[AWID-1:AWID-2] == 0;
+wire b_start = work_araddr[AWID-1:AWID-2] == 1;
+wire c_start = work_araddr[AWID-1:AWID-2] == 2;
+wire d_start = work_araddr[AWID-1:AWID-2] == 3;
 
 assign readout_ar_fifo = !ar_empty && (
     (a_start && a_arready) ||
@@ -125,15 +131,20 @@ assign c_arvalid = c_start && !ar_empty ;
 assign d_arvalid = d_start && !ar_empty ;
 
 
-assign a_araddr = {work_araddr[29:0],2'b0};
-assign b_araddr = {work_araddr[29:0],2'b0};
-assign c_araddr = {work_araddr[29:0],2'b0};
-assign d_araddr = {work_araddr[29:0],2'b0};
+assign a_araddr = {work_araddr[AWID-3:0],2'b0};
+assign b_araddr = {work_araddr[AWID-3:0],2'b0};
+assign c_araddr = {work_araddr[AWID-3:0],2'b0};
+assign d_araddr = {work_araddr[AWID-3:0],2'b0};
 
 assign a_arlen = work_arlen;
 assign b_arlen = work_arlen;
 assign c_arlen = work_arlen;
 assign d_arlen = work_arlen;
+
+assign a_arsize = work_arsize;
+assign b_arsize = work_arsize;
+assign c_arsize = work_arsize;
+assign d_arsize = work_arsize;
 
 assign a_arextras = work_arextras;
 assign b_arextras = work_arextras;

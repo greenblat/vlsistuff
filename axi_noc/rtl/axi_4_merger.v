@@ -3,13 +3,14 @@
 
 
 
-module axi_4_merger #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/8, parameter EXTRAS=8)(
+module axi_4_merger #(parameter AWID=32, parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/8, parameter EXTRAS=8)(
 
     input clk, input rst_n
 
     ,input [IDWID-1:0] a_arid
-    ,input [31:0] a_araddr
+    ,input [AWID-1:0] a_araddr
     ,input [7:0] a_arlen
+    ,input [2:0] a_arsize
     ,input [EXTRAS-1:0] a_arextras
     ,input [1:0] a_arburst
     ,input a_arvalid
@@ -22,8 +23,9 @@ module axi_4_merger #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/
     ,input a_rready
 
     ,output [3:0] awid
-    ,output [31:0] awaddr
+    ,output [AWID-1:0] awaddr
     ,output [7:0] awlen
+    ,output [2:0] awsize
     ,output [EXTRAS-1:0] awextras
     ,output [1:0] awburst
     ,output awvalid
@@ -39,8 +41,9 @@ module axi_4_merger #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/
     ,output bready
 
     ,input [IDWID-1:0] b_arid
-    ,input [31:0] b_araddr
+    ,input [AWID-1:0] b_araddr
     ,input [7:0] b_arlen
+    ,input [2:0] b_arsize
     ,input [EXTRAS-1:0] b_arextras
     ,input [1:0] b_arburst
     ,input b_arvalid
@@ -53,8 +56,9 @@ module axi_4_merger #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/
     ,input b_rready
 
     ,input [IDWID-1:0] c_arid
-    ,input [31:0] c_araddr
+    ,input [AWID-1:0] c_araddr
     ,input [7:0] c_arlen
+    ,input [2:0] c_arsize
     ,input [EXTRAS-1:0] c_arextras
     ,input [1:0] c_arburst
     ,input c_arvalid
@@ -68,8 +72,9 @@ module axi_4_merger #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/
 
 
     ,input [IDWID-1:0] d_arid
-    ,input [31:0] d_araddr
+    ,input [AWID-1:0] d_araddr
     ,input [7:0] d_arlen
+    ,input [2:0] d_arsize
     ,input [EXTRAS-1:0] d_arextras
     ,input [1:0] d_arburst
     ,input d_arvalid
@@ -83,8 +88,9 @@ module axi_4_merger #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/
 
 
     ,output [IDWID-1:0] arid
-    ,output [31:0] araddr
+    ,output [AWID-1:0] araddr
     ,output [7:0] arlen
+    ,output [2:0] arsize
     ,output [EXTRAS-1:0] arextras
     ,output [1:0] arburst
     ,output arvalid
@@ -98,8 +104,9 @@ module axi_4_merger #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/
 
 
     ,input [IDWID-1:0] a_awid
-    ,input [31:0] a_awaddr
+    ,input [AWID-1:0] a_awaddr
     ,input [7:0] a_awlen
+    ,input [2:0] a_awsize
     ,input [EXTRAS-1:0] a_awextras
     ,input [1:0] a_awburst
     ,input a_awvalid
@@ -115,8 +122,9 @@ module axi_4_merger #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/
     ,input a_bready
 
     ,input [IDWID-1:0] b_awid
-    ,input [31:0] b_awaddr
+    ,input [AWID-1:0] b_awaddr
     ,input [7:0] b_awlen
+    ,input [2:0] b_awsize
     ,input [EXTRAS-1:0] b_awextras
     ,input [1:0] b_awburst
     ,input b_awvalid
@@ -133,8 +141,9 @@ module axi_4_merger #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/
 
 
     ,input [IDWID-1:0] c_awid
-    ,input [31:0] c_awaddr
+    ,input [AWID-1:0] c_awaddr
     ,input [7:0] c_awlen
+    ,input [2:0] c_awsize
     ,input [EXTRAS-1:0] c_awextras
     ,input [1:0] c_awburst
     ,input c_awvalid
@@ -150,8 +159,9 @@ module axi_4_merger #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/
     ,input c_bready
 
     ,input [IDWID-1:0] d_awid
-    ,input [31:0] d_awaddr
+    ,input [AWID-1:0] d_awaddr
     ,input [7:0] d_awlen
+    ,input [2:0] d_awsize
     ,input [EXTRAS-1:0] d_awextras
     ,input [1:0] d_awburst
     ,input d_awvalid
@@ -171,13 +181,14 @@ module axi_4_merger #(parameter IDWID=4,parameter DWID=64, parameter WSTRB=DWID/
 
 );
 
-axi_wr_4_merger  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_merger (
+axi_wr_4_merger  #(.AWID(AWID),.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_merger (
      .clk(clk) ,.rst_n(rst_n)
 
-    ,.awaddr(awaddr[31:0])
+    ,.awaddr(awaddr)
     ,.awburst(awburst[1:0])
     ,.awid(awid[3:0])
     ,.awlen(awlen[7:0])
+    ,.awsize(awsize)
     ,.awready(awready)
     ,.awextras(awextras[EXTRAS-1:0])
     ,.awvalid(awvalid)
@@ -191,10 +202,11 @@ axi_wr_4_merger  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_merger (
     ,.bresp(bresp[1:0])
     ,.bvalid(bvalid)
 
-    ,.a_awaddr(a_awaddr[31:0])
+    ,.a_awaddr(a_awaddr)
     ,.a_awburst(a_awburst[1:0])
     ,.a_awid(a_awid[(IDWID - 1):0])
     ,.a_awlen(a_awlen[7:0])
+    ,.a_awsize(a_awsize)
     ,.a_awready(a_awready)
     ,.a_awextras(a_awextras[EXTRAS-1:0])
     ,.a_awvalid(a_awvalid)
@@ -208,10 +220,11 @@ axi_wr_4_merger  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_merger (
     ,.a_wstrb(a_wstrb[(WSTRB - 1):0])
     ,.a_wvalid(a_wvalid)
 
-    ,.b_awaddr(b_awaddr[31:0])
+    ,.b_awaddr(b_awaddr)
     ,.b_awburst(b_awburst[1:0])
     ,.b_awid(b_awid[(IDWID - 1):0])
     ,.b_awlen(b_awlen[7:0])
+    ,.b_awsize(b_awsize)
     ,.b_awready(b_awready)
     ,.b_awextras(b_awextras[EXTRAS-1:0])
     ,.b_awvalid(b_awvalid)
@@ -225,10 +238,11 @@ axi_wr_4_merger  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_merger (
     ,.b_wstrb(b_wstrb[(WSTRB - 1):0])
     ,.b_wvalid(b_wvalid)
 
-    ,.c_awaddr(c_awaddr[31:0])
+    ,.c_awaddr(c_awaddr)
     ,.c_awburst(c_awburst[1:0])
     ,.c_awid(c_awid[(IDWID - 1):0])
     ,.c_awlen(c_awlen[7:0])
+    ,.c_awsize(c_awsize)
     ,.c_awready(c_awready)
     ,.c_awextras(c_awextras[EXTRAS-1:0])
     ,.c_awvalid(c_awvalid)
@@ -242,10 +256,11 @@ axi_wr_4_merger  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_merger (
     ,.c_wstrb(c_wstrb[(WSTRB - 1):0])
     ,.c_wvalid(c_wvalid)
 
-    ,.d_awaddr(d_awaddr[31:0])
+    ,.d_awaddr(d_awaddr)
     ,.d_awburst(d_awburst[1:0])
     ,.d_awid(d_awid[(IDWID - 1):0])
     ,.d_awlen(d_awlen[7:0])
+    ,.d_awsize(d_awsize)
     ,.d_awready(d_awready)
     ,.d_awextras(d_awextras[EXTRAS-1:0])
     ,.d_awvalid(d_awvalid)
@@ -263,13 +278,14 @@ axi_wr_4_merger  #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_wr_4_merger (
 );
 
 
-axi_rd_4_merger #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_4_merger (
+axi_rd_4_merger #(.AWID(AWID),.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_4_merger (
     .clk(clk) ,.rst_n(rst_n)
 
-    ,.araddr(araddr[31:0])
+    ,.araddr(araddr)
     ,.arburst(arburst[1:0])
     ,.arid(arid[(IDWID - 1):0])
     ,.arlen(arlen[7:0])
+    ,.arsize(arsize)
     ,.arready(arready)
     ,.arextras(arextras[EXTRAS-1:0])
     ,.arvalid(arvalid)
@@ -280,10 +296,11 @@ axi_rd_4_merger #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_4_merger (
     ,.rresp(rresp[1:0])
     ,.rvalid(rvalid)
 
-    ,.a_araddr(a_araddr[31:0])
+    ,.a_araddr(a_araddr)
     ,.a_arburst(a_arburst[1:0])
     ,.a_arid(a_arid[(IDWID - 1):0])
     ,.a_arlen(a_arlen[7:0])
+    ,.a_arsize(a_arsize)
     ,.a_arready(a_arready)
     ,.a_arextras(a_arextras[EXTRAS-1:0])
     ,.a_arvalid(a_arvalid)
@@ -294,10 +311,11 @@ axi_rd_4_merger #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_4_merger (
     ,.a_rresp(a_rresp[1:0])
     ,.a_rvalid(a_rvalid)
 
-    ,.b_araddr(b_araddr[31:0])
+    ,.b_araddr(b_araddr)
     ,.b_arburst(b_arburst[1:0])
     ,.b_arid(b_arid[(IDWID - 1):0])
     ,.b_arlen(b_arlen[7:0])
+    ,.b_arsize(b_arsize)
     ,.b_arready(b_arready)
     ,.b_arextras(b_arextras[EXTRAS-1:0])
     ,.b_arvalid(b_arvalid)
@@ -308,10 +326,11 @@ axi_rd_4_merger #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_4_merger (
     ,.b_rresp(b_rresp[1:0])
     ,.b_rvalid(b_rvalid)
 
-    ,.c_araddr(c_araddr[31:0])
+    ,.c_araddr(c_araddr)
     ,.c_arburst(c_arburst[1:0])
     ,.c_arid(c_arid[(IDWID - 1):0])
     ,.c_arlen(c_arlen[7:0])
+    ,.c_arsize(c_arsize)
     ,.c_arready(c_arready)
     ,.c_arextras(c_arextras[EXTRAS-1:0])
     ,.c_arvalid(c_arvalid)
@@ -322,10 +341,11 @@ axi_rd_4_merger #(.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_4_merger (
     ,.c_rresp(c_rresp[1:0])
     ,.c_rvalid(c_rvalid)
 
-    ,.d_araddr(d_araddr[31:0])
+    ,.d_araddr(d_araddr)
     ,.d_arburst(d_arburst[1:0])
     ,.d_arid(d_arid[(IDWID - 1):0])
     ,.d_arlen(d_arlen[7:0])
+    ,.d_arsize(d_arsize)
     ,.d_arready(d_arready)
     ,.d_arextras(d_arextras[EXTRAS-1:0])
     ,.d_arvalid(d_arvalid)

@@ -11,20 +11,20 @@ reg [31:0] marker1;   initial marker1=0;
 reg [31:0] marker2;   initial marker2=0;
 reg [31:0] marker3;   initial marker3=0;
 reg [31:0] Index;   initial Index=0;
-wire [2:0] awsize = 3;
-wire [2:0] arsize = 3;
 parameter IDWID = 4;
 parameter DWID = 64;
 reg [31:0] araddr;
 reg [1:0] arburst;
 reg [(IDWID - 1):0] arid;
 reg [7:0] arlen;
+reg [2:0] arsize;
 wire  arready;
 reg  arvalid;
 reg [31:0] awaddr;
 reg [1:0] awburst;
 reg [3:0] awid;
 reg [7:0] awlen;
+reg [2:0] awsize;
 wire  awready;
 reg  awvalid;
 wire [(IDWID - 1):0] bid;
@@ -60,11 +60,13 @@ initial begin
     arburst = 0;
     arid = 0;
     arlen = 0;
+    arsize = 0;
     arvalid = 0;
     awaddr = 0;
     awburst = 0;
     awid = 0;
     awlen = 0;
+    awsize = 0;
     awvalid = 0;
     bready = 0;
     clk = 0;
@@ -80,14 +82,16 @@ end
 axi2ram dut (
      .araddr(araddr[31:0])
     ,.arburst(arburst[1:0])
-    ,.arid(arid[(IDWID - 1):0])
-    ,.arlen(arlen[7:0])
+    ,.arid(arid)
+    ,.arlen(arlen)
+    ,.arsize(arsize)
     ,.arready(arready)
     ,.arvalid(arvalid)
     ,.awaddr(awaddr[31:0])
     ,.awburst(awburst[1:0])
-    ,.awid(awid[3:0])
-    ,.awlen(awlen[7:0])
+    ,.awid(awid)
+    ,.awlen(awlen)
+    ,.awsize(awsize)
     ,.awready(awready)
     ,.awvalid(awvalid)
     ,.bid(bid[(IDWID - 1):0])

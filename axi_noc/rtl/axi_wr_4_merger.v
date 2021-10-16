@@ -1,11 +1,12 @@
 
-module axi_wr_4_merger #(parameter IDWID=4, parameter DWID=64, parameter WSTRB=DWID/8, parameter EXTRAS=8) (
+module axi_wr_4_merger #(parameter AWID=32,parameter IDWID=4, parameter DWID=64, parameter WSTRB=DWID/8, parameter EXTRAS=8) (
     input clk, input rst_n
 
 
     ,input [IDWID-1:0] a_awid
-    ,input [31:0] a_awaddr
+    ,input [AWID-1:0] a_awaddr
     ,input [7:0] a_awlen
+    ,input [2:0] a_awsize
     ,input [EXTRAS-1:0] a_awextras
     ,input [1:0] a_awburst
     ,input a_awvalid
@@ -21,8 +22,9 @@ module axi_wr_4_merger #(parameter IDWID=4, parameter DWID=64, parameter WSTRB=D
     ,input a_bready
 
     ,input [IDWID-1:0] b_awid
-    ,input [31:0] b_awaddr
+    ,input [AWID-1:0] b_awaddr
     ,input [7:0] b_awlen
+    ,input [2:0] b_awsize
     ,input [EXTRAS-1:0] b_awextras
     ,input [1:0] b_awburst
     ,input b_awvalid
@@ -39,8 +41,9 @@ module axi_wr_4_merger #(parameter IDWID=4, parameter DWID=64, parameter WSTRB=D
 
 
     ,input [IDWID-1:0] c_awid
-    ,input [31:0] c_awaddr
+    ,input [AWID-1:0] c_awaddr
     ,input [7:0] c_awlen
+    ,input [2:0] c_awsize
     ,input [EXTRAS-1:0] c_awextras
     ,input [1:0] c_awburst
     ,input c_awvalid
@@ -56,8 +59,9 @@ module axi_wr_4_merger #(parameter IDWID=4, parameter DWID=64, parameter WSTRB=D
     ,input c_bready
 
     ,input [IDWID-1:0] d_awid
-    ,input [31:0] d_awaddr
+    ,input [AWID-1:0] d_awaddr
     ,input [7:0] d_awlen
+    ,input [2:0] d_awsize
     ,input [EXTRAS-1:0] d_awextras
     ,input [1:0] d_awburst
     ,input d_awvalid
@@ -75,8 +79,9 @@ module axi_wr_4_merger #(parameter IDWID=4, parameter DWID=64, parameter WSTRB=D
 
 
     ,output [3:0] awid
-    ,output [31:0] awaddr
+    ,output [AWID-1:0] awaddr
     ,output [7:0] awlen
+    ,output [2:0] awsize
     ,output [EXTRAS-1:0] awextras
     ,output [1:0] awburst
     ,output awvalid
@@ -102,11 +107,11 @@ assign c_awready = !c_aw_full;
 wire d_aw_full,d_aw_empty;
 assign d_awready = !d_aw_full;
 
-localparam AWIDE = IDWID + 32 + 8 + EXTRAS + 2 ;
-wire [AWIDE-1:0] new_a_aw_entry =   { a_awextras ,a_awid, a_awburst, a_awlen, a_awaddr };
-wire [AWIDE-1:0] new_b_aw_entry =   { b_awextras ,b_awid, b_awburst, b_awlen, b_awaddr };
-wire [AWIDE-1:0] new_c_aw_entry =   { c_awextras ,c_awid, c_awburst, c_awlen, c_awaddr };
-wire [AWIDE-1:0] new_d_aw_entry =   { d_awextras ,d_awid, d_awburst, d_awlen, d_awaddr };
+localparam AWIDE = 3 + IDWID + AWID + 8 + EXTRAS + 2 ;
+wire [AWIDE-1:0] new_a_aw_entry =   { a_awsize, a_awextras ,a_awid, a_awburst, a_awlen, a_awaddr };
+wire [AWIDE-1:0] new_b_aw_entry =   { b_awsize, b_awextras ,b_awid, b_awburst, b_awlen, b_awaddr };
+wire [AWIDE-1:0] new_c_aw_entry =   { c_awsize, c_awextras ,c_awid, c_awburst, c_awlen, c_awaddr };
+wire [AWIDE-1:0] new_d_aw_entry =   { d_awsize, d_awextras ,d_awid, d_awburst, d_awlen, d_awaddr };
 
 wire [AWIDE-1:0] a_active_aw_entry;
 wire [AWIDE-1:0] b_active_aw_entry;
@@ -194,10 +199,10 @@ wire start_b = eligible_b && (all_idle) && awready && wready && (b_bcount<8) && 
 wire start_c = eligible_c && (all_idle) && awready && wready && (c_bcount<8) && c_winner;
 wire start_d = eligible_d && (all_idle) && awready && wready && (d_bcount<8) && d_winner;
 
-wire longer_a = a_active_aw_entry[7+32:32] != 0;
-wire longer_b = b_active_aw_entry[7+32:32] != 0;
-wire longer_c = c_active_aw_entry[7+32:32] != 0;
-wire longer_d = d_active_aw_entry[7+32:32] != 0;
+wire longer_a = a_active_aw_entry[7+AWID:AWID] != 0;
+wire longer_b = b_active_aw_entry[7+AWID:AWID] != 0;
+wire longer_c = c_active_aw_entry[7+AWID:AWID] != 0;
+wire longer_d = d_active_aw_entry[7+AWID:AWID] != 0;
 
 
 always @(posedge clk or negedge rst_n) begin
@@ -273,7 +278,7 @@ assign d_winner = (d_pri_count>0) && !a_winner && !b_winner && !c_winner;
 
 
 wire [3:0] orig_wid;
-assign {awextras ,orig_wid,awburst,awlen,awaddr} = 
+assign {awsize, awextras ,orig_wid,awburst,awlen,awaddr} = 
     (readout_a_aw_fifo) ? a_active_aw_entry :
     (readout_b_aw_fifo) ? b_active_aw_entry :
     (readout_c_aw_fifo) ? c_active_aw_entry :
