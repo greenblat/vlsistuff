@@ -49,6 +49,7 @@ class sequenceClass:
         self.Guardian = 0   # against wait too long.
         self.waitNotBusy = False
         self.agents={}
+        self.agents['logs'] = logs
         self.Translates = Translates
         self.Translates['rnd'] = self.rnd
         self.Translates['envir'] = self.envir

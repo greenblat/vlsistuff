@@ -132,7 +132,7 @@ there is directory called axi_noc. All is  there.  Including building block RTLs
 ## What's missing
 
 2. Some modules are in development stage and are empty in GIT:  clock and width changers.
-3. Internal verificationcovers most of it. Working on external verification (by external party).
+3. Internal verification covers most of it. Working on external verification (by external party).
 4. Not going to add AHB interfaces. You probably have them already. If not, good for You.
 5. Not going to build it in VHDL. Enough weapons as it is.
 
@@ -168,4 +168,4 @@ As with any new idea, there are level one objects and issues. Here is the first 
 
 8. Industry standards.
 
-   Love this one. Accelera standards usually stink. The reason they are so popular is because they are popular and  clueless management  buy into them.
+   Love this one. Accelera standards usually stink. The reason they are so popular is because they are popular and  clueless management  buys into them.

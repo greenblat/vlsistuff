@@ -8,7 +8,12 @@ import dumpUser
 
 class connectivityClass:
     def __init__(self,Glbs,Root):
-        self.Mod = Glbs.details[Root]
+        if type(Root) is str:
+            self.Mod = Glbs.details[Root]
+        else:
+            print('IAM %s' % str(type(Root)))
+            self.Mod = Root
+            
         self.Module = self.Mod.Module
         self.Names={}
         self.Params={}
@@ -166,6 +171,8 @@ class connectivityClass:
             Pic = Obj.Type
             if Inst not in self.Conns: self.Conns[Inst] = {}
             if (Pic in ['antenna','vcc','gnd','input','output','node'])or('logo' in Obj.Type):
+                pass
+            elif not self.Glbs:
                 pass
             elif Pic in self.Glbs.pictures:
                 Pins = self.Glbs.pictures[Pic].pins
