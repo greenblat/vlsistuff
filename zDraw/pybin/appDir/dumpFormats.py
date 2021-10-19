@@ -199,7 +199,21 @@ class connectivityClass:
 
 
     def dumpVerilogHeader(self,File):
-        File.write('module %s (' % self.Mod.Module)
+        Params = []
+        All = []
+        for Bus in self.Inps | self.Outs | self.Inouts:
+            if '[' in Bus:
+                Prms = extractWireParams(Bus)
+                All.extend(Prms)
+        if All!=[]:
+            Used = []
+            for Prm in All:
+                if Prm not in Used:
+                    Params.append('parameter %s=1' % Prm)
+                    Used.append(Prm)
+            Params = '#(%s) ' % (', '.join(Params))
+
+        File.write('module %s%s (' % (self.Mod.Module,Params))
         Pref=' '
         for Inp in self.Inps:
             Rinp = reworkPort(Inp)
@@ -663,3 +677,14 @@ def make_legal(Txt):
             return '_%s'%Txt
     return Txt
 
+def extractWireParams(Bus):
+    Prms = []
+    X = Bus.replace('[',' ')
+    X = X.replace(':',' ')
+    X = X.replace(']',' ')
+    X = X.replace('-',' ')
+    Wrds = X.split()
+    for Y in Wrds[1:]:
+        if Y[0] not in '0123456789':
+            Prms.append(Y)
+    return Prms
