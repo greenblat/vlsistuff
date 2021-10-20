@@ -1,7 +1,8 @@
 
 
 
-from pygameGeoms import setLineWidth,draw_line,draw_label,draw_circle,draw_arc,draw_fcircle,draw_frect,draw_rect,draw_dashed_line
+from pygameGeoms import setLineWidth,draw_line,draw_text,draw_circle,draw_arc,draw_fcircle,draw_frect,draw_rect,draw_dashed_line
+
 
 def render_point(Matrix,Point,Color):
     X,Y = Point
@@ -71,15 +72,9 @@ def render_text(Matrix,Text,XY,Rot,Size,Color,Align):
     Min = min(abs(A),abs(B))
     if Min<0.1:
         Min = min(abs(A1),abs(B1))
-    Size1 = Min*Size
-    P0 =  world_coord(Matrix,XY)
-    if Glbs.useVectorText:
-        P1 =  world_coord(Matrix,(XY[0]+10,XY[1]))
-        Dx = signme(P1[0]-P0[0])
-        Dy = signme(P1[1]-P0[1])
-        draw_vector_text(Text,P0[0],P0[1],Color,Align,Size1,Dx,Dy)
-    else:
-        draw_label(Text,P0[0],P0[1],Color,'left',Size)
+    Size1 = 3*Min*Size
+    P0 =  world_coord(Matrix,tuple(XY))
+    draw_text(Text,P0[0],P0[1],Color,'left',Size1)
 
 def signme(Dd):
     if Dd>0: return 1

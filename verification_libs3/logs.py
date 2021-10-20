@@ -15,7 +15,7 @@ if 'PYMONLOG' in os.environ:
     PYMONLOG = os.environ['PYMONLOG']
 
 
-
+def onFinish(): return
 
 
 def pymonname(Fname):

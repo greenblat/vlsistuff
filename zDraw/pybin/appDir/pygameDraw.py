@@ -71,6 +71,8 @@ class GlobalsClass:
         self.wireNumName=0
         self.set_context('backgroundColor','white')
         self.set_context('wire_direction',1)
+        self.set_context('font','times.tff')
+        self.set_context('param_text_size',0.5)
         self.associated_dir={}
         self.useVectorText=True
         self.useShyParams=True
@@ -654,7 +656,7 @@ def __use_command_wrds(wrds):
     elif 'name' in wrds[0]:
         Glbs.paramName='name'
         Glbs.params_queue.extend(wrds[1:])
-    elif 'param' in wrds[0]:
+    elif 'param' ==  wrds[0]:
         Glbs.paramName=wrds[1]
         Glbs.params_queue.extend(wrds[2:])
     elif 'spice' in wrds[0]:
@@ -743,7 +745,17 @@ def __use_command_wrds(wrds):
         logs.log_info('pictures   in "%s"  %s'%(Dir,L2))
                 
     elif (len(wrds)==3)and(wrds[1]=='='):
-        Glbs.set_context(wrds[0],makenum(wrds[2]))
+        if wrds[0] == 'font':
+            OKfonts = pygame.font.get_fonts() 
+            Font = wrds[2]
+            if Font in OKfonts:
+                Glbs.set_context('font',Font)
+            else:
+                logs.log_error('font "%s" not in fonts:\n %s' % (Font,OKfonts))
+        else:
+            if wrds[0] not in Glbs.contexts:
+                logs.log_info('defining new context param "%s" ' %wrds[0])
+            Glbs.set_context(wrds[0],makenum(wrds[2]))
     elif(wrds[0]=='variables'):
         for Key in Glbs.contexts:
             print(Key,Glbs.contexts[Key])

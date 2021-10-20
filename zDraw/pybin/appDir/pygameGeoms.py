@@ -129,16 +129,30 @@ def draw_vertical(X,Y0,Y1,Color):
    draw_line((X,Y0),(X,Y1),Color)
 
 
-def draw_label(Text,X,Y,Color,AnchorX='left',FontSize=12):
+def draw_text(Text,X,Y,Color,AnchorX='left',FontSize=36):
+#    XXYY = (X,Y)
     (X,Y) = fixCoord((X,Y))
-    font = pygame.font.Font('freesansbold.ttf', int(FontSize))
+    Font  = Glbs.get_context('font')
+    font = pygame.font.SysFont(Font, int(FontSize))
     Color = oglcolor(Color)
-    text = font.render(Text, True, Color, (200,200,200))
+#    print('DRAWLABEL %s %d %d color=%s font=%s  "%s"' % (XXYY,X,Y,Color,font,Text))
+    text = font.render(Text, True, Color, (255,255,255))
+    textRect = text.get_rect()
+    textRect.bottomleft = (X,Y)
+    Screen = Glbs.get_context('screen')
+    Screen.blit(text, textRect)
+
+def draw_label(Text,X,Y,Color,AnchorX='left',FontSize=12):
+#    XXYY = (X,Y)
+    (X,Y) = fixCoord((X,Y))
+    font = pygame.font.SysFont('times.ttf', int(FontSize))
+    Color = oglcolor(Color)
+#    print('DRAWLABEL %s %d %d color=%s font=%s  "%s"' % (XXYY,X,Y,Color,font,Text))
+    text = font.render(Text, True, Color, (255,255,255))
     textRect = text.get_rect()
     textRect.center = (Glbs.get_context('width') // 2, Y // 2)
     Screen = Glbs.get_context('screen')
     Screen.blit(text, textRect)
-
 
 GLCOLORS = {}
 GLCOLORS['white']=[255,255,255,255]

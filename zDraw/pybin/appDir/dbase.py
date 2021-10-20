@@ -191,7 +191,6 @@ class InstanceClass:
         X1 = X0+Dx
         Y1 = Y0+Dy
         X2,Y2 = putOnGrid((X1,Y1))
-        print('move %s : dxdy=%f,%f point %f,%f x1y1 = %f,%f x2y2 = %f %f' % (self.Inst,Dx,Dy,X0,Y0,X1,Y1,X2,Y2))
         self.Point = X2,Y2
         self.bbox0=False
         self.recompute_wires()
@@ -402,8 +401,6 @@ class ParamClass:
         PrmSize = Glbs.get_context('param_text_size')
         if PrmSize==0:
             PrmSize=self.Size
-#        Mat2 = translate_rotate(self.Rot,UnitMatrix)
-#        Mat3 = matrix_mult(Mat2,Matrix)
         Mat3 = instmatrix(1,self.Point,self.Rot,Matrix)
         if self.Param in Glbs.get_context('shyParams') and Glbs.useShyParams:
             if (self.Param=='name')and(self.Value=='$inst'):
@@ -418,7 +415,7 @@ class ParamClass:
             X0,Y0=Bbox[0]
             X1,Y1=Bbox[1]
             List = [(X0,Y0),(X0,Y1),(X1,Y1),(X1,Y0),(X0,Y0)]
-            render_aline(Mat3,List,get_context('geom_color'))
+            render_aline(Matrix,List,get_context('geom_color'))
 
 
     def postscript(self,File):
@@ -452,8 +449,8 @@ class ParamClass:
             Mult = self.Father.matrix[0]
         else:
             Mult = 10.0
-        Size = 1.0*self.Size/Mult
-        self.bbox0=[self.Point,(self.Point[0]+(Size*len(self.Value))/3,self.Point[1]+Size)]
+        Size = 2.0*self.Size
+        self.bbox0=[self.Point,(self.Point[0]+Size,self.Point[1]+Size)]
         return self.bbox0
     def save(self,File):
         File.write('param %s %s %s xy=%.1f,%.1f rot=%s\n'%(self.Owner,self.Param,self.Value,self.Point[0],self.Point[1],self.Rot))
@@ -900,7 +897,6 @@ class DetailClass:
                     elif (Dist<Closest):
                         Closest,Best=Dist,Pin
                         Pnt = Px
-                print('CLOSE',Pic.pins,Inst,Best,Pnt)
                 if Best == 0:
                     return Inst,Pnt
                 return Inst+'.'+Best,Pnt
@@ -1024,7 +1020,7 @@ def load_dbase_file(Fname):
         load_dbase_file__(File)
         Glbs.graphicsChanged=True
     else:
-        print('cannot open "%s"'%Fname)
+        logs.log_error('cannot open "%s"'%Fname)
         return False
 
 def load_dbase_file__(File):
@@ -1926,7 +1922,6 @@ def center_display(Xw,Yw):
     H = get_context('height')
     H2 = H/2 
     W2 = W/2 
-#    print('center_display %s %s screen=%s %s'%(Xw,Yw,W,H))
 
     Dx = -(Xw-W2)
     Dy = -(Yw-H2)
@@ -1960,7 +1955,6 @@ def get_pin_location(Module,Conn):
 def select_object(Point):
     SchPoint = screen2schem(Point)
     Root=get_context('root')
-#    print('select_object screen=%s schem=%s matrix=%s'%(Point,SchPoint,Glbs.get_context('matrix')))
     return Glbs.details[Root].select_object(SchPoint)
 
 def close_enough(BB,Point):
