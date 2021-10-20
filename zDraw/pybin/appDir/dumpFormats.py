@@ -201,7 +201,8 @@ class connectivityClass:
     def dumpVerilogHeader(self,File):
         Params = []
         All = []
-        for Bus in self.Inps | self.Outs | self.Inouts:
+#        for Bus in self.Inps | self.Outs | self.Inouts:
+        for Bus in { **self.Inps, **self.Outs, **self.Inouts}:
             if '[' in Bus:
                 Prms = extractWireParams(Bus)
                 All.extend(Prms)
