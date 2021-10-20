@@ -39,7 +39,7 @@ from schem import PICTURES
 def init():
     set_context('screen_proximity',10.0)
     set_context('matrix',[1,0,0,0,1,0])
-    set_context('pics_lib','.')
+    set_context('pics_lib',['.'])
     set_context('linewidth',1)
     set_context('state','idle')
     set_context('wire_color',[0,255,0])

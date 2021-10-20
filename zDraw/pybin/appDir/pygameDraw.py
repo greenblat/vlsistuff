@@ -75,6 +75,7 @@ class GlobalsClass:
         self.set_context('param_text_size',0.5)
         self.associated_dir={}
         self.set_context('useVectorText',1)
+        self.set_context('pics_lib',['.'])
         self.useShyParams=True
         self.fontShrink = 0.8
         self.pleaseExit=False
@@ -281,7 +282,9 @@ def read_init_file(Fname):
             import_command(wrds[1])
         elif (len(wrds)>=2)and(wrds[0] == 'pics_lib'):
             Was = dbase.get_context('pics_lib')
-            for wrd in wrds[1:]:
+            line2 = line.replace(',',' ')
+            wrds2 = line2.split()
+            for wrd in wrds2[1:]:
                 Was.append(wrd)
             dbase.set_context('pics_lib',Was) 
         elif (len(wrds)==2):
@@ -302,6 +305,11 @@ def read_init_file(Fname):
             logs.log_warning('read_init_file got "%s" . not valid.'%(' '.join(wrds)))
                 
 def makenum(Txt):
+    if type(Txt) is str:
+        if ',' in Txt:
+            wrds = Txt.split(',')
+            LL =list(map(makenum,wrds))
+            return LL
     try:
         if '.' in Txt:
             return float(Txt)
@@ -565,6 +573,7 @@ def __use_command_wrds(wrds):
         __use_command_wrds(['print'])
         __use_command_wrds(['verilog'])
         __use_command_wrds(['pickle'])
+        __use_command_wrds(['picture'])
 
     elif wrds[0]=='pickle':
         Schem = Glbs.details[Root]
@@ -755,6 +764,14 @@ def __use_command_wrds(wrds):
                 Glbs.set_context('font',Font)
             else:
                 logs.log_error('font "%s" not in fonts:\n %s' % (Font,OKfonts))
+        elif wrds[0] in ['pics_lib']:
+            Was = Glbs.get_context(wrds[0])
+            X = makenum(wrds[2])
+            if type(X) is str:
+                Was.append(X)
+            elif type(X) is list:
+                Was.extend(X)
+            Glbs.set_context(wrds[0],Was)
         else:
             if wrds[0] not in Glbs.contexts:
                 logs.log_info('defining new context param "%s" ' %wrds[0])
