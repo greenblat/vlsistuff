@@ -74,7 +74,7 @@ class GlobalsClass:
         self.set_context('font','times.tff')
         self.set_context('param_text_size',0.5)
         self.associated_dir={}
-        self.useVectorText=True
+        self.set_context('useVectorText',1)
         self.useShyParams=True
         self.fontShrink = 0.8
         self.pleaseExit=False
@@ -615,7 +615,7 @@ def __use_command_wrds(wrds):
              Glbs.set_context('root','opening') 
              Glbs.graphicsChanged=True
     elif wrds[0] == 'V':
-        Glbs.useVectorText = not Glbs.useVectorText;
+        Glbs.set_contect('useVectorText',not Glbs.get_context('useVectorText'))
         Glbs.graphicsChanged=True
     elif wrds[0] in ['plot','print']:
         dbase.postscript_current()
@@ -745,7 +745,10 @@ def __use_command_wrds(wrds):
         logs.log_info('pictures   in "%s"  %s'%(Dir,L2))
                 
     elif (len(wrds)==3)and(wrds[1]=='='):
-        if wrds[0] == 'font':
+        if wrds[0] == 'useVectorText':
+            Glbs.set_context('useVectorText',eval(wrds[2]))
+            Glbs.graphicsChanged=True
+        elif wrds[0] == 'font':
             OKfonts = pygame.font.get_fonts() 
             Font = wrds[2]
             if Font in OKfonts:

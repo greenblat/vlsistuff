@@ -430,7 +430,7 @@ class ParamClass:
         Mat3 = instmatrix(1,self.Point,self.Rot,UnitMatrix)
 #        Mat4 = instmatrix(1,self.Point,self.Rot,Matrix)
 #        Mat5 = instmatrix(1,[0,0],self.Rot,UnitMatrix)
-        if Glbs.useVectorText:
+        if Glbs.get_context('useVectorText'):
             set_pscontext(File,'setrgbcolor',get_context('param_color'))
             Big = make_text_vectors(Value,[0,0],'left',PrmSize)
             for Seg in Big:
@@ -559,7 +559,7 @@ class PictureClass:
                 logs.log_error('missing postscript pic geom %s in %s'%(Which,self.Picture))
 
         for (Text,Point,Rot,Size,Align) in self.texts:
-            if Glbs.useVectorText:
+            if Glbs.get_context('useVectorText'):
                 NN = Text.replace('|',' ')
                 set_pscontext(File,'setrgbcolor',Color)
                 Big = make_text_vectors(NN,Point,Align,Size)
@@ -1757,7 +1757,7 @@ def use_keystroke(Uni,Ord,XY):
             set_context('state','idle')
             set_context('banner','%s : unset grouping'%(Root))
     elif (Uni == 'V'):
-        Glbs.useVectorText = not Glbs.useVectorText;
+        Glbs.set_context('useVectorText',not Glbs.get_context('useVectorText'));
     elif (Uni == 'C'):
         screenShot(get_context('width'),get_context('height'),get_context('screenShotFileName','screenshot.png'))
     elif (Uni == 'P'):

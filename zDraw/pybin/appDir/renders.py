@@ -63,7 +63,7 @@ def render_fcircle(Matrix,Point0,Point1,Color):
 
 
 def render_text(Matrix,Text,XY,Rot,Size,Color,Align):
-    if Glbs.useVectorText:
+    if Glbs.get_context('useVectorText'):
         setLineWidth(Glbs.get_context('vectorTextWidth'))
         render_vector_text(Matrix,Text,XY,Rot,Size,Color,Align)
         return
