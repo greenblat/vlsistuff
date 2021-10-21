@@ -804,6 +804,7 @@ def str2hex(Txt):
 
 #class anyClas(driverClass):
 #    driverClass.__init__(self,Path,Monitors)
+
 class driverClass:
     def __init__(self,Path,Monitors,Prefix='',Name=''):
         if (Monitors!=-1): Monitors.append(self)
@@ -824,7 +825,39 @@ class driverClass:
         return Fname
         
 
-
+    def createMonModule(self):
+        Vars = dir(self)
+        Mons = []
+        for Var in Vars:
+            if '__' not in Var:
+                X = eval('type(self.%s)' % Var)
+                if X is str:
+                    Mons.append(('str',Var))
+                elif X is int:
+                    Mons.append(('int',Var))
+                elif X is bool:
+                    Mons.append(('bool',Var))
+        Fpy = open('%s.py' % self.Name,'w')
+        Fpy.write('    def forcemyself(self):\n')
+        for Kind,Var in Mons:
+            if Kind == 'str':
+                Fpy.write('    veri.force("%s_mon,str2hex(self.%s)))\n' % (self.Name,Var))
+            elif Kind == 'int':
+                Fpy.write('    veri.force("%s_mon,str(self.%s))\n' % (self.Name,Var))
+            elif Kind == 'bool':
+                Fpy.write('    veri.force("%s_mon,str(int(self.%s)))\n' % (self.Name,Var))
+        Fpy.close() 
+        Fv = open('%s.v' % self.Name,'w')
+        Fv.write('module %s_mon;\n' % self.Name)
+        for Kind,Var in Mons:
+            if Kind == 'str':
+                Fv.write('reg [1023:0] %s; initial %s=0;\n' % (Var,Var))
+            elif Kind == 'int':
+                Fv.write('integer %s; initial %s=0;\n' % (Var,Var))
+            elif Kind == 'bool':
+                Fv.write('reg %s; initial %s=0;\n' % (Var,Var))
+        Fv.write('endmodule\n')
+        Fv.close()
 
     def exists(self,Sig):
         Full = self.fullname(Sig)

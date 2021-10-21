@@ -145,6 +145,8 @@ special notes:
         shyParams name,size    : parameters that show only the value (and not param=value)
         lineWidth 1.5 
         vectorTextWidth 1.0 
+        useVectorText 0   / 1    : switch to ttf font (or back)
+        font times               : use times font for ttf. Has to be in system fonts.
     
         wire_direction [0,1]   : do we put small circle on wires end (as indication of the direction).
 

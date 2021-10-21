@@ -6,7 +6,7 @@ I got frustrated with existing NOC solutions, so why not try my own?
 ## why NOC?
 In almost every ASIC, there is region called SOC. System On a Chip. It is a collection of modules that should work together. 
 Usual ingredients are CPUs, DMAs, Accelerators, Register files, Communication modules, Off-chip memory controllers, 
-On chip memories  Rams, Roms, Flash embedded, Security and more that now i forgot.
+On-chip memories  Rams, Roms, Flash embedded, Security and more that now i forgot.
 To make them into a coherent system, conventional way is to hang them all on a NOC. Network on a chip.
 
 At Virata, years ago, we created ring based NOC, that didn't have masters and slaves and was passing messages at 
@@ -15,21 +15,21 @@ pretty high speed between all members. Instead of Masters and Slaves, all member
 Sweet memories..., but nowadays all ingredients have AXI, AHB or APB interfaces (and couple more weirder ones).
 
 ## Choices
-There used to be 3 vendors + ARM  selling NOC creators to You. They come with fancy configuration app.
+There used to be 3 vendors + ARM + selling NOC creators. They come with fancy configuration app.
 I say "used to" because they are being swallowed and not sure to exist on the market much longer.
 All apps create ugly unreadable RTL code. My guess it is on purpose to make it look sophisticated and 
 hard to implement Yourself. 
 
-There is also open-source (like OpenSoC) but for me it is "תפסת מרובה לא תפסת" syndrom. For non Hebrew readers - it approximately translates to " there is no value in excess". 
+There is also open-source (like OpenSoC) but for me it has  "מרובה תפסת , לא תפסת " syndrom. If Your Hebrew is lacking  - it approximately translates to " there is no value in excess". 
 
-My rings-inspired NOC is still great, but it is scary to conventional designer and their managers. 
+My rings-inspired NOC is still great, but it is scary to conventional designers and their managers. 
 This is the reason i thought of AXI NOC from scratch. 
 Recently,  projects i came across in companies i work for, could benefit from simple NOC that 
 doesn't require a dedicated person cooking the ( Arteris Sonics netSpeed )  for the duration of the project and beyond. About hardships of these commercial solutions You can read in my older Linky-Dinky post.  And anyway,  most of them are not that relevant or alive.
 
 ## The setup of AXI NOC
 
-Suppose You have few masters and bunch of slaves. 
+Suppose You have few AXI4 masters and bunch of slaves. 
 The task is to enable masters to access slaves with max reasonable efficiency.
 Complications and restrictions:
 
@@ -37,15 +37,17 @@ Complications and restrictions:
 2. We should support several clock regions.
 3. For first viable, the AXI is 64 bits data and 32bits address.  
 4. Not all Masters can access all Slaves. There should be easy way to configure that too.
-5. AXI in standard has 4 busses without clear job, that 90% of designs don't know what to do with them: size, prot, cache and qos. In this design, instead, i allocate "extras" bus with configurable width. Do with it whatever.
-6. Cut combi paths into manageable timing pieces, layout friendly, latency of clock here and clock there is not a problem. 
+5. AXI in standard has 4 busses without clear job, that 90% of designs don't know what to do with them: size, prot, cache and qos. In this design, instead, i allocate "extras" bus with configurable width. Do with it whatever. Size will probably creep back in.
+6. Cut combi paths into manageable timing pieces, layout friendly, Latency of clock here and clock there is not a problem. 
 7. QOS is for losers.
 8. Keep it simple, focused. Debuggable. Humanly understanble.  I dont expect it to save the world or make coffee. My cat can do that.
 <img src="mycat.jpg" alt="mycat" style="zoom:33%;" />
 
 
 ## The idea
-We define and implement a limited set of building blocks.  For the first version there are only six.
+We define and implement a limited set of building blocks. Out of this limited set we can compose any NOC we need.
+
+ For the first version there are only six modules:
 
 <img src="axinoczoo.svg" alt="axinoczoo" style="zoom:80%;" />
 
@@ -55,7 +57,7 @@ We define and implement a limited set of building blocks.  For the first version
 3. clock changer module is inserted between two different clock domains.
 4. axi2ram module is demo module to connect ram to this noc.
 5. axi2apb module is translation to apb slaves.
-6. (planned) change AXI width module. e.g. from 128 to 64 and back. Keep in mind, that AXI is two way street. Modules have to keep tabs on what going through the in order to route response correctly back. All nodules introduce a clock delay between ports.
+6. (planned) change AXI width module. e.g. from 128 to 64 and back. Keep in mind, that AXI is two way street. Modules have to keep tabs on what going through the in order to route response correctly back. All modules introduce a clock delay between ports.
 7. (planned) SERDES. Optimizing serializer of the traffic. Full AXI is handful bunch of wires. The traffix can be made thinner busses.
 
 ##  Connecting the dots
@@ -99,14 +101,14 @@ The steering of the writes and reads is based on pre compiled address tables.
 We do the opposite.
 Merger modules don't have any address sensitivity. Only splitter modules must decide which output port to use.
 The simple solution:  take two msb bits of address and use them as index to decide where to send the transaction. On selected downstream port the address is  shifted two bits left. So the next decision point have fresh two bits.
-The software in masters, should be aware of this shifting, and configuration script, adds "shift value" for each slave. This number is used by connection to slave to shift the address back. If the slave is 3 layers from master, it will receive address shifted six buts right.
+The software in masters, should be aware of this shifting, and configuration script, adds "shift value" for each slave. This number is used by connection to slave to shift the address back. If the slave is 3 layers from master, it will receive address shifted six bits right. RTL creator auto-adjusts the address back for each slave.
 
 CPU software gets a table of addresses for each slave,  adapted for each master CPU. In all NOCs it is pretty much the same.
 If this addressing will be too confusing, we may switch back to more conservative table based traffic steering.
 
 ## What is the status
 in my github, clone:  https://github.com/greenblat/vlsistuff.git
-there is directory called axi_noc. All is  there.  Including building block RTLs and few demos. The demos cover major verification issues.
+there is directory called axi_noc. All is  there.  Including building block RTLs and few demos. The demos cover major verification issues. Biggest NOC simulated was 16 masters over 16 slaves. While it can be configured much bigger (and work ok) , I feel for a larger network -  a modified solution may be needed.
 
 
 ## What's next?
@@ -156,7 +158,7 @@ As with any new idea, there are level one objects and issues. Here is the first 
 
 5. Custom features : ECC, Firewalls and setera.
 
-   The idea is to integrate them in the package. 
+   The idea is to integrate them in the package. Eventually.
 
 6. DFT?
 
@@ -169,3 +171,14 @@ As with any new idea, there are level one objects and issues. Here is the first 
 8. Industry standards.
 
    Love this one. Accelera standards usually stink. The reason they are so popular is because they are popular and  clueless management  buys into them.
+   
+   
+   
+## So what can You do now?
+
+   Clone the repository. Look at the RTL code. Look at examples. Prepare Your own.  
+
+Simulate it with Your tools or use open source like me.
+Report insights, ideas, problems and concerns. Save bunch of money and effort by ditching expensive alternatives.  As with any (open-source  or not ) project  - problems will surface. But nothing like a showstopper and the axi_noc design is ready to be taken from the shelf. 
+
+greenblat@me.com
