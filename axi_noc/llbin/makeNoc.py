@@ -91,6 +91,11 @@ def record(Src,Dst):
             if Dst not in Items:
                 Items[Dst] = itemClass('clocker',Dst)
             Items[Dst].Inputs.append(Src)
+        elif Dst.startswith('slice'):
+            Items[Src].Outputs.append(Dst)
+            if Dst not in Items:
+                Items[Dst] = itemClass('slicer',Dst)
+            Items[Dst].Inputs.append(Src)
         else:
             print('error! record %s -> %s' % ( Src,Dst))
 
@@ -98,6 +103,25 @@ def record(Src,Dst):
         Clocks[Src] = True
         if Src not in Items:
             Items[Src] = itemClass('clocker',Src)
+        if Dst.startswith('slv'):
+            Slaves[Dst] = Src
+            Items[Src].Outputs.append(Dst)
+        elif Dst.startswith('split'):
+            Items[Src].Outputs.append(Dst)
+            if Dst not in Items:
+                Items[Dst] = itemClass('splitter',Dst)
+            Items[Dst].Inputs.append(Src)
+        elif Dst.startswith('merge'):
+            Items[Src].Outputs.append(Dst)
+            if Dst not in Items:
+                Items[Dst] = itemClass('merger',Dst)
+            Items[Dst].Inputs.append(Src)
+        else:
+            print('error! record %s -> %s' % ( Src,Dst))
+    elif Src.startswith('slice'):
+        Clocks[Src] = True
+        if Src not in Items:
+            Items[Src] = itemClass('slicer',Src)
         if Dst.startswith('slv'):
             Slaves[Dst] = Src
             Items[Src].Outputs.append(Dst)
@@ -226,6 +250,31 @@ def createCode(Module):
                 sys.exit()
             elif len(Obj.Inputs)!=1:
                 print('Error! clocker %s can have only  one input' % (Obj.Name))
+                sys.exit()
+            elif Dst.startswith('slv'):
+                Str = Str.replace('BB',Dst)
+            else:
+                Str = Str.replace('BB',Obj.Name+'_'+Obj.Outputs[0])
+                defineWires(Fout,Obj.Name+'_'+Obj.Outputs[0])
+            if Src.startswith('mst'):
+                Str = Str.replace('AA',Src)
+            else:
+                Str = Str.replace('AA',Src+'_'+Obj.Name)
+                defineWires(Fout,Src+'_'+Obj.Name)
+            Fout.write(Str)
+        elif Obj.Kind == 'slicer':
+            Str = SLICER.replace('NAME',Obj.Name)
+            Str = Str.replace('INCLOCK','clk')      # temporary solution
+            Dst = Obj.Outputs[0]
+            Src = Obj.Inputs[0]
+            if Obj.Outputs == []:
+                print('Error! slicer %s has no output' % (Obj.Name))
+                sys.exit()
+            elif len(Obj.Outputs)!=1:
+                print('Error! slicer %s can have only  one output' % (Obj.Name))
+                sys.exit()
+            elif len(Obj.Inputs)!=1:
+                print('Error! slicer %s can have only  one input' % (Obj.Name))
                 sys.exit()
             elif Dst.startswith('slv'):
                 Str = Str.replace('BB',Dst)
@@ -1007,6 +1056,76 @@ axi2clock axi_NAME (
 
 '''
 
+SLICER = '''
+axi_slice axi_NAME (
+     .clk(INCLOCK),.rst_n(rst_n)
+    ,.in_araddr(AA_araddr[31:0])
+    ,.in_arburst(AA_arburst[1:0])
+    ,.in_arextras(AA_arextras[(EXTRAS - 1):0])
+    ,.in_arid(AA_arid)
+    ,.in_arlen(AA_arlen)
+    ,.in_arsize(AA_arsize)
+    ,.in_arready(AA_arready)
+    ,.in_arvalid(AA_arvalid)
+    ,.in_awaddr(AA_awaddr[31:0])
+    ,.in_awburst(AA_awburst[1:0])
+    ,.in_awextras(AA_awextras[(EXTRAS - 1):0])
+    ,.in_awid(AA_awid)
+    ,.in_awlen(AA_awlen)
+    ,.in_awsize(AA_awsize)
+    ,.in_awready(AA_awready)
+    ,.in_awvalid(AA_awvalid)
+    ,.in_bid(AA_bid[(IDWID - 1):0])
+    ,.in_bready(AA_bready)
+    ,.in_bresp(AA_bresp[1:0])
+    ,.in_bvalid(AA_bvalid)
+    ,.in_rdata(AA_rdata[(DWID - 1):0])
+    ,.in_rid(AA_rid[(IDWID - 1):0])
+    ,.in_rlast(AA_rlast)
+    ,.in_rready(AA_rready)
+    ,.in_rresp(AA_rresp[1:0])
+    ,.in_rvalid(AA_rvalid)
+    ,.in_wdata(AA_wdata[(DWID - 1):0])
+    ,.in_wlast(AA_wlast)
+    ,.in_wready(AA_wready)
+    ,.in_wstrb(AA_wstrb[(WSTRB - 1):0])
+    ,.in_wvalid(AA_wvalid)
+
+    ,.ou_araddr(BB_araddr[31:0])
+    ,.ou_arburst(BB_arburst[1:0])
+    ,.ou_arextras(BB_arextras[(EXTRAS - 1):0])
+    ,.ou_arid(BB_arid[(IDWID - 1):0])
+    ,.ou_arlen(BB_arlen[7:0])
+    ,.ou_arsize(BB_arsize)
+    ,.ou_arready(BB_arready)
+    ,.ou_arvalid(BB_arvalid)
+    ,.ou_awaddr(BB_awaddr[31:0])
+    ,.ou_awburst(BB_awburst[1:0])
+    ,.ou_awextras(BB_awextras[(EXTRAS - 1):0])
+    ,.ou_awid(BB_awid)
+    ,.ou_awlen(BB_awlen)
+    ,.ou_awsize(BB_awsize)
+    ,.ou_awready(BB_awready)
+    ,.ou_awvalid(BB_awvalid)
+    ,.ou_bid(BB_bid[(IDWID - 1):0])
+    ,.ou_bready(BB_bready)
+    ,.ou_bresp(BB_bresp[1:0])
+    ,.ou_bvalid(BB_bvalid)
+    ,.ou_rdata(BB_rdata[(DWID - 1):0])
+    ,.ou_rid(BB_rid[(IDWID - 1):0])
+    ,.ou_rlast(BB_rlast)
+    ,.ou_rready(BB_rready)
+    ,.ou_rresp(BB_rresp[1:0])
+    ,.ou_rvalid(BB_rvalid)
+    ,.ou_wdata(BB_wdata[(DWID - 1):0])
+    ,.ou_wlast(BB_wlast)
+    ,.ou_wready(BB_wready)
+    ,.ou_wstrb(BB_wstrb[(WSTRB - 1):0])
+    ,.ou_wvalid(BB_wvalid)
+
+);
+
+'''
 
 
 

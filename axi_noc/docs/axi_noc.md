@@ -37,7 +37,7 @@ Complications and restrictions:
 2. We should support several clock regions.
 3. For first viable, the AXI is 64 bits data and 32bits address.  
 4. Not all Masters can access all Slaves. There should be easy way to configure that too.
-5. AXI in standard has 4 busses without clear job, that 90% of designs don't know what to do with them: size, prot, cache and qos. In this design, instead, i allocate "extras" bus with configurable width. Do with it whatever. Size will probably creep back in.
+5. AXI in standard has 4 busses without nebulous  job, that 90% of designs don't know what to do with them: size, prot, cache and qos. In this design, instead, i allocate "extras" bus with configurable width. Do with it whatever. Size will probably creep back in.
 6. Cut combi paths into manageable timing pieces, layout friendly, Latency of clock here and clock there is not a problem. 
 7. QOS is for losers.
 8. Keep it simple, focused. Debuggable. Humanly understanble.  I dont expect it to save the world or make coffee. My cat can do that.
@@ -182,3 +182,8 @@ Simulate it with Your tools or use open source like me.
 Report insights, ideas, problems and concerns. Save bunch of money and effort by ditching expensive alternatives.  As with any (open-source  or not ) project  - problems will surface. But nothing like a showstopper and the axi_noc design is ready to be taken from the shelf. 
 
 greenblat@me.com
+
+
+
+22oct2021:  Added axi_slice.v . Jst path breaker for long wires. Adds one clock delay. Similar axi2clock.v which can also change the clock.
+
