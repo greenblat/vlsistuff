@@ -23,8 +23,9 @@ import logs
 import veri
 
 class axiLiteMasterClass:
-    def __init__(self,Path,Monitors):
+    def __init__(self,Path,Monitors,Name):
         self.Path = Path
+        self.Name = Name
         Monitors.append(self)
         self.Queue=[]
         self.Queue2=[]
@@ -45,7 +46,7 @@ class axiLiteMasterClass:
         try:
             return eval(Txt,self.Translates,self.renames)
         except:
-            logs.log_error('eval of "%s" in axiLiteMasterClass failed' % Txt)
+            logs.log_error('%s eval of "%s" in axiLiteMasterClass failed' % (self.Name,Txt))
             return 0
 
     def onFinish(self):
@@ -112,7 +113,7 @@ class axiLiteMasterClass:
             self.Queue2.append('force wvalid=1 wdata=%s wstrb=%s '%(Wdata,Wstrb))
             self.Queue2.append('force wvalid=0 wdata=0 wstrb=0')
         else:
-            logs.log_error('QUEUE can be 1 or 2, not "%s"'%Queue)
+            logs.log_error('%s: QUEUE can be 1 or 2, not "%s"'%(self.Name,Queue))
 
     def wait(self,Many):
         self.Queue.append('wait %s'%Many)
@@ -125,7 +126,7 @@ class axiLiteMasterClass:
         elif Queue==2:
             self.Queue2.append('print %s'%(Text))
         else:
-            logs.log_error('QUEUE can be 1 or 2, not "%s"'%Queue)
+            logs.log_error('%s: QUEUE can be 1 or 2, not "%s"'%(self.Name,Queue))
 
 
     def busy(self):
@@ -137,6 +138,12 @@ class axiLiteMasterClass:
 
 
     def run(self):
+        if not self.busy():
+            self.force('awvalid',0)
+            self.force('arvalid',0)
+            self.force('wvalid',0)
+            self.force('rready',0)
+            self.force('bready',0)
         self.runResponce()
         self.runBresponce()
         self.runQueue2()
@@ -170,9 +177,9 @@ class axiLiteMasterClass:
             if self.Comments!=[]:
                 Comm = self.Comments.pop(0)
             if rdata<0:
-                logs.log_error('axiLiteMaster %s responce rdata=UNKNOWN'%(Comm))
+                logs.log_error('%s: axiLiteMaster %s responce rdata=UNKNOWN'%(self.Name,Comm))
             else:
-                logs.log_info('axiLiteMaster %s responce rdata=%08x'%(Comm,rdata))
+                logs.log_info('%s: axiLiteMaster %s responce rdata=%08x'%(self.Name,Comm,rdata))
         else:
             self.force('rready',1)
 
@@ -185,7 +192,7 @@ class axiLiteMasterClass:
         if wrds==[]:
             pass
         elif (wrds[0]=='print'):
-            logs.log_info('axiLiteMaster: %s'%' '.join(wrds[1:]))
+            logs.log_info('%s: axiLiteMaster: %s'% (self.Name,' '.join(wrds[1:])))
         elif (wrds[0]=='force'):
             for wrd in wrds[1:]:
                 ww = wrd.split('=')
@@ -193,21 +200,20 @@ class axiLiteMasterClass:
                 Val = self.evalit(ww[1])
                 self.force(Var,Val)
         else:
-            logs.log_error('runQueue2 cannot deal with "%s"'%Cmd)
+            logs.log_error('%s: runQueue2 cannot deal with "%s"'%(self.Name,Cmd))
 
     def runQueue(self):
         if self.Queue==[]: return
         Cmd = self.Queue.pop(0)
         wrds = Cmd.split()
-#        logs.log_info('qu=%d  cmd="%s" wait=%d'%(len(self.Queue),Cmd,self.waiting))
         if wrds==[]:
             pass
         elif (wrds[0]=='wait'):
             self.waiting = int(wrds[1])
         elif (wrds[0]=='print'):
-            logs.log_info('axiLiteMaster: %s'%' '.join(wrds[1:]))
+            logs.log_info('%s axiLiteMaster: %s'% (self.Name,' '.join(wrds[1:])))
         elif (wrds[0]=='finish'):
-            logs.log_info('veri finish from axi Master')
+            logs.log_info('%s veri finish from axi Master' % self.Name)
             veri.finish()
             sys.exit()
         elif (wrds[0]=='force_cond'):
@@ -238,13 +244,13 @@ class axiLiteMasterClass:
                 Val = self.evalit(ww[1])
                 self.force(Var,Val)
         else:
-            logs.log_error('runQueue cannot deal with "%s"'%Cmd)
+            logs.log_error('%s runQueue cannot deal with "%s"'%(self.Name,Cmd))
 
     def evalit(self,Expr):
         try:
             Val = eval(Expr,self.Defines)
         except:
-            logs.log_error('eval of "%s" failed, on %s'%(Expr,self.Defines.keys()))
+            logs.log_error('%s eval of "%s" failed, on %s'%(self.Name,Expr,self.Defines.keys()))
             Val=0
         return Val
 
@@ -260,7 +266,7 @@ class axiLiteMasterClass:
                 pass
             elif (wrds[0]=='finish'):
                 self.Queue.append('finish')
-#                logs.log_info('queue append finish')
+#                logs.log_info('%s queue append finish' % self.Name)
             elif (wrds[0]=='wait'):
                 self.Queue.append(line)
             elif (wrds[0]=='include'):

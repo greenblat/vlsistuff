@@ -140,12 +140,13 @@ class GlobalsClass:
         Res = []
         if type(Dirs) is list:
             for Dir in Dirs:
-                LL = os.listdir(Dir)
-                for Fname in LL:
-                    if '.zpic' in Fname:
-                        Cell = Fname[:-5]
-                        if Cell not in self.pictures:
-                            Res.append(Cell)
+                if os.path.exists(Dir):
+                    LL = os.listdir(Dir)
+                    for Fname in LL:
+                        if '.zpic' in Fname:
+                            Cell = Fname[:-5]
+                            if Cell not in self.pictures:
+                                Res.append(Cell)
         elif type(Dirs) is str:
             if not os.path.exists(Dirs): 
                 logs.log_warning('no pics directory "%s"'%Dirs)
@@ -487,7 +488,8 @@ def use_command_wrds(wrds):
     except Exception:
         logs.log_error('command "%s" kinda crashed it' % ' '.join(wrds))
         X = sys.exc_info()
-        traceback.print_exception(etype=X[0],value=X[1],tb=X[2])
+#        traceback.print_exception(etype=X[0],value=X[1],tb=X[2])
+        traceback.print_exception(X[0],value=X[1],tb=X[2])
 
 def import_command(Fname):
     Fname  = os.path.expanduser(Fname) 

@@ -806,7 +806,7 @@ def str2hex(Txt):
 #    driverClass.__init__(self,Path,Monitors)
 
 class driverClass:
-    def __init__(self,Path,Monitors,Prefix='',Name=''):
+    def __init__(self,Path,Monitors,Prefix='',Name='',Vars=[]):
         if (Monitors!=-1): Monitors.append(self)
         if Path == '':
             self.Path = Path
@@ -819,11 +819,44 @@ class driverClass:
         self.state='idle'
         self.waiting  = 0 
         self.edges = {}
+        self.traced_vars = Vars
+        self.traceEnabled = False
 
     def fullname(self,Sig):
         Fname = '%s%s%s' % (self.Path,self.Prefix,Sig)
         return Fname
         
+    def action(self,Txt):
+        wrds = Txt.split()
+        if wrds == []:
+            pass
+        elif wrds[0] == 'trace':
+            if wrds[1] in ['on','1','yes']: 
+                self.traceEnabled = True
+
+                for Var in self.traced_vars:
+                    if Var not in dir(self):
+                        logs.log_error('var %s not in class %s' % (Var,self.Name))
+                        self.traced_vars.remove(Var)
+
+            elif wrds[1] in ['off','0','no']: 
+                self.traceEnabled = False
+            else:
+                log_warning('trace enable accepts: on /off 1 / 0 yes / no')
+
+    def trace(self):
+        if not self.traceEnabled: return
+        for Var in self.traced_vars:
+            X = eval('type(self.%s)' % Var)
+            if X is str:
+                Str = 'veri.force("trace_%s.%s",str2hex(self.%s))' % (self.Name,Var,Var)
+            elif X is int:
+                Str = 'veri.force("trace_%s.%s",str(self.%s))' % (self.Name,Var,Var)
+            elif X is bool:
+                Str = 'veri.force("trace_%s.%s",str(self.%s))' % (self.Name,Var,Var)
+            exec(Str)
+
+
 
     def createMonModule(self):
         Vars = dir(self)
