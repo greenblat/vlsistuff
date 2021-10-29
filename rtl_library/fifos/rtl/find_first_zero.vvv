@@ -1,0 +1,11 @@
+
+module find_first_zero ( input [31:0] din, output [5:0] dout);
+
+assign dout = 
+#for II in range(32):
+    !din[II] ? II :
+#
+    6'b100000 ; 
+
+
+endmodule
