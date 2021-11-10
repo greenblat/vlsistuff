@@ -1,0 +1,13 @@
+`define RGF1_BASEADDR    'h0
+`define ADDR_RONLY                                               'h30000
+`define ADDR_RONLY2                                              'h30004
+`define ADDR_WONLY                                               'h30008
+`define ADDR_ONE                                                 'h3000c
+`define ADDR_REGA                                                'h30010
+`define ADDR_CONTROL0                                            'h30014
+`define ADDR_STATUSA                                             'h30018
+`define ADDR_REGB                                                'h3001c
+`define ADDR_W1CC                                                'h30020
+`define ADDR_BADFWR                                              'h30024
+`define ADDR_BADFRO                                              'h30028
+`define ADDR_RAMX                                                'h30100

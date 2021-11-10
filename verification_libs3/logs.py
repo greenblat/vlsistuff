@@ -821,6 +821,7 @@ class driverClass:
         self.edges = {}
         self.traced_vars = Vars
         self.traceEnabled = False
+        self.Status = [0,0,0,0]
 
     def fullname(self,Sig):
         Fname = '%s%s%s' % (self.Path,self.Prefix,Sig)
@@ -929,9 +930,23 @@ class driverClass:
         Full = self.fullname(Sig)
         return peek_float(Full)
 
-    def valid(self,Sig):
-        return self.peek(Sig)==1
+    def log_correct(self,Text,Which=0,Print=True):
+        log_error(Text,Which,Tb,Pstack)
+        self.Status[0] += 1
+    def log_error(self,Text,Which=0,Tb=True,Pstack=False):
+        log_error(Text,Which,Tb.Pstack)
+        self.Status[1] += 1
+    def log_wrong(self,Text,Which=0):
+        log_wrong(Text,Which)
+        self.Status[2] += 1
+    def log_warning(self,Text,Which=0):
+        log_warning(Text,Which)
+        self.Status[3] += 1
 
+    def status(self):
+        X = self.Status[:]
+        self.Status = [0,0,0,0]
+        return X
 
     def posedge(self,Sig):
         if Sig not in self.edges:

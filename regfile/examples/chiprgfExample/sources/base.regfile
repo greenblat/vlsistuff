@@ -1,0 +1,6 @@
+
+
+rgf rgf1 base=0x10000 instance=rgf1_0
+rgf rgf2 base=0x20000 instance=rgf2_0
+rgf rgf1 base=0x30000 instance=rgf1_1
+rgf rgf2 base=0x40000 instance=rgf2_1

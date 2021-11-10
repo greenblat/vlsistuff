@@ -1,3 +1,6 @@
+# 10.nov.2021
+Started new app: chiprgf.py to create one common md and csv of all chip's regfiles.
+
 # LATEST FIXES
 1. added "field gap wid=4"   : expand "field with aligh" notion. adding field named "gap" inserts empty bits in regfile.
 

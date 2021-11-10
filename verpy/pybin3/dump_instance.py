@@ -79,6 +79,7 @@ def dump_instance(Mod,Simple=False):
         Fout.write('reg [31:0] marker2;   initial marker2=0;\n')
         Fout.write('reg [31:0] marker3;   initial marker3=0;\n')
         Fout.write('reg [31:0] Index;   initial Index=0;\n')
+        Fout.write('reg [31:0] ID;   initial ID=0;\n')
 
     for Param in Mod.parameters:
         Val = Mod.parameters[Param]

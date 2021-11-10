@@ -5,9 +5,11 @@
 
 The goal is to make simplest to write/use/maintain  register file generator.
 "Less is more".
-The input format is text file, editable by vim or emacs. Dont allow complex directives. Use minimal number of directives. Most registers defined in one line. While register can have fields,  don't define just one field. It is almost stupid.
+The input format is text file, editable by vim or emacs. Don't allow complex directives. Use minimal number of directives. Most registers defined in one line. While register can have fields,  don't define just one field. It is almost stupid.
 
 Registers and Fields appear on the header under their names. Unique fields keep their names. If You must use same field names in several registers, Register name will be prefixed. Unless suffix/prefix is defined from that register.
+
+*Additional file can define connection between several register files in one chip. Look up the document or ask* greenblat@mac.com
 
 
 ## chip line
@@ -72,7 +74,7 @@ Ram adds interface to external ram module. it adds read/write/addr/rdata/wdata p
 
 ## Files generated
 
-to run it :     **pybin/regfile.py**  *SOME***.regfile**
+to run it :     **pybin/regfile.py**  *SOME*.**regfile**
 
 Verilog RTL file is generated. Additional several formats are generated - include files and documentation.
 
@@ -115,4 +117,7 @@ end
 
 questions/suggestions:    Ilia greenblat@mac.com
 
+support 24/7: +972-54-4927322 
+
+​     was jocking about 24/7, but i work from home and have no life, so give it a shot.
 

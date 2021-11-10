@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ipxact:component xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ipxact="http://www.accellera.org/XMLSchema/IPXACT/1685-2014"
+    xsi:schemaLocation="http://www.accellera.org/XMLSchema/IPXACT/1685-2014 http://www.accellera.org/XMLSchema/IPXACT/1685-2014/index.xsd">
+    <ipxact:vendor>Autotalks</ipxact:vendor>
+    <ipxact:library>AutoTalksLib</ipxact:library>
+    <ipxact:name>rgf2</ipxact:name>
+    <ipxact:version>0.0</ipxact:version>
+    <ipxact:description>Auto Regfiles</ipxact:description>
+    <ipxact:memoryMaps>
+        <ipxact:memoryMap>
+            <ipxact:name>MAP</ipxact:name>
+            <ipxact:isPresent>true</ipxact:isPresent>
+            <ipxact:addressUnitBits>8</ipxact:addressUnitBits>
+            <ipxact:addressBlock>
+                <ipxact:name>BLOCK</ipxact:name>
+                <ipxact:isPresent>true</ipxact:isPresent>
+                <ipxact:baseAddress>'h0</ipxact:baseAddress>
+                <ipxact:range>'h40a04</ipxact:range>
+                <ipxact:width>32</ipxact:width>
+
+               <ipxact:register>
+                    <ipxact:name>rega</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40000</ipxact:addressOffset>
+                    <ipxact:description>"first register"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>rega</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>1193046</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>control0</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40004</ipxact:addressOffset>
+                    <ipxact:description>"control register"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>control0</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>52224</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>statusa</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40008</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>true</ipxact:volatile>
+                    <ipxact:access>read-only</ipxact:access>
+                    
+                    <ipxact:field>
+                        <ipxact:name>dma0</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>2</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                        
+                    </ipxact:field>
+
+                    <ipxact:field>
+                        <ipxact:name>cpu1</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>8</ipxact:bitOffset>
+                        <ipxact:bitWidth>8</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                        
+                    </ipxact:field>
+
+                    <ipxact:field>
+                        <ipxact:name>spi0</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>16</ipxact:bitOffset>
+                        <ipxact:bitWidth>3</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                        <ipxact:description>spi.status</ipxact:description>
+                    </ipxact:field>
+
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+                <ipxact:register>
+                    <ipxact:name>regb</ipxact:name>
+                    <ipxact:displayName>regb</ipxact:displayName>
+                    <ipxact:description>DESC NOT GIVEN</ipxact:description>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h4000c</ipxact:addressOffset>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>true</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>regb</ipxact:name>
+                        <ipxact:displayName>regb</ipxact:displayName>
+                        <ipxact:description>DESC NOT GIVEN</ipxact:description>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h18</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:access>read-write</ipxact:access>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+                <ipxact:register>
+                    <ipxact:name>extern</ipxact:name>
+                    <ipxact:displayName>extern</ipxact:displayName>
+                    <ipxact:description>dual fifo</ipxact:description>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40010</ipxact:addressOffset>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>true</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>extern</ipxact:name>
+                        <ipxact:displayName>extern</ipxact:displayName>
+                        <ipxact:description>dual fifo</ipxact:description>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:access>read-write</ipxact:access>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>eth0tmp0</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40100</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>eth0tmp0</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>eth0tmp1</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40104</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>eth0tmp1</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h18</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>eth0tmp2</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40108</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>eth0tmp2</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h10</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>eth1tmp0</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40200</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>eth1tmp0</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>eth1tmp1</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40204</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>eth1tmp1</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h18</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>eth1tmp2</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40208</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>eth1tmp2</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h10</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>eth2tmp0</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40300</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>eth2tmp0</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>eth2tmp1</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40304</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>eth2tmp1</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h18</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>eth2tmp2</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40308</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>eth2tmp2</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h10</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>eth3tmp0</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40400</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>eth3tmp0</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>eth3tmp1</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40404</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>eth3tmp1</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h18</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>eth3tmp2</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40408</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>eth3tmp2</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h10</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>wider_0</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h4040c</ipxact:addressOffset>
+                    <ipxact:description>"staaam"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>wider_0</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>wider_1</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40410</ipxact:addressOffset>
+                    <ipxact:description>"staaam"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>wider_1</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>wider_2</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40414</ipxact:addressOffset>
+                    <ipxact:description>"staaam"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>wider_2</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>wider_3</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40418</ipxact:addressOffset>
+                    <ipxact:description>"staaam"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>wider_3</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>longer_0</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h4041c</ipxact:addressOffset>
+                    <ipxact:description>"staaam"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>true</ipxact:volatile>
+                    <ipxact:access>read-only</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>longer_0</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>longer_1</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40420</ipxact:addressOffset>
+                    <ipxact:description>"staaam"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>true</ipxact:volatile>
+                    <ipxact:access>read-only</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>longer_1</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>longer_2</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40424</ipxact:addressOffset>
+                    <ipxact:description>"staaam"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>true</ipxact:volatile>
+                    <ipxact:access>read-only</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>longer_2</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>longer_3</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40428</ipxact:addressOffset>
+                    <ipxact:description>"staaam"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>true</ipxact:volatile>
+                    <ipxact:access>read-only</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>longer_3</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>ronly</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h4042c</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>true</ipxact:volatile>
+                    <ipxact:access>read-only</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>ronly</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>ronly2</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h40430</ipxact:addressOffset>
+                    <ipxact:description>"DESC NOT GIVEN"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>true</ipxact:volatile>
+                    <ipxact:access>read-only</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>ronly2</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h10</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>ldst_ram</ipxact:name>
+                    <ipxact:displayName>ldst_ram</ipxact:displayName>
+                    <ipxact:description>DESC NOT GIVEN</ipxact:description>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:dim>'h80</ipxact:dim>
+                    <ipxact:addressOffset>'h40800</ipxact:addressOffset>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>true</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>ldst_ram</ipxact:name>
+                        <ipxact:displayName>ldst_ram</ipxact:displayName>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>RESET</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+ 
+
+
+
+            </ipxact:addressBlock>
+        </ipxact:memoryMap>
+    </ipxact:memoryMaps>
+
+
+</ipxact:component>

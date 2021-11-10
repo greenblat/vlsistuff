@@ -89,7 +89,7 @@ class axiMasterClass:
             self.Rid = eval(wrds[1])
         elif wrds[0]=='wait':
             self.wait(eval(wrds[1]))
-        elif wrds[0]=='size':
+        elif wrds[0] in ['wsize','size']:
             self.Size = eval(wrds[1])
         elif wrds[0]=='axi3':
             self.AXI3 = True
@@ -270,12 +270,13 @@ class axiMasterClass:
         if self.AREADS == []:
             logs.log_error('READ ACTION %s and no AREADS' % (self.Name))
             return
-            
         Len,Addr,Rid = self.AREADS[0]
+        logs.log_info('READ %x %x %x || %x %x %x   %s' % (Len,Addr,Rid,rid,rlast,rdatax,self.AREADS))
+
         if (Rid & ((1<<widrid)-1)) != rid:
             logs.log_wrong('sent ARID=%d RID=%d'%(Rid,rid))
         if rresp!=0:
-            logs.log_wrong('RRESP came back %s  ADDR=%a  rid=%sd'%(rresp,Addr,Rid))
+            logs.log_wrong('RRESP came back %s  ADDR=%a  rid=0x%x'%(rresp,Addr,Rid))
         
         if Addr in self.RDATAS:
             self.RDATAS[Addr].append(rdatax)

@@ -1,0 +1,30 @@
+#! /bin/csh -f
+
+# the source regfiles contain various warning generation triggers. this is normal 
+# to showcase the problems You might encounter.
+
+../../pybin/chiprgf.py sources/base.regfile sources/rgf1.regfile sources/rgf2.regfile
+
+
+
+
+# tqwo files that are created
+# base.csv
+# base.md
+
+# delete notneeded files
+/bin/rm pymon.log0
+/bin/rm rgf1.csv
+/bin/rm rgf1.inst
+/bin/rm rgf1.md
+/bin/rm rgf1.py
+/bin/rm rgf1.splits
+/bin/rm rgf1_cinc.h
+/bin/rm rgf1_rgf.html
+/bin/rm rgf2.csv
+/bin/rm rgf2.inst
+/bin/rm rgf2.md
+/bin/rm rgf2.py
+/bin/rm rgf2.splits
+/bin/rm rgf2_cinc.h
+/bin/rm rgf2_rgf.html

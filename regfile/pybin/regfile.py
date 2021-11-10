@@ -18,9 +18,13 @@ def main():
     else:
         run('%s.%s' % (Cell,Ext),Dir)
 
-def run(Fname,Dirx='.'):
+def run(Fname,Dirx='.',Base=0):
     global Dir
     Dir = Dirx
+    for Key in Db.keys():
+        Db[Key] = []
+    Db['checkNames'] = {}
+    Db['BASE'] = Base
     File = open(Dirx + '/' +Fname)
     readFile(File)
     
@@ -102,7 +106,6 @@ def createLines(File):
     return Res2        
 
 
-checkNames = {}
 def readFile(File):
     Lines = createLines(File)  
     Lines = treatTemplates(Lines)
@@ -129,14 +132,14 @@ def readFile(File):
 
 def checkPair(Item,Kind,Name):
     if Kind == 'field': return
-    if Kind not in checkNames: 
-        checkNames[Kind]=[Name]
+    if Kind not in Db['checkNames']: 
+        Db['checkNames'][Kind]=[Name]
         return
-    if Name in checkNames[Kind]:
-        logs.log_error('#%d: double defined item %s of kind %s . previous=%s'%((Item.Lnum,Name,Kind,checkNames[Kind])))
+    if Name in Db['checkNames'][Kind]:
+        logs.log_error('#%d: double defined item %s of kind %s . previous=%s'%((Item.Lnum,Name,Kind,Db['checkNames'][Kind])))
         return
 
-    checkNames[Kind].append(Name)
+    Db['checkNames'][Kind].append(Name)
 
 def treatTemplates(Lines):
     Templates = {}
@@ -511,8 +514,9 @@ def computeWidthFromFields():
 
 def assignAddresses():
     Chip = Db['chip']
-    Addr = getPrm(Chip,'base',0)
-    Addr,HADDR = 0,0
+#    Addr = getPrm(Chip,'base',0)
+    Addr = Db['BASE'] 
+    HADDR = Addr
     for Reg in Db['regs']:
         Reg.Addr = Addr
         if Reg.Kind in ['reg','array','ram']:
@@ -524,6 +528,7 @@ def assignAddresses():
         Reg.HADDR = Addr
     Chip.Addr = Addr
     Chip.HADDR = Addr
+    Db['lastAddr'] = Addr
 
 
 def computeWid(Obj):
@@ -647,11 +652,11 @@ wire [ADDWID-1:0] mpaddr = (pread||pwrite) ? mpaddr0  : 0;
 assign prdata_wire =
 '''
 
-PSTRB1 = '{8{pstrb}}';
-PSTRB2 = '{{8{pstrb[1]}},{8{pstrb[0]}}}';
-PSTRB4 = '{{8{pstrb[3]}},{8{pstrb[2]}},{8{pstrb[1]}},{8{pstrb[0]}}}';
-PSTRB8 = '{{8{pstrb[7]}},{8{pstrb[6]}},{8{pstrb[5]}},{8{pstrb[4]}},{8{pstrb[3]}},{8{pstrb[2]}},{8{pstrb[1]}},{8{pstrb[0]}}}';
-PSTRB16 = '{{8{pstrb[15]}},{8{pstrb[14]}},{8{pstrb[13]}},{8{pstrb[12]}},{8{pstrb[11]}},{8{pstrb[10]}},{8{pstrb[9]}},{8{pstrb[8]}}' + PSTRB8;
+PSTRB1 = '{8{pstrb}}'
+PSTRB2 = '{{8{pstrb[1]}},{8{pstrb[0]}}}'
+PSTRB4 = '{{8{pstrb[3]}},{8{pstrb[2]}},{8{pstrb[1]}},{8{pstrb[0]}}}'
+PSTRB8 = '{{8{pstrb[7]}},{8{pstrb[6]}},{8{pstrb[5]}},{8{pstrb[4]}},{8{pstrb[3]}},{8{pstrb[2]}},{8{pstrb[1]}},{8{pstrb[0]}}}'
+PSTRB16 = '{{8{pstrb[15]}},{8{pstrb[14]}},{8{pstrb[13]}},{8{pstrb[12]}},{8{pstrb[11]}},{8{pstrb[10]}},{8{pstrb[9]}},{8{pstrb[8]}}' + PSTRB8
 
 
 STRING1 = '''

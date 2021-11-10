@@ -1,0 +1,73 @@
+
+chip rgf2 apb reset=async wid=32 addrwid=16 empty=0xdeadbeaf
+
+# empty =  means result when reading from non-address
+# bus may be ram or apb 
+# width is data width. address width is automatic
+# access can be rw ro  rw_pulse ro_pulse
+# first token in every line defines the line.
+# it may be: chip(once) reg array gap ram or external.
+# array has additional parameter depth=17
+# ram has wid and depth. creates interface to simple ram. not instanced inside.
+# gap can have either  abs=0x1000  or  align=8
+# fields belong to preceding reg/
+# external : similar to ram. but no depth.
+# rw_pulse, will add pulse output to indicate this reg was written. good for driving fifos.
+# ro_pulse, will add pulse output yo indicate this reg was read. good for reading from fifos.
+
+
+
+
+
+reg rega wid=32 access=rw reset=0x123456 desc=first.register
+reg control0 wid=32 access=rw reset=0xcc00 desc=control.register
+reg statusa wid=24 access=ro
+field dma0 wid=2 align=8
+field cpu1 wid=8
+field spi0 wid=3 desc=spi.status
+
+reg regb wid=24 access=rw_pulse reset=0x0
+field odma wid=2 align=8
+field ocpu wid=8
+field ospi wid=3 desc=spi.status
+
+
+reg extern wid=32 access=external desc=dual.fifo
+
+template TMP0
+gap align=256 
+reg tmp0 wid=32 access=rw
+reg tmp1 wid=24 access=rw 
+reg tmp2 wid=16 access=rw
+endtemplate
+
+// template name is prefixed to all regs in each instance.
+instance TMP0 eth0
+instance TMP0 eth1
+instance TMP0 eth2
+instance TMP0 eth3
+
+reg wider access=rw desc=staaam fields=external
+field wide0 wid=32
+field wide1 wid=32
+field wide2 wid=32
+field wide3 wid=32
+
+reg longer access=ro desc=staaam fields=external
+field long0 wid=32
+field long1 wid=32
+field long2 wid=32
+field long3 wid=32
+
+
+reg ronly access=ro_pulse wid=32 ready=true
+reg ronly2 access=ro_pulse wid=16 ready=true
+
+
+
+gap align=2048
+ram ldst_ram wid=32 depth=128
+
+end
+
+
