@@ -1060,7 +1060,7 @@ def dump_always(Always,Fout):
     logs.log_err('dump_always %d %s'%(len(Always),Always))
     return ''
 
-OPS =  ['~|','**','~^','^','=','>=','=>','*','/','<','>','+','-','~','!','&','&&','<=','>>','>>>','<<','||','==','!=','|','!==','===']
+OPS =  ['~&','~|','**','~^','^','=','>=','=>','*','/','<','>','+','-','~','!','&','&&','<=','>>','>>>','<<','||','==','!=','|','!==','===']
 KEYWORDS = ('while else sub_slice sub_slicebit taskcall functioncall named_begin unsigned if for ifelse edge posedge negedge list case casex casez default double_sub wait #').split()
 
 def support_set(Sig,Bussed=True):
@@ -1977,7 +1977,7 @@ def is_external_dir(Dir):
 
 
 def myExtras(Token):
-    return Token in '$realtime $stime wait # $high $signed empty_begin_end unique_case $display'.split()
+    return Token in '$time $realtime $stime wait # $high $signed empty_begin_end unique_case $display'.split()
 
 def evalz(What):
     try:

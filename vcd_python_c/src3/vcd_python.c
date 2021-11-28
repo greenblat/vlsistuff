@@ -225,6 +225,7 @@ FILE *vcdF0 = NULL;
 FILE *vcdF1 = NULL;
 int vcdCode = 1;
 int intcode();
+int diffs (char *A, char *B);
 void do_help() { 
     printf("activation:  vcd_python <vcd_file> <python file> \nPROTOTYPE of python file:\n %s\n",helpstring); 
     printf("\n\n\nBIGGER EXAMPLE:\n %s\n",EXAMPLE); 
@@ -740,7 +741,7 @@ void drive_value(char *Val,char *Code,int forReal) {
         strcpy(sigs[P].value,&(Val[1]));
         return;
     }
-
+    int Diffs;
     int Width = sigs[P].wide; 
     if (sigs[P].code == -1) {
         printf("FATAL internal error. code=%s (P=%d) (intcode=%d) is not a declared net linenum %d\n",Code,P,sigs[P].code,linenum);
@@ -751,8 +752,10 @@ void drive_value(char *Val,char *Code,int forReal) {
     }
 //    printf("DRIVE wid=%d %s %s %s   %ld\n",sigs[P].wide,Code,qqia(sigs[P].name),Val,(long) run_time);
     if (Width<=8) {
+        Diffs = diffs(sigs[P].value,Val);
         strcpy(sigs[P].value,Val);
     } else {
+        Diffs = diffs(sigs[P].allocated,Val);
         strcpy(sigs[P].allocated,Val);
     }
     if (sigs[P].traceable) {
@@ -765,7 +768,7 @@ void drive_value(char *Val,char *Code,int forReal) {
         else
             fprintf(vcdF1,"%s%s\n",Val,Code);
     }
-    sigs[P].toggles += 1;
+    sigs[P].toggles += Diffs;
     if (forReal) {
         armTriggers(P,Val);
         useTriggers();
@@ -1077,20 +1080,21 @@ veri_toggles(PyObject *self,PyObject *args) {
     char tmp[1000];
     sprintf(LongString,"%s = []",notestring);
     PyRun_SimpleString(LongString);
+    int tot = 0;
     for (ii=0; ii<maxsig; ii++) {
         if (sigs[ii].toggles>0) {
 //            printf("%s (%d) code%d = %8d    %s\n",notestring,jj,ii,sigs[ii].toggles,qqia(sigs[ii].fpath));
-            sprintf(tmp,"%s.append(('%s',%d))",notestring,qqia(sigs[ii].fpath),sigs[ii].toggles);
+            sprintf(tmp,"%s.append((%d,'%s'))",notestring,sigs[ii].toggles,qqia(sigs[ii].fpath));
             PyRun_SimpleString(tmp);
 //            if (strlen(LongString)<(longestVal-1000))
 //                strcat(LongString,tmp);
+            tot += sigs[ii].toggles;
             sigs[ii].toggles = 0;
-            jj++;
         }
     }
 //    strcat(LongString,"'''");
 //    PyRun_SimpleString(LongString);
-    return Py_BuildValue("i", jj);
+    return Py_BuildValue("i", tot);
 }
 
 
@@ -1163,5 +1167,13 @@ char *int2bin(int AA,int Wid,char *tmp) {
     return tmp;
 }
 
+int diffs (char *A, char *B) {
+    int Diff = 0;
+    int ind;
+    for (ind=0;A[ind]!=0;ind++) {
+        if (A[ind]!=B[ind]) Diff++;
+    }
+    return Diff;
+}
 
 

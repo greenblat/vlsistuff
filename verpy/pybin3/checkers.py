@@ -489,7 +489,7 @@ def check_src_expr(Current,Item):
                 check_src_expr(Current,X)
             return 
 
-        if Item[0] in ['/','>','<','!','~','&&','||','&','|','^','+','-','*','>=','>>','<<','<=','curly','==','!=','question','repeat']:
+        if Item[0] in ['~&','~|','/','>','<','!','~','&&','||','&','|','^','+','-','*','>=','>>','<<','<=','curly','==','!=','question','repeat']:
             for X in Item[1:]:
                 check_src_expr(Current,X)
             return 

@@ -68,7 +68,7 @@ wire [15:0] effectivetxbaudrate = baudrate + txfixer;
 
 // rxd sync
 reg rxd1,rxd_raw;
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     rxd1 <= rxd;
     rxd_raw <= rxd1;
 end
