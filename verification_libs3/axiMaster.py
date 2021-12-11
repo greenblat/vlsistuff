@@ -46,6 +46,7 @@ class axiMasterClass:
         self.WSTRB = -1 
         self.AXI3 = False
         self.Bscore = []
+        self.Starvation = False
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig)
@@ -83,7 +84,16 @@ class axiMasterClass:
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
     def action(self,Txt):
         wrds = Txt.split()
-        if wrds[0] == 'ready':
+        if wrds[0] == 'starvation':
+            if wrds[1] in [1,'1','on']:
+                self.Starvation = True
+                veri.force('tb.marker0','5')
+            elif wrds[1] in [0,'0','off']:
+                self.Starvation = False
+                veri.force('tb.marker0','0')
+            else:
+                logs.log_error('Starvation accepts only on / off , given is "%s"' % wrds[1])
+        elif wrds[0] == 'ready':
             self.ReadyAlways = (eval(wrds[1]) != 0)
         elif wrds[0]=='rid':
             self.Rid = eval(wrds[1])
@@ -207,6 +217,10 @@ class axiMasterClass:
 
     def run(self):
 #        logs.log_info('runn lenaw=%d lenar=%d lenq=%d lenw=%d'%(len(self.awQueue),len(self.arQueue),len(self.Queue),len(self.wQueue)))
+        if self.Starvation:
+            self.force('rready',0)
+            self.force('bready',0)
+            return
         self.runResponce()
         self.runAw()
         self.runAr()

@@ -831,6 +831,7 @@ def is_oper(Var):
 def load_db0(Fname):
     global DataBase
     File = open(Fname,'rb')
+    print('open %s pickle' % Fname)
     DataBase = pickle.load(File) 
 
 def dump_dump():

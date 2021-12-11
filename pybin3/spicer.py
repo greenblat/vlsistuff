@@ -116,12 +116,17 @@ def write_verilogs(lines):
             state='idle'
         else:
             if (state!='idle'):
-                print('>>>>',wrds)
                 Inst = clean_sig(wrds[0])
-                St = wrds.index('(')
-                En = wrds.index(')')
-                Nets = list(map(useReplacements,wrds[St+1:En]))
-                Type = wrds[En+1]
+                try:
+                    St = wrds.index('(')
+                    En = wrds.index(')')
+                    Nets = list(map(useReplacements,wrds[St+1:En]))
+                    Type = wrds[En+1]
+                except:
+                    print('NO () in wrds %s ' % str(wrds))
+                    Nets = []
+                    En = 0
+                    Type = wrds[-1]
                 Modules[Cell].add_son(Type,Inst)
                 if (Type in Headers):
                     Pins = Headers[Type]
@@ -177,20 +182,23 @@ def write_verilogs(lines):
                 else:
                     Params = wrds[En+2:]
                     if Inst[0] in 'Mm':
-                        S,G,D,B = Nets
-                        if G == '0': G = 'vss'
-                        if D == '0': D = 'vss'
-                        if S == '0': S = 'vss'
+                        if len(Nets) == 4:
+                            S,G,D,B = Nets
+                            if G == '0': G = 'vss'
+                            if D == '0': D = 'vss'
+                            if S == '0': S = 'vss'
+    
+                            if G[0] in '0123456789': G = 'nn'+G
+                            if D[0] in '0123456789': D = 'nn'+D
+                            if S[0] in '0123456789': S = 'nn'+S
 
-                        if G[0] in '0123456789': G = 'nn'+G
-                        if D[0] in '0123456789': D = 'nn'+D
-                        if S[0] in '0123456789': S = 'nn'+S
-
-                        Conns = '.s(%s),.g(%s),.d(%s),.b(%s)'%(S,G,D,B)
-                        if Type[0] in 'pP':
-                            File.write('pmos_tran %s( %s );\n'%(Inst,Conns))
-                        elif Type[0] in 'nN':
-                            File.write('nmos_tran %s( %s );\n'%(Inst,Conns))
+                            Conns = '.s(%s),.g(%s),.d(%s),.b(%s)'%(S,G,D,B)
+                            if Type[0] in 'pP':
+                                File.write('pmos_tran %s( %s );\n'%(Inst,Conns))
+                            elif Type[0] in 'nN':
+                                File.write('nmos_tran %s( %s );\n'%(Inst,Conns))
+                            else:
+                                print('error trans typ is %s %s'%(Inst,Type))
                         else:
                             print('error trans typ is %s %s'%(Inst,Type))
                     else:

@@ -36,6 +36,7 @@ class axiSlaveClass:
         self.WAITWRITE = 0
         self.busWidth = 8   # in bytes
         self.Passive = False
+        self.Starvation = False
 
     def busy(self):
         if self.arqueue!=[]: return True
@@ -72,6 +73,13 @@ class axiSlaveClass:
         Wrds = Text.split()
         if Wrds == []:
             pass
+        elif Wrds[0] == 'starvation':
+            if Wrds[1] == 'on':
+                self.Starvation = True
+            elif Wrds[1] == 'off':
+                self.Starvation = False
+            else:
+                logs.log_error('starvation gets only on / off , not "%s"' % Wrds[1])
         elif Wrds[0] == 'passive':
             self.Passive = True
         elif Wrds[0] == 'active':
@@ -143,6 +151,13 @@ class axiSlaveClass:
         return Addr
 
     def run(self):
+        if self.Starvation:
+            self.force('awready',0)
+            self.force('wready',0)
+            self.force('arready',0)
+            if self.peek('rready')==1: self.force('rvalid',0) 
+            if self.peek('bready')==1: self.force('bvalid',0) 
+            return
 #        pudb.set_trace()
         self.reading()
         self.writing()
