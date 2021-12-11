@@ -388,8 +388,10 @@ def make_str(Int):
     return Y
 
 def binx(Int,Wid=8):  
-    Wid = eval(Wid)
-    Int2 = int(Int) & ((1<<Wid)-1)
+    Wid = int(Wid)
+    if type(Int) is str:
+        Int = eval(Int)
+    Int2 = Int & ((1<<Wid)-1)
     YY = bin(Int2)
     Ind = YY.index('b')
     X = YY[Ind+1:]
