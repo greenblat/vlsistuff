@@ -933,7 +933,7 @@ class driverClass:
         return peek_float(Full)
 
     def log_correct(self,Text,Which=0,Print=True):
-        log_error(Text,Which,Tb,Pstack)
+        log_correct(Text,Which,Tb,Pstack)
         self.Status[0] += 1
     def log_error(self,Text,Which=0,Tb=True,Pstack=False):
         log_error(Text,Which,Tb.Pstack)

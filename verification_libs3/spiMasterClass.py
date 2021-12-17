@@ -17,7 +17,10 @@ class spiMasterClass(logs.driverClass):
         self.Forw = []
         self.was = 0
         self.Expects = {}
-
+        self.Catch = False
+        self.Miso = ''
+    def callback(self,Txt):
+        return Txt
     def force(self,Sig,Val):
         if Sig in self.Renames: Sig = self.Renames[Sig]
         logs.driverClass.force(self,Sig,Val)
@@ -40,8 +43,11 @@ class spiMasterClass(logs.driverClass):
         if Cmd =='send':
             Str = ''
             for Wrd in wrds[1:]:
-                Abin = logs.binx(Wrd,8)
-                Str += Abin
+                if Wrd == '?':
+                    Str += '????????'
+                else:
+                    Abin = logs.binx(Wrd,8)
+                    Str += Abin
             logs.log_info('SEND SPI %d %s'%(len(Str),Str))
             self.send(Str,1)
             return
@@ -126,13 +132,24 @@ class spiMasterClass(logs.driverClass):
         if What[0]=='wait': 
             self.waiting = What[1]
             return
+        if self.Catch:
+            self.Miso += str(self.peek('spi_miso'))
+            if len(self.Miso)>=32:
+                self.callback(self.Miso)
+                self.Miso = ''
+
         if (What[0]==0)and(self.was==1):            
             self.Back.append(str(self.peek('spi_miso')))
             self.Forw.append(str(What[1]))
 #            veri.force(TB+'.help0',str(len(self.Back)))
         self.was = What[0]
         self.force('spi_clk',What[0])
-        self.force('spi_mosi',What[1])
+        if What[1] == '?':
+            self.force('spi_mosi',0)
+            self.Catch = True
+        else:
+            self.Catch = False
+            self.force('spi_mosi',What[1])
         self.force('spi_ss',What[2])
 
         if len(self.Back)>=32:
@@ -140,7 +157,7 @@ class spiMasterClass(logs.driverClass):
             self.Forw = self.Forw[32:]
             Part = FL[:12]
             Part.reverse()
-            Addr = int(''.join(Part),2)
+            Addr = int(''.join(Part).replace('?','0'),2)
             Cmd = '?'
             if FL[12]=='0': Cmd='RD'
             if FL[12]=='1': Cmd='WR'
