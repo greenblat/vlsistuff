@@ -42,6 +42,8 @@ class ahbSlave(logs.driverClass):
         self.translations=Translations
         self.hrdata = 0
         self.haddr = 0
+        self.writing = False
+        self.Active = True
 
     def translate(self,Addr):
         if Addr[0] in '0123456789':
@@ -91,25 +93,37 @@ class ahbSlave(logs.driverClass):
         return self.force(Sig,Val)
 
     def run(self):
+        veri.force("tracer.ddd0",hex(self.tr_peek('hwdata')))
+        if self.writing:
+            self.writing = False
+            self.RAM[self.haddr] = self.tr_peek('hwdata')
+            if self.Active:
+                self.tr_force('hresp',0)
+            logs.log_info('AHB slave %s :got written addr=%x data=%x'%(self.Name,self.haddr,self.RAM[self.haddr] ))
+            veri.force("tracer.ccc",hex(self.tr_peek('hwdata')))
         if self.waiting>0:
             self.waiting -= 1
             return
-        if self.hrdata>=0:
+        if self.hrdata  == '?':
+            if (self.tr_peek('hready') == 1):
+                logs.log_info('AHB slave %s :got read addr=%x data=%x'%(self.Name,self.haddr,self.tr_peek('hrdata')))
+                self.hrdata = -1
+        elif self.hrdata>=0:
             self.tr_force('hrdata',self.hrdata)
             logs.log_info('AHB slave %s :got read addr=%x data=%x'%(self.Name,self.haddr,self.hrdata))
             self.hrdata = -1
-        self.tr_force('hready',1)
+        if self.Active:
+            self.tr_force('hready',1)
 #        logs.log_info('>>>> hsel %d htrans %d hwrite %d haddr %x hwdata %x'%(self.tr_peek('hsel'),self.tr_peek('htrans'),self.tr_peek('hwrite'),self.tr_peek('haddr'),self.tr_peek('hwdata')))
         if (self.tr_peek('hsel')==1)and (self.tr_peek('htrans') in [SEQ,NONSEQ]):
             haddr  = self.tr_peek('haddr')
             hwrite  = self.tr_peek('hwrite')
             self.haddr = haddr
             if (hwrite) :
-                self.RAM[haddr] = self.tr_peek('hwdata')
-                self.tr_force('hresp',0)
-                self.haddr = haddr
-                logs.log_info('AHB slave %s :got written addr=%x data=%x'%(self.Name,self.haddr,self.RAM[haddr] ))
+                self.writing = True
                 
+            elif not self.Active:
+                self.hrdata = '?'
             elif haddr in self.RAM:
                 self.hrdata = self.RAM[haddr]
             else:

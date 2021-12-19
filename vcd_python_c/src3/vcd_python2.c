@@ -583,7 +583,7 @@ void do_upscope(long n){
 void createTrace(char *Name,int Code) {
     char Full[100];
     codeint(Code); 
-    fprintf(Outf,"$var reg 32 %s %s [31:0] $end\n",codeintstr,Name); 
+    fprintf(Outf,"$var integer 32 %s %s [31:0] $end\n",codeintstr,Name); 
     sprintf(Full,"tracer.%s",Name);
     qqsa(qqai(Full),Code);
     sigs[Code].name = qqai(Full);
@@ -594,6 +594,40 @@ void createTrace(char *Name,int Code) {
     sigs[Code].allocated = allocateString(33);
 }
 
+long traced[1000];
+int lastTracedSig = 0;
+void getTracedSigs() {
+    FILE *Tfile;
+    char Signame[100];
+    char *j;
+    int ii,jj;
+    for (ii=0;ii<20;ii++) {
+        sprintf(Signame,"trace%d",ii);
+        traced[ii] = qqai(Signame);
+    }
+    lastTracedSig = 20;
+    Tfile = fopen("trace.sigs", "r");
+    if (Tfile==NULL) return;
+    j = (char *) 1;
+    char line[300];
+    jj = 0;
+    while ((j != NULL)&&(Tfile!=NULL)) {
+        j = fgets(line, 300, Tfile);
+        ii=sscanf(line,"%s %s %s %s %s %s %s",s1,s2,s3,s4,s5,s6,s7);
+        printf(">>>>> %d",ii);
+        if (ii>0) { traced[jj] = qqai(s1); jj++; }
+        if (ii>1) { traced[jj] = qqai(s2); jj++; }
+        if (ii>2) { traced[jj] = qqai(s3); jj++; }
+        if (ii>3) { traced[jj] = qqai(s4); jj++; }
+        if (ii>4) { traced[jj] = qqai(s5); jj++; }
+        if (ii>5) { traced[jj] = qqai(s6); jj++; }
+        if (ii>6) { traced[jj] = qqai(s7); jj++; }
+    }
+    lastTracedSig = jj;
+}
+
+
+
 void do_enddefinitions(char *s) {
     int ii;
     char Signame[100];
@@ -601,8 +635,9 @@ void do_enddefinitions(char *s) {
         state=Idle;
         printf("maxusedsig %d/%d\n",maxusedsig,maxsig);
         fprintf(Outf,"$scope module tracer $end\n");
-        for (ii=0;ii<20;ii++) {
-            sprintf(Signame,"trace%d",ii);
+        getTracedSigs();
+        for (ii=0;ii<lastTracedSig;ii++) {
+            strcpy(Signame,qqia(traced[ii]));
             createTrace(Signame,ii+maxusedsig+1); 
         }
 
@@ -995,8 +1030,18 @@ veri_force(PyObject *self,PyObject *args) {
     }
     codeint(Psig);
     int wid = sigs[Psig].wide;
-    int XX = atoi(vstr);
+    int Len = strlen(vstr);
+    int XX;
+    if ((Len>2)  && (vstr[0] == '0')&& (vstr[1] == 'x')) {
+        XX = (int)strtol( &vstr[2], NULL, 16);
+    } else if ((Len>2)  && (vstr[0] == '0')&& (vstr[1] == 'b')) {
+        XX = (int)strtol( &vstr[2], NULL, 2);
+    } else {
+        XX = atoi(vstr);
+    }
     int2bin(XX,wid,tmp);
+
+    printf("%s %s %ld %x\n",pathstring,codeintstr,Psig,XX);
     fprintf(Outf,"b%s %s\n",tmp,codeintstr);
     return Py_BuildValue("i", 0);
 }

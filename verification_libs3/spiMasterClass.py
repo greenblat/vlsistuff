@@ -134,6 +134,7 @@ class spiMasterClass(logs.driverClass):
             return
         if self.Catch:
             self.Miso += str(self.peek('spi_miso'))
+            self.Catch = False
             if len(self.Miso)>=32:
                 self.callback(self.Miso)
                 self.Miso = ''
@@ -142,15 +143,16 @@ class spiMasterClass(logs.driverClass):
             self.Back.append(str(self.peek('spi_miso')))
             self.Forw.append(str(What[1]))
 #            veri.force(TB+'.help0',str(len(self.Back)))
-        self.was = What[0]
-        self.force('spi_clk',What[0])
         if What[1] == '?':
-            self.force('spi_mosi',0)
-            self.Catch = True
+            if (What[0]==0)and(self.was==1):            
+                self.force('spi_mosi',0)
+                self.Catch = True
         else:
             self.Catch = False
             self.force('spi_mosi',What[1])
         self.force('spi_ss',What[2])
+        self.was = What[0]
+        self.force('spi_clk',What[0])
 
         if len(self.Back)>=32:
             FL = self.Forw[:32]
