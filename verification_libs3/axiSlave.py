@@ -55,11 +55,13 @@ class axiSlaveClass:
             logs.log_info('AWQUEUE %x %x %x %x %x' % self.awqueue[0])
 
     def peek(self,Sig):
+        Orig = Sig
         if Sig in self.Fixed: return self.Fixed[Sig]
         if self.prefix!='': Sig = '%s%s'%(self.prefix,Sig)
         if self.suffix!='': Sig = '%s%s'%(Sig,self.suffix)
         if Sig in self.Translates: 
             Sig = self.Translates[Sig]
+        
         return logs.peek('%s%s'%(self.Path,Sig))
 
     def force(self,Sig,Val):
@@ -214,14 +216,14 @@ class axiSlaveClass:
             arid=self.peek('arid')
             arburst=self.peek('arburst')
             araddr=self.peek('araddr')
+            logs.log_info('>>>>>>>> %s %x' % (arburst,araddr))
             arlen=self.peek('arlen')
-            arburst=self.peek('arburst')
             arsize=self.peek('arsize')
-            self.arqueue.append((arburst,araddr,arlen,arburst,arsize))
+            self.arqueue.append((arburst,araddr,arlen,arsize))
             self.rqueue.append(('wait',self.WAITREAD,0))
             for ii in range(arlen):
-                self.readQueue(ii,arburst,arsize,araddr,arid,0)
-            self.readQueue(arlen,arburst,arsize,araddr,arid,1)
+                self.readQueue(arlen,ii,arburst,arsize,araddr,arid,0)
+            self.readQueue(arlen,arlen,arburst,arsize,araddr,arid,1)
             self.rqueue.append('pop')
                 
             LastAddr = (araddr + (arlen+1)*(1<<arsize))-1
@@ -230,21 +232,34 @@ class axiSlaveClass:
             if (FirstPage != LastPage):
                 logs.log_error('slave %s CROSSING 4K read araddr=%x arlen=%x arsize=%x' % (self.Name,araddr,arlen,arsize))
                 
-    def readQueue(self,ii,burst,arsize,addr,rid,rlast):
+    def readQueue(self,arlen,ii,burst,arsize,addr,rid,rlast):
         if (arsize>4): arsize = 4
         Incr = 1<<arsize
         Mask = ~((1<<arsize)-1)
+        Mask2 = ((1<<arsize)-1)
         if burst==0:
             Addr = addr
-        else:
+        elif burst==1:
             Addr = ii*Incr + addr
+        elif burst==2:
+            Len = (arlen+1) * (1<<arsize)
+            Maskw = ~(Len-1)
+            Maskw2 = (Len-1)
+            Base = addr & Maskw
+            Addr = ii*Incr + addr
+            Pos = Addr &  Maskw2
+            Addr =  Base + Pos
+        else:
+            logs.log_error('BURST %s' % burst)
+            Addr = addr
+
         Addr1 = Addr & Mask 
         if Addr1!=Addr:
             logs.log_warning('axiSlave read address is not aligned size=%d addrin=%08x'%(arsize,Addr))
         rdata = ''
         takenram = 0
-        for ii in range(Incr):
-            Add = Addr1 + ii
+        for jj in range(Incr):
+            Add = Addr1 + jj
             if Add in self.Ram:
                 AA = '%02x'%(self.Ram[Add])
                 takenram += 1

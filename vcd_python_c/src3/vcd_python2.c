@@ -7,6 +7,7 @@
 #include "strings.h"
 #include "ctype.h"
 #include "qq64.h"
+#include "signal.h"
 
 #include <Python.h>
 
@@ -331,6 +332,8 @@ char Valex[longestVal];
 
 int armed[SENSITIVES];
 
+void     INThandler(int);
+
 
 char option[200],fname1[1000],fname2[1000];
 int main(argc, argv)
@@ -346,6 +349,7 @@ int main(argc, argv)
     int             maxhash = 3000, stringlength = 8, maxchars = 12000000, maxtabs = 3, maxstrings = 3000;
 
     alpha_init();
+    signal(SIGINT, INThandler);
     Valex[0]=0;
     fname1[0]=0;
     fname2[0]=0;
@@ -1041,7 +1045,7 @@ veri_force(PyObject *self,PyObject *args) {
     }
     int2bin(XX,wid,tmp);
 
-    printf("%s %s %ld %x\n",pathstring,codeintstr,Psig,XX);
+//    printf("%s %s %ld %x\n",pathstring,codeintstr,Psig,XX);
     fprintf(Outf,"b%s %s\n",tmp,codeintstr);
     return Py_BuildValue("i", 0);
 }
@@ -1179,5 +1183,19 @@ char *int2bin(int AA,int Wid,char *tmp) {
     return tmp;
 }
 
+void  INThandler(int sig)
+{
+     char  c;
+
+     signal(sig, SIG_IGN);
+     printf("OUCH, did you hit Ctrl-C?\n"
+            "Do you really want to quit? [y/n] ");
+     c = getchar();
+     if (c == 'y' || c == 'Y')
+          exit(0);
+     else
+          signal(SIGINT, INThandler);
+     getchar(); // Get new line character
+}
 
 

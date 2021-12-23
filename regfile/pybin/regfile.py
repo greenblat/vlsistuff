@@ -40,9 +40,13 @@ def run(Fname,Dirx='.',Base=0):
     Db['module']=Module
     Db['dir']=Dirx
     Db['lines'] = LINES
+    Dir = Db['dir']
+    Db['fout'] = open('%s/%s.v'%(Dir,Module),'w')
     if 'apb' in Params:
         dumpApb(Db)
     elif 'ram' in Params:
+        bodyDump0(Db)
+        dumpRam('_ram',Db['fout'])
         Db['fout'].close()
     else:
         logs.log_error('need to specify output format:  apb ram')
@@ -63,7 +67,7 @@ def report2(LINES):
         for Li in LL:
             logs.log_info('%s: %s'%(Key,Li))
 
-Db = {'items':[],'clocks':[],'regs':[],'fields':[]}
+Db = {'items':[],'clocks':[],'regs':[],'fields':[],'splitted':[]}
 
 def createLines(File):
     Lines = File.readlines()
@@ -116,15 +120,57 @@ def readFile(File):
         elif (wrds[0]=='chip'):
             Db['chip'] = itemClass(Lnum,wrds)
         else:
-            Item = itemClass(Lnum,wrds)
-            Db['items'].append(Item)
-            Kind = Item.Kind
-            if len(Item.Params['names'])>0:
-                Name = Item.Params['names'][0]
-                Item.Name = Name
-                checkPair(Item,Kind,Name)
-            else:
-                Item.Name = 'none'
+            Split = False
+            if wrds[0] == 'array':
+                Params = getParams(Lnum,wrds[1:])
+                if ('pulse' in Params['access']) or (Params['width'] >32):
+                    Split = True
+                    Base = Params['names'][0]
+                    Prepare = 'reg %sNNN width=%s access=%s desc=%s' % (Params['names'][0],Params['width'],Params['access'],Params['desc'])
+                    if 'fields' in Params:
+                        Prepare += ' fields=external'
+                    Splitted = [Base,Params['depth']]
+                    Members = []
+                    Members_pulse = []
+                    for II in range(Params['depth']):
+                        Prep = Prepare.replace('NNN',str(II))
+                        wrds = Prep.split()
+                        Item = itemClass(Lnum,wrds)
+                        Db['items'].append(Item)
+                        Kind = Item.Kind
+                        Item.Name = Item.Params['names'][0]
+                        Members.append('%s' % Item.Name)
+                        Members_pulse.append('%s_pulse' % Item.Name)
+                        Splitted.append(Item.Name)
+                        if len(Item.Params['names'])>0:
+                            Name = Item.Params['names'][0]
+                            Item.Name = Name
+                            checkPair(Item,Kind,Name)
+                        else:
+                            Item.Name = 'none'
+                    Db['splitted'].append(Splitted)
+                    if outAccess(Params['access']):
+                        LINES[0].append('    ,output [%s-1:0] [%s-1:0] %s' % (Params['depth'],Params['width'],Base))
+                        Members.reverse()
+                        LINES['split2'].append('assign %s = { %s };' % (Base,','.join(Members)))
+                    else:
+                        LINES[0].append('    ,input [%s-1:0] [%s-1:0] %s' % (Params['depth'],Params['width'],Base))
+                        LINES['split2'].append('assign { %s } = %s;' % (','.join(Members),Base))
+
+                    if ('pulse' in Params['access']):
+                        LINES[0].append('    ,output [%s-1:0] %s_pulse' % (Params['depth'],Base))
+                        Members_pulse.reverse()
+                        LINES['split2'].append('assign %s_pulse = { %s };' % (Base,','.join(Members_pulse)))
+            if (not Split):
+                Item = itemClass(Lnum,wrds)
+                Db['items'].append(Item)
+                Kind = Item.Kind
+                if len(Item.Params['names'])>0:
+                    Name = Item.Params['names'][0]
+                    Item.Name = Name
+                    checkPair(Item,Kind,Name)
+                else:
+                    Item.Name = 'none'
     logs.log_warning('You should have "end" line as last line.')
     generate()
 
@@ -683,7 +729,7 @@ always @(posedge pclk ASYNCRST) begin
 end
 '''
 
-LINES = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[]}
+LINES = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],'split':[],'split2':[]}
 def dumpRam(Postfix,File):
     Module = Db['chip'].Params['names'][0] 
     try:
@@ -708,11 +754,30 @@ def dumpRam(Postfix,File):
     File.write(Str)
     Db['module']=Module
 #    bodyDump0(Db,File)
+    Finstram = open('%s.inst' % Module,'w')
+    for Line in LINES[0]:
+        forInst(Line,'wire',Finstram)
+    Str  = APBInst.replace('MODULE',Module)
+    Finstram.write('%s\n' % Str)
     for Line in LINES[0]:
         File.write('%s\n'%Line)
+        forInst(Line,'con',Finstram)
     bodyDump1(Db,File)
+    Finstram.write(');\n')
+    Finstram.close()
     return File
     
+def forInst(Line,Which,Finst):
+    wrds = Line.split()
+    if wrds[1] == 'reg': wrds.pop(1)
+    Sig = wrds[-1]
+    if Which == 'wire':
+        if len(wrds) == 3:
+            Finst.write('wire %s %s;\n' % (wrds[1],Sig))
+        if len(wrds) == 4:
+            Finst.write('wire %s %s %s;\n' % (wrds[1],wrds[2],Sig))
+    if Which == 'con':
+        Finst.write('    ,.%s(%s)\n' % (Sig,Sig))
 
 
 def bodyDump0(Db):
@@ -755,6 +820,8 @@ def bodyDump1(Db,File):
         Wstrb = 4
         Buswid = 32
     File.write(');\n')
+    for Line in LINES['split']+LINES['split2']:
+        File.write('%s\n'%Line)
     Str = 'wire [BUSWID-1:0] wdata = pwdata;\n'.replace('BUSWID',str(Buswid))
     File.write(Str)
 
@@ -887,6 +954,17 @@ def treatPrdata(Reg,Wid,Name):
             Hi = min(Wid-1,Hi+busWid)
             LINES[1].append(Line)
 
+def fromArray(Reg):
+    Name = Reg.Name
+    Arrs = Db['splitted']
+    for Arlist in Arrs:
+        Base = Arlist[0]
+        if Name.startswith(Base):
+            Ind = Arlist.index(Name)
+            return Ind
+    return False
+            
+
 def treatReg(Reg):
     busWid = Db['chip'].Params['width']
     Jump = busWid//8
@@ -896,17 +974,27 @@ def treatReg(Reg):
     Default= getPrm(Reg,'default',0)
     if (Reset==0)and(Default!=0): Reset=Default
     Name= getPrm(Reg,'names',['err'])[0]
+    isArray = fromArray(Reg)
     if 'ro' in Access:
-        Line = '    ,input %s %s'%(widi(Wid),Name)
-        LINES[0].append(Line)
+        if isArray:
+            Line = 'wire %s %s;'%(widi(Wid),Name)
+            LINES['split'].append(Line)
+        else:
+            Line = '    ,input %s %s'%(widi(Wid),Name)
+            LINES[0].append(Line)
+
         if 'pulse' in Access:
             lastAddr = Reg.Addr
             Wid2 = Wid
             while Wid2>busWid:
                 lastAddr += Jump
                 Wid2 -= busWid
-            Line = '    ,output %s_pulse'%(Name)
-            LINES[0].append(Line)
+            if isArray:
+                Line = 'wire %s_pulse;'%(Name)
+                LINES['split'].append(Line)
+            else:
+                Line = '    ,output %s_pulse'%(Name)
+                LINES[0].append(Line)
             if 'ready' in Reg.Params:
                 Line = '    ,input %s_ready'%(Name)
                 LINES[0].append(Line)
@@ -918,17 +1006,25 @@ def treatReg(Reg):
             LINES[4].append(Str)
 
         treatPrdata(Reg,Wid,Name)
-    elif ('rw' in Access)or('wr' in Access) or ('wo' in Access):
-        Line = '    ,output reg %s %s'%(widi(Wid),Name)
-        LINES[0].append(Line)
+    elif outAccess(Access):
+        if isArray:
+            Line = 'reg %s %s;'%(widi(Wid),Name)
+            LINES['split'].append(Line)
+        else:
+            Line = '    ,output reg %s %s'%(widi(Wid),Name)
+            LINES[0].append(Line)
         lastAddr = Reg.Addr
         Wid2 = Wid
         while Wid2>busWid:
             lastAddr += Jump
             Wid2 -= busWid
         if 'pulse' in Access:
-            Line = '    ,output %s_pulse'%(Name)
-            LINES[0].append(Line)
+            if not isArray:
+                Line = '    ,output %s_pulse'%(Name)
+                LINES[0].append(Line)
+            else:
+                Line = 'wire %s_pulse;'%(Name)
+                LINES['split'].append(Line)
             STR = RWPULSE
             if 'ready' in Reg.Params:
                 Line = '    ,input %s_ready'%(Name)
@@ -1015,6 +1111,8 @@ def widi(WID):
         if WID<2: return ''
         return '[%d:0]'%(WID-1)
     return '[%s-1:0]'%(WID)
+
+
 def treatArray(Reg):
     Access = getPrm(Reg,'access','rw')
     Wid = getPrm(Reg,'width',32)
@@ -1042,7 +1140,7 @@ def treatArray(Reg):
         Str = Str.replace('HADDR',hex(Reg.HADDR)[2:])
         LINES[4].append(Str)
 
-    elif ('wr' in Access)or('rw' in Access) or ('wo' in Access):
+    elif outAccess(Access):
         Line = '    ,output reg [%d:0] [%d:0] %s'%(Dep-1,Wid-1,Name)
         LINES[0].append(Line)
         Ad = Reg.Addr
@@ -1172,7 +1270,6 @@ module MODULE (input pclk, input presetn,
 '''
 APBInst = '''
 wire [1023:0] ZEROES = 1024'b0;
-// wire [31:0] last_wdata;
 MODULE rgf (.pclk(pclk),.presetn(presetn),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
     ,.pwdata(pwdata),.prdata(prdata),.prdata_wire(prdata_wire)
     ,.pstrb(pstrb),.last_wdata(last_wdata)
@@ -1191,7 +1288,7 @@ def dumpApb(Db):
     bodyDump0(Db)
     Module = Db['chip'].Params['names'][0] 
     Dir = Db['dir']
-    Db['fout'] = open('%s/%s.v'%(Dir,Module),'w')
+#    Db['fout'] = open('%s/%s.v'%(Dir,Module),'w')
     Str = INSTANCE.replace('MODULE',Db['module'])
     Finst = open('%s.inst'%Db['module'],'w')
     Finst.write(Str)
