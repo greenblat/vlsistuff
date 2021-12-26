@@ -47,6 +47,7 @@ class axiMasterClass:
         self.AXI3 = False
         self.Bscore = []
         self.Starvation = False
+        self.arready = 0
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig)
@@ -84,6 +85,7 @@ class axiMasterClass:
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
     def action(self,Txt):
         wrds = Txt.split()
+        logs.log_info('ACTION %s' % Txt)
         if wrds[0] == 'starvation':
             if wrds[1] in [1,'1','on']:
                 self.Starvation = True
@@ -118,7 +120,11 @@ class axiMasterClass:
             Burst = eval(wrds[1])
             Len   = eval(wrds[2])
             Addr  = eval(wrds[3])
-            self.makeRead(Burst,Len,Addr,self.Size,self.Rid)
+            if len(wrds)>=5:
+                Size = eval(wrds[4])
+            else:
+                Size = self.Size
+            self.makeRead(Burst,Len,Addr,Size,self.Rid)
 # axim read  1 32 0x00045600 4 7
         elif wrds[0] in ['readcheck', 'check', 'rdcheck']:
             Addr = eval(wrds[1])
@@ -129,9 +135,9 @@ class axiMasterClass:
             if Addr in self.RDATAS:
                 Exps = self.RDATAS[Addr]
                 while (Datas!=[])and(Exps!=[]):
-                    ExpData = Exps.pop(0)
-                    ActData = Datas.pop(0)
-                    logs.log_ensure(ExpData == ActData, 'RDATA addr=%x exp = %x act = %x'%(Addr,ExpData,ActData))
+                    ActData = Exps.pop(0)
+                    ExpData = Datas.pop(0)
+                    logs.log_ensure(ExpData == ActData, 'RDATA addr=%x exp = %x act = %x tail=%d'%(Addr,ExpData,ActData,len(Exps)))
 
             else:
                 logs.log_error('address %x is not registred in RDATAS %s' % (Addr,list(map(hex,self.RDATAS.keys()))))
@@ -146,7 +152,9 @@ class axiMasterClass:
             
 # Burst,Len,Address,Size=4,Wdatas=[]):
 
-    def busy(self):
+    def busy(self,Why = False):
+        if Why:
+            logs.log_info('BUSY %s q=%d arq=%d awq=%d wq=%d bq=%d ' % (self.Name,len(self.Queue),len(self.arQueue),len(self.awQueue),len(self.wQueue),len(self.Bscore))) 
         if self.Queue!=[]: return True
         if self.arQueue!=[]: return True
         if self.awQueue!=[]: return True
@@ -160,6 +168,7 @@ class axiMasterClass:
         else: 
             self.Rid = 1
         self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
+
         self.AREADS.append((Len,Address,self.Rid))
         self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
         Mask = (1<<len(self.peekbin('arid')))-1
@@ -310,6 +319,7 @@ class axiMasterClass:
                 self.awQueue.append(Cmd)
             elif Dst=='ar':
                 self.arQueue.append(Cmd)
+                logs.log_info('ARQUEUE %s' % Cmd)
             elif Dst=='w':
                 self.wQueue.append(Cmd)
             else:
@@ -391,7 +401,9 @@ class axiMasterClass:
         self.AWVALID = ('awvalid=1' in Cmd)
 
     def runAr(self):
-        if (self.ARVALID) and (self.peek('arready')==0): return
+        if (self.ARVALID) and (self.arready==0): 
+            self.arready = self.peek('arready')
+            return
         if self.arQueue==[]: 
             self.force('arvalid',0)
             return
@@ -402,5 +414,6 @@ class axiMasterClass:
         elif (wrds[0]=='force'):
             self.forces(wrds[1:])
         self.ARVALID = ('arvalid=1' in Cmd)
+        self.arready = self.peek('arready')
 
 
