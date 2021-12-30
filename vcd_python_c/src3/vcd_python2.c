@@ -1029,7 +1029,7 @@ veri_force(PyObject *self,PyObject *args) {
         return NULL;
     long Psig =  qqas(qqai(pathstring));
     if (Psig == 99999999) {
-        printf("\npython: cannot find sig %s for peek\n",pathstring);
+        printf("\npython: cannot find sig %s for force\n",pathstring);
         return Py_BuildValue("i", "1");
     }
     codeint(Psig);

@@ -43,13 +43,14 @@ class apbDriver:
         self.noList = []
         if not self.exists('pstrb'):
             self.noList.append('pstrb')
+            logs.log_warning('NO PSTRB detected for apb master %s' % (self.Name))
 
     def onFinish(self):
         return
     def exists(self,Sig):
         Full = '%s.%s'%(self.Path,Sig)
         X = veri.exists(Full)
-        return Full == '1'
+        return X == '1'
 
 
     def setName(self,Name):
@@ -198,8 +199,7 @@ class apbDriver:
         if Sig in self.noList:
             return 
 #        logs.log_info('forcing %s %s <- %x'%(self.Name,Sig,Val))
-        if Sig in self.translations:
-            Sig = self.translations[Sig]
+        Sig = self.rename(Sig)
         if self.hexMode: Val = hex(Val)
         if self.Path=='':
             veri.force(Sig,str(Val))
@@ -264,9 +264,9 @@ class apbDriver:
                 if (apbDriver.bus_locked) and (apbDriver.bus_locked!=self):  return
         
         if self.seq0==[]:
-            self.force(self.rename('psel'),0)
-            self.force(self.rename('pwrite'),0)
-            self.force(self.rename('penable'),0)
+            self.force('psel',0)
+            self.force('pwrite',0)
+            self.force('penable',0)
             
         if self.seq0!=[]:
             AA0 = self.seq0[0][0]
@@ -309,7 +309,7 @@ class apbDriver:
                 elif Sig=='catch':
                     Who,Exp,Addr = Val
                     print('EXP',Who,Addr,Exp)
-                    Act = self.peek(self.rename(Who))
+                    Act = self.peek(Who)
                     if type(Exp) is types.FunctionType:
                         Exp(Act)
                     elif type(Exp) is int:
@@ -320,7 +320,7 @@ class apbDriver:
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 else:
-                    self.force(self.rename(Sig),Val)
+                    self.force(Sig,Val)
             if self.peek('pready')==1:
                 self.seq0.pop(0)
             return
@@ -413,7 +413,7 @@ class apbDriver:
                     self.waiting1=int(Val)
                 elif Sig=='catch':
                     Who,Exp,Addr = Val
-                    X = self.peek(self.rename(Who))
+                    X = self.peek(Who)
                     logs.log_info('catch %s %s'%(Who,Exp))
                     if type(Exp) is function:
                         Exp(X)
@@ -427,9 +427,9 @@ class apbDriver:
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 else:
-                    self.force(self.rename(Sig),Val)
+                    self.force(Sig,Val)
             return
-        if self.peek(self.rename('pready'))=='0':
+        if self.peek('pready')=='0':
             self.waiting1 = 10
             return
         if self.queue1!=[]:

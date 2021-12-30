@@ -1,5 +1,5 @@
 
-import sys,types,string,os
+import sys,os
 import traceback
 import random
 Errors = 0   
@@ -63,7 +63,9 @@ finishCycles = 0
 noCycles=False
 Cycles=0
 def get_cycles():
-    global noCycles
+    global noCycles,Cycles
+    if Cycles>0:
+        return Cycles
     if noCycles:
         if veri: return veri.stime()
         return 0
@@ -129,10 +131,10 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
     if Pstack:
         traceback.print_stack(file=Flogs[Which])
         
-    if Tb: 
-        if veri: veri.force('%serrors'%TB,str(Errors))
     if TRACE: 
         veri.force('tracer.errors',str(Errors))
+    elif Tb: 
+        if veri: veri.force('%serrors'%TB,str(Errors))
 
 
     if (Errors>MAXERRORS):
@@ -198,7 +200,7 @@ def finish_now(Text='.'):
         finishReason('finish now',Errors,Wrongs,Corrects)
     if veri: veri.finish()
     
-def status(Text):
+def status(Text = "status"):
     if veri:
         Now = '@'+str(veri.stime())+':'
     else:
