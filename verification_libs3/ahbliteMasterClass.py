@@ -35,7 +35,6 @@ IDLE = 0
 class ahbliteMaster(logs.driverClass):
     def __init__(self,Path,Monitors,Translations={},Name='noName'):
         logs.driverClass.__init__(self,Path,Monitors)
-        self.Path = Path
         self.queue=[]
         self.seq=[]
         self.Name=Name
@@ -62,6 +61,8 @@ class ahbliteMaster(logs.driverClass):
     def onFinish(self):
         return
 
+    def onFinish(self):
+        logs.log_info('AHBLITE queueu=%d waiting=%d seq=%d  %s' % (len(self.queue),self.waiting,len(self.seq),self.seq))
 
     def busy(self):
         if self.queue!=[]: return True
@@ -164,7 +165,11 @@ class ahbliteMaster(logs.driverClass):
         if self.seq!=[]:
             List = self.seq[0]
             for (Sig,Val) in List:
-                if Sig=='wait':
+                popIt = True
+                if Sig=='popif':
+                    Net,Exp = Val[0],Val[1]
+                    if self.peek(Net) != Exp: popIt = False
+                elif Sig=='wait':
                     self.waiting=int(Val)
                 elif Sig=='catch':
                     if hreadyout==1:
@@ -193,8 +198,8 @@ class ahbliteMaster(logs.driverClass):
                 self.tr_force('hburst',0)
                 self.tr_force('hwrite',0)
                 return
-            if hreadyout==0: return
-            self.seq.pop(0)
+            if popIt:
+                self.seq.pop(0)
 
         while self.queue!=[]:
             What = self.queue.pop(0)
@@ -272,17 +277,14 @@ class ahbliteMaster(logs.driverClass):
 
 
             if What[0]=='write':
-                self.seq.append([('haddr',What[1]),('hwdata',0),('hwrite',1),('htrans',2),('hsize',self.HSIZE),('hsel',1)])
+                self.seq.append([('haddr',What[1]),('hwdata',0),('hwrite',1),('htrans',2),('hsize',self.HSIZE),('hsel',1),('popif',('hready',1))])
                 self.seq.append([('haddr',0),('hwdata',What[2]),('hwrite',0),('htrans',0),('hsize',0),('hsel',0)])
                 self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('hsel',0)])
-                self.seq.append([('waitUntil',('hreadyout',1))])
                 return
 
             if What[0]=='read':
-                
-                self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hsize',self.HSIZE)])
+                self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hsize',self.HSIZE),('popif',('hready',1))])
                 self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('catch',('hrdata',What[1],What[2])),('hsel',self.HSEL)])
-                self.seq.append([('waitUntil',('hreadyout',1))])
                 return
 
 

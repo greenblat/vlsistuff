@@ -185,6 +185,8 @@ class apbDriver:
         if Sig in self.renames: 
             return self.rename(self.renames[Sig])
         return Sig
+    def valid(self,Sig):
+        return self.peek(Sig) > 0
     def peek(self,Sig):
         if Sig in self.noList:
             return 0
@@ -282,10 +284,8 @@ class apbDriver:
                 return
 
             List = self.seq0[0]
-#            if self.peek('pready')==0:
-#                return
             if (len(List[0])==3): List.pop(0)
-#            logs.log_info('DBG0 %s'%str(List))
+            popIt = False
             for (Sig,Val) in List:
                 if Sig=='lock':
                     if Val==1: apbDriver.bus_locked=self
@@ -319,9 +319,15 @@ class apbDriver:
                         self.Backs.append((Who,Act,Addr))
                 elif Sig=='until':
                     self.installUntil(Val,0)
+                elif Sig=='popif':
+                    Who,Comp = Val
+                    if self.peek(Who) == Comp:
+                        popIt = True
                 else:
                     self.force(Sig,Val)
-            if self.peek('pready')==1:
+                    if (Sig == 'penable') and (Val == 0):
+                        popIt = True
+            if popIt or self.valid('pready'):
                 self.seq0.pop(0)
             return
         if self.peek('pready')==0:
@@ -333,16 +339,15 @@ class apbDriver:
             if What[0]=='write':
 #                logs.log_info('write apb queue0 seq0 %s %s %s'%(What[0],hex(What[1]),hex(What[2])))
                 self.seq0.append([('penable',0),('lock',1),('psel',1),('pstrb',0xf),('paddr',What[1]),('pwdata',What[2]),('pwrite',1)])
-                self.seq0.append([('penable',1)])
+                self.seq0.append([('penable',1),('popif',('pready',1))])
                 if (self.queue0==[])or(self.queue0[0][0] not in ['write','read']):
-                    self.seq0.append([('conditional','pready',1),('psel',0),('pstrb',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0),('lock',0)])
+                    self.seq0.append([('psel',0),('pstrb',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0),('lock',0)])
 #                self.seq0.append([('lock',0)])
 
             elif What[0]=='read':
-                self.seq0.append([('lock','1'),('psel',1),('paddr',What[1]),('pwrite',0)])
-                self.seq0.append([('penable',1)])
-                self.seq0.append([('conditional','pready',1),('catch',('prdata',What[2],What[1])),('psel',0),('paddr',0),('pwrite',0),('penable',0)])
-                self.seq0.append([('lock','0'),('wait',5)])
+                self.seq0.append([('penable',0),('lock','1'),('psel',1),('paddr',What[1]),('pwrite',0)])
+                self.seq0.append([('penable',1),('catch',('prdata',What[2],What[1])),('popif',('pready',1))])
+                self.seq0.append([('psel',0),('paddr',0),('pwrite',0),('penable',0)])
             elif What[0]=='wait':
                 self.seq0.append([('wait',What[1])])
             elif What[0]=='finish':
