@@ -6,11 +6,20 @@ import logs
 LIB_ABC = '/Users/ilia/clients/libs/synth_libs/small28.lib'
 LIB_DFF = '/Users/ilia/clients/libs/synth_libs/dff28.lib'
 
+
 LIB_ABC = '/Users/ilia/clients/yosys_libs/scmetro_abc.lib'
 LIB_DFF = '/Users/ilia/clients/yosys_libs/scmetro_dff.lib'
 
+
 LIB_ABC = '/Users/ilia/clients/yosys_libs/basic_no_timing.lib'
 LIB_DFF = '/Users/ilia/clients/yosys_libs/basic_no_timing.lib'
+
+LIB_ABC = '/Users/ilia/clients/yosys_libs/messica_no_time.lib'
+LIB_DFF = '/Users/ilia/clients/yosys_libs/messica_no_time.lib'
+
+LIB_ABC = '/Users/ilia/clients/yosys_libs/messica.lib'
+LIB_DFF = '/Users/ilia/clients/yosys_libs/messica.lib'
+
 
 INCFILE = '''
 read_verilog -sv ALLRTL
@@ -28,9 +37,9 @@ flatten;
 opt_clean;
 techmap; opt
 write_verilog -noattr aa2.glv
+
 dfflibmap -liberty LIB_DFF
 abc -liberty  LIB_ABC
-
 ## opt_rmdff;
 opt_merge;
 opt_expr -full;

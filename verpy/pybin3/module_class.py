@@ -75,7 +75,7 @@ class module_class:
         if Wid==1: Wid=0
         if (type(Name) is str)and('{' in Name):
             return
-        if (type(Name) is str)and('[' in Name):
+        if (type(Name) is str)and('[' in Name)and (Name[0] != '\\'):
             Bus,Hi,Lo  = parseBus(Name)
             return self.add_sig(['subbus',Bus,Hi,Lo],Dir,Wid)
 
@@ -746,7 +746,15 @@ class module_class:
 
     def del_inst(self,Inst):
         Inst = clean_inst(Inst)
-        self.insts.pop(Inst)
+        if Inst in self.insts:
+            self.insts.pop(Inst)
+        elif '\\'+Inst in self.insts:
+            self.insts.pop('\\'+Inst)
+        else:
+            logs.log_error('INST %s not in %s' % (Inst,self.Module))
+            for In in self.insts:
+                logs.log_info('>>> "%s"' % In)
+
     def relax_instance_wires_names(self):
         Insts = self.insts.keys()
         for Inst in Insts:
@@ -2011,6 +2019,7 @@ def allIn(Sup,Base):
     return True
 
 def parseBus(Name):
+    if Name[0] == '\\': return Name
     if '[' not in Name: return Name
     Name = Name.replace('[',' ')
     Name = Name.replace(']','')

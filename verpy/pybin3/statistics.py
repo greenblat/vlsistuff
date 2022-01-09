@@ -2,9 +2,13 @@
 import logs
 from module_class import support_set
 def help_main(Env):
-    Mod = Env.Current
-    instances(Mod)
-    connectivity(Mod)
+    Types = {}
+    for Module in Env.Modules:
+        Mod = Env.Modules[Module]
+        logs.log_info('scan %s' % Module)
+        gatherInstances(Mod,Types)
+    reportInstances(Types)
+#    connectivity(Mod)
 
 def connectivity(Mod):
     buildConns(Mod)
@@ -14,7 +18,10 @@ def reportConns():
     Nets = list(CONNS.keys())
     Nets.sort()
     for Net in Nets:
-        logs.log_info('%30s : %s'%(Net,CONNS[Net]))
+        if len(CONNS[Net]) > 10:
+            logs.log_info('%5d %30s : %s'%(len(CONNS[Net]),Net,CONNS[Net][:10]))
+        else:
+            logs.log_info('%5d %30s : %s'%(len(CONNS[Net]),Net,CONNS[Net]))
 
 
 def buildConns(Mod):
@@ -42,20 +49,24 @@ def connect(Net,Pin,Type,Inst):
 
 
 
-def instances(Mod):
-    Types = {}
+def gatherInstances(Mod,Types):
     for Inst in Mod.insts.keys():
         Type =  Mod.insts[Inst].Type
         if Type not in Types: Types[Type] = 0
         Types[Type]  += 1
+
+def reportInstances(Types):
     LL = []
     for Type in Types.keys():
         LL.append((Types[Type],Type))
 
     LL.sort()
     LL.reverse()
-
-    for Many,Type in LL:
-        logs.log_info('        %6d     %s'%(Many,Type))
-
+    Tot = 0
+    Fout = open('mod.csv','w')
+    for ind,(Many,Type) in enumerate(LL):
+        Tot += Many
+        logs.log_info('%5d        %6d  / %6d    %s'%(ind,Many,Tot,Type))
+        Fout.write('%d,%d,%d,%s,,,\n'%(ind,Many,Tot,Type))
+    Fout.close()
         

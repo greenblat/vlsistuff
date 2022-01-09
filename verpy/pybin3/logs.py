@@ -185,6 +185,7 @@ def log_write(Text,Which=0):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
 #    print('%s'%(Text))
     Flogs[Which].write('%s\n'%(Text))
+
 def log_info(Text,Which=0):
     if (not Flogs[Which]):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')

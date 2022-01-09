@@ -57,11 +57,13 @@ def main():
             Fnotime.write(Pin)    
         Flib.write('}\n')
         Fnotime.write('}\n')
-    Timing1 = TIMING.replace('PIN','CK')
+
+    Timing1 = CLK2Q.replace('PIN','CK')
     Timing1 = Timing1.replace('DELAY','2')
+    Flops = FLOPS.replace('CLK2Q',Timing1)
+
     Timing2 = SETUP.replace('PIN','CK')
     Timing2 = Timing2.replace('SETUP','1')
-    Flops = FLOPS.replace('TIMING',Timing1)
     Flops = Flops.replace('SETUP',Timing2)
     Flib.write(Flops)
     Fnotime.write(Flops)
@@ -106,6 +108,7 @@ def simpleGate(Cell):
     if Cell.startswith('NOR') and (len(Cell) == 4): return True
     if Cell.startswith('XOR') and (len(Cell) == 4): return True
     if Cell.startswith('XNOR') and (len(Cell) == 5): return True
+    if Cell in ['BUF','INV']: return True
     return False
 
 
@@ -287,7 +290,7 @@ cell  ( DFF )   {
     direction : output ; 
     capacitance : 0.0 ; 
     function : "IQ" ; 
-    TIMING
+    CLK2Q
   } 
  } 
 
@@ -317,7 +320,7 @@ cell  ( DFFRN )   {
   pin ( Q )   { 
     direction : output ; 
     function : "IQ" ; 
-    TIMING
+    CLK2Q
   } 
 } 
 
@@ -345,7 +348,7 @@ cell  ( DFFSN )   {
   pin ( Q )   { 
     direction : output ; 
     function : "IQ" ; 
-    TIMING
+    CLK2Q
   } 
 } 
 '''
@@ -368,6 +371,33 @@ SETUP = '''
 
 '''
 
+CLK2Q = '''
+    timing() {
+      related_pin : "PIN";
+      timing_type : rising_edge;
+      cell_rise(template_3x3) {
+        index_1 ("0, 1.0, 2.0");
+        index_2 ("0, 1.0, 2.0");
+        values ( "DELAY, DELAY, DELAY", "DELAY, DELAY, DELAY", "DELAY, DELAY, DELAY");
+      }
+      rise_transition(template_3x3) {
+        index_1 ("0, 1.0, 2.0");
+        index_2 ("0, 1.0, 2.0");
+        values ( "0.5, 0.5, 0.5","0.5, 0.5, 0.5", "0.5, 0.5, 0.5");
+      }
+      cell_fall(template_3x3) {
+        index_1 ("0, 1.0, 2.0");
+        index_2 ("0, 1.0, 2.0");
+        values ( "DELAY, DELAY, DELAY", "DELAY, DELAY, DELAY", "DELAY, DELAY, DELAY");
+      }
+      fall_transition(template_3x3) {
+        index_1 ("0, 1.0, 2.0");
+        index_2 ("0, 1.0, 2.0");
+        values ( "0.5, 0.5, 0.5", "0.5, 0.5, 0.5", "0.5, 0.5, 0.5");
+      }
+    }
+   
+'''
 
 
 

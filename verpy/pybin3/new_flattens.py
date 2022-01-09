@@ -153,15 +153,18 @@ def flatten(Current,Whome,Env,load_module):
                          print('dont flatten %s (from %s) because not loaded'%(Type,Current.Module))
                      else:
                         flatten_inst(Current,Inst,Env.Modules)
+                        print('FLATTEN',Inst,Type)
                         dones += 1
-    return dones
+    return dones,(Inst,Type)
 
 
 def flatten_deep(Current,Whome,Env,load_module):
     Dones=1
-    while (Dones>0):
-        Dones = flatten(Current,Whome,Env,load_module)
+    Max = 30
+    while (Dones>0) and (Max>0):
+        Dones,Who = flatten(Current,Whome,Env,load_module)
         print('dones',Dones)
+        Max -= 1
     
 
 def flatten_inst(Current,InstName,modules):
@@ -199,6 +202,8 @@ def flatten_inst(Current,InstName,modules):
             Sonsig1 = flatten_trans(InstName,Sonsig,Translate,Son)
             Current.check_net_def(Sonsig1)
             Current.add_conn(Soninst,Sonpin,Sonsig1)
+    if InstName not in Current.insts:
+        logs.log_error('inst %s for flat is not in %s' % (InstName,Current.Module))
     Current.del_inst(InstName)
         
 
@@ -437,6 +442,7 @@ def relax_inst(Inst):
     Soninst = Soninst.replace(']','_')
     Soninst = Soninst.replace('\\','')
     Soninst = Soninst.replace(' ','')
+#    Soninst = Soninst.replace('.','_')
     return Soninst
 
 

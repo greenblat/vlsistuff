@@ -1,5 +1,19 @@
 #! /usr/bin/env python3.9
 
+
+HELPSTRING = '''
+needs regfile description file.
+
+example of regfile file:
+
+chip plug_rgf  bus=apb addrwid=20 width=32 reset=async empty=0xdeadbeaf
+reg cucu width=72 access=rw desc="this is very important register"
+// access(can be ro wo rw_pulse ro_pulse)  
+array arr width=12 depth=13 access=ro desc="less important"
+// several other options appear in docs
+'''
+
+
 import os,sys,string
 
 import logs
@@ -9,6 +23,9 @@ import regfile_html
 import regfile_c
 
 def main():
+    if len(sys.argv) == 1:
+        print(HELPSTRING)
+        return
     Fname = sys.argv[1]
     Cell,Dir,Ext = logs.fnameCell(Fname)
     if Dir == '': 
@@ -800,15 +817,15 @@ def bodyDump1(Db,File):
     Buswid = Db['chip'].Params['width']
     Addwid = Db['chip'].Params['addrwid']
     if Buswid == 128:
-        Mask = ((1<<X)-1) & 0xfffc
+        Mask = ((1<<Addwid)-1) & 0xfffc
     elif Buswid == 64:
-        Mask = ((1<<X)-1) & 0xfffc
+        Mask = ((1<<Addwid)-1) & 0xfffc
     elif Buswid == 32:
-        Mask = ((1<<X)-1) & 0xfffc
+        Mask = ((1<<Addwid)-1) & 0xfffc
     elif Buswid == 16:
-        Mask = ((1<<X)-1) & 0xfffe
+        Mask = ((1<<Addwid)-1) & 0xfffe
     elif Buswid == 8:
-        Mask = ((1<<X)-1) & 0xffff
+        Mask = ((1<<Addwid)-1) & 0xffff
 
     if Buswid==128: Wstrb=16
     elif Buswid==64: Wstrb=8

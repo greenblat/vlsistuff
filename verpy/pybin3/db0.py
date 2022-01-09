@@ -1981,7 +1981,7 @@ def get_expr(Item):
             return float(Item[0])
         if Item[1]=='always':
             return Item[0]
-    if (len(Item)==3)and(Item[0] in ['<<','>>','+','-','/','*','functioncall']):
+    if (len(Item)==3)and(Item[0] in ['**','<<','>>','+','-','/','*','functioncall']):
         return Item
     if (len(Item)==4)and(Item[0] in ['question']):
         return Item
