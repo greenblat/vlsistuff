@@ -817,15 +817,15 @@ def bodyDump1(Db,File):
     Buswid = Db['chip'].Params['width']
     Addwid = Db['chip'].Params['addrwid']
     if Buswid == 128:
-        Mask = ((1<<Addwid)-1) & 0xfffc
+        Mask = ((1<<Addwid)-1) & 0xffffffe0
     elif Buswid == 64:
-        Mask = ((1<<Addwid)-1) & 0xfffc
+        Mask = ((1<<Addwid)-1) & 0xfffffff8
     elif Buswid == 32:
-        Mask = ((1<<Addwid)-1) & 0xfffc
+        Mask = ((1<<Addwid)-1) & 0xfffffffc
     elif Buswid == 16:
-        Mask = ((1<<Addwid)-1) & 0xfffe
+        Mask = ((1<<Addwid)-1) & 0xfffffffe
     elif Buswid == 8:
-        Mask = ((1<<Addwid)-1) & 0xffff
+        Mask = ((1<<Addwid)-1) & 0xffffffff
 
     if Buswid==128: Wstrb=16
     elif Buswid==64: Wstrb=8
