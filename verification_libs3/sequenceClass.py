@@ -380,7 +380,7 @@ class sequenceClass:
                     Lnum = self.Sequence[self.Ptr][1]
                     logs.log_error('Guardian expired at line %s'%(Lnum))
                     self.agentsFinish()
-                    logs.finish('Guardian expired %s  at line %s'%(self.Fname,Lnumtr))
+                    logs.finish('Guardian expired %s  at line %s'%(self.testFileName,Lnum))
                     veri.finish()
                     sys.exit()
             if (len(wrds)==3)and(self.Guardian==0):
