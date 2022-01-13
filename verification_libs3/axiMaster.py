@@ -169,7 +169,7 @@ class axiMasterClass:
             self.Rid = 1
         self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
 
-        self.AREADS.append((Len,Address,self.Rid))
+        self.AREADS.append((Len,Address,self.Rid,0))
         self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
         Mask = (1<<len(self.peekbin('arid')))-1
         self.Rid = Mask & (1+self.Rid)
@@ -293,8 +293,9 @@ class axiMasterClass:
         if self.AREADS == []:
             logs.log_error('READ ACTION %s and no AREADS' % (self.Name))
             return
-        Len,Addr,Rid = self.AREADS[0]
-        logs.log_info('READ %x %x %x || %x %x %x   %s' % (Len,Addr,Rid,rid,rlast,rdatax,self.AREADS))
+        Len,Addr,Rid,Pos = self.AREADS[0]
+        logs.log_info('axi Master %s READ len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Len,Addr,Addr+8*Pos,Rid,rid,rlast,rdatax,rresp,self.AREADS))
+        self.AREADS[0] = (Len,Addr,Rid,Pos+1)
 
         if (Rid & ((1<<widrid)-1)) != rid:
             logs.log_wrong('sent ARID=%d RID=%d'%(Rid,rid))

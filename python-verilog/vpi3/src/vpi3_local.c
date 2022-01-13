@@ -1310,9 +1310,16 @@ PyMODINIT_FUNC PyInit_veri(void)
     return PyModule_Create(&veri_module_definition);
 }
 
+// You dont need all the dlopens below, just comment all not needed, or leave is is.
+// If You get it wrong, import random will fail.
 
 void start_py() {
+    dlopen("libpython3.8.dylib",RTLD_LAZY | RTLD_GLOBAL);
+    dlopen("libpython3.8.so",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.9.dylib",RTLD_LAZY | RTLD_GLOBAL);
+    dlopen("libpython3.9.so",RTLD_LAZY | RTLD_GLOBAL);
+    dlopen("libpython3.10.dylib",RTLD_LAZY | RTLD_GLOBAL);
+    dlopen("libpython3.10.so",RTLD_LAZY | RTLD_GLOBAL);
     PyImport_AppendInittab("veri", PyInit_veri);
     Py_Initialize();
     PyRun_SimpleString("import veri; print(dir(veri));\n");

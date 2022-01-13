@@ -22,6 +22,7 @@ LIB_DFF = '/Users/ilia/clients/yosys_libs/messica.lib'
 
 
 INCFILE = '''
+read_liberty -lib LIB_ABC
 read_verilog -sv ALLRTL
 hierarchy -check -top  TOP
 check;
