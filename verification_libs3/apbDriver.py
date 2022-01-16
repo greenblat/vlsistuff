@@ -138,7 +138,8 @@ class apbDriver:
 
     def eval(self,Data):
         if self.Caller:
-            return eval(Data,self.renames,self.Caller.Translates)
+            Dict = {**self.renames, **self.Caller.Translates}
+            return eval(Data,Dict)
         return eval(Data,self.renames)
 
     def write(self,Addr,Data):

@@ -323,7 +323,7 @@ def produce_verilog():
             else:
                 Cond = ''
 
-            ofile.write('assign %s_code = valid && ((opcode & %s)==%s) && %s;\n'%(Name,Mask,Data,Cond))
+            ofile.write('assign %s_code = valid && ((opcode & %s)==%s) %s;\n'%(Name,Mask,Data,Cond))
             if Name=='nop':
                 ofile.write('assign nop_opcode = %s;\n'%(Data))
             GoodOpCodes.append(Name+'_code')

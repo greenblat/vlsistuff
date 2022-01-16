@@ -152,6 +152,10 @@ class axiMasterClass:
             
 # Burst,Len,Address,Size=4,Wdatas=[]):
 
+    def busyWhy(self):
+        for Item in self.wQueue:
+            logs.log_info('BUSYWHY %s ' % str(Item))
+
     def busy(self,Why = False):
         if Why:
             logs.log_info('BUSY %s q=%d arq=%d awq=%d wq=%d bq=%d ' % (self.Name,len(self.Queue),len(self.arQueue),len(self.awQueue),len(self.wQueue),len(self.Bscore))) 
@@ -377,7 +381,7 @@ class axiMasterClass:
         elif (wrds[0]=='force'):
             self.forces(wrds[1:])
         self.WVALID = ('wvalid=1' in Cmd)
-        if (self.peek('wready')==1):
+        if (self.peek('wready')==1) or ('wvalid=0' in Cmd) :
             self.wQueue.pop(0)
 
     def forces(self,wrds):

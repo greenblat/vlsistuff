@@ -220,8 +220,8 @@ def log_warning(Text,Which=0):
     if (Text in printed_already):
         return
     openFlog(Which)
-    print('%d: warning: %s'%(Warnings,Text))
-    Flogs[Which].write('%d: warning: %s\n'%(Warnings,Text))
+    print('%d: __WARNING: %s'%(Warnings,Text))
+    Flogs[Which].write('%d: __WARNING: %s\n'%(Warnings,Text))
     printed_already[Text]=1
     Warnings +=1  
 

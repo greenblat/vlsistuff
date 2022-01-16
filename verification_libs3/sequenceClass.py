@@ -32,6 +32,8 @@ import importlib
 
 TB = 'tb'
 
+
+
 class sequenceClass:
     def __init__(self,Path,Monitors,SEQUENCE='',AGENTS=[],Translates={}):
         self.Path = Path
@@ -131,8 +133,38 @@ class sequenceClass:
         self.searchPath.append(os.path.abspath(os.path.dirname(Filename)))
         self.workIncludes()
         self.definesPreRun()
+        self.pythonCodes()
         self.extractSequences()
 
+    def pythonCodes(self):
+        Pythons = []
+        Seqs = []
+        state = 'idle'
+        for Line,AA in self.Sequence:
+            wrds = Line.split()
+            if state == 'idle':
+                if wrds == []:
+                    Seqs.append((Line,AA))
+                elif wrds[0] == '+python':
+                    state = 'python' 
+                else:
+                    Seqs.append((Line,AA))
+            elif state == 'python':
+                if wrds == []:
+                    Pythons.append((Line,AA))
+                elif wrds[0] == '-python':
+                    state = 'idle' 
+                else:
+                    Pythons.append(Line)
+
+        self.Sequence = Seqs
+        Code = '\n'.join(Pythons)
+        exec(Code,globals())
+        
+
+
+
+                    
     def definesPreRun(self):
         for Line,_ in self.Sequence:
             wrds = Line.split()
@@ -231,23 +263,23 @@ class sequenceClass:
         return Val
 
     def eval(self,Txt,Bad=False):
-        if type(Txt) is int:
-            return Txt
-
-        if Txt in self.Translates:
-            return self.eval(self.Translates[Txt])
-
+        if type(Txt) is int: return Txt
+        if Txt in self.Translates: return self.eval(self.Translates[Txt])
         try:
-            Val = eval(Txt,self.Translates)
+            Val =  eval(Txt)
             return Val
-        except:
+        except:            
             try:
-                Val = self.evalStr(Txt,self.Translates)
+                Val = eval(Txt,self.Translates)
                 return Val
             except:
-                if Bad:
-                    logs.log_error('failed eval of "%s"' % str(Txt))
-                return Txt
+                try:
+                    Val = self.evalStr(Txt,self.Translates)
+                    return Val
+                except:
+                    if Bad:
+                        logs.log_error('failed eval of "%s"' % str(Txt))
+                    return Txt
 
     def runSons(self):
         if self.Sons==[]: return
