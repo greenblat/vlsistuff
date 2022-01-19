@@ -60,6 +60,7 @@ def ensureParam(Item,Param):
     logs.log_error('#%d: ensureParams item=%s missing=%s   avail=%s'%(Item.Lnum,Item.Name,Param,Item.Params))
     Item.Params[Param] = -1,-1
 
+
 def outputFields(Items,Fch):
     for Item in Items:
         if Item.Kind=='reg':
@@ -67,6 +68,5 @@ def outputFields(Items,Fch):
         elif Item.Kind=='field':
             ensureParam(Item,'width')
             ensureParam(Item,'position')
-            Fch.write('#define %s_COUNT (%d)\n'%(Item.Name,Item.Params['width']))
-            Fch.write('#define %s_OFFSET (%s)\n'%(Item.Name,Item.Params['position'][1]))
-
+            Fch.write('#define %s_COUNT (%d)\n'%(Item.Name.upper(),Item.Params['width']))
+            Fch.write('#define %s_OFFSET (%s)\n'%(Item.Name.upper(),Item.Params['position'][1]))
