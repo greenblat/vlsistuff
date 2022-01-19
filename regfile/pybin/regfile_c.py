@@ -16,10 +16,10 @@ def produce_c_headers(Module,Db):
    Items = Db['items']
    Range = Chip.Addr+4
    Fch = open('%s_cinc.h'%(Module),'w')
-   Fch.write(HEADER.replace('MODULE',Module))
+   Fch.write(HEADER.replace('MODULE',Module).replace('RF_INTERFACE_RGF',Module.upper()))
    outputStructures(Module,Items,Fch)
    outputFields(Items,Fch)
-   Fch.write('#endif\n')
+   Fch.write('\n#endif\n')
    Fch.close()
 
 
@@ -53,7 +53,7 @@ def outputStructures(Module,Items,Fch):
             Fch.write('    %s uint32_t  %-25s;          // ad=%s w=%d acc=%s      %s\n'%(ACC,NW,Addr,Width,Access,Desc)) 
             RunAddr = Item.Addr+(Jump*4)
 
-    Fch.write('} %s_RegDef;\n'%Module)
+    Fch.write('} %s_RegDef;\n\n'%Module)
 
 def ensureParam(Item,Param):
     if Param in Item.Params: return
@@ -69,5 +69,4 @@ def outputFields(Items,Fch):
             ensureParam(Item,'position')
             Fch.write('#define %s_COUNT (%d)\n'%(Item.Name,Item.Params['width']))
             Fch.write('#define %s_OFFSET (%s)\n'%(Item.Name,Item.Params['position'][1]))
-
 
