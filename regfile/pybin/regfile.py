@@ -178,6 +178,11 @@ def readFile(File):
                         LINES[0].append('    ,output [%s-1:0] %s_pulse' % (Params['depth'],Base))
                         Members_pulse.reverse()
                         LINES['split2'].append('assign %s_pulse = { %s };' % (Base,','.join(Members_pulse)))
+                    if 'ready' in Params:
+                        Line = '    ,input %s_ready'%(Base)
+                        LINES[0].append(Line)
+                        LINES[9].append(Base)
+
             if (not Split):
                 Item = itemClass(Lnum,wrds)
                 Db['items'].append(Item)
@@ -246,6 +251,7 @@ class itemClass:
         self.Synonyms()
         self.Addr = -1
         self.RAMS = ''
+        self.PREADIES = '1'
         self.RAMS_WIRES = ''
         self.incs = []
 
@@ -707,6 +713,7 @@ HEADER = '''module MODULE (
     ,input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata, output [BUSWID-1:0] prdata_wire
     ,input [WSTRB-1:0] pstrb
     ,input [ADDWID-1:0] paddr ,output reg [BUSWID-1:0] last_wdata
+    ,output pready
 '''
 
 STRING0 = '''
@@ -726,6 +733,7 @@ STRING1 = '''
 
 reg [BUSWID-1:0] prdata_reg;
 always @(posedge pclk) prdata_reg <=  prdata_wire;
+PREADIES
 assign prdata =   RAMS
     prdata_reg;
 
@@ -869,6 +877,7 @@ def bodyDump1(Db,File):
             
     File.write("    %d'h%s;\n" % (Buswid,Default))
     Str = STRING1.replace('RAMS',Db['chip'].RAMS)
+    Str = Str.replace('PREADIES',makePready())
     Str = Str.replace('BUSWID',str(Buswid))
     Str = Str.replace('ADDWID',str(Addwid))
     Str = Str.replace('WSTRB',str(Wstrb))
@@ -1121,7 +1130,7 @@ def treatReg(Reg):
             LINES[4].append(Str)
 
     else:
-        logs.log_error('#%d: ACCESS not recognized %s of %s'%(Reg.Lnum,Access,Name))
+        logs.log_error('#%d: ACCESS not recognized "%s" of %s, valid accesses:  "rw ro w1c rw_pulse ro_pulse external"'%(Reg.Lnum,Access,Name))
 
 def widi(WID):
     if type(WID) is int:
@@ -1355,6 +1364,21 @@ def helper0(Finst):
             Li = Li + '; // hhh'
             Temp.append(Li)
     return Temp
+
+
+def makePready():
+    if LINES[9]==[]:
+        return 'assign pready = 1;\n'
+    else:
+        Str = 'assign pready = \n'
+        for Name in LINES[9]:
+            if (type(Name) is tuple)and(Name[0]=='ram'):
+                Str += '    (%s_wr_pulse || %s_rd_pulse) ? %s_ready :\n'%(Name[1],Name[1],Name[1])
+            else:
+                Str += '    %s_pulse ? %s_ready :\n'%(Name,Name)
+        Str += '    1;\n'
+        return Str
+
 
 def enclosingModule(Temp,Finst):
     for Li in LINES[7]:
