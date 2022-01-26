@@ -109,6 +109,8 @@ class axiMasterClass:
             self.AXI3 = False
         elif wrds[0]=='wstrb':
             self.WSTRB = eval(wrds[1])
+        elif wrds[0]=='write_illegal':
+            self.makeWriteIllegal(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),eval(wrds[5]),list(map(eval,wrds[6:])))
         elif wrds[0]=='write':
             if len(wrds)==3:
                 self.makeWrite(1,1,eval(wrds[1]),self.Size,[eval(wrds[2])])
@@ -178,6 +180,12 @@ class axiMasterClass:
         Mask = (1<<len(self.peekbin('arid')))-1
         self.Rid = Mask & (1+self.Rid)
 
+    def makeWriteIllegal(self,Burst,Len,actualLen,Address,Size=4,Wdatas=[]):
+        self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
+        self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
+        self.Bscore.append((self.Rid,Address))
+        self.writeDatasLoop(actualLen,Size,Wdatas)
+        logs.log_info('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)))
 
     def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
         if Len==0: 
@@ -189,6 +197,10 @@ class axiMasterClass:
         self.Bscore.append((self.Rid,Address))
         if Len<=0:
             logs.log_warning('axiMaster %s got len=%d for write'%(self.Name,Len))
+        self.writeDatasLoop(Len,Size,Wdatas)
+        logs.log_info('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)))
+
+    def writeDatasLoop(self,Len,Size,Wdatas):
         for ii in range(Len):
             if type(Wdatas) is int:
                 Wdata = Wdatas
@@ -215,7 +227,6 @@ class axiMasterClass:
         if self.AXI3:
             Str += ' wid=%d'%self.Rid
         self.Queue.append(('w',Str))
-        logs.log_info('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)))
         Mask = (1<<len(self.peekbin('awid')))-1
         self.Rid = Mask & (1+self.Rid)
             
@@ -304,7 +315,7 @@ class axiMasterClass:
         if (Rid & ((1<<widrid)-1)) != rid:
             logs.log_wrong('sent ARID=%d RID=%d'%(Rid,rid))
         if rresp!=0:
-            logs.log_wrong('RRESP came back %s  ADDR=%a  rid=0x%x'%(rresp,Addr,Rid))
+            logs.log_wrong('RRESP came back %s  ADDR=%x  rid=0x%x'%(rresp,Addr,Rid))
         
         if Addr in self.RDATAS:
             self.RDATAS[Addr].append(rdatax)

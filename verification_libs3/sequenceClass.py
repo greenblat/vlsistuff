@@ -307,6 +307,7 @@ class sequenceClass:
                         self.agents[self.waitNotBusy].busy(True)
                         self.agentsFinish()
                         logs.finish('Guardian expired %s at line %s'%(self.waitNotBusy,Lnum))
+                        logs.closeLogs()
                         veri.finish()
                         sys.exit()
                 return True
