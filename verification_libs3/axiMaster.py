@@ -184,7 +184,7 @@ class axiMasterClass:
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
         self.Bscore.append((self.Rid,Address))
-        self.writeDatasLoop(actualLen,Size,Wdatas)
+        self.writeDatasLoop(actualLen,Size,Address,Wdatas)
         logs.log_info('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)))
 
     def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
@@ -197,10 +197,10 @@ class axiMasterClass:
         self.Bscore.append((self.Rid,Address))
         if Len<=0:
             logs.log_warning('axiMaster %s got len=%d for write'%(self.Name,Len))
-        self.writeDatasLoop(Len,Size,Wdatas)
+        self.writeDatasLoop(Len,Size,Address,Wdatas)
         logs.log_info('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)))
 
-    def writeDatasLoop(self,Len,Size,Wdatas):
+    def writeDatasLoop(self,Len,Size,Address,Wdatas):
         for ii in range(Len):
             if type(Wdatas) is int:
                 Wdata = Wdatas

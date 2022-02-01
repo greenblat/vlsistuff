@@ -82,7 +82,7 @@ def run_machine():
     while (state!=0):
         Steps += 1
         if (Steps % 100000)==0: logs.log_info('%dK steps'%(Steps/1000))
-        if (Verbose):
+        if (Verbose or True):
             logs.log_info('stepit state=%s tok=%s stack=%s\n\n\n\n'%(state,Lex[0],Stack))
         nextstate = step_machine(state)
         state=nextstate

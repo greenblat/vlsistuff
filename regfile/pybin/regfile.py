@@ -63,7 +63,7 @@ def run(Fname,Dirx='.',Base=0):
         dumpApb(Db)
     elif 'ram' in Params:
         bodyDump0(Db)
-        dumpRam('_ram',Db['fout'])
+        dumpRam('_ram',Db['fout'],True)
         Db['fout'].close()
     else:
         logs.log_error('need to specify output format:  apb ram')
@@ -755,7 +755,7 @@ end
 '''
 
 LINES = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],'split':[],'split2':[]}
-def dumpRam(Postfix,File):
+def dumpRam(Postfix,File,Alone):
     Module = Db['chip'].Params['names'][0] 
     try:
         Buswid = Db['chip'].Params['width']
@@ -787,7 +787,7 @@ def dumpRam(Postfix,File):
     for Line in LINES[0]:
         File.write('%s\n'%Line)
         forInst(Line,'con',Finstram)
-    bodyDump1(Db,File)
+    bodyDump1(Db,File,Alone)
     Finstram.write(');\n')
     Finstram.close()
     return File
@@ -819,7 +819,7 @@ def bodyDump0(Db):
             logs.log_error('#%d: wrong kind %s %s'%(Reg.Lnum,Reg.Kind,Reg.Params))
     
 
-def bodyDump1(Db,File):
+def bodyDump1(Db,File,Alone):
     Base = getPrm(Db['chip'],'base',0)
     X = logs.neededBits(Db['chip'].Addr-Base)
     Buswid = Db['chip'].Params['width']
@@ -844,6 +844,9 @@ def bodyDump1(Db,File):
         logs.log_error('#%d: BUSWIDTH is %d , allowed values are 32,64,128'%(Reg.Lnum,Buswid))
         Wstrb = 4
         Buswid = 32
+    if Alone:
+        for Line in LINES[7]:
+            File.write('%s\n' % Line)
     File.write(');\n')
     for Line in LINES['split']+LINES['split2']:
         File.write('%s\n'%Line)
@@ -921,6 +924,9 @@ def bodyDump1(Db,File):
 
     for Line in LINES[4]:
         File.write('%s\n'%Line)
+    if Alone:
+        for Line in LINES[6]:
+            File.write('%s\n' % Line)
 
     File.write('endmodule\n')
 
@@ -1321,7 +1327,7 @@ def dumpApb(Db):
     apbHead()
     Temp = helper0(Finst)
     enclosingModule(Temp,Finst)
-    dumpRam('_ram',Db['fout'])
+    dumpRam('_ram',Db['fout'],False)
     Finst.close()
 
 def apbHead():
