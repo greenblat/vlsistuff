@@ -75,7 +75,7 @@ def main():
     Fnotime.close()
 
 def outPin(Cell,Data):
-    Str = '    pin (Y) {\n    direction : output;\n    capacitance : 0.0;\n   function : "%s";\n    \n ' % outFunction(Cell,Data)
+    Str = '    pin (OUT) {\n    direction : output;\n    capacitance : 0.0;\n   function : "%s";\n    \n ' % outFunction(Cell,Data)
     Notime = Str + '}\n'
     Pins = inPins(Cell,Data)
     for Pin in Pins:
@@ -85,13 +85,16 @@ def outPin(Cell,Data):
         Str += Tim
     return Str + '\n}\n',Notime
 def inPins(Cell,Data):
-    if Cell == 'INV': return ['A']
-    if Cell == 'BUF': return ['A']
+    if Cell == 'INV': return ['IN0']
+    if Cell == 'BUF': return ['IN0']
     if simpleGate(Cell):
-        Num = int(Cell[-1])
-        X = 'ABCDEFGHKLMNOPQRST'
-        Y = list(X)
-        return Y[:Num]
+        XX = Cell
+        while XX[0] in 'QWERTYUIOPASDFGHJKLZXCVBNM': XX = XX[1:]
+        Num = int(XX)
+        Res = []
+        for ii in range(1,Num+1):
+            Res.append('IN%d' % ii)
+        return Res
     else:
         Func = get_param('function',Data,'A')
         List = []
@@ -102,12 +105,12 @@ def inPins(Cell,Data):
         
 
 def simpleGate(Cell):
-    if Cell.startswith('AND') and (len(Cell) == 4): return True
-    if Cell.startswith('NAND') and (len(Cell) == 5): return True
-    if Cell.startswith('OR') and (len(Cell) == 3): return True
-    if Cell.startswith('NOR') and (len(Cell) == 4): return True
-    if Cell.startswith('XOR') and (len(Cell) == 4): return True
-    if Cell.startswith('XNOR') and (len(Cell) == 5): return True
+    if Cell.startswith('AND') and (len(Cell) >= 4): return True
+    if Cell.startswith('NAND') and (len(Cell) >= 5): return True
+    if Cell.startswith('OR') and (len(Cell) >= 3): return True
+    if Cell.startswith('NOR') and (len(Cell) >= 4): return True
+    if Cell.startswith('XOR') and (len(Cell) >= 4): return True
+    if Cell.startswith('XNOR') and (len(Cell) >= 5): return True
     if Cell in ['BUF','INV']: return True
     return False
 

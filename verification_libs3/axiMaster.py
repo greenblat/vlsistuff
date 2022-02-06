@@ -48,6 +48,7 @@ class axiMasterClass:
         self.Bscore = []
         self.Starvation = False
         self.arready = 0
+        self.defines = {}
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig)
@@ -71,6 +72,8 @@ class axiMasterClass:
             Sig = Sig + self.suffix 
         return Sig
 
+    def eval(self,Expr):
+        return eval(Expr,self.defines,self.SeqObj.Translates)
     def peekbin(self,Sig):
         Sig = self.rename(Sig)
         return veri.peek('%s.%s'%(self.Path,Sig))
@@ -113,9 +116,9 @@ class axiMasterClass:
             self.makeWriteIllegal(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),eval(wrds[5]),list(map(eval,wrds[6:])))
         elif wrds[0]=='write':
             if len(wrds)==3:
-                self.makeWrite(1,1,eval(wrds[1]),self.Size,[eval(wrds[2])])
+                self.makeWrite(1,1,self.eval(wrds[1]),self.Size,[eval(wrds[2])])
             elif len(wrds)>=6:
-                self.makeWrite(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),list(map(eval,wrds[5:])))
+                self.makeWrite(self.eval(wrds[1]),self.eval(wrds[2]),self.eval(wrds[3]),self.eval(wrds[4]),list(map(self.eval,wrds[5:])))
             else:
                 logs.log_error('axiMaster %s write got not enough words in command (%s)' % (self.Name,wrds))
         elif wrds[0]=='read':

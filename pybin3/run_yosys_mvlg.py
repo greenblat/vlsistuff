@@ -3,23 +3,25 @@
 import os,sys,string
 import logs
 
-LIB_ABC = '/Users/ilia/clients/libs/synth_libs/small28.lib'
-LIB_DFF = '/Users/ilia/clients/libs/synth_libs/dff28.lib'
+LIB_ABC = '/Users/iliagreenblat/clients/libs/synth_libs/small28.lib'
+LIB_DFF = '/Users/iliagreenblat/clients/libs/synth_libs/dff28.lib'
 
 
-LIB_ABC = '/Users/ilia/clients/yosys_libs/scmetro_abc.lib'
-LIB_DFF = '/Users/ilia/clients/yosys_libs/scmetro_dff.lib'
+LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/scmetro_abc.lib'
+LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/scmetro_dff.lib'
 
 
-LIB_ABC = '/Users/ilia/clients/yosys_libs/basic_no_timing.lib'
-LIB_DFF = '/Users/ilia/clients/yosys_libs/basic_no_timing.lib'
+LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
+LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
 
-LIB_ABC = '/Users/ilia/clients/yosys_libs/messica_no_time.lib'
-LIB_DFF = '/Users/ilia/clients/yosys_libs/messica_no_time.lib'
+LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/messica_no_time.lib'
+LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/messica_no_time.lib'
 
-LIB_ABC = '/Users/ilia/clients/yosys_libs/messica.lib'
-LIB_DFF = '/Users/ilia/clients/yosys_libs/messica.lib'
+LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/messica.lib'
+LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/messica.lib'
 
+LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/messika2.lib'
+LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/messika2.lib'
 
 INCFILE = '''
 read_liberty -lib LIB_ABC
@@ -121,7 +123,7 @@ def main():
     Finc.write(INC)
     Finc.close()
 #    os.system('/usr/local//Cellar/yosys/0.9_2/bin/yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
-    os.system('~/external_software/tmp/yosys/yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
+    os.system('yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
 #    os.system('yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
 
 helpString = '''

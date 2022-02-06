@@ -712,6 +712,16 @@ bool hasDot( char *strx) {
     return 0;
 }
 
+static PyObject*
+veri_display(PyObject *self,PyObject *args) {
+    char *pathstring;
+    if (PyArg_ParseTuple(args, "s",&pathstring)) {
+        vpi_printf("\npython: %s",pathstring);
+        return Py_BuildValue("i", 1);
+    } else {
+        return Py_BuildValue("i", 0);
+    }
+}
 
 static PyObject*
 veri_force(PyObject *self,PyObject *args) {
@@ -1278,6 +1288,8 @@ static PyMethodDef VeriMethods[] = {
      "Return the number of arguments received by the process."},
     {"hpeek", veri_hpeek, METH_VARARGS,
      "Return the number of arguments received by the process."},
+    {"display", veri_display, METH_VARARGS,
+      "Return the number of arguments received by the process."},
 
     {NULL, NULL, 0, NULL}
 };

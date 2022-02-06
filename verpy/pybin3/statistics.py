@@ -8,7 +8,7 @@ def help_main(Env):
         logs.log_info('scan %s' % Module)
         gatherInstances(Mod,Types)
     reportInstances(Types)
-#    connectivity(Mod)
+    connectivity(Mod)
 
 def connectivity(Mod):
     buildConns(Mod)
