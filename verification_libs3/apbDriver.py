@@ -41,13 +41,12 @@ class apbDriver:
         self.Caller = False
         logs.log_info('apbDriver  ver 27.apr.2021')
         self.noList = []
-        if not self.exists('pstrb'):
-            self.noList.append('pstrb')
-            logs.log_warning('NO PSTRB detected for apb master %s' % (self.Name))
 
     def onFinish(self):
         return
     def exists(self,Sig):
+        if Sig in self.renames:
+            Sig = self.renames[Sig]
         Full = '%s.%s'%(self.Path,Sig)
         X = veri.exists(Full)
         return X == '1'
@@ -103,6 +102,9 @@ class apbDriver:
         return Act
 
     def action(self,Cmd):
+        if not self.exists('pstrb'):
+            self.noList.append('pstrb')
+            logs.log_warning('NO PSTRB detected for apb master %s' % (self.Name))
         wrds = Cmd.split()
         if wrds[0]=='read':
             if len(wrds)==2:
