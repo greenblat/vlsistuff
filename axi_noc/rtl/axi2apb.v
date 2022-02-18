@@ -160,7 +160,7 @@ syncfifo_sampled #(AWIDE,4) aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(awvalid && a
 );
 assign awready = !aw_full;
 
-syncfifo_sampled #(4,4) b_fifo (.clk(clk),.rst_n(rst_n),.vldin(run_last && working_w)
+syncfifo_sampled #(4,4) b_fifo (.clk(clk),.rst_n(rst_n),.vldin((pstate==10) && run_last && working_w)
     ,.din(run_rid)
     ,.empty(b_empty),.full(panic_b_full)
     ,.readout(bready)

@@ -416,6 +416,10 @@ def asciiForce(Sig,Str):
 
    
     
+def float2hex(Float):
+    Int = float2int(Float)
+    return hex(Int)
+
 def float2int(Float):
     if Float== -1: return -1
     if ((Float & 0x7fffffff)==0): return 0

@@ -57,6 +57,7 @@ class sequenceClass:
         self.Translates['envir'] = self.envir
         self.Translates['eflash'] = self.eflash
         self.Translates['peek'] = self.seq_peek
+        self.Translates['float2int'] = logs.float2binary
         for (Nickname,Object) in AGENTS:
             self.agents[Nickname]=Object
             Object.Caller = self
@@ -318,6 +319,7 @@ class sequenceClass:
         if '#' in Line: Line = Line[:Line.index('#')]
         if '//' in Line: Line = Line[:Line.index('//')]
         logs.log_write('sequence: %s'%Line,'seq')
+#        print(lnum,Line)
         wrds = Line.split()
         if len(wrds)==0: return True
         if wrds[0] == 'seed':

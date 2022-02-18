@@ -79,7 +79,7 @@ class apbDriver:
     def translate(self,Addr):
         if ('[' in Addr):
             Bus,Ind = Addr.split('[')
-            Ind = eval(Ind[:-1])
+            Ind = self.eval(Ind[:-1])
             Base = self.translate(Bus)
             return Base + 4*Ind
 
@@ -88,10 +88,10 @@ class apbDriver:
         if Addr in self.translations:
             return self.translations[Addr][0]
         try:
-            Add = eval(Addr,self.renames)
+            Add = self.eval(Addr)
             return Add
         except:
-            logs.log_error('apb %s cannot determine "%s" address'%(self.Name,Addr))
+            logs.log_error('apbMaster "%s" cannot determine "%s" address'%(self.Name,Addr))
             return 0
 
     def marker(self,Which):
@@ -161,7 +161,7 @@ class apbDriver:
         if type(Data) is float:
             Data = logs.float2binary(Data)
         if type(Data) is str:
-            Data = eval(Data,self.renames)
+            Data = self.eval(Data,self.renames)
         self.queue1.append(('write',Addr,Data))
 
 

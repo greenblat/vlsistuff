@@ -73,7 +73,10 @@ class axiMasterClass:
         return Sig
 
     def eval(self,Expr):
-        return eval(Expr,self.defines,self.SeqObj.Translates)
+        print('EVAL',Expr)
+        Res =  eval(Expr,self.defines,self.SeqObj.Translates)
+        print('EVAL',Expr,hex(Res))
+        return Res
     def peekbin(self,Sig):
         Sig = self.rename(Sig)
         return veri.peek('%s.%s'%(self.Path,Sig))

@@ -37,6 +37,7 @@ class axiSlaveClass:
         self.busWidth = 8   # in bytes
         self.Passive = False
         self.Starvation = False
+        self.Initial = True
 
     def busy(self):
         if self.arqueue!=[]: return True
@@ -153,6 +154,11 @@ class axiSlaveClass:
         return Addr
 
     def run(self):
+        if self.Initial:
+            self.Initial = False
+            self.force('awready',1)
+            self.force('wready',1)
+            self.force('arready',1)
         if self.Starvation:
             self.force('awready',0)
             self.force('wready',0)
