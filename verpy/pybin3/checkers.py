@@ -427,6 +427,7 @@ Used={}
 Driven={}
 Mentioned={}
 def check_src_expr(Current,Item):
+    print('ITEM',Item)
     if type(Item)is tuple:
         if Item[0]=='*': return
         if Item[0]=='dotted': return
@@ -456,8 +457,6 @@ def check_src_expr(Current,Item):
             for X in Item[1:]:
                 check_src_expr(Current,X)
             return
-        if Item[0] == '*':
-            return
         if Item[0] in ['edge']:
             check_src_expr(Current,Item[2])
             return
@@ -467,12 +466,14 @@ def check_src_expr(Current,Item):
             Bus = Item[1]
             Wid = Item[2]
             check_bus_usage(Current,Bus,Wid,372)
+            check_src_expr(Current,Wid)
             Used[Bus]=1
             return
         if Item[0]=='subbit':
             Bus = Item[1]
             Wid = Item[2]
             check_bus_usage(Current,Bus,(Wid,Wid),378)
+            check_src_expr(Current,Wid)
             Used[Bus]=1
             return
         if Item[0]=='curly':
@@ -504,6 +505,13 @@ def check_src_expr(Current,Item):
         return
     elif (type(Item)is int):
         return
+    if (type(Item) is list)and(Item[0] == 'case'):
+        check_src_expr(Current,Item[1])
+        for _,Code in Item[2]:
+            check_src_expr(Current,Code)
+        return            
+        
+
     logs.log_err('check src expr %s'%str(Item))
 
 def check_bus_usage(Current,Bus,Wid,Where=0):
@@ -522,7 +530,8 @@ def check_bus_usage(Current,Bus,Wid,Where=0):
         if Wid1[0]=='double':
             (H1,L1)=Wid1[1]
         elif Wid1[0]=='packed':
-            H1 = (Wid1[1][0]+1)*(Wid1[1][0]+1)
+            print('>>>>>',Wid1)
+            H1 = (Wid1[1][0]+1)*(Wid1[2][0]+1)
             L1 = 0
         else:
             (H1,L1)=Wid1
