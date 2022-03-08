@@ -342,6 +342,7 @@ class sequenceClass:
             if len(wrds)==3:
                 Val = self.eval(wrds[2])
                 self.Translates[Var]=Val
+                logs.log_info('DBG %s %s' % (Var,Val))
             elif len(wrds)>3:
                 Val = list(map(self.eval,wrds[2:]))
                 self.Translates[Var]=Val

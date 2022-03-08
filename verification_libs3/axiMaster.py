@@ -119,7 +119,7 @@ class axiMasterClass:
             self.makeWriteIllegal(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),eval(wrds[5]),list(map(eval,wrds[6:])))
         elif wrds[0]=='write':
             if len(wrds)==3:
-                self.makeWrite(1,1,self.eval(wrds[1]),self.Size,[eval(wrds[2])])
+                self.makeWrite(1,1,self.eval(wrds[1]),self.Size,[self.eval(wrds[2])])
             elif len(wrds)>=6:
                 self.makeWrite(self.eval(wrds[1]),self.eval(wrds[2]),self.eval(wrds[3]),self.eval(wrds[4]),list(map(self.eval,wrds[5:])))
             else:
@@ -323,10 +323,9 @@ class axiMasterClass:
         if rresp!=0:
             logs.log_wrong('RRESP came back %s  ADDR=%x  rid=0x%x'%(rresp,Addr,Rid))
         
-        if Addr in self.RDATAS:
-            self.RDATAS[Addr].append(rdatax)
-        else:
-            self.RDATAS[Addr] = [rdatax]
+        ADDR = Addr + Pos * (1<<self.Size)
+        if ADDR not in self.RDATAS: self.RDATA[ADDR] = []
+        self.RDATAS[ADDR].append(rdatax)
         if rlast == 1:
             self.AREADS.pop(0)
 #        logs.log_info('ADDRDATAS %s len=%d  %s' % (hex(Addr), len(self.RDATAS[Addr]),list(map(hex,self.RDATAS.keys()))))

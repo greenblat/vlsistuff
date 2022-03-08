@@ -259,7 +259,7 @@ def print_Strings(Str):
     res.reverse()
     for _,Var,Val in res:
         X = X.replace(Var,formati(Var,Val))
-    print(X),
+    print(X[:-1])
         
 
 
