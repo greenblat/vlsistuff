@@ -873,12 +873,12 @@ def bodyDump1(Db,File,Alone):
         Default = hex(Default)[2:]
     elif (type(Default) is str):
         try:
-            Default = eval(Default)
+            Default = hex(eval(Default))
         except:
             logs.log_error('#empty of chip (default value for cases) is not a legal integer "%s"'%(Default))
             Default='0; // BAD DEFAULT %s'%Default
             
-    File.write("    %d'h%s;\n" % (Buswid,Default))
+    File.write("    %d'h%s;\n" % (Buswid,Default[-8:]))
     Str = STRING1.replace('RAMS',Db['chip'].RAMS)
     Str = Str.replace('PREADIES',makePready())
     Str = Str.replace('BUSWID',str(Buswid))

@@ -324,7 +324,7 @@ class axiMasterClass:
             logs.log_wrong('RRESP came back %s  ADDR=%x  rid=0x%x'%(rresp,Addr,Rid))
         
         ADDR = Addr + Pos * (1<<self.Size)
-        if ADDR not in self.RDATAS: self.RDATA[ADDR] = []
+        if ADDR not in self.RDATAS: self.RDATAS[ADDR] = []
         self.RDATAS[ADDR].append(rdatax)
         if rlast == 1:
             self.AREADS.pop(0)

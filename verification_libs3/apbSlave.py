@@ -34,13 +34,14 @@ class apbSlave(logs.driverClass):
                 self.pwrite = self.peek('pwrite')
         elif self.state == 'work':
             self.force('pready',1)
-            if self.pwrite == 1:
-                self.wdata = self.peek('pwdata')
-                self.RAM[self.addr] = self.wdata
-                logs.log_info('APBSLAVE %s write %x %x' % (self.Name,self.addr,self.wdata))
-            else:
-                if self.addr not in self.RAM:
-                    self.RAM[self.addr] = 0
-                self.force('prdata',self.RAM[self.addr])
-                logs.log_info('APBSLAVE %s read %x %x' % (self.Name,self.addr,self.RAM[self.addr]))
-            self.state = 'idle'
+            if self.valid('penable'):
+                if self.pwrite == 1:
+                    self.wdata = self.peek('pwdata')
+                    self.RAM[self.addr] = self.wdata
+                    logs.log_info('APBSLAVE %s write %x %x' % (self.Name,self.addr,self.wdata))
+                else:
+                    if self.addr not in self.RAM:
+                        self.RAM[self.addr] = 0
+                    self.force('prdata',self.RAM[self.addr])
+                    logs.log_info('APBSLAVE %s read %x %x' % (self.Name,self.addr,self.RAM[self.addr]))
+                self.state = 'idle'

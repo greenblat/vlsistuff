@@ -1,14 +1,11 @@
 
 import veri
-import types
-import string
 import logs
 
 
-class uartClass:
+class uartClass(logs.driverClass):
     def __init__(self,Path,Monitors,rxd='rxd',txd='txd'):
-        self.Path = Path
-        Monitors.append(self)
+        logs.driverClass.__init__(self,Path,Monitors)
         self.rxd = rxd
         self.txd = txd
         self.baudRate = 100
@@ -21,15 +18,9 @@ class uartClass:
         self.rxbyte=''
         self.force(self.rxd,1)
 
-    def busy(self):
-        return (self.txQueue==[])and(self.txWaiting==0)
-
-    def peek(self,Sig):
-        return logs.peek('%s%s'%(self.Path,Sig))
-
-    def force(self,Sig,Val):
-        veri.force('%s%s'%(self.Path,Sig),str(Val))
-
+    def busy(self,Why=False):
+        return (self.txQueue != []) or (self.rxQueue != [])
+      
     def run(self):
         self.runTx()
         self.runRx()
@@ -50,10 +41,14 @@ class uartClass:
                 Byte = ord(Byte)
                 self.send(Byte)
                 return
+            elif Byte == 'CRLF':
+                self.send(10)
+                return
             else:
                 for Chr in Byte:
                     self.send(Chr)
                 return
+        print('QQQQ',Byte)
         self.txQueue.append(0)
         for II in range(0,8):
             Val = (Byte>>II)&1
@@ -117,6 +112,8 @@ class uartClass:
                 logs.log_error('ilia rxd stop bit isnt there')
             self.rxState='idle'
 
+    def onFinish(self):
+        return
 
                 
 
