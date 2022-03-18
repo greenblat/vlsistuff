@@ -49,6 +49,7 @@ class axiMasterClass:
         self.Starvation = False
         self.arready = 0
         self.defines = {}
+        self.callback = False
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig)
@@ -73,9 +74,7 @@ class axiMasterClass:
         return Sig
 
     def eval(self,Expr):
-        print('EVAL',Expr)
         Res =  eval(Expr,self.defines,self.SeqObj.Translates)
-        print('EVAL',Expr,hex(Res))
         return Res
     def peekbin(self,Sig):
         Sig = self.rename(Sig)
@@ -326,6 +325,8 @@ class axiMasterClass:
         ADDR = Addr + Pos * (1<<self.Size)
         if ADDR not in self.RDATAS: self.RDATAS[ADDR] = []
         self.RDATAS[ADDR].append(rdatax)
+        if self.callback:
+            self.callback(ADDR,rdatax)
         if rlast == 1:
             self.AREADS.pop(0)
 #        logs.log_info('ADDRDATAS %s len=%d  %s' % (hex(Addr), len(self.RDATAS[Addr]),list(map(hex,self.RDATAS.keys()))))
