@@ -161,6 +161,18 @@ assign b_arid = work_arid;
 assign c_arid = work_arid;
 assign d_arid = work_arid;
 
+wire back_r_empty,back_r_full;
+wire [1:0] back_r;
+wire back_rtaken;
+syncfifo #(2,6) back_r_fifo (.clk(clk),.rst_n(rst_n),.vldin(readout_ar_fifo)
+    ,.din(work_araddr[AWID-1:AWID-2])
+    ,.empty(back_r_empty),.full(back_r_full)
+    ,.readout(back_rtaken)
+    ,.dout(back_r)
+    ,.count() ,.softreset(1'b0) ,.overflow()
+);
+
+
 wire [DWID+4+2+1 - 1:0] a_r_new_entry,b_r_new_entry,c_r_new_entry,d_r_new_entry;
 wire a_rtaken,b_rtaken,c_rtaken,d_rtaken;
 syncfifo #(DWID+4+2+1,2) a_r_fifo (.clk(clk),.rst_n(rst_n),.vldin(a_rvalid && a_rready)
@@ -204,18 +216,20 @@ assign d_rready = !d_r_full;
 
 wire r_vldin = !a_r_empty || !b_r_empty || !c_r_empty || !d_r_empty;
 
+
 wire [DWID+4+2+1 -1 : 0] r_new_entry = 
-    !a_r_empty ? a_r_new_entry :
-    !b_r_empty ? b_r_new_entry :
-    !c_r_empty ? c_r_new_entry :
-    !d_r_empty ? d_r_new_entry :
+    ((back_r == 0) && !a_r_empty) ? a_r_new_entry :
+    ((back_r == 1) && !b_r_empty) ? b_r_new_entry :
+    ((back_r == 2) && !c_r_empty) ? c_r_new_entry :
+    ((back_r == 3) && !d_r_empty) ? d_r_new_entry :
     0;
 
-assign a_rtaken = !r_full && !a_r_empty;
-assign b_rtaken = !r_full && !b_r_empty && a_r_empty;
-assign c_rtaken = !r_full && !c_r_empty && a_r_empty && b_r_empty;
-assign d_rtaken = !r_full && !d_r_empty && a_r_empty && b_r_empty && c_r_empty ;
+assign a_rtaken = (back_r == 0) && !r_full && !a_r_empty;
+assign b_rtaken = (back_r == 1) && !r_full && !b_r_empty;
+assign c_rtaken = (back_r == 2) && !r_full && !c_r_empty;
+assign d_rtaken = (back_r == 3) && !r_full && !d_r_empty;
 
+assign back_rtaken = r_vldin && r_new_entry[DWID+4+2+1-1] && !r_full;
 syncfifo #(DWID+4+2+1,4) r_fifo (.clk(clk),.rst_n(rst_n),.vldin(r_vldin)
     ,.din(r_new_entry)
     ,.empty(r_empty),.full(r_full)
