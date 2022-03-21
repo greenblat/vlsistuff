@@ -203,6 +203,7 @@ def main():
             
             
 #    Thr = threading.Thread.start(execute_terminal_commands)
+    Glbs.set_context("use_command_words", use_command_wrds)
     thread1.start()
     work()
     

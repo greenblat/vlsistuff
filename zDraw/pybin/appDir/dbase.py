@@ -4,7 +4,7 @@ import os,sys,math,copy
 from renders import screen2schem,schem2screen
 
 from drawVectorText import make_text_vectors
-from pygameGeoms import screenShot
+from pygameGeoms import screenShot,draw_text
 import helpString
 import logs
 
@@ -193,7 +193,7 @@ class InstanceClass:
         X2,Y2 = putOnGrid((X1,Y1))
         self.Point = X2,Y2
         self.bbox0=False
-        self.recompute_wires()
+        self.recompute_wires(Dx,Dy)
         Root=get_context('root')
         for Key in Glbs.details[Root].params:
             if Glbs.details[Root].params[Key].Owner==self.Inst:
@@ -203,14 +203,14 @@ class InstanceClass:
         NewRot = merge_rot(self.Rot,What)
         self.Rot=NewRot
         self.bbox0=False
-        self.recompute_wires()
+        self.recompute_wires(0,0)
 
 
     def it_is_me(self,Wire):
         ww = Wire.split('.')
         return ww[0]==self.Inst
         
-    def recompute_wires(self):
+    def recompute_wires(self,Dx,Dy):
         for Wire in self.Father.wires:
             WW = self.Father.wires[Wire]
             Start=WW.Start
@@ -218,6 +218,10 @@ class InstanceClass:
                 X,Y = get_pin_location(self.Father.Module,Start)
                 self.Father.wires[Wire].List = [(X,Y)]+self.Father.wires[Wire].List[1:]
 #                self.Father.wires[Wire].List =[]
+                Root=get_context('root')
+                for Key in Glbs.details[Root].params:
+                    if Glbs.details[Root].params[Key].Owner==Wire:
+                        Glbs.details[Root].params[Key].move(Dx,Dy)
             End=WW.End
             if self.it_is_me(End):
                 X,Y = get_pin_location(self.Father.Module,End)
@@ -758,6 +762,8 @@ class DetailClass:
             return 'inst',self.instances[Inst]
         if Inst in self.geoms:
             return 'geom',self.geoms[Inst]
+        if Inst in self.wires:
+            return 'wire',self.wires[Inst]
         return False,False
 
 
@@ -1318,6 +1324,20 @@ def duplicate_inst(From,PP):
 def use_keystroke(Uni,Ord,XY):
 #    print('KEY',Uni,Ord,XY)
     X,Y = XY
+    if get_context("state") == "textonscreen":
+        if Ord == 13:
+            set_context("state", "idle")
+            executeOnScreen()
+            return
+        Was = get_context("onscreen")
+        if Ord == 8:
+            Was = Was[:-1]
+        else:
+            Was += Uni
+        set_context("onscreen", Was)
+        displayOnScreen()
+        return
+
     if Uni != '':
         Glbs.lastKeys.append(Uni)
         while len(Glbs.lastKeys)>3:
@@ -1688,7 +1708,7 @@ def use_keystroke(Uni,Ord,XY):
                 set_context('grouping',[P0,P1,List])
             else:
                 Psch = screen2schem((X,Y))
-                set_context('grouping',[P0,Psch,_])
+                set_context('grouping',[P0,Psch,'_'])
                 Included = Glbs.details[Root].select_enclosed(P0,Psch)  
                 set_context('grouping',[P0,Psch,Included])
                 Glbs.set_context('banner','%s: grouping (%d)'%(Root,len(Included)))
@@ -1875,11 +1895,40 @@ def use_keystroke(Uni,Ord,XY):
                     logs.log_info('  %s'%(' '.join(Matches[:5])))
                     Matches = Matches[5:]
                 logs.log_info('  %s'%(' '.join(Matches)))
+    elif Uni == ":": 
+        set_context("state", "textonscreen")
+        set_context("onscreen", ":") 
+        displayOnScreen()
+        Glbs.graphicsChanged = True 
     elif Uni == '':
         if Ord not in [0x400000e1]:
             logs.log_info('key ord (%d) not used'%(Ord))
     else:
         logs.log_info('key "%s" (%d) not used'%(Uni,ord(Uni)))
+
+
+def displayOnScreen() -> None:
+    Was = get_context("onscreen")
+    draw_text(":                                     ", 10, 80, "black")
+    draw_text(Was, 10, 80, "black")
+
+
+def executeOnScreen() -> None:
+    Was = get_context("onscreen")
+    Was = Was[1:]
+    wrds = splitLine(Was)
+    use_command_wrds = Glbs.get_context("use_command_words")
+    use_command_wrds(wrds)
+    set_context("onscreen", ":")
+
+
+def use_textonscreen():
+    if get_context("state") == "textonscreen":
+        displayOnScreen()
+    else:
+        set_context("onscreen", "")
+        displayOnScreen()
+
 
 
 def findMatches(What):
