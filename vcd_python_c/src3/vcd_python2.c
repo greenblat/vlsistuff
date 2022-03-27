@@ -852,9 +852,12 @@ void drive_value(char *Val,char *Code,int forReal) {
 
 void armTriggers(int P,char *Val) {
     for (int ii=0;ii<psensitive;ii++) {
-        int AA = (sensitives[ii]==P);
+        long LP = (long) P;
+        int AA = (sensitives[ii]== LP);
         int BB = (sensitive_value[ii]==Val[0]);
         int Cond = AA && BB;
+        if (AA)
+            printf(">>>> p=%d sens=%ld cond=%d ii=%d aa=%d  bb=%d sens=%d act=%d\n",P,sensitives[ii],Cond,ii,AA,BB,sensitive_value[ii],Val[0]);
         if (Cond) {
             armed[ii]=1;
         }

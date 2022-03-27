@@ -90,7 +90,7 @@ class axiMasterClass:
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
     def action(self,Txt):
         wrds = Txt.split()
-        logs.log_info('ACTION %s' % Txt)
+        logs.log_debug('%s ACTION %s' % (self.Name,Txt),'dbg')
         if wrds[0] == 'starvation':
             if wrds[1] in [1,'1','on']:
                 self.Starvation = True
@@ -124,11 +124,11 @@ class axiMasterClass:
             else:
                 logs.log_error('axiMaster %s write got not enough words in command (%s)' % (self.Name,wrds))
         elif wrds[0]=='read':
-            Burst = eval(wrds[1])
-            Len   = eval(wrds[2])
-            Addr  = eval(wrds[3])
+            Burst = self.eval(wrds[1])
+            Len   = self.eval(wrds[2])
+            Addr  = self.eval(wrds[3])
             if len(wrds)>=5:
-                Size = eval(wrds[4])
+                Size = self.eval(wrds[4])
             else:
                 Size = self.Size
             self.makeRead(Burst,Len,Addr,Size,self.Rid)
@@ -190,20 +190,20 @@ class axiMasterClass:
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
         self.Bscore.append((self.Rid,Address))
         self.writeDatasLoop(actualLen,Size,Address,Wdatas)
-        logs.log_info('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)))
+        logs.log_debug('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)),'dbg')
 
     def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
         if Len==0: 
             logs.log_error('axiMaster %s makeWrite got zero length request at addr=%x ' % (self.Name,Address))
             return
-        logs.log_info('makeWrite %x %x %x %x %s' % (Burst,Len,Address,Size,Wdatas))
+        logs.log_debug('makeWrite %x %x %x %x %s' % (Burst,Len,Address,Size,Wdatas),'dbg')
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
         self.Bscore.append((self.Rid,Address))
         if Len<=0:
             logs.log_warning('axiMaster %s got len=%d for write'%(self.Name,Len))
         self.writeDatasLoop(Len,Size,Address,Wdatas)
-        logs.log_info('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)))
+        logs.log_debug('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)),'dbg')
 
     def writeDatasLoop(self,Len,Size,Address,Wdatas):
         for ii in range(Len):
@@ -245,7 +245,7 @@ class axiMasterClass:
         self.Queue.append(('w','force %s=%s'%(Net,Val)))
 
     def run(self):
-#        logs.log_info('runn lenaw=%d lenar=%d lenq=%d lenw=%d'%(len(self.awQueue),len(self.arQueue),len(self.Queue),len(self.wQueue)))
+#        logs.log_debug('runn lenaw=%d lenar=%d lenq=%d lenw=%d'%(len(self.awQueue),len(self.arQueue),len(self.Queue),len(self.wQueue)),'dbg')
         if self.Starvation:
             self.force('rready',0)
             self.force('bready',0)
@@ -341,7 +341,7 @@ class axiMasterClass:
                 self.awQueue.append(Cmd)
             elif Dst=='ar':
                 self.arQueue.append(Cmd)
-                logs.log_info('ARQUEUE %s' % Cmd)
+                logs.log_debug('ARQUEUE %s' % Cmd,'dbg')
             elif Dst=='w':
                 self.wQueue.append(Cmd)
             else:
@@ -435,6 +435,7 @@ class axiMasterClass:
             pass
         elif (wrds[0]=='force'):
             self.forces(wrds[1:])
+            logs.log_debug('DBG AR %s' % str(wrds),'dbg')
         self.ARVALID = ('arvalid=1' in Cmd)
         self.arready = self.peek('arready')
 

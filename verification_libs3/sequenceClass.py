@@ -253,11 +253,20 @@ class sequenceClass:
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
     def exists(self,Sig):
+        if Sig.startswith(self.Path+'.'):
+            Sig = Sig.replace(self.Path+'.','')
+        elif Sig.startswith(self.Path):
+            Sig = Sig.replace(self.Path,'')
+            
         Full = '%s.%s'%(self.Path,Sig)
         if veri.exists(Full)=='0': return False
         return True
 
     def peek(self,Sig):
+        if Sig.startswith(self.Path+'.'):
+            Sig = Sig.replace(self.Path+'.','')
+        elif Sig.startswith(self.Path):
+            Sig = Sig.replace(self.Path,'')
         Full = '%s.%s'%(self.Path,Sig)
         if veri.exists(Full)=='0': return False
         Val = hex(logs.peek(Full))
@@ -278,6 +287,11 @@ class sequenceClass:
                     Val = self.evalStr(Txt,self.Translates)
                     return Val
                 except:
+                    X =  self.exists(Txt)
+                    if X:
+                        return self.peek(Txt)
+
+
                     if Bad:
                         logs.log_error('failed eval of "%s"' % str(Txt))
                     return Txt
