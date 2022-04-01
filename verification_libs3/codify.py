@@ -9,8 +9,12 @@ def main():
     Fout = open('myproc.py','w')
     lines = File.readlines()
     File.close()
+    Pref = ''
     for line in lines:
-        Fout.write(line)
+        if line.startswith('    def code_source'):
+            Pref = '#'
+        Fout.write(Pref+line)
+    Fout.write('\n\n')
     LL = getLines(lines)
     LL.append('        self.Done = True')
     LL.append("        yield 'NotOk'")
@@ -48,34 +52,38 @@ def getLines(lines):
 def work(Lines):
     Res = [Lines[0]]
     for line in Lines[1:]:
-        if ('axi_read' in line):
-            Res.extend(axi_read(line))
-        elif ('axi_write' in line):
-            Res.extend(axi_write(line))
-        elif '        posedge(' in line:
-            Res.extend(posedge(line))
-        elif '        negedge(' in line:
-            Res.extend(negedge(line))
+        ww = line.split()
+        if (ww!=[])and(ww[0][0] == '$'):
+#            lll = line[line.index('$')+1:]
+            lll = line.lstrip()
+            Mid = eval(lll[1:])
+            More = adjustIndent(line,Mid)
+            Res.extend(More)
         else:
             Res.append(line)
     return Res
 
-def axi_write(line):
-    pos = line.replace('(',' ')
-    pos = pos.replace(')',' ')
-    pos = pos.replace(',',' ')
-    wrds = pos.split()
-    Addr = cleanit(wrds[-2])
-    Data = cleanit(wrds[-1])
-    codex = AXI_WRITE.replace('VAR',Addr)
-    codex = codex.replace('DATA',Data)
-    return adjustIndent(line,codex)
+def axi_read(Addr,Beats=1):
+    Str = AXI_READ.replace('ADDR',str(Addr))
+    Str = Str.replace('BEATS',str(Beats))
+    pos = str(Addr)
+    for Chr in '+-*':
+        pos = pos.replace(Chr,'_')
+    Str = Str.replace('VAR',pos)
+    return Str
+     
+
+def axi_write(Addr,Data):
+    codex = AXI_WRITE.replace('VAR',str(Addr))
+    codex = codex.replace('DATA',str(Data))
+    return codex
 
 def cleanit(Txt):
     Txt = Txt.replace('"','')
     Txt = Txt.replace("'",'')
     return Txt
-def axi_read(line):
+
+def __axi_read(line):
     pos = line[line.index('axi_read')+9:]
     pos = pos[:pos.index(')')]
     pos = cleanit(pos)
@@ -87,21 +95,13 @@ def axi_read(line):
     
 
 
-def posedge(line):
-    Expr = line[line.index('(')+1:]
-    Expr = Expr[:Expr.index(')')]
-    Expr = Expr.replace('"','')
-    Expr = Expr.replace("'",'')
+def posedge(Expr):
     Pos = POS.replace('EXPR',Expr)
-    return adjustIndent(line,Pos)
+    return Pos
 
-def negedge(line):
-    Expr = line[line.index('(')+1:]
-    Expr = Expr[:Expr.index(')')]
-    Expr = Expr.replace('"','')
-    Expr = Expr.replace("'",'')
+def negedge(Expr):
     Pos = NEG.replace('EXPR',Expr)
-    return adjustIndent(line,Pos)
+    return Pos
 
 def adjustIndent(line,LLs):
     LL =  LLs.split('\n')
@@ -131,10 +131,10 @@ while self.valid("EXPR"):
 '''
 
 AXI_READ = '''
-self.issue('%s read 1 1 XL+VAR1 2' % self.Axi)
+self.issue('%s read 1 BEATS ADDR 2' % self.Axi)
 self.armCallback = True
 yield 'Ok'
-self.VAR2 = self.Data
+self.VAR = self.Data
 '''
 
 AXI_WRITE = '''

@@ -11,7 +11,8 @@ class i2cSlaveClass(logs.driverClass):
         self.Queue = []
         self.bitqueue = []
         self.Renames = Renames
-        self.force('sda_out',1)
+        self.force('sda_slave',1)
+        self.ACK = True
         self.Freq =Freq
         self.RX = []
         self.Check = False
@@ -19,6 +20,13 @@ class i2cSlaveClass(logs.driverClass):
         self.SCL = '1111'
         self.BYTE = ''
         self.state = 'idle'
+
+    def action(self,Txt):
+        wrds = Txt.split()
+        if wrds[0] == 'ack':
+            self.ACK = eval(wrds[1])
+        else:
+            logs.log_error('i2cSlave action not recognized "%s" ' % Txt)
 
     def force(self,Sig,Val):
         if Sig in self.Renames: Sig = self.Renames[Sig]
@@ -74,7 +82,7 @@ class i2cSlaveClass(logs.driverClass):
                 if self.state == 'stop':
                     self.state = 'idle'
                 else:
-                    logs.log_error('expected stop state (%s)' % self.state)
+                    logs.log_info('expected stop state (actual state of i2c slave: %s)' % self.state)
                     self.state = 'idle'
             if self.SDA == '1100':
                 logs.log_info('START %s ' %self.state)
@@ -83,7 +91,14 @@ class i2cSlaveClass(logs.driverClass):
                 self.BYTE = ''
         elif self.SCL == '0000':
             if len(self.BYTE) == 8:
-                self.force('sda_slave',0)
+                if self.ACK:
+                    if self.state in [ 'readinglo','readinghi']:
+                        logs.log_info('ACK state = %s sda=%s' % (self.state,sda))
+                        self.force('sda_slave',1)
+                    else:
+                        self.force('sda_slave',0)
+                else:
+                    self.force('sda_slave',1)
             else:
                 self.force('sda_slave',1)
         elif self.SCL == '0011':

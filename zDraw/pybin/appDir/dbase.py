@@ -148,12 +148,19 @@ class InstanceClass:
             List = [(X0,Y0),(X0,Y1),(X1,Y1),(X1,Y0),(X0,Y0)]
             render_aline(Matrix,List,get_context('geom_color'))
 
-
     def postscript(self,File):
         Color = get_context('instance_color')
         Mat3 = instmatrix(self.Mag,self.Point,self.Rot,UnitMatrix)
         if self.Type in Glbs.pictures:
-            Glbs.pictures[self.Type].postscript(File,Mat3,Color)
+            count = 0
+            if self.Type == 'node':
+                for Wire in self.Father.wires:
+                    if self.Father.wires[Wire].End == self.Inst:
+                        count += 1
+                    if self.Father.wires[Wire].Start == self.Inst:
+                        count += 1
+            if count!=2: 
+                Glbs.pictures[self.Type].postscript(File,Mat3,Color)
 
 
 
@@ -272,7 +279,16 @@ class WireClass:
         postscript_aline(File,self.List,Color)
         Glbs.Svg.x_aline(self.List,Color)
 
-        if get_context('wire_direction'):
+        Circle = True
+        End = self.End
+        if '.' in End:
+            Circle = True
+        else:
+            if (End in self.Father.instances) and (self.Father.instances[End].Type == 'node'):
+                Circle = False
+                
+
+        if get_context('wire_direction') and Circle:
             Last = self.List[-1]
             postscript_circle(File,Last,(Last[0],Last[1]+0.2),Color)
             Glbs.Svg.x_circle(Last,(Last[0],Last[1]+0.2),Color)
@@ -836,6 +852,7 @@ class DetailClass:
         self.bbox0= [(min(X0,X2),min(Y0,Y2)),(max(X1,X3),max(Y1,Y3))]
 
     def save(self,File):
+        self.clean_stuff()
         File.write('schematic %s\n'%self.Module)
         for Inst in self.instances:
             self.instances[Inst].save(File)
@@ -975,7 +992,22 @@ class DetailClass:
 #                    if self.params[Key].Owner==Inst:
 #                        self.params[Key].move(Dx,Dy)
                 
-
+    def clean_stuff(self):
+        Keep = {}
+        Dels = []
+        for Wire in self.wires:
+            End = self.wires[Wire].End
+            Start = self.wires[Wire].Start
+            X = [End,Start]
+            X.sort()
+            X = tuple(X)
+            if X in Keep:
+                was = Keep[X]
+                if Wire != was:
+                    Dels.append(Wire)
+        for Wire in Dels:
+            self.wires.pop(Wire)
+        print('cleaned %d' % len(Dels))
 
 
 def point_on_section(Point,Pa,Pb):

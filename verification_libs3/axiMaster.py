@@ -16,6 +16,7 @@ axi.wait(100)
 import os,sys
 import logs
 import veri
+import traceback
 
 class axiMasterClass:
     def __init__(self,Path,Monitors,Prefix='',Suffix='',Name='"no given name"'):
@@ -184,6 +185,8 @@ class axiMasterClass:
         self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
         Mask = (1<<len(self.peekbin('arid')))-1
         self.Rid = Mask & (1+self.Rid)
+        logs.log_info('%s makeRead %x %x %x %x' % (self.Name, Burst,Len,Address,Size),'dbg')
+#        traceback.print_stack()
 
     def makeWriteIllegal(self,Burst,Len,actualLen,Address,Size=4,Wdatas=[]):
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
@@ -196,7 +199,7 @@ class axiMasterClass:
         if Len==0: 
             logs.log_error('axiMaster %s makeWrite got zero length request at addr=%x ' % (self.Name,Address))
             return
-        logs.log_debug('makeWrite %x %x %x %x %s' % (Burst,Len,Address,Size,Wdatas),'dbg')
+        logs.log_info('%s makeWrite %x %x %x %x %s' % (self.Name, Burst,Len,Address,Size,list(map(hex,Wdatas))),'dbg')
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
         self.Bscore.append((self.Rid,Address))

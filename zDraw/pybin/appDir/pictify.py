@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python3.10
 
 import os,sys
 import logs

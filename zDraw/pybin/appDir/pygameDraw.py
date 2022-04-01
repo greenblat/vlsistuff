@@ -421,6 +421,8 @@ def initFun():
 #    glLoadIdentity()
 #    gluOrtho2D(0.0,Glbs.width,0.0,Glbs.height)
 
+Dir = os.path.dirname(__file__)
+Img = pygame.image.load("%s/frog.png" % Dir)
 
 
 def on_draw():
@@ -439,6 +441,7 @@ def on_draw():
     initFun()
     Screen = Glbs.get_context('screen')
     Screen.fill((255,255,255))
+    Screen.blit(Img, (10, 30))
     WW,HH = int(Glbs.width*Glbs.wratio),int(Glbs.height*Glbs.hratio)
     pygameGeoms.draw_label(Glbs.get_context('banner',Glbs.Banner),200,15,'magenta','center',13)
     pygameGeoms.draw_horizontal(0,WW,20,'magenta')
@@ -611,6 +614,8 @@ def __use_command_wrds(wrds):
             Glbs.details[Root].touched(False)
         except:
             logs.log_info('Failed to open "%s" for saving' % Fname)
+            X = sys.exc_info()
+            traceback.print_exception(X[0],value=X[1],tb=X[2])
     elif wrds[0]=='change':
         List = list(Glbs.details.keys())
         List.sort()

@@ -48,7 +48,6 @@ class uartClass(logs.driverClass):
                 for Chr in Byte:
                     self.send(Chr)
                 return
-        print('QQQQ',Byte)
         self.txQueue.append(0)
         for II in range(0,8):
             Val = (Byte>>II)&1
