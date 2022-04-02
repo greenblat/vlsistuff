@@ -236,75 +236,65 @@ class connectivityClass:
             for (Prm,Val) in Params:
                 if Prm=='delay': return '#(%s) ' % Val
         return ''
-##     def dumpRtlVerilog(self,File):
-##         for Inst in self.Mod.instances:
-##             Obj = self.Mod.instances[Inst]
-##             Type = Obj.Type
-##             Obj.conns = {}
-##             Dly = self.getDelay(Inst)
-##             if Inst in self.Conns:
-##                 Pins  = self.Conns[Inst]
-##                 Obj.conns = Pins
-##             if Type in ['gnd','vcc','input','output','node','inout']:
-##                 pass
-##             elif Type.startswith('nand'):
-##                 O,Ins  = typicalConns(Obj.conns,'&')
-##                 File.write('assign %s%s = ~(%s);\n' % (Dly,O,Ins))
-##             elif Type.startswith('and'):
-##                 O,Ins  = typicalConns(Obj.conns,'&')
-##                 File.write('assign %s%s = %s;\n' % (Dly,O,Ins))
-##             elif Type.startswith('nor'):
-##                 O,Ins  = typicalConns(Obj.conns,'|')
-##                 File.write('assign %s%s = ~(%s);\n' % (Dly,O,Ins))
-##             elif Type.startswith('or'):
-##                 O,Ins  = typicalConns(Obj.conns,'|')
-##                 File.write('assign %s%s = %s;\n' % (Dly,O,Ins))
-##             elif Type.startswith('xor'):
-##                 O,Ins  = typicalConns(Obj.conns,'^')
-##                 File.write('assign %s%s = %s;\n' % (Dly,O,Ins))
-##             elif Type.startswith('xnor'):
-##                 O,Ins  = typicalConns(Obj.conns,'^')
-##                 File.write('assign %s%s = ~(%s);\n' % (Dly,O,Ins))
-##             elif Type.startswith('inv'):
-##                 O,Ins  = typicalConns(Obj.conns,'&')
-##                 File.write('assign %s%s = ~%s;\n' % (Dly,O,Ins))
-##             elif Type.startswith('buf'):
-##                 O,Ins  = typicalConns(Obj.conns,'&')
-##                 File.write('assign %s%s = %s;\n' % (Dly,O,Ins))
-##             elif Type == 'flop':
-##                 ensureExists(Obj,Inst,'ck d q')
-##                 Ck = Obj.conns['ck']
-##                 D = Obj.conns['d']
-##                 Q = Obj.conns['q']
-##                 File.write('reg %s; assign %s%s = %s;\n' % (Inst,Dly,Q,Inst))
-##                 File.write('always @(posedge %s) %s <= %s;\n' % (Ck,Inst,D))
-##             elif Type == 'dffr':
-##                 ensureExists(Obj,Inst,'ck d q rn')
-##                 Ck = Obj.conns['ck']
-##                 D = Obj.conns['d']
-##                 Q = Obj.conns['q']
-##                 RN = Obj.conns['rn']
-##                 File.write('reg %s; assign %s%s = %s;\n' % (Inst,Dly,Q,Inst))
-##                 File.write('always @(posedge %s or negedge %s) if (!%s) %s <= 0; else %s <= %s;\n' % (Ck,RN,RN,Inst,Inst,D))
-##             elif Type == 'dffs':
-##                 ensureExists(Obj,Inst,'ck d q sn')
-##                 Ck = Obj.conns['ck']
-##                 D = Obj.conns['d']
-##                 Q = Obj.conns['q']
-##                 SN = Obj.conns['sn']
-##                 File.write('reg %s; assign %s%s = %s;\n' % (Inst,Dly,Q,Inst))
-##                 File.write('always @(posedge %s or negedge %s) if (!%s) %s <= 1; else %s <= %s;\n' % (Ck,SN,SN,Inst,Inst,D))
-##             elif Type == 'mux2':
-##                 ensureExists(Obj,Inst,'i0 i1 s o')
-##                 i0 = Obj.conns['i0']
-##                 i1 = Obj.conns['i1']
-##                 s = Obj.conns['s']
-##                 o = Obj.conns['o']
-##                 File.write('assign %s%s = %s ? %s : %s;\n' % (Dly,o,s,i1,i0))
-##             elif list(Obj.conns.keys()) != []:
-##                 self.dumpInstance(Inst,File)
-##             else:
-##                print('warning! %s ignored for rtl verilog %s %s' % (Type,Inst,Obj.conns)) 
+
+    def createModuleClass(self):
+        self.Modx = module_class.module_class(self.Mod.Module)
+        for Inp in self.Inps:
+            self.Modx.add_sig(Inp, "input", 0)
+        for Out in self.Outs:
+            self.Modx.add_sig(Out, "output", 0)
+        for Out in self.Inouts:
+            self.Modx.add_sig(Out, "inout", 0)
+
+        for Pragma in self.Mod.geoms:
+            Txt = Pragma
+            Txt = Txt.replace('"', "")
+            if "<assign>" in Txt:
+                Txt = Txt[8:]
+                Txt = Txt.strip()
+                Txt = Txt.replace("  ", " ")
+                Wrds = Txt.split("=")
+                Dst = Wrds[0].strip()
+                Src = " ".join(Wrds[1:])
+                self.Modx.add_sig(Dst, "wire", 0)
+                self.Modx.hard_assigns.append((Dst, Src, "", ""))
+            elif Txt.startswith("parameter"):
+                X = Txt.replace("parameter ", "")
+                W = X.split("=")
+                if len(W) == 2:
+                    try:
+                        W1 = eval(W[1])
+                    except Exception:
+                        W1 = W[1]
+                    self.Modx.parameters[W[0]] = W1
+                else:
+                    logs.log_error("parameter string '%s' is wrong" % Txt)
+        for Inst in self.Mod.instances:
+            Obj = self.Mod.instances[Inst]
+            Type = Obj.Type
+            Obj.conns = {}
+            if Inst in self.Conns:
+                Pins = self.Conns[Inst]
+                Obj.conns = Pins
+            if Type in ["gnd", "vcc"]:
+                pass
+            elif Type in ["antenna", "input", "output", "node", "inout"]:
+                pass
+            else:
+                self.Modx.add_inst(Type, Inst)
+                if Inst in self.Conns:
+                    Pins = self.Conns[Inst]
+                    for Pin in Pins:
+                        if Type not in self.Glbs.pictures:
+                            self.Glbs.try_load_picture(Type)
+                        if Pin in self.Glbs.pictures[Type].pins:
+                            Sig = Pins[Pin]
+                            self.Modx.add_conn(Inst, Pin, Sig)
+            if Inst in self.Params:
+                Params = self.Params[Inst]
+                for (Prm, Val) in Params:
+                    self.Modx.add_inst_param(Inst, Prm, Val)
+        return self.Modx
 
     def dumpVerilog(self,File,Rtl,User):
         if User:
@@ -314,9 +304,12 @@ class connectivityClass:
             newRtl.createNewRtl(self.Modx)
             self.Modx.dump_verilog(File)
         else:
-            self.dumpVerilogHeader(File)
-            self.dumpGlvVerilog(File)
-            File.write('endmodule\n')
+            print('CCCCCC')
+            Modx = self.createModuleClass()
+            Modx.dump_verilog(File)
+#            self.dumpVerilogHeader(File)
+#            self.dumpGlvVerilog(File)
+#            File.write('endmodule\n')
 
     def dumpGlvVerilog(self,File):
         for Inst in self.Mod.instances:
@@ -360,7 +353,7 @@ class connectivityClass:
                  
             File.write(');\n')
 
-    def createModuleClass(self):
+    def __createModuleClass(self):
         self.Modx = module_class.module_class(self.Mod.Module)
         for Inp in self.Inps:
             self.Modx.add_sig(Inp,'input',0)
