@@ -251,10 +251,17 @@ class WireClass:
         self.selected=What
 
     def get_wire_list(self):
-        if (self.List==[]):
+        if (len(self.List) <= 2):
             P0=get_pin_location(self.Father.Module,self.Start)
             P1=get_pin_location(self.Father.Module,self.End)
-            self.List=[P0,P1]
+            X0,Y0 = P0
+            X1,Y1 = P1
+            if (X0==X1)or(Y0==Y1) or not Glbs.get_context('useManhattenWires'): 
+                 return [P0,P1]
+            Xmid = (X0+X1)/2
+            P01 = (Xmid,Y0)
+            P10 = (Xmid,Y1)
+            return [P0,P01,P10,P1]
         return self.List
 
     def origin(self):
@@ -262,22 +269,23 @@ class WireClass:
         return L[0]
 
     def draw(self,Matrix):
-        self.get_wire_list()
+        List = self.get_wire_list()
+        print('DRAW',List)
         if self.selected:
             Color=RED_COLOR
         else:
             Color=get_context('wire_color')
-        render_aline(Matrix,self.List,Color)
+        render_aline(Matrix,List,Color)
         if get_context('wire_direction'):
             Last = self.List[-1]
             render_circle(Matrix,Last,(Last[0],Last[1]+0.2),Color)
 
 
     def postscript(self,File):
-        self.get_wire_list()
+        List = self.get_wire_list()
         Color = get_context('wire_color')
-        postscript_aline(File,self.List,Color)
-        Glbs.Svg.x_aline(self.List,Color)
+        postscript_aline(File,List,Color)
+        Glbs.Svg.x_aline(List,Color)
 
         Circle = True
         End = self.End
@@ -677,6 +685,10 @@ class DetailClass:
         self.is_touched=False
         self.drawBoxes=False
 
+    def recompute_wires(self):
+        for Inst in self.instances:
+            self.instances[Inst].recompute_wires(0,0)
+
     def copy(self):
         Copy = DetailClass(self.Module)
         Copy.bbox0 = self.bbox0
@@ -993,6 +1005,7 @@ class DetailClass:
 #                        self.params[Key].move(Dx,Dy)
                 
     def clean_stuff(self):
+        self.recompute_wires()
         Keep = {}
         Dels = []
         for Wire in self.wires:
@@ -1051,12 +1064,14 @@ def load_dbase_file(Fname):
         Dir = extract_dir(Fname)
         for Sch in New:
             Glbs.associated_dir[Sch]=Dir
+            Glbs.details[Sch].recompute_wires()
 
         Glbs.graphicsChanged=True
     elif ('.' not in Fname)and(os.path.exists('%s.zdraw'%Fname)):
         File=open('%s.zdraw'%Fname)
         load_dbase_file__(File)
         Glbs.graphicsChanged=True
+        Glbs.details[Fname].recompute_wires()
     else:
         logs.log_error('cannot open "%s"'%Fname)
         return False
@@ -1411,7 +1426,6 @@ def use_keystroke(Uni,Ord,XY):
 
 
         (Who,Inst)= select_object((X,Y))
-        print('>>>>>>>>',Who,Inst)
         if (Who):
             Glbs.graphicsChanged=True
             if (Who=='instance'):
@@ -1808,6 +1822,8 @@ def use_keystroke(Uni,Ord,XY):
             unset_context('grouping')
             set_context('state','idle')
             set_context('banner','%s : unset grouping'%(Root))
+    elif (Uni == 'M'):
+        Glbs.set_context('useManhattenWires',not Glbs.get_context('useManhattenWires'))
     elif (Uni == 'V'):
         Glbs.set_context('useVectorText',not Glbs.get_context('useVectorText'));
     elif (Uni == 'C'):

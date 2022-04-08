@@ -77,22 +77,25 @@ Mstuff :
 // Define : backtick_undef token | backtick_define token Expr | backtick_include Expr | backtick_timescale  number token '/' number token  ;
 Define : define string | define token | define token Expr | define  number token '/' number token  ;
 Initial : initial Statement ;
+OneDef : token | token '=' Expr ;
+ManyDefs : ManyDefs ',' OneDef | OneDef ;
 Definition : 
       ExtDir Tokens_list ';'
-    | event Tokens_list ';'
-    | IntDir Tokens_list ';'
-    | IntDir Tokens_list '=' Expr ';'
     | ExtDir Width Tokens_list ';'
     | ExtDir Width Tokens_list Width ';'
-    | IntDir Width Tokens_list ';'
-    | IntDir Width token '=' Expr ';'
+    | event Tokens_list ';'
+    | IntDir ManyDefs ';'
+    | IntDir Width ManyDefs ';'
+    | IntDir Width Width ManyDefs ';'
+//    | IntDir Tokens_list '=' Expr ';'
+//    | IntDir Width token '=' Expr ';'
     | IntDir Width token Width ';'
-    | IntDir Width Width Tokens_list ';'
-    | IntDir Width Width token '=' Expr ';'
+//    | IntDir Width Width Tokens_list ';'
+//    | IntDir Width Width token '=' Expr ';'
     | IntDir token Width ';'
     | IntDir InstParams Tokens_list ';'
     | IntDir InstParams token '=' Expr ';'
-    | token domino token token ';'
+//    | token domino token token ';'
     ;
 
 Assign : 
@@ -203,7 +206,7 @@ GenStatements : GenStatements GenStatement | GenStatement ;
 GenStatement : 
      begin GenStatements end
     | begin ':' token GenStatements end
-    | genvar token ';' 
+    | genvar Tokens_list ';' 
     | Definition 
     | Assign 
     | Parameter 
@@ -213,6 +216,7 @@ GenStatement :
     | GenFor_statement
     | Always
     | Initial
+    | Pragma 
     | if '(' Expr ')' GenStatement 
     | if '(' Expr ')' GenStatement else GenStatement 
     ;
@@ -273,7 +277,12 @@ Statement :
     | return token ';'
     ;
 
-Pragma : pragma1 string pragma2 ;
+
+pragma_stuffs : pragma_stuffs ',' pragma_item | pragma_item ;
+pragma_item : token '=' Expr | string ;
+
+Pragma : pragma1 pragma_stuffs pragma2 ;
+// Pragma : pragma1 string pragma1 ;
 For_statement : for '(' Soft_assigns ';' Expr ';' Soft_assigns ')' Statement ; 
 Repeat_statement : repeat '(' Expr ')' Statement ; 
 While_statement : while '(' Expr ')' Statement ; 

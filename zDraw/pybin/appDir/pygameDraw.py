@@ -75,6 +75,7 @@ class GlobalsClass:
         self.set_context('param_text_size',0.5)
         self.associated_dir={}
         self.set_context('useVectorText',1)
+        self.set_context('useManhattenWires',1)
         self.set_context('pics_lib',['.'])
         self.useShyParams=True
         self.fontShrink = 0.8
@@ -631,8 +632,11 @@ def __use_command_wrds(wrds):
              Glbs.details.pop(Root)
              Glbs.set_context('root','opening') 
              Glbs.graphicsChanged=True
+    elif wrds[0] == 'M':
+        Glbs.set_context('useManhattenWires',not Glbs.get_context('useManhattenWires'))
+        Glbs.graphicsChanged=True
     elif wrds[0] == 'V':
-        Glbs.set_contect('useVectorText',not Glbs.get_context('useVectorText'))
+        Glbs.set_context('useVectorText',not Glbs.get_context('useVectorText'))
         Glbs.graphicsChanged=True
     elif wrds[0] in ['plot','print']:
         dbase.postscript_current()
@@ -818,7 +822,8 @@ def load_schematics(newRoot):
         else:
             logs.log_error('file "%s" cant be read'%newRoot)
             return
-            
+    print('RECOMPUTE %s' % newRoot)
+    Glbs.details[newRoot].recompute_wires()            
 
 import importlib
 def my_importing(Fname):

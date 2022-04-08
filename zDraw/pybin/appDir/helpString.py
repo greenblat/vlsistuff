@@ -30,6 +30,7 @@ helpString = '''
         C   - take screen snapshot and save it in PNG file.
         Q   - (temporarily out of order) quit now
         X   - undo. new feature. use with caution.
+        M   - manhatten om/off diagonal wires.
 
         (removed on purpose) pressing and moving mouse while holding it down - will drag selected or group 
 

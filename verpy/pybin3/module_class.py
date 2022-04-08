@@ -104,6 +104,9 @@ class module_class:
         if type(Name) is list:
             if Name[0] == 'subbus':
                 self.add_sig(Name[1],Dir,(eval(str(Name[2])),eval(str(Name[3]))))
+            elif Dir in ['reg','wire']:
+                for Sig in Name:
+                    self.add_sig(Sig,Dir,Wid)
             else:
                 logs.log_error('add_sig got list: %s %s %s' % (str(Name),Dir,Wid))
             return
@@ -420,8 +423,10 @@ class module_class:
         for Name in self.mems:
             (Dir,Wid1,Wid2)=self.mems[Name]
             Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid1),pr_expr(Name),pr_wid(Wid2)))
-        for (A,B,C,D) in self.pragmas:
-            Fout.write('(* %s lnum=%s *)\n'%(A[:-1],C[:-1]))
+
+        for ABCD in self.pragmas:
+            Fout.write('PRAGMA %s\n' % str(ABCD))
+#            Fout.write('(* %s lnum=%s *)\n'%(A[:-1],C[:-1]))
         for Name in self.modports:
             List = self.modports[Name]
             res=[]

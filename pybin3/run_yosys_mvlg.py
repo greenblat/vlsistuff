@@ -7,8 +7,6 @@ LIB_ABC = '/Users/iliagreenblat/clients/libs/synth_libs/small28.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/libs/synth_libs/dff28.lib'
 
 
-LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/scmetro_abc.lib'
-LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/scmetro_dff.lib'
 
 
 LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
@@ -22,6 +20,9 @@ LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/messica.lib'
 
 LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/messika2.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/messika2.lib'
+
+LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/scmetro_abc.lib'
+LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/scmetro_dff.lib'
 
 INCFILE = '''
 read_liberty -lib LIB_ABC

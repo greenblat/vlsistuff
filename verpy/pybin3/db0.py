@@ -723,9 +723,31 @@ def get_statement(Item):
 
     Vars = matches.matches(List,'!IntDir !Tokens_list  = !Expr ;')
     if Vars:
-        logs.log_err('needs care. wire in genvar with assign')
+        logs.log_warning('needs care. wire in genvar with assign')
+        return
+    Vars = matches.matches(List,'!pragma1 !pragma_stuffs  !pragma2')
+    if Vars:
+        logs.log_warning('needs care. pragma in genvar with assign')
+        return
+    Vars = matches.matches(List,'!IntDir !Width ? !Width ;')
+    if Vars:
+        logs.log_warning('needs care. sigs def in genvar ')
         return
 
+    Vars = matches.matches(List,'!IntDir !ManyDefs ;')
+    if Vars:
+        logs.log_warning('needs care. sigs many def in genvar ')
+        return
+
+    Vars = matches.matches(List,'!IntDir !Width !ManyDefs ;')
+    if Vars:
+        logs.log_warning('needs care. sigs width many def in genvar ')
+        return
+    Vars = matches.matches(List,'initial  !Statement ')
+    if Vars:
+        logs.log_warning('needs care. initial def in genvar ')
+        return
+     
 
     logs.log_err(' db0: untreated statement len=%d list="%s"'%(len(List),List),True)
     return []
@@ -972,6 +994,15 @@ def get_list(Item):
         Pairs = get_list(Vars[0])
         Pair  = get_list(Vars[1])
         return Pairs+Pair
+
+    Vars = matches.matches(Item,'!ManyDefs , !OneDef')
+    if Vars:
+        Defs = get_list(Vars[0])
+        Def  = get_list(Vars[1])
+        return Defs+Def
+
+
+
     Vars = matches.matches(Item,'!SimpleDefs !SimpleDef')
     if Vars:
         Pairs = get_list(Vars[0])
@@ -1084,8 +1115,9 @@ def add_module_item(Item):
             X = get_statement(Item)
             Current.add_generate(X)
         elif Item[0]=='Pragma':
-            Str = List[1]
-            add_pragma(Str)
+            Item = List[1]
+            List = get_list(Item)
+            add_pragma(List)
 
         else:
             logs.log_err('untreated(0) "%s" "%s"'%(Item,List))
@@ -1108,6 +1140,7 @@ def add_typedef_item(List):
 
 
 def add_pragma(Item):
+    
     Current.pragmas.append(Item)
 
 def add_newver(Item):
@@ -1532,17 +1565,15 @@ def add_definition(List):
             for Net in List0:
                 Current.add_sig(Net,Dir,0)
         return
-    Vars = matches.matches(List,'!IntDir !Width ? !Width ;',False)
+    Vars = matches.matches(List,'!IntDir ? !Width ;',False)
     if Vars:
         Dir = get_dir(Vars[0])
-        Wid0 = get_wid(Vars[1])
-        Wid1 = get_wid(Vars[3])
-        Name = get_expr(Vars[2])
-        Current.add_sig(Name,Dir,('double',Wid0,Wid1))
+        Wid0 = get_wid(Vars[2])
+        Name = get_expr(Vars[1])
+        Current.add_sig(Name,Dir,Wid0)
         return
 
     Vars = matches.matches(List,'!IntDir !Width !Width ? ;',False)
-   
     if Vars:
         Dir = get_dir(Vars[0])
         Wid0 = get_wid(Vars[1])
@@ -1554,6 +1585,16 @@ def add_definition(List):
         else:
             Current.add_sig(Name,Dir,('packed',Wid0,Wid1))
         return
+
+    Vars = matches.matches(List,'!IntDir !Width ? !Width ;',False)
+    if Vars:
+        Dir = get_dir(Vars[0])
+        Wid0 = get_wid(Vars[1])
+        Wid1 = get_wid(Vars[3])
+        Name = get_list(Vars[2])
+        Current.add_sig(Name,Dir,('packed',Wid0,Wid1))
+        return
+
     Vars = matches.matches(List,'!IntDir !Width ? !BusBit ;',False)
     if Vars:
         Dir = get_dir(Vars[0])
@@ -1583,7 +1624,50 @@ def add_definition(List):
         Current.add_hard_assign(Name,Expr)
         return
 
+    Vars = matches.matches(List,'!IntDir !ManyDefs ;',False)
+    if Vars:
+        Dir = get_dir(Vars[0])
+        List0 = get_list(Vars[1])
+        for Item in List0:
+            if type(Item) is str:
+                Current.add_sig(Item,Dir,0)
+            elif (Item[0] == 'parameter'):
+                Current.add_sig(Item[1],Dir,0)
+                Expr = get_expr(Item[2])
+                Current.add_hard_assign(Item[1],Expr)
+        return
 
+    Vars = matches.matches(List,'!IntDir !Width !ManyDefs ;',False)
+    if Vars:
+        Dir = get_dir(Vars[0])
+        Wid0 = get_wid(Vars[1])
+        List0 = get_list(Vars[2])
+        for Item in List0:
+            if type(Item) is str:
+                Current.add_sig(Item,Dir,Wid0)
+            elif (Item[0] == 'parameter'):
+                Current.add_sig(Item[1],Dir,Wid0)
+                Expr = get_expr(Item[2])
+                Current.add_hard_assign(Item[1],Expr)
+
+
+
+        return
+
+    Vars = matches.matches(List,'!IntDir !Width !Width !ManyDefs ;',False)
+    if Vars:
+        Dir = get_dir(Vars[0])
+        Wid0 = get_wid(Vars[1])
+        Wid1 = get_wid(Vars[2])
+        List0 = get_list(Vars[3])
+        for Item in List0:
+            if type(Item) is str:
+                Current.add_sig(Item,Dir,('packed',Wid0,Wid1))
+            elif (Item[0] == 'parameter'):
+                Current.add_sig(Item[1],Dir,('packed',Wid0,Wid1))
+                Expr = get_expr(Item[2])
+                Current.add_hard_assign(Item[1],Expr)
+        return
 
     Vars = matches.matches(List,'const logic !Width !Width ? = { !Exprs } ;',False)
     if Vars:
@@ -1666,10 +1750,9 @@ def add_localparam(List0):
 
     Vars = matches.matches(List0,'localparam !Width !Pairs ;',False)
     if Vars:
-        List1 = DataBase[Vars[1]]
+        List1 = get_list(Vars[1])
         for Item in List1:
-            List2 = DataBase[Item]
-            Vars2 = matches.matches(List2,'?token = !Expr',False)
+            Vars2 = matches.matches(Item,'?token = !Expr',False)
             if Vars2:
                 Name = Vars2[0][0]
                 Expr = get_expr(Vars2[1])
@@ -1913,11 +1996,12 @@ def get_expr(Item):
             if List[1][0]=='CurlyItems':    
                 X =  get_curly_items(List[1])
                 return ['curly']+X
+
             if isexpr(List[0])and isexpr(List[2]) and is_math_op(List[1]):
                 Expr0 = get_expr(List[0])
                 Expr1 = get_expr(List[2])
                 Op = List[1][0]
-                if Op in ['+','*','|','||','^','&&','||','<<','>>']:
+                if Op in ['==','!=','+','*','|','||','^','&&','||','<<','>>']:
                     RR = [Op]
                     if (type(Expr0) is tuple)and(Expr0[0]==Op):
                         RR.extend(list(Expr0[1:]))
@@ -1987,6 +2071,15 @@ def get_expr(Item):
         return Item
     if Item[0] == 'curly':
         return Item 
+    if len(Item)==3:
+        if Item[0] == 'subbus':
+            return Item
+        if Item[0] == 'subbit':
+            return Item
+        if Item[0] in ['^','&','&&','|','||','==','!=']:
+            Expr0 = get_expr(Item[1])
+            Expr1 = get_expr(Item[2])
+            return [Item[0],Expr0,Expr1]
     logs.log_err('DB0: very bad expr %s %s'%(len(Item),str(Item)))
     traceback.print_stack()
     return 0

@@ -1,6 +1,6 @@
-#! /usr/bin/python
+#! /usr/bin/env python3
 
-import os,sys,string
+import os,sys
 import pickle
 
 class Db_class:
@@ -17,10 +17,10 @@ def main():
     File = open('y.output')
     work1(File)
     work2()
-    Outf = open('yacc.pickle','w')
-    pickle.dump(Rules,Outf)
-    pickle.dump(States,Outf)
-    Outf.close()
+#    Outf = open('yacc.pickle','w')
+#    pickle.dump(Rules,Outf)
+#    pickle.dump(States,Outf)
+#    Outf.close()
     report()
     mysave()
 def mysave():
@@ -45,7 +45,7 @@ def rework_list(State,List):
             if ind<0:
                 ind=i
             else:
-                print 'ilia rework list got %s'%List
+                print('ilia rework list got %s'%List)
     if ind>=0:
         X = List.pop(ind)
         List.append(X)
@@ -65,7 +65,7 @@ def work1(File):
         line=File.readline()
         if len(line)==0:
             return
-        wrds = string.split(line)
+        wrds = line.split()
         if len(wrds)>0:
             use_line(wrds)
 
@@ -130,7 +130,7 @@ def use_reduces():
             if (X[0]=='reduce')and(X[-1]==Goto):
                 Y = list(X)
                 Y[-1]=Reduces[(State,Goto)]
-                print 'replace reduce st=%s goto=%s'%(State,Goto)
+                print('replace reduce st=%s goto=%s'%(State,Goto))
                 List[i]=tuple(Y)
         States[State]=List
 
