@@ -62,6 +62,8 @@ class hspiceVector(logs.driverClass):
             newLine1 += ' %s'%(Bin)
         if newLine != self.lastLine:
             self.Fout.write('%8d %s\n'%(self.Time,newLine))
+            newLine1 = newLine1.replace('z','0')
+            newLine1 = newLine1.replace('x','0')
             self.Fout1.write('%8d %s\n'%(self.Time,newLine1))
             self.lastLine = newLine
         self.Time += self.Step
@@ -121,7 +123,7 @@ class hspiceVector(logs.driverClass):
         self.Fout.write('vname %s\n'%Vname)
         self.Fout.write('io    %s\n'%IO)
         self.Fout.write('tunit  ns\n')
-        self.Fout.write('''VOH 1.2
+        self.Fout.write('''VOH 1.8
 VIH 1.2
 VOL 0
 VIL 0
@@ -132,7 +134,7 @@ VIL 0
         self.Fout1.write('vname %s\n'%Vname1)
         self.Fout1.write('io    %s\n'%IO1)
         self.Fout1.write('tunit  ns\n')
-        self.Fout1.write('''VOH 1.2
+        self.Fout1.write('''VOH 1.8
 VIH 1.2
 VOL 0
 VIL 0

@@ -7,7 +7,7 @@ import module_class as mcl
 # from module_class import module_class
 import matches
 import pprint
-
+MathOps = ('** ~| ~& ~^ !^ + - * / ^ % & | && || ! ~ < > << >> >>> == <= >= != !== ~& === !==').split()
 if os.path.exists('packages_save.py'):
     sys.path.append('.')
     import packages_save
@@ -2076,7 +2076,7 @@ def get_expr(Item):
             return Item
         if Item[0] == 'subbit':
             return Item
-        if Item[0] in ['^','&','&&','|','||','==','!=']:
+        if Item[0] in MathOps:
             Expr0 = get_expr(Item[1])
             Expr1 = get_expr(Item[2])
             return [Item[0],Expr0,Expr1]
