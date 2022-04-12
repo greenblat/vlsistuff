@@ -59,6 +59,7 @@ class hspiceVector(logs.driverClass):
             newLine += Str%(Val)
 #            Bin = Wid1*'0'+bin(Val)[2:]
             Bin = Val1[-Wid1:]
+            print('>>>>>>',Wid1,Wid,Sig,Bin)
             newLine1 += ' %s'%(Bin)
         if newLine != self.lastLine:
             self.Fout.write('%8d %s\n'%(self.Time,newLine))
@@ -103,7 +104,7 @@ class hspiceVector(logs.driverClass):
                 for X in range(Wid-1,-1,-1):
                     Vname1 += ' '+Sig+'<%d>'%X
                 Radix1 += ' '+(Wid*'1')
-                self.Sigs.append((1,1,Sig))
+                self.Sigs.append((Wid,1,Sig))
                 IO1 += ' '+(Wid*WW[0])
             else:
                 Vname += ' %s[[%s:0]]'%(Sig,Wid-1)
@@ -141,5 +142,6 @@ VIL 0
 ''')
         self.Fout1.write('; Tabular  data\n')
                  
+
 
 
