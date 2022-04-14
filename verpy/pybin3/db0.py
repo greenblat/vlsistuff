@@ -1891,6 +1891,7 @@ def get_expr(Item):
         if Item[0]=='*':
             return '*'
     if len(Item)==2:
+        if Item[0] == '~': return Item
         List = DataBase[Item]
         if Item[0]=='Crazy3':
             Vars = matches.matches(List,'? !crazy2 ? )',False)

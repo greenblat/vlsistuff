@@ -95,7 +95,7 @@ def read_verilog_file(Fname,RunDir,Env):
     else:
         from vyaccer2 import run_yacc
         import db0 as dbx
-    run_yacc(False,'%s/lex.out'%RunDir,RunDir,Fname)
+    run_yacc(False,'%s/lex.out'%RunDir,RunDir,tmpfilename+' ++ '+Fname)
     Locals = dbx.load_parsed(RunDir)
     for Mod in Locals:
         Locals[Mod].cleanZeroNets()

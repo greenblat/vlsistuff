@@ -205,8 +205,9 @@ class module_class:
 
     def add_inst_conns(self,Type,Inst,List):
         if Inst == '': Inst = inventInst(Type)
-        self.add_inst(Type,Inst)
+        Obj = self.add_inst(Type,Inst)
         self.add_conns(Inst,List)
+        return Obj
 
     def add_inst(self,Type,Inst):
         if Inst == '': Inst = inventInst(Type)
