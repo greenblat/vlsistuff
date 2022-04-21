@@ -476,7 +476,7 @@ class sequenceClass:
                     self.Guardian = DEFAULTWAITGUARD
 
                 return True
-            Wrds = list(map(str,map(self.eval,wrds[1:])))
+            Wrds = list(map(str,map(self.eval,wrds[2:])))
             Wrds2 = []
             for Wrd in Wrds:
                 if '=' in Wrd:
@@ -485,7 +485,7 @@ class sequenceClass:
                     Wrds2.append('%s=%s'%(ww[0],w1))
                 else:
                     Wrds2.append(Wrd)
-            self.agents[wrds[0]].action(' '.join(Wrds2))
+            self.agents[wrds[0]].action(wrds[1]+' '+' '.join(Wrds2))
             return True
         elif (wrds[0] == 'check'):
             BB = makeExpr(wrds[1])

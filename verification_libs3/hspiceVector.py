@@ -98,7 +98,7 @@ class hspiceVector(logs.driverClass):
                 self.Sigs.append((1,1,Sig))
                 IO1 += ' '+WW[0]
             elif Wid < 5:
-                Vname += ' '+Sig
+                Vname += ' '+Sig+'[[%d:0]]' % (Wid-1)
                 Radix += ' %s' % Wid
                 for X in range(Wid-1,-1,-1):
                     Vname1 += ' '+Sig+'<%d>'%X

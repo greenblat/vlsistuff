@@ -75,7 +75,11 @@ class axiMasterClass:
         return Sig
 
     def eval(self,Expr):
-        Res =  eval(Expr,self.defines,self.SeqObj.Translates)
+        try:
+            Res =  eval(Expr,self.defines,self.SeqObj.Translates)
+        except:
+            logs.log_error('eval of "%s" failed' % Expr)
+            return 0
         return Res
     def peekbin(self,Sig):
         Sig = self.rename(Sig)
