@@ -23,7 +23,7 @@ import logs
 import veri
 
 class axiLiteMasterClass:
-    def __init__(self,Path,Monitors,Name):
+    def __init__(self,Path,Monitors,Prefix='',Suffix='',Name='liteMaster'):
         self.Path = Path
         self.Name = Name
         Monitors.append(self)
@@ -33,8 +33,8 @@ class axiLiteMasterClass:
         self.bwaiting=0
 
         self.Translates={}
-        self.Prefix = ''
-        self.Suffix = ''
+        self.Prefix = Prefix
+        self.Suffix = Suffix
         self.Defines={}
         self.renames = {}
         self.Comments=[]

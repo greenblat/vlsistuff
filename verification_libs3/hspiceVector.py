@@ -124,7 +124,7 @@ class hspiceVector(logs.driverClass):
         self.Fout.write('io    %s\n'%IO)
         self.Fout.write('tunit  ns\n')
         self.Fout.write('''VOH 1.8
-VIH 1.2
+VIH 1.8
 VOL 0
 VIL 0
 ''')
@@ -135,7 +135,7 @@ VIL 0
         self.Fout1.write('io    %s\n'%IO1)
         self.Fout1.write('tunit  ns\n')
         self.Fout1.write('''VOH 1.8
-VIH 1.2
+VIH 1.8
 VOL 0
 VIL 0
 ''')
