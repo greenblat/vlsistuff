@@ -310,6 +310,7 @@ def startsWith(Long,Short):
     return  Long.index(Short)==0 
 
 def intx(Val):
+    if Val is None: return -1
     if type(Val) is int: return Val
     if type(Val) is float: return Val
     if Val=='-999': return -1
