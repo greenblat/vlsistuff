@@ -159,28 +159,22 @@ class spiMasterClass(logs.driverClass):
         self.was = What[0]
         self.force('spi_clk',What[0])
 
-        if len(self.Back)>=32:
-            FL = self.Forw[:32]
-            self.Forw = self.Forw[32:]
-            Part = FL[:12]
-            Part.reverse()
-            Addr = int(''.join(Part).replace('?','0'),2)
+        if len(self.Back)>=48:
+            logs.log_info('BACK %s\n                  %s' % (''.join(self.Back),''.join(self.Forw)))
+            FL = self.Forw[:48]
+            self.Forw = []
+            Addr = int(''.join(FL[:15]).replace('?','0'),2)
             Cmd = '?'
-            if FL[12]=='0': Cmd='RD'
-            if FL[12]=='1': Cmd='WR'
+            if FL[0]=='0': Cmd='RD'
+            if FL[0]=='1': Cmd='WR'
 
 
-            LL = self.Back[:32]
-            self.Back = self.Back[32:]
+            LL = self.Back[15:47]
+            self.Back = []
+
             AA = ''.join(LL)
-            LL.reverse()
-            BB = ''.join(LL)
-            AX,BX = 'x','x'
-            if '-1' not in AA:
-                AX = '%08x'%(int(AA,2))
-            if '-1' not in BB:
-                BX = '%08x'%(int(BB,2))
-            logs.log_info('SPI MISO %s %s cmd=%s addr=%x'%(AX,BX,Cmd,Addr))
+            AX = '%08x'%(int(AA,2))
+            logs.log_info('SPI MISO rdata=%s cmd=%s addr=%x'%(AX,Cmd,Addr))
             if Cmd=='RD':
                 if Addr in self.Expects:
                     Exp,Mask,Comment = self.Expects[Addr]

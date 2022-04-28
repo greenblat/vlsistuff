@@ -811,8 +811,7 @@ def str2hex(Txt):
         Res += Chr
     return Res
 
-#class anyClas(driverClass):
-#    driverClass.__init__(self,Path,Monitors)
+
 
 class driverClass:
     def __init__(self,Path,Monitors,Prefix='',Name='',Vars=[]):
@@ -980,6 +979,11 @@ class driverClass:
     def run(self):
         log_error('run() of driverClass is supposed to be replaced')
 
+class emptyClass(driverClass):
+    def __init__(self,Path,Monitors):
+        driverClass.__init__(self,Path,Monitors)
+    def run(self):
+        return
 
 def veri_peek(Sig):
     if not veri: return 'x'
