@@ -135,14 +135,16 @@
      newver = 351,
      return = 352,
      always_comb = 353,
-     arith_shift_right = 354,
-     SignedLeft = 355,
-     shift_right = 356,
-     shift_left = 357,
-     Veryequal = 358,
-     noteqeq = 359,
-     StarStar = 360,
-     UNARY_PREC = 361
+     enum = 354,
+     typedef = 355,
+     arith_shift_right = 356,
+     SignedLeft = 357,
+     shift_right = 358,
+     shift_left = 359,
+     Veryequal = 360,
+     noteqeq = 361,
+     StarStar = 362,
+     UNARY_PREC = 363
    };
 #endif
 /* Tokens.  */
@@ -242,14 +244,16 @@
 #define newver 351
 #define return 352
 #define always_comb 353
-#define arith_shift_right 354
-#define SignedLeft 355
-#define shift_right 356
-#define shift_left 357
-#define Veryequal 358
-#define noteqeq 359
-#define StarStar 360
-#define UNARY_PREC 361
+#define enum 354
+#define typedef 355
+#define arith_shift_right 356
+#define SignedLeft 357
+#define shift_right 358
+#define shift_left 359
+#define Veryequal 360
+#define noteqeq 361
+#define StarStar 362
+#define UNARY_PREC 363
 
 
 

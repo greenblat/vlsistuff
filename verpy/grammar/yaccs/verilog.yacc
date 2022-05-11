@@ -22,7 +22,7 @@
 %token supply0 supply1
 %token newver
 %token return
-%token always_comb
+%token always_comb enum typedef
 
 %right '?' ':' 
 %left '|' 
@@ -95,6 +95,7 @@ Definition :
     | IntDir token Width ';'
     | IntDir InstParams Tokens_list ';'
     | IntDir InstParams token '=' Expr ';'
+    | typedef enum logic Width '{' Tokens_list '}' token ';'
 //    | token domino token token ';'
     ;
 

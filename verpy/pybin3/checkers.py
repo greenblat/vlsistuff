@@ -427,7 +427,6 @@ Used={}
 Driven={}
 Mentioned={}
 def check_src_expr(Current,Item):
-    print('ITEM',Item)
     if type(Item)is tuple:
         if Item[0]=='*': return
         if Item[0]=='dotted': return

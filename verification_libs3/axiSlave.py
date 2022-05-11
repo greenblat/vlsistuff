@@ -109,7 +109,7 @@ class axiSlaveClass:
         elif Wrds[0] == 'ram':
             Addr = eval(Wrds[1])
             for Wrd in Wrds[2:]:
-                Addr = self.addWord(Addr,int(Wrd,16))
+                Addr = self.addWord(Addr,eval(Wrd))
         elif Wrds[0] == 'waitread':
             self.WAITREAD = int(Wrds[1])
         elif Wrds[0] == 'waitwrite':

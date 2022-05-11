@@ -1,6 +1,11 @@
 
 import logs
 from module_class import support_set
+try:
+    import skywater as libx
+except:
+    libx = False
+
 def help_main(Env):
     Types = {}
     for Module in Env.Modules:
@@ -63,10 +68,18 @@ def reportInstances(Types):
     LL.sort()
     LL.reverse()
     Tot = 0
+    TotArea = 0
     Fout = open('mod.csv','w')
+    Fout.write('index,many,tot,type,cell,totcell,totarea\n')
     for ind,(Many,Type) in enumerate(LL):
+        Area = 0
+        if libx:
+            if Type in libx.CellLib:
+                Area = eval(libx.CellLib[Type].properties['area'])
         Tot += Many
+        Area0 = Many*Area
+        TotArea += Area0
         logs.log_info('%5d        %6d  / %6d    %s'%(ind,Many,Tot,Type))
-        Fout.write('%d,%d,%d,%s,,,\n'%(ind,Many,Tot,Type))
+        Fout.write('%d,%d,%d,%s,%.4f,%.3f,%.2f,,\n'%(ind,Many,Tot,Type,Area,Area0,TotArea))
     Fout.close()
         
