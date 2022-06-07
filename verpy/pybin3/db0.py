@@ -1802,23 +1802,32 @@ def get_conns(Ptr):
                 more = get_conns(Item)
                 res.extend(more)
             elif (Item[0]=='Connection'):
-                List2 = DataBase[Item]
-                Pin = List2[1][0]
-                if Pin=='*':
-                    Sig='*'
-                elif List2[3][0]==')':
-                    Sig=False    
+                List3 = DataBase[Item]
+                if List3[0][0] == '.':
+                    if List3[2][0] == '(':
+                        Pin = List3[1][0]
+                        if Pin=='*':
+                            Sig='*'
+                        elif List3[3][0]==')':
+                            Sig=False    
+                        else:
+                            Sig = get_expr(List3[3])
+                    elif (List3[2][0] == '[') and (List3[5][0] == '('):
+                        Sig = get_expr(List3[6])
+                        Pexp = get_expr(List3[3])
+                        Bexp = get_expr(List3[1])
+                        Pin = '%s[%s]' % (Bexp,Pexp)
+                    res.append([Pin,Sig])
                 else:
-                    Sig = get_expr(List2[3])
-                res.append([Pin,Sig])
+                    logs.log_error('Ilia strange %s' % str(List3))
             elif (Item[0]=='PrmAssign'):
-                List2 = DataBase[Item]
-                if (len(List2)==5)and(List2[0][0]=='.'):
-                    Param = List2[1][0]
-                    Sig = get_expr(List2[3])
+                List4 = DataBase[Item]
+                if (len(List4)==5)and(List4[0][0]=='.'):
+                    Param = List4[1][0]
+                    Sig = get_expr(List4[3])
                     res.append((Param,Sig))
                 else:
-                    logs.log_err( 'strange get_conns %s'%str(List2))
+                    logs.log_err( 'strange get_conns %s'%str(List4))
 
             else:
                 logs.log_err('strange get_conns %s'%str(Item))
@@ -1861,6 +1870,9 @@ def checkInPackages(Item):
 def findField(Item):
     wrds = Item.split('.')
     Net = wrds[0]
+    Key = (Net,Current.Module)
+    if Key not in OriginalTypeDefs:
+        return Item
     Base = OriginalTypeDefs[(Net,Current.Module)]
     Field = wrds[1]
     Tot,Fields = getStructFields(Base)
@@ -1894,7 +1906,11 @@ def get_expr(Item):
         if Item[0] == '~': return Item
         if Item[0] == '!': return Item
         if Item[0] == 'curly': return Item
-        List = DataBase[Item]
+        try:
+            List = DataBase[Item]
+        except:
+            print('EXCEPTION',Item)
+            return Item
         if Item[0]=='Crazy3':
             Vars = matches.matches(List,'? !crazy2 ? )',False)
             if Vars:

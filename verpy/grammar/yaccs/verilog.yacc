@@ -189,7 +189,7 @@ Instance :
 
 
 Conns_list : Conns_list ',' Connection | Connection ;
-Connection : '.' '*' | '.' token '(' Expr ')' | '.' token '(' ')' ;
+Connection : '.' '*' | '.' token '(' Expr ')' | '.' token '(' ')' | '.' token '[' number ']' '(' Expr ')' ;
 
 AssignParams : '#' '(' Exprs ')' | '#' number | '#' token | '#' floating ;
 Prms_list : Prms_list ',' PrmAssign | PrmAssign ;

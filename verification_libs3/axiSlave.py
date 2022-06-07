@@ -339,7 +339,7 @@ class axiSlaveClass:
             wlast = self.peek('wlast')
             wdata = self.peek('wdata')
             self.wqueue.append((wdata,wlast,wstrb))
-            logs.log_info('ADDWQUEUE %x %x %x' % (wdata,wlast,wstrb),self.Name)
+            logs.log_info('axiSlave %s written  %x %x %x' % (self.Name,wdata,wlast,wstrb))
 
         if len(self.wqueue) == 0: return    
         if (self.awlen<0) and (len(self.awqueue) == 0): return    

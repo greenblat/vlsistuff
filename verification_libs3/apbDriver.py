@@ -8,14 +8,14 @@
 
 '''
 
-import os,sys,string,types
+import os,sys,types
 import veri
 import logs
 
 
 class apbDriver:
     bus_locked=False
-    def __init__(self,Path,Monitors,Name='optional'):
+    def __init__(self,Path,Monitors,Prefix,Suffix,Name='optional'):
         self.Path = Path
         self.Name = Name
 
@@ -31,7 +31,8 @@ class apbDriver:
 
         self.translations={}
         self.renames={}
-        self.prefix = ''
+        self.prefix = Prefix
+        self.suffix = Suffix
         self.markers={}
         self.finishes=False
         self.hexMode = False
@@ -41,10 +42,14 @@ class apbDriver:
         self.Caller = False
         logs.log_info('apbDriver  ver 27.apr.2021')
         self.noList = []
+        self.force('psel',0)
+        self.force('pwrite',0)
+        self.force('penable',0)
 
     def onFinish(self):
         return
     def exists(self,Sig):
+        Sig = self.rename(Sig)
         if Sig in self.renames:
             Sig = self.renames[Sig]
         Full = '%s.%s'%(self.Path,Sig)
@@ -185,6 +190,8 @@ class apbDriver:
             return Sig
         if self.prefix!='':
             Sig = '%s%s'%(self.prefix,Sig)
+        if self.suffix!='':
+            Sig = '%s%s'%(Sig,self.suffix)
         if Sig in self.renames: 
             return self.rename(self.renames[Sig])
         return Sig

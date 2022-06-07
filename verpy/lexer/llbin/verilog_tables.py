@@ -1,4 +1,5 @@
 
+print('ERROR')
 Joines = [('number','uhex'),('number','udig'),('number','ubin')]
 Modifiers = []
 EOL = [10]
@@ -35,6 +36,7 @@ CapLetters = 'QWERTYUIOPASDFGHJKLZXCVBNM'
 Letters = LowLetters+CapLetters
 Digits='0123456789'
 Alphas = Letters+Digits+'_'
+AlphasPlus = Alphas + '.'
 HexDig = Digits+'abcdef'+'ABCDEF'+'_'+'xX'
 BinDig = '01_xzXZ?'
 Singles = '?.,[]{}#@()~%^;:/+-*'
@@ -63,8 +65,8 @@ Table = [
     ,('define',Alphas,Alphas,       'define','add',0)
     ,('define',Alphas,'',           'idle','push','define')
     ,('idle',Letters+'$'+'_',Alphas,    'token','add',0)
-    ,('token',Alphas,Alphas,        'token','add',0)
-    ,('token',Alphas,'',            'idle','push','token')
+    ,('token',AlphasPlus,AlphasPlus,        'token','add',0)
+    ,('token',AlphasPlus,'',            'idle','push','token')
     ,('idle',Letters,'',             'idle','push','token')
 
     ,('idle',Digits,Digits,         'number','add',0)

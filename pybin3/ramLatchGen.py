@@ -31,7 +31,7 @@ def main():
 
     Defs = DEFS.replace('IDW',str(Idwid-1))
     if (Idwid == Dwid):
-        Defs = Defs.replace('DEPTH',str(Lines)-1)
+        Defs = Defs.replace('DEPTH',str(Lines-1))
         Aspect = 1
         LL = Lines
         LsbA = 0
@@ -86,23 +86,23 @@ def main():
         print('aspect %s not supported yet' % Aspect)
     Fout.write(Str0)
     for X in range(LL):
-        Fout.write('always @* if (clk && !wen & !cen && (addr[%s:%s] == %d)) begin\n' % (MsbA,LsbA,X))
+        Fout.write('always @* if (clk && !wen_l && (addr_l[%s:%s] == %d)) begin\n' % (MsbA,LsbA,X))
         M,L,Ind = 7,0,0
         Sign = '!'
         Pos = 0
         for Byte in range(Bytes):
             if (Aspect == 1):
-                Fout.write('    if (bytew[%d]) bytes%d[%d] = din[%d:%d];\n' % (Ind,Byte,X,M,L))
+                Fout.write('    if (bytew_l[%d]) bytes%d[%d] = din_l[%d:%d];\n' % (Ind,Byte,X,M,L))
             elif (Aspect == 2):
                 if Byte >= Bytes0:
                     Sign = ' '
-                Fout.write('    if (bytew[%d] && %saddr[0]) bytes%d[%d] = din[%d:%d];\n' % (Ind,Sign,Byte,X,M,L))
+                Fout.write('    if (bytew_l[%d] && %saddr_l[0]) bytes%d[%d] = din_l[%d:%d];\n' % (Ind,Sign,Byte,X,M,L))
             elif (Aspect == 4):
                 Pos = int(Byte/Bytes0)
-                Fout.write('    if (bytew[%d] && (addr[1:0] == %s)) bytes%d[%d] = din[%d:%d];\n' % (Ind,Pos,Byte,X,M,L))
+                Fout.write('    if (bytew_l[%d] && (addr_l[1:0] == %s)) bytes%d[%d] = din_l[%d:%d];\n' % (Ind,Pos,Byte,X,M,L))
             elif (Aspect == 8):
                 Pos = int(Byte/Bytes0)
-                Fout.write('    if (bytew[%d] && (addr[2:0] == %s)) bytes%d[%d] = din[%d:%d];\n' % (Ind,Pos,Byte,X,M,L))
+                Fout.write('    if (bytew_l[%d] && (addr_l[2:0] == %s)) bytes%d[%d] = din_l[%d:%d];\n' % (Ind,Pos,Byte,X,M,L))
             else:
                 print('Aspect %s not supported yet' % Aspect)
 
@@ -125,6 +125,19 @@ module RAMX (input clk, input cen, input wen
     ,input  [AWID:0] addr
     ,output [DWID:0] dout
 );
+
+reg [DWID:0] din_l;
+reg [BYTES:0] bytew_l;
+reg [AWID:0] addr_l;
+reg wen_l;
+always @* if (!clk) begin
+    din_l = din;
+    bytew_l = bytew;
+    addr_l = addr;
+    wen_l = cen ? 1 : wen;
+end
+
+
 
 '''
 

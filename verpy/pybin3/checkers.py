@@ -509,6 +509,8 @@ def check_src_expr(Current,Item):
         for _,Code in Item[2]:
             check_src_expr(Current,Code)
         return            
+    if (Item[0] == '#'):
+        return            
         
 
     logs.log_err('check src expr %s'%str(Item))
@@ -529,8 +531,7 @@ def check_bus_usage(Current,Bus,Wid,Where=0):
         if Wid1[0]=='double':
             (H1,L1)=Wid1[1]
         elif Wid1[0]=='packed':
-            print('>>>>>',Wid1)
-            H1 = (Wid1[1][0]+1)*(Wid1[2][0]+1)
+            H1 = (compute1(Wid1[1][0],Current)+1)*(compute1(Wid1[2][0],Current)+1)
             L1 = 0
         else:
             (H1,L1)=Wid1

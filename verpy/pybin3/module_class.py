@@ -855,6 +855,13 @@ class module_class:
         self.prepareNetTable()
     def prepareNetTable(self):
         netTable={}
+        for Net in self.nets:
+            Dir,Wid = self.nets[Net]
+            if 'input' in Dir:
+                netTable[Net] = [(self.Module,'input',Dir)]
+            elif 'output' in Dir:
+                netTable[Net] = [(self.Module,'output',Dir)]
+                
         for Inst in self.insts:
             Obj = self.insts[Inst]
             Type = Obj.Type
