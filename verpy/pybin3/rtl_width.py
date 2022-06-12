@@ -59,7 +59,7 @@ def get_width2(Net,Mod):
                 Smin -= Ymin
             return Smax,Smin
 
-        if Net[0] in  ['>>','<<']:
+        if Net[0] in  ['>>>','>>','<<']:
             Ymax,Ymin = get_width2(Net[1],Mod)
             return  Ymax,Ymin
 

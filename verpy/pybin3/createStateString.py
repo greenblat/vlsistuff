@@ -24,6 +24,7 @@ def help_main(Env):
                 if Src[1] in List0:
                     Dic0[Dst] = Src[1],Src[2]
     rounds(Dic0)
+    print('DIC0',Dic0)
     Wides = {}
     for Dst in Dic0:
         Base,Ind = splitBaseIndex(Dst)
@@ -35,15 +36,33 @@ def help_main(Env):
     for Base in Wides:
         LL = Wides[Base]
         Start = Dic0[Base+str(LL[0])]
-        if type(Start) is not int:
-            print('ERROR bases=%s ll=%s start=%s' % (Base,LL,Start))
-        for X in range(LL[0],LL[-1]-1,-1):
-            New = Base+str(X)
-            if (New in Dic0):
-                if Dic0[New] != Start:
-                    print('ERROR %s %s %s' % (New,Dic0[New],Start))
-            Dic0[New] = Start
-            Start += 1
+        Start = LL[0]
+        End = LL[-1]
+        Len = len(LL)
+        if (Start-End+1) > Len:
+            print('NEED WORK START',Base,Start,LL)
+            Range = list(range(LL[0],LL[-1],-1))
+            for X in Range:
+                Name = Base+str(X)
+                if Name not in Dic0:
+                    print('ADDD ',Name,LL)
+                    Prev = Base+str(X+1)
+                    if Prev in Dic0:
+                        Dic0[Name] = Dic0[Prev]+1
+
+
+
+    print('DIC0',Dic0)
+#        if type(Start) is not int:
+#            print('ERROR bases=%s ll=%s start=%s' % (Base,LL,Start))
+#        for X in range(LL[0],LL[-1]-1,-1):
+#            New = Base+str(X)
+#            if (New in Dic0):
+#                if Dic0[New] != Start:
+#                    print('OUTOFORDER %s %s %s' % (New,Dic0[New],Start))
+#            else:
+#                Dic0[New] = Start
+#                Start += 1
     Fout = open('%s_states.v' % Mod.Module,'w')
     Fout.write('module %s_states ( input [7:0] State);\nreg [127:0] Str;\n' % Mod.Module)
     Fout.write('always @* begin\n    Str = 0;\n')

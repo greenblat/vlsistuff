@@ -376,7 +376,7 @@ def check_dst_expr(Current,Item,MustBeReg=True):
             incr_driven(Item,'rtl')
             if MustBeReg and (Data[0] not in ['reg','integer','output reg','output wire']):
                 logs.log_errx(104,'check dst of %s failed on bad kind %s'%(Item,Data[0]))
-            if not MustBeReg and (Data[0] not in ['wire','output','output wire']):
+            if not MustBeReg and (Data[0] not in ['wire','output','output wire','wire signed','output signed','input signed']):
                 logs.log_errx(104,'check dst of %s failed on bad kind %s'%(Item,Data[0]))
         else:
             logs.log_errx(11,'check dst failed on net %s'%(Item))
@@ -465,7 +465,10 @@ def check_src_expr(Current,Item):
             Bus = Item[1]
             Wid = Item[2]
             check_bus_usage(Current,Bus,Wid,372)
-            check_src_expr(Current,Wid)
+            if (type(Wid) is tuple) and (len(Wid) ==2) and (type(Wid[0]) is int):
+                pass
+            else:
+                check_src_expr(Current,Wid)
             Used[Bus]=1
             return
         if Item[0]=='subbit':
@@ -489,7 +492,7 @@ def check_src_expr(Current,Item):
                 check_src_expr(Current,X)
             return 
 
-        if Item[0] in ['~&','~|','/','>','<','!','~','&&','||','&','|','^','+','-','*','>=','>>','<<','<=','curly','==','!=','question','repeat']:
+        if Item[0] in ['>>>','~&','~|','/','>','<','!','~','&&','||','&','|','^','+','-','*','>=','>>','<<','<=','curly','==','!=','question','repeat']:
             for X in Item[1:]:
                 check_src_expr(Current,X)
             return 
@@ -513,7 +516,8 @@ def check_src_expr(Current,Item):
         return            
         
 
-    logs.log_err('check src expr %s'%str(Item))
+    logs.log_err('check src expr %s %s'%(str(Item),type(Item)))
+    traceback.print_stack(None,None,logs.Flogs[0])
 
 def check_bus_usage(Current,Bus,Wid,Where=0):
     if Bus in Current.mems:
