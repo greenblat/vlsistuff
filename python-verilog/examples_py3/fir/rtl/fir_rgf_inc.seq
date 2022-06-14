@@ -1,0 +1,10 @@
+define enable 0x0
+define WIDTH_MAP["enable"] 4
+define scalefactor 0x4
+define WIDTH_MAP["scalefactor"] 4
+define coeffs 0x8
+define WIDTH_MAP["coeffs"] 32
+define goods 0x28
+define WIDTH_MAP["goods"] 4
+define bads 0x2c
+define WIDTH_MAP["bads"] 4

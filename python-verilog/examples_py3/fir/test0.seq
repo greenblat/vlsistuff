@@ -1,0 +1,21 @@
+
+
+include rtl/fir_rgf_inc.seq 
+wait 10
+apb write scalefactor 5
+apb write coeffs    0x11221215
+apb write coeffs+4  0x05060708
+apb write coeffs+8  0x05060708
+apb write coeffs+12 0x15141312
+
+uvm enable
+model enable
+wait 100
+apb write enable 1
+wait 1000
+apb read goods READ.GOODS
+apb read bads  READ.BADS
+wait 20
+finish
+
+

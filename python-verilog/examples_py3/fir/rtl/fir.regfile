@@ -1,0 +1,12 @@
+
+
+chip fir_rgf  bus=apb width=32 addrwidth=32
+
+reg enable width=1 reset=0 access=rw desc="enable"
+reg scalefactor width=4 reset=0 access=rw desc="scale back factor of sum before output"
+array coeffs width=8 depth=8 access=rw desc="coeffs"
+reg goods width=32 access=ro desc="number of no saturations"
+reg bads width=32 access=ro desc="number of saturations"
+
+end
+

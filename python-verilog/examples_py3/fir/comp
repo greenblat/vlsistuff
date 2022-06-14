@@ -1,0 +1,18 @@
+#! /bin/csh -f
+ 
+set DIR = "~/vlsistuff/regfile/pybin/"
+
+$DIR/regfile.py rtl/fir.regfile
+
+/bin/rm tb.vvp
+iverilog  -o tb.vvp -g2012 rtl/tb.v \
+    rtl/fir_top.v  \
+    rtl/fir.v  \
+    rtl/fir_rgf.v  \
+
+setenv PYVERILOG "$*"
+vvp -M/Users/$USER/vlsistuff/python-verilog/vpi3 -mvpi3_local -lver.log tb.vvp +SEQ=test0.seq
+
+
+
+

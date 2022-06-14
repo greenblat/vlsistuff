@@ -1,0 +1,18 @@
+
+fir_rgf fir_rgf (.pclk(pclk),.presetn(presetn)
+    .pwrite(pwrite),.paddr(paddr),.psel(psel),.penable(penable)
+    ,.prdata(prdata),.prdata_wire(),.pwdata(pwdata),.pstrb(pstrb)
+    ,.pready(pready),.pslverr(pselverr)
+    ,.penable(penable)
+    ,.enable(enable)
+    ,.scalefactor(scalefactor)
+    ,.coeffs(coeffs)
+    ,.goods(goods)
+    ,.bads(bads)
+);
+enable)
+    ,.scalefactor(scalefactor)
+    ,.coeffs(coeffs)
+    ,.goods(goods)
+    ,.bads(bads)
+);

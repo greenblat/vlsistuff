@@ -1,0 +1,6 @@
+kind,access,width,pos,name,reset,addr,desc
+reg,rw,1, ,enable,0x0,0x0,"enable"
+reg,rw,4, ,scalefactor,0x0,0x4,"scale back factor of sum before output"
+array,rw,8, ,coeffs, ,0x8,"coeffs"
+reg,ro,32, ,goods, ,0x28,"number of no saturations"
+reg,ro,32, ,bads, ,0x2c,"number of saturations"

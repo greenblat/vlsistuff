@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ipxact:component xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ipxact="http://www.accellera.org/XMLSchema/IPXACT/1685-2014"
+    xsi:schemaLocation="http://www.accellera.org/XMLSchema/IPXACT/1685-2014 http://www.accellera.org/XMLSchema/IPXACT/1685-2014/index.xsd">
+    <ipxact:vendor>Autotalks</ipxact:vendor>
+    <ipxact:library>AutoTalksLib</ipxact:library>
+    <ipxact:name>fir_rgf</ipxact:name>
+    <ipxact:version>0.0</ipxact:version>
+    <ipxact:description>Auto Regfiles</ipxact:description>
+    <ipxact:memoryMaps>
+        <ipxact:memoryMap>
+            <ipxact:name>MAP</ipxact:name>
+            <ipxact:isPresent>true</ipxact:isPresent>
+            <ipxact:addressUnitBits>8</ipxact:addressUnitBits>
+            <ipxact:addressBlock>
+                <ipxact:name>BLOCK</ipxact:name>
+                <ipxact:isPresent>true</ipxact:isPresent>
+                <ipxact:baseAddress>'h0</ipxact:baseAddress>
+                <ipxact:range>'h34</ipxact:range>
+                <ipxact:width>32</ipxact:width>
+
+               <ipxact:register>
+                    <ipxact:name>enable</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h0</ipxact:addressOffset>
+                    <ipxact:description>"enable"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>enable</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h1</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>scalefactor</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h4</ipxact:addressOffset>
+                    <ipxact:description>"scale back factor of sum before output"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>scalefactor</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h4</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>coeffs</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h8</ipxact:addressOffset>
+                    <ipxact:description>"coeffs"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>false</ipxact:volatile>
+                    <ipxact:access>read-write</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>coeffs</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h8</ipxact:bitWidth>
+                        <ipxact:volatile>false</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>false</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>goods</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h28</ipxact:addressOffset>
+                    <ipxact:description>"number of no saturations"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>true</ipxact:volatile>
+                    <ipxact:access>read-only</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>goods</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+
+               <ipxact:register>
+                    <ipxact:name>bads</ipxact:name>
+                    <ipxact:isPresent>true</ipxact:isPresent>
+                    <ipxact:addressOffset>'h2c</ipxact:addressOffset>
+                    <ipxact:description>"number of saturations"</ipxact:description>
+                    <ipxact:size>32</ipxact:size>
+                    <ipxact:volatile>true</ipxact:volatile>
+                    <ipxact:access>read-only</ipxact:access>
+                    <ipxact:field>
+                        <ipxact:name>bads</ipxact:name>
+                        <ipxact:isPresent>true</ipxact:isPresent>
+                        <ipxact:bitOffset>0</ipxact:bitOffset>
+                        <ipxact:bitWidth>'h20</ipxact:bitWidth>
+                        <ipxact:volatile>true</ipxact:volatile>
+                        <ipxact:resets> <ipxact:reset> <ipxact:value>0</ipxact:value> </ipxact:reset> </ipxact:resets>
+                        <ipxact:vendorExtensions>
+                            <userLogic>true</userLogic>
+                        </ipxact:vendorExtensions>
+                    </ipxact:field>
+                    <ipxact:vendorExtensions>
+                    </ipxact:vendorExtensions>
+                </ipxact:register>
+ 
+
+
+
+            </ipxact:addressBlock>
+        </ipxact:memoryMap>
+    </ipxact:memoryMaps>
+
+
+</ipxact:component>
