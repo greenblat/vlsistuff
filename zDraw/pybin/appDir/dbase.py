@@ -120,13 +120,33 @@ class InstanceClass:
         self.Mag=1.0
         self.bbox0=False
         self.selected=False
+        self.exploded=False
 
     def origin(self):
         return self.Point
     def make_selected(self,What):
         self.selected=What
+    def make_exploded(self,What):
+        self.exploded=What
 
     def draw(self,Matrix):
+        if self.exploded:
+            BB0 = Glbs.details[self.Type].bbox()
+            BB2 = Glbs.pictures[self.Type].bbox()
+            Scx = (BB0[1][0] - BB0[0][0])/(BB2[1][0] - BB2[0][0])
+            Scy = (BB0[1][1] - BB0[0][1])/(BB2[1][1] - BB2[0][1])
+            Max = max(Scx,Scy)
+            Mat0 = translate_mag(self.Mag/Max,UnitMatrix)
+            Point = list(self.Point)
+            Point[0] *= Max
+            Point[1] *= Max
+            Point[0] -= BB0[0][0]
+            Point[1] -= BB0[0][1]
+            Mat1 = translate_move(Point,Mat0)
+            Mat2 = translate_rotate(self.Rot,Mat1)
+            Mat3 = matrix_mult(Mat2,Matrix)
+            Glbs.details[self.Type].draw(Mat3)
+            return
         Mat0 = translate_mag(self.Mag,UnitMatrix)
         Mat1 = translate_move(self.Point,Mat0)
         Mat2 = translate_rotate(self.Rot,Mat1)
@@ -135,6 +155,7 @@ class InstanceClass:
             Color=RED_COLOR
         else:
             Color = get_context('instance_color')
+
         if self.Type in Glbs.pictures:
             Glbs.pictures[self.Type].draw(Mat3,Color)
         elif Glbs.try_load_picture(self.Type):
@@ -254,6 +275,7 @@ class WireClass:
         if (len(self.List) <= 2):
             P0=get_pin_location(self.Father.Module,self.Start)
             P1=get_pin_location(self.Father.Module,self.End)
+            print('>>>>>>',P0,P1)
             X0,Y0 = P0
             X1,Y1 = P1
             if (X0==X1)or(Y0==Y1) or not Glbs.get_context('useManhattenWires'): 
@@ -270,7 +292,7 @@ class WireClass:
 
     def draw(self,Matrix):
         List = self.get_wire_list()
-        print('DRAW',List)
+#        print('DRAW',List)
         if self.selected:
             Color=RED_COLOR
         else:
@@ -879,7 +901,7 @@ class DetailClass:
 
     def where_inst(self,Inst):
         if Inst not in self.instances:
-            logs.log_error('unknown instance %s'%(Inst))
+            logs.log_error('unknown instance %s in %s'%(Inst,self.Module))
             return
         P0 = self.instances[Inst].Point
         return P0
@@ -887,7 +909,7 @@ class DetailClass:
     def where_pin(self,Inst,Pin):
         if Inst not in self.instances:
             logs.log_error('unknown instance %s'%(Inst))
-            return
+            return (0,0)
         P0 = self.instances[Inst].Point
         Rot = self.instances[Inst].Rot
         Type = self.instances[Inst].Type
@@ -910,7 +932,7 @@ class DetailClass:
                 return (0,0)
         else:
             logs.log_error('no picture of %s'%Type)
-            return (0,0)
+        return (0,0)
 
     def select_pin(self,ScrPoint):
         Point = screen2schem(ScrPoint)
@@ -1442,11 +1464,7 @@ def use_keystroke(Uni,Ord,XY):
                 Glbs.undoValid = True
             else:
                 logs.log_error('dont know(2) to move who="%s" inst="%s"'%(Who,Inst))
-    elif (Ord<128)and(((len(str(Uni))==1)and(str(Uni) in '123456789'))or(Uni in ['Z','z'])):
-        if (Uni=='Z'):
-            Uni=2
-        elif (Uni=='z'):
-            Uni=7
+    elif (Ord<128)and(((len(str(Uni))==1)and(str(Uni) in '123456789'))):
         
         Was = screen2schem((X,Y))
         Mid = schem2screen(Was)
@@ -1552,6 +1570,28 @@ def use_keystroke(Uni,Ord,XY):
             Type = Glbs.details[Root].instances[Inst].Type
             load_schematics(Type)
             Glbs.loadStack.append(Root)
+
+    elif (Uni=='Z'):
+        return  # not good yet.
+        (Who,Inst)= select_object((X,Y))
+        if Who=='instance':
+            Type = Glbs.details[Root].instances[Inst].Type
+            load_schematics(Type)
+            load_schematics(Root)
+            for Instx in Glbs.details[Type].instances:
+                Glbs.details[Root].instances[Type+'_'+Instx] = copy.deepcopy(Glbs.details[Type].instances[Instx])
+            Glbs.details[Root].instances.pop(Inst)                
+            Glbs.graphicsChanged=True
+
+    elif (Uni=='E'):
+        (Who,Inst)= select_object((X,Y))
+        if Who=='instance':
+            Type = Glbs.details[Root].instances[Inst].Type
+            load_schematics(Type)
+            load_schematics(Root)
+            Glbs.graphicsChanged=True
+            Glbs.details[Root].instances[Inst].make_exploded(True)
+
     elif (Uni=='H'):
         print(helpString.helpString)
     elif (Uni=='U'):

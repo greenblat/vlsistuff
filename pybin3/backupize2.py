@@ -235,9 +235,14 @@ def use_backup_lines(Path,lines):
                             ddd='.'
                         L11 = os.listdir(Path+'/'+ddd)
                         Mask = ws[-1]
-                        for L2 in L11:
-                            if compatible_wild_card(Mask,L2)and (not os.path.isdir(L2)):
+                        L22 = compatibleList(L11,Mask)
+                        for L2 in L22:
+                            if (not os.path.isdir(L2)):
                                 Obj.files = Obj.files + [ddd+'/'+L2]
+                        
+#                        for L2 in L11:
+#                            if compatible_wild_card(Mask,L2)and (not os.path.isdir(L2)):
+#                                Obj.files = Obj.files + [ddd+'/'+L2]
                     else:
                         if (os.path.exists(Path+'/'+wrd)):
                             ws = wrd.split('/')
@@ -395,6 +400,12 @@ def is_not_comment(word):
         return 0
     return 1
 
+import fnmatch
+def compatibleList(List,Mask):
+    Mask = Mask.replace('*','?')
+    L1 = fnmatch.filter(List,Mask)
+    return L1
+
 def compatible_wild_card(Mask,Fname):
     if (Mask=='*'):
         return 1
@@ -411,6 +422,7 @@ def compatible_wild_card(Mask,Fname):
         if (Pos<Indx):
             return 0
         Indx=Pos
+    print('compatible_wild_card',Mask,Fname)
     return 1
 
 if __name__=='__main__':

@@ -151,7 +151,10 @@ def make_limits(Max):
     Dx = MaxX-MinX
     Dy = MaxY-MinY
     ScaleX = Max*1.0/Dx
-    ScaleY = Max*1.0/Dy
+    if Dy == 0:
+        ScaleY = ScaleX
+    else:
+        ScaleY = Max*1.0/Dy
     Scale = min(ScaleX,ScaleY)
     return MinX,MinY,Scale
 

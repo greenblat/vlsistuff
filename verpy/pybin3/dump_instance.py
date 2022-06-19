@@ -226,10 +226,10 @@ initial begin
 """    
 String2 = """
 
-import os,sys,string,random
+import os,sys,random
 import veri
 NewName = os.path.expanduser('~')
-sys.path.append('%s/verification_libs3'%NewName)
+sys.path.append('%s/vlsistuff/verification_libs3'%NewName)
 import logs
 Monitors=[]
 cycles=0

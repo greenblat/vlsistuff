@@ -64,15 +64,18 @@ def help_main(Env):
 #                Dic0[New] = Start
 #                Start += 1
     Fout = open('%s_states.v' % Mod.Module,'w')
-    Fout.write('module %s_states ( input [7:0] State);\nreg [127:0] Str;\n' % Mod.Module)
-    Fout.write('always @* begin\n    Str = 0;\n')
+    Fout.write('module %s_states ( input [7:0] State);\nreg ack; reg [127:0] Str;\n' % Mod.Module)
+    Fout.write('always @* begin\n    Str = 0; ack=0;\n')
     List2 = []
     for Dst in Dic0:
         List2.append((Dic0[Dst],Dst))
     List2.sort()
     Else = ''
     for Val,Dst in List2:
-        Fout.write('    %s if (State == %s) Str = "%s";\n' % (Else,Val,Dst))
+        if (Dst == 'ACK'):
+            Fout.write('    %s if (State == %s) begin ack = 1; Str = "%s"; end\n' % (Else,Val,Dst))
+        else:
+            Fout.write('    %s if (State == %s) Str = "%s";\n' % (Else,Val,Dst))
         Else = 'else'
     Fout.write('end\nendmodule\n')
     Fout.close()

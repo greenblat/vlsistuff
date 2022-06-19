@@ -9,26 +9,26 @@
 
 this is the file:
 
-set INC1 = /home/iliag/local/include/python3.X
-set LIB = /home/iliag/local/lib
-set MTI_HOME = /tools/cdnc/XCELIUM/current/tools.lnx86/include/
+`set INC1 = /home/iliag/local/include/python3.X`
+`set LIB = /home/iliag/local/lib`
+`set MTI_HOME = /tools/cdnc/XCELIUM/current/tools.lnx86/include/`
 
 
-gcc  -c -O3 src/vpi3_local.c src/qq64.c \
-     -Wall \
-     -I$INC1 \
-     -I$MTI_HOME \
-     -fPIC \
+`gcc  -c -O3 src/vpi3_local.c src/qq64.c \`
+     `-Wall \`
+     `-I$INC1 \`
+     `-I$MTI_HOME \`
+     `-fPIC \`
 
 
 
-ld -shared  -export-dynamic  \
-    -o my_vpi3.so \
-    vpi3_local.o qq64.o \
-    -L/usr/lib \
-    -L$LIB \
-    -lpython3.X \
-    -lc  -lpthread -lutil \
+`ld -shared  -export-dynamic  \`
+    `-o my_vpi3.so \`
+    `vpi3_local.o qq64.o \`
+    `-L/usr/lib \`
+    `-L$LIB \`
+    `-lpython3.X \`
+    `-lc  -lpthread -lutil \`
 
 
 6. modify  INC1/LIB/MTI_HOME  lines to match Your server.
@@ -49,4 +49,4 @@ ld -shared  -export-dynamic  \
     in ~/bin/ You will find pip3.10 - but it refuses to install packages, because of some SSH issue. I dont know how to solve that. If You do - share with me, please.
 
 9. in cadence or synopsys run scripts add 
-add full path of "my_vpi3.so" - look in above directory for activation_cadence synopsys for example.
+add full path of "my_vpi3.so" - look in above directory for activation_cadence synopsys for example.;

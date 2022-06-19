@@ -115,7 +115,7 @@ class apbDriver:
             if len(wrds)==2:
                 self.read(wrds[1])
             else:
-                self.read(wrds[1],self.eval(wrds[2]))
+                self.read(wrds[1],wrds[2])
         elif wrds[0]=='write':
             self.write(wrds[1],wrds[2])
         elif wrds[0]=='prdata':
@@ -123,7 +123,6 @@ class apbDriver:
             Deg = wrds[1]
             if self.Caller:
                 self.Caller.Translates[Deg]=Act
-                print('XXXXX',Deg,Act)
 
         elif wrds[0]=='wait':
             self.wait(wrds[1])
@@ -318,14 +317,13 @@ class apbDriver:
                     self.waiting0=int(Val)
                 elif Sig=='catch':
                     Who,Exp,Addr = Val
-                    print('EXP',Who,Addr,Exp)
                     Act = self.peek(Who)
                     if type(Exp) is types.FunctionType:
                         Exp(Act)
                     elif type(Exp) is int:
                         logs.log_ensure((Exp==Act),'apb addr=%x %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(Addr,self.Name,Act,Exp,Exp,Exp,self.rename(Who)),2)
                     else: 
-                        logs.log_info('apb addr=%x %s read act=%x who=%s'%(Addr,self.Name,Act,self.rename(Who)))
+                        logs.log_info('apb %s addr=%x %s read act=%x who=%s'%(Exp,Addr,self.Name,Act,self.rename(Who)))
                         self.Backs.append((Who,Act,Addr))
                 elif Sig=='until':
                     self.installUntil(Val,0)

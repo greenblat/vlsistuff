@@ -20,6 +20,11 @@ def help_main(Env):
             Fout.write(Type)
             
     Fout.write(CELL.replace('MODULE',Mod.Module))
+    Inputs = []
+    for Net in Mod.nets:
+        Dir,Wid = Mod.nets[Net]
+        if 'input' in Dir:
+            Inputs.append(Net)
             
     for Net in Mod.nets:
         Dir,Wid = Mod.nets[Net]
@@ -33,6 +38,7 @@ def help_main(Env):
             if 'input' in Dir:
                 Bus = Bus.replace('DIRECTION','input')
                 Pin = Pin.replace('DIRECTION','input')
+                Pin = Pin.replace('TIMING','')
             elif 'inout' in Dir:
                 Bus = Bus.replace('DIRECTION','inout')
                 Pin = Pin.replace('DIRECTION','inout')
@@ -40,19 +46,24 @@ def help_main(Env):
                 Bus = Bus.replace('DIRECTION','output')
                 Pin = Pin.replace('DIRECTION','output')
             Fout.write(Bus)
+
             Fout.write(Pin)
             Fout.write('    }\n')
 
         elif 'input' in Dir:
             Str = PIN.replace('PIN',Net)
             Str = Str.replace('DIRECTION','input')
+            Str = Str.replace('TIMING','')
         elif 'inout' in Dir:
             Str = PIN.replace('PIN',Net)
             Str = Str.replace('DIRECTION','inout')
         elif 'output' in Dir:
             Str = PIN.replace('PIN',Net)
             Str = Str.replace('DIRECTION','output')
-
+            tim = ''
+            for Inp in Inputs:
+                tim += TIMING.replace('INPIN',Inp)
+            Str = Str.replace('TIMING',tim)
         if Str:
             Fout.write(Str)
         
@@ -115,6 +126,7 @@ PIN = '''
             related_ground_pin : VSS;
             related_power_pin : VDD;
             rise_capacitance : 0.001704883;
+            TIMING
        }
 '''
 
@@ -228,4 +240,47 @@ library (LIBRARY) {
    voltage_map (VDD, 0.99) ;
    voltage_map (VSS, 0.0) ;
 
+   lu_table_template(template_3x3) {
+       variable_1 : total_output_net_capacitance;
+       variable_2 : input_net_transition;
+       index_1 ("0, 1, 2");
+       index_2 ("0.01, 0.026135, 0.4682");
+    }
+
+
+
+
 '''
+
+TIMING = '''
+
+    timing() {
+      related_pin : "INPIN";
+      cell_rise(template_3x3) {
+        index_1 ("0, 1.0, 2.0");
+        index_2 ("0, 1.0, 2.0");
+        values ( "1, 1, 1", "1, 1, 1", "1, 1, 1"); 
+      }    
+      rise_transition(template_3x3) {
+        index_1 ("0, 1.0, 2.0");
+        index_2 ("0, 1.0, 2.0");
+        values ( "0.5, 0.5, 0.5","0.5, 0.5, 0.5", "0.5, 0.5, 0.5");
+      }    
+      cell_fall(template_3x3) {
+        index_1 ("0, 1.0, 2.0");
+        index_2 ("0, 1.0, 2.0");
+        values ( "1, 1, 1", "1, 1, 1", "1, 1, 1"); 
+      }    
+      fall_transition(template_3x3) {
+        index_1 ("0, 1.0, 2.0");
+        index_2 ("0, 1.0, 2.0");
+        values ( "0.5, 0.5, 0.5", "0.5, 0.5, 0.5", "0.5, 0.5, 0.5");
+      }    
+    }    
+'''   
+
+
+
+
+
+

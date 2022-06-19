@@ -179,6 +179,10 @@ class sequenceClass:
                 elif len(wrds)>3:
                     Val = list(map(self.eval,wrds[2:]))
                     self.Translates[Var]=Val
+            elif (len(wrds)==3) and (wrds[1] == '='):
+                Var = wrds[0]
+                Val = self.eval(wrds[2])
+                self.Translates[Var]=Val
 
 
     def extractSequences(self):
@@ -356,14 +360,16 @@ class sequenceClass:
             if len(wrds)==3:
                 Val = self.eval(wrds[2])
                 self.Translates[Var]=Val
-                logs.log_info('DBG %s %s' % (Var,Val))
+#                logs.log_info('DBG %s %s' % (Var,Val))
             elif len(wrds)>3:
                 Val = list(map(self.eval,wrds[2:]))
                 self.Translates[Var]=Val
-
-
-
             return True
+        if (len(wrds) == 3) and (wrds[1] == '='):
+            Val = self.eval(wrds[2])
+            self.Translates[wrds[0]]=Val
+            return 
+
         if wrds[0] == 'finish':
             logs.log_info('finishing on sequence')
             self.agentsFinish()
@@ -485,7 +491,9 @@ class sequenceClass:
                     Wrds2.append('%s=%s'%(ww[0],w1))
                 else:
                     Wrds2.append(Wrd)
-            self.agents[wrds[0]].action(wrds[1]+' '+' '.join(Wrds2))
+            Cmd = wrds[1]+' '+' '.join(Wrds2)
+            logs.log_info('tell %s <- %s' % (wrds[0],Cmd))
+            self.agents[wrds[0]].action(Cmd)
             return True
         elif (wrds[0] == 'check'):
             BB = makeExpr(wrds[1])
@@ -522,6 +530,21 @@ class sequenceClass:
         else:
             logs.log_error('what!! sequence failed %s on %s agents=%s'%(wrds[0],Line,list(self.agents.keys())))
             return False
+
+    def agentAction(self,Agent,Txt):
+        wrds = Txt.split()
+        Wrds = list(map(str,map(self.eval,wrds[1:])))
+        Wrds2 = []
+        for Wrd in Wrds:
+            if '=' in Wrd:
+                ww = Wrd.split('=')
+                w1 = self.eval(ww[1])
+                Wrds2.append('%s=%s'%(ww[0],w1))
+            else:
+                Wrds2.append(Wrd)
+        Cmd = wrds[0]+' '+' '.join(Wrds2)
+        logs.log_info('tell %s <- %s' % (Agent,Cmd),'seq')
+        self.agents[Agent].action(Cmd)
 
     def jumpLabel(self,Lbl):
         if Lbl in self.Labels:
