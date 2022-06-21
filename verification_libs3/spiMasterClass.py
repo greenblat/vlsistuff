@@ -64,6 +64,14 @@ class spiMasterClass(logs.driverClass):
             Data = eval(wrds[2])
             Str = 'send %s %s %s %s %s %s' % ( hex(0x00+((Addr>>8) & 0x7f)),hex(Addr & 0xff), hex((Data>>24)&0xff),hex((Data>>16)&0xff),hex((Data>>8)&0xff),hex(Data&0xff)   )
             self.action(Str)
+
+        elif Cmd =='rreg':
+            Addr = eval(wrds[1])
+            Data = 0
+            Str = 'send %s %s %s %s %s %s' % ( hex(0x80+((Addr>>8) & 0x7f)),hex(Addr & 0xff), hex((Data>>24)&0xff),hex((Data>>16)&0xff),hex((Data>>8)&0xff),hex(Data&0xff)   )
+            self.action(Str)
+
+
         elif Cmd =='wait':
             self.wait(wrds[1])
         elif Cmd =='waitNotBusy':

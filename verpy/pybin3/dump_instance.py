@@ -126,7 +126,7 @@ def dump_instance(Mod,Simple=False):
     Fout.close()
     Fout = open('%s.inst.py'%(Name),'w')
     Fout.write(String2)
-    Fout.write('def cucu():\n')
+    Fout.write('def cucu():  # list of all interface signals, just to help You find the names\n')
     for Sig in Sigs:
         DirHL = Mod.nets[Sig]
         Dir1 = DirHL[0].split()[0]

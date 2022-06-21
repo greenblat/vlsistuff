@@ -17,6 +17,7 @@ class uartClass(logs.driverClass):
         self.rxWaiting=0
         self.rxbyte=''
         self.force(self.rxd,1)
+        self.RxStr = ''
 
     def busy(self,Why=False):
         return (self.txQueue != []) or (self.rxQueue != [])
@@ -101,7 +102,8 @@ class uartClass(logs.driverClass):
                     Chr = chr(logs.intx(self.rxbyte))
                 else:
                     Chr = '(ERR%s)'%self.rxbyte
-                logs.log_info('uart rxbyte %s   "%s" '%(self.rxbyte,Chr))
+                self.RxStr += Chr
+                logs.log_info('uart rxbyte %s   "%s" |||%s||| '%(self.rxbyte,Chr,self.RxStr))
 #                veri.force('tb.marker','0b'+self.rxbyte)
                 self.rxbyte=''
             self.rxWaiting = self.baudRate
