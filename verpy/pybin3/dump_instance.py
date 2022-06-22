@@ -235,7 +235,7 @@ NewName = os.path.expanduser('~')
 if os.path.exists('%s/vlsistuff' % NewName):
     sys.path.append('%s/vlsistuff/verification_libs3'%NewName)
 elif 'VLSISTUFF' in os.environ:
-    sys.path.append('%s/verification_libs3'%os.environ('VLSISTUFF'))
+    sys.path.append('%s/verification_libs3'%os.environ['VLSISTUFF'])
 else:
     print("please set VLSISTUFF to where You cloned vlsistuff repository. like:  /home/cucu/softs/vlsistuff")
     sys.exit()
