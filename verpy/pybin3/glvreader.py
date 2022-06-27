@@ -138,12 +138,32 @@ def add_width_h(wrds):
 def add_width_l(wrds):
     Db.WidthL=wrds[0]
 
+def set_defparam(wrds):
+    Db.Defparam= [wrds[0]]
+def update_defparam(wrds):
+    Db.Defparam.append(wrds[0])
+
+def add_defparam(wrds):
+    Val=wrds[0]
+    Db.Current.defparams[tuple(Db.Defparam)] = Val
+
 def set_type(wrds):
     Db.Type=wrds[0]
+    Db.PRMS = []
+
+def add_param(wrds):
+    Db.Paramname = wrds[0]
+def add_param2(wrds):
+    Val = wrds[0]
+    Db.PRMS.append((Db.Paramname,Val))
+
 def set_inst(wrds):
     Db.Inst=wrds[0]
     Db.Insts+=1
     Db.Current.add_inst(Db.Type,Db.Inst)
+    for (Prm,Val) in Db.PRMS:
+        Db.Current.add_inst_param(Db.Inst,Prm,Val)
+
 def set_pin(wrds):
     Db.Pin=wrds[0]
     Db.WidthH=None
@@ -229,6 +249,19 @@ body0    inout       wire0   set_inout
 body0    wire        wire0   set_wire
 body0    reg        wire0   set_wire
 body0    endmodule   idle   none
+body0    defparam   defparam0  none
+body0    pragma1     pragma0 none
+pragma0  pragma2     body0 none
+defparam0  token   defparam1  set_defparam
+defparam1  .   defparam1  update_defparam
+defparam1  token   defparam1  update_defparam
+defparam1  =   defparam2  none
+defparam2  token   defparam3  add_defparam
+defparam2  ubin   defparam3  add_defparam
+defparam2  hex   defparam3  add_defparam
+defparam2  string   defparam3  add_defparam
+defparam2  number   defparam3  add_defparam
+defparam3  ;   body0  none
 wire0    [           width0 push
 wire0    token       wire1 add_wire
 wire1    ,           wire0 none
@@ -249,6 +282,22 @@ body0    token       inst0 set_type
 inst0    token       inst1 set_inst
 inst1    ;           body0 none
 inst1    (           inst2 none
+inst0    #           instp1 none
+instp1    (          instp2 none
+instp2    .          instp3 none
+instp3    token      instp4 add_param
+instp4    (          instp5 none
+instp5    bin        instp6 add_param2
+instp5    ubin       instp6 add_param2
+instp5    hex        instp6 add_param2
+instp5    uhex       instp6 add_param2
+instp5    dig        instp6 add_param2
+instp5    number     instp6 add_param2
+instp5    string     instp6 add_param2
+instp6    )          instp7 none
+instp7    )          inst0  none
+instp7    ,          instp2  none
+
 inst2    .           conn0 none
 inst2    )           inst4 none
 conn0    token       conn1 set_pin

@@ -15,7 +15,7 @@ import logs
 
 class apbDriver:
     bus_locked=False
-    def __init__(self,Path,Monitors,Prefix,Suffix,Name='optional'):
+    def __init__(self,Path,Monitors,Prefix='',Suffix='',Name='optional'):
         self.Path = Path
         self.Name = Name
 

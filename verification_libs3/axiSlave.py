@@ -38,6 +38,7 @@ class axiSlaveClass:
         self.Passive = False
         self.Starvation = False
         self.Initial = True
+        self.badRresp = 0
 
     def busy(self):
         if self.arqueue!=[]: return True
@@ -76,6 +77,9 @@ class axiSlaveClass:
         Wrds = Text.split()
         if Wrds == []:
             pass
+        elif Wrds[0] == 'rresp':
+            self.badRresp = eval(Wrds[1])
+            logs.log_info('BADRESP of slave set to %x' % self.badRresp)
         elif Wrds[0] == 'starvation':
             if Wrds[1] == 'on':
                 self.Starvation = True
@@ -193,7 +197,7 @@ class axiSlaveClass:
                 self.force('rvalid',1)
                 self.force('rlast',rlast)
                 self.force('rid',rid)
-                self.force('rresp',0)
+                self.force('rresp',self.rresp())
                 self.force('rdata','0x'+rdata)
             return
         (rlast,rid,rdata) = self.rqueue.pop(0)
@@ -205,9 +209,15 @@ class axiSlaveClass:
         self.force('rvalid',1)
         self.force('rlast',rlast)
         self.force('rid',rid)
-        self.force('rresp',0)
+        self.force('rresp',self.rresp())
         self.force('rdata','0x'+rdata)
 
+    def rresp(self):
+        logs.log_info('RRESP %x %x   %s' % (self.badRresp , self.arqueue[0][1],self.arqueue[0]))
+        if self.badRresp == self.arqueue[0][1]:
+            logs.log_info('RRESP ERR %s %s' % (self.rqueue,self.arqueue)) 
+            return 2
+        return 0
 
     def idleread(self):
         self.force('rvalid',0)

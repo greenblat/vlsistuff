@@ -23,6 +23,7 @@ class module_class:
         self.generates=[]
         self.parameters={}
         self.localparams={}
+        self.defparams={}
         self.functions={}
         self.pragmas=[]
         self.newvers=[]
