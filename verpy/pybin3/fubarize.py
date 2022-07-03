@@ -9,17 +9,18 @@ def help_main(Env):
     fub.workOnMod()
 
 class fubarizeClass:
-    def __init__(self,Mod):
+    def __init__(self,Mod,work=True):
         self.TRANS = []
         self.Translation = {}
         self.Mod = Mod
         self.Invented = {}
-        self.workOnMod()
+        if work:
+            self.workOnMod()
         
 
     def workOnMod(self):
          self.makeRenames()
-         self.renameDeep()
+         self.renameDeep(False)
          Fout = open('0.%s.fbr'%self.Mod.Module,'w')
          self.Mod.dump_verilog(Fout)
          Fout.close()
@@ -36,18 +37,21 @@ class fubarizeClass:
              else:
                  self.Mod.hard_assigns.append((Invent,Net,'',''))
 
-    def renameDeep(self):
+    def renameDeep(self,noFubar = False):
         for ind,(Dst,Src,A,B) in enumerate(self.Mod.hard_assigns):
-            Xd = self.renameExpr(Dst)
-            Xs = self.renameExpr(Src)
+            Xd = self.renameExpr(Dst,noFubar)
+            Xs = self.renameExpr(Src,noFubar)
             self.Mod.hard_assigns[ind] = (Xd,Xs,A,B)
         for ind,Always in enumerate(self.Mod.alwayses):
-            Alw = self.renameExpr(Always)
+            Alw = self.renameExpr(Always,noFubar)
             self.Mod.alwayses[ind] = Alw
     
+        for ind,Body in enumerate(self.Mod.generates):
+            Alw = self.renameExpr(Body,noFubar)
+            self.Mod.generates[ind] = Alw
             
             
-    def renameExpr(self,Src):
+    def renameExpr(self,Src,noFubar = False):
         if type(Src) is str: 
             if Src in self.Translation: return self.Translation[Src]
             return Src
@@ -56,6 +60,7 @@ class fubarizeClass:
             return Src
 
         if (len(Src)==3)and(Src[0] in ['hex','dig','bin']):
+            if noFubar: return Src
             Invent = self.fubarname()
             if Src[0]=='hex':
                 Val = int(Src[2],16)
@@ -70,13 +75,13 @@ class fubarizeClass:
     
         if type(Src) is list:
             for ind,X in enumerate(Src):
-                Y = self.renameExpr(X)
+                Y = self.renameExpr(X,noFubar)
                 Src[ind]=Y
             return Src
     
         if type(Src) is tuple:
             LL = list(Src)
-            Res = self.renameExpr(LL)
+            Res = self.renameExpr(LL,noFubar)
             return tuple(Res)
     
     

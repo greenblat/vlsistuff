@@ -59,9 +59,12 @@ class sequenceClass:
         self.Translates['peek'] = self.seq_peek
         self.Translates['float2int'] = logs.float2binary
         for (Nickname,Object) in AGENTS:
-            self.agents[Nickname]=Object
-            Object.Caller = self
-            Object.SeqObj = self
+            if type(Object) is int:
+                pass
+            else:
+                self.agents[Nickname]=Object
+                Object.Caller = self
+                Object.SeqObj = self
         self.searchPath = ['.'] 
         self.Ptr = 0
         self.Stack = []
@@ -276,6 +279,11 @@ class sequenceClass:
         Val = hex(logs.peek(Full))
         return Val
 
+    def evalh(self,Txt,Bad=False):
+        X = self.eval(Txt,Bad)
+        if type(X) is int: return hex(X)
+        return X
+
     def eval(self,Txt,Bad=False):
         if type(Txt) is int: return Txt
         if Txt in self.Translates: return self.eval(self.Translates[Txt])
@@ -360,7 +368,7 @@ class sequenceClass:
             if len(wrds)==3:
                 Val = self.eval(wrds[2])
                 self.Translates[Var]=Val
-#                logs.log_info('DBG %s %s' % (Var,Val))
+                logs.log_info('DBG %s %s' % (Var,Val))
             elif len(wrds)>3:
                 Val = list(map(self.eval,wrds[2:]))
                 self.Translates[Var]=Val
@@ -482,8 +490,9 @@ class sequenceClass:
                     self.Guardian = DEFAULTWAITGUARD
 
                 return True
-            Wrds = list(map(str,map(self.eval,wrds[2:])))
+            Wrds = list(map(self.evalh,wrds[2:]))
             Wrds2 = []
+            print('>>>>>>',Wrds,wrds)
             for Wrd in Wrds:
                 if '=' in Wrd:
                     ww = Wrd.split('=')

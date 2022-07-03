@@ -254,6 +254,7 @@ class apbDriver:
         self.run1()
 
     def run0(self):
+#        logs.force('tb.marker0',self.waiting0)
         if self.waiting0>0:
             self.waiting0 -= 1
             return
@@ -280,6 +281,7 @@ class apbDriver:
             self.force('penable',0)
             
         if self.seq0!=[]:
+            logs.forceAscii('tb.markstr',str(self.seq0[0]))
             AA0 = self.seq0[0][0]
             if (len(AA0)==3)and(AA0[0]=='conditional'):
                 Who = AA0[1]
@@ -329,12 +331,13 @@ class apbDriver:
                     self.installUntil(Val,0)
                 elif Sig=='popif':
                     Who,Comp = Val
-                    if self.peek(Who) == Comp:
-                        popIt = True
+                    logs.log_info('POPIF %s comp=%s act=%s' % (Who,Comp,self.peek(Who)))
+                    popIt = self.peek(Who) == Comp
                 else:
                     self.force(Sig,Val)
                     if (Sig == 'penable') and (Val == 0):
                         popIt = True
+            logs.force('tb.marker1',int(popIt))
             if popIt or self.valid('pready'):
                 self.seq0.pop(0)
             return

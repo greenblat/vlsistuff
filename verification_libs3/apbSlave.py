@@ -4,19 +4,20 @@ import veri
 import logs
 
 class apbSlave(logs.driverClass):
-    def __init__(self,Path,Monitors,Prefix,Suffix,Name='noName'):
+    def __init__(self,Path,Monitors,Prefix='',Suffix='',Name='noName'):
         logs.driverClass.__init__(self,Path,Monitors)
         self.state = 'idle'
         self.RAM = {}
         self.prefix = Prefix
         self.suffix = Suffix
+        self.READY = 0
 
 
     def onFinish(self):
         return
 
     def busy(self):
-        return False
+        return (self.waiting!=0)or(self.state != 'idle')
 
 
     def prdata(self):
@@ -25,6 +26,9 @@ class apbSlave(logs.driverClass):
 
     def action(self,Cmd):
         wrds = Cmd.split()
+        if wrds[0] == 'ready':
+            self.READY = eval(wrds[1])
+            return
         if wrds[0] == 'ram':
             Addr = eval(wrds[1])
             for X in wrds[2:]:
@@ -52,12 +56,17 @@ class apbSlave(logs.driverClass):
         return self.valid(Sig)
 
     def run(self):
+        if self.waiting>0:
+            self.waiting -= 1
+            return
+#        logs.forceAscii('tb.markstr0',self.state)
         if self.state == 'idle':
             self.lcl_force('pready',0)
             if self.lcl_valid('psel'):
                 self.state = 'work'
                 self.addr = self.lcl_peek('paddr')
                 self.pwrite = self.lcl_peek('pwrite')
+                self.waiting = self.READY
         elif self.state == 'work':
             self.lcl_force('pready',1)
             if self.lcl_valid('penable'):

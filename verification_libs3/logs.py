@@ -337,6 +337,9 @@ def peekBus(Bus,Wid,Base=''):
     return int(Res,2)
 
 
+def force(Sig,Val):
+    veri.force(Sig,str(Val))
+
 def peek(Sig):
     X = veri_peek(Sig)
     if MODE == 'verilator':
@@ -403,6 +406,8 @@ def binx(Int,Wid=8):
     Z = Y[-Wid:]
     return Z
 
+def forceAscii(Sig,Str):
+    asciiForce(Sig,Str)
 def force_ascii(Sig,Str):
     asciiForce(Sig,Str)
 def asciiForce(Sig,Str):
