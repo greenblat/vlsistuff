@@ -223,6 +223,7 @@ always begin
 end
 initial begin
     $dumpvars(0,tb);
+    rst_n = 0;
 """    
 String2 = """
 

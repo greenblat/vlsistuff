@@ -105,7 +105,7 @@ class axiLiteMasterClass:
             self.Queue.append('force awvalid=1 awaddr=%s'%(Address))
             self.Queue.append('force awvalid=0 awaddr=0')
             self.Queue.append('check wready==1')
-            self.Queue.append('force wvalid=1 wdata=%s wstrb=%s wlast=1 '%(Wdata,Wstrb))
+            self.Queue.append('force wvalid=1 wdata=%s wstrb=%s '%(Wdata,Wstrb))
             self.Queue.append('force wvalid=0 wdata=0 wstrb=0')
         elif Queue==2:
             self.Queue2.append('force awvalid=1 awaddr=%s'%(Address))

@@ -507,7 +507,7 @@ class sequenceClass:
         elif (wrds[0] == 'check'):
             BB = makeExpr(wrds[1])
             Val = self.evalExpr(BB)
-            logs.log_ensure(Val,'CHECK of %s  vars=%s '%(wrds[1],self.DEFS)) 
+            logs.log_ensure(Val,'CHECK of %s  vars=%s %s '%(wrds[1],self.DEFS,' '.join(wrds[2:]))) 
         elif (wrds[0] in ['correct','wrong','print']):
             Res = ''
             for Wrd in wrds[1:]:

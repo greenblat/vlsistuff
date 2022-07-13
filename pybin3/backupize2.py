@@ -111,7 +111,7 @@ class backup_class:
                     (Item not in self.deeps) and
                     (Item[0]!='.')
                    ):
-                   print('please check %s from %s'%(Item,self.Path),self.deeps,self.shallows)
+                   print('please check directory=%s is not mentioned in backup file %s'%(Item,self.Path),self.deeps,self.shallows)
                    has_errors(1)
 
     def deep_names(self):
@@ -155,8 +155,8 @@ def main():
             Tarname = run_one_backup_file('.')
             print('changing back to ',BasePath)
             os.chdir(BasePath)
-            if (Path1==Path):
-                print('>>>>>',Objs[Path].ignores_deep)
+#            if (Path1==Path):
+#                print('>>>>>',Objs[Path].ignores_deep)
             if (Tarname != 0):
                 if (for_real):
                     if Path1!='.':
@@ -240,7 +240,7 @@ def use_backup_lines(Path,lines):
                             if (not os.path.isdir(L2)):
                                 Obj.files = Obj.files + [ddd+'/'+L2]
                         
-                        print('>>>>>>>>',wrd,Obj.files,Mask,L11)
+#                        print('>>>>>>>>',wrd,Obj.files,Mask,L11)
 #                        for L2 in L11:
 #                            if compatible_wild_card(Mask,L2)and (not os.path.isdir(L2)):
 #                                Obj.files = Obj.files + [ddd+'/'+L2]
@@ -405,7 +405,7 @@ import fnmatch
 def compatibleList(List,Mask):
 #    Mask = Mask.replace('*','?')
     L1 = fnmatch.filter(List,Mask)
-    print('compatibleList',Mask,L1)
+#    print('compatibleList',Mask,L1)
     return L1
 
 def compatible_wild_card(Mask,Fname):
