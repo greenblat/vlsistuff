@@ -40,9 +40,23 @@ def run_yacc(YaccTableName,Flexname,RunDir,Fname):
     if YaccTableName:
         load_yacc_table(YaccTableName)
     readlexfile(Flexname)
+    removePragmas()
     run_machine()
     reportDb(RunDir)
     Fout.close()
+
+def removePragmas():
+    ind = 0
+    while ind < len(Lex):
+        Item = Lex[ind]
+        if Item[1] == 'pragma1':
+            Lex.pop(ind)
+            Lex.pop(ind)
+            Lex.pop(ind)
+        else:
+            ind += 1
+
+
 
 def readlexfile(Flexname):
     Flex=open(Flexname)

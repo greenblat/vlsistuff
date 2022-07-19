@@ -32,13 +32,13 @@ def help_main(Env):
         if Wid==0:
             Fout.write('        %s : in std_logic;\n' % Net)
         else:
-            Fout.write('        %s : in std_logic_vector ( %s downto 0);\n' % (Net,Wid))
+            Fout.write('        %s : in std_logic_vector ( %s downto 0);\n' % (Net,Wid-1))
     Fout.write('-------------\n')
     for Net,Wid in Outs:
         if Wid==0:
             Fout.write('        %s : out std_logic;\n' % Net)
         else:
-            Fout.write('        %s : out std_logic_vector ( %s downto 0);\n' % (Net,Wid))
+            Fout.write('        %s : out std_logic_vector ( %s downto 0);\n' % (Net,Wid-1))
     Fout.write('   );\n')
     Fout.write('end component;\n')
     Fout.write('\n\n\n')
@@ -51,15 +51,54 @@ def help_main(Env):
     Fout.write(');\n')
     Fout.write('\n\n\n')
 
-
-
-
-
-
-
-
-
+    wires(Mod,Fout)
+    assigns(Mod,Fout)
+    alwayses(Mod,Fout)
     Fout.close()
+
+def pr_expr(Expr):
+    if type(Expr) is str:
+        return Expr
+    if type(Expr) is list:
+        if Expr[0] == 'subbit':
+            return '%s(%s)' % (Expr[1],Expr[2])
+        if Expr[0] == 'subbus':
+            return '%s(%s downto %s)' % (Expr[1],Expr[2][0],Expr[2][1])
+    print('ERROR %s' % str(Expr)) 
+    return 'ERROR %s' % str(Expr)
+
+def internalDir(Dir):
+    if 'input' in Dir: return False
+    if 'output' in Dir: return False
+    if 'inout' in Dir: return False
+    return True
+
+
+def wires(Mod,Fout):
+    for Prm in Mod.localparams:
+        Fout.write('    constant %s integer := %s;\n' % (Prm,Mod.localparams[Prm]))
+    for Net in Mod.nets:
+        Dir,Wid = Mod.nets[Net]
+        if internalDir(Dir):
+            if (Wid == 0):
+                Fout.write('    signal %s std_logic;\n' % Net)
+            else:
+                H,L = Wid
+                Fout.write('    signal %s std_logic_vector ( %s downto %s);\n' % (Net,H,L))
+
+
+
+
+def assigns(Mod,Fout):
+    for Dst,Src,_,_ in Mod.hard_assigns:
+        Fout.write('    %s <= %s;\n' % (pr_expr(Dst),pr_expr(Src)))
+
+def alwayses(Mod,Fout):
+    for Head,Body,_ in Mod.alwayses:
+        Fout.write('process \n')
+        Fout.write('end process \n')
+        
+        
 
 
 def prepExternals(Mod):

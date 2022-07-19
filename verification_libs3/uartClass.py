@@ -31,6 +31,7 @@ class uartClass(logs.driverClass):
         if Wrds[0]=='tx':
             for Wrd in Wrds[1:]:
                 self.send(Wrd)
+            self.send('\x0a')
         elif Wrds[0]=='baudrate':
             self.baudRate = eval(Wrds[1])
         else:
@@ -103,7 +104,15 @@ class uartClass(logs.driverClass):
                 else:
                     Chr = '(ERR%s)'%self.rxbyte
                 self.RxStr += Chr
-                logs.log_info('uart rxbyte %s   "%s" |||%s||| '%(self.rxbyte,Chr,self.RxStr))
+#                logs.log_info('uart rxbyte %s   "%s" '%(self.rxbyte,self.RxStr))
+                try:
+                    if ord(Chr) <= 10:
+                        logs.log_info('UART RX  "%s" '%(self.RxStr[:-1]))
+                        self.RxStr = ''
+                except:
+                    logs.log_info('UART RX ERROR |%s|  "%s" '%(Chr,self.RxStr))
+                    self.RxStr = ''
+
 #                veri.force('tb.marker','0b'+self.rxbyte)
                 self.rxbyte=''
             self.rxWaiting = self.baudRate

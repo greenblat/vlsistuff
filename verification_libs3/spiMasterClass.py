@@ -68,6 +68,8 @@ class spiMasterClass(logs.driverClass):
         elif Cmd =='rreg':
             Addr = eval(wrds[1])
             Data = 0
+            if len(wrds)>2:
+                self.Expects[Addr] = eval(wrds[2]),0xffffffff,"RREG"
             Str = 'send %s %s %s %s %s %s' % ( hex(0x80+((Addr>>8) & 0x7f)),hex(Addr & 0xff), hex((Data>>24)&0xff),hex((Data>>16)&0xff),hex((Data>>8)&0xff),hex(Data&0xff)   )
             self.action(Str)
 
@@ -94,6 +96,7 @@ class spiMasterClass(logs.driverClass):
 
 
     def read(self,Addr,Check='no',Mask = 0xffff,Comment=''):
+        logs.log_info('READ %x %s %s %s' % (Addr,Check,Mask,Comment))
         Abin = logs.binx(Addr,12)
         Abin = reverseBin(Abin)
 
@@ -188,9 +191,11 @@ class spiMasterClass(logs.driverClass):
                     Exp,Mask,Comment = self.Expects[Addr]
                     Exp = '%04x'%Exp
                     try:
-                        Act = '%04x'%(int(BX[:4],16) & ((1<<Mask)-1))
+                        
+                        Act = '%04x'%(int(AX,16) & ((1<<Mask)-1))
                     except:
-                        Act = 'x'
+                        logs.log_error("GOT %s " % AX)
+                        Act = 'AX'
                     if Exp==Act:
                         logs.log_correct('MISO "%s" exp=%s act=%s for add=%x'%(Comment,Exp,Act,Addr))
                     else:
