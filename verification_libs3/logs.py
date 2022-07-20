@@ -913,6 +913,8 @@ class driverClass:
 
     def force(self,Sig,Val):
         Full = self.fullname(Sig)
+        if (type(Val) is int) and (Val < 0): 
+            Val = '0bx'
         if veri: veri.force(Full,str(Val))
 
     def forceAscii(self,Sig,Txt,Len):
