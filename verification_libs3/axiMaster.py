@@ -1,7 +1,7 @@
 
 DEMO = '''
 
-BURST: 0 - fixed, 1- incremtning 2-wrapping
+BURST: 0 - fixed, 1- incrementing 2-wrapping
 
 axi = axiMaster.axiMasterClass('tb',Monitors)
 
@@ -12,6 +12,14 @@ axi.wait(100)
 # def makeRead(self,Burst,Len,Address,Size=4,Rid='none'):
 # def makeWriteWstrb(self,Burst,Len,Address,Size=4,Wstrb='auto',Wdatas=[]):
 # def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
+
+
+# in sequence:    axi write Burst Length Address  Size Wdata0 Wdata1 ... WdataN
+# bursts: 0 - fixed, 1- incrementing 2-wrapping
+# Size = in bytes 1,2,4,8
+# Wdatas are optional and if not enough given, it will invent something.
+# Id  is set prior in sequence by "axi rid 3" for id 3.
+# read is similar just without datas.
 
 import os,sys
 import logs

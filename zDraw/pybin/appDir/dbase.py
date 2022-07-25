@@ -998,6 +998,14 @@ class DetailClass:
                     return 'wire',Wire
         return False,False
 
+    def wipe_out_wire(self,Wire):
+        Keys = list(self.params.keys())
+        print('wipe out %s %s' % (Wire,Keys))
+        for Param in Keys:
+            if self.params[Param].Owner==Wire:
+                print('OWNER %s %s ' % (Param,self.params[Param].Owner))
+                self.params.pop(Param)
+                
     def wipe_out_instance(self,Inst):
         Keys = list(self.params.keys())
         for Param in Keys:
@@ -1762,6 +1770,7 @@ def use_keystroke(Uni,Ord,XY):
                 Glbs.undoValid = True
             elif (What=='wire'):
                 Glbs.details[Root].wires.pop(Who)
+                Glbs.details[Root].wipe_out_wire(Who)
                 Glbs.details[Root].touched(True)
                 Glbs.undoValid = True
             elif (What=='geom'):
