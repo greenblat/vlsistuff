@@ -618,7 +618,6 @@ void getTracedSigs() {
     while ((j != NULL)&&(Tfile!=NULL)) {
         j = fgets(line, 300, Tfile);
         ii=sscanf(line,"%s %s %s %s %s %s %s",s1,s2,s3,s4,s5,s6,s7);
-        printf(">>>>> %d",ii);
         if (ii>0) { traced[jj] = qqai(s1); jj++; }
         if (ii>1) { traced[jj] = qqai(s2); jj++; }
         if (ii>2) { traced[jj] = qqai(s3); jj++; }
@@ -856,8 +855,8 @@ void armTriggers(int P,char *Val) {
         int AA = (sensitives[ii]== LP);
         int BB = (sensitive_value[ii]==Val[0]);
         int Cond = AA && BB;
-        if (AA)
-            printf(">>>> p=%d sens=%ld cond=%d ii=%d aa=%d  bb=%d sens=%d act=%d\n",P,sensitives[ii],Cond,ii,AA,BB,sensitive_value[ii],Val[0]);
+//        if (AA)
+//            printf(">>>> p=%d sens=%ld cond=%d ii=%d aa=%d  bb=%d sens=%d act=%d\n",P,sensitives[ii],Cond,ii,AA,BB,sensitive_value[ii],Val[0]);
         if (Cond) {
             armed[ii]=1;
         }

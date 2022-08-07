@@ -39,6 +39,7 @@ class axiSlaveClass:
         self.Starvation = False
         self.Initial = True
         self.badRresp = 0
+        self.Awready = 1
 
     def busy(self):
         if self.arqueue!=[]: return True
@@ -77,6 +78,8 @@ class axiSlaveClass:
         Wrds = Text.split()
         if Wrds == []:
             pass
+        elif Wrds[0] == 'awready':
+            self.Awready = eval(Wrds[1])
         elif Wrds[0] == 'rresp':
             self.badRresp = eval(Wrds[1])
             logs.log_info('BADRESP of slave set to %x' % self.badRresp)
@@ -160,7 +163,7 @@ class axiSlaveClass:
     def run(self):
         if self.Initial:
             self.Initial = False
-            self.force('awready',1)
+            self.force('awready',self.Awready)
             self.force('wready',1)
             self.force('arready',1)
         if self.Starvation:
@@ -317,8 +320,11 @@ class axiSlaveClass:
             self.force('bvalid',0)
 
         if len(self.awqueue)>1000:
-            self.force('awready',1)
+            self.force('awready',self.Awready)
         elif self.Passive and (self.peek('awready')==0):
+            pass
+        elif self.Awready == 0:
+            self.force('awready',0)
             pass
         elif self.peek('awvalid')==1:
             self.force('awready',1)

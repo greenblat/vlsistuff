@@ -34,6 +34,7 @@ class apbSlave(logs.driverClass):
             for X in wrds[2:]:
                 Data = eval(X)
                 self.RAM[Addr] = Data
+                logs.log_info('SLV RAM %x -> [%x]' % (Data,Addr))
                 Addr += 4
             return
         logs.log_error('action not recogninzed "%s"'%Cmd)

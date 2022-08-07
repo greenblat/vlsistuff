@@ -1014,8 +1014,10 @@ class DetailClass:
         Keys = list(self.wires.keys())
         for Wire in Keys:
             if belongs_together(self.wires[Wire].Start,Inst):
+                self.wipe_out_wire(Wire)
                 self.wires.pop(Wire)
             elif belongs_together(self.wires[Wire].End,Inst):
+                self.wipe_out_wire(Wire)
                 self.wires.pop(Wire)
 
     def select_enclosed(self,P0,P1):
