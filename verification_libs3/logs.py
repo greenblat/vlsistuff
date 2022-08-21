@@ -835,6 +835,10 @@ class driverClass:
         self.traced_vars = Vars
         self.traceEnabled = False
         self.Status = [0,0,0,0]
+        self.cycles = 0
+        self.Forces = []
+    def eval(self,Item):
+        return self.SeqObj.eval(Item)
 
     def fullname(self,Sig):
         Fname = '%s%s%s' % (self.Path,self.Prefix,Sig)
@@ -911,7 +915,24 @@ class driverClass:
         X = veri.exists(Full)
         return X == '1'
 
-    def force(self,Sig,Val):
+    def useForces(self):
+        Next = [] 
+        self.cycles += 1
+        while self.Forces!=[]:
+            (When,Sig,Val) = self.Forces[0]
+            if When <= self.cycles:
+                self.Forces.pop(0)
+                self.force(Sig,Val)
+            else:
+                Next.append((When,Sig,Val))
+        if Next!=[]:
+            self.Forces.extend(Next)
+
+
+    def force(self,Sig,Val,Future = 0):
+        if Future>0:
+            self.Force.append((self.cycles+Future,Sig,Val))
+            return
         Full = self.fullname(Sig)
         if (type(Val) is int) and (Val < 0): 
             Val = '0bx'
@@ -984,6 +1005,7 @@ class driverClass:
         return
 
     def run(self):
+        self.cycles += 1
         log_error('run() of driverClass is supposed to be replaced')
 
 class emptyClass(driverClass):

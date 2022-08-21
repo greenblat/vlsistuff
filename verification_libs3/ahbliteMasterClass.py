@@ -48,6 +48,11 @@ class ahbliteMaster(logs.driverClass):
         self.RDATA = []
         self.HWD = 1
         self.PWDATA = []
+        self.cycles = 0
+        self.tr_force('hsel',0)
+        self.tr_force('htrans',0)
+        self.tr_force('hburst',0)
+        self.tr_force('hwrite',0)
 
     def translate(self,Addr):
         if Addr[0] in '0123456789':
@@ -148,6 +153,7 @@ class ahbliteMaster(logs.driverClass):
         return  hex(Res)
         
     def run(self):
+        self.cycles += 1
         if veri.exists('tb.lenq') == '1':
             veri.force('tb.lenqq',str(len(self.queue)))
             veri.force('tb.lenq',str(len(self.seq)))
