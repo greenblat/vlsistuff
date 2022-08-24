@@ -71,7 +71,8 @@ class module_class:
     def add_define(self,Name,Expr):
         self.defines[Name]=Expr
     def add_net(self,Name,Dir,Wid):
-        self.add_sig(Name,Dir,Wid)
+        if Name:
+            self.add_sig(Name,Dir,Wid)
     def add_sig(self,Name,Dir,Wid):
         if Wid==1: Wid=0
         if (type(Name) is str)and('{' in Name):
@@ -283,7 +284,7 @@ class module_class:
 
         for Sig in self.nets:
             Dir,Wid = self.nets[Sig]
-            if is_external_dir(Dir):
+            if is_external_dir(Dir) and (Sig):
                 IOS.append((Sig,Dir,Wid))
             else:
                 NOIOS.append((Sig,Dir,Wid))

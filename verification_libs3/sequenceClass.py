@@ -331,7 +331,7 @@ class sequenceClass:
                     if self.Guardian==0:
                         Lnum = self.Sequence[self.Ptr][1]
                         logs.log_error('Guardian expired %s at line %s'%(self.waitNotBusy,Lnum))
-                        self.agents[self.waitNotBusy].busy(True)
+                        self.agents[self.waitNotBusy].busy()
                         self.agentsFinish()
                         logs.finish('Guardian expired %s at line %s'%(self.waitNotBusy,Lnum))
                         logs.closeLogs()
