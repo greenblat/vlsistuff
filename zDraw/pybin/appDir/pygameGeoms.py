@@ -29,9 +29,18 @@ def fixCoord(Point):
 
 glLineWidth = 1
 def setLineWidth(Wid):
-    Glbs.set_context('linewidth',Wid)
     global glLineWidth
+    Glbs.set_context('lineWidth',Wid)
     glLineWidth = int(Wid)
+
+
+def getLineWidth():
+    global glLineWidth
+    Wid = Glbs.get_context('lineWidth')
+    glLineWidth = int(Wid)
+
+
+
 
 def draw_segment(P0,P1):
    P0 = fixCoord(P0)
@@ -77,6 +86,7 @@ def draw_dashed_line(P0,P1,Color,dash_length=10):
 
 
 def draw_line(P0,P1,Color):
+    getLineWidth()
     P0f = fixCoord(P0)
     P1f = fixCoord(P1)
     Color = oglcolor(Color)
@@ -86,6 +96,7 @@ def draw_line(P0,P1,Color):
 def draw_long_line(Points,Color):
     Color = oglcolor(Color)
     Screen = Glbs.get_context('screen')
+    getLineWidth()
     pygame.draw.lines(Screen,Color,False,Points,glLineWidth)
 
 
@@ -94,6 +105,7 @@ def draw_frect(X0,Y0,X1,Y1,Color):
     (X0,Y0) = fixCoord((X0,Y0))
     (X1,Y1) = fixCoord((X1,Y1))
     Screen = Glbs.get_context('screen')
+    getLineWidth()
     pygame.draw.lines(Screen,Color,True,Points,glLineWidth)
 
 def draw_rect(X0,Y0,X1,Y1,Color):
@@ -102,6 +114,7 @@ def draw_rect(X0,Y0,X1,Y1,Color):
     (X0,Y0) = fixCoord((X0,Y0))
     (X1,Y1) = fixCoord((X1,Y1))
     Screen = Glbs.get_context('screen')
+    getLineWidth()
     pygame.draw.lines(Screen,Color,Points,glLineWidth)
 
 def draw_xcircle(P0,Radii,Color):

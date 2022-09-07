@@ -38,7 +38,7 @@ class axiSlaveClass:
         self.Passive = False
         self.Starvation = False
         self.Initial = True
-        self.badRresp = 0
+        self.badRresp =  -1
         self.Awready = 1
 
     def busy(self):

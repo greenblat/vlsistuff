@@ -117,7 +117,9 @@ class apbDriver:
             else:
                 self.read(wrds[1],wrds[2])
         elif wrds[0]=='write':
-            self.write(wrds[1],wrds[2])
+            Mark = False
+            if len(wrds)>3: Mark = wrds[3]
+            self.write(wrds[1],wrds[2],Mark)
         elif wrds[0]=='prdata':
             Who,Act,Addr = self.Backs.pop(0)
             Deg = wrds[1]
@@ -148,16 +150,16 @@ class apbDriver:
             return eval(Data,Dict)
         return eval(Data,self.renames)
 
-    def write(self,Addr,Data):
+    def write(self,Addr,Data,Mark=False):
         if type(Addr) is str:
 #            logs.log_info('translate address in=%s out=%x'%(Addr,self.translate(Addr)))
             Addr = self.translate(Addr)
         if type(Data) is float:
             Data = logs.float2binary(Data)
-#        logs.log_info('apb write  address=%x  data=%x'%(Addr,Data))
+#        logs.log_info('apb write  address=%x  data=%x mark=%s '%(Addr,Data,Mark))
         if type(Data) is str:
             Data = self.eval(Data)
-        self.queue0.append(('write',Addr,Data))
+        self.queue0.append(('write',Addr,Data,Mark))
 
     def write1(self,Addr,Data):
         if type(Addr) is str:
@@ -303,6 +305,12 @@ class apbDriver:
                     elif Val==0: apbDriver.bus_locked=False
                 elif Sig=='name':
                     self.Name = Val
+                elif Sig=='mark':
+                    if not Val: 
+                        Val = 0
+                    else:
+                        Val = eval(Val)
+                    self.force('mark',Val)
                 elif Sig=='marker':
                     logs.log_info('marker from APB %s'%self.Name)
                     if Val[0] in self.markers:
@@ -352,7 +360,7 @@ class apbDriver:
                 self.seq0.append([('penable',0),('lock',1),('psel',1),('pstrb',0xf),('paddr',What[1]),('pwdata',What[2]),('pwrite',1)])
                 self.seq0.append([('penable',1),('popif',('pready',1))])
                 if (self.queue0==[])or(self.queue0[0][0] not in ['write','read']):
-                    self.seq0.append([('psel',0),('pstrb',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0),('lock',0)])
+                    self.seq0.append([('psel',0),('pstrb',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0),('lock',0),('mark',What[3])])
 #                self.seq0.append([('lock',0)])
 
             elif What[0]=='read':
@@ -484,3 +492,55 @@ def extractVars(Txt):
             if Wrd[0] not in '0123456789':
                 Res.append(Wrd)
     return Res
+
+'''
+task apb_wr_task(input [31:0] addr, input [31:0] wdata, input string str);
+begin
+    $display("IG %x %x  %s",addr,wdata,str);
+    @(posedge clk);
+    #1;
+    psel = 1;
+    pwrite = 1;
+    paddr = addr;
+    pwdata = wdata;
+    @(posedge clk);
+    #1;
+    penable = 1;
+    wait(pready);
+    @(posedge clk);
+    #1;
+    penable = 0;
+    psel = 0;
+    pwrite = 0;
+    paddr = 0;
+    pwdata = 0;
+end
+endtask
+
+reg [31:0] rdata;
+task apb_rd_task(input [31:0] addr, input string str);
+begin
+    @(posedge clk);
+    #1;
+    psel = 1;
+    pwrite = 0;
+    paddr = addr;
+    @(posedge clk);
+    #1;
+    penable = 1;
+    wait(pready);
+    @(posedge clk);
+    #1;
+    rdata = prdata;
+    $display("IG rd %x %x %s",addr,rdata,str);
+    penable = 0;
+    psel = 0;
+    pwrite = 0;
+    paddr = 0;
+end
+endtask
+
+
+'''
+
+

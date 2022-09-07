@@ -16,6 +16,8 @@ defaultPicTextSize = 0.15
 
 def get_context(Param,Default=None):
     if Param in Glbs.contexts:
+        if Param == 'lineWidth':
+            print('SET %s %s' % (Param,Glbs.contexts[Param]))
         return Glbs.contexts[Param]
     if (Default!=None):
         set_context(Param,Default)
@@ -23,6 +25,8 @@ def get_context(Param,Default=None):
 
 def set_context(Param,Value):
     Glbs.contexts[Param]=Value
+    if Param == 'lineWidth':
+        print('SET %s %s' % (Param,Value))
     if (Param=='matrix'):
         Imatrix = matrix_inverse(Value)
         set_context('imatrix',Imatrix)
@@ -40,7 +44,7 @@ def init():
     set_context('screen_proximity',10.0)
     set_context('matrix',[1,0,0,0,1,0])
     set_context('pics_lib',['.'])
-    set_context('linewidth',1)
+    set_context('lineWidth',1)
     set_context('state','idle')
     set_context('wire_color',[0,255,0])
     set_context('pic_color',[255,255,0])
@@ -60,7 +64,6 @@ def init():
     set_context('banner','iDraw: greenblat@mac.com +972-54-4927322')
     set_context('grid',0.5)
     set_context('shyParams',['name','size'])
-    set_context('lineWidth',1.5)
     set_context('vectorTextWidth',1.0)
     state='idle'
     lines = PICTURES.split('\n')
@@ -275,7 +278,6 @@ class WireClass:
         if (len(self.List) <= 2):
             P0=get_pin_location(self.Father.Module,self.Start)
             P1=get_pin_location(self.Father.Module,self.End)
-            print('>>>>>>',P0,P1)
             X0,Y0 = P0
             X1,Y1 = P1
             if (X0==X1)or(Y0==Y1) or not Glbs.get_context('useManhattenWires'): 

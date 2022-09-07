@@ -1,5 +1,6 @@
 #! /usr/bin/python
 
+# reads lex output file!!!
 
 import os,sys,string
 from  module_class import module_class
@@ -36,7 +37,8 @@ class Db_class:
         self.Insts=0
         self.right_assign=''
 
-Db=Db_class()
+Db = Db_class()
+Db.Current = module_class('none')
 
 
 def debug():

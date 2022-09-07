@@ -1,11 +1,11 @@
 
 NOC made out of 4-to-1 axi merger and 1-to-4 axi splitter.
-plan to use .dot language to specify.
+use .dot language to specify the topolgy.
 
 additional lego pieces:
-1. clock changerr (in private repository)
+1. clock changer (in private repository)
 2. width changer (in private repository)
-3. nice to have: serdes
+3. nice to have: serdes to connect to other chip.
 
 
 18.Sep.2021

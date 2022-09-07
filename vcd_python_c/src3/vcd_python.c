@@ -228,6 +228,7 @@ int intcode();
 int diffs (char *A, char *B);
 void do_help() { 
     printf("activation:  vcd_python <vcd_file> <python file> \nPROTOTYPE of python file:\n %s\n",helpstring); 
+    printf("   -toggles  -start <TIME> -end <TIME>\n");
     printf("\n\n\nBIGGER EXAMPLE:\n %s\n",EXAMPLE); 
     exit(0); }
 void check_x(int i) { return; }
@@ -281,6 +282,7 @@ typedef struct SIG {
     char value[9];
     char traceable;
     int toggles;
+    long wasZ;
 } change_sig;
 
  change_sig sigs[maxsig];
@@ -313,7 +315,7 @@ if os.path.exists(INITFILE):\n\
         sys.exit() \n\
 else:\n\
     print('verilog.py does not exist')\n\
-    sys.exit() \n\
+    if (not toggles): sys.exit() \n\
 \n\
 ";
 
@@ -329,6 +331,7 @@ int armed[SENSITIVES];
 
 
 char option[200],fname1[1000],fname2[1000];
+int toggles = 0;
 int main(argc, argv)
     int             argc;
     char           *argv[];
@@ -346,7 +349,7 @@ int main(argc, argv)
     fname1[0]=0;
     fname2[0]=0;
 /* update hash table maxsize, if wanted */
-    for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].allocated=0; sigs[i].traceable=0; sigs[i].toggles=0;} 
+    for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].allocated=0; sigs[i].traceable=0; sigs[i].toggles=0; sigs[i].wasZ = 0;} 
     for (i=0;i<SENSITIVES;i++) armed[i]=0;
     if (argc <= 1) do_help();
     if (argc > 1) {
@@ -364,6 +367,8 @@ int main(argc, argv)
                     strcpy(option, *++argv);
                   end_time=atof(option);
                   k++;
+            } else if (strcmp(option,"-toggles")==0) {
+                toggles = 1;
             } else if (fname1[0]==0) strcpy(fname1,option); 
             else if (fname2[0]==0) strcpy(fname2,option);
         }
@@ -380,6 +385,7 @@ int main(argc, argv)
 }
 
 
+void simpleToggles();
 int python_started = 0;
 void conclusions() {
     if (!python_started) {
@@ -387,10 +393,29 @@ void conclusions() {
         return;
     }
     PyRun_SimpleString("conclusions()");
+    if (toggles) {
+        printf("dumping toggles\n");
+        simpleToggles();
+    }
 
 }
 
-
+void simpleToggles() {
+    int tot = 0;
+    int ii;
+    for (ii=0; ii<=maxusedsig; ii++) {
+        if (sigs[ii].toggles>0) {
+            printf("%d %s\n",sigs[ii].toggles,qqia(sigs[ii].fpath));
+            tot += sigs[ii].toggles;
+        }
+    }
+    printf("total %d toggles\n",tot);
+    for (ii=0; ii<=maxusedsig; ii++) {
+        if (sigs[ii].wasZ>0) {
+            printf("%s  was Z\n",qqia(sigs[ii].fpath));
+        }
+    }
+}
 
 char s1[longestVal];
 char s2[longestVal];
@@ -758,6 +783,7 @@ void drive_value(char *Val,char *Code,int forReal) {
         Diffs = diffs(sigs[P].allocated,Val);
         strcpy(sigs[P].allocated,Val);
     }
+    if (Val[0] == 'z') { sigs[P].wasZ = run_time; }
     if (sigs[P].traceable) {
         if (lastTraceTime<run_time) {
             fprintf(vcdF1,"#%ld\n",(long) run_time);
@@ -1081,7 +1107,7 @@ veri_toggles(PyObject *self,PyObject *args) {
     sprintf(LongString,"%s = []",notestring);
     PyRun_SimpleString(LongString);
     int tot = 0;
-    for (ii=0; ii<maxsig; ii++) {
+    for (ii=0; ii<=maxusedsig; ii++) {
         if (sigs[ii].toggles>0) {
 //            printf("%s (%d) code%d = %8d    %s\n",notestring,jj,ii,sigs[ii].toggles,qqia(sigs[ii].fpath));
             sprintf(tmp,"%s.append((%d,'%s'))",notestring,sigs[ii].toggles,qqia(sigs[ii].fpath));
@@ -1090,10 +1116,13 @@ veri_toggles(PyObject *self,PyObject *args) {
 //                strcat(LongString,tmp);
             tot += sigs[ii].toggles;
             sigs[ii].toggles = 0;
+        } else {
+            if (sigs[ii].value[0]!=0)
+                printf("0x%x %s\n",sigs[ii].value[0],qqia(sigs[ii].fpath));
+//            sprintf(tmp,"%s.append((0x%x,'%s'))",notestring,sigs[ii].value[0],qqia(sigs[ii].fpath));
+//            PyRun_SimpleString(tmp);
         }
     }
-//    strcat(LongString,"'''");
-//    PyRun_SimpleString(LongString);
     return Py_BuildValue("i", tot);
 }
 
@@ -1145,7 +1174,10 @@ void start_python() {
     char temp[10000];
     PyImport_AppendInittab("veri", PyInit_veri);
     Py_Initialize();
-    sprintf(temp,"INITFILE = '%s'\n%s",fname2,scriptStart);
+    if (toggles) 
+        sprintf(temp,"toggles = True\nINITFILE = '%s'\n%s",fname2,scriptStart);
+    else
+        sprintf(temp,"toggles = False\nINITFILE = '%s'\n%s",fname2,scriptStart);
     PyRun_SimpleString(temp);
     globals = PyDict_New();
     if (!globals) exit(2);

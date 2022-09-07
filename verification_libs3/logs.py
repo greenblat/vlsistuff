@@ -14,7 +14,6 @@ PYMONLOG = 'pymon.log'
 if 'PYMONLOG' in os.environ:
     PYMONLOG = os.environ['PYMONLOG']
 
-
 def onFinish(): return
 
 
@@ -30,6 +29,7 @@ def pymonname(Fname):
 
 FORCE_WORKS = True
 TRACE = False
+printWrongTrace = False
 
 MODE = 'verilog'   # other is verilator
 WHERE = ''
@@ -178,6 +178,8 @@ def log_wrong(Text,Which=0):
 #        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: %d vs %d (err=%d):  ___WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     Flogs[Which].write('@%d: %d vs %d (err=%d):  ___WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
+    if (printWrongTrace):
+        traceback.print_stack(file=Flogs[Which])
     if Wrongs >= MAXWRONGS:
         log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS),Which)
         finish('max wrongs reached')
@@ -229,7 +231,7 @@ def log_write(Text,Which=0):
     openFlog(Which)
     Flogs[Which].write('%s\n'%(Text))
 
-def log_debug(Text,Tokens,Which=0):
+def log_debug(Text,Tokens = '',Which=0):
     if printDebugs.intersection(set(Tokens.split())) == set(): return
     openFlog(Which)
     print('@%d: debug: %s'%(get_cycles(),Text))

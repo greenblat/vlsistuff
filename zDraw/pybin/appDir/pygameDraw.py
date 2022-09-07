@@ -1,5 +1,5 @@
 
-VERSION = '08oct2021'
+VERSION = '06sep2022'
 WID,HEI = 1200,600
 
 import os,sys,time,traceback
@@ -206,6 +206,7 @@ def main():
 #    Thr = threading.Thread.start(execute_terminal_commands)
     Glbs.set_context("use_command_words", use_command_wrds)
     thread1.start()
+    print('>>>>W',Glbs.get_context('linewidth'))
     work()
     
 
