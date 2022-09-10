@@ -232,7 +232,7 @@ def log_write(Text,Which=0):
     Flogs[Which].write('%s\n'%(Text))
 
 def log_debug(Text,Tokens = '',Which=0):
-    if printDebugs.intersection(set(Tokens.split())) == set(): return
+#    if printDebugs.intersection(set(Tokens.split())) == set(): return
     openFlog(Which)
     print('@%d: debug: %s'%(get_cycles(),Text))
     Flogs[Which].write('@%d: debug: %s\n'%(get_cycles(),Text))

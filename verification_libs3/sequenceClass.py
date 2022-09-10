@@ -58,13 +58,19 @@ class sequenceClass:
         self.Translates['eflash'] = self.eflash
         self.Translates['peek'] = self.seq_peek
         self.Translates['float2int'] = logs.float2binary
-        for (Nickname,Object) in AGENTS:
-            if type(Object) is int:
+        for NickObj in AGENTS:
+            if type(NickObj) is int:
                 pass
-            else:
+            elif (type(NickObj) is tuple):
+                (Nickname,Object) = NickObj
                 self.agents[Nickname]=Object
                 Object.Caller = self
                 Object.SeqObj = self
+            elif 'Name' in dir(NickObj):
+                self.agents[NickObj.Name]=NickObj
+            else:
+                logs.log_error('sequence agent failed to connect')
+
         self.searchPath = ['.'] 
         self.Ptr = 0
         self.Stack = []
