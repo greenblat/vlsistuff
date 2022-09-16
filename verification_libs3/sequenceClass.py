@@ -293,6 +293,7 @@ class sequenceClass:
     def eval(self,Txt,Bad=False):
         if type(Txt) is int: return Txt
         if Txt in self.Translates: return self.eval(self.Translates[Txt])
+        if Txt[0] == '"': return Txt[1:-1]
         try:
             Val =  eval(Txt)
             return Val
@@ -498,7 +499,6 @@ class sequenceClass:
                 return True
             Wrds = list(map(self.evalh,wrds[2:]))
             Wrds2 = []
-            print('>>>>>>',Wrds,wrds)
             for Wrd in Wrds:
                 if '=' in Wrd:
                     ww = Wrd.split('=')
@@ -527,8 +527,6 @@ class sequenceClass:
                         Res += str(self.Translates[Wrd])
                 elif (Wrd[0] == '('):
                     BB = makeExpr(Wrd)
-                    print('>>>>>>>',BB)
-                    logs.log_info('>>>>>>> %s' % str(BB))
                     Val = self.evalExpr(BB)
                     Res += ' '+str(Val)
                 else:

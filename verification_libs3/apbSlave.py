@@ -31,9 +31,9 @@ class apbSlave(logs.driverClass):
             self.READY = eval(wrds[1])
             return
         if wrds[0] == 'ram':
-            Addr = eval(wrds[1])
+            Addr = self.eval(wrds[1])
             for X in wrds[2:]:
-                Data = eval(X)
+                Data = self.eval(X)
                 self.RAM[Addr] = Data
                 logs.log_info('SLV RAM %x -> [%x]' % (Data,Addr))
                 Addr += 4
