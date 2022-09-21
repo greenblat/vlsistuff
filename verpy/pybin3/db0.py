@@ -270,8 +270,14 @@ def add_module_header(List0):
     Dir = False
     Vars = matches.matches(List0,'( !Header_list ) ;')
     if Vars:
-        List = get_list(DataBase[Vars[0]])
-        for Item in List:
+        List2 = flattenList(Vars[0])
+        List3,List4 = [],[]
+        for X in List2:
+            List3.append(DataBase[X])
+        for X in List3:
+           LLL = get_list(X)
+           List4.append(LLL[0])
+        for Item in List4:
             if type(Item) is tuple:
                 Vars2 = matches.matches(Item,'extdir ? ? ?')
                 if Vars2:

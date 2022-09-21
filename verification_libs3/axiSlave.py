@@ -38,8 +38,13 @@ class axiSlaveClass:
         self.Passive = False
         self.Starvation = False
         self.Initial = True
-        self.badRresp =  -1
+        self.badRresp =  0
         self.Awready = 1
+        self.force('bid',0)
+        self.force('rid',0)
+        self.force('rresp',0)
+        self.force('bresp',0)
+        self.force('bvalid',0)
 
     def busy(self):
         if self.arqueue!=[]: return True
@@ -96,10 +101,8 @@ class axiSlaveClass:
             self.Passive = False
         elif Wrds[0] == 'write':
             Addr = eval(Wrds[1])
-            logs.log_info('>>>>>>setWord %x %s'%(Addr,Wrds))
             for Wrd in Wrds[2:]:
                 Data = eval(Wrd)
-                logs.log_info('>>>>>>assWord %x %x'%(Addr,Data))
                 Addr = self.addWord(Addr,Data)
         elif Wrds[0] == 'ramfile':
             File = open(Wrds[1])
@@ -166,6 +169,11 @@ class axiSlaveClass:
             self.force('awready',self.Awready)
             self.force('wready',1)
             self.force('arready',1)
+            self.force('bid',0)
+            self.force('rid',0)
+            self.force('rresp',0)
+            self.force('bresp',0)
+            self.force('bvalid',0)
         if self.Starvation:
             self.force('awready',0)
             self.force('wready',0)
@@ -216,7 +224,8 @@ class axiSlaveClass:
         self.force('rdata','0x'+rdata)
 
     def rresp(self):
-        logs.log_info('RRESP %x %x   %s' % (self.badRresp , self.arqueue[0][1],self.arqueue[0]))
+        return 0
+        logs.log_debug('RRESP name=%s badresp=%x %x   %s' % (self.Name,self.badRresp , self.arqueue[0][1],self.arqueue[0]))
         if self.badRresp == self.arqueue[0][1]:
             logs.log_info('RRESP ERR %s %s' % (self.rqueue,self.arqueue)) 
             return 2
@@ -235,7 +244,6 @@ class axiSlaveClass:
             arid=self.peek('arid')
             arburst=self.peek('arburst')
             araddr=self.peek('araddr')
-            logs.log_info('>>>>>>>> %s %x' % (arburst,araddr))
             arlen=self.peek('arlen')
             arsize=self.peek('arsize')
             self.arqueue.append((arburst,araddr,arlen,arsize))

@@ -335,7 +335,7 @@ class axiMasterClass:
         if (Rid & ((1<<widrid)-1)) != rid:
             logs.log_wrong('sent ARID=%d RID=%d'%(Rid,rid))
         if rresp!=0:
-            logs.log_wrong('RRESP came back %s  ADDR=%x  rid=0x%x'%(rresp,Addr,Rid))
+            logs.log_wrong('RRESP came back %s  ADDR=%x  rid=0x%x  name=%s'%(rresp,Addr,Rid,self.Name))
         
         ADDR = Addr + Pos * (1<<self.Size)
         if ADDR not in self.RDATAS: self.RDATAS[ADDR] = []
