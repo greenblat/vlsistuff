@@ -1124,7 +1124,14 @@ def add_module_item(Item):
             Item = List[1]
             List = get_list(Item)
             add_pragma(List)
-
+        elif Item[0]=='Defparam':
+            Item = List[1]
+            List = get_list(Item)
+            for Item in List:
+                if Item[0] == 'parameter':
+                    Who = Item[1]
+                    Val = get_expr(Item[2])
+                    Current.defparams[Who] = Val
         else:
             logs.log_err('untreated(0) "%s" "%s"'%(Item,List))
     elif (len(Item)==4)and(Item[1]=='pragma'):
@@ -1629,11 +1636,12 @@ def add_definition(List):
         Current.add_sig(Name,Dir,('packed',Wid0,Wid1))
         Current.add_hard_assign(Name,Expr)
         return
-
+# ILIA
     Vars = matches.matches(List,'!IntDir !ManyDefs ;',False)
     if Vars:
+        List0 = flattenList(Vars[1])
         Dir = get_dir(Vars[0])
-        List0 = get_list(Vars[1])
+#        List0 = get_list(Vars[1])
         for Item in List0:
             if type(Item) is str:
                 Current.add_sig(Item,Dir,0)
