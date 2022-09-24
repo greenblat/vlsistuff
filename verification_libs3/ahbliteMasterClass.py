@@ -4,6 +4,7 @@ import veri
 import logs
 import random
 
+# ahb wrap4 write 0x1000
 
 BURSTS = 'single incr incr4 wrap4 incr8 wrap8 incr16 wrap16'.split()
 def burstlen(Burst):
@@ -174,7 +175,7 @@ class ahbliteMaster(logs.driverClass):
                 popIt = True
                 if Sig=='popif':
                     Net,Exp = Val[0],Val[1]
-                    if self.peek(Net) != Exp: popIt = False
+                    if self.tr_peek(Net) != Exp: popIt = False
                 elif Sig=='wait':
                     self.waiting=int(Val)
                 elif Sig=='catch':
@@ -273,7 +274,7 @@ class ahbliteMaster(logs.driverClass):
                         self.seq.append([('hburst',Burst),('haddr',Addr),('hwdata',0),('hwrite',HW),('htrans',SEQ),('catch',('hrdata',Eff,'none')),('hsize',self.HSIZE),('hsel',1)])
                     INCR = 1
                 
-                Eff = Addrs[X+1]
+                Eff = Addrs[-1]
                 if HW==1:
                     HWDATA = self.hwdata(INCR)
                     self.seq.append([('hburst',0),('haddr',0),('hwdata',HWDATA),('hwrite',0),('htrans',IDLE),('hsize',0),('hsel',0)])
@@ -283,13 +284,13 @@ class ahbliteMaster(logs.driverClass):
 
 
             if What[0]=='write':
-                self.seq.append([('haddr',What[1]),('hwdata',0),('hwrite',1),('htrans',2),('hsize',self.HSIZE),('hsel',1),('popif',('hready',1))])
+                self.seq.append([('haddr',What[1]),('hwdata',0),('hwrite',1),('htrans',2),('hsize',self.HSIZE),('hsel',1),('popif',('hreadyout',1))])
                 self.seq.append([('haddr',0),('hwdata',What[2]),('hwrite',0),('htrans',0),('hsize',0),('hsel',0)])
                 self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('hsel',0)])
                 return
 
             if What[0]=='read':
-                self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hsize',self.HSIZE),('popif',('hready',1))])
+                self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hsize',self.HSIZE),('popif',('hreadyout',1))])
                 self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('catch',('hrdata',What[1],What[2])),('hsel',self.HSEL)])
                 return
 

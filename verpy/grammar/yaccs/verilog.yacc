@@ -152,9 +152,7 @@ Parameter :
     | parameter signed Width Pairs ';'
     ;
 Localparam : localparam Pairs ';' | localparam Width Pairs ';'  | localparam Width Width Pairs ';';
-Defparam : defparam DottedPairs ';' ;
-DottedPair : Dotted '=' Expr ;
-DottedPairs : DottedPairs ',' DottedPair | DottedPair ;
+Defparam : defparam Pairs ';' ;
 
 Pairs : Pairs ',' Pair | Pair ;
 Pair : token '=' Expr ;
