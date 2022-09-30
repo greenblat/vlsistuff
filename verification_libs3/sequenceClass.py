@@ -345,6 +345,7 @@ class sequenceClass:
                         veri.finish()
                         sys.exit()
                 return True
+            self.Guardian = 0
             self.waitNotBusy = False
         if self.Ptr == len(self.Sequence): return False
         Line,lnum = self.Sequence[self.Ptr]
@@ -457,7 +458,12 @@ class sequenceClass:
             if (len(wrds)==3)and(self.Guardian==0):
                 Guard = self.eval(wrds[2])
                 self.Guardian=Guard
+                Lnum = self.Sequence[self.Ptr][1]
+                logs.log_info('GUARDIAN started %d at line %s' % (Guard,Lnum))
 
+            if (self.Guardian % 10000) == 1:
+                Lnum = self.Sequence[self.Ptr][1]
+                logs.log_info('GUARDIAN %s lnum=%d wrds=%s len=%d' % (self.Guardian,Lnum,wrds,len(wrds)))
                     
             BB = makeExpr(wrds[1])
             Val = self.evalExpr(BB)
@@ -593,13 +599,14 @@ class sequenceClass:
                     Wrds[ind]=Val
 
         Txt = ' '.join(map(str,Wrds))
+
         if Txt == '': return 0
         try:
             X = eval(Txt,self.Defs,self.Translates)
             return X
         except:
             logs.log_error('evaluation of %s failed'%Txt,0,True,True)
-            logs.log_info('TRANSLATES %s'%(str(self.Translates)))
+#            logs.log_info('TRANSLATES %s'%(str(self.Translates)))
             logs.log_info('RDS %s'%(str(Wrds)))
             return 0
 

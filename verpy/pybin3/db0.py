@@ -889,6 +889,11 @@ def get_busbit(Item):
             return Ind
     logs.log_err('get_busbit %s %s'%(Item,List))
 
+
+def get_dir_(Item):
+    X = get_dir_(Item)
+    return X
+
 def get_dir(Item):
     if (type(Item) is list)and(len(Item)==1):
         return get_dir(Item[0])
@@ -1018,9 +1023,12 @@ def get_list(Item):
     if Vars:
         Dir = get_dir(Vars[0])
         Name = get_expr(Vars[1])
+        print('INTDIR',Dir,Name)
         return [(Dir,Name)]
 
     if Item[0][0]=='ExtDir':
+        Dirx = getExtDir(Item)
+        print('EXTDIR',Dirx,Item)
         return [getExtDir(Item)]
 
     if (type(Item) is list)and(len(Item))==1:
@@ -1641,8 +1649,11 @@ def add_definition(List):
     if Vars:
         List0 = flattenList(Vars[1])
         Dir = get_dir(Vars[0])
-#        List0 = get_list(Vars[1])
+        List1 = []
         for Item in List0:
+            Item2 = get_list(Item)
+            List1.extend(Item2)
+        for Item in List1:
             if type(Item) is str:
                 Current.add_sig(Item,Dir,0)
             elif (Item[0] == 'parameter'):

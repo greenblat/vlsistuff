@@ -12,6 +12,7 @@ class apbSlave(logs.driverClass):
         self.prefix = Prefix
         self.suffix = Suffix
         self.READY = 0
+        self.Name = Name
 
 
     def onFinish(self):
@@ -26,6 +27,7 @@ class apbSlave(logs.driverClass):
         return Act
 
     def action(self,Cmd):
+        logs.log_info('XXXXXXXX %s' % Cmd)
         wrds = Cmd.split()
         if wrds[0] == 'ready':
             self.READY = eval(wrds[1])
@@ -35,7 +37,7 @@ class apbSlave(logs.driverClass):
             for X in wrds[2:]:
                 Data = self.eval(X)
                 self.RAM[Addr] = Data
-                logs.log_info('SLV RAM %x -> [%x]' % (Data,Addr))
+                logs.log_info('SLV "%s" RAM %x -> [%x]' % (self.Name,Data,Addr))
                 Addr += 4
             return
         logs.log_error('action not recogninzed "%s"'%Cmd)

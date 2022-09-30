@@ -1,15 +1,36 @@
 #! /usr/bin/env python3
 
-#         #define XXX
-#         
-#         #ifdef XXX
-#         #else
-#         #endif
-#         
-#         -f|-F file.mvlg
-#         filename
 
-# usage: mvlg [in_file.mvlg] [out_file]
+helpString = '''
+ usage: 
+    mvlg in_file.mvlg out_file [-v] [-d define0] [-d define1] [-d ....
+
+out_file will have all mentioned verilog files with absolute paths.
+-y -v incdir and define: passed as is to the simulator
+-d TXT    <--  adds define from invokation line.
+
+
+include another mvlg file:
+         -f|-F file.mvlg
+         -y DIR           <---- library dir
+
+local verilog file name (doesnt have to be verilog by the way).
+         filename
+         +incdir+PATH
+         +define+TXT      <--- passed to simulator.
+filename can include $environs (setenv's) and non local path         
+
+macro manipulators (line in mvlg file):
+         #define XXX
+         
+         #ifdef XXX
+         #else
+         #endif
+         
+
+greenblat@mac.com 
+
+'''
 
 import sys, string, os
 
@@ -25,8 +46,8 @@ STATE_ELSE_SKIPPED = 4
 
 
 class scanClass:
-    def __init__ (self, fname_in, fname_out=False,minusV=False):
-        self.defined = []
+    def __init__ (self, fname_in, fname_out=False,minusV=False,Defs=[]):
+        self.defined = Defs
         self.state = STATE_NORM
         self.skipping = False
         self.res = []
@@ -226,23 +247,30 @@ def canBeLibrary(Fname):
 
 def main():
     if len(sys.argv) < 2:
-        print("mvlg.py [input.mvlg] <output> [-v]")
+        print(helpString)
         return
     minusV = '-v' in sys.argv
+    Args = sys.argv[3:]
+    Defs = []
+    for ind,Prm in Args:
+        if Prm in ['-d','-D']:
+            Def = Args[ind+1]
+            Defs.append(Def)
     if len(sys.argv) < 3:
-        s = scanClass(sys.argv[1],False,minusV)
+        scanned = scanClass(sys.argv[1],False,minusV,Defs)
     else:
-        s = scanClass(sys.argv[1], sys.argv[2],minusV)
+        scanned = scanClass(sys.argv[1], sys.argv[2],minusV,Defs)
 
+    
 
        # report errors
-    if len(s.err) > 0:
+    if len(scanned.err) > 0:
         print("\n\n*** Errors encountered:")
-        for err in s.err:
+        for err in scanned.err:
             print(err)
     
-def run(Fname,outFname): 
-    s = scanClass(Fname,outFname ,False)
+def run(Fname,outFname,Defs = []): 
+    s = scanClass(Fname,outFname ,False,Defs)
     if len(s.err) > 0:
         print("\n\n*** Errors encountered:")
         for err in s.err:
