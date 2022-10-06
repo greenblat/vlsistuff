@@ -165,11 +165,24 @@ int main(argc, argv)
 void read_in_file() {
     char *x;
     char line[10000];
+    char tmpline[10000];
     int i,nop;
     while (1) {
         x = fgets(line,10000,Infile);
         lineNum += 1;
-//        printf("%d: line=%s",lineNum,line);
+        if (strlen(line)>7) {
+            if ((line[0] == '_') && (line[1] == '_') && (line[2] == 'L')
+                && (line[3] == 'N') && (line[4] == 'U') 
+                && (line[5] == 'M'))
+            {
+                lineNum = 1+atoi( &(line[6]));
+                int xx = 7;
+                while (line[xx] != ' ') xx++;
+                strcpy(tmpline, &(line[xx]));
+                strcpy(line,tmpline);
+            }
+        }
+        printf("%d: line=%s",lineNum,line);
         if ((lineNum % 50000)==0) {
             printf(" %d lines\n",lineNum);
         }

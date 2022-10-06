@@ -6,10 +6,11 @@ import veri
 # jtag = jtagDriverClass.jtagDriverClass('tb',Monitors,'JTCK','JTDI','JTMS','JTDO')
 
 class jtagDriverClass(logs.driverClass):
-    def __init__(self,Path,Monitors,JTCK='jtck',JTDI='jtdi',JTMS='jtms',JTDO='jtdo'):
+    def __init__(self,Path,Monitors,JTCK='jtck',JTDI='jtdi',JTMS='jtms',JTDO='jtdo',Name = 'jtag'):
         logs.driverClass.__init__(self,Path,Monitors)
         self.queue=[]
         self.commands=[]
+        self.Name = Name
         self.jtck = JTCK
         self.jtdi = JTDI
         self.jtdo = JTDO

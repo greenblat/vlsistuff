@@ -84,7 +84,7 @@ def read_verilog_file(Fname,RunDir,Env):
         Params['-d'] = More['-d']
     if '-y' in More:
         Params['-y'] = More['-y']
-    macro_verilog_pp.run_main(Params,'00010')
+    macro_verilog_pp.run_main(Params,'00010',True)
 
 
     run_lexer(tmpfilename,'%s/lex.out'%RunDir)

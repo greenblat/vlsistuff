@@ -164,12 +164,12 @@ class ahbliteMaster(logs.driverClass):
             self.waiting -= 1
             return
         hreadyout = self.tr_peek('hreadyout')
-        if self.seq==[]:
+        if (self.seq==[]):
             self.tr_force('hsel',0)
             self.tr_force('htrans',0)
             self.tr_force('hburst',0)
             self.tr_force('hwrite',0)
-        if self.seq!=[]:
+        elif self.seq!=[]:
             List = self.seq[0]
             for (Sig,Val) in List:
                 popIt = True
@@ -199,7 +199,6 @@ class ahbliteMaster(logs.driverClass):
                     self.tr_force(Sig,Val)
             if self.tr_peek('hresp')!=0:
                 self.seq = []
-                print('HRESP %s' % self.tr_peek('hresp'))
                 self.tr_force('hsel',0)
                 self.tr_force('htrans',0)
                 self.tr_force('hburst',0)
@@ -257,7 +256,6 @@ class ahbliteMaster(logs.driverClass):
 #                        logs.log_info('WRAP16 addr=%x run=%x low=%x high=%x    %s' % (What[3],Addr,Low,High,list(map(hex,Addrs))))
 
 
-#                print('ADDRS',What[0],What[1],burstlen(What[1]),Addrs)
                 INCR = 1
                 for X in range(burstlen(What[1])-1):
                     Addr = Addrs[X+1]
@@ -284,12 +282,14 @@ class ahbliteMaster(logs.driverClass):
 
 
             if What[0]=='write':
+                self.seq.append([('popif',('hreadyout',1))])
                 self.seq.append([('haddr',What[1]),('hwdata',0),('hwrite',1),('htrans',2),('hsize',self.HSIZE),('hsel',1),('popif',('hreadyout',1))])
                 self.seq.append([('haddr',0),('hwdata',What[2]),('hwrite',0),('htrans',0),('hsize',0),('hsel',0)])
                 self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('hsel',0)])
                 return
 
             if What[0]=='read':
+                self.seq.append([('popif',('hreadyout',1))])
                 self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hsize',self.HSIZE),('popif',('hreadyout',1))])
                 self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('catch',('hrdata',What[1],What[2])),('hsel',self.HSEL)])
                 return

@@ -37,8 +37,7 @@ def main():
     Params = parse_args()
     run_main(Params)
 
-def run_main(Params,Dumps='11111'):
-    global Lines2,Lines3
+def run_main(Params,Dumps='11111',KeepLnum=False):
     Fnames = Params['fnames']
     if Fnames==[]:
         print(__doc__)
@@ -78,6 +77,8 @@ def run_main(Params,Dumps='11111'):
         print('removing translates')
         Lines= remove_synopsys_on_off(Lines)
 
+    for ind,line in enumerate(Lines):
+        Lines[ind] = ind,line
     scan0(Lines)
     if Dumps[0] == '1':
         File2 = open('filex0.v','w')
@@ -99,10 +100,10 @@ def run_main(Params,Dumps='11111'):
     Def2.reverse()
     print('computing...')
     dones=0
-    for i,line in enumerate(Lines3):
+    for i,(Num,line) in enumerate(Lines3):
         line = use_defines(line,Def2)
         linex = line
-        Lines3[i]=linex
+        Lines3[i]= Num,linex
         dones += 1
         if (dones % 10000)==0:
             print('%d lines'%dones)
@@ -113,11 +114,11 @@ def run_main(Params,Dumps='11111'):
     if Dumps[2] == '1':
         File3 = open(OutFileName,'w')
     Lines4=[]
-    for line in Lines3:
+    for Num,line in Lines3:
         if Dumps[2] == '1':  File3.write(line)
         wrds = line.split()
         if len(wrds)!=0:
-            Lines4.append(line)
+            Lines4.append((Num,line))
     if Dumps[2] == '1': File3.close()
 
 
@@ -130,15 +131,16 @@ def run_main(Params,Dumps='11111'):
     File4name = 'file4.v'
     if Dumps[2] == '0':
         File4name = OutFileName
-    if (Dumps[3] == '1') or (Dumps[4] == '1'): doFile4(Lines4,Lines5,File4name)
+    if (Dumps[3] == '1') or (Dumps[4] == '1'): doFile4(Lines4,Lines5,File4name,KeepLnum)
     if Dumps[4] == '1': doFile5(Lines5)
 
 
 
-def doFile4(Lines4,Lines5,Fname):
+def doFile4(Lines4,Lines5,Fname,KeepLnum):
     File4 = open(Fname,'w')
+    print('DOFILE4',Fname,len(Lines5))
     state='idle'
-    for line in Lines4:
+    for Num,line in Lines4:
         if len(line)==0:
             pass
         elif line[-1]=='\n':
@@ -174,14 +176,17 @@ def doFile4(Lines4,Lines5,Fname):
 
         wrds = line.split()
         if len(wrds)>0:
-            File4.write('%s\n'%line)
-            Lines5.append(line+'\n')
+            if KeepLnum:
+                File4.write('__LNUM%d %s\n'%(Num,line))
+            else:
+                File4.write(line)
+            Lines5.append((Num,line+'\n'))
     File4.close()
 
 def doFile5(Lines5):
     File5 = open('file5.v','w')
     state='header'
-    for line in Lines5:
+    for Num,line in Lines5:
         if (state=='header'):
             File5.write(line)
             if ';' in line:
@@ -392,37 +397,37 @@ def needs_work(line):
 def scan0(Lines):
     ind=0
     while ind<len(Lines):
-        line = Lines[ind]
+        Num,line = Lines[ind]
         if '//' in line:
             line = line[:line.index('//')]+'\n'
-            Lines[ind]=line
+            Lines[ind]=Num,line
         ind += 1
 
     ind=0
     while ind<len(Lines):
-        line = Lines[ind]
+        Num,line = Lines[ind]
         if (len(line)>1)and(line[-2]=='\\'):
             line = line[:-2]+Lines[ind+1]
-            Lines[ind]=line
+            Lines[ind]=Num,line
             Lines.pop(ind+1)
         else:
             ind += 1
     ind=0
     while ind<len(Lines):
-        line = Lines[ind]
+        Num,line = Lines[ind]
         if (" 'b" in line): line = line.replace(" 'b","'b")
         if (" 'd" in line): line = line.replace(" 'd","'d")
         if (" 'h" in line): line = line.replace(" 'h","'h")
         if ("'b " in line): line = line.replace("'b ","'b")
         if ("'d " in line): line = line.replace("'d ","'d")
         if ("'h " in line): line = line.replace("'h ","'h")
-        Lines[ind]=line
+        Lines[ind]=Num,line
         ind += 1
             
     state = 'idle'
     ind=0
     while ind<len(Lines):
-        line = Lines[ind]
+        Num,line = Lines[ind]
         if state=='idle':
             if '/*' in line:
                 Bef = line[:line.index('/*')]
@@ -430,9 +435,9 @@ def scan0(Lines):
                 if '*/' in Aft:
                     Aft2 = Aft[Aft.index('*/')+2:]
                     line = Bef+Aft2
-                    Lines[ind]=line
+                    Lines[ind]=Num,line
                 else:
-                    Lines[ind]=Bef
+                    Lines[ind]=Num,Bef
                     state = 'inside'
                     ind += 1
             else: 
@@ -440,7 +445,7 @@ def scan0(Lines):
         elif state=='inside':
             if '*/' in line:
                 line = line[line.index('*/')+2:]
-                Lines[ind]=line
+                Lines[ind]=Num,line
                 state='idle'
             else:
                 Lines[ind]=''
@@ -453,7 +458,7 @@ def scan1(Lines):
     queue=[]
     indx=0
     while indx<len(Lines):
-        line = Lines[indx]
+        Num,line = Lines[indx]
         indx+=1
         wrds = line.split()
         if state=='idle':
@@ -482,12 +487,12 @@ def scan1(Lines):
             elif needs_work(line):
                 print('error! kind=1',state,indx,line)
             else:
-                Lines2.append(line)
-                Lines3.append(line)
+                Lines2.append((Num,line))
+                Lines3.append((Num,line))
         elif state=='ifdef_true':
             if ('`define' in line):
                 Defined[wrds[1]]=' '.join(wrds[2:])
-                Lines2.append(line)
+                Lines2.append((Num,line))
             elif ('`ifdef' in line):
                 queue = [state]+queue
                 if wrds[1] in Defined:
@@ -512,8 +517,8 @@ def scan1(Lines):
             elif needs_work(line):
                 print('error! kind=2',state,line)
             else:
-                Lines2.append(line)
-                Lines3.append(line)
+                Lines2.append((Num,line))
+                Lines3.append((Num,line))
             
         elif state=='ifdef_false':
             if ('`else' in line):
@@ -577,8 +582,8 @@ def scan1(Lines):
             elif needs_work(line):
                 print('error! kind=4',state,line)
             else:
-                Lines2.append(line)
-                Lines3.append(line)
+                Lines2.append((Num,line))
+                Lines3.append((Num,line))
         elif state=='wait_endif':
             if ('`ifdef' in line):
                 queue = [state]+queue

@@ -1028,7 +1028,6 @@ def get_list(Item):
 
     if Item[0][0]=='ExtDir':
         Dirx = getExtDir(Item)
-        print('EXTDIR',Dirx,Item)
         return [getExtDir(Item)]
 
     if (type(Item) is list)and(len(Item))==1:

@@ -7,7 +7,7 @@ set FLAGS = '-O3'
 set FLAGS = '-g'
 gcc src/verilog_tables.c src/nlexer.c -o ../pybin3/verilog_lexer $FLAGS
 
-# optional. not required
+# optional. needed for OSX, to convince it is legit executable 
 gcc src/verilog_tables.c src/nlexer.c -o ~/bin/verilog_lexer $FLAGS
 
 
