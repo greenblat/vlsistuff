@@ -513,7 +513,7 @@ class sequenceClass:
                 else:
                     Wrds2.append(Wrd)
             Cmd = wrds[1]+' '+' '.join(Wrds2)
-            logs.log_info('tell %s <- %s' % (wrds[0],Cmd))
+            logs.log_info('tell %s <- %s' % (Line[:-1],Cmd))
             self.agents[wrds[0]].action(Cmd)
             return True
         elif (wrds[0] == 'check'):
@@ -562,7 +562,7 @@ class sequenceClass:
             else:
                 Wrds2.append(Wrd)
         Cmd = wrds[0]+' '+' '.join(Wrds2)
-        logs.log_info('tell %s <- %s' % (Agent,Cmd),'seq')
+        logs.log_info('tell %s %s -> %s' % (Agent,Txt,Cmd),'seq')
         self.agents[Agent].action(Cmd)
 
     def jumpLabel(self,Lbl):

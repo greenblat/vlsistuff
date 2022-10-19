@@ -182,7 +182,7 @@ void read_in_file() {
                 strcpy(line,tmpline);
             }
         }
-        printf("%d: line=%s",lineNum,line);
+//        printf("%d: line=%s",lineNum,line);
         if ((lineNum % 50000)==0) {
             printf(" %d lines\n",lineNum);
         }

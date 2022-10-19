@@ -5,7 +5,7 @@
 // III sets the depth of the fifo.
 //  greenblat@mac.com
 
-#III = 8
+#III = 2
 #WWW = len(bin(III))-3
 module asyncIIIfifo #(parameter WID=32)(
      input wclk

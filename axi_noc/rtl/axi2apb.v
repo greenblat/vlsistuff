@@ -2,13 +2,13 @@
 // add address generator;
 
 
-module axi2apb #(parameter IDWID=4,parameter DWID=64, parameter WSTRB = DWID/8, parameter EXTRAS=8)(
+module axi2apb #(parameter AWID=32,parameter IDWID=4,parameter DWID=64, parameter WSTRB = DWID/8, parameter EXTRAS=8)(
 
     input clk, input rst_n
 
 
     ,input [IDWID-1:0] arid
-    ,input [31:0] araddr
+    ,input [AWID-1:0] araddr
     ,input [7:0] arlen
     ,input [2:0] arsize
     ,input [EXTRAS-1:0] arextras
@@ -23,7 +23,7 @@ module axi2apb #(parameter IDWID=4,parameter DWID=64, parameter WSTRB = DWID/8, 
     ,input rready
 
     ,input [3:0] awid
-    ,input [31:0] awaddr
+    ,input [AWID-1:0] awaddr
     ,input [7:0] awlen
     ,input [2:0] awsize
     ,input [EXTRAS-1:0] awextras
@@ -44,14 +44,14 @@ module axi2apb #(parameter IDWID=4,parameter DWID=64, parameter WSTRB = DWID/8, 
 
 
     ,output psel
-    ,output [31:0] paddr
+    ,output [AWID-1:0] paddr
     ,output penable
     ,output pwrite
-    ,output [31:0] pwdata
+    ,output [DWID/2-1:0] pwdata
     ,input pready
     ,input [1:0] presp
-    ,input [31:0] prdata
-    ,output [3:0] pstrb
+    ,input [DWID/2-1:0] prdata
+    ,output [WSTRB/2-1:0] pstrb
 );
     
 
@@ -62,14 +62,14 @@ wire ar_empty,aw_empty;
 reg working_r,working_w;
 
 wire [7:0] work_awlen;
-reg [31:0] run_addr;
+reg [AWID-1:0] run_addr;
 reg [1:0] run_burst;
 reg [8:0] run_len;
 wire run_last = run_len == 1;
 reg [IDWID-1:0] run_rid;
 wire [IDWID-1:0] work_awid;
 wire [7:0] work_arlen;
-wire [31:0] work_awaddr,work_araddr;
+wire [AWID-1:0] work_awaddr,work_araddr;
 wire [1:0] work_awburst;
 wire [IDWID-1:0] work_arid;
 wire [1:0] work_arburst;
@@ -78,18 +78,20 @@ wire r_full;
 wire run_rlast = (run_len == 1) && working_r;
 wire pread = working_r && !r_full && (run_len>0);
 
+wire [DWID-1:0] ONES = {DWID{1'b1}};
 
-wire [31:0] wrapmask = 
-    (work_arlen == 3) ? 32'hffff_ffe0 :
-    (work_arlen == 7) ? 32'hffff_ffc0 :
-    (work_arlen ==15) ? 32'hffff_ff80 :
-    (work_arlen ==31) ? 32'hffff_ff00 :
-    (work_arlen ==63) ? 32'hffff_fe00 :
-    32'hffff_fc00 ;
+reg [2:0] run_size;
+wire [AWID-1:0] wrapmask = 
+    (work_arlen == 3) ? ONES << (run_size+2):
+    (work_arlen == 7) ? ONES << (run_size+3) :
+    (work_arlen ==15) ? ONES << (run_size+4) :
+    (work_arlen ==31) ? ONES << (run_size+5):
+    (work_arlen ==63) ? ONES << (run_size+6) :
+    ONES << (run_size+7) ;
 
 
-wire [3:0] addr_jump = 1 << run_size;
-wire [31:0] next_addr = 
+wire [AWID-1:0] addr_jump = 1 << run_size;
+wire [AWID-1:0] next_addr = 
     (run_burst == 0) ? run_addr :
     (run_burst == 1) ? (run_addr+addr_jump) :
     (run_burst == 2) ? (run_addr & wrapmask) + ((run_addr + addr_jump) & ~wrapmask) :
@@ -97,7 +99,6 @@ wire [31:0] next_addr =
 
 
 wire pushr;
-reg [2:0] run_size;
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         working_r <= 0;
@@ -142,7 +143,7 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 
-localparam AWIDE =  3+IDWID + 32 + 8  +2;
+localparam AWIDE =  3+IDWID + AWID + 8  +2;
 wire [AWIDE-1:0] new_aw_entry =   {awsize,   awid ,awaddr ,awlen , awburst };
 wire aw_full;
 wire [AWIDE-1:0] active_aw_entry;
@@ -175,8 +176,8 @@ assign bvalid = !b_empty;
 wire work_wlast;
 wire [DWID-1:0] work_wdata;
 wire [WSTRB-1:0] work_wstrb;
-syncfifo_sampled #(1+8+64,4) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid && wready)
-    ,.din({wlast,wstrb[7:0],wdata[63:0]})
+syncfifo_sampled #(1+WSTRB+DWID,4) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid && wready)
+    ,.din({wlast,wstrb[WSTRB-1:0],wdata[DWID-1:0]})
     ,.empty(w_empty),.full(w_full)
     ,.readout((pstate==10) && pready)
     ,.dout({work_wlast,work_wstrb,work_wdata})
@@ -188,7 +189,7 @@ syncfifo_sampled #(1+8+64,4) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid && wr
 wire ipwrite;
 assign readout_aw_fifo = ipwrite && work_wlast && working_w;
 wire readout_ar_fifo = working_r && run_rlast &&  pushr;
-localparam ARIDE = 3+IDWID+2+8+32;
+localparam ARIDE = 3+IDWID+2+8+AWID;
 wire [ARIDE-1:0] new_ar_entry =  {arsize,arid,arburst,arlen,araddr};
 wire [ARIDE-1:0]  active_ar_entry;
 syncfifo_sampled #(ARIDE,4) ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(arvalid && arready)
@@ -220,7 +221,7 @@ reg [3:0] pstate;
 assign pushr = (pstate==3) && pready; 
 always @(posedge clk) begin
     if (pready) begin
-        if (pstate==1) lowrdata[31:0] <= prdata;
+        if (pstate==1) lowrdata[DWID/2-1:0] <= prdata;
     end
 end
 
@@ -251,12 +252,14 @@ assign rvalid= !r_empty;
 
 assign ipwrite = !aw_empty && !w_empty && working_w && (pstate==0);
 
-wire [3:0] paddr_jump = 
+wire [6:0] paddr_jump = 
     (run_size == 0) ? 1 :
     (run_size == 1) ? 2 :
     (run_size == 2) ? 4 :
-    (run_size == 3) ? 4 :
-    0;
+    (run_size == 3) ? 8 :
+    (run_size == 4) ? 16 :
+    (run_size == 5) ? 32 :
+    64;
 
 assign paddr = 
     (pstate == 0) ? run_addr :
@@ -267,14 +270,14 @@ assign paddr =
     run_addr;
 
 assign pwdata =  
-    (pstate==8) ? work_wdata[31:0] :
-    (pstate==9) ? work_wdata[63:32] :
-    (pstate==10) ? work_wdata[63:32] :
-     work_wdata[31:0];
+    (pstate==8) ? work_wdata[DWID/1-1:0] :
+    (pstate==9) ? work_wdata[DWID-1:DWID/2] :
+    (pstate==10) ? work_wdata[DWID-1:DWID/2] :
+     work_wdata[DWID/2-1:0];
 
 assign pstrb = 
-    (pstate == 8) ? work_wstrb[3:0] :
-    (pstate == 10) ? work_wstrb[7:4] :
+    (pstate == 8) ? work_wstrb[WSTRB/2-1:0] :
+    (pstate == 10) ? work_wstrb[WSTRB-1:WSTRB/2] :
     0;
 
 assign psel = pread || ipwrite || (pstate>0) ;

@@ -458,6 +458,8 @@ def scan1(Lines):
     queue=[]
     indx=0
     while indx<len(Lines):
+        if Lines[indx] == '':
+            Lines[indx] = 0,''
         Num,line = Lines[indx]
         indx+=1
         wrds = line.split()

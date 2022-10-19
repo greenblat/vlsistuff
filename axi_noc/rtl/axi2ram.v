@@ -130,7 +130,7 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 
-localparam AWIDE =  3 + IDWID + 32 + 8  +2;
+localparam AWIDE =  3 + IDWID + ADWID + 8  +2;
 wire [AWIDE-1:0] new_aw_entry =   {awsize, awid ,awaddr ,awlen , awburst };
 wire aw_full;
 wire [AWIDE-1:0] active_aw_entry;
@@ -163,8 +163,8 @@ assign bvalid = !b_empty;
 wire work_wlast;
 wire [DWID-1:0] work_wdata;
 wire [WSTRB-1:0] work_wstrb;
-syncfifo_sampled #(1+8+64,4) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid && wready)
-    ,.din({wlast,wstrb[7:0],wdata[63:0]})
+syncfifo_sampled #(1+WSTRB+DWID,4) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid && wready)
+    ,.din({wlast,wstrb[WSTRB-1:0],wdata[DWID-1:0]})
     ,.empty(w_empty),.full(w_full)
     ,.readout(pwrite)
     ,.dout({work_wlast,work_wstrb,work_wdata})
@@ -175,7 +175,7 @@ syncfifo_sampled #(1+8+64,4) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid && wr
 
 assign readout_aw_fifo = pwrite && work_wlast && working_w;
 wire readout_ar_fifo = working_r && run_rlast &&  pread_dly;
-localparam ARIDE = 3+IDWID+2+8+32;
+localparam ARIDE = 3+IDWID+2+8+ADWID;
 wire [ARIDE-1:0] new_ar_entry =  {arsize,arid,arburst,arlen,araddr};
  wire [ARIDE-1:0]  active_ar_entry;
 syncfifo_sampled #(ARIDE,4) ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(arvalid && arready)
@@ -190,10 +190,9 @@ syncfifo_sampled #(ARIDE,4) ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(arvalid && a
 assign arready = !ar_full;
 assign {work_arsize,work_arid,work_arburst,work_arlen,work_araddr} = active_ar_entry;
 
-reg [63:0] ram [0:(1<<RAMSIZE)-1];
-reg [63:0] prdata; 
+reg [DWID-1:0] prdata; 
 reg pread_dly; always @(posedge clk) pread_dly <= pread;
-syncfifo_sampled #(1+4+64,4) r_fifo (.clk(clk),.rst_n(rst_n),.vldin(pread_dly)
+syncfifo_sampled #(1+4+DWID,4) r_fifo (.clk(clk),.rst_n(rst_n),.vldin(pread_dly)
     ,.din({prdata,run_id,run_rlast})
     ,.empty(r_empty),.full(r_full)
     ,.readout(rready)
@@ -208,8 +207,9 @@ assign rvalid= !r_empty;
 assign pwrite = !aw_empty && !w_empty && working_w;
 
 
-wire [63:0] was_data = ram[run_addr>>3];
-wire [63:0] wmask;
+reg [DWID-1:0] ram [0:(1<<RAMSIZE)-1];
+wire [DWID-1:0] was_data = ram[run_addr>>3];
+wire [DWID-1:0] wmask;
 assign wmask[7+0*8:0*8] = {8{work_wstrb[0]}};
 assign wmask[7+1*8:1*8] = {8{work_wstrb[1]}};
 assign wmask[7+2*8:2*8] = {8{work_wstrb[2]}};

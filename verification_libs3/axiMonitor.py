@@ -4,11 +4,11 @@ import logs
 
 
 class axiMonitorClass:
-    def __init__(self,Path,Monitors,dataWidth=4,Renames={},Prefix='',Suffix=''):
+    def __init__(self,Path,Monitors,dataWidth=4,Renames={},Prefix='',Suffix='', Name='mon1'):
         if Monitors != -1:
             Monitors.append(self)
         self.dataWidth = dataWidth
-        self.Name = 'mon1'
+        self.Name = Name
         self.Logs = 3
         self.Path = Path
         self.Renames = Renames
@@ -71,7 +71,7 @@ class axiMonitorClass:
             Last = self.peek('wlast')
             (Addr,Len,Size,Burst,Id) = self.AWQUEUE[0]
             self.store(self.WADDR,Data,Wstrb)
-            logs.log_info('AXIMON %s WRITE ad=%x wlen=%d data=0x%x (%d) wstrb=%x' % (self.Name,self.WADDR,self.WLEN,Data,Data,Wstrb),self.Logs)
+            logs.log_info('AXIMON %s WRITE ad=0x%x wlen=%d data=0x%x (%d) wstrb=%x' % (self.Name,self.WADDR,self.WLEN,Data,Data,Wstrb),self.Logs)
             if Burst == 1:
                 self.WADDR += self.dataWidth
             self.WLEN -= 1
@@ -153,11 +153,14 @@ class axiMonitorClass:
             Addr += 1
     
 
-    def load(self,Addr):
+    def load(self,Addr, readSize=None):
+        dataWidth = self.dataWidth
+        if readSize is not None:
+            dataWidth = readSize
         Res = 0
         Valids = 0
 #        logs.log_info('XXX Addr=%x RAM = %s' % (Addr,list(map(hex,self.RAM.keys()))))
-        for JJ in range(self.dataWidth):
+        for JJ in range(dataWidth):
             Ad = Addr + JJ
             if Ad in self.RAM:
                 Val = self.RAM[Ad]

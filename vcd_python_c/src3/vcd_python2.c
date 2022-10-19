@@ -167,10 +167,12 @@ char helpstring[] = "\
 import os,sys,string\n\
 import veri\n\
 \n\
-New = os.path.expanduser('~/pybin')\n\
+New = os.path.expanduser('~/vlsistuff/verification_libs3')\n\
 sys.path.append(New)\n\
 import logs\n\
 \n\
+def conclusions():\n\
+    logs.closeLogs()\n\
 LASTTIME = 4.60717e+08\n\
 \n\
 BASE = 'tb.dut.dma'\n\

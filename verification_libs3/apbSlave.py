@@ -13,6 +13,7 @@ class apbSlave(logs.driverClass):
         self.suffix = Suffix
         self.READY = 0
         self.Name = Name
+        self.Uart = False
 
 
     def onFinish(self):
@@ -37,6 +38,8 @@ class apbSlave(logs.driverClass):
             for X in wrds[2:]:
                 Data = self.eval(X)
                 self.RAM[Addr] = Data
+                if self.Uart:
+                    self.Uart('ram',Addr,Data)
                 logs.log_info('SLV "%s" RAM %x -> [%x]' % (self.Name,Data,Addr))
                 Addr += 4
             return

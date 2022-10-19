@@ -45,6 +45,7 @@ class apbDriver:
         self.force('psel',0)
         self.force('pwrite',0)
         self.force('penable',0)
+        self.Uart = False
 
     def onFinish(self):
         return
@@ -356,6 +357,8 @@ class apbDriver:
         while self.queue0!=[]:
             What = self.queue0.pop(0)
             if What[0]=='write':
+                if self.Uart:
+                    self.Uart('write',What[1],What[2])
 #                logs.log_info('write apb queue0 seq0 %s %s %s'%(What[0],hex(What[1]),hex(What[2])))
                 self.seq0.append([('penable',0),('lock',1),('psel',1),('pstrb',0xf),('paddr',What[1]),('pwdata',What[2]),('pwrite',1)])
                 self.seq0.append([('penable',1),('popif',('pready',1))])
