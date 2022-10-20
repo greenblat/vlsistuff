@@ -22,6 +22,8 @@ class axiMonitorClass:
         self.WADDR = -1
         self.WLEN = -1
         self.RADDR = []
+        self.RespRAM = {}
+        self.RespADDR = 0
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig,self.Logs)
@@ -70,7 +72,7 @@ class axiMonitorClass:
             Wstrb = self.peek('wstrb')
             Last = self.peek('wlast')
             (Addr,Len,Size,Burst,Id) = self.AWQUEUE[0]
-            self.store(self.WADDR,Data,Wstrb)
+            self.store(self.RAM, self.WADDR,Data,Wstrb)
             logs.log_info('AXIMON %s WRITE ad=0x%x wlen=%d data=0x%x (%d) wstrb=%x' % (self.Name,self.WADDR,self.WLEN,Data,Data,Wstrb),self.Logs)
             if Burst == 1:
                 self.WADDR += self.dataWidth
@@ -143,17 +145,25 @@ class axiMonitorClass:
             self.RADDR.pop(0)
             if Last == 1:
                 self.ARQUEUE.pop(0)
+            self.store(self.RespRAM, self.RespADDR, Data)
+            self.log_info_msg("RespRAM: Write {data} to address: {address}".format(data=Data, address=self.RespADDR))
+            self.RespADDR += self.dataWidth
 
-    def store(self,Addr,Data,Wstrb):
+    def store(self, memory, Addr, Data, Wstrb=None):
+        if Wstrb is None:  # if no Wstrb, assume all data is valid
+            Wstrb = int('1'*self.dataWidth, base=2)
         while Wstrb > 0:
             if (Wstrb & 1) == 1:
-                self.RAM[Addr] = Data & 0xff
+                memory[Addr] = Data & 0xff
             Wstrb = Wstrb >> 1
             Data = Data >> 8
             Addr += 1
-    
 
-    def load(self,Addr, readSize=None):
+    def load(self,Addr, readSize=None, memtype='RAM'):
+        if memtype == 'RAM':
+            mem = self.RAM
+        if memtype == "RespRAM":
+            mem = self.RespRAM
         dataWidth = self.dataWidth
         if readSize is not None:
             dataWidth = readSize
@@ -162,11 +172,16 @@ class axiMonitorClass:
 #        logs.log_info('XXX Addr=%x RAM = %s' % (Addr,list(map(hex,self.RAM.keys()))))
         for JJ in range(dataWidth):
             Ad = Addr + JJ
-            if Ad in self.RAM:
-                Val = self.RAM[Ad]
+            if Ad in mem:
+                Val = mem[Ad]
                 Res += (Val<<(8*JJ))
                 Valids += (0xff<<(8*JJ))
         return Valids,Res
+
+    def log_info_msg(self, msg):
+        prefix = "[" + self.Name + "]: "
+        full_msg = prefix + msg
+        logs.log_info(full_msg)
 
 
 
