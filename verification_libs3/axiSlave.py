@@ -8,7 +8,7 @@ import random
 
 
 class axiSlaveClass:
-    def __init__(self,Path,Monitors,prefix='',suffix='',Name='slv no name'):
+    def __init__(self,Path,Monitors,prefix='',suffix='',Name='slv no name', busWidth = 8):
         self.Path = Path
         self.Name = Name
         if self.Path != '':
@@ -34,7 +34,7 @@ class axiSlaveClass:
         self.wready = 0
         self.WAITREAD = 4
         self.WAITWRITE = 0
-        self.busWidth = 8   # in bytes
+        self.busWidth = busWidth
         self.Passive = False
         self.Starvation = False
         self.Initial = True
@@ -138,26 +138,8 @@ class axiSlaveClass:
                 
 
     def addWord(self,Addr,Data):
-        self.Ram[Addr] = Data & 0xff
-        self.Ram[Addr+1] = (Data>>8) & 0xff
-        self.Ram[Addr+2] = (Data>>16) & 0xff
-        self.Ram[Addr+3] = (Data>>24) & 0xff
-        if self.busWidth == 8:
-            self.Ram[Addr+4] = (Data >>(8*4)) & 0xff
-            self.Ram[Addr+5] = (Data >>(8*5))  & 0xff
-            self.Ram[Addr+6] = (Data >>(8*6))  & 0xff
-            self.Ram[Addr+7] = (Data >>(8*7))  & 0xff
-
-        if self.busWidth == 16:
-            self.Ram[Addr+8] = (Data >>(8*8)) & 0xff
-            self.Ram[Addr+9] = (Data >>(8*9))  & 0xff
-            self.Ram[Addr+10] = (Data >>(8*10))  & 0xff
-            self.Ram[Addr+11] = (Data >>(8*11))  & 0xff
-            self.Ram[Addr+12] = (Data >>(8*12))  & 0xff
-            self.Ram[Addr+13] = (Data >>(8*13))  & 0xff
-            self.Ram[Addr+14] = (Data >>(8*14))  & 0xff
-            self.Ram[Addr+15] = (Data >>(8*15))  & 0xff
-
+        for byte_idx in range(self.busWidth):
+            self.Ram[Addr + byte_idx] = (Data >> 8*byte_idx) & 0xff
 
         logs.log_info('adding %x %x'%(Addr,Data))
         Addr += self.busWidth
@@ -224,10 +206,9 @@ class axiSlaveClass:
         self.force('rdata','0x'+rdata)
 
     def rresp(self):
-        return 0
-        logs.log_debug('RRESP name=%s badresp=%x %x   %s' % (self.Name,self.badRresp , self.arqueue[0][1],self.arqueue[0]))
+        logs.log_info(self.Name + ': RRESP %x %x   %s' % (self.badRresp , self.arqueue[0][1],self.arqueue[0]))
         if self.badRresp == self.arqueue[0][1]:
-            logs.log_info('RRESP ERR %s %s' % (self.rqueue,self.arqueue)) 
+            logs.log_info(self.Name + ': RRESP ERR %s %s' % (self.rqueue,self.arqueue))
             return 2
         return 0
 
@@ -260,7 +241,6 @@ class axiSlaveClass:
                 logs.log_error('slave %s CROSSING 4K read araddr=%x arlen=%x arsize=%x' % (self.Name,araddr,arlen,arsize))
                 
     def readQueue(self,arlen,ii,burst,arsize,addr,rid,rlast):
-        if (arsize>4): arsize = 4
         Incr = 1<<arsize
         Mask = ~((1<<arsize)-1)
         Mask2 = ((1<<arsize)-1)
@@ -371,7 +351,7 @@ class axiSlaveClass:
             self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = self.awqueue.pop(0)
         (wdata,wlast,wstrb) = self.wqueue.pop(0)
         logs.log_info('axiSlave %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=0x%x 0d%d'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata,wdata),self.Name)
-        for ii in range(16):
+        for ii in range(self.busWidth):
             if ((wstrb>>ii)&1)==1:
                 Byte = (wdata>>(ii*8))& 0xff
                 self.Ram[self.awaddr+ii]=Byte

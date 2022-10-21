@@ -78,8 +78,13 @@ class module_class:
         if (type(Name) is str)and('{' in Name):
             return
         if (type(Name) is str)and('[' in Name)and (Name[0] != '\\'):
-            Bus,Hi,Lo  = parseBus(Name)
-            return self.add_sig(['subbus',Bus,Hi,Lo],Dir,Wid)
+            BB = parseBus(Name)
+            if len(BB) == 3:
+                Bus,Hi,Lo  = BB
+                return self.add_sig(['subbus',Bus,Hi,Lo],Dir,Wid)
+            elif len(BB) == 5:
+                return self.add_sig(BB[0],Dir,('packed',(BB[1],BB[2]),(BB[3],BB[4])))
+            
 
         if Name=='':
             Name = 'net_%d'%self.inventedNets
@@ -2040,6 +2045,7 @@ def parseBus(Name):
     Name = Name.replace(']','')
     Name = Name.replace(':',' ')
     W3 = Name.split()
+    if len(W3)==5: return [W3[0],eval(W3[1]),eval(W3[2]),eval(W3[3]),eval(W3[4])]
     if len(W3)==3: return [W3[0],eval(W3[1]),eval(W3[2])]
     if len(W3)==2: return [W3[0],eval(W3[1]),eval(W3[1])]
     logs.log_error('PARSE BUS %s' % Name)
