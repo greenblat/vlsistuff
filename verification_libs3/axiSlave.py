@@ -45,6 +45,7 @@ class axiSlaveClass:
         self.force('rresp',0)
         self.force('bresp',0)
         self.force('bvalid',0)
+        self.read_data_generator = None
 
     def busy(self):
         if self.arqueue!=[]: return True
@@ -263,19 +264,26 @@ class axiSlaveClass:
         Addr1 = Addr & Mask 
         if Addr1!=Addr:
             logs.log_warning('axiSlave read address is not aligned size=%d addrin=%08x'%(arsize,Addr))
-        rdata = ''
-        takenram = 0
-        for jj in range(Incr):
-            Add = Addr1 + jj
-            if Add in self.Ram:
-                AA = '%02x'%(self.Ram[Add])
-                takenram += 1
-            else:
-                AA = '%02x'%(self.bytex)
-                self.bytex = (self.bytex+1) & 0xff
-            rdata = AA + rdata
+        if self.read_data_generator is None:
+            rdata = ''
+            takenram = 0
+            for jj in range(Incr):
+                Add = Addr1 + jj
+                if Add in self.Ram:
+                    AA = '%02x'%(self.Ram[Add])
+                    takenram += 1
+                else:
+                    AA = '%02x'%(self.bytex)
+                    self.bytex = (self.bytex+1) & 0xff
+                rdata = AA + rdata
+                logs.log_info(
+                'axiSlave taken from ram %d bytes  rdata=%s addr=%08x rid=%x' % (takenram, rdata, Addr, rid))
+        else:
+            rdata = self.read_data_generator()
+            rdata = hex(rdata)[2:]
+            logs.log_info(f'[{self.Name}]: reading data from read data generator function rdata = 0x{rdata}, ')
         self.rqueue.append((rlast,rid,rdata))
-        logs.log_info('axiSlave taken from ram %d bytes  rdata=%s addr=%08x rid=%x'%(takenram,rdata,Addr,rid))
+
 
 
 

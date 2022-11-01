@@ -184,7 +184,10 @@ class spiMasterClass(logs.driverClass):
             self.Back = []
 
             AA = ''.join(LL)
-            AX = '%08x'%(int(AA,2))
+            try:
+                AX = '%08x'%(int(AA,2))
+            except:
+                AX = AA
             logs.log_info('SPI MISO rdata=%s cmd=%s addr=%x'%(AX,Cmd,Addr))
             if Cmd=='RD':
                 if Addr in self.Expects:

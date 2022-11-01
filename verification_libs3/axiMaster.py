@@ -27,7 +27,7 @@ import veri
 import traceback
 
 class axiMasterClass:
-    def __init__(self,Path,Monitors,Prefix='',Suffix='',Name='"no given name"'):
+    def __init__(self,Path,Monitors,Prefix='',Suffix='',Name='"no given name"', write_data_generator=None):
         self.Path = Path
         if Monitors != -1: Monitors.append(self)
         self.Name=Name
@@ -59,6 +59,7 @@ class axiMasterClass:
         self.arready = 0
         self.defines = {}
         self.callback = False
+        self.write_data_generator = write_data_generator
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig)
@@ -130,8 +131,11 @@ class axiMasterClass:
         elif wrds[0]=='write_illegal':
             self.makeWriteIllegal(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),eval(wrds[5]),list(map(eval,wrds[6:])))
         elif wrds[0]=='write':
+            print("WRITE ", len(wrds), wrds)
             if len(wrds)==3:
                 self.makeWrite(1,1,self.eval(wrds[1]),self.Size,[self.eval(wrds[2])])
+            elif len(wrds) == 5:
+                self.makeWrite(self.eval(wrds[1]), self.eval(wrds[2]), self.eval(wrds[3]), self.eval(wrds[4]),[])
             elif len(wrds)>=6:
                 self.makeWrite(self.eval(wrds[1]),self.eval(wrds[2]),self.eval(wrds[3]),self.eval(wrds[4]),list(map(self.eval,wrds[5:])))
             else:
@@ -225,8 +229,11 @@ class axiMasterClass:
             if type(Wdatas) is int:
                 Wdata = Wdatas
             elif len(Wdatas)==0:
-                Wdata = '0x%08x%08x%08x%08x'%(self.Rid+0x1000*ii,0x100+self.Rid+0x1000*ii,0x200+self.Rid+0x1000*ii,0x300+self.Rid+0x1000*ii)
-                Wdata = Address + ii * 0x8
+                if self.write_data_generator is None:
+                    Wdata = Address + ii * 0x8
+                else:
+                    Wdata = self.write_data_generator()
+
             elif (type(Wdatas[0]) is str):
                 Wdata = Wdatas.pop(0)
             else:
