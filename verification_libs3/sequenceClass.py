@@ -58,6 +58,8 @@ class sequenceClass:
         self.Translates['eflash'] = self.eflash
         self.Translates['peek'] = self.seq_peek
         self.Translates['float2int'] = logs.float2binary
+        self.Timed = {}
+        self.AGENTS = AGENTS
         for NickObj in AGENTS:
             if type(NickObj) is int:
                 pass
@@ -69,7 +71,7 @@ class sequenceClass:
             elif 'Name' in dir(NickObj):
                 self.agents[NickObj.Name]=NickObj
             else:
-                logs.log_error('sequence agent failed to connect')
+                logs.log_error('sequence agent failed to connect "%s"' % (NickObj,AGENTS))
 
         self.searchPath = ['.'] 
         self.Ptr = 0
@@ -85,10 +87,13 @@ class sequenceClass:
         # do i need to restart more items???
 
 
+# def __init__(self,Path,Monitors,SEQUENCE='',AGENTS=[],Translates={}):
 
     def newone(self,Seq,Name):
-        New = sequenceClass(self.Path,-1,'',self.agents,self.Translates)
-        New.Sequence = Seq
+        New = sequenceClass(self.Path,self.Monitors,'',self.AGENTS,self.Translates)
+        logs.log_info('NEWONE %s' % str(Seq))
+        for ind,Line in enumerate(Seq[1]):
+            New.Sequence.append((Line,ind+1000))
         New.Name = Name
         self.Sons.append(New)
 
@@ -211,11 +216,12 @@ class sequenceClass:
                     LL.append(Line)
             elif (state=='sub'):
                 if wrds[0]=='end':
-                    self.Subs[SEQ] = Params,SUB
+                    self.Subs[SEQ] = Params[:],SUB[:]
                     for PP in Params:
                         self.Translates[PP] = 0
                     SUB = []
                     state = 'idle'
+                    logs.log_info('SUBDEF %s %s' % (SEQ,self.Subs[SEQ]))
                 else:
                     SUB.append(Line)
 
@@ -326,8 +332,20 @@ class sequenceClass:
             else:
                 ind += 1
 
+    def runTimed(self):
+        for When in self.Timed:
+            if logs.get_cycles() == When:
+                Line = self.Timed[When]
+                logs.log_info('TIMED USE %s %s' % (When,Line))
+                self.seq_line(Line)
+                
+            
+
+
+
     def run(self):
         self.runSons()
+        self.runTimed()
         if self.waiting>0:
             self.waiting -= 1
             return True
@@ -348,12 +366,21 @@ class sequenceClass:
             self.Guardian = 0
             self.waitNotBusy = False
         if self.Ptr == len(self.Sequence): return False
-        Line,lnum = self.Sequence[self.Ptr]
+        logs.log_info('>>>>>>>> %d %s' % (self.Ptr,len(self.Sequence)))
+        try:
+            Line,lnum = self.Sequence[self.Ptr]
+        except:
+            logs.log_info('XXXXXXX %s %s {{%s}} ' % (self.Ptr,self.Sequence[self.Ptr],self.Sequence))
+            Line = ''
+            lnum = 999
         self.Ptr += 1
         if '#' in Line: Line = Line[:Line.index('#')]
         if '//' in Line: Line = Line[:Line.index('//')]
         logs.log_write('sequence: %s'%Line,'seq')
 #        print(lnum,Line)
+        self.seq_line(Line)
+
+    def seq_line(self,Line):
         wrds = Line.split()
         if len(wrds)==0: return True
         if wrds[0] == 'seed':
@@ -398,9 +425,11 @@ class sequenceClass:
             self.Labels[wrds[1]] = self.Ptr-1
         elif wrds[0] in ['spawn','fork']:
             Seq = self.Subs[wrds[1]]
+            if len(wrds)==2:
+                wrds.append(Name)
             Name = wrds[2]
             self.newone(Seq,Name)
-            logs.log_info('spawning %s %s'%(wrds[1],Name))
+            logs.log_info('spawning seq=%s %s'%(wrds[1],Name))
         elif wrds[0] == 'return':
             if self.Stack==[]:
                 logs.log_error('return in sequence from empty stack')
@@ -437,6 +466,10 @@ class sequenceClass:
             Lbl = wrds[2]
             self.jumpLabel(Lbl)
             return
+        elif (wrds[0][0] == '@'):
+            Time = eval(wrds[0][1:])
+            self.Timed[Time] = ' '.join(wrds[1:])
+            logs.log_info('TIMED added %d %s' % (Time,self.Timed[Time]))
         elif (wrds[0] == 'force'):
             Ind = 1
             while Ind < len(wrds):

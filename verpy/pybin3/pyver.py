@@ -53,7 +53,9 @@ def setupMain(Env):
     Env.read_verilog_file=read_verilog_file
     Env.read_gate_level_verilog_file=read_gate_level_verilog_file
     for Fname in Fnames:
-        if Env.GateLevelRead:
+        if not os.path.exists(Fname):
+            logs.log_error('given filename "%s" cannot be read' % Fname)
+        elif Env.GateLevelRead:
             Env.read_gate_level_verilog_file(Fname,Env.rundir)
         else:
             Env.read_verilog_file(Fname,Env.rundir,Env)
@@ -84,6 +86,10 @@ def read_verilog_file(Fname,RunDir,Env):
         Params['-d'] = More['-d']
     if '-y' in More:
         Params['-y'] = More['-y']
+
+    if Fname.endswith('.vvv'):
+        os.system('genver.py %s %s' % (Fname,Fname.replace('vvv','v')))
+        Params['fnames'] = [Fname.replace('vvv','v')]
     macro_verilog_pp.run_main(Params,'00010',True)
 
 
