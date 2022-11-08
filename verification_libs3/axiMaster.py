@@ -60,6 +60,8 @@ class axiMasterClass:
         self.defines = {}
         self.callback = False
         self.write_data_generator = write_data_generator
+        self.verbose = True
+        self.fix_write_bid = False
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig)
@@ -68,7 +70,7 @@ class axiMasterClass:
         if self.Bscore != []:
             logs.log_error('BVALID: some (%d) BID left in BID queue' % (len(self.Bscore)))
             for ii in range(min(10,len(self.Bscore))):
-                logs.log_info('    leftover in BID %x %x' % (self.Bscore[ii]))
+                self.log_info_print('    leftover in BID %x %x' % (self.Bscore[ii]))
         elif self.busy():
             logs.log_error('%s finished busy status' % (self.Name))
             
@@ -104,7 +106,7 @@ class axiMasterClass:
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
     def action(self,Txt):
         wrds = Txt.split()
-        logs.log_debug('%s ACTION %s' % (self.Name,Txt),'dbg')
+        self.log_debug_print('%s ACTION %s' % (self.Name,Txt),Which='dbg')
         if wrds[0] == 'starvation':
             if wrds[1] in [1,'1','on']:
                 self.Starvation = True
@@ -131,7 +133,8 @@ class axiMasterClass:
         elif wrds[0]=='write_illegal':
             self.makeWriteIllegal(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),eval(wrds[5]),list(map(eval,wrds[6:])))
         elif wrds[0]=='write':
-            print("WRITE ", len(wrds), wrds)
+            if self.verbose:
+                print("WRITE ", len(wrds), wrds)
             if len(wrds)==3:
                 self.makeWrite(1,1,self.eval(wrds[1]),self.Size,[self.eval(wrds[2])])
             elif len(wrds) == 5:
@@ -178,11 +181,11 @@ class axiMasterClass:
 
     def busyWhy(self):
         for Item in self.wQueue:
-            logs.log_info('BUSYWHY %s ' % str(Item))
+            self.log_info_print('BUSYWHY %s ' % str(Item))
 
     def busy(self,Why = False):
         if Why:
-            logs.log_info('BUSY %s q=%d arq=%d awq=%d wq=%d bq=%d ' % (self.Name,len(self.Queue),len(self.arQueue),len(self.awQueue),len(self.wQueue),len(self.Bscore))) 
+            self.log_info_print('BUSY %s q=%d arq=%d awq=%d wq=%d bq=%d ' % (self.Name,len(self.Queue),len(self.arQueue),len(self.awQueue),len(self.wQueue),len(self.Bscore))) 
         if self.Queue!=[]: return True
         if self.arQueue!=[]: return True
         if self.awQueue!=[]: return True
@@ -201,7 +204,7 @@ class axiMasterClass:
         self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
         Mask = (1<<len(self.peekbin('arid')))-1
         self.Rid = Mask & (1+self.Rid)
-        logs.log_info('%s makeRead %x %x %x %x' % (self.Name, Burst,Len,Address,Size),'dbg')
+        self.log_info_print('%s makeRead %x %x %x %x' % (self.Name, Burst,Len,Address,Size),'dbg')
 #        traceback.print_stack()
 
     def makeWriteIllegal(self,Burst,Len,actualLen,Address,Size=4,Wdatas=[]):
@@ -209,20 +212,20 @@ class axiMasterClass:
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
         self.Bscore.append((self.Rid,Address))
         self.writeDatasLoop(actualLen,Size,Address,Wdatas)
-        logs.log_debug('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)),'dbg')
+        self.log_debug_print('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)),Which='dbg')
 
     def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
         if Len==0: 
             logs.log_error('axiMaster %s makeWrite got zero length request at addr=%x ' % (self.Name,Address))
             return
-        logs.log_info('%s makeWrite %x %x %x %x %s' % (self.Name, Burst,Len,Address,Size,list(map(hex,Wdatas))),'dbg')
+        self.log_info_print('%s makeWrite %x %x %x %x %s' % (self.Name, Burst,Len,Address,Size,list(map(hex,Wdatas))),'dbg')
         self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
         self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
         self.Bscore.append((self.Rid,Address))
         if Len<=0:
             logs.log_warning('axiMaster %s got len=%d for write'%(self.Name,Len))
         self.writeDatasLoop(Len,Size,Address,Wdatas)
-        logs.log_debug('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)),'dbg')
+        self.log_debug_print('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)),Which='dbg')
 
     def writeDatasLoop(self,Len,Size,Address,Wdatas):
         for ii in range(Len):
@@ -254,8 +257,9 @@ class axiMasterClass:
         if self.AXI3:
             Str += ' wid=%d'%self.Rid
         self.Queue.append(('w',Str))
-        Mask = (1<<len(self.peekbin('awid')))-1
-        self.Rid = Mask & (1+self.Rid)
+        if not self.fix_write_bid:
+            Mask = (1<<len(self.peekbin('awid')))-1
+            self.Rid = Mask & (1+self.Rid)
             
     def wait(self,Many):
         self.Queue.append(('this','wait %d'%Many))
@@ -267,7 +271,6 @@ class axiMasterClass:
         self.Queue.append(('w','force %s=%s'%(Net,Val)))
 
     def run(self):
-#        logs.log_debug('runn lenaw=%d lenar=%d lenq=%d lenw=%d'%(len(self.awQueue),len(self.arQueue),len(self.Queue),len(self.wQueue)),'dbg')
         if self.Starvation:
             self.force('rready',0)
             self.force('bready',0)
@@ -326,7 +329,7 @@ class axiMasterClass:
             msb  = int(self.datawidth/4) 
 #            print('MSB "%s" %s    %s'%(msb,type(msb),rdatax))
             rdatax = rdatax[-msb:]
-            logs.log_info('axiM responce rid=%x rlast=%d rdata=%s rresp=%s     %s'%(rid,rlast,rdatax,rresp,self.Path))
+            self.log_info_print('axiM responce rid=%x rlast=%d rdata=%s rresp=%s     %s'%(rid,rlast,rdatax,rresp,self.Path))
             self.readAction(rid,rlast,rdata,widrid,rresp)
         else:
             self.manageRready(0)
@@ -336,7 +339,7 @@ class axiMasterClass:
             logs.log_error('READ ACTION %s and no AREADS' % (self.Name))
             return
         Len,Addr,Rid,Pos = self.AREADS[0]
-        logs.log_info('axi Master %s READ len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Len,Addr,Addr+8*Pos,Rid,rid,rlast,rdatax,rresp,self.AREADS))
+        self.log_info_print('axi Master %s READ len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Len,Addr,Addr+8*Pos,Rid,rid,rlast,rdatax,rresp,self.AREADS))
         self.AREADS[0] = (Len,Addr,Rid,Pos+1)
 
         if (Rid & ((1<<widrid)-1)) != rid:
@@ -351,7 +354,7 @@ class axiMasterClass:
             self.callback(ADDR,rdatax)
         if rlast == 1:
             self.AREADS.pop(0)
-#        logs.log_info('ADDRDATAS %s len=%d  %s' % (hex(Addr), len(self.RDATAS[Addr]),list(map(hex,self.RDATAS.keys()))))
+#        self.log_info_print('ADDRDATAS %s len=%d  %s' % (hex(Addr), len(self.RDATAS[Addr]),list(map(hex,self.RDATAS.keys()))))
 
     def runQueue(self):
 #        print('\n\n\n\ 0 RUNQ',self.Queue)
@@ -363,7 +366,7 @@ class axiMasterClass:
                 self.awQueue.append(Cmd)
             elif Dst=='ar':
                 self.arQueue.append(Cmd)
-                logs.log_debug('ARQUEUE %s' % Cmd,'dbg')
+                self.log_debug_print('ARQUEUE %s' % Cmd,Which='dbg')
             elif Dst=='w':
                 self.wQueue.append(Cmd)
             else:
@@ -377,7 +380,7 @@ class axiMasterClass:
         elif (wrds[0]=='wait'):
             self.waiting = int(wrds[1])
         elif (wrds[0]=='finish'):
-            logs.log_info('veri finish from axi Master')
+            self.log_info_print('veri finish from axi Master')
             veri.finish()
             sys.exit()
         elif (wrds[0]=='force'):
@@ -398,7 +401,7 @@ class axiMasterClass:
                 ii = 0;
                 while ii < len(self.Bscore):
                     if self.Bscore[ii][0] == Bid:
-                        logs.log_correct('BVALID %s bid=%x bresp=%x' % (self.Name,Bid,Bresp))
+                        logs.log_correct('BVALID %s bid=%x bresp=%x' % (self.Name,Bid,Bresp), Print=self.verbose)
                         self.Bscore.pop(ii)
                         ii = 10000
                     else:
@@ -457,8 +460,14 @@ class axiMasterClass:
             pass
         elif (wrds[0]=='force'):
             self.forces(wrds[1:])
-            logs.log_debug('DBG AR %s' % str(wrds),'dbg')
+            self.log_debug_print('DBG AR %s' % str(wrds),Which='dbg')
         self.ARVALID = ('arvalid=1' in Cmd)
         self.arready = self.peek('arready')
 
+    def log_info_print(self, msg, Which=0):
+        prefix = f"[{self.Name}]: "
+        logs.log_info(prefix + msg, Which, verbose=self.verbose)
 
+    def log_debug_print(self, msg, Which=0):
+        prefix = f"[{self.Name}]: "
+        logs.log_debug(prefix + msg, Which=Which, verbose=self.verbose)

@@ -231,18 +231,20 @@ def log_write(Text,Which=0):
     openFlog(Which)
     Flogs[Which].write('%s\n'%(Text))
 
-def log_debug(Text,Tokens = '',Which=0):
+def log_debug(Text,Tokens = '',Which=0, verbose=True):
 #    if printDebugs.intersection(set(Tokens.split())) == set(): return
     openFlog(Which)
-    print('@%d: debug: %s'%(get_cycles(),Text))
+    if verbose:
+        print('@%d: debug: %s'%(get_cycles(),Text))
     Flogs[Which].write('@%d: debug: %s\n'%(get_cycles(),Text))
 
 
     return
 
-def log_info(Text,Which=0):
+def log_info(Text,Which=0, verbose=True):
     openFlog(Which)
-    print('@%d: info: %s'%(get_cycles(),Text))
+    if verbose:
+        print('@%d: info: %s'%(get_cycles(),Text))
     Flogs[Which].write('@%d: info: %s\n'%(get_cycles(),Text))
 
 def log_finfo(Text,File):

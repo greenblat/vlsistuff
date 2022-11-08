@@ -24,6 +24,7 @@ class axiMonitorClass:
         self.RADDR = []
         self.RespRAM = {}
         self.RespADDR = 0
+        self.verbose = True
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig,self.Logs)
@@ -40,7 +41,7 @@ class axiMonitorClass:
         return logs.peek('%s%s' % (self.Path,Net))
 
     def onFinish(self):
-        logs.log_info('ONFINISH OF AXIMONITOR')
+        self.log_info_msg('ONFINISH OF AXIMONITOR')
         if self.AWQUEUE != []:
             logs.log_error('onFinish axi monitor AWQUEUE not empty',self.Logs)
         if self.ARQUEUE != []:
@@ -73,7 +74,7 @@ class axiMonitorClass:
             Last = self.peek('wlast')
             (Addr,Len,Size,Burst,Id) = self.AWQUEUE[0]
             self.store(self.RAM, self.WADDR,Data,Wstrb)
-            logs.log_info('AXIMON %s WRITE ad=0x%x wlen=%d data=0x%x (%d) wstrb=%x' % (self.Name,self.WADDR,self.WLEN,Data,Data,Wstrb),self.Logs)
+            self.log_info_msg('AXIMON %s WRITE ad=0x%x wlen=%d data=0x%x (%d) wstrb=%x' % (self.Name,self.WADDR,self.WLEN,Data,Data,Wstrb),Which=self.Logs)
             if Burst == 1:
                 self.WADDR += self.dataWidth
             self.WLEN -= 1
@@ -169,7 +170,7 @@ class axiMonitorClass:
             dataWidth = readSize
         Res = 0
         Valids = 0
-#        logs.log_info('XXX Addr=%x RAM = %s' % (Addr,list(map(hex,self.RAM.keys()))))
+#        log_info_msg('XXX Addr=%x RAM = %s' % (Addr,list(map(hex,self.RAM.keys()))))
         for JJ in range(dataWidth):
             Ad = Addr + JJ
             if Ad in mem:
@@ -178,10 +179,10 @@ class axiMonitorClass:
                 Valids += (0xff<<(8*JJ))
         return Valids,Res
 
-    def log_info_msg(self, msg):
+    def log_info_msg(self, msg, Which=0):
         prefix = "[" + self.Name + "]: "
         full_msg = prefix + msg
-        logs.log_info(full_msg)
+        logs.log_info(full_msg, Which=Which, verbose=self.verbose)
 
 
 

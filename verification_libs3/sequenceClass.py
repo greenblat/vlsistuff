@@ -366,7 +366,6 @@ class sequenceClass:
             self.Guardian = 0
             self.waitNotBusy = False
         if self.Ptr == len(self.Sequence): return False
-        logs.log_info('>>>>>>>> %d %s' % (self.Ptr,len(self.Sequence)))
         try:
             Line,lnum = self.Sequence[self.Ptr]
         except:
