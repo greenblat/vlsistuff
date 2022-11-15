@@ -8,6 +8,7 @@ import module_class as mcl
 import matches
 import pprint
 MathOps = ('** ~| ~& ~^ !^ + - * / ^ % & | && || ! ~ < > << >> >>> == <= >= != !== ~& === !==').split()
+makeInteger = []
 if os.path.exists('packages_save.py'):
     sys.path.append('.')
     import packages_save
@@ -1275,7 +1276,12 @@ def add_initial(List):
 def add_instance(List):
     Vars = matches.matches(List,'? ? ;')
     if Vars:
-        Current.add_inst(Vars[0],Vars[1])
+        What = Vars[0][0]
+        Who = Vars[1][0]
+        if What in makeInteger:
+            Current.add_sig(Who,'integer',0)
+        else:
+            Current.add_inst(Vars[0],Vars[1])
         return
         
 
@@ -1488,6 +1494,14 @@ def get_definition(List):
 
 def add_definition(List):
 
+    Vars = matches.matches(List,'typedef enum { !Tokens_list } ? ;',False)
+    if Vars:
+        List0 = get_list(Vars[0])
+        Name = Vars[1][0]
+        makeInteger.append(Name)
+        for ind,State in enumerate(List0):
+            Current.add_localparam(State,ind)
+        return 
     Vars = matches.matches(List,'enum !WireLogic !Width { !Tokens_list } !Tokens_list ;',False)
     if Vars:
         Dir = get_dir(Vars[0])

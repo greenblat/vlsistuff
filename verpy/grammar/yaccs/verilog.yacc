@@ -96,6 +96,8 @@ Definition :
     | IntDir InstParams Tokens_list ';'
     | IntDir InstParams token '=' Expr ';'
     | typedef enum logic Width '{' Tokens_list '}' token ';'
+    | typedef enum logic '{' Tokens_list '}' token ';'
+    | typedef enum '{' Tokens_list '}' token ';'
 //    | token domino token token ';'
     ;
 
