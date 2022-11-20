@@ -17,6 +17,7 @@ def main():
                 F1 = wrds[1]
                 F2 = wrds[-2]
                 print('diff -bBw %s %s' % (F1,F2))
+                print('/bin/cp %s %s' % (F1,F2))
                 diffies += 1
         elif ('Only' in line):
             onlies += 1

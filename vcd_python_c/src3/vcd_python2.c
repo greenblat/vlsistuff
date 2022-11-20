@@ -383,7 +383,6 @@ int main(argc, argv)
         sigs[i].allocated = 0;
     }
         
-
     readfile(fname1);
     conclusions();
     fclose(Outf);
@@ -978,6 +977,27 @@ veri_changes(PyObject *self,PyObject *args) {
     return Py_BuildValue("l", (long) Changes);
 }
 
+static PyObject*
+veri_deep(PyObject *self,PyObject *args) {
+    if (!PyArg_ParseTuple(args, ""))
+        return NULL;
+    int ii;
+    char pvalue[10000];
+    FILE *fout;
+    fout = fopen("deep.list","w");
+    for (ii=0; ii<maxsig; ii++) {
+       if (sigs[ii].wide<=8) {
+            strcpy(pvalue,sigs[ii].value);
+        } else if (!sigs[ii].allocated) {
+            strcpy(pvalue,"x");
+        } else {
+            strcpy(pvalue,sigs[ii].allocated);
+        }
+        fprintf(fout,"%d %s %s\n",ii,qqia(sigs[ii].fpath),pvalue);
+    }
+    fclose(fout);
+    return Py_BuildValue("l", (long) Changes);
+}
 
 static PyObject*
 veri_exists(PyObject *self,PyObject *args) {
@@ -1156,6 +1176,7 @@ static PyMethodDef VeriMethods[] = {
     {"force", veri_force, METH_VARARGS, "tracing of new signals."},
     {"stime", veri_stime, METH_VARARGS, "Return the number of arguments received by the process."},
     {"changes", veri_changes, METH_VARARGS, "Return the number of arguments received by the process."},
+    {"deep", veri_deep, METH_VARARGS, "Return the number of arguments received by the process."},
     {"sensitive", veri_sensitive, METH_VARARGS,"add to watch list"},
     {"finish", veri_finish, METH_VARARGS, "Return the number of arguments received by the process."},
     {"toggles", veri_toggles, METH_VARARGS, "Return the number of arguments received by the process."},
@@ -1194,6 +1215,9 @@ void start_python() {
     char temp[10000];
     PyImport_AppendInittab("veri", PyInit_veri);
     Py_Initialize();
+    sprintf(temp,"vcdFileName = '%s'",fname1);
+    printf("TTTTTTTTTTT %s\n",temp);
+    PyRun_SimpleString(temp);
     sprintf(temp,"INITFILE = '%s'\n%s",fname2,scriptStart);
     PyRun_SimpleString(temp);
     globals = PyDict_New();
@@ -1201,6 +1225,7 @@ void start_python() {
     PyDict_SetItemString(globals, "__builtins__", PyEval_GetBuiltins());
     locals = Py_BuildValue("{}");
     python_started = 1;
+
 }
 
 char *int2bin(int AA,int Wid,char *tmp) {

@@ -25,10 +25,21 @@ class axiMonitorClass:
         self.RespRAM = {}
         self.RespADDR = 0
         self.verbose = True
+        self.checkRam = False
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig,self.Logs)
 
+    def action(self,Txt):
+        wrds = Txt.split()
+        if wrds==[]:
+            pass
+        elif wrds[0]== 'verbose':
+            self.verbose = eval(wrds[1])
+        elif wrds[0]== 'checkRam':
+            self.checkRam = eval(wrds[1])
+        else:
+            logs.log_error('action of axi monitor accepts only "verbose" or "checkRam" directives, not "%s"' % Txt)
 
     def peek(self,Sig):
         Net = Sig
@@ -161,6 +172,8 @@ class axiMonitorClass:
             Addr += 1
 
     def load(self,Addr, readSize=None, memtype='RAM'):
+        if not self.checkRam:
+            return False,0
         if memtype == 'RAM':
             mem = self.RAM
         if memtype == "RespRAM":
