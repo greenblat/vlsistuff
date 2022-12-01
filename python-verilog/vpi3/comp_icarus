@@ -1,11 +1,11 @@
 #! /bin/csh -f
 
-set INC = /Library/Frameworks/Python.framework/Versions/3.8/include/python3.8/
-set LIB = /Library/Frameworks/Python.framework/Versions/3.8/lib
+set INC = /Library/Frameworks/Python.framework/Versions/3.10/include/python3.10/
+set LIB = /Library/Frameworks/Python.framework/Versions/3.10/lib
 
 iverilog-vpi src/vpi3_72.c src/qq64.c \
     -I$INC \
-    -lpython3.8  \
+    -lpython3.10  \
     -L$LIB \
 
 

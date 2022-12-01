@@ -1060,6 +1060,15 @@ def getExtDir(Item):
         Name = get_expr(Vars[3])
         return ('extdir',Dir,Name,('packed',Wid0,Wid1))
 
+    Vars = matches.matches(Item,'!ExtDir !Width !Width !Width  ?')
+    if Vars:
+        Dir = get_dir(Vars[0])
+        Wid0 = get_wid(Vars[1])
+        Wid1 = get_wid(Vars[2])
+        Wid2 = get_wid(Vars[3])
+        Name = get_expr(Vars[4])
+        return ('extdir',Dir,Name,('packed',Wid0,Wid1,Wid2))
+
     Vars = matches.matches(Item,'!ExtDir !Width ? !Width')
     if Vars:
         Dir = get_dir(Vars[0])
@@ -1705,6 +1714,16 @@ def add_definition(List):
                 Current.add_sig(Item[1],Dir,('packed',Wid0,Wid1))
                 Expr = get_expr(Item[2])
                 Current.add_hard_assign(Item[1],Expr)
+        return
+
+    Vars = matches.matches(List,'!IntDir !Width !Width !Width ? ;',False)
+    if Vars:
+        Dir = get_dir(Vars[0])
+        Wid0 = get_wid(Vars[1])
+        Wid1 = get_wid(Vars[2])
+        Wid2 = get_wid(Vars[3])
+        Name = get_expr(Vars[4])
+        Current.add_sig(Name,Dir,('packed',Wid0,Wid1,Wid2))
         return
 
     Vars = matches.matches(List,'const logic !Width !Width ? = { !Exprs } ;',False)

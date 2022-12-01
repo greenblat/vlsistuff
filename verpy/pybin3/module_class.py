@@ -84,7 +84,8 @@ class module_class:
                 return self.add_sig(['subbus',Bus,Hi,Lo],Dir,Wid)
             elif len(BB) == 5:
                 return self.add_sig(BB[0],Dir,('packed',(BB[1],BB[2]),(BB[3],BB[4])))
-            
+            else:
+                logs.log_error('add_sig got %d %s' % (len(BB),BB))
 
         if Name=='':
             Name = 'net_%d'%self.inventedNets
@@ -271,9 +272,10 @@ class module_class:
             Pref=''
             Fout.write(' #( ')
             for Prm in self.parameters:
-                Fout.write('%sparameter %s = %s'%(Pref,pr_expr(Prm),pr_expr(self.parameters[Prm])))
-                if Prm in self.nets: self.nets.pop(Prm)
-                Pref=','
+                if Prm != '__builtins__':
+                    Fout.write('%sparameter %s = %s'%(Pref,pr_expr(Prm),pr_expr(self.parameters[Prm])))
+                    if Prm in self.nets: self.nets.pop(Prm)
+                    Pref=','
             Fout.write(') ')
         IOS=[]
         NOIOS=[]
@@ -300,12 +302,6 @@ class module_class:
             IOS.sort()
             Pref=''
             for (Name,Dir,Wid) in IOS:
-#                if is_double_def(Wid):
-#                    if (Wid[0]=='packed'):
-#                        Fout.write('    %s%s %s %s %s\n'%(Pref,pr_dir(Dir),pr_wid(Wid[1]),pr_wid(Wid[2]),pr_expr(Name)))
-#                    else:
-#                        Fout.write('    %s%s %s %s %s\n'%(Pref,pr_dir(Dir),pr_wid(Wid[1]),pr_expr(Name),pr_wid(Wid[2])))
-#                else:
                 Fout.write('    %s%s %s %s\n'%(Pref,pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
                 Pref=','
             for (Type,Inst) in IFS:
@@ -1032,7 +1028,13 @@ class module_class:
             Hi = self.compute_int(Wid[2][0])
             Lo = self.compute_int(Wid[2][1])
             One = abs(Hi-Lo)+1
-            return Many*One
+            Two = 1
+            if len(Wid) == 4:
+                Hi = self.compute_int(Wid[3][0])
+                Lo = self.compute_int(Wid[3][1])
+                Two = abs(Hi-Lo)+1
+
+            return Many*One*Two
 
         logs.log_error('computeWidth got "%s"'%(str(Wid)))
         return 1
@@ -1567,6 +1569,7 @@ def pr_assign_list(List):
         return '%s=%s'%(Dst,Src)
         
     for Item in List:
+        print('RRRR',Item,List)
         Res = pr_assign_list(Item)
         res.append(Res)
     return ', '.join(res)
@@ -1617,6 +1620,8 @@ def pr_wid(Wid):
         
     if (len(Wid)==3)and(Wid[0]=='packed'):
         return pr_wid(Wid[1])+pr_wid(Wid[2])
+    if (len(Wid)==4)and(Wid[0]=='packed'):
+        return pr_wid(Wid[1])+pr_wid(Wid[2])+pr_wid(Wid[3])
     if len(Wid)==3:
         logs.log_err('pr_wid %s'%(str(Wid)))
         traceback.print_stack(None,None,logs.Flogs[0])
@@ -1693,6 +1698,10 @@ def pr_expr(What):
         res1 = '(%s)'%(' %s '%What[0]).join(res)
         return res1
 
+    if What[0]in ['=']:
+        Dst  = pr_expr(What[1])
+        Src  = pr_expr(What[2])
+        return '%s = %s' % (Dst,Src)
 
     if What[0]in ['?','question']:
         Cond = pr_expr(What[1])
@@ -1924,6 +1933,7 @@ def is_double_def(Wid):
         logs.log_err('bad width definition, ilia!  %s '%(str(Wid)))
         traceback.print_stack(None,None,logs.Flogs[0])
         return False
+    
     return False        
     
 def make_int(Str):

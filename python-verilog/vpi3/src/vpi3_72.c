@@ -138,6 +138,48 @@ int isSimpleExpr(exprHndl)
 
 int split_for_python(char *Exe,char *Dir,char *Import,int Which);
 
+char basemodule[1000];
+PLI_INT32 vpit_basemodule( PLI_BYTE8 *user_data ) {
+
+    int pos=0;
+    vpiHandle tfH,argH,argI;
+    s_vpi_value pvalue;
+    s_vpi_error_info error_info;
+    int err=0,iii;
+    char execstr[200000];
+    char params[200000];
+    char tempstr[200000];
+    int Len,FuncCall;
+    params[0]=0;
+
+    if (python_started) {
+        vpi_printf("basemodule not used, python already started\n");
+        return 0;
+    }
+    iii=0;
+    tfH = vpi_handle(vpiSysTfCall,NULL); 
+    if (!tfH) { vpi_printf("call to basemodule without params\n"); return 0; }
+    argI = vpi_iterate(vpiArgument,tfH); 
+    err = err + vpi_chk_error(&error_info);
+    if (argI) { 
+        argH = vpi_scan(argI);
+        err = err + vpi_chk_error(&error_info);
+        while (argH && (!err)) { 
+            iii++;
+            if (isSimpleExpr(argH)) /* If argument is a simple */ {
+                pvalue.format = vpiIntVal; 
+                pvalue.format = vpiBinStrVal; 
+                vpi_get_value(argH, &pvalue); 
+                sprintf(tempstr,"%s",pvalue.value.str);
+                vpi_printf( "\n=====starting python with %s basemodule ======\n", tempstr );
+                start_py();
+                python_started=1;
+            } else vpi_printf(" Not simple argument for base.\n"); 
+        }
+    } else vpi_printf(" No arguments.\n"); /* There were no arguments */ 
+    return 0;
+}
+
 PLI_INT32 vpit_import( PLI_BYTE8 *user_data ) {
     int pos=0;
     vpiHandle tfH,argH,argI;
@@ -453,6 +495,7 @@ void vpit_RegisterTfs( void )
     static s_vpi_systf_data systf_data_list[] = {
   { vpiSysTask, 0, "$python", vpit_python, NULL, NULL,NULL },
   { vpiSysTask, 0, "$import", vpit_import, NULL, NULL,NULL },
+  { vpiSysTask, 0, "$basemodule", vpit_basemodule, NULL, NULL,NULL },
   { vpiSysFunc, vpiIntFunc, "$pythonf", vpit_pythonf, NULL, 32,NULL },
   { 0, 0, NULL, NULL, NULL, NULL, NULL }
 
@@ -625,7 +668,8 @@ veri_peek_mem(PyObject *self,PyObject *args) {
     char *pathstring,*indexstring;
     int index=10;
     if (!PyArg_ParseTuple(args, "ss",&pathstring,&indexstring))
-        return NULL;
+        vpi_printf("\npython: cannot parse peek_mem\n");
+        return Py_BuildValue("s", "BAD0");
     index = atoi(indexstring);
 //    vpi_printf("\n mem=%s ind=%d\n",pathstring,index);
 //    handle =  vpi_handle_by_name(pathstring,NULL);
@@ -711,6 +755,16 @@ bool hasDot( char *strx) {
     return 0;
 }
 
+static PyObject*
+veri_display(PyObject *self,PyObject *args) {
+    char *pathstring;
+    if (PyArg_ParseTuple(args, "s",&pathstring)) {
+        vpi_printf("\npython: %s",pathstring);
+        return Py_BuildValue("i", 1);
+    } else {
+        return Py_BuildValue("i", 0);
+    }
+}
 
 static PyObject*
 veri_force(PyObject *self,PyObject *args) {
@@ -744,6 +798,8 @@ veri_force(PyObject *self,PyObject *args) {
         for (iii=0;vstr[iii];iii++) {
             if ((vstr[iii]<'0')||(vstr[iii]>'9')) {
                 vpi_printf("verilog-python ERROR! force me of %s got %s , not legal number\n",pathstring,vstr);
+                sprintf(CannotFindCallBack,"try:\n    wrong_force_value('%s','%s')\nexcept:\n    print('python: wrong force value %s for force of %s')\n",pathstring,vstr,vstr,pathstring);
+                PyRun_SimpleString(CannotFindCallBack);
                 return Py_BuildValue("i", 0);
             }
         }
@@ -1094,7 +1150,7 @@ veri_listing(PyObject *self,PyObject *args) {
 int printHierarchyDeep(char *pathstring,int depth,FILE *File) {
     vpiHandle handle,net_iterator, net_handle;
     s_vpi_value pvalue;
-    char deeper[1000],full1[1000],full0[1000];
+    char deeper[10000],full1[10000],full0[10000];
     handle =  vpi_handle_by_name(pathstring,NULL);
     if (!handle) {
         vpi_printf("\ncannot find module %s for listing\n",pathstring);
@@ -1275,6 +1331,8 @@ static PyMethodDef VeriMethods[] = {
      "Return the number of arguments received by the process."},
     {"hpeek", veri_hpeek, METH_VARARGS,
      "Return the number of arguments received by the process."},
+    {"display", veri_display, METH_VARARGS,
+      "Return the number of arguments received by the process."},
 
     {NULL, NULL, 0, NULL}
 };
@@ -1307,13 +1365,17 @@ PyMODINIT_FUNC PyInit_veri(void)
     return PyModule_Create(&veri_module_definition);
 }
 
+// You dont need all the dlopens below, just comment all not needed, or leave is is.
+// If You get it wrong, import random will fail.
 
 void start_py() {
     dlopen("libpython3.8.dylib",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.9.dylib",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.10.dylib",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.8.so",RTLD_LAZY | RTLD_GLOBAL);
+    dlopen("libpython3.9.dylib",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.9.so",RTLD_LAZY | RTLD_GLOBAL);
+    dlopen("libpython3.10.dylib",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.10.so",RTLD_LAZY | RTLD_GLOBAL);
     PyImport_AppendInittab("veri", PyInit_veri);
     Py_Initialize();
@@ -1345,6 +1407,7 @@ void end_py() {
 }
 int stat64() {printf(">>>error stat64\n"); return 0;}
 int lstat64() {printf(">>>error lstat64\n"); return 0;}
+
 
 
 

@@ -51,7 +51,11 @@ Hparams : '#' '(' head_params ')' |  '#' '(' ')' | ;
 Header : ';' | '(' Header_list ')' ';' | '(' ')' ';' ;
 Header_list : Header_list ',' Header_item | Header_item ;
 
-Header_item : ExtDir token | ExtDir Width token | ExtDir integer token | ExtDir Width token  Width | ExtDir Width Width token | token | ExtDir token '=' Literal | ExtDir Width token '=' Literal; 
+Header_item : ExtDir token | ExtDir Width token | ExtDir integer token 
+    | ExtDir Width token  Width 
+    | ExtDir Width Width token  
+    | ExtDir Width Width Width token 
+    | token | ExtDir token '=' Literal | ExtDir Width token '=' Literal; 
 
 
 
@@ -90,7 +94,8 @@ Definition :
 //    | IntDir Tokens_list '=' Expr ';'
 //    | IntDir Width token '=' Expr ';'
     | IntDir Width token Width ';'
-//    | IntDir Width Width Tokens_list ';'
+    | IntDir Width Width token ';'
+    | IntDir Width Width Width token ';'
 //    | IntDir Width Width token '=' Expr ';'
     | IntDir token Width ';'
     | IntDir InstParams Tokens_list ';'
