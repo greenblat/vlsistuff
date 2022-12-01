@@ -673,10 +673,12 @@ veri_peek_mem(PyObject *self,PyObject *args) {
     vpiHandle handle,handle2;
     s_vpi_value pvalue;
     char *pathstring,*indexstring;
+
     int index=10;
-    if (!PyArg_ParseTuple(args, "ss",&pathstring,&indexstring))
+    if (!PyArg_ParseTuple(args, "ss",&pathstring,&indexstring)) {
         vpi_printf("\npython: cannot parse peek_mem\n");
-        return Py_BuildValue("s", "BAD0");
+        return Py_BuildValue("s", "ILLEGAL PEEK_MEM");
+    }
     index = atoi(indexstring);
 //    vpi_printf("\n mem=%s ind=%d\n",pathstring,index);
 //    handle =  vpi_handle_by_name(pathstring,NULL);

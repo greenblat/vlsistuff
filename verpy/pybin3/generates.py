@@ -5,11 +5,18 @@
 import logs
 import module_class as mdcl
 def help_main(Env):
-    Mod = Env.Current
-    Mod.Genvars = {}
-    for Gen in Mod.generates:
-        gen_execute(Gen,Mod)
-    Mod.generates = []
+    Top = Env.Current
+    for Module in Env.Modules:
+        Mod = Env.Modules[Module]
+        Mod.Genvars = {}
+        for Gen in Mod.generates:
+            gen_execute(Gen,Mod)
+        Mod.generates = []
+    File = open('%s.gen.v' % Top.Module,'w') 
+    for Module in Env.Modules:
+        Env.Modules[Module].dump_verilog(File)
+
+    File.close()
 
 def evalx(Expr,Mod):
     Gen = mdcl.pr_expr(cleanList(Expr))
