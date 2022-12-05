@@ -46,8 +46,11 @@ char CannotFindCallBack[1000];
 char VERSION[50] = "14.jan.2017";
 
 void checkRC(int RC);
+void start_py(char *basemodule);
 
 int x=5;
+
+
 char scriptStart[] = "\n\
 import string,os,sys\n\
 import traceback \n\
@@ -69,21 +72,29 @@ if Exit:\n\
     print('PROBLEM!!! PY-VERILOG LICENSE EXPIRED, CALL Ilia today = %s %s %s lic = 15.Oct.2025'%(Year,Month,Day))\n\
     sys.exit()\n\
 print('py3-verilog@ilia  license ok, Ilia today = %s %s %s lic = 15.Oct.2025'%(Year,Month,Day))\n\
-if os.path.exists('./verilog.py'):\n\
+import importlib \n\
+if os.path.exists('Z.py'):\n\
     try:\n\
-        print('verilog.py found')\n\
-        from verilog import *\n\
-        print('verilog.py found and loaded')\n\
+        print('Z.py found')\n\
+        Abs = os.path.abspath('Z.py') \n\
+        Abs,Fname = os.path.split(Abs) \n\
+        Fname = Fname.replace('.py','')  \n\
+        sys.path.append(Abs) \n\
+        exec('from %s import *' % Fname) \n\
+        # __import__(Fname,globals=None, locals=None, fromlist=('*'), level=0) \n\
+        print('Z.py found and loaded')\n\
     except:\n\
         traceback.print_exc() \n\
-        print('verilog.py exists, but crashed. failed to read verilog.py')\n\
+        print('Z.py exists, but crashed. failed to read Z.py')\n\
         veri.finish() \n\
         sys.exit() \n\
 else:\n\
-    print('verilog.py do not exist')\n\
+    print('___ERROR: Z.py does not exist')\n\
+    veri.finish() \n\
+    sys.exit() \n\
 \n\
 print('available veri. services: ',dir(veri))\n\
-print('python3-verilog connection mode=7 (ver 19nov2017) started')\n\
+print('python3-verilog connection mode=7 (ver 24nov2022) started')\n\
 interactiveWait=0\n\
 def do_interactive():\n\
     global interactiveWait\n\
@@ -110,7 +121,6 @@ def do_interactive():\n\
 
 
 
-void start_py();
 void end_py();
 int python_started=0;
 PyObject *globals;
@@ -138,7 +148,6 @@ int isSimpleExpr(exprHndl)
 
 int split_for_python(char *Exe,char *Dir,char *Import,int Which);
 
-char basemodule[1000];
 PLI_INT32 vpit_basemodule( PLI_BYTE8 *user_data ) {
 
     int pos=0;
@@ -146,12 +155,9 @@ PLI_INT32 vpit_basemodule( PLI_BYTE8 *user_data ) {
     s_vpi_value pvalue;
     s_vpi_error_info error_info;
     int err=0,iii;
-    char execstr[200000];
-    char params[200000];
-    char tempstr[200000];
+    char tempstr[2000];
     int Len,FuncCall;
-    params[0]=0;
-
+    tempstr[0] = 0;
     if (python_started) {
         vpi_printf("basemodule not used, python already started\n");
         return 0;
@@ -166,17 +172,18 @@ PLI_INT32 vpit_basemodule( PLI_BYTE8 *user_data ) {
         err = err + vpi_chk_error(&error_info);
         while (argH && (!err)) { 
             iii++;
-            if (isSimpleExpr(argH)) /* If argument is a simple */ {
-                pvalue.format = vpiIntVal; 
-                pvalue.format = vpiBinStrVal; 
-                vpi_get_value(argH, &pvalue); 
-                sprintf(tempstr,"%s",pvalue.value.str);
-                vpi_printf( "\n=====starting python with %s basemodule ======\n", tempstr );
-                start_py();
-                python_started=1;
-            } else vpi_printf(" Not simple argument for base.\n"); 
+            pvalue.format = vpiStringVal; 
+            vpi_get_value(argH, &pvalue); 
+            err = err + vpi_chk_error(&error_info);
+            sprintf(tempstr,"%s",pvalue.value.str);
+            vpi_printf( "\n=====starting python with %s basemodule ======\n", tempstr );
+            start_py(tempstr);
+            python_started=1;
+            return 1;
         }
     } else vpi_printf(" No arguments.\n"); /* There were no arguments */ 
+    start_py("verilog");
+    python_started=1;
     return 0;
 }
 
@@ -193,7 +200,7 @@ PLI_INT32 vpit_import( PLI_BYTE8 *user_data ) {
     params[0]=0;
     if (!python_started) {
         vpi_printf( "\n=====starting python ======\n" );
-        start_py();
+        start_py("verilog");
         python_started=1;
     }
     tfH = vpi_handle(vpiSysTfCall,NULL); 
@@ -328,7 +335,7 @@ PLI_INT32 vpit_python( PLI_BYTE8 *user_data )
     params[0]=0;
     if (!python_started) {
         vpi_printf( "\n=====starting python ======\n" );
-        start_py();
+        start_py("verilog");
         python_started=1;
     }
     iii=0;
@@ -425,7 +432,7 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
     params[0]=0;
     if (!python_started) {
         vpi_printf( "\n=====starting python ======\n" );
-        start_py();
+        start_py("verilog");
         python_started=1;
     }
     tfH = vpi_handle(vpiSysTfCall,NULL); 
@@ -666,10 +673,12 @@ veri_peek_mem(PyObject *self,PyObject *args) {
     vpiHandle handle,handle2;
     s_vpi_value pvalue;
     char *pathstring,*indexstring;
+
     int index=10;
-    if (!PyArg_ParseTuple(args, "ss",&pathstring,&indexstring))
+    if (!PyArg_ParseTuple(args, "ss",&pathstring,&indexstring)) {
         vpi_printf("\npython: cannot parse peek_mem\n");
-        return Py_BuildValue("s", "BAD0");
+        return Py_BuildValue("s", "ILLEGAL PEEK_MEM");
+    }
     index = atoi(indexstring);
 //    vpi_printf("\n mem=%s ind=%d\n",pathstring,index);
 //    handle =  vpi_handle_by_name(pathstring,NULL);
@@ -1368,7 +1377,7 @@ PyMODINIT_FUNC PyInit_veri(void)
 // You dont need all the dlopens below, just comment all not needed, or leave is is.
 // If You get it wrong, import random will fail.
 
-void start_py() {
+void start_py(char *basemodule) {
     dlopen("libpython3.8.dylib",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.9.dylib",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.10.dylib",RTLD_LAZY | RTLD_GLOBAL);
@@ -1380,18 +1389,24 @@ void start_py() {
     PyImport_AppendInittab("veri", PyInit_veri);
     Py_Initialize();
     PyRun_SimpleString("import veri; print(dir(veri));\n");
-   
-
-
 // Oren - Added to solve linking problem when importing random
-//    PyObject *mmm;
-//    Py_Initialize();
-//    mmm = PyModule_Create(&veri_module_definition);
-//    mmm = PyInit_veri();
-//   printf(">>>>>>> %lx >>>>\n",(long unsigned) mmm);
 
-//    PyRun_SimpleString("help('modules')");
-    PyRun_SimpleString(scriptStart);
+    char tempstr[5000];
+    int ii=0,jj=0,kk=0;
+    for (ii=0;scriptStart[ii];ii++) {
+        if (scriptStart[ii] == 'Z') {
+            for (kk=0;basemodule[kk];kk++) {
+                tempstr[jj] = basemodule[kk];
+                jj++;
+            }
+        } else {
+            tempstr[jj] = scriptStart[ii];
+            jj++;
+        }
+    }
+    tempstr[jj] =0;
+//    vpi_printf("AAAAAAAA%sBBBBBB\n",tempstr);
+    PyRun_SimpleString(tempstr);
     globals = PyDict_New();
     if (!globals) return;
     PyDict_SetItemString(globals, "__builtins__", PyEval_GetBuiltins());
