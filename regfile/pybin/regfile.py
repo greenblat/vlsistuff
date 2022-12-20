@@ -708,7 +708,8 @@ MODULE MODULE (.pclk(pclk),.presetn(presetn)
 
 
 
-HEADER = '''module MODULE (
+HEADER = '''`timescale 1ns / 1ps
+module MODULE (
     input pclk,input presetn,input pwrite, input pread, input penable
     ,input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata, output [BUSWID-1:0] prdata_wire
     ,input [WSTRB-1:0] pstrb
@@ -1296,6 +1297,7 @@ def runXml():
     regfile_c.produce_c_headers(Module,Db)
 
 APBHead = '''
+`timescale 1ns / 1ps
 module MODULE (input pclk, input presetn,
     input psel, input penable, input pwrite, input [WSTRB-1:0] pstrb, input [ADDWID-1:0] paddr, input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata,output [BUSWID-1:0] prdata_wire
     ,output pready, output pslverr

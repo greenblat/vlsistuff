@@ -11,7 +11,7 @@ import logs
 UnitMatrix = [1,0,0,0,1,0]
 
 RED_COLOR=[255,0,0]
-INSTANCE_COLOR=[150,150,0]
+INSTANCE_COLOR=[100,100,0]
 defaultPicTextSize = 0.15
 
 def get_context(Param,Default=None):
@@ -46,9 +46,9 @@ def init():
     set_context('pics_lib',['.'])
     set_context('lineWidth',1)
     set_context('state','idle')
-    set_context('wire_color',[0,255,0])
-    set_context('pic_color',[255,255,0])
-    set_context('param_color',[0,150,150])
+    set_context('wire_color',[0,100,0])
+    set_context('pic_color',[150,150,0])
+    set_context('param_color',[0,100,100])
     set_context('geom_color',[0,0,255])
     set_context('instance_color',INSTANCE_COLOR)
     set_context('root',False)

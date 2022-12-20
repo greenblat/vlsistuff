@@ -1203,11 +1203,11 @@ pic_text qn xy=2.3,1.1
 end
 
 picture dffs
-pic_pin sn i xy=1.3,0.0
-pic_pin ck i xy=0.0,2.6
+pic_pin sn i xy=1.5,0.0
+pic_pin ck i xy=0.0,2.5
 pic_pin d i xy=0.0,1.5
-pic_pin q o xy=4.0,2.7
-pic_pin qn o xy=3.9,1.3
+pic_pin q o xy=4.0,2.5
+pic_pin qn o xy=4.0,1.5
 pic_aline list=0.41,0.72,1.24,0.72
 pic_aline list=1.24,0.72,3.11,0.72
 pic_aline list=3.11,0.72,3.11,1.22

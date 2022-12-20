@@ -159,9 +159,9 @@ def log_correct(Text,Which=0,Print=True):
         print('@%d: %d vs %d (err=%d) ___CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text))
     Flogs[Which].write('@%d: %d vs %d (err=%d) ___CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
 
-def log_ensure(Cond,Text,Which=0):
+def log_ensure(Cond,Text,Which=0,print_correct=True):
     if Cond:
-        log_correct(Text,Which)
+        log_correct(Text,Which,print_correct)
     else:
         log_wrong(Text,Which)
     
