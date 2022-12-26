@@ -25,7 +25,7 @@ import importlib
 #checking on agent that is not busy (finished all jobs)
 #agents:   apb waitNotBusy
 
-
+#NEW! assert tb.dut.regx==0x50   [OPTIONAL_TEXT]  : will to log_ensure of the expression.
 #
 
 # def initialSequence(Fname):
@@ -337,7 +337,7 @@ class sequenceClass:
             if logs.get_cycles() == When:
                 Line = self.Timed[When]
                 logs.log_info('TIMED USE %s %s' % (When,Line))
-                self.seq_line(Line)
+                self.seq_line(Line,0)
                 
             
 
@@ -377,9 +377,9 @@ class sequenceClass:
         if '//' in Line: Line = Line[:Line.index('//')]
         logs.log_write('sequence: %s'%Line,'seq')
 #        print(lnum,Line)
-        self.seq_line(Line)
+        self.seq_line(Line,lnum)
 
-    def seq_line(self,Line):
+    def seq_line(self,Line,lnum):
         wrds = Line.split()
         if len(wrds)==0: return True
         if wrds[0] == 'seed':
@@ -476,6 +476,15 @@ class sequenceClass:
                 Val = self.evalExpr(BB)
                 self.force(wrds[Ind],Val)
                 Ind += 2
+            return True
+        elif (wrds[0] == 'assert'):
+            if (len(wrds)==3):
+                Marker = wrds[2]
+            else:
+                Marker = 'lnum #%d' % lnum
+            BB = makeExpr(wrds[1])
+            Val = self.evalExpr(BB)
+            logs.log_ensure(Val,'ASSERT '+Marker)
             return True
         elif (wrds[0] == 'waitUntil'):
             if self.Guardian>0:
