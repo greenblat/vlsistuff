@@ -26,6 +26,7 @@ class axiMonitorClass:
         self.RespADDR = 0
         self.verbose = True
         self.checkRam = False
+        self.verify_read_mem = True
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig,self.Logs)
@@ -152,8 +153,9 @@ class axiMonitorClass:
                 logs.log_error('RVALID and ARQUEUE is empty data=%x rid=%x' % (Data,Rid))
                 return
             (Addr,Len,Size,Burst,Id) = self.ARQUEUE[0]
-            Valids,Exp = self.load(self.RADDR[0])
-            logs.log_ensure(((Exp & Valids)==(Data & Valids)) and (Data>=0),'READ vlds=%x rresp=%x ad=%x exp=%x act=%x last=%d rid %d<>%d' % (Valids,Resp,self.RADDR[0],Exp,Data,Last,Rid,Id),self.Logs)
+            if self.verify_read_mem:
+                Valids,Exp = self.load(self.RADDR[0])
+                logs.log_ensure(((Exp & Valids)==(Data & Valids)) and (Data>=0),'READ vlds=%x rresp=%x ad=%x exp=%x act=%x last=%d rid %d<>%d' % (Valids,Resp,self.RADDR[0],Exp,Data,Last,Rid,Id),self.Logs)
             self.RADDR.pop(0)
             if Last == 1:
                 self.ARQUEUE.pop(0)
