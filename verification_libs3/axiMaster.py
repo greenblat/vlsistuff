@@ -198,13 +198,31 @@ class axiMasterClass:
             self.Rid = Rid
         else: 
             self.Rid = 1
-        self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
 
-        self.AREADS.append((Len,Address,self.Rid,0))
-        self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
-        Mask = (1<<len(self.peekbin('arid')))-1
-        self.Rid = Mask & (1+self.Rid)
-        self.log_info_print('%s makeRead %x %x %x %x' % (self.Name, Burst,Len,Address,Size),'dbg')
+        num_full_writes, last_write_length = divmod(Len, 256)
+        self.log_info_print('%s makeRead %x %x %x %x' % (self.Name, Burst, Len, Address, Size), 'dbg')
+        if num_full_writes > 0:
+            logs.log_info(
+                f"Read request is greater than 256, splitting into {num_full_writes + 1 * (last_write_length > 0)} AXI transactions")
+            for i in range(num_full_writes):
+                Len = 256
+                self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
+                self.AREADS.append((Len,Address,self.Rid,0))
+                self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
+                Mask = (1<<len(self.peekbin('arid')))-1
+                self.Rid = Mask & (1+self.Rid)
+                Address = Address + int(256 * (1<<Size))
+
+        if last_write_length > 0:
+            for i in range(num_full_writes):
+                Len = last_write_length
+                self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
+                self.AREADS.append((Len,Address,self.Rid,0))
+                self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
+                Mask = (1<<len(self.peekbin('arid')))-1
+                self.Rid = Mask & (1+self.Rid)
+
+
 #        traceback.print_stack()
 
     def makeWriteIllegal(self,Burst,Len,actualLen,Address,Size=4,Wdatas=[]):
@@ -218,14 +236,34 @@ class axiMasterClass:
         if Len==0: 
             logs.log_error('axiMaster %s makeWrite got zero length request at addr=%x ' % (self.Name,Address))
             return
+
         self.log_info_print('%s makeWrite %x %x %x %x %s' % (self.Name, Burst,Len,Address,Size,list(map(hex,Wdatas))),'dbg')
-        self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
-        self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
-        self.Bscore.append((self.Rid,Address))
-        if Len<=0:
-            logs.log_warning('axiMaster %s got len=%d for write'%(self.Name,Len))
-        self.writeDatasLoop(Len,Size,Address,Wdatas)
-        self.log_debug_print('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)),Which='dbg')
+        num_full_writes, last_write_length = divmod(Len, 256)
+        if num_full_writes > 0:
+            logs.log_info(f"Write request is greater than 256, splitting into {num_full_writes + 1*(last_write_length > 0)} AXI transactions")
+        for i in range(num_full_writes):
+            Len = 256
+            self.Queue.append(('aw','force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
+            self.Queue.append(('aw','force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
+            self.Bscore.append((self.Rid,Address))
+            if Len<=0:
+                logs.log_warning('axiMaster %s got len=%d for write'%(self.Name,Len))
+            self.writeDatasLoop(Len,Size,Address,Wdatas)
+            self.log_debug_print('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)),Which='dbg')
+            Address = Address + int(256 * (1 << Size))
+
+        if last_write_length != 0:
+            self.Queue.append(('aw', 'force awvalid=1 awburst=%s awlen=%s awaddr=%s awsize=%s awid=%s' % (
+            Burst, last_write_length - 1, Address, Size, self.Rid)))
+            self.Queue.append(('aw', 'force awvalid=0 awburst=0 awlen=0 awaddr=0 awsize=0 awid=0'))
+            self.Bscore.append((self.Rid, Address))
+            if last_write_length <= 0:
+                logs.log_warning('axiMaster %s got len=%d for write' % (self.Name, Len))
+            self.writeDatasLoop(last_write_length, Size, Address, Wdatas)
+            self.log_debug_print('makeWrite %s >>>>> %x size=%s qu=%d' % (self.Name, Address, Size, len(self.Queue)),
+                                 Which='dbg')
+
+
 
     def writeDatasLoop(self,Len,Size,Address,Wdatas):
         for ii in range(Len):
@@ -338,6 +376,7 @@ class axiMasterClass:
         if self.AREADS == []:
             logs.log_error('READ ACTION %s and no AREADS' % (self.Name))
             return
+
         Len,Addr,Rid,Pos = self.AREADS[0]
         self.log_info_print('axi Master %s READ len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Len,Addr,Addr+8*Pos,Rid,rid,rlast,rdatax,rresp,self.AREADS))
         self.AREADS[0] = (Len,Addr,Rid,Pos+1)
