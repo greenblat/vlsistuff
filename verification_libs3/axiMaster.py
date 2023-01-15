@@ -191,6 +191,7 @@ class axiMasterClass:
         if self.awQueue!=[]: return True
         if self.wQueue!=[]: return True
         if self.Bscore!=[]: return True
+        if self.AREADS!=[]: return True
         return False
 
     def makeRead(self,Burst,Len,Address,Size=4,Rid='none'):
@@ -214,13 +215,12 @@ class axiMasterClass:
                 Address = Address + int(256 * (1<<Size))
 
         if last_write_length > 0:
-            for i in range(num_full_writes):
-                Len = last_write_length
-                self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
-                self.AREADS.append((Len,Address,self.Rid,0))
-                self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
-                Mask = (1<<len(self.peekbin('arid')))-1
-                self.Rid = Mask & (1+self.Rid)
+            Len = last_write_length
+            self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
+            self.AREADS.append((Len,Address,self.Rid,0))
+            self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
+            Mask = (1<<len(self.peekbin('arid')))-1
+            self.Rid = Mask & (1+self.Rid)
 
 
 #        traceback.print_stack()
