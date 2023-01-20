@@ -1501,6 +1501,17 @@ def use_keystroke(Uni,Ord,XY):
             print('type another Q to exit')
         else:
             sys.exit()
+    elif Uni == ">":
+        if Glbs.adding_text_queue != []:
+            NewType = Glbs.adding_text_queue.pop(0)
+            (Who, Inst) = select_object((X, Y))
+            if Who == "instance":
+                Glbs.details[Root].instances[Inst].Type = NewType
+                Glbs.details[Root].touched(True)
+                Glbs.undoValid = True
+
+
+
     elif (Uni in ['r','R','f','F']):
         (Who,Inst)= select_object((X,Y))
         if (Who):

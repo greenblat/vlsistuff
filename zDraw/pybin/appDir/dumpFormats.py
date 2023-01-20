@@ -466,6 +466,12 @@ class connectivityClass:
                 II = self.Conns[Inst]['n']
                 RR = get_size(self.Params[Inst])
                 File.write('c%s %s %s %s\n'%(Name,II,OO,RR))
+            elif Obj.Type=='coil':
+                OO = self.Conns[Inst]['p']
+                II = self.Conns[Inst]['n']
+                RR = get_size(self.Params[Inst])
+                File.write('l%s %s %s %s\n'%(Name,II,OO,RR))
+
 
             else:
                 File.write('x%s'%(Name))
@@ -626,6 +632,7 @@ def complexWidthAndLenght(Params):
 
 def widthAndLenght(Params):
     Diff = 5.0e-7
+    print('XXXXX',Params)
     for Prm,Val in Params:
         if Prm=='size':
             if 'param' in Val:
@@ -647,6 +654,8 @@ def widthAndLenght(Params):
                 PD = 2*(float(W)+float(L))
                 PS = PD
                 return 'W=%s L=%s AS=%.2e AD=%.2e PD=%.2e PS=%.2e'%(W,L,AD,AS,PD,PS)
+            else:
+                return 'W=%s L=Ldiff' % Val
             
     return 'W=1 L=1'
 

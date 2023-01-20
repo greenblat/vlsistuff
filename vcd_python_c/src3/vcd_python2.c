@@ -77,6 +77,9 @@ def negedge():\n\
     cycles += 1\n\
 \n\
 veri.sensitive(CLK,'0',\"negedge()\")\n\
+# -> when CLK path goes down (or 1 for up) :: veri.sensitive(CLK,'0','negedge()')\n\
+# -> start time. period  :: veri.sensitive('100,'10','negedge()')\n\
+# -> on every time change :: veri.sensitive('always','0','negedge()')\n\
 \n\
 class monitorAxiClass:\n\
     def __init__(self,Path,Monitors):\n\
@@ -276,6 +279,7 @@ float startTime = -1;
 float deltaTime = -1;
 float nextTriggerTime = -1.0;
 char functionTime[1000];
+int AlwaysMode = 0;
 
 
 int psig=1;
@@ -526,6 +530,11 @@ void pushtok(char *s,int ind) {
     if ((ind==1)&&(s[0]=='#')) {
         run_time=atof(&(s[1]));
         LASTCHANGE++;
+        if (AlwaysMode) {
+            PyRun_SimpleString(functionTime);
+            state=Values;
+            return;
+        }    
         if ((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)) {
             nextTriggerTime += deltaTime; 
             PyRun_SimpleString(functionTime);
@@ -1022,6 +1031,11 @@ veri_sensitive(PyObject *self,PyObject *args) {
     if (!PyArg_ParseTuple(args, "sss",&pathstring,&val,&function))
         return NULL;
 
+    if (strcmp(pathstring,"always")==0) {
+        strcpy(functionTime,function);
+        AlwaysMode = 1;
+        return Py_BuildValue("s", "always");
+    }
     if ((pathstring[0]<='9')&&(pathstring[0]>='0')) {
         startTime = atoi(pathstring);
         nextTriggerTime = atof(pathstring);

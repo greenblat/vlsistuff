@@ -52,8 +52,10 @@ def use_line2(line):
             Cell = cell_line(line)
             open_cell(Cell,line)
             Opens=1
+            Header.append(' library (tcbn28hpcplusbwp35p140tt1v25c) {\n')
         elif ok_line(line):
-            Header.append(line)
+            pass
+            # Header.append(line)
     elif (state1=='incell'):
         X = count_char(line,'{')
         Y = count_char(line,'}')
@@ -98,7 +100,7 @@ def close_cell(line):
     
 def has_bad_vibes(line):
     wrds = line.split()
-    for Pattern in ['pg_pin','ccsn_first_stage','output_voltage_fall','propagated_noise_high','propagated_noise_low','dc_current','ccsn_last_stage','leakage_power','internal_power','output_current_fall','output_current_rise','fall_power','rise_power','receiver_capacitance1_fall','receiver_capacitance1_rise','receiver_capacitance2_rise','receiver_capacitance2_fall','cell_fall','cell_rise','fall_transition','rise_transition','operating_conditions','revision']:
+    for Pattern in ['driver_waveform_fall','pg_pin','ccsn_first_stage','output_voltage_fall','propagated_noise_high','propagated_noise_low','dc_current','ccsn_last_stage','leakage_power','internal_power','output_current_fall','output_current_rise','fall_power','rise_power','receiver_capacitance1_fall','receiver_capacitance1_rise','receiver_capacitance2_rise','receiver_capacitance2_fall','cell_fall','cell_rise','fall_transition','rise_transition','operating_conditions','revision']:
         if Pattern in wrds:
             return True
     return False

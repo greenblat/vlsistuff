@@ -66,14 +66,19 @@ def get_cycles():
     global noCycles,Cycles
     if Cycles>0:
         return Cycles
+    if not veri: return 0
     if noCycles:
         if veri: return veri.stime()
+    if not veri.exists('%scycles'%TB):
+        noCycles=True
+        log_info('NO CYCLES')
         return 0
-    else:
-        Now =  peek('%scycles'%TB)
-        if (Now<0) and ((not veri) or (veri.stime()>10)): 
-            noCycles=True
-            log_info('NO CYCLES')
+
+
+    Now =  peek('%scycles'%TB)
+    if (Now<0) and ((not veri) or (veri.stime()>10)): 
+        noCycles=True
+        log_info('NO CYCLES')
     if (finishCycles>0)and(finishCycles<=Now):
         if veri: veri.finish()
         sys.exit()
@@ -649,6 +654,16 @@ def fixedp(Int,Shift):
     X = 1<<Shift
     Res = 1.0 * Int /X
     return Res
+
+def string2bin(Str):
+    Res = ''
+    for Chr in Str:
+        Ord = ord(Chr)
+        Bchr = binx(Ord,8)
+        Res += Bchr
+    return Res
+
+
 
 def bin2ascii(Bin):
     return bin2str(Bin)

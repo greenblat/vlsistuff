@@ -163,7 +163,7 @@ class ahbliteMaster(logs.driverClass):
         if self.waiting>0:
             self.waiting -= 1
             return
-        hreadyout = self.tr_peek('hreadyout')
+        hready = self.tr_peek('hready')
         if (self.seq==[]):
             self.tr_force('hsel',0)
             self.tr_force('htrans',0)
@@ -179,7 +179,7 @@ class ahbliteMaster(logs.driverClass):
                 elif Sig=='wait':
                     self.waiting=int(Val)
                 elif Sig=='catch':
-                    if hreadyout==1:
+                    if hready==1:
                         X = self.tr_peek(Val[0])
                         if Val[2]!= 'none':
                             if type(Val[2]) == str:
@@ -282,15 +282,15 @@ class ahbliteMaster(logs.driverClass):
 
 
             if What[0]=='write':
-                self.seq.append([('popif',('hreadyout',1))])
-                self.seq.append([('haddr',What[1]),('hwdata',0),('hwrite',1),('htrans',2),('hsize',self.HSIZE),('hsel',1),('popif',('hreadyout',1))])
+                self.seq.append([('popif',('hready',1))])
+                self.seq.append([('haddr',What[1]),('hwdata',0),('hwrite',1),('htrans',2),('hsize',self.HSIZE),('hsel',1),('popif',('hready',1))])
                 self.seq.append([('haddr',0),('hwdata',What[2]),('hwrite',0),('htrans',0),('hsize',0),('hsel',0)])
                 self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('hsel',0)])
                 return
 
             if What[0]=='read':
-                self.seq.append([('popif',('hreadyout',1))])
-                self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hsize',self.HSIZE),('popif',('hreadyout',1))])
+                self.seq.append([('popif',('hready',1))])
+                self.seq.append([('haddr',What[1]),('hwrite',0),('htrans',2),('hsel',1),('hsize',self.HSIZE),('popif',('hready',1))])
                 self.seq.append([('haddr',0),('hwrite',0),('htrans',0),('catch',('hrdata',What[1],What[2])),('hsel',self.HSEL)])
                 return
 

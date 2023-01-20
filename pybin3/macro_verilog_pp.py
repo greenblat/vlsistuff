@@ -341,6 +341,7 @@ def work(line):
 def include_file(Fname):
     if Fname[0]=='`': return ['`include "%s"\n'%Fname]
     Fname = Fname.replace('"','')
+    print("INCLUDDE",Fname,os.path.exists(Fname))
     if os.path.exists(Fname):
         File = open(Fname)
         lines = readfile(File)
