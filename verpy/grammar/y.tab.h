@@ -1,14 +1,14 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
-/* Skeleton interface for Bison's Yacc-like parsers in C
+/* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+   Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,9 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -33,121 +31,143 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Tokens.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
+
+#ifndef YY_YY_Y_TAB_H_INCLUDED
+# define YY_YY_Y_TAB_H_INCLUDED
+/* Debug traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int yydebug;
+#endif
+
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     module = 258,
-     number = 259,
-     token = 260,
-     endmodule = 261,
-     assign = 262,
-     input = 263,
-     output = 264,
-     inout = 265,
-     reg = 266,
-     wire = 267,
-     logic = 268,
-     tri0 = 269,
-     tri1 = 270,
-     signed = 271,
-     event = 272,
-     bin = 273,
-     hex = 274,
-     dig = 275,
-     integer = 276,
-     real = 277,
-     wreal = 278,
-     ubin = 279,
-     uhex = 280,
-     udig = 281,
-     domino = 282,
-     and_and = 283,
-     or_or = 284,
-     eq3 = 285,
-     eq_eq = 286,
-     not_eq = 287,
-     gr_eq = 288,
-     sm_eq = 289,
-     always = 290,
-     begin = 291,
-     end = 292,
-     if = 293,
-     else = 294,
-     posedge = 295,
-     negedge = 296,
-     or = 297,
-     wait = 298,
-     emit = 299,
-     string = 300,
-     defparam = 301,
-     parameter = 302,
-     localparam = 303,
-     case = 304,
-     casez = 305,
-     casex = 306,
-     endcase = 307,
-     default = 308,
-     initial = 309,
-     forever = 310,
-     function = 311,
-     endfunction = 312,
-     task = 313,
-     endtask = 314,
-     for = 315,
-     while = 316,
-     backtick_define = 317,
-     backtick_include = 318,
-     backtick_timescale = 319,
-     backtick_undef = 320,
-     define = 321,
-     strong1 = 322,
-     strong0 = 323,
-     pull1 = 324,
-     pull0 = 325,
-     weak1 = 326,
-     weak0 = 327,
-     highz1 = 328,
-     highz0 = 329,
-     fork = 330,
-     join = 331,
-     disable = 332,
-     pragma1 = 333,
-     pragma2 = 334,
-     plus_range = 335,
-     minus_range = 336,
-     floating = 337,
-     power = 338,
-     star = 339,
-     generate = 340,
-     endgenerate = 341,
-     genvar = 342,
-     force = 343,
-     release = 344,
-     xnor = 345,
-     nand = 346,
-     nor = 347,
-     repeat = 348,
-     supply0 = 349,
-     supply1 = 350,
-     newver = 351,
-     return = 352,
-     always_comb = 353,
-     enum = 354,
-     typedef = 355,
-     arith_shift_right = 356,
-     SignedLeft = 357,
-     shift_right = 358,
-     shift_left = 359,
-     Veryequal = 360,
-     noteqeq = 361,
-     StarStar = 362,
-     UNARY_PREC = 363
-   };
+  enum yytokentype
+  {
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    module = 258,                  /* module  */
+    number = 259,                  /* number  */
+    token = 260,                   /* token  */
+    endmodule = 261,               /* endmodule  */
+    assign = 262,                  /* assign  */
+    input = 263,                   /* input  */
+    output = 264,                  /* output  */
+    inout = 265,                   /* inout  */
+    reg = 266,                     /* reg  */
+    wire = 267,                    /* wire  */
+    logic = 268,                   /* logic  */
+    tri0 = 269,                    /* tri0  */
+    tri1 = 270,                    /* tri1  */
+    signed = 271,                  /* signed  */
+    event = 272,                   /* event  */
+    bin = 273,                     /* bin  */
+    hex = 274,                     /* hex  */
+    dig = 275,                     /* dig  */
+    integer = 276,                 /* integer  */
+    real = 277,                    /* real  */
+    wreal = 278,                   /* wreal  */
+    ubin = 279,                    /* ubin  */
+    uhex = 280,                    /* uhex  */
+    udig = 281,                    /* udig  */
+    domino = 282,                  /* domino  */
+    and_and = 283,                 /* and_and  */
+    or_or = 284,                   /* or_or  */
+    eq3 = 285,                     /* eq3  */
+    eq_eq = 286,                   /* eq_eq  */
+    not_eq = 287,                  /* not_eq  */
+    gr_eq = 288,                   /* gr_eq  */
+    sm_eq = 289,                   /* sm_eq  */
+    always = 290,                  /* always  */
+    begin = 291,                   /* begin  */
+    end = 292,                     /* end  */
+    if = 293,                      /* if  */
+    else = 294,                    /* else  */
+    posedge = 295,                 /* posedge  */
+    negedge = 296,                 /* negedge  */
+    or = 297,                      /* or  */
+    wait = 298,                    /* wait  */
+    emit = 299,                    /* emit  */
+    string = 300,                  /* string  */
+    defparam = 301,                /* defparam  */
+    parameter = 302,               /* parameter  */
+    localparam = 303,              /* localparam  */
+    case = 304,                    /* case  */
+    casez = 305,                   /* casez  */
+    casex = 306,                   /* casex  */
+    endcase = 307,                 /* endcase  */
+    default = 308,                 /* default  */
+    initial = 309,                 /* initial  */
+    forever = 310,                 /* forever  */
+    function = 311,                /* function  */
+    endfunction = 312,             /* endfunction  */
+    task = 313,                    /* task  */
+    endtask = 314,                 /* endtask  */
+    for = 315,                     /* for  */
+    while = 316,                   /* while  */
+    backtick_define = 317,         /* backtick_define  */
+    backtick_include = 318,        /* backtick_include  */
+    backtick_timescale = 319,      /* backtick_timescale  */
+    backtick_undef = 320,          /* backtick_undef  */
+    define = 321,                  /* define  */
+    strong1 = 322,                 /* strong1  */
+    strong0 = 323,                 /* strong0  */
+    pull1 = 324,                   /* pull1  */
+    pull0 = 325,                   /* pull0  */
+    weak1 = 326,                   /* weak1  */
+    weak0 = 327,                   /* weak0  */
+    highz1 = 328,                  /* highz1  */
+    highz0 = 329,                  /* highz0  */
+    fork = 330,                    /* fork  */
+    join = 331,                    /* join  */
+    disable = 332,                 /* disable  */
+    pragma1 = 333,                 /* pragma1  */
+    pragma2 = 334,                 /* pragma2  */
+    plus_range = 335,              /* plus_range  */
+    minus_range = 336,             /* minus_range  */
+    floating = 337,                /* floating  */
+    power = 338,                   /* power  */
+    star = 339,                    /* star  */
+    generate = 340,                /* generate  */
+    endgenerate = 341,             /* endgenerate  */
+    genvar = 342,                  /* genvar  */
+    force = 343,                   /* force  */
+    release = 344,                 /* release  */
+    xnor = 345,                    /* xnor  */
+    nand = 346,                    /* nand  */
+    nor = 347,                     /* nor  */
+    repeat = 348,                  /* repeat  */
+    supply0 = 349,                 /* supply0  */
+    supply1 = 350,                 /* supply1  */
+    newver = 351,                  /* newver  */
+    return = 352,                  /* return  */
+    always_comb = 353,             /* always_comb  */
+    enum = 354,                    /* enum  */
+    typedef = 355,                 /* typedef  */
+    shift_left = 356,              /* shift_left  */
+    shift_right = 357,             /* shift_right  */
+    SignedLeft = 358,              /* SignedLeft  */
+    arith_shift_right = 359,       /* arith_shift_right  */
+    noteqeq = 360,                 /* noteqeq  */
+    Veryequal = 361,               /* Veryequal  */
+    StarStar = 362,                /* StarStar  */
+    UNARY_PREC = 363               /* UNARY_PREC  */
+  };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define module 258
 #define number 259
 #define token 260
@@ -246,24 +266,27 @@
 #define always_comb 353
 #define enum 354
 #define typedef 355
-#define arith_shift_right 356
-#define SignedLeft 357
-#define shift_right 358
-#define shift_left 359
-#define Veryequal 360
-#define noteqeq 361
+#define shift_left 356
+#define shift_right 357
+#define SignedLeft 358
+#define arith_shift_right 359
+#define noteqeq 360
+#define Veryequal 361
 #define StarStar 362
 #define UNARY_PREC 363
 
-
-
-
+/* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef int YYSTYPE;
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
-# define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
+# define YYSTYPE_IS_DECLARED 1
 #endif
+
 
 extern YYSTYPE yylval;
 
+
+int yyparse (void);
+
+
+#endif /* !YY_YY_Y_TAB_H_INCLUDED  */

@@ -15,7 +15,7 @@ class uartClass(logs.driverClass):
         self.rxState = 'idle'
         self.rxQueue = []
         self.rxWaiting=0
-        self.rxbyte=''
+        self.rxByte=''
         self.force(self.rxd,1)
         self.RxStr = ''
 
@@ -34,6 +34,8 @@ class uartClass(logs.driverClass):
             self.send('\x0a')
         elif Wrds[0]=='baudrate':
             self.baudRate = eval(Wrds[1])
+        elif Wrds[0]=='rx':
+            logs.log_info('UART RX  "%s" '%(self.RxStr))
         else:
             logs.log_error('action by uart is not : %s'%(Str))
 
@@ -76,6 +78,8 @@ class uartClass(logs.driverClass):
     def runRx(self):
         if self.rxWaiting>0:
             self.rxWaiting -= 1
+#            if (self.rxWaiting == 1):
+#                logs.log_info("rxwait %s %s " % (self.rxState,self.rxByte))
             return
         
         if self.rxState=='idle':
@@ -94,17 +98,17 @@ class uartClass(logs.driverClass):
                 return
         elif self.rxState=='bitx':
             Rxd = self.peek(self.txd)
-            self.rxbyte = str(Rxd) + self.rxbyte 
-            if len(self.rxbyte)==8:
+            self.rxByte = str(Rxd) + self.rxByte 
+            if len(self.rxByte)==8:
                 self.rxState = 'stop'
-#                self.rxQueue.append(self.rxbyte)
-                Int = logs.intx(self.rxbyte)
+#                self.rxQueue.append(self.rxByte)
+                Int = logs.intx(self.rxByte)
                 if ((Int>=0)and(Int<256)):
-                    Chr = chr(logs.intx(self.rxbyte))
+                    Chr = chr(logs.intx(self.rxByte))
                 else:
-                    Chr = '(ERR%s)'%self.rxbyte
+                    Chr = '(ERR%s)'%self.rxByte
                 self.RxStr += Chr
-#                logs.log_info('uart rxbyte %s   "%s" '%(self.rxbyte,self.RxStr))
+#                logs.log_info('uart rxByte %s   "%s" '%(self.rxByte,self.RxStr))
                 try:
                     if ord(Chr) <= 10:
                         logs.log_info('UART RX  "%s" '%(self.RxStr[:-1]))
@@ -113,8 +117,8 @@ class uartClass(logs.driverClass):
                     logs.log_info('UART RX ERROR |%s|  "%s" '%(Chr,self.RxStr))
                     self.RxStr = ''
 
-#                veri.force('tb.marker','0b'+self.rxbyte)
-                self.rxbyte=''
+#                veri.force('tb.marker','0b'+self.rxByte)
+                self.rxByte=''
             self.rxWaiting = self.baudRate
         elif self.rxState=='stop':
             Rxd = self.peek(self.txd)

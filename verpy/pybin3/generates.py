@@ -18,6 +18,14 @@ def help_main(Env):
 
     File.close()
 
+def work_module(Mod):
+    Mod.Genvars = {}
+    for Gen in Mod.generates:
+        gen_execute(Gen,Mod)
+    Mod.generates = []
+
+
+
 def evalx(Expr,Mod):
     Gen = mdcl.pr_expr(cleanList(Expr))
     return eval(Gen,Mod.parameters,Mod.Genvars)
@@ -51,6 +59,10 @@ def gen_execute(Gen,Mod):
                 do_assign(Ass,Mod)
     elif Gen[0] == 'instance':
         do_instance(Gen[1:],Mod)
+    elif type(Gen[0]) is list:
+        for Item in Gen:
+            gen_execute(Item,Mod)
+            
     else:
         logs.log_error('GEN EXECUTE got %d %s' % (len(Gen),str(Gen)))
 

@@ -273,7 +273,9 @@ int debug;
 float startTime = -1;
 float deltaTime = -1;
 float nextTriggerTime = -1.0;
+float nextOffsetTime = -1.0;
 char functionTime[1000];
+char functionOffset[1000];
 int AlwaysMode = 0;
 
 
@@ -334,6 +336,11 @@ else:\n\
 char Valex[longestVal];
 
 int armed[SENSITIVES];
+int sensitive_offset[SENSITIVES];
+long sensitives[SENSITIVES];
+char sensitive_value[SENSITIVES];
+long sensitive_command[SENSITIVES];
+int psensitive=0;
 
 
 char option[200],fname1[1000],fname2[1000];
@@ -357,6 +364,7 @@ int main(argc, argv)
 /* update hash table maxsize, if wanted */
     for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].allocated=0; sigs[i].traceable=0; sigs[i].toggles=0; sigs[i].wasZ = 0;} 
     for (i=0;i<SENSITIVES;i++) armed[i]=0;
+    for (i=0;i<SENSITIVES;i++)  sensitive_offset[i]= -1;
     if (argc <= 1) do_help();
     if (argc > 1) {
         for (k = 2; k <= argc; k++) {
@@ -539,6 +547,10 @@ void pushtok(char *s,int ind) {
         if ((nextTriggerTime>=0)&&(run_time>=nextTriggerTime)) {
             nextTriggerTime += deltaTime; 
             PyRun_SimpleString(functionTime);
+         }
+        if ((nextOffsetTime>=0)&&(run_time>=nextOffsetTime)) {
+            PyRun_SimpleString(functionOffset);
+            nextOffsetTime = -1;
          }
         state=Values;
         return;
@@ -733,10 +745,6 @@ int intcode(char *st) {
 
 
 
-long sensitives[SENSITIVES];
-char sensitive_value[SENSITIVES];
-long sensitive_command[SENSITIVES];
-int psensitive=0;
 
 
 #define BIG 1000000
@@ -818,7 +826,11 @@ void armTriggers(int P,char *Val) {
         int BB = (sensitive_value[ii]==Val[0]);
         int Cond = AA && BB;
         if (Cond) {
-            armed[ii]=1;
+            if (sensitive_offset[ii]>0) {
+                nextOffsetTime = sensitive_offset[ii] + run_time;
+            } else {
+                armed[ii]=1;
+            }
         }
     }
 }
@@ -932,13 +944,18 @@ veri_exists(PyObject *self,PyObject *args) {
 
 static PyObject*
 veri_sensitive(PyObject *self,PyObject *args) {
-    char *pathstring,*val,*function;
+    char *pathstring,*val,*function,*offset;
     char Str[10000];
     long handle;
     Str[0]='x';
     Str[1]=0;
-    if (!PyArg_ParseTuple(args, "sss",&pathstring,&val,&function))
-        return NULL;
+    int hasOffset = -1;
+    printf(">>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+//    if (PyArg_ParseTuple(args, "sss",&pathstring,&val,&function))
+//        hasOffset = 1;
+    if (PyArg_ParseTuple(args, "ssss",&pathstring,&val,&function,&offset))
+        hasOffset = 2;
+    if (hasOffset<0) return NULL;
 
     if (strcmp(pathstring,"always")==0) {
         strcpy(functionTime,function);
@@ -951,15 +968,18 @@ veri_sensitive(PyObject *self,PyObject *args) {
         nextTriggerTime = atof(pathstring);
         deltaTime = atof(val);
         strcpy(functionTime,function);
-        printf("install time based triggers start=%f delta=%f\n",nextTriggerTime,deltaTime);
+        printf("install time based ||%s|| triggers start=%f delta=%f\n",Str,nextTriggerTime,deltaTime);
         return Py_BuildValue("s", Str);
     }
 
     long Psig =  qqas(qqai(pathstring));
-    printf("install ptr=%d psig=%lu sensitive %s %s %s\n",psensitive,Psig,pathstring,val,function);
+    printf("install ||%s|| ptr=%d psig=%lu sensitive %s %s %s\n",Str,psensitive,Psig,pathstring,val,function);
     sensitives[psensitive] =Psig; 
     sensitive_command[psensitive] = qqai(function);
     sensitive_value[psensitive] = val[0];
+    if (hasOffset) {
+        sensitive_offset[psensitive] = atof(offset);
+    }
     psensitive++;
 
     if (Psig==99999999) {

@@ -77,6 +77,7 @@ class GlobalsClass:
         self.set_context('useVectorText',1)
         self.set_context('useManhattenWires',1)
         self.set_context('pics_lib',['.'])
+        self.set_context('default_mos_l','0.1u')
         self.useShyParams=True
         self.fontShrink = 0.8
         self.pleaseExit=False

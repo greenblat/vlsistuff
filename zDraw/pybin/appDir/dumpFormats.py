@@ -441,7 +441,7 @@ class connectivityClass:
             if (Obj.Type in ['antenna','vcc','gnd','input','output','node'])or('logo' in Obj.Type):
                 pass
             elif Obj.Type == 'nmos':
-                WL = widthAndLenght(self.Params[Inst])
+                WL = widthAndLength(self.Params[Inst],self.Glbs)
                 II = self.Conns[Inst]['i']
                 OO = self.Conns[Inst]['o']
                 GG = self.Conns[Inst]['g']
@@ -449,7 +449,7 @@ class connectivityClass:
                 Bulk = getBulk(self.Params[Inst],'gnd')
                 File.write('m%s %s %s %s %s %s %s\n'%(Name,II,GG,OO,Bulk,Actual,WL))
             elif Obj.Type=='pmos':
-                WL = widthAndLenght(self.Params[Inst])
+                WL = widthAndLength(self.Params[Inst],self.Glbs)
                 II = self.Conns[Inst]['i']
                 OO = self.Conns[Inst]['o']
                 GG = self.Conns[Inst]['g']
@@ -485,7 +485,7 @@ class connectivityClass:
                         File.write(' %s'%(Pins[Pin]))
                 File.write(' %s'%(Obj.Type))
                 if Inst in self.Params:
-                    WL = complexWidthAndLenght(self.Params[Inst])
+                    WL = complexWidthAndLength(self.Params[Inst])
                     File.write(' %s\n'%WL)
                 else:
                     File.write('\n')
@@ -606,7 +606,7 @@ def assembleArgvTypes():
     return Types,Maxes
 
 
-def complexWidthAndLenght(Params):
+def complexWidthAndLength(Params):
     for Prm,Val in Params:
         if Prm=='size':
             res=''
@@ -630,9 +630,8 @@ def complexWidthAndLenght(Params):
             
 
 
-def widthAndLenght(Params):
+def widthAndLength(Params,Glbs):
     Diff = 5.0e-7
-    print('XXXXX',Params)
     for Prm,Val in Params:
         if Prm=='size':
             if 'param' in Val:
@@ -655,7 +654,8 @@ def widthAndLenght(Params):
                 PS = PD
                 return 'W=%s L=%s AS=%.2e AD=%.2e PD=%.2e PS=%.2e'%(W,L,AD,AS,PD,PS)
             else:
-                return 'W=%s L=Ldiff' % Val
+                LL = Glbs.get_context('default_mos_l')
+                return 'W=%s L=%s' % (Val,LL)
             
     return 'W=1 L=1'
 

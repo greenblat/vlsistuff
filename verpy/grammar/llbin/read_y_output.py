@@ -13,7 +13,7 @@ Reduces = {}
 
 def main():
     YaccFname = sys.argv[1]
-    os.system('yacc -dv %s'%YaccFname)
+#    os.system('yacc -dv %s'%YaccFname)
     File = open('y.output')
     work1(File)
     work2()
@@ -38,7 +38,7 @@ def rework_list(State,List):
     if len(List)<2:
         return
 
-    ind=-1
+    ind = -1
     for i in range(len(List)):
         A,B,C = List[i]
         if (A=='reduce')and(B=='$default'):
@@ -71,15 +71,16 @@ def work1(File):
 
 
 def use_line(wrds):
+    print('XXXXX',db.state,wrds)
     if (db.state=='idle'):
         if wrds[0]=='Grammar':
             db.state='rules'
-        elif wrds[0]=='state':
+        elif (len(wrds) == 2) and (wrds[0] in ['state','State']):
             db.state='state'
             db.inState=wrds[1]
             States[wrds[1]]=[]
     elif (db.state=='rules'):
-        if (wrds[0]=='state'):
+        if (len(wrds) == 2) and (wrds[0] in ['state','State']):
             db.state='state'
             db.inState=wrds[1]
             States[wrds[1]]=[]
@@ -102,12 +103,16 @@ def use_line(wrds):
 
 
     elif (db.state=='state'):
-        if (wrds[0]=='state'):
+        if wrds==[]:
+            pass
+        elif (len(wrds) == 2) and (wrds[0] in ['state','State']):
             db.state='state'
             db.inState=wrds[1]
             States[wrds[1]]=[]
         elif is_num(wrds[0]):
             db.rule=wrds[:]
+        elif len(wrds)<2:
+            pass
         elif wrds[1]=='shift,':
             Tok = clean_token(wrds[0])
             State = wrds[-1]
