@@ -939,7 +939,7 @@ veri_force_mem(PyObject *self,PyObject *args) {
         vpi_printf("\nindex %d of memory too bit for  %s for force_mem\n",index,pathstring);
         return Py_BuildValue("s", "x");
     }
-    vpi_printf("forcing mem %s[%s] = %s\n",pathstring,indexstring,vstr);
+    //vpi_printf("forcing mem %s[%s] = %s\n",pathstring,indexstring,vstr);
     handle2 = vpi_handle_by_index(handle, index);
     if ((vstr[0]=='0')&&(vstr[1]=='b')) {
         pvalue.format = vpiBinStrVal; 
