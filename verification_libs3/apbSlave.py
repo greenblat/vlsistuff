@@ -40,7 +40,7 @@ class apbSlave(logs.driverClass):
                 self.RAM[Addr] = Data
                 if self.Uart:
                     self.Uart('ram',Addr,Data)
-                logs.log_info('SLV "%s" RAM %x -> [%x]' % (self.Name,Data,Addr))
+                logs.log_info('SLV "%s" RAM %s -> [%s]' % (self.Name,Data,Addr))
                 Addr += 4
             return
         logs.log_error('action not recogninzed "%s"'%Cmd)
