@@ -2,6 +2,7 @@
 module round_robin #(parameter WID=16) (input clk, input rst_n
     ,input [WID-1:0] requests
     ,output [WID-1:0] grants
+    ,output [AWID-1:0] pos 
 );
 
 localparam AWID = $clog2(WID);
@@ -24,7 +25,7 @@ always @(twice_shifted) begin
     end
 end
     
-wire [AWID-1:0] pos = (outx + shift) & ((1<<AWID)-1);
+assign pos = (outx + shift) & ((1<<AWID)-1);
 assign grants = {32'b0,found}<<pos;
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin

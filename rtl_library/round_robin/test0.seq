@@ -8,5 +8,6 @@ force requests 4
 force requests 0
 force requests 0x1100
 force requests 0
-wait 10
+force requests 0xffff
+wait 30
 finish
