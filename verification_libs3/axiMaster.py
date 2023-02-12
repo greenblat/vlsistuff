@@ -202,7 +202,7 @@ class axiMasterClass:
 
         num_full_writes, last_write_length = divmod(Len, 256)
         self.log_info_print('%s makeRead %x %x %x %x' % (self.Name, Burst, Len, Address, Size), 'dbg')
-        if num_full_writes > 0:
+        if Len > 256:
             logs.log_info(
                 f"Read request is greater than 256, splitting into {num_full_writes + 1 * (last_write_length > 0)} AXI transactions")
             for i in range(num_full_writes):
@@ -239,7 +239,7 @@ class axiMasterClass:
 
         self.log_info_print('%s makeWrite %x %x %x %x %s' % (self.Name, Burst,Len,Address,Size,list(map(hex,Wdatas))),'dbg')
         num_full_writes, last_write_length = divmod(Len, 256)
-        if num_full_writes > 0:
+        if Len > 256:
             logs.log_info(f"Write request is greater than 256, splitting into {num_full_writes + 1*(last_write_length > 0)} AXI transactions")
         for i in range(num_full_writes):
             Len = 256
