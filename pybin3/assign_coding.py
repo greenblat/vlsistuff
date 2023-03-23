@@ -530,6 +530,8 @@ def read_inst_file(File):
                 longline=longline+' '+line
     longline = longline.replace(';',' ; ')
     wrds = longline.split()
+    wrds = gatherQuotes(wrds)
+    for wrd in wrds: print("W",wrd)
     LLL = []
     while (len(wrds)>0):
         if (';' not in wrds):
@@ -539,6 +541,28 @@ def read_inst_file(File):
         wrds = wrds[X+1:]
         LLL = LLL + [OneDef]
     return LLL
+
+def gatherQuotes(wrds):
+    state = 'idle'
+    res = []
+    Wrd = ''
+    for wrd in wrds:
+#        print("XXXX",wrd,state)
+        if state=='idle':
+            if ('"' in wrd)and(wrd[-1] != '"'):
+                state = 'work'
+                Wrd = wrd
+            else:
+                res.append(wrd)
+        elif state=='work':
+            Wrd += ' '+wrd
+            if (wrd[-1] == '"'):
+                res.append(Wrd)
+                Wrd = ''
+                state = 'idle'
+    if len(Wrd)>0:  
+        res.append(Wrd)
+    return res
 
 def catch_error(Text,What):
     print('catch error',Text,What,'  >>>',txtline)

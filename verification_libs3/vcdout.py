@@ -71,7 +71,10 @@ class vcdoutClass:
         self.File.close()
 
     def force(self,Sig,Value):
-        Wid = self.Wids[Sig]
+        if Sig in self.Wids:
+            Wid = self.Wids[Sig]
+        else:
+            Wid = 1
         if Wid==1:
             self.File.write('%s%s\n' % (Value,self.Codes[Sig]))
         else:

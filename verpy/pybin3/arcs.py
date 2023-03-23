@@ -6,6 +6,26 @@ class holder:
         self.Name = "NAME"
 
 hld = holder()
+
+def travelFW(Net,Deep=0,Sofar=[]):
+    if Net in hld.ARCSFW:
+        Tos = hld.ARCSFW[Net]
+        print('FW',Net,Deep,Tos)
+        Sofar.append(Net)
+        for To in Tos:
+            if To not in Sofar:
+                travelFW(To,Deep+1,Sofar)
+
+
+def travelBK(Net,Deep=0,Sofar=[]):
+    if Net in hld.ARCSBK:
+        Tos = hld.ARCSBK[Net]
+        print('BK',Net,Deep,Tos)
+        Sofar.append(Net)
+        for To in Tos:
+            if To not in Sofar:
+                travelBK(To,Deep+1,Sofar)
+
 '''
 
 
@@ -96,6 +116,9 @@ def travelAlw(Alw,Cond,Params):
         if Alw[0]=='list':
             for AA in Alw[1:]:
                 travelAlw(AA,Cond,Params)
+            return
+        if Alw[0]=='for':
+            travelAlw(Alw[4],Cond,Params)
             return
         if Alw[0]=='ifelse':
             More = support_set(Alw[1],False)

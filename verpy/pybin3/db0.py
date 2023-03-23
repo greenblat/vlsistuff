@@ -777,7 +777,7 @@ def get_cases(Item1):
     res = []
     for Item in List:
         if len(Item)==2:
-            if (Item[0]=='Case'):
+            if (Item[0] in ['Case','GenCase']):
                 List2 = DataBase[Item]
                 if len(List2)==3:
                     Cond = get_exprs(List2[0])
@@ -787,6 +787,9 @@ def get_cases(Item1):
                 else:
                     logs.log_err('case %s %s'%(Item,List2))
             elif (Item[0]=='Cases'):
+                more = get_cases(Item)
+                res.extend(more)
+            elif (Item[0]=='GenCases'):
                 more = get_cases(Item)
                 res.extend(more)
             elif (Item[0]=='default'):

@@ -22,12 +22,20 @@ ifdef, ifndef ,else ,endif  : ARE NOT TREATED on purpose! Dont use them!!!
 
 
 def main():
+    global TOP,Reserved
     Fname = sys.argv[1]
     Seed  = eval(sys.argv[2])
-    if len(sys.argv)>3:
-        Prefix = sys.argv[3]
+    TOP  = sys.argv[3]
+    print('TOP is "%s"' % TOP)
+    if len(sys.argv)>4:
+        Prefix = sys.argv[4]
     else:
         Prefix = False
+    Fres = open('reserved')
+    Reserved = Fres.read()
+    Fres.close()
+    Reserved = Reserved.split()
+
     Dir,Cell,Ext = cellName(Fname)
     random.seed(Seed)
     File = open(Fname)
@@ -36,22 +44,34 @@ def main():
     Text3 = removeComments0(Text2)
     Defines,Text4 = extractDefines(Text3)
     Wrds = tokenify(Text4)
-    Module,Inouts,Wires = externals(Wrds,Prefix)
-    revork(Wrds,Module,Inouts,Wires,Seed) 
+    dddd("000000",Wrds)
+    Modules,Inouts,Wires = externals(Wrds,Prefix)
+    dddd("000000",Wrds)
+    revork(Wrds,Modules,Inouts,Wires,Seed) 
+    dddd("111111",Wrds)
     if Dir == '': Dir = '.'
     Ofilename = '%s/%s_fub.%s' % (Dir,Cell,Ext)
     saveWords(Ofilename,Defines,Wrds,Seed)
+    for Key in TRANS:
+        print("%s %s" % (Key,TRANS[Key]))
 
+def dddd(Head,Wrds):
+    WW = Wrds[:]
+    while WW!=[]:
+        Res = 'h%s: ' % Head
+        while (len(Res)<128)and(WW!=[]):
+            Res += ' '+WW.pop(0)
+        print(Res)
 
 TRANS = {}
-def translate(Tok,Module,Inouts,Wires):
-    if Tok == Module: return Module
-    if Tok in Inouts: return Tok
+def translate(Tok,Modules,Inouts,Wires):
+    if Tok in Reserved: return Tok
+#    if Tok in Inouts: return Tok
     if Tok in Keywords: return Tok
     if not token(Tok): return Tok
-    if Tok not in Wires: return Tok
+#    if Tok not in Wires+Modules+Inouts: return Tok
     if Tok in TRANS: return TRANS[Tok]
-    X = random.randint(0xff,0xffff)
+    X = random.randint(0xff,0xffffff)
     Res = 'o%04x'%X
     TRANS[Tok] = Res
     return Res
@@ -116,20 +136,22 @@ def insertSeed(Wrds,Seed):
     
 
 
-Keywords = '''module posedge negedge endmodule if else input output inout reg wire always for begin end assign'''.split()
+Keywords = '''or default case endcase parameter localparam module posedge negedge endmodule if else int integer input output inout reg wire always always_ff always_comb for begin end assign'''.split()
 
 def externals(Wrds,Prefix):
     
     state = 'idle'
     Inouts = []
     Wires = []
+    Modules = []
     for ind,Tok in enumerate(Wrds):
         if Tok == 'module':
             Module = Wrds[ind+1]
+            Modules.append(Module)
         if state=='idle':
             if Tok in ['input','output','inout']:
                 state = 'workio'
-            if Tok in ['wire','reg','logic', 'localparam']:
+            if Tok in ['integer','wire','reg','logic', 'localparam','parameter']:
                 state = 'workwire'
         elif state=='workio':
             if (Tok == ';') or (Tok == '='):
@@ -143,7 +165,7 @@ def externals(Wrds,Prefix):
                     Wires.append(Tok)
                 
     print('obfuscating %d wires' % len(Wires))
-    return Module,Inouts,Wires            
+    return Modules,Inouts,Wires            
     
 Letters = 'qwertyuiopasdfghjklzxcvbnm'+'QWERTYUIOPASDFGHJKLZXCVBNM'+'_' 
 Digits = '0123456789'
@@ -170,7 +192,7 @@ def removeComments0(Text):
 
 
 def tokenify(Text):
-    for Chr in '/~`!|:<>+=-()*&^%#@,;{}[]':
+    for Chr in './~`!|:<>+=-()*&^%#@,;{}[]':
         Text = Text.replace(Chr,' %s '%Chr)
 
     for Duo in ['*  *','!  =','<  =','=  =','<  <','>  >','>  =','&  &','|  |','-  :','+  :','(  *','*  )']:

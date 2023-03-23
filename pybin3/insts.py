@@ -1354,6 +1354,7 @@ def read_inst_file(File):
             longline=longline+' '+line
     longline = longline.replace(';',' ; ')
     wrds = longline.split()
+    wrds = gatherQuotes(wrds)
     LLL = []
     while (len(wrds)>0):
         X = wrds.index(';')
@@ -1427,6 +1428,29 @@ def bin2hex(Bin):
         res =S+res
         if (len(Bin)==0):
             return res
+
+def gatherQuotes(wrds):
+    state = 'idle'
+    res = []
+    Wrd = ''
+    for wrd in wrds:
+#        print("XXXX",wrd,state)
+        if state=='idle':
+            if ('"' in wrd)and(wrd[-1] != '"'):
+                state = 'work'
+                Wrd = wrd 
+            else:
+                res.append(wrd)
+        elif state=='work':
+            Wrd += ' '+wrd
+            if (wrd[-1] == '"'):
+                res.append(Wrd)
+                Wrd = ''
+                state = 'idle'
+    if len(Wrd)>0:  
+        res.append(Wrd)
+    return res 
+
 
 
 

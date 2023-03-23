@@ -45,9 +45,9 @@
 Main : Mains ;
 Mains : Mains MainItem | MainItem  ;
 MainItem : Module | Define ;
-Module : module token Hparams Header Module_stuffs endmodule
+Module : module token Hparams Header Module_stuffs endmodule | module token Header Module_stuffs endmodule ;
 
-Hparams : '#' '(' head_params ')' |  '#' '(' ')' | ;
+Hparams : '#' '(' head_params ')' |  '#' '(' ')' ;
 Header : ';' | '(' Header_list ')' ';' | '(' ')' ';' ;
 Header_list : Header_list ',' Header_item | Header_item ;
 
@@ -222,6 +222,9 @@ GenStatement :
     | Pragma 
     | if '(' Expr ')' GenStatement 
     | if '(' Expr ')' GenStatement else GenStatement 
+    | case '(' Expr ')' GenCases endcase 
+    | case '(' Expr ')' GenCases GenDefault endcase
+    | case '(' Expr ')' GenDefault endcase 
     ;
 
 
@@ -274,7 +277,6 @@ Statement :
     | For_statement
     | Repeat_statement
     | While_statement
-    | Dotted ';'
     | Pragma
     | assign LSH '=' Expr ';'
     | return token ';'
@@ -292,14 +294,17 @@ While_statement : while '(' Expr ')' Statement ;
 Soft_assigns : Soft_assigns ',' Soft_assign | Soft_assign ;
 Soft_assign : LSH '=' Expr ;
 Cases : Cases Case | Case ;
+GenCases : GenCases GenCase | GenCase ;
 Case : Exprs ':' Statement  | Exprs ':' ';' ;
+GenCase : Exprs ':' GenStatement  | Exprs ':' ';' ;
 Default : default ':'  Statement  | default ':' ';' ;
+GenDefault : default ':'  GenStatement  | default ':' ';' ;
 
 Exprs : Exprs ',' Expr | Expr ;
 Statements : Statements Statement | Statement ;
 
 
-LSH : token | token Width | token BusBit Width | token BusBit BusBit | token BusBit | Dotted  |CurlyList ;
+LSH : token | token Width | token BusBit Width | token BusBit BusBit | token BusBit | CurlyList ;
 
 Tokens_list : token ',' Tokens_list | token ;
 
@@ -318,13 +323,6 @@ CurlyItem :
     | shift_left CurlyList 
     ; 
 
-Dotted : 
-      token '.' Dotted 
-    | token '.' token 
-    | token '.' token Width 
-    | token '.' token BusBit
-    | token '.' token '(' Expr ')'
-    ;
 
 Literal : 
       number
@@ -335,7 +333,6 @@ Literal :
 
 Expr :
      token
-    | Dotted
     | number
     | floating
     | string

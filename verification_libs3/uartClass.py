@@ -28,7 +28,17 @@ class uartClass(logs.driverClass):
 
     def action(self,Str):
         Wrds  = Str.split()
-        if Wrds[0]=='tx':
+        if Wrds[0]=='txfile':
+            Fname = Wrds[1]
+            File = open(Fname)
+            Str = File.read()
+            File.close()
+            Words = Str.split()
+            for Wrd in Words:
+                self.send(Wrd)
+            self.send('\x0a')
+                
+        elif Wrds[0]=='tx':
             for Wrd in Wrds[1:]:
                 self.send(Wrd)
             self.send('\x0a')

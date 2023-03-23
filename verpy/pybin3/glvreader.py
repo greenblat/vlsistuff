@@ -192,7 +192,7 @@ def check_curly_bus0(wrds):
 def check_curly_bus(wrds):
     check_curly_bus0(wrds)
     Db.right_assign=Db.Curly[:]
-#    Db.Curly=['curly']
+    Db.Curly=['curly']
 
 def finish_conn_empty(wrds):
     Db.Current.add_conn(Db.Inst,Db.Pin,None)

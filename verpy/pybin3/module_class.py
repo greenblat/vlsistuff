@@ -201,7 +201,7 @@ class module_class:
                 Net = Net[:Net.index('[')]
             if (not myExtras(Net))and(Net not in self.nets)and(Net not in self.parameters)and(Net[0] not in '0123456789')and(Net not in self.localparams)and(Net not in self.genvars):
                 logs.log_err('%s: net %s used before defined (%s)'%(self.Module,Net,Net in self.nets))
-                logs.log_info('defined localparams %s %s '%(list(self.localparams.keys())[:10],list(self.parameters.keys())[:10]))
+                logs.log_err('defined localparams %s %s '%(list(self.localparams.keys())[:10],list(self.parameters.keys())[:10]))
                 traceback.print_stack(None,None,logs.Flogs[0])
 
     def duplicate_inst(self,Inst,Inst2):
@@ -1059,6 +1059,169 @@ class module_class:
             logs.log_error('done know to create code from %s' % (str(Code)))
         
 
+    def explodeBus(self, Net, Pin, Expected=0):
+        if not Net:
+            return []
+        elif type(Net) is str:
+            if Net in self.parameters:
+                return self.explodeBus(self.parameters[Net], Pin, Expected)
+            if Net in self.nets:
+                _, Wid = self.nets[Net]
+                if Wid == 0:
+                    return [(Net, Pin)]
+                elif type(Wid) is tuple:
+                    if len(Wid) == 2:
+                        Low, High = Wid
+                        return self.explodeBus(
+                            ["subbus", Net, Low, High], Pin, Expected
+                        )
+                    if Wid[0] == "double":
+                        Wid0 = Wid[1]
+                        Wid1 = Wid[2]
+                        Res = []
+                        pinind = 0
+                        for KK in range(Wid0[0], Wid0[1]):
+                            for LL in range(Wid1[0], Wid1[1]):
+                                Res.append(
+                                    (
+                                        f"{Net}[{KK}][{LL}]",
+                                        f"{Pin}[{pinind}]",
+                                    )
+                                )
+                                pinind += 1
+                        return Res
+                    if (Wid[0] == "packed") and (len(Wid) == 3):
+                        Wid0 = Wid[1]
+                        Wid1 = Wid[2]
+                        Res = []
+                        pinind = 0
+                        for KK in range(Wid0[0], Wid0[1]):
+                            for LL in range(Wid1[0], Wid1[1]):
+                                Res.append(
+                                    (
+                                        f"{Net}[{KK}][{LL}]",
+                                        f"{Pin}[{pinind}]",
+                                    )
+                                )
+                                pinind += 1
+                        return Res
+                    logs.log_error(
+                        "explodeBus of net {} met strange width {}".format(
+                            Net, str(Wid)
+                        )
+                    )
+
+            return [(Net, Pin)]
+        elif (type(Net) is list) and (Net[0] == "subbit") and (Net[1] in self.nets):
+            _, Wid = self.nets[Net[1]]
+            if (type(Wid) is str) and (Wid[0] in ["packed", "double"]):
+                Wid1 = Wid[2]
+                Res = []
+                pinind = 0
+                for LL in range(Wid1[0], Wid1[1] + 1):
+                    Res.append(
+                        (
+                            f"{Net[1]}[{Net[2]}][{LL}]",
+                            f"{Pin}[{pinind}]",
+                        )
+                    )
+                    pinind += 1
+                return Res
+
+            return [(f"{Net[1]}[{Net[2]}]", Pin)]
+        elif (type(Net) is list) and (Net[0] == "subbit"):
+            return [(f"{Net[1]}[{Net[2]}]", Pin)]
+
+        elif (type(Net) is list) and (Net[0] == "subbus"):
+            Bus = Net[1]
+            if len(Net) == 3:
+                Lo, Hi = Net[2]
+            else:
+                Lo, Hi = Net[2], Net[3]
+
+            if "__builtins__" in self.parameters.keys():
+                self.parameters.pop("__builtins__")
+
+            Hi = deepEval(pr_expr(Hi), self.parameters)
+            Lo = deepEval(pr_expr(Lo), self.parameters)
+            Res = []
+            run = 0
+            Lo = int(Lo)
+            Hi = int(Hi)
+            for ind in range(Lo, Hi + 1):
+                Res.append((f"{Bus}[{ind}]", f"{Pin}[{run}]"))
+                run += 1
+            return Res
+        elif (type(Net) is list) and (Net[0] == "sub_slicebit"):
+            Bus = Net[1]
+            Ind0 = eval(pr_expr(Net[2]), self.parameters)
+            Ind1 = eval(pr_expr(Net[3]), self.parameters)
+            return [(f"{Bus}[{Ind0}][{Ind1}]", Pin)]
+
+        elif (type(Net) is list) and (Net[0] == "curly"):
+            Res = []
+            for Item in Net[1:]:
+                More = self.explodeBus(Item, Pin)
+                for A, _ in More:
+                    Res.append(A)
+            for ind, Item in enumerate(Res):
+                Res[ind] = Item, f"{Pin}[{ind}]"
+            return Res
+        elif (type(Net) is list) and (Net[0] == "hex"):
+            if Net[1] == "":
+                Wid = Expected
+            else:
+                Wid = int(Net[1])
+            Val = int(Net[2], 16)
+            Res = []
+            for ii in range(Wid):
+                Res.append((["bin", 1, (Val >> ii) & 1], f"{Pin}[{ii}]"))
+            return Res
+        else:
+            logs.log_error("explodeBus got %s" % str(Net))
+            return []
+
+def deepEval(Expr, Params_in):
+    if type(Expr) is int:
+        return Expr
+    if (type(Expr) is str) and Expr.isnumeric():
+        return int(Expr)
+
+    Params = Params_in.copy()
+    #    print("deepEval",pr_expr(Expr),Params)
+    Keys = list(Params.keys())
+    for Prm in Keys:
+        Val = Params[Prm]
+        if type(Val) is str:
+            Val = Val.replace('"', "")
+            Val2 = eval(Val, Params, {"math": math})
+            if "__builtins__" in Params.keys():
+                Params.pop("__builtins__")
+            Params[Prm] = Val2
+
+    try:
+        Exp0 = eval(pr_expr(Expr), Params, {"math": math})
+    except:
+        if "__builtins__" in Params.keys():
+            Params.pop("__builtins__")
+        logs.log_error(f"deepEval2 {pr_expr(Expr)} {Params}")
+        return 0
+
+    if type(Exp0) is int:
+        return str(Exp0)
+
+    Exp1 = eval(Exp0, Params, {"math": math})
+    if type(Exp1) is int:
+        return str(Exp1)
+
+    Exp2 = eval(Exp1, Params, {"math": math})
+    if type(Exp2) is int:
+        return Exp2
+
+    Exp3 = eval(Exp2, Params, {"math": math})
+    return Exp3
+
+
 def dump_always(Always,Fout):
     if len(Always)==3:
         
@@ -1586,6 +1749,7 @@ def pexpr(Src):
     return clean_br(pr_expr(Src))
 
 def pr_dly(Dly):
+    if not Dly: return ''
     if len(Dly)==0:
         return ''
     if Dly=='':
@@ -1598,6 +1762,7 @@ def pr_dly(Dly):
 def pr_strength(Strength):
     if Strength=='':
         return ''
+    if not Strength: return ''
     A,B = Strength
     return str('(%s,%s)'%(A,B))
 

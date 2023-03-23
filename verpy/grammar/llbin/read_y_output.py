@@ -13,7 +13,8 @@ Reduces = {}
 
 def main():
     YaccFname = sys.argv[1]
-#    os.system('yacc -dv %s'%YaccFname)
+    os.system('yacc -dv %s '%YaccFname)
+#    os.system('yacc -dv %s -Wcounterexamples'%YaccFname)
     File = open('y.output')
     work1(File)
     work2()
@@ -71,7 +72,6 @@ def work1(File):
 
 
 def use_line(wrds):
-    print('XXXXX',db.state,wrds)
     if (db.state=='idle'):
         if wrds[0]=='Grammar':
             db.state='rules'

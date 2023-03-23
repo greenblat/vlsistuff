@@ -30,6 +30,9 @@ def main():
         elif (len(wrds)>=4) and (wrds[0] == 'wire') and (wrds[1] == '[63:0]') and (wrds[2] == 'sign_version'):
             Signs[Module] = ind,wrds[4][4:]
             Lines.pop(ind)
+        elif (len(wrds)>=3) and (wrds[0] == 'assign') and (wrds[1] == 'sign_version'):
+            Signs[Module] = ind,wrds[3][4:]
+            Lines.pop(ind)
         ind += 1
     Signature = 0            
     sign_version = 'wire [63:0] '
@@ -48,11 +51,8 @@ def main():
                 _,Was = Signs[Module]
                 Int = int(Was,16)
                 Sign = Int>>32
-                if Sign != Signature:
-                    New = "%s sign_version = 64'h%08x%s ;\nendmodule\n" % (sign_version,Signature,HourDate)
-                    Lines[ind] = New
-                    
-
+                New = "%s sign_version = 64'h%08x%s ;\nendmodule\n" % (sign_version,Signature,HourDate)
+                Lines[ind] = New
             else:
                 New = "%s sign_version = 64'h%08x%s ;\nendmodule\n" % (sign_version,Signature,HourDate)
                 Lines[ind] = New

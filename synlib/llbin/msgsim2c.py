@@ -619,12 +619,26 @@ def cell_dump_description(self,Fout,pythonConnection):
             
     if self.ff:
         Fout.write('Desc.set_job("flipflop")\n')
+        Res = ''
+        for A,B  in self.ff[1]:
+            Item = ',"%s": "%s"' % (A,B)
+            Res += Item
+        Fout.write('Desc.function = { "regs":"%s %s" %s }\n' % (self.ff[0][0],self.ff[0][1],Res))
     if self.latch:
         Fout.write('Desc.set_job("latch")\n')
+        Res = ''
+        print('ASSSSS',self.latch[1])
+        for A,B  in self.latch[1]:
+            print("AAAAA",A,B)
+            Item = ',"%s": "%s"' % (A,B)
+            Res += Item
+        Fout.write('Desc.function = { "regs":"%s %s" %s }\n' % (self.latch[0][0],self.latch[0][1],Res))
     if self.statetable:
         Fout.write('Desc.set_job("statetable")\n')
+        Fout.write('%s %s\n' % ("#",self.statetable))
     if self.memory:
         Fout.write('Desc.set_job("memory")\n')
+        Fout.write('%s %s\n' % ("#",self.memory))
     if pythonConnection:
         Fout.write('Desc.set_job("python")\n')
 

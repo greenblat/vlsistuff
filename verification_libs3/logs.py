@@ -14,6 +14,7 @@ PYMONLOG = 'pymon.log'
 if 'PYMONLOG' in os.environ:
     PYMONLOG = os.environ['PYMONLOG']
 
+notTalking = True
 def onFinish(): return
 
 
@@ -124,6 +125,15 @@ def log_fatal(Text,Which=0):
         finishReason('FATAL! %s'%Text,Errors+1,Wrongs,Corrects)
     sys.exit()
 
+def talk(Eng,Hebrew = '',Arabic = ''):
+    if notTalking: return
+    if Eng != "":
+        os.system("say -v  Samantha   %s" % Eng)
+    if Hebrew!="":
+        os.system("say -v  Carmit   %s" % Hebrew)
+    if Arabic!="":
+        os.system("say -v  Majed   %s" % Arabic)
+
 def log_error(Text,Which=0,Tb=True,Pstack=False):
     log_err(Text,Which,Tb,Pstack)
 def log_err(Text,Which=0,Tb=True,Pstack=False):
@@ -145,6 +155,7 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
     if (Errors>MAXERRORS):
         log_info('max errors reached (%d). bailing out. (MAXERRORS==%d)'%(Errors,MAXERRORS),Which)
         finish('max errors reached')
+        talk('Hei Ilia, maximal number of errors reached ( %s )' % (Errors))
         return
 
     if (Text in printed_already):
@@ -186,6 +197,7 @@ def log_wrong(Text,Which=0):
     if (printWrongTrace):
         traceback.print_stack(file=Flogs[Which])
     if Wrongs >= MAXWRONGS:
+        talk("",'יותר מדי שגיאות')
         log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS),Which)
         finish('max wrongs reached')
 

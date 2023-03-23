@@ -359,6 +359,10 @@ class sequenceClass:
                         self.agents[self.waitNotBusy].busy()
                         self.agentsFinish()
                         logs.finish('Guardian expired %s at line %s'%(self.waitNotBusy,Lnum))
+                        logs.talk('simulation finished on guardian of %s line number %s' % (self.waitNotBusy,Lnum))
+#                        os.system('say  -v Carmit שלום איליה שים לב' )
+#                        os.system('say -v Majed انتهت المحاكاة' )
+#                        os.system('say  -v Samantha simulation finished on guardian of %s line number %s' % (self.waitNotBusy,Lnum))
                         logs.closeLogs()
                         veri.finish()
                         sys.exit()
@@ -415,6 +419,20 @@ class sequenceClass:
         if wrds[0] == 'finish':
             logs.log_info('finishing on sequence')
             self.agentsFinish()
+            logs.talk("",'שלום איליה שים לב' )
+            if (logs.Wrongs>0) or (logs.Errors>0):
+                HH = HEB2.replace('1@',str(logs.Wrongs))
+                HH = HH.replace('2@',str(logs.Errors))
+                HH = HH.replace('@2',str(logs.Errors))
+                HH = HH.replace('@1',str(logs.Wrongs))
+                logs.talk(HH)
+            elif (logs.Wrongs==0) or (logs.Errors==0):
+                if (logs.Corrects == 0):
+                    logs.talk("",HEB0)
+                else:
+                    logs.talk(HEB1.replace('@',str(logs.Corrects)))
+#            os.system('say -v Majed انتهت المحاكاة' )
+            logs.talk('Simulation finished on sequence! we have %s corrects, %s wrongs and %s errors' % (logs.Corrects,logs.Wrongs,logs.Errors))
             logs.finish('sequence %s seed=%d '%(self.testFileName,self.Seed))
             sys.exit()
         if (wrds[0] == 'marker'):
@@ -494,6 +512,7 @@ class sequenceClass:
                     logs.log_error('Guardian expired at line %s'%(Lnum))
                     self.agentsFinish()
                     logs.finish('Guardian expired %s  at line %s'%(self.testFileName,Lnum))
+                    logs.talk('Hei Ilia  simulation finished on guardian!')
                     veri.finish()
                     sys.exit()
             if (len(wrds)==3)and(self.Guardian==0):
@@ -560,7 +579,7 @@ class sequenceClass:
         elif (wrds[0] == 'check'):
             BB = makeExpr(wrds[1])
             Val = self.evalExpr(BB)
-            logs.log_ensure(Val,'CHECK of %s  vars=%s %s '%(wrds[1],self.DEFS,' '.join(wrds[2:]))) 
+            logs.log_ensure(Val,'CHECK of %s == %s  vars=%s %s '%(wrds[1],Val,self.DEFS,' '.join(wrds[2:]))) 
         elif (wrds[0] in ['correct','wrong','print']):
             Res = ''
             for Wrd in wrds[1:]:
@@ -693,3 +712,7 @@ def acceptablePath(Word):
         if X not in ('_'+string.digits + string.ascii_letters): return False
     return True
 
+HEB0 = "טסט נגמר ללא שגיאות, אבל עם אפס מדויקים "
+HEB1 = " טסט נגמר ללא שגיאות, עם  @ מדויקים"
+HEB2 = " טסט נגמר עם  @1 כשלים , @2 שגיאות"
+HEB3 = " טסט נגמר עם  @1 כשלים , @2 שגיאות"
