@@ -1,5 +1,5 @@
 
-chip nc100_rgf apb reset=async wid=32 addrwid=16 empty=0xdeadbeaf
+chip nc100_rgf apb reset=sync wid=32 addrwid=16 empty=0xdeadbeaf
 
 # empty =  means result when reading from non-address
 # bus may be ram or apb 
@@ -19,8 +19,8 @@ chip nc100_rgf apb reset=async wid=32 addrwid=16 empty=0xdeadbeaf
 
 
 
-reg rega wid=32 access=rw reset=0x123456 desc=first.register
-reg control0 wid=32 access=rw reset=0xcc00 desc=control.register
+reg rega wid=32 access=rw reset=0x123456 desc="first register that does wonders"
+reg control0 wid=32 access=rw reset=0xcc00 
 reg statusa wid=24 access=ro
 field dma0 wid=2 align=8
 field cpu1 wid=8

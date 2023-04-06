@@ -38,7 +38,7 @@ wire AAA = !BBB;
 
 #code CUCU www aaa&bbb
 
-
+# <>3+4<> will print 7
 
 
 enjoy,

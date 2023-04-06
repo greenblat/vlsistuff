@@ -51,7 +51,12 @@ def main():
                 _,Was = Signs[Module]
                 Int = int(Was,16)
                 Sign = Int>>32
-                New = "%s sign_version = 64'h%08x%s ;\nendmodule\n" % (sign_version,Signature,HourDate)
+                Now = '%08x' % Signature
+                WasS = Was[:8]
+                if (Now != WasS):
+                    New = "%s sign_version = 64'h%08x%s ;\nendmodule\n" % (sign_version,Signature,HourDate)
+                else:
+                    New = "%s sign_version = 64'h%s ;\nendmodule\n" % (sign_version,Was)
                 Lines[ind] = New
             else:
                 New = "%s sign_version = 64'h%08x%s ;\nendmodule\n" % (sign_version,Signature,HourDate)
