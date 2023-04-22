@@ -428,10 +428,10 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
     s_vpi_value pvalue;
     s_vpi_error_info error_info;
     int err=0;
-    char execstr[1000];
-    char funcname[1000];
-    char params[1000];
-    char tempstr[1000];
+    char execstr[10000];
+    char funcname[10000];
+    char params[10000];
+    char tempstr[10000];
     int argsx[10];
     int argsnum = 0;
     int Len;
@@ -453,11 +453,16 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
         err = err + vpi_chk_error(&error_info);
         while (argH && (!err)) { 
             if (isSimpleExpr(argH)) /* If argument is a simple */ {
-                pvalue.format = vpiIntVal; 
+                pvalue.format = vpiBinStrVal; 
                 vpi_get_value(argH, &pvalue); 
-                sprintf(tempstr,",%d",pvalue.value.integer);
+                sprintf(tempstr," %s",pvalue.value.str);
                 strcat(params,tempstr);
-                argsx[argsnum] = pvalue.value.integer;
+
+//               pvalue.format = vpiIntVal; 
+//               vpi_get_value(argH, &pvalue); 
+//                sprintf(tempstr," %d",pvalue.value.integer);
+//                strcat(params,tempstr);
+//                argsx[argsnum] = pvalue.value.integer;
                 argsnum++;
 
             } else if (argH) {
@@ -468,13 +473,18 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
                     strcpy(execstr,pvalue.value.str);
                     strcpy(funcname,execstr);
                 } else {
-                    pvalue.format = vpiIntVal; 
+                    pvalue.format = vpiBinStrVal; 
                     vpi_get_value(argH, &pvalue); 
-                    err = err + vpi_chk_error(&error_info);
-                    sprintf(tempstr,",%d",pvalue.value.integer);
+                    sprintf(tempstr," %s",pvalue.value.str);
                     strcat(params,tempstr);
                     argsx[argsnum] = pvalue.value.integer;
                     argsnum++;
+
+//                    pvalue.format = vpiIntVal; 
+//                    vpi_get_value(argH, &pvalue); 
+//                    err = err + vpi_chk_error(&error_info);
+//                    sprintf(tempstr,",%d",pvalue.value.integer);
+//                    strcat(params,tempstr);
                 }
                 pos++;
             }
@@ -499,16 +509,20 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
             if (strcmp(funcname,"HIGHP") == 0) {
                 value.value.integer = HIGHP;
                 value.format = vpiIntVal;/* return the result */
+                printf("GET HIGHP %x", HIGHP);
                 vpi_put_value(tfH, &value, NULL, vpiNoDelay);
                 return 0;
             }
     // Get a reference to the function
             PyObject* function = PyObject_GetAttrString(py_main,funcname);
             if (argsnum>0) {
-                PyObject* args = PyTuple_New(argsnum);
-                for (int ii=0; ii<argsnum; ii++) {
-                    PyTuple_SetItem(args, ii, PyLong_FromLong(argsx[ii]));
-                }
+                PyObject* args = PyTuple_New(1);
+//                printf("argsnum %d\n",argsnum);
+                PyTuple_SetItem(args, 0, PyUnicode_FromString(params));
+//                for (int ii=0; ii<argsnum; ii++) {
+//                    PyTuple_SetItem(args, ii, PyLong_FromLong(argsx[ii]));
+//                }
+//                printf("PARAMS %s %s\n",funcname,params);
                 result2 = PyObject_CallObject(function, args);
             } else {
                 result2 = PyObject_CallObject(function, NULL);
@@ -546,7 +560,7 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
               value.format = vpiIntVal;/* return the result */
               vpi_put_value(tfH, &value, NULL, vpiNoDelay);
               HIGHP = value2>>32;
-              printf("HIGHP %x\n",HIGHP);
+              printf("HIGHP 550 %x\n",HIGHP);
             return 0;
         } 
 
