@@ -425,10 +425,15 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
     s_vpi_error_info error_info;
     int err=0;
     char execstr[1000];
+    char funcname[1000];
     char params[1000];
     char tempstr[1000];
+    int argsx[10];
+    int argsnum = 0;
     int Len;
     s_vpi_value value;
+    PyObject* result2;
+
     params[0]=0;
     if (!python_started) {
         vpi_printf( "\n=====starting python ======\n" );
@@ -448,6 +453,8 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
                 vpi_get_value(argH, &pvalue); 
                 sprintf(tempstr,",%d",pvalue.value.integer);
                 strcat(params,tempstr);
+                argsx[argsnum] = pvalue.value.integer;
+                argsnum++;
 
             } else if (argH) {
                 if (pos==0) {
@@ -455,12 +462,15 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
                     vpi_get_value(argH, &pvalue); 
                     err = err + vpi_chk_error(&error_info);
                     strcpy(execstr,pvalue.value.str);
+                    strcpy(funcname,execstr);
                 } else {
                     pvalue.format = vpiIntVal; 
                     vpi_get_value(argH, &pvalue); 
                     err = err + vpi_chk_error(&error_info);
                     sprintf(tempstr,",%d",pvalue.value.integer);
                     strcat(params,tempstr);
+                    argsx[argsnum] = pvalue.value.integer;
+                    argsnum++;
                 }
                 pos++;
             }
@@ -479,16 +489,57 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
                     strcat(execstr,params);
             }
             strcat(execstr,")");
-            PyObject *py_main, *py_dict;
+            PyObject *py_main, *py_dict, *py_temp;
             py_main = PyImport_AddModule("__main__");
-            py_dict = PyModule_GetDict(py_main);
-            /* PyObject * PyRes = */ PyRun_String(execstr, Py_single_input, py_dict, py_dict);
-//            PyRun_String(execstr,Py_file_input,globals,locals);
-            long result = PyLong_AsLong(PyDict_GetItemString(py_dict, "result"));
-//            printf("inside %ld (%s)\n",result,execstr);
-              value.value.integer = result;
+
+            py_main = PyImport_AddModule("__main__");
+    // Get a reference to the function
+            printf("FUNCNAME %s\n",funcname);
+            PyObject* function = PyObject_GetAttrString(py_main,funcname);
+            if (argsnum>0) {
+                PyObject* args = PyTuple_New(argsnum);
+                for (int ii=0; ii<argsnum; ii++) {
+                    PyTuple_SetItem(args, ii, PyLong_FromLong(argsx[ii]));
+                }
+                result2 = PyObject_CallObject(function, args);
+            } else {
+                result2 = PyObject_CallObject(function, NULL);
+            }
+    // Convert the return value to a C integer
+            int value2 = PyLong_AsLong(result2);
+            printf("FUNCNAME %s %d\n",funcname,value2);
+
+
+
+
+
+
+
+
+
+//            py_dict = PyModule_GetDict(py_main);
+////            PyRun_String(execstr, Py_single_input, py_dict, py_dict);
+//            printf("Begin\n");
+//            int RC = PyRun_String(execstr,Py_file_input,py_dict,py_dict);
+//            PyObject *RC2;
+//            RC2 = PyRun_String("xxx = 345876",Py_file_input,py_dict,py_dict);
+//            long rc2x = PyLong_AsLong(RC2);
+//            PyRun_String("print('aaaa',result)",Py_file_input,py_dict,py_dict);
+//            printf("After %ld\n" , rc2x);
+//
+//            py_dict = PyModule_GetDict(py_main);
+//            py_temp = PyDict_GetItemString(py_dict, "result");
+//            printf("After2 |%s|\n",py_temp);
+//            int iresult = PyLong_AsLong(py_temp);
+//            printf("After3\n");
+//            long lresult = PyLong_AsLong(py_temp);
+//            char *STR = PyBytes_AsString(py_temp);
+//            printf("After4 ||%s||\n",STR);
+//            printf("inside rc=%d ires=%d lres=%ld exec=(%s)\n",RC,iresult,lresult,execstr);
+              value.value.integer = value2;
               value.format = vpiIntVal;/* return the result */
               vpi_put_value(tfH, &value, NULL, vpiNoDelay);
+            printf("After5\n");
             return 0;
         } 
 

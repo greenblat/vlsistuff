@@ -425,6 +425,7 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
     s_vpi_error_info error_info;
     int err=0;
     char execstr[1000];
+    char funcname[1000];
     char params[1000];
     char tempstr[1000];
     int Len;
@@ -455,6 +456,7 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
                     vpi_get_value(argH, &pvalue); 
                     err = err + vpi_chk_error(&error_info);
                     strcpy(execstr,pvalue.value.str);
+                    strcpy(funcname,execstr);
                 } else {
                     pvalue.format = vpiIntVal; 
                     vpi_get_value(argH, &pvalue); 
@@ -479,13 +481,30 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
                     strcat(execstr,params);
             }
             strcat(execstr,")");
-            PyObject *py_main, *py_dict;
+
+//            PyObject* module = PyImport_ImportModule("my_module");
             py_main = PyImport_AddModule("__main__");
-            py_dict = PyModule_GetDict(py_main);
-            /* PyObject * PyRes = */ PyRun_String(execstr, Py_single_input, py_dict, py_dict);
+    // Get a reference to the function
+            printf("FUNCNAME %s\n",funcname);
+            PyObject* function = PyObject_GetAttrString(py_main,funcname);
+
+    // Call the function and get the return value
+            PyObject* result = PyObject_CallObject(function, NULL);
+    // Convert the return value to a C integer
+            int value = PyLong_AsLong(result);
+            printf("FUNCNAME %s %d\n",funcname,result);
+
+
+
+
+//            PyObject *py_main, *py_dict;
+//            py_main = PyImport_AddModule("__main__");
+//            py_dict = PyModule_GetDict(py_main);
+//            /* PyObject * PyRes = */ PyRun_String(execstr, Py_single_input, py_dict, py_dict);
 //            PyRun_String(execstr,Py_file_input,globals,locals);
-            long result = PyLong_AsLong(PyDict_GetItemString(py_dict, "result"));
+//            long result = PyLong_AsLong(PyDict_GetItemString(py_dict, "result"));
 //            printf("inside %ld (%s)\n",result,execstr);
+
               value.value.integer = result;
               value.format = vpiIntVal;/* return the result */
               vpi_put_value(tfH, &value, NULL, vpiNoDelay);

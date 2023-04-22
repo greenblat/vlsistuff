@@ -1,4 +1,5 @@
-# How to install  
+# How to install  for Linus 
+**for iverilog look below**
 
 1. cd goto to where You want my vlsistuff installed. best: your home (~)
 2. git clone https://github.com/greenblat/vlsistuff.git
@@ -50,3 +51,27 @@ this is the file:
 
 9. in cadence or synopsys run scripts add 
 add full path of "my_vpi3.so" - look in above directory for activation_cadence synopsys for example.;
+
+
+
+# Install for icarus / iverilog
+
+1. copy comp3_local_icarus to comp3_local_icarus_mine
+
+2. set variables to latest python version on Yout computer
+  PYC and TAT are helpers to assemble the pointer to directories:
+
+3. example from my computer:
+
+   **set PYC = 3.10**    to where libpython3.10 (or latest version of python on Your computer)
+   **set TAT = 9**       to     to where libpython3.10 (or latest version of python on Your computer)
+  LIB is pointer to directory where libpython3.$PYC.so or  same.dyld is located.
+  INC is pointer to directory with matching **Python.h** file
+
+4. example from my computer:
+
+   **set LIB =** /opt/homebrew//Cellar/python@$PYC/$PYC.$TAT/Frameworks/Python.framework/Versions/$PYC/lib
+   **set INC =** /opt/homebrew//Cellar/python@$PYC/$PYC.$TAT/Frameworks/Python.framework/Versions/$PYC/include/python$PYC/
+
+
+

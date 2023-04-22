@@ -75,8 +75,12 @@ def gen_execute(Gen,Mod,Env):
     elif Gen[0] == 'case':
         Key = Gen[1]
         List = Gen[2]
-        for What,Stmnts in List:
-            print('Key',Key,What,Stmnts)
+        for What, Stmnts in List:
+            if evalx(What,Mod) == evalx(Key,Mod):
+                gen_execute(Stmnts,Mod,Sons)
+
+
+
     elif Gen[0] == 'list':
         for Item in Gen[1:]:
             gen_execute(Item,Mod,Env)
