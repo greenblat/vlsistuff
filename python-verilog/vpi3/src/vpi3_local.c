@@ -1,4 +1,6 @@
 
+//ILIA: HIGHP is not a best solution!
+
 #include <stdlib.h>             /* for malloc(), getenv() */
 #include <unistd.h>             /* for pipe(), vfork(), getpid(), write() */
 #include <string.h>             /* for strerror() */
@@ -415,6 +417,8 @@ PLI_INT32 vpit_python( PLI_BYTE8 *user_data )
     return 0;
 }
 
+int HIGHP;
+
 
 PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
 {
@@ -491,10 +495,14 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
             strcat(execstr,")");
             PyObject *py_main, *py_dict, *py_temp;
             py_main = PyImport_AddModule("__main__");
-
-            py_main = PyImport_AddModule("__main__");
+                
+            if (strcmp(funcname,"HIGHP") == 0) {
+                value.value.integer = HIGHP;
+                value.format = vpiIntVal;/* return the result */
+                vpi_put_value(tfH, &value, NULL, vpiNoDelay);
+                return 0;
+            }
     // Get a reference to the function
-            printf("FUNCNAME %s\n",funcname);
             PyObject* function = PyObject_GetAttrString(py_main,funcname);
             if (argsnum>0) {
                 PyObject* args = PyTuple_New(argsnum);
@@ -506,15 +514,8 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
                 result2 = PyObject_CallObject(function, NULL);
             }
     // Convert the return value to a C integer
-            int value2 = PyLong_AsLong(result2);
-            printf("FUNCNAME %s %d\n",funcname,value2);
-
-
-
-
-
-
-
+            long value2 = PyLong_AsLong(result2);
+//            printf("FUNCNAME %s %lx\n",funcname,value2);
 
 
 //            py_dict = PyModule_GetDict(py_main);
@@ -536,10 +537,16 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
 //            char *STR = PyBytes_AsString(py_temp);
 //            printf("After4 ||%s||\n",STR);
 //            printf("inside rc=%d ires=%d lres=%ld exec=(%s)\n",RC,iresult,lresult,execstr);
+//              sprintf(funcname,"%lx",value2);
+//              printf(">>>>>>>>>> %s\n",funcname);
+//              return 0;
+//              value.value.str = &(funcname[0]);
+
               value.value.integer = value2;
               value.format = vpiIntVal;/* return the result */
               vpi_put_value(tfH, &value, NULL, vpiNoDelay);
-            printf("After5\n");
+              HIGHP = value2>>32;
+              printf("HIGHP %x\n",HIGHP);
             return 0;
         } 
 
@@ -554,7 +561,7 @@ void vpit_RegisterTfs( void )
   { vpiSysTask, 0, "$python", vpit_python, NULL, NULL,NULL },
   { vpiSysTask, 0, "$import", vpit_import, NULL, NULL,NULL },
   { vpiSysTask, 0, "$basemodule", vpit_basemodule, NULL, NULL,NULL },
-  { vpiSysFunc, vpiIntFunc, "$pythonf", vpit_pythonf, NULL, 32,NULL },
+  { vpiSysFunc, 0, "$pythonf", vpit_pythonf, NULL, 64,NULL },
   { 0, 0, NULL, NULL, NULL, NULL, NULL }
 
 
