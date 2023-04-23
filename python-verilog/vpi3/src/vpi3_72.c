@@ -1,4 +1,6 @@
 
+//ILIA: HIGHP is not a best solution!
+
 #include <stdlib.h>             /* for malloc(), getenv() */
 #include <unistd.h>             /* for pipe(), vfork(), getpid(), write() */
 #include <string.h>             /* for strerror() */
@@ -415,6 +417,8 @@ PLI_INT32 vpit_python( PLI_BYTE8 *user_data )
     return 0;
 }
 
+int HIGHP;
+
 
 PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
 {
@@ -424,12 +428,16 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
     s_vpi_value pvalue;
     s_vpi_error_info error_info;
     int err=0;
-    char execstr[1000];
-    char funcname[1000];
-    char params[1000];
-    char tempstr[1000];
+    char execstr[10000];
+    char funcname[10000];
+    char params[10000];
+    char tempstr[10000];
+    int argsx[10];
+    int argsnum = 0;
     int Len;
     s_vpi_value value;
+    PyObject* result2;
+
     params[0]=0;
     if (!python_started) {
         vpi_printf( "\n=====starting python ======\n" );
@@ -445,10 +453,17 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
         err = err + vpi_chk_error(&error_info);
         while (argH && (!err)) { 
             if (isSimpleExpr(argH)) /* If argument is a simple */ {
-                pvalue.format = vpiIntVal; 
+                pvalue.format = vpiBinStrVal; 
                 vpi_get_value(argH, &pvalue); 
-                sprintf(tempstr,",%d",pvalue.value.integer);
+                sprintf(tempstr," %s",pvalue.value.str);
                 strcat(params,tempstr);
+
+//               pvalue.format = vpiIntVal; 
+//               vpi_get_value(argH, &pvalue); 
+//                sprintf(tempstr," %d",pvalue.value.integer);
+//                strcat(params,tempstr);
+//                argsx[argsnum] = pvalue.value.integer;
+                argsnum++;
 
             } else if (argH) {
                 if (pos==0) {
@@ -458,11 +473,18 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
                     strcpy(execstr,pvalue.value.str);
                     strcpy(funcname,execstr);
                 } else {
-                    pvalue.format = vpiIntVal; 
+                    pvalue.format = vpiBinStrVal; 
                     vpi_get_value(argH, &pvalue); 
-                    err = err + vpi_chk_error(&error_info);
-                    sprintf(tempstr,",%d",pvalue.value.integer);
+                    sprintf(tempstr," %s",pvalue.value.str);
                     strcat(params,tempstr);
+                    argsx[argsnum] = pvalue.value.integer;
+                    argsnum++;
+
+//                    pvalue.format = vpiIntVal; 
+//                    vpi_get_value(argH, &pvalue); 
+//                    err = err + vpi_chk_error(&error_info);
+//                    sprintf(tempstr,",%d",pvalue.value.integer);
+//                    strcat(params,tempstr);
                 }
                 pos++;
             }
@@ -481,33 +503,64 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
                     strcat(execstr,params);
             }
             strcat(execstr,")");
-
-//            PyObject* module = PyImport_ImportModule("my_module");
+            PyObject *py_main, *py_dict, *py_temp;
             py_main = PyImport_AddModule("__main__");
+                
+            if (strcmp(funcname,"HIGHP") == 0) {
+                value.value.integer = HIGHP;
+                value.format = vpiIntVal;/* return the result */
+                printf("GET HIGHP %x", HIGHP);
+                vpi_put_value(tfH, &value, NULL, vpiNoDelay);
+                return 0;
+            }
     // Get a reference to the function
-            printf("FUNCNAME %s\n",funcname);
             PyObject* function = PyObject_GetAttrString(py_main,funcname);
-
-    // Call the function and get the return value
-            PyObject* result = PyObject_CallObject(function, NULL);
+            if (argsnum>0) {
+                PyObject* args = PyTuple_New(1);
+//                printf("argsnum %d\n",argsnum);
+                PyTuple_SetItem(args, 0, PyUnicode_FromString(params));
+//                for (int ii=0; ii<argsnum; ii++) {
+//                    PyTuple_SetItem(args, ii, PyLong_FromLong(argsx[ii]));
+//                }
+//                printf("PARAMS %s %s\n",funcname,params);
+                result2 = PyObject_CallObject(function, args);
+            } else {
+                result2 = PyObject_CallObject(function, NULL);
+            }
     // Convert the return value to a C integer
-            int value = PyLong_AsLong(result);
-            printf("FUNCNAME %s %d\n",funcname,result);
+            long value2 = PyLong_AsLong(result2);
+//            printf("FUNCNAME %s %lx\n",funcname,value2);
 
 
-
-
-//            PyObject *py_main, *py_dict;
-//            py_main = PyImport_AddModule("__main__");
 //            py_dict = PyModule_GetDict(py_main);
-//            /* PyObject * PyRes = */ PyRun_String(execstr, Py_single_input, py_dict, py_dict);
-//            PyRun_String(execstr,Py_file_input,globals,locals);
-//            long result = PyLong_AsLong(PyDict_GetItemString(py_dict, "result"));
-//            printf("inside %ld (%s)\n",result,execstr);
+////            PyRun_String(execstr, Py_single_input, py_dict, py_dict);
+//            printf("Begin\n");
+//            int RC = PyRun_String(execstr,Py_file_input,py_dict,py_dict);
+//            PyObject *RC2;
+//            RC2 = PyRun_String("xxx = 345876",Py_file_input,py_dict,py_dict);
+//            long rc2x = PyLong_AsLong(RC2);
+//            PyRun_String("print('aaaa',result)",Py_file_input,py_dict,py_dict);
+//            printf("After %ld\n" , rc2x);
+//
+//            py_dict = PyModule_GetDict(py_main);
+//            py_temp = PyDict_GetItemString(py_dict, "result");
+//            printf("After2 |%s|\n",py_temp);
+//            int iresult = PyLong_AsLong(py_temp);
+//            printf("After3\n");
+//            long lresult = PyLong_AsLong(py_temp);
+//            char *STR = PyBytes_AsString(py_temp);
+//            printf("After4 ||%s||\n",STR);
+//            printf("inside rc=%d ires=%d lres=%ld exec=(%s)\n",RC,iresult,lresult,execstr);
+//              sprintf(funcname,"%lx",value2);
+//              printf(">>>>>>>>>> %s\n",funcname);
+//              return 0;
+//              value.value.str = &(funcname[0]);
 
-              value.value.integer = result;
+              value.value.integer = value2;
               value.format = vpiIntVal;/* return the result */
               vpi_put_value(tfH, &value, NULL, vpiNoDelay);
+              HIGHP = value2>>32;
+              printf("HIGHP 550 %x\n",HIGHP);
             return 0;
         } 
 
@@ -522,7 +575,7 @@ void vpit_RegisterTfs( void )
   { vpiSysTask, 0, "$python", vpit_python, NULL, NULL,NULL },
   { vpiSysTask, 0, "$import", vpit_import, NULL, NULL,NULL },
   { vpiSysTask, 0, "$basemodule", vpit_basemodule, NULL, NULL,NULL },
-  { vpiSysFunc, vpiIntFunc, "$pythonf", vpit_pythonf, NULL, 32,NULL },
+  { vpiSysFunc, 0, "$pythonf", vpit_pythonf, NULL, 64,NULL },
   { 0, 0, NULL, NULL, NULL, NULL, NULL }
 
 
@@ -958,7 +1011,7 @@ veri_force_mem(PyObject *self,PyObject *args) {
         vpi_printf("\nindex %d of memory too bit for  %s for force_mem\n",index,pathstring);
         return Py_BuildValue("s", "x");
     }
-    //vpi_printf("forcing mem %s[%s] = %s\n",pathstring,indexstring,vstr);
+//    vpi_printf("forcing mem %s[%s] = %s\n",pathstring,indexstring,vstr);
     handle2 = vpi_handle_by_index(handle, index);
     if ((vstr[0]=='0')&&(vstr[1]=='b')) {
         pvalue.format = vpiBinStrVal; 
