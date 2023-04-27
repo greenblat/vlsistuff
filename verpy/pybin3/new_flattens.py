@@ -155,6 +155,7 @@ def flatten(Current,Whome,Env,load_module):
                         flatten_inst(Current,Inst,Env.Modules)
                         print('FLATTEN',Inst,Type)
                         dones += 1
+    if dones==0: return False                            
     return dones,(Inst,Type)
 
 

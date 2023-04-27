@@ -186,6 +186,7 @@ class module_class:
     def add_localparam(self,Name,Expr):
         logs.log_info('adding localparam %s %s'%(Name,Expr))
         self.localparams[Name]=Expr
+
     def add_hard_assign(self,Dst,Src,Strength='',Delay=''):
         if (Dst =='')or(Dst==False):
             logs.log_err('add_hard_assign got dst="%s" and src="%s"'%(Dst,Src))
@@ -220,6 +221,8 @@ class module_class:
     def add_inst(self,Type,Inst):
         if Inst == '': Inst = inventInst(Type)
         InstObj = instance_class(Type,Inst)
+        if Inst in self.insts:
+            logs.log_warning("replacing %s %s with %s %s instance in %s" % (Inst,self.insts[Inst].Type,Inst,Type,self.Module))
         self.insts[Inst]=InstObj
         return InstObj
     def add_inst_param(self,Inst,Prm,Val):
