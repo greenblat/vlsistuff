@@ -804,32 +804,9 @@ class module_class:
             Obj=self.insts[Inst]
             for Pin in Obj.conns:
                 Net = Obj.conns[Pin]
-                if not Net:
-                    pass
-                elif type(Net) is str:
-                    if "'" in Net:
-                        pass
-                    elif Net not in Wires:
-                        Wires[Net]=(0,0)
-                elif isinstance(Net,(tuple,list)):
-                    if Net[0] in ['subbit','subbus']:
-                        Name = Net[1]
-                        if Net[0]=='subbit':
-                            Hi = int(Net[2])
-                            Lo = Hi
-                        elif Net[0]=='subbus':
-                            Hi = int(Net[2])
-                            Lo = int(Net[3])
-                        if Name in Wires:
-                            WasHi=Wires[Name][0]
-                            WasLo=Wires[Name][1]
-                            Hi = max(Hi,WasHi)
-                            Lo = min(Lo,WasLo)
-                        Wires[Name]=(Hi,Lo)
-                    else:
-                        logs.log_err('net %s is strange for recompute_instance_wires'%(str(Net)))
+                self.recompute_instance_wires_helper(Net,Wires)
 
-        Nets = self.nets.keys()
+        Nets = list(self.nets.keys())
         for Net in Nets:
             (Dir,WW)=self.nets[Net]
             if (Dir=='wire')and(Net not in Wires):
@@ -842,6 +819,41 @@ class module_class:
                     self.add_sig(Wire,'wire',0)
                 else:
                     self.add_sig(Wire,'wire',(Hi,Lo))
+
+
+    def recompute_instance_wires_helper(self,Net,Wires):
+        if not Net:
+            pass
+        elif type(Net) is str:
+            if "'" in Net:
+                pass
+            elif Net not in Wires:
+                Wires[Net]=(0,0)
+        elif isinstance(Net,(tuple,list)):
+            if Net[0] in ['curly']:
+                for Def in Net[1:]:
+                    self.recompute_instance_wires_helper(Def,Wires)
+            elif Net[0] in ['subbit','subbus']:
+                Name = Net[1]
+                if Net[0]=='subbit':
+                    Hi = int(Net[2])
+                    Lo = Hi
+                elif Net[0]=='subbus':
+                    if len(Net) == 4:
+                        Hi = int(Net[2])
+                        Lo = int(Net[3])
+                    else:
+                        Hi = int(Net[2][0])
+                        Lo = int(Net[2][1])
+                if Name in Wires:
+                    WasHi=Wires[Name][0]
+                    WasLo=Wires[Name][1]
+                    Hi = max(Hi,WasHi)
+                    Lo = min(Lo,WasLo)
+                Wires[Name]=(Hi,Lo)
+            else:
+                logs.log_err('net %s is strange for recompute_instance_wires'%(str(Net)))
+
                 
     def mergeNetTableBusses(self):
         Keys = list(self.netTable.keys())
@@ -867,6 +879,8 @@ class module_class:
                 netTable[Net] = [(self.Module,'input',Dir)]
             elif 'output' in Dir:
                 netTable[Net] = [(self.Module,'output',Dir)]
+            elif 'inout' in Dir:
+                netTable[Net] = [(self.Module,'inout',Dir)]
                 
         for Inst in self.insts:
             Obj = self.insts[Inst]

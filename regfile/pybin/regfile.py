@@ -84,7 +84,7 @@ def report2(LINES):
         for Li in LL:
             logs.log_info('%s: %s'%(Key,Li))
 
-Db = {'items':[],'clocks':[],'regs':[],'fields':[],'splitted':[]}
+Db = {'items':[],'clocks':[],'regs':[],'fields':[],'splitted':[],'enable_writes':[]}
 
 def createLines(File):
     Lines = File.readlines()
@@ -254,6 +254,7 @@ class itemClass:
         self.PREADIES = '1'
         self.RAMS_WIRES = ''
         self.incs = []
+        self.enable_writes = []
 
 
     def dump(self):
@@ -1002,6 +1003,11 @@ def treatReg(Reg):
     busWid = Db['chip'].Params['width']
     Jump = busWid//8
     Access= getPrm(Reg,'access','rw')
+    EnableWr= getPrm(Reg,'enable_write','none')
+    if EnableWr!='none':
+        if EnableWr not in Db['chip'].enable_writes:
+            LINES[0].append('    ,input %s' % EnableWr)
+            Db['chip'].enable_writes.append(EnableWr)
     Wid= getPrm(Reg,'width',busWid)
     Reset= getPrm(Reg,'reset',0)
     Default= getPrm(Reg,'default',0)
@@ -1068,18 +1074,24 @@ def treatReg(Reg):
             LINES[4].append(Str)
         if 'wo' not in Access:
             treatPrdata(Reg,Wid,Name)
+        if EnableWr!='none':
+            pre_WRITE = '(%s && ' % EnableWr
+            post_WRITE = ')'
+        else:
+            pre_WRITE = ''
+            post_WRITE = ''
         if Wid<busWid:
-            Line = '        if (mpaddr == \'h%x) %s <= (%s & ~mask[%d:0]) | (wdata[%d:0] & mask[%d:0]);'%(Reg.Addr,Name,Name,Wid-1,Wid-1,Wid-1)
+            Line = '        if %s(mpaddr == \'h%x)%s %s <= (%s & ~mask[%d:0]) | (wdata[%d:0] & mask[%d:0]);'%(pre_WRITE,Reg.Addr,post_WRITE,Name,Name,Wid-1,Wid-1,Wid-1)
             LINES[3].append(Line)
         elif Wid==busWid:
-            Line = '        if (mpaddr == \'h%x) %s <= (%s & ~mask) | (wdata & mask);'%(Reg.Addr,Name,Name)
+            Line = '        if %s(mpaddr == \'h%x)%s %s <= (%s & ~mask) | (wdata & mask);'%(pre_WRITE,Reg.Addr,post_WRITE,Name,Name)
             LINES[3].append(Line)
         else:
             Wid1 = Wid
             Ad = Reg.Addr
             Hi,Lo = busWid-1,0
             while Wid1>0:
-                Line = '        if (mpaddr == \'h%x) %s[%d:%d] <= (%s[%d:%d] & ~mask) | (wdata & mask);'%(Ad,Name,Hi,Lo,Name,Hi,Lo)
+                Line = '        if %s(mpaddr == \'h%x)%s %s[%d:%d] <= (%s[%d:%d] & ~mask) | (wdata & mask);'%(pre_WRITE,Ad,post_WRITE,Name,Hi,Lo,Name,Hi,Lo)
                 LINES[3].append(Line)
                 Ad += Jump
                 Lo += busWid
