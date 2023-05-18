@@ -222,7 +222,7 @@ forever
 endprimitive
 strong1 strong0 pull1 pull0 weak1 weak0 highz1 highz0
 posedge negedge
-integer real time
+int integer real time
 event
 disable
 localparam

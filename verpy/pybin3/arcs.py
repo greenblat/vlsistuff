@@ -84,7 +84,7 @@ def getCosts(Src):
         if Src == []: return []
         if len(Src) == 1:
             return getCosts(Src[0])
-        if Src[0] in ['hex','bin','dec']:
+        if Src[0] in ['hex','bin','dig']:
             return []
         elif Src[0] in ['subbus']:
             return [(Src[1],0)]
@@ -115,10 +115,16 @@ def getCosts(Src):
 
         elif Src[0] in ['&','&&','|','||','^','>','<','>=','<=','==','!=']:
             Csts0 = getCosts(Src[1])
-            Csts1 = getCosts(Src[2])
-            Cost =  mergeCosts(Csts0,Csts1,1)
-            print("CCCCC",Src,Csts0,Csts1,Cost)
-            return Cost
+            if len(Src) == 3:
+                Csts1 = getCosts(Src[2])
+                Cost =  mergeCosts(Csts0,Csts1,1)
+                return Cost
+            if len(Src) == 2:
+                Csts0 =  getCosts(Src[1])
+                Cost =  mergeCosts(Csts0,[],1)
+                return Cost
+
+
         elif Src[0] in ['question']:
             Csts0 = getCosts(Src[1])
             Csts1 = getCosts(Src[2])
@@ -205,7 +211,7 @@ def builds(Mod):
             for Src in SetS:
                 CONNS.append((Inst,Pin,Src))
     for _,Alw,_ in Mod.alwayses:
-        travelAlw(Alw,[],Params)
+        travelAlw(Alw,[],Params,Mod)
 
     for Net in Mod.nets:
         Dir,_ = Mod.nets[Net]
@@ -213,24 +219,26 @@ def builds(Mod):
         if 'input' in Dir: INPUTS.append(Net)
 
 
-def travelAlw(Alw,Cond,Params):
+def travelAlw(Alw,Cond,Params,Mod):
     if type(Alw) is list:
         if Alw[0]=='list':
             for AA in Alw[1:]:
-                travelAlw(AA,Cond,Params)
+                travelAlw(AA,Cond,Params,Mod)
             return
         if Alw[0]=='for':
-            travelAlw(Alw[4],Cond,Params)
+            travelAlw(Alw[4],Cond,Params,Mod)
             return
         if Alw[0]=='ifelse':
             More = support_set(Alw[1],False)
-            travelAlw(Alw[2],Cond+More,Params)
-            travelAlw(Alw[3],Cond+More,Params)
+            print("IFELSE",Alw[2],Alw[3],Cond+More,Params)
+            travelAlw(Alw[2],Cond+More,Params,Mod)
+            travelAlw(Alw[3],Cond+More,Params,Mod)
             return
 
         if Alw[0]=='if':
             More = support_set(Alw[1],False)
-            travelAlw(Alw[2],Cond+More,Params)
+            print("IF",Alw[2],Cond+More,Params)
+            travelAlw(Alw[2],Cond+More,Params,Mod)
             return
 
         if Alw[0]=='wait': return
@@ -240,11 +248,12 @@ def travelAlw(Alw,Cond,Params):
             More = support_set(Alw[1],False)
             for Case in Alw[2]:
                More2 = support_set(Case[0],False) 
-               travelAlw(Case[1],Cond+More+More2,Params)
+               travelAlw(Case[1],Cond+More+More2,Params,Mod)
             return
 
         if Alw[0]=='<=':
             adds(Alw[1],Alw[2],Params)
+            adds(Alw[1],Cond,Params)
             SetD = support_set(Alw[1],False)
             for D in SetD: 
                 if D not in TERMS: TERMS.append(D)
@@ -252,10 +261,15 @@ def travelAlw(Alw,Cond,Params):
 
         if Alw[0]=='=':
             adds(Alw[1],Alw[2],Params)
+            adds(Alw[1],Cond,Params)
             return
 
+        if Alw[0]=='functioncall':
+            return
+        if Alw[0]=='empty_begin_end':
+            return
 
-    print('ERROR alw',Alw)
+    logs.log_error('ARCS %s: alw %s' % (Mod.Module,Alw))
 
 
 

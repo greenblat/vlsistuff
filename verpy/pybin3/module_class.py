@@ -1749,7 +1749,6 @@ def pr_assign_list(List):
         return '%s=%s'%(Dst,Src)
         
     for Item in List:
-        print('RRRR',Item,List)
         Res = pr_assign_list(Item)
         res.append(Res)
     return ', '.join(res)

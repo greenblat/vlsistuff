@@ -415,6 +415,13 @@ def get_exprs(Item1):
 def get_soft_assigns(Item1):
     List = DataBase[Item1]
     res=['list']
+    if Item1[0] == 'Soft_assign':
+        Dst = get_expr(List[0])
+        Src = get_expr(List[2])
+        res.append(['=',Dst,Src])
+        Current.add_sig(Dst,'integer',0)
+        return res
+
     Vars = matches.matches(List,'assign !Soft_assigns ;')
     if Vars:
         Res = get_soft_assigns(Vars[0])
@@ -546,6 +553,16 @@ def get_statement(Item):
         Assigns2 = get_soft_assigns(Vars[2])
         Stmt = get_statement(Vars[3])
         return ['for',Assigns1,Cond,Assigns2,Stmt]
+
+    Vars = matches.matches(List,"for ( int  ? ; ? ; ? ) ?")
+    if Vars:
+        Assigns1 = get_soft_assigns(Vars[0])
+        Cond = get_expr(Vars[1])
+        Assigns2 = get_soft_assigns(Vars[2])
+        Stmt = get_statement(Vars[3])
+        return ['for',Assigns1,Cond,Assigns2,Stmt]
+
+
 #ILIA
     Vars = matches.matches(List,"parameter  ? ;")
     if Vars:
@@ -1963,13 +1980,11 @@ def get_expr(Item):
         if Item[0]=='*':
             return '*'
     if len(Item)==2:
-        if Item[0] == '~': return Item
-        if Item[0] == '!': return Item
-        if Item[0] == 'curly': return Item
+        if Item[0] in ['^','~','!','curly']: return Item
         try:
             List = DataBase[Item]
         except:
-            print('EXCEPTION',Item)
+            print('DB0 EXCEPTION',Item)
             return Item
         if Item[0]=='Crazy3':
             Vars = matches.matches(List,'? !crazy2 ? )',False)
@@ -2143,6 +2158,10 @@ def get_expr(Item):
         if (Item[1]=='floating'):
             return float(Item[0])
         if Item[1]=='always':
+            return Item[0]
+        if Item[1]=='always_ff':
+            return Item[0]
+        if Item[1]=='always_comb':
             return Item[0]
     if (len(Item)==3)and(Item[0] in ['**','<<','>>','+','-','/','*','functioncall']):
         return Item

@@ -465,13 +465,10 @@ def my_importing(Fname,Env,Original=True):
 
     what = 'from %s import help_main'%(Fname)
     That = importlib.import_module(Fname)
-    print('importing0 "%s"'%Fname)
     That = importlib.import_module(Fname)
-    print('importing1 "%s"'%Fname)
     help_main = That.help_main
-    print('importing2 "%s"'%Fname)
     help_main(Env)
-    print('importing3 "%s"'%Fname)
+    print('importing "%s"'%Fname)
     return help_main
     if (Env.Current==None):
         Keys = Env.Modules.keys()

@@ -716,6 +716,7 @@ void reserved_words(char *Token,char *tokenType){
     if (strcmp(Token,"initial")==0) {strcpy(tokenType,"initial"); return; }
     if (strcmp(Token,"inout")==0) {strcpy(tokenType,"inout"); return; }
     if (strcmp(Token,"input")==0) {strcpy(tokenType,"input"); return; }
+    if (strcmp(Token,"int")==0) {strcpy(tokenType,"int"); return; }
     if (strcmp(Token,"integer")==0) {strcpy(tokenType,"integer"); return; }
     if (strcmp(Token,"join")==0) {strcpy(tokenType,"join"); return; }
     if (strcmp(Token,"join_any")==0) {strcpy(tokenType,"join_any"); return; }

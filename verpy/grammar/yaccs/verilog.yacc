@@ -2,7 +2,7 @@
 
 %token module number token endmodule assign 
 %token input  output  inout reg  wire  logic tri0 tri1 signed  event
-%token bin hex dig integer real wreal
+%token bin hex dig integer int real wreal
 %token ubin uhex udig
 %token domino and_and or_or eq3 eq_eq not_eq gr_eq sm_eq
 %token always begin end if else posedge negedge or wait emit
@@ -22,7 +22,7 @@
 %token supply0 supply1
 %token newver
 %token return
-%token always_comb enum typedef
+%token always_comb always_ff enum typedef
 
 %right '?' ':' 
 %left '|' 
@@ -199,7 +199,7 @@ PrmAssign :  '.' token '(' Expr ')' | '.' token ;
 InstParams : '#' '(' Exprs ')' | '#' number | '#' floating | '#' token | '#' '(' Prms_list ')' | '#' '(' ')'  ;
 
 
-Always : always_comb Statement | always Statement | always When Statement ;
+Always : always_ff When Statement | always_comb Statement | always Statement | always When Statement ;
 
 
 Generate : generate GenStatements  endgenerate ;
@@ -255,6 +255,7 @@ Statement :
     | if '(' Expr ')' Statement else Statement 
     | wait Expr ';'
     | integer Tokens_list ';'
+    | int Tokens_list ';'
     | reg Tokens_list ';'
     | reg Width Tokens_list ';'
     | release Expr ';'
@@ -288,7 +289,10 @@ pragma_item : token '=' Expr | string ;
 
 Pragma : pragma1 pragma_stuffs pragma2 ;
 // Pragma : pragma1 string pragma1 ;
-For_statement : for '(' Soft_assigns ';' Expr ';' Soft_assigns ')' Statement ; 
+For_statement : 
+    for '(' Soft_assigns ';' Expr ';' Soft_assigns ')' Statement 
+    | for '(' int Soft_assign ';' Expr ';' Soft_assigns ')' Statement
+    ; 
 Repeat_statement : repeat '(' Expr ')' Statement ; 
 While_statement : while '(' Expr ')' Statement ; 
 Soft_assigns : Soft_assigns ',' Soft_assign | Soft_assign ;

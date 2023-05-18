@@ -21,7 +21,12 @@ def main():
     instancesDeep([Top],[Top])
     createConnTables()
     scanDeep(Top,[Top])
-
+    PATHS.sort()
+    PATHS.reverse()
+    Frep = open('%s.longarcs.report' % Top,'w')
+    for (Len,Path) in PATHS:
+        Frep.write(Path + '\n')
+    Frep.close()
 
 class holderClass:
     def __init__(self,Name):
@@ -96,7 +101,7 @@ def scanDeep(Mod,Path):
     for Inst,Type in Hld.SONS:
         if Type in Modules:
             scanDeep(Type,Path+[Inst])
-
+PATHS = []
 def printPath(Kind,Mod,Path):
     Lng = logs.getVar('longest')
     if len(Path) > Lng:
@@ -106,6 +111,7 @@ def printPath(Kind,Mod,Path):
         X = '.'.join(PP)
         Pr += '    %s\n' % X
     logs.log_info(Pr)
+    PATHS.append( (len(Path),Pr))
 
 def ppPath(Path):
     return '.'.join(Path)
@@ -119,7 +125,8 @@ def travelFW(Net,Mod,instPath,netPath):
     Here = ppPath(instPath + [Net])
     if ((Here,Src) in DONES)and(DONES[(Here,Src)]>=Len):
         return
-#    logs.log_info('TTT here=%s  %s %s %s %s' % (Here,Src,Mod,Len,Net),4)
+    if Net == 'finishing':
+        logs.log_info('TTT here=%s  %s %s %s %s' % (Here,Src,Mod,Len,Net),4)
 
     DONES[(Here,Src)] = Len
     if Mod not in Modules:
@@ -132,7 +139,6 @@ def travelFW(Net,Mod,instPath,netPath):
             for Instx,Typex in Hld.SONS:
                 if Instx == Inst:
                     Sth = Modules[Typex]
-                    print("X23",Instx,Typex,Pin,Pin in Sth.INPUTS)
                     if Pin in Sth.INPUTS:
                         dinstPath =  instPath + [Inst] 
                         Key = '.'.join(dinstPath)
@@ -142,7 +148,22 @@ def travelFW(Net,Mod,instPath,netPath):
         
 
     if Net not in  Modules[Mod].ARCSFW:
-        printPath('PATH1',Mod,netPath+[instPath+[Net]])
+        if (Net in Hld.OUTPUTS) and (len(instPath)>1):
+            upInst = instPath[:-1] 
+            Type = Instances['.'.join(upInst)]
+            Father = Modules[Type]
+            upNetPath = netPath+[instPath + [Net]]
+            upHld = Modules[Type]
+            Keyx = (instPath[-1],Net)
+            if Net in Hld.TERMS:
+                pass
+            elif Keyx in upHld.instPinTable:
+                upSig = upHld.instPinTable[Keyx]
+                if upSig == 'rst_nn':
+                    print('RST_NN',upSig,Type,instPath[:-1],upNetPath)
+                travelFW(upSig,Type,instPath[:-1],upNetPath)
+        else:
+            printPath('PATH1',Mod,netPath+[instPath+[Net]])
         return
 
 
