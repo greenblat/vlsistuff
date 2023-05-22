@@ -468,7 +468,8 @@ def check_src_expr(Current,Item):
             if (type(Wid) is tuple) and (len(Wid) ==2) and (type(Wid[0]) is int):
                 pass
             else:
-                check_src_expr(Current,Wid)
+                check_src_expr(Current,Wid[0])
+                check_src_expr(Current,Wid[1])
             Used[Bus]=1
             return
         if Item[0]=='subbit':

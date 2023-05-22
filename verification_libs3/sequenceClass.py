@@ -65,9 +65,10 @@ class sequenceClass:
                 pass
             elif (type(NickObj) is tuple):
                 (Nickname,Object) = NickObj
-                self.agents[Nickname]=Object
-                Object.Caller = self
-                Object.SeqObj = self
+                if Object:
+                    self.agents[Nickname]=Object
+                    Object.Caller = self
+                    Object.SeqObj = self
             elif 'Name' in dir(NickObj):
                 self.agents[NickObj.Name]=NickObj
             else:

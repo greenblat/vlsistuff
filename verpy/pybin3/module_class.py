@@ -201,8 +201,7 @@ class module_class:
             if '[' in Net:
                 Net = Net[:Net.index('[')]
             if (not myExtras(Net))and(Net not in self.nets)and(Net not in self.parameters)and(Net[0] not in '0123456789')and(Net not in self.localparams)and(Net not in self.genvars):
-                logs.log_err('%s: net %s used before defined (%s)'%(self.Module,Net,Net in self.nets))
-                logs.log_err('defined localparams %s %s '%(list(self.localparams.keys())[:10],list(self.parameters.keys())[:10]))
+                logs.log_err('%s: net %s used before defined (%s) %s'%(self.Module,Net,Net in self.nets,'defined localparams %s %s '%(list(self.localparams.keys())[:10],list(self.parameters.keys())[:10])))
                 traceback.print_stack(None,None,logs.Flogs[0])
 
     def duplicate_inst(self,Inst,Inst2):

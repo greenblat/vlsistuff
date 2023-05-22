@@ -42,9 +42,9 @@ class apbDriver:
         self.Caller = False
         logs.log_info('apbDriver  ver 27.apr.2021')
         self.noList = []
-        self.force('psel',0)
-        self.force('pwrite',0)
-        self.force('penable',0)
+#        self.force('psel',0)
+#        self.force('pwrite',0)
+#        self.force('penable',0)
         self.Uart = False
 
     def onFinish(self):
@@ -340,7 +340,7 @@ class apbDriver:
                     self.installUntil(Val,0)
                 elif Sig=='popif':
                     Who,Comp = Val
-                    logs.log_info('POPIF %s comp=%s act=%s' % (Who,Comp,self.peek(Who)))
+#                    logs.log_info('POPIF %s comp=%s act=%s' % (Who,Comp,self.peek(Who)))
                     popIt = self.peek(Who) == Comp
                 else:
                     self.force(Sig,Val)

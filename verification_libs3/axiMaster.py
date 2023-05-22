@@ -106,7 +106,7 @@ class axiMasterClass:
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
     def action(self,Txt):
         wrds = Txt.split()
-        self.log_debug_print('%s ACTION %s' % (self.Name,Txt),Which='dbg')
+        logs.log_info('%s ACTION %s' % (self.Name,Txt))
         if wrds[0] == 'starvation':
             if wrds[1] in [1,'1','on']:
                 self.Starvation = True
@@ -233,6 +233,7 @@ class axiMasterClass:
         self.log_debug_print('makeWrite %s >>>>> %x size=%s qu=%d'%(self.Name,Address,Size,len(self.Queue)),Which='dbg')
 
     def makeWrite(self,Burst,Len,Address,Size=4,Wdatas=[]):
+        logs.log_info("Wdatas %s" % (' '.join(list(map(hex,Wdatas)))))
         if Len==0: 
             logs.log_error('axiMaster %s makeWrite got zero length request at addr=%x ' % (self.Name,Address))
             return

@@ -1,4 +1,6 @@
 
+# -lower in sys.argv will make all external connections to lower case. Pins/Ports are unaffected.
+
 import os,sys,string
 import logs
 import traceback
@@ -15,7 +17,7 @@ def help_main(Env):
     Mod = Env.Current
     if '-clean' in Env.params:
         cleanParameters(Mod)
-    dump_instance(Mod,'-simple' in Env.params)
+    dump_instance(Mod,'-simple' in Env.params,'-lower' in Env.params)
     dump_empty_module(Mod)
     if '-tb' in Env.params:
         prepare_tb(Mod)
@@ -62,7 +64,7 @@ PREPARE_STRING = '''
 
 
 
-def dump_instance(Mod,Simple=False):
+def dump_instance(Mod,Simple=False,allPinsLowerCase = False):
     Name = Mod.Module
     Fout = open('%s.inst'%(Name),'w')
     if not Simple:
@@ -91,6 +93,7 @@ def dump_instance(Mod,Simple=False):
     for Sig in Sigs:
         DirHL = Mod.nets[Sig]
         Dir1 = DirHL[0]
+        if allPinsLowerCase: Sig = Sig.lower()
         if Simple:
             Fout.write('wire %s %s;\n'%(wids(DirHL[1]),Sig))
         elif ('input' in Dir1):
@@ -116,7 +119,9 @@ def dump_instance(Mod,Simple=False):
         if (Dir1=='output')or(Dir1=='inout')or(Dir1=='input'):
             Wids = wids(DirHL[1])
             if '][' in Wids: Wids=''
-            Fout.write('    %s.%s(%s%s)\n'%(Pref,Sig,Sig,Wids))
+            Ext = Sig
+            if allPinsLowerCase: Ext = Sig.lower()
+            Fout.write('    %s.%s(%s%s)\n'%(Pref,Sig,Ext,Wids))
             Pref=','
     Fout.write(');\n')
     if not Simple:
@@ -131,12 +136,14 @@ def dump_instance(Mod,Simple=False):
         DirHL = Mod.nets[Sig]
         Dir1 = DirHL[0].split()[0]
         if (Dir1=='input')and(Sig not in ['clk','rst_n']):
+            if allPinsLowerCase: Sig = Sig.lower()
             Fout.write("    veri.force('tb.%s','0')\n"%(Sig))
 
     for Sig in Sigs:
         DirHL = Mod.nets[Sig]
         Dir1 = DirHL[0].split()[0]
         if (Dir1=='output'):
+            if allPinsLowerCase: Sig = Sig.lower()
             Fout.write("    %s = logs.peek('tb.%s')\n"%(Sig,Sig))
     Fout.close()
     

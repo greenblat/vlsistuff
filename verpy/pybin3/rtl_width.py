@@ -104,12 +104,20 @@ def get_width2(Net,Mod):
             W2,W3 = get_width2(Net[3],Mod)
             return max(W0,W2),min(W1,W3)
         if Net[0] == 'subbit':
-
+            print("XXXXXXX",Net,Mod.nets[Net[1]])
             if (Mod.mems.keys()!=[])and(Net[1] in Mod.mems):
                 Dir,Wid1,Wid2=Mod.mems[Net[1]]
                 H = compute1(Wid1[0],Mod)
                 L = compute1(Wid1[1],Mod)
                 return H-L+1,H-L+1
+            Dir,Wid = Mod.nets[Net[1]]
+            if Wid[0] == 'packed':
+                H = compute1(Wid[2][0],Mod)
+                L = compute1(Wid[2][1],Mod)
+                return H-L+1,H-L+1
+                
+
+
 
             return 1,1
         if Net[0] == 'subbus':
