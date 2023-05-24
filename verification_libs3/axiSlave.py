@@ -47,6 +47,10 @@ class axiSlaveClass:
         self.force('bvalid',0)
         self.read_data_generator = None
 
+    def onFinish(self):
+        if self.busy(): self.busyWhy();
+
+
     def busy(self):
         if self.arqueue!=[]: return True
         if self.awqueue!=[]: return True
@@ -277,7 +281,7 @@ class axiSlaveClass:
                     self.bytex = (self.bytex+1) & 0xff
                 rdata = AA + rdata
                 logs.log_info(
-                'axiSlave taken from ram %d bytes  rdata=%s addr=%08x rid=%x' % (takenram, rdata, Addr, rid))
+                'axiSlave taken from ram %d bytes  rdata=%s addr=%08x rid=%x burst=%d' % (takenram, rdata, Addr, rid,burst))
         else:
             rdata = self.read_data_generator()
             rdata = hex(rdata)[2:]
