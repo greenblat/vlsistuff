@@ -138,6 +138,7 @@ def log_error(Text,Which=0,Tb=True,Pstack=False):
     log_err(Text,Which,Tb,Pstack)
 def log_err(Text,Which=0,Tb=True,Pstack=False):
     global Errors,printed_already
+    print("XXXXXXXX",Text)
     openFlog(Which)
 #    if (not Flogs[Which]):
 #        Flogs[Which]=open(PYMONLOG+str(Which),'w')

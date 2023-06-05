@@ -28,7 +28,6 @@ class apbSlave(logs.driverClass):
         return Act
 
     def action(self,Cmd):
-        logs.log_info('XXXXXXXX %s' % Cmd)
         wrds = Cmd.split()
         if wrds[0] == 'ready':
             self.READY = eval(wrds[1])
@@ -40,7 +39,7 @@ class apbSlave(logs.driverClass):
                 self.RAM[Addr] = Data
                 if self.Uart:
                     self.Uart('ram',Addr,Data)
-                logs.log_info('SLV "%s" RAM %s -> [%s]' % (self.Name,Data,Addr))
+                logs.log_info('SLV "%s" RAM %s -> [%s]' % (self.Name,hex(Data),hex(Addr)))
                 Addr += 4
             return
         logs.log_error('action not recogninzed "%s"'%Cmd)

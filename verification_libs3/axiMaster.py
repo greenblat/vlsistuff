@@ -185,13 +185,14 @@ class axiMasterClass:
 
     def busy(self,Why = False):
         if Why:
-            self.log_info_print('BUSY %s q=%d arq=%d awq=%d wq=%d bq=%d ' % (self.Name,len(self.Queue),len(self.arQueue),len(self.awQueue),len(self.wQueue),len(self.Bscore))) 
+            self.log_info_print('BUSY %s q=%d arq=%d awq=%d wq=%d bq=%d areads=%d ' % (
+                self.Name,len(self.Queue),len(self.arQueue),len(self.awQueue),len(self.wQueue),len(self.Bscore),len(self.AREADS))) 
         if self.Queue!=[]: return True
         if self.arQueue!=[]: return True
         if self.awQueue!=[]: return True
         if self.wQueue!=[]: return True
         if self.Bscore!=[]: return True
-        if self.AREADS!=[]: return True
+#        if self.AREADS!=[]: return True
         return False
 
     def makeRead(self,Burst,Len,Address,Size=4,Rid='none'):

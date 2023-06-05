@@ -13,14 +13,30 @@ from executes import try_and_load_module
 from cleanParameters import cleanParameters
 import logs
 
-def help_main(Env):
+def help_main(Env,Color=False):
     Mod = Env.Current
     if '-clean' in Env.params:
         cleanParameters(Mod)
-    dump_instance(Mod,'-simple' in Env.params,'-lower' in Env.params)
+
+
+    dump_instance(Mod,'-simple' in Env.params,'-lower' in Env.params,Color)
     dump_empty_module(Mod)
     if '-tb' in Env.params:
         prepare_tb(Mod)
+
+FWID = 63
+def makeIt64Bits(Mod):
+    for Net in Mod.nets:
+        Dir,Wid = Mod.nets[Net]
+        if ('input' in Dir) or ('output' in Dir):
+            if Wid == 0:
+                Mod.nets[Net] = Dir,(FWID,0)    
+            elif type(Wid) is tuple:
+                if type(Wid[0]) is int:
+                    Wid2 = ('packed',Wid,(FWID,0))
+                    Mod.nets[Net] = Dir,Wid2   
+
+
 
 def prepare_tb(Mod):
     Name = Mod.Module
@@ -64,7 +80,7 @@ PREPARE_STRING = '''
 
 
 
-def dump_instance(Mod,Simple=False,allPinsLowerCase = False):
+def dump_instance(Mod,Simple=False,allPinsLowerCase = False,Color = False):
     Name = Mod.Module
     Fout = open('%s.inst'%(Name),'w')
     if not Simple:
@@ -90,11 +106,45 @@ def dump_instance(Mod,Simple=False,allPinsLowerCase = False):
     Regs=''
     Sigs = list(Mod.nets.keys())
     Sigs.sort()
+    if Color:
+        try:
+            from voltages import DRVS
+            logs.log_info("voltages.py imported")
+        except:
+            logs.log_info("No voltages directions, reading file voltage.py failed")
+            DRVS = {}
     for Sig in Sigs:
         DirHL = Mod.nets[Sig]
         Dir1 = DirHL[0]
         if allPinsLowerCase: Sig = Sig.lower()
-        if Simple:
+        if Color:
+            Wid = DirHL[1]
+            if ('input' in Dir1):
+                Fout.write('wire %s %s;\n'%(wids(Wid),Sig))
+                if (type(Wid) is tuple) and (Wid[0] == 'packed'): 
+                    Bus = int(Wid[1][0]) - int(Wid[1][1]) + 1
+                    if Sig in DRVS:
+                        Kind,Volt = DRVS[Sig]
+                        for Ind in range(Bus):
+                            Fout.write('%s #(%s) drv_%s_%s ( %s[%s] );\n'%(Kind,Volt,Sig,Ind,Sig,Int))
+
+                    else:
+                        Fout.write('input_bus_driver #(%s,800) drv_%s ( %s );\n'%(Bus,Sig,Sig))
+                elif Sig in DRVS:
+                    Kind,Volt = DRVS[Sig]
+                    Fout.write('%s #(%s) drv_%s ( %s );\n'%(Kind,Volt,Sig,Sig))
+                else:                
+                    Fout.write('input_driver #(800) drv_%s ( %s );\n'%(Sig,Sig))
+            elif ('output' in Dir1):
+                Fout.write('wire %s %s;\n'%(wids(Wid),Sig))
+                if (type(Wid) is tuple)and (Wid[0] == 'packed'): 
+                    Bus = int(Wid[1][0]) - int(Wid[1][1]) + 1
+                    Fout.write('output_bus_monitor #(%s) drv_%s ( %s );\n'%(Bus,Sig,Sig))
+                else:
+                    Fout.write('output_monitor mon_%s ( %s;\n'%(Sig,Sig))
+
+
+        elif Simple:
             Fout.write('wire %s %s;\n'%(wids(DirHL[1]),Sig))
         elif ('input' in Dir1):
             Fout.write('reg %s %s;\n'%(wids(DirHL[1]),Sig))

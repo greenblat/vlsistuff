@@ -45,7 +45,10 @@
 Main : Mains ;
 Mains : Mains MainItem | MainItem  ;
 MainItem : Module | Define ;
-Module : module token Hparams Header Module_stuffs endmodule | module token Header Module_stuffs endmodule ;
+Module : 
+      module token Hparams Header Module_stuffs endmodule 
+    | module token Header Module_stuffs endmodule 
+    | module token Header endmodule ;
 
 Hparams : '#' '(' head_params ')' |  '#' '(' ')' ;
 Header : ';' | '(' Header_list ')' ';' | '(' ')' ';' ;

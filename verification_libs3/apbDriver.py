@@ -40,7 +40,7 @@ class apbDriver:
         if Monitors != -1:
             Monitors.append(self)
         self.Caller = False
-        logs.log_info('apbDriver  ver 27.apr.2021')
+        logs.log_info('apbDriver  ver 30.may.2023')
         self.noList = []
 #        self.force('psel',0)
 #        self.force('pwrite',0)
@@ -74,8 +74,9 @@ class apbDriver:
 
 
 
-    def busy(self):
-#        logs.log_info('q1 %d q0 %d seq1 %d seq0 %d %s' % (len(self.queue1),len(self.queue0),len(self.seq1),len(self.seq0),self.seq0))
+    def busy(self,Why=False):
+        if Why:
+            logs.log_info('q1 %d q0 %d seq1 %d seq0 %d %s' % (len(self.queue1),len(self.queue0),len(self.seq1),len(self.seq0),self.seq0))
         if self.queue1!=[]: return True
         if self.queue0!=[]: return True
         if self.seq0!=[]: return True
