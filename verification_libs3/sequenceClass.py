@@ -557,6 +557,7 @@ class sequenceClass:
             return
 
         elif wrds[0] in self.agents:
+            print("AAAAAWWWWW",wrds)
             if wrds[1]=='waitNotBusy':
                 self.waitNotBusy = wrds[0]
                 if len(wrds)>2:

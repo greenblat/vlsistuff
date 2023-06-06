@@ -116,43 +116,58 @@ def dump_instance(Mod,Simple=False,allPinsLowerCase = False,Color = False):
     for Sig in Sigs:
         DirHL = Mod.nets[Sig]
         Dir1 = DirHL[0]
+        Wid = DirHL[1]
         if allPinsLowerCase: Sig = Sig.lower()
-        if Color:
+        if Simple:
+            Fout.write('wire %s %s;\n'%(wids(DirHL[1]),Sig))
+        elif ('input' in Dir1):
+            if Color:
+                Fout.write('reg %s %s;\n'%(widscolor(DirHL[1]),Sig))
+                Fout.write('wire %s drv_%s;\n'%(wids(Wid),Sig))
+            else:
+                Fout.write('reg %s %s;\n'%(wids(DirHL[1]),Sig))
+            Regs +='    %s = 0;\n'%(Sig)
+        elif ('output' in Dir1):
+            if Color:
+                Fout.write('wire %s %s;\n'%(widscolor(DirHL[1]),Sig))
+                Fout.write('wire %s drv_%s;\n'%(wids(Wid),Sig))
+            else:
+                Fout.write('wire %s %s;\n'%(wids(DirHL[1]),Sig))
+        elif ('inout' in Dir1):
+            Fout.write('inout_driver drvx_%s(.io(%s),.dflt(1\'b0));\n'%(Sig,Sig))
+
+    if Color:
+        for Sig in Sigs:
+            DirHL = Mod.nets[Sig]
+            Dir1 = DirHL[0]
+            if allPinsLowerCase: Sig = Sig.lower()
             Wid = DirHL[1]
             if ('input' in Dir1):
-                Fout.write('wire %s %s;\n'%(wids(Wid),Sig))
+#                Fout.write('wire %s drv_%s;\n'%(wids(Wid),Sig))
                 if (type(Wid) is tuple) and (Wid[0] == 'packed'): 
                     Bus = int(Wid[1][0]) - int(Wid[1][1]) + 1
                     if Sig in DRVS:
                         Kind,Volt = DRVS[Sig]
-                        for Ind in range(Bus):
-                            Fout.write('%s #(%s) drv_%s_%s ( %s[%s] );\n'%(Kind,Volt,Sig,Ind,Sig,Int))
+                        for Ind in range(int(Wid[1][1]),int(Wid[1][0])+1):
+                            Fout.write('%s #(%s) drvx_%s_%s (.drv(drv_%s[%s]),.inx(%s[%s]) );\n'%(Kind,Volt,Sig,Ind,Sig,Ind,Sig,Ind))
 
                     else:
-                        Fout.write('input_bus_driver #(%s,800) drv_%s ( %s );\n'%(Bus,Sig,Sig))
+                        Fout.write('input_bus_driver #(%s,800) drvx_%s ( .drv(drv_%s),.inx(%s) );\n'%(Bus,Sig,Sig,Sig))
                 elif Sig in DRVS:
                     Kind,Volt = DRVS[Sig]
-                    Fout.write('%s #(%s) drv_%s ( %s );\n'%(Kind,Volt,Sig,Sig))
+                    Fout.write('%s #(%s) drvx_%s (.drv(drv_%s),.inx(%s) );\n'%(Kind,Volt,Sig,Sig,Sig))
                 else:                
-                    Fout.write('input_driver #(800) drv_%s ( %s );\n'%(Sig,Sig))
+                    Fout.write('input_driver #(800) drvi_%s (.drv(drv_%s),.inx(%s));\n'%(Sig,Sig,Sig))
             elif ('output' in Dir1):
-                Fout.write('wire %s %s;\n'%(wids(Wid),Sig))
+#                Fout.write('wire %s %s;\n'%(wids(Wid),Sig))
                 if (type(Wid) is tuple)and (Wid[0] == 'packed'): 
                     Bus = int(Wid[1][0]) - int(Wid[1][1]) + 1
-                    Fout.write('output_bus_monitor #(%s) drv_%s ( %s );\n'%(Bus,Sig,Sig))
+                    Fout.write('output_bus_monitor #(%s) drvx_%s (.drv(%s),.outx(%s) );\n'%(Bus,Sig,Sig,Sig))
                 else:
-                    Fout.write('output_monitor mon_%s ( %s;\n'%(Sig,Sig))
+                    Fout.write('output_monitor mon_%s (.drv(drv_%s),.outx(%s));\n'%(Sig,Sig,Sig))
 
 
-        elif Simple:
-            Fout.write('wire %s %s;\n'%(wids(DirHL[1]),Sig))
-        elif ('input' in Dir1):
-            Fout.write('reg %s %s;\n'%(wids(DirHL[1]),Sig))
-            Regs +='    %s = 0;\n'%(Sig)
-        elif ('output' in Dir1):
-            Fout.write('wire %s %s;\n'%(wids(DirHL[1]),Sig))
-        elif ('inout' in Dir1):
-            Fout.write('inout_driver drv_%s(.io(%s),.dflt(1\'b0));\n'%(Sig,Sig))
+
     if 'clk' not in Sigs:
         Fout.write('reg clk;\n')
     if 'rst_n' not in Sigs:
@@ -171,7 +186,10 @@ def dump_instance(Mod,Simple=False,allPinsLowerCase = False,Color = False):
             if '][' in Wids: Wids=''
             Ext = Sig
             if allPinsLowerCase: Ext = Sig.lower()
-            Fout.write('    %s.%s(%s%s)\n'%(Pref,Sig,Ext,Wids))
+            if Color:
+                Fout.write('    %s.%s(drv_%s%s)\n'%(Pref,Sig,Ext,Wids))
+            else:
+                Fout.write('    %s.%s(%s%s)\n'%(Pref,Sig,Ext,Wids))
             Pref=','
     Fout.write(');\n')
     if not Simple:
@@ -394,6 +412,17 @@ def is_double_def(Wid):
     return False
 
 
+def widscolor(Wid):
+    X = wids(Wid)
+    if '][' in X:
+        Ind = X.index('][')
+        X = X[:Ind+1]
+    elif '[' in X:
+        Ind = X.index('[')
+        X =  ''
+        
+        
+    return X
 
 def wids(Wid):
     if is_double_def(Wid):

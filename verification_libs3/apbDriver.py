@@ -109,6 +109,7 @@ class apbDriver:
         return Act
 
     def action(self,Cmd):
+        logs.log_info("APB ACTION %s %s" % (self.Name,Cmd))
         if not self.exists('pstrb'):
             self.noList.append('pstrb')
             logs.log_warning('NO PSTRB detected for apb master %s' % (self.Name))
