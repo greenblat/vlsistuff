@@ -95,7 +95,10 @@ class axiMonitorClass:
             self.WLEN -= 1
 
             if Last == 1:
-                (Addr,Len,Size,Burst,Id) = self.AWQUEUE.pop(0)
+                if self.AWQUEUE != []:
+                    (Addr,Len,Size,Burst,Id) = self.AWQUEUE.pop(0)
+                else:
+                    Id = 5
                 self.BEXPECT.append(Id)
                 if self.AWQUEUE == []:
                     self.WADDR = -1
