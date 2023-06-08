@@ -1,7 +1,11 @@
+# mockup of software. simple "assembly" opcodes play like a software.
 
-import string
+Verbose = False
+Verbose = True
+
 import logs
 import veri
+import sys
 
 
 class processorClass(logs.driverClass):
@@ -25,14 +29,18 @@ class processorClass(logs.driverClass):
         return X
 
     def run(self):
-        if self.Lines != []:
-            print("ADADA",self.state,self.progCounter,self.Lines[self.progCounter])
+        if (self.Lines != [])and Verbose:
+            logs.log_info("%s ADADA %s %s line=|%s| wait=%s" % (self.Dut,self.state,self.progCounter,self.Lines[self.progCounter][:-1],self.waiting))
+        xst = self.state+'   '
+        xval = str(ord(xst[3]) + (ord(xst[2])<<8)+ (ord(xst[1])<<16)+(ord(xst[    0])<<24))
+        veri.force('tb.xst'+self.Apbs,xval)
+        veri.force('tb.lin'+self.Apbs,str(self.progCounter))
         if self.state == 'idle' : return
         if self.waiting>0:
             self.waiting -= 1
             return
         if self.state == 'wait':
-            self.state = 'idle'
+            self.state = 'run'
             return
         if self.state == 'wait_for_interrupt':
             if self.peek('%s.int_to_arm' % self.Dut) == 1:
@@ -49,6 +57,11 @@ class processorClass(logs.driverClass):
                 self.Vars[self.saveTo] = Val
             self.state = 'run'
             return
+        elif self.state == 'ram':
+            Aobj = self.SeqObj.agents[self.Apbm]
+            if self.SeqObj.agents[self.Apbm].busy(): return
+            self.state = 'run'
+            return
 
     def execute(self):
         Line = self.Lines[self.progCounter]
@@ -56,9 +69,20 @@ class processorClass(logs.driverClass):
         if wrds == []:
             self.progCounter += 1
             return
+        if wrds[0] == 'print':
+            Res = ''
+            for X in wrds[1:]:
+                if X in self.Vars:
+                    Res += ' '+X+'='+hex(self.Vars[X])
+                else:
+                    Res += ' '+X
+            logs.log_info("@%s: PR: %s" % (self.Dut,Res))
+            self.progCounter += 1
+            return
         if wrds[0] == 'wait':
             self.waiting = self.lcleval(wrds[1])
             self.state = 'wait'
+            self.progCounter += 1
             return
         if wrds[0] == 'return':
             self.progCounter = self.stack.pop(-1)
@@ -69,17 +93,42 @@ class processorClass(logs.driverClass):
             return
         if wrds[0] == 'goto':
             self.jumpTo(wrds[1])
+            return
+        if wrds[0] == 'peek':
+            X = self.peek(wrds[1])
+            self.Vars[wrds[1]] = X
         if wrds[0] == 'if':
             Eval = self.lcleval(wrds[1])
             if Eval:
-                self.jumpTo(wrds[2])
+                if wrds[2] == 'goto': 
+                    self.jumpTo(wrds[3])
+                    return
+                elif wrds[2] == 'call':
+                    self.stack.append(self.progCounter+1)
+                    self.jumpTo(wrds[3])
+                    return
+                else:
+                    logs.log_error("@s: if wrds[2]=%s wrds |%a|s" % (self.Dut,wrds[2],' '.join(wrds)))
+                    self.progCounter += 1
+                    sys.exit()
+                    return
             else:
                 self.progCounter += 1
+                return
 
-        if wrds[1] == '=':
+
+        if (len(wrds)>2) and (wrds[1] == '='):
             Val = self.lcleval(' '.join(wrds[2:]))
             self.Vars[wrds[0]] = Val
             self.progCounter += 1
+            return
+
+        if wrds[0] == 'ram':
+            self.state = 'ram'
+            self.progCounter += 1
+            Addr = self.lcleval(wrds[1])
+            Data = self.lcleval(wrds[2])
+            self.SeqObj.agents[self.Apbm].action('ram %s %s' % (hex(Addr),hex(Data)))
             return
 
         if wrds[0] == 'apb':
@@ -104,7 +153,8 @@ class processorClass(logs.driverClass):
 
         if wrds[0] == 'stop':
             self.state = 'wait_for_interrupt'
-            self.progCounter = 0
+            self.buildLabels(wrds[1])
+            self.progCounter = self.Labels[wrds[1]]
             return
         if wrds[0] == 'idle':
             self.state = 'idle'
@@ -114,8 +164,8 @@ class processorClass(logs.driverClass):
     def jumpTo(self,Label):
         if Label not in self.Labels:
             for ind,Line in enumerate(self.Lines):
-                wrds = Lines.split()
-                if wrds[0] == 'label':
+                wrds = Line.split()
+                if (wrds!=[]) and (wrds[0] == 'label'):
                     self.Labels[wrds[1]] = ind
         if Label in self.Labels:
             self.progCounter = self.Labels[Label]
@@ -124,8 +174,16 @@ class processorClass(logs.driverClass):
             logs.log_error('jumpTo %s failed' % Label)
             sys.exit()
 
+    def buildLabels(self,Label):
+        if Label not in self.Labels:
+            for ind,Line in enumerate(self.Lines):
+                wrds = Line.split()
+                if (wrds!=[]) and (wrds[0] == 'label'):
+                    self.Labels[wrds[1]] = ind
+
+
     def busy(self):
-        return self.state != 'idle' 
+        return (self.state not in ['idle','wait_for_interrupt']) 
     def onFinish(self):
         return
 
@@ -135,6 +193,9 @@ class processorClass(logs.driverClass):
         if wrds[0] == 'program':
             self.readProgram(wrds[1])
             logs.log_info('Program loaded %s %d lines' % (wrds[1],len(self.Lines)))
+            return
+        if wrds[0] == 'idle':
+            self.state = 'idle'
             return
         if wrds[0] == 'run':
             if self.Lines == []:

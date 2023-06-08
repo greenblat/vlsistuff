@@ -84,7 +84,10 @@ class axiMonitorClass:
             Data = self.peek('wdata')
             Wstrb = self.peek('wstrb')
             Last = self.peek('wlast')
-            (Addr,Len,Size,Burst,Id) = self.AWQUEUE[0]
+            if self.AWQUEUE != []:
+                (Addr,Len,Size,Burst,Id) = self.AWQUEUE[0]
+            else:
+                (Addr,Len,Size,Burst,Id) = (0,0,0,0,0)
             self.store(self.RAM, self.WADDR,Data,Wstrb)
             self.log_info_msg('AXIMON %s WRITE ad=0x%x wlen=%d data=0x%x (%d) wstrb=%x' % (self.Name,self.WADDR,self.WLEN,Data,Data,Wstrb),Which=self.Logs)
             if Burst == 1:
