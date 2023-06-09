@@ -59,6 +59,7 @@ class sequenceClass:
         self.Translates['peek'] = self.seq_peek
         self.Translates['float2int'] = logs.float2binary
         self.Timed = {}
+        self.Loops = []
         self.AGENTS = AGENTS
         for NickObj in AGENTS:
             if type(NickObj) is int:
@@ -474,6 +475,24 @@ class sequenceClass:
             self.jumpLabel(Sub)
             self.Ptr += 1
             return
+        elif wrds[0] == 'for':
+            X = wrds[1].replace('=',' = ').split()
+            if len(X) == 3:
+                self.Translates[X[0]] = self.eval(X[2])
+            self.Loops.append((self.Ptr,wrds[2],wrds[3]))
+
+        elif wrds[0] == 'endfor':
+            Ptr,Cond,End = self.Loops.pop(0)
+            if self.eval(Cond):
+                X = End.replace('=',' = ').split()
+                if len(X) == 3:
+                    self.Translates[X[0]] = self.eval(X[2])
+                self.Loops.append((Ptr,Cond,End))
+                self.Ptr = Ptr+1
+                return
+            self.Ptr += 1
+            return
+
         elif wrds[0] == 'goto':
             Lbl = wrds[1]
             self.jumpLabel(Lbl)
