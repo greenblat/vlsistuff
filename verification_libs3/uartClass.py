@@ -8,7 +8,7 @@ class uartClass(logs.driverClass):
         logs.driverClass.__init__(self,Path,Monitors)
         self.rxd = rxd
         self.txd = txd
-        self.baudRate = 100
+        self.baudRate = 100*32
         self.txQueue = []
         self.txWaiting=0
 
@@ -20,7 +20,9 @@ class uartClass(logs.driverClass):
         self.RxStr = ''
 
     def busy(self,Why=False):
-        return (self.txQueue != []) or (self.rxQueue != [])
+        if Why:
+            logs.log_info("UART BUSY %s %s %s %s" % (len(self.txQueue),len(self.rxQueue),(self.txWaiting>0),(self.rxWaiting>0)))
+        return (self.txQueue != []) or (self.rxQueue != []) or (self.txWaiting>0) or (self.rxWaiting>0)
       
     def run(self):
         self.runTx()
@@ -66,6 +68,7 @@ class uartClass(logs.driverClass):
         for II in range(0,8):
             Val = (Byte>>II)&1
             self.txQueue.append(Val)
+        logs.log_info('txQueue %02x   %d' % (Byte,self.baudRate))
         self.txQueue.append(1)
         self.txQueue.append(1)
         self.txQueue.append(1)
@@ -88,10 +91,14 @@ class uartClass(logs.driverClass):
     def runRx(self):
         if self.rxWaiting>0:
             self.rxWaiting -= 1
+            veri.force('tb.midbit','0')
 #            if (self.rxWaiting == 1):
 #                logs.log_info("rxwait %s %s " % (self.rxState,self.rxByte))
             return
-        
+        if self.rxState in ['bitx','bit0','stop']:
+            veri.force('tb.midbit','1')
+        else:
+            veri.force('tb.midbit','0')
         if self.rxState=='idle':
             Rxd = self.peek(self.txd)
             if Rxd==0:
