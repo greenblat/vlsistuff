@@ -90,9 +90,9 @@ class axiSlaveClass:
         if Wrds == []:
             pass
         elif Wrds[0] == 'verbose':
-            if Wrds[1] in ['yes','1']:
+            if Wrds[1] in ['yes','1','on']:
                 self.verbose = True
-            elif Wrds[1] in ['no','0']:
+            elif Wrds[1] in ['no','0','off']:
                 self.verbose = False
             else:
                 logs.log_error('verbose recognozes:  yes 1  or no 0')
