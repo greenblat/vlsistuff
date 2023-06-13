@@ -87,7 +87,7 @@ class axiMonitorClass:
             if self.AWQUEUE != []:
                 (Addr,Len,Size,Burst,Id) = self.AWQUEUE[0]
             else:
-                logs.wrong("MON_W got empty AWQUQUE")
+                logs.log_wrong("MON_W got empty AWQUQUE")
                 (Addr,Len,Size,Burst,Id) = (0,0,0,0,5)
             self.store(self.RAM, self.WADDR,Data,Wstrb)
             self.log_info_msg('AXIMON %s WRITE ad=0x%x wlen=%d data=0x%x (%d) wstrb=%x' % (self.Name,self.WADDR,self.WLEN,Data,Data,Wstrb),Which=self.Logs)
@@ -99,7 +99,7 @@ class axiMonitorClass:
                 if self.AWQUEUE != []:
                     (Addr,Len,Size,Burst,Id) = self.AWQUEUE.pop(0)
                 else:
-                    logs.wrong("MON_W (2)  got empty AWQUQUE")
+                    logs.log_wrong("MON_W (2)  got empty AWQUQUE")
                     Id = 5
                 self.BEXPECT.append(Id)
                 if self.AWQUEUE == []:
