@@ -47,6 +47,7 @@ class axiSlaveClass:
         self.force('bvalid',0)
         self.read_data_generator = None
         self.verbose = True
+        self.errorReadFromUnknown = False
 
     def onFinish(self):
         if self.busy(): self.busyWhy();
@@ -94,6 +95,13 @@ class axiSlaveClass:
                 self.verbose = True
             elif Wrds[1] in ['no','0','off']:
                 self.verbose = False
+            else:
+                logs.log_error('verbose recognozes:  yes 1  or no 0')
+        elif Wrds[0] == 'errorReadFromUnknown':
+            if Wrds[1] in ['yes','1','on']:
+                self.errorReadFromUnknown = True
+            elif Wrds[1] in ['no','0','off']:
+                self.errorReadFromUnknown = False
             else:
                 logs.log_error('verbose recognozes:  yes 1  or no 0')
 
@@ -287,6 +295,8 @@ class axiSlaveClass:
                     takenram += 1
                 else:
                     AA = '%02x'%(self.bytex)
+                    if self.errorReadFromUnknown:
+                        logs.log_error("READING FROM UN INIT RAM address=%x" % Add)
                     self.bytex = (self.bytex+1) & 0xff
                 rdata = AA + rdata
                 logs.log_info(
