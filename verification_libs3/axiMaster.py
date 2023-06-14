@@ -192,7 +192,7 @@ class axiMasterClass:
         if self.awQueue!=[]: return True
         if self.wQueue!=[]: return True
         if self.Bscore!=[]: return True
-#        if self.AREADS!=[]: return True
+        if self.AREADS!=[]: return True
         return False
 
     def makeRead(self,Burst,Len,Address,Size=4,Rid='none'):
