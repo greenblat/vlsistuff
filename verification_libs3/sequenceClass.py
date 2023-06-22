@@ -60,6 +60,7 @@ class sequenceClass:
         self.Translates['float2int'] = logs.float2binary
         self.Timed = {}
         self.Loops = []
+        self.Break = False 
         self.AGENTS = AGENTS
         for NickObj in AGENTS:
             if type(NickObj) is int:
@@ -146,12 +147,19 @@ class sequenceClass:
         File.close()
         for lnum,Line in enumerate(List):
             if len(Line)>1:
-                self.Sequence.append((Line[:-1],lnum))
+                if Line[-1] == '\n': Line = Line[:-1]
+                self.Sequence.append((Line,lnum))
         self.searchPath.append(os.path.abspath(os.path.dirname(Filename)))
         self.workIncludes()
         self.definesPreRun()
         self.pythonCodes()
         self.extractSequences()
+        logs.log_info("SUBS %s" % str(list(self.Subs.keys())))
+        for Sub in self.Subs:
+            List = self.Subs[Sub]
+            logs.log_info('SUB %s %s' % (Sub,List))
+        for ind,Line in enumerate(self.Sequence):
+            logs.log_info('SEQ %d %s' % (ind,Line))
 
     def pythonCodes(self):
         Pythons = []
@@ -342,10 +350,25 @@ class sequenceClass:
                 self.seq_line(Line,0)
                 
             
-
+    def runBreak(self):
+        Txt = input("br:") 
+        wrds = Txt.split()
+        if wrds==[]: return
+        if wrds[0] in ['return','resume']:
+            self.Break = False
+            return
+        self.seq_line(Txt,-1)
+        
 
 
     def run(self):
+        if self.Break: 
+            self.runSons()
+            if self.waiting>0:
+                self.waiting -= 1
+                return True
+            self.runBreak()
+            return
         self.runSons()
         self.runTimed()
         if self.waiting>0:
@@ -404,6 +427,12 @@ class sequenceClass:
             Cmd = ' '.join(wrds[1:])
             exec(Cmd)
             return True
+        if wrds[0] == 'break':
+            self.Break = lnum
+            return
+
+
+
         if wrds[0] == 'define':
             Var = wrds[1]
             if len(wrds)==3:
@@ -576,8 +605,7 @@ class sequenceClass:
             return
 
         elif wrds[0] in self.agents:
-            print("AAAAAWWWWW",wrds)
-            if wrds[1]=='waitNotBusy':
+            if (len(wrds)>1) and (wrds[1]=='waitNotBusy'):
                 self.waitNotBusy = wrds[0]
                 if len(wrds)>2:
                     self.Guardian = eval(wrds[2])
@@ -602,7 +630,7 @@ class sequenceClass:
             BB = makeExpr(wrds[1])
             Val = self.evalExpr(BB)
             logs.log_ensure(Val,'CHECK of %s == %s  vars=%s %s '%(wrds[1],Val,self.DEFS,' '.join(wrds[2:]))) 
-        elif (wrds[0] in ['correct','wrong','print']):
+        elif (wrds[0] in ['correct','wrong','print','say']):
             Res = ''
             for Wrd in wrds[1:]:
                 if acceptablePath(Wrd) and self.peek(Wrd):
@@ -623,6 +651,8 @@ class sequenceClass:
                 logs.log_correct('   %s'%Res)
             elif wrds[0]=='wrong':
                 logs.log_wrong('   %s'%Res)
+            elif (wrds[0] == 'say'):
+                os.system('say  -v Samantha %s' % Res)
             else:
                 logs.log_info('PRINT %s'%Res)
             return True

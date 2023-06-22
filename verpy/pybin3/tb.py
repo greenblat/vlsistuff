@@ -13,7 +13,9 @@ def help_main(Env):
         print('COMP FILE EXISTS. DONT WANT TO OVERWRITE. EXITING')
         return
         
-    if '-color' in Env.params:
+    if '-volt' in Env.params:
+        dump_instance.help_main(Env,False,True)
+    elif '-color' in Env.params:
         dump_instance.help_main(Env,'color')
     else:
         dump_instance.help_main(Env)

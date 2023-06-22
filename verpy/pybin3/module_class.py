@@ -46,6 +46,29 @@ class module_class:
                 self.stat_types[Type]=1
             else:
                 self.stat_types[Type] +=1
+
+    def sig_width(self,Net):
+        if Net in self.nets:
+            _,Wid = self.nets[Net]
+            if type(Wid) is int:
+                return 1
+            if len(Wid) == 2:
+                H = self.compute_int(Wid[0])
+                L = self.compute_int(Wid[1])
+                return abs(H-L)+1
+            if Wid[0] == 'packed':
+                H = self.compute_int(Wid[1][0])
+                L = self.compute_int(Wid[1][1])
+                W0 = abs(H-L)+1
+                H = self.compute_int(Wid[2][0])
+                L = self.compute_int(Wid[2][1])
+                W1 = abs(H-L)+1
+                return W0 * W1
+            logs.log_error('sig_width on %s got %s wid' % (Net,Wid))
+
+        return 1
+
+
     def pr_expr(self,Expr):
         return pr_expr(Expr)
     def add_interface(self,Type,Inst,Dir):
@@ -1390,7 +1413,7 @@ class instance_class:
     def add_param(self,Prm,Val):
         self.params[Prm]=Val
     def dump(self,File):
-        File.write('instance %s %s %s\n'%(self.Type,self.Name,self.params))
+        File.write('instance %s %s %s\n'%(self.Type,hashit(self.Name),self.params))
         for Pin in self.conns:
             File.write('      conn pin=%s sig=%s\n'%(Pin,self.conns[Pin]))
 
@@ -1398,7 +1421,7 @@ class instance_class:
     def dump_verilog(self,Fout):
         Prms = pr_inst_params(self.params)
         Many = pr_width_param(self.params)
-        Fout.write('%s %s %s %s'%(pr_expr(self.Type),Prms,pr_expr(self.Name),Many))
+        Fout.write('%s %s %s %s'%(pr_expr(self.Type),Prms,simplestr(pr_expr(self.Name)),Many))
         if self.conns.keys()==[]:
             Fout.write(';\n')
             return
@@ -2242,4 +2265,7 @@ def parseBus(Name):
     return Name
 
 
-
+def simplestr(Txt):
+    X = Txt.replace('[','_')
+    X = X.replace(']','_')
+    return X

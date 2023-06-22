@@ -15,6 +15,7 @@ def main():
     Top = Way[-1][:-3]
     Topo = importlib.import_module(Top)
     Modules[Top] = Topo.hld
+    print("DIRDIR",Top,dir(Topo.hld))
     loadDeep([Top],[Top])
     createMissings()
     Instances[Top] = Top
@@ -38,6 +39,7 @@ class holderClass:
         self.INPUTS = []
         self.OUTPUTS = []
         self.SONS = []
+        self.DRIVEN = {}
 
 
 
@@ -109,7 +111,14 @@ def printPath(Kind,Mod,Path):
     Pr = '%s %s %d / %d :    %s -> %s \n' % (Kind,Mod,len(Path),Lng,'.'.join(Path[0]),'.'.join(Path[-1]))
     for PP in Path:
         X = '.'.join(PP)
-        Pr += '    %s\n' % X
+        Add = ''
+        if len(PP)>=3:
+            Sig = PP[-1]
+            Where = PP[-3]
+            print("XXXX",Sig,Where, Sig in Modules[Where].DRIVEN)
+            if Sig in Modules[Where].DRIVEN:
+                Add = Modules[Where].DRIVEN[Sig]
+        Pr += '    %s   %s\n' % (X,Add)
     logs.log_info(Pr)
     PATHS.append( (len(Path),Pr))
 

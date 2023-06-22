@@ -13,13 +13,13 @@ from executes import try_and_load_module
 from cleanParameters import cleanParameters
 import logs
 
-def help_main(Env,Color=False):
+def help_main(Env,Color=False,Volt=False):
     Mod = Env.Current
     if '-clean' in Env.params:
         cleanParameters(Mod)
 
 
-    dump_instance(Mod,'-simple' in Env.params,'-lower' in Env.params,Color)
+    dump_instance(Env,Mod,'-simple' in Env.params,'-lower' in Env.params,Color,Volt)
     dump_empty_module(Mod)
     if '-tb' in Env.params:
         prepare_tb(Mod)
@@ -80,7 +80,7 @@ PREPARE_STRING = '''
 
 
 
-def dump_instance(Mod,Simple=False,allPinsLowerCase = False,Color = False):
+def dump_instance(Env,Mod,Simple=False,allPinsLowerCase = False,Color = False,Volt = False):
     Name = Mod.Module
     Fout = open('%s.inst'%(Name),'w')
     if not Simple:
@@ -106,7 +106,10 @@ def dump_instance(Mod,Simple=False,allPinsLowerCase = False,Color = False):
     Regs=''
     Sigs = list(Mod.nets.keys())
     Sigs.sort()
-    if Color:
+    if Volt or Color:
+        if '-voltages' in Env.params:
+            Fname = Env.params['-voltages']
+            os.system('ln -sf %s voltages.py' % Fname[0])
         try:
             from voltages import DRVS
             logs.log_info("voltages.py imported")
@@ -121,16 +124,35 @@ def dump_instance(Mod,Simple=False,allPinsLowerCase = False,Color = False):
         if Simple:
             Fout.write('wire %s %s;\n'%(wids(DirHL[1]),Sig))
         elif ('input' in Dir1):
-            if Color:
-                Fout.write('reg %s %s;\n'%(widscolor(DirHL[1]),Sig))
-                Fout.write('wire %s drv_%s;\n'%(wids(Wid),Sig))
+            if Volt:
+                if isVolt(DRVS,Sig):
+                    Kind,Voltx = DRVS[Sig]
+                    Fout.write('reg %s %s = %s;\n'%(wids(Wid),Sig,Voltx))
+                else:
+                    Fout.write('reg %s %s;\n'%(wids(DirHL[1]),Sig))
+            elif Color:
+                if isVolt(DRVS,Sig):
+                    Fout.write('reg %s [15:0] %s;\n'%(widscolor(DirHL[1]),Sig))
+                    Fout.write('reg %s en_%s;\n'%(widscolor(DirHL[1]),Sig))
+                    Fout.write('wire %s drv_%s;\n'%(wids(Wid),Sig))
+                else:
+                    Fout.write('reg %s %s;\n'%(widscolor(DirHL[1]),Sig))
+                    Fout.write('wire %s drv_%s;\n'%(wids(Wid),Sig))
             else:
                 Fout.write('reg %s %s;\n'%(wids(DirHL[1]),Sig))
-            Regs +='    %s = 0;\n'%(Sig)
+            if not Volt or not isVolt(DRVS,Sig):
+                Regs +='    %s = 0;\n'%(Sig)
         elif ('output' in Dir1):
-            if Color:
-                Fout.write('wire %s %s;\n'%(widscolor(DirHL[1]),Sig))
-                Fout.write('wire %s drv_%s;\n'%(wids(Wid),Sig))
+            if Volt:
+                Fout.write('wire %s %s;\n'%(wids(Wid),Sig))
+            elif Color:
+                if isVolt(DRVS,Sig):
+                    Fout.write('wire %s [15:0] %s;\n'%(widscolor(DirHL[1]),Sig))
+                    Fout.write('wire %s  %s_en;\n'%(widscolor(DirHL[1]),Sig))
+                    Fout.write('wire %s drv_%s;\n'%(wids(Wid),Sig))
+                else:
+                    Fout.write('wire %s %s;\n'%(widscolor(DirHL[1]),Sig))
+                    Fout.write('wire %s drv_%s;\n'%(wids(Wid),Sig))
             else:
                 Fout.write('wire %s %s;\n'%(wids(DirHL[1]),Sig))
         elif ('inout' in Dir1):
@@ -149,20 +171,32 @@ def dump_instance(Mod,Simple=False,allPinsLowerCase = False,Color = False):
                     if Sig in DRVS:
                         Kind,Volt = DRVS[Sig]
                         for Ind in range(int(Wid[1][1]),int(Wid[1][0])+1):
-                            Fout.write('%s #(%s) drvx_%s_%s (.drv(drv_%s[%s]),.inx(%s[%s]) );\n'%(Kind,Volt,Sig,Ind,Sig,Ind,Sig,Ind))
+                            if isVolt(DRVS,Sig):
+                                Fout.write("initial begin %s[%s] = %s; en_%s[%s] = %s; end\n" % (Sig,Ind,Volt,Sig,Ind,int(Volt>400)))
+                                Fout.write('%s #(%s) drvx_%s_%s (.drv(drv_%s[%s]),.voltin(%s[%s]),.inx(en_%s[%s]) );\n'%(Kind,Volt,Sig,Ind,Sig,Ind,Sig,Ind,Sig,Ind))
+                            else:
+                                Fout.write('%s #(%s) drvx_%s_%s (.drv(drv_%s[%s]),.inx(%s[%s]) );\n'%(Kind,Volt,Sig,Ind,Sig,Ind,Sig,Ind))
 
                     else:
                         Fout.write('input_bus_driver #(%s,800) drvx_%s ( .drv(drv_%s),.inx(%s) );\n'%(Bus,Sig,Sig,Sig))
                 elif Sig in DRVS:
                     Kind,Volt = DRVS[Sig]
-                    Fout.write('%s #(%s) drvx_%s (.drv(drv_%s),.inx(%s) );\n'%(Kind,Volt,Sig,Sig,Sig))
+                    if isVolt(DRVS,Sig):
+                        Fout.write('initial begin %s = %s; en_%s = %s; end\n' % (Sig,Volt,Sig,int(Volt>400)))
+                        Fout.write('%s #(%s) drvx_%s (.drv(drv_%s),.voltin(%s),.inx(en_%s) );\n'%(Kind,Volt,Sig,Sig,Sig,Sig))
+                    else:
+                        Fout.write('%s #(%s) drvx_%s (.drv(drv_%s),.inx(%s) );\n'%(Kind,Volt,Sig,Sig,Sig))
                 else:                
                     Fout.write('input_driver #(800) drvi_%s (.drv(drv_%s),.inx(%s));\n'%(Sig,Sig,Sig))
             elif ('output' in Dir1):
-#                Fout.write('wire %s %s;\n'%(wids(Wid),Sig))
                 if (type(Wid) is tuple)and (Wid[0] == 'packed'): 
                     Bus = int(Wid[1][0]) - int(Wid[1][1]) + 1
-                    Fout.write('output_bus_monitor #(%s) drvx_%s (.drv(%s),.outx(%s) );\n'%(Bus,Sig,Sig,Sig))
+                    if isVolt(DRVS,Sig):
+                        Fout.write('output_volt_bus_monitor #(%s) drvx_%s (.drv(drv_%s),.outx(%s_en),.voltout(%s) );\n'%(Bus,Sig,Sig,Sig,Sig))
+                    else:
+                        Fout.write('output_bus_monitor #(%s) drvx_%s (.drv(drv_%s),.outx(%s) );\n'%(Bus,Sig,Sig,Sig))
+                elif isVolt(DRVS,Sig):
+                    Fout.write('output_volt_monitor mon_%s (.drv(drv_%s),.outx(en_%s),.voltout(%s));\n'%(Sig,Sig,Sig,Sig))
                 else:
                     Fout.write('output_monitor mon_%s (.drv(drv_%s),.outx(%s));\n'%(Sig,Sig,Sig))
 
@@ -197,7 +231,7 @@ def dump_instance(Mod,Simple=False,allPinsLowerCase = False,Color = False):
         Fout.write('endmodule\n')
         Fout.write(INOUT_DRIVER)
     Fout.close()
-    Fout = open('%s.inst.py'%(Name),'w')
+    Fout = open('verilog.py','w')
     Fout.write(String2)
     Fout.write('def cucu():  # list of all interface signals, just to help You find the names\n')
     for Sig in Sigs:
@@ -215,6 +249,14 @@ def dump_instance(Mod,Simple=False,allPinsLowerCase = False,Color = False):
             Fout.write("    %s = logs.peek('tb.%s')\n"%(Sig,Sig))
     Fout.close()
     
+def isVolt(DRVS,Sig):
+    if Sig not in DRVS: return False
+    Kind,Volt = DRVS[Sig]
+    return  'volt' in Kind
+
+
+
+
 PLUSARG = '''
 reg [1023:0] testname;
 initial begin

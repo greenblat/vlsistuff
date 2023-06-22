@@ -1,6 +1,7 @@
 
 import os
 import logs
+from module_class import hashit
 STRING = '''
 class holder:
     def __init__(self):
@@ -33,6 +34,7 @@ hld = holder()
 
 ARCSBK = {}
 ARCSFW = {}
+DRIVEN = {}
 CONNS = []
 TERMS = []
 INPUTS = []
@@ -43,7 +45,8 @@ from pprint import pprint
 import pprint
 from module_class import support_set
 def help_main(Env):
-    global ARCSBK ,ARCSFW ,CONNS ,TERMS ,INPUTS ,OUTPUTS ,SONS, COSTS
+    global ARCSBK ,ARCSFW ,CONNS ,TERMS ,INPUTS ,OUTPUTS ,SONS, COSTS, DRIVEN
+
 
     for Module in Env.Modules:
         ARCSBK = {}
@@ -54,6 +57,7 @@ def help_main(Env):
         OUTPUTS = []
         SONS = []
         COSTS = {}
+        DRIVEN = {}
         buildOne(Env.Modules[Module])
 
 
@@ -71,6 +75,7 @@ def buildOne(Mod):
     out.write('hld.OUTPUTS = %s\n'%pprint.pformat(OUTPUTS))
     out.write('hld.SONS = %s\n'%pprint.pformat(SONS))
     out.write('hld.COSTS = %s\n'%pprint.pformat(COSTS))
+    out.write('hld.DRIVEN = %s\n'%pprint.pformat(DRIVEN))
     out.close()
 
 def getCosts(Src):
@@ -190,6 +195,18 @@ def cleanNons(Lst,Nons):
     return Lst
 
 
+GATELEVEL = {}
+GATELEVEL['EFX_ADD'] = [('CI','I0','I1'),('CO','O')]
+GATELEVEL['EFX_LUT4'] = [('I0','I1','I2','I3'),('O')]
+GATELEVEL['EFX_MULT'] = [('A', 'B', 'CEA', 'CEB','RSTA', 'RSTB'), ('CEO', 'O', 'RSTO'),('CLK')]
+GATELEVEL['EFX_FF'] = [('CE', 'D'), ('Q'),('CLK','SR')]
+GATELEVEL['EFX_GBUFCE'] = [('CE', 'I'), ('O')]
+GATELEVEL['EFX_RAM_5K'] = [('RADDR', 'RE', 'WADDR','WE','WDATA','WCLKE'),('RDATA'),('RCLK','WCLK')]
+
+if os.path.exists('gatelevel.py'):
+    print('importing gatelevel')
+    from gatelevel import GATELEVEL
+
 
 def builds(Mod):
     Params = []
@@ -204,12 +221,25 @@ def builds(Mod):
                 
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
-        SONS.append((Inst,Obj.Type))
-        for Pin in Obj.conns:
-            Sig = Obj.conns[Pin]
-            SetS = support_set(Sig,False)
-            for Src in SetS:
-                CONNS.append((Inst,Pin,Src))
+        if Obj.Type in GATELEVEL:
+            GL = GATELEVEL[Obj.Type]
+            if len(GL) == 2:
+                Outs,Inps = whatConnected(Obj,GL[1]),whatConnected(Obj,GL[0])
+                adds(Outs,Inps,[])
+                driven(Outs,Inst,Obj.Type)
+            elif len(GL) == 3:
+                Outs,Inps = whatConnected(Obj,GL[1]),whatConnected(Obj,GL[0])
+                for D in Inps: 
+                    if D not in TERMS: TERMS.append(D)
+
+
+        else:
+            SONS.append((Inst,Obj.Type))
+            for Pin in Obj.conns:
+                Sig = Obj.conns[Pin]
+                SetS = support_set(Sig,False)
+                for Src in SetS:
+                    CONNS.append((Inst,Pin,Src))
     for _,Alw,_ in Mod.alwayses:
         travelAlw(Alw,[],Params,Mod)
 
@@ -217,6 +247,20 @@ def builds(Mod):
         Dir,_ = Mod.nets[Net]
         if 'output' in Dir: OUTPUTS.append(Net)
         if 'input' in Dir: INPUTS.append(Net)
+
+def whatConnected(Obj,Pins):
+    Res = []
+    for Pin in Pins:
+        if Pin in Obj.conns:
+            Sig = Obj.conns[Pin]
+            if Sig[0] not in ['0','1']:
+                Res.append(Sig)
+    return Res
+
+def driven(Outs,Inst,Type):
+    for Out in Outs:
+        DRIVEN[hashit(Out)] = (Inst,Type)
+
 
 
 def travelAlw(Alw,Cond,Params,Mod):
