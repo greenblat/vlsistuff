@@ -46,6 +46,9 @@ class sequenceClass:
         self.Sequence = []
         logs.log_info('INCLUDES STARTED')
         self.workIncludes()
+        self.workIncludes()
+        self.workIncludes()
+        self.workIncludes()
         logs.log_info('INCLUDES DONE')
         self.waiting = 0
         self.Guardian = 0   # against wait too long.
@@ -151,6 +154,9 @@ class sequenceClass:
                 self.Sequence.append((Line,lnum))
         self.searchPath.append(os.path.abspath(os.path.dirname(Filename)))
         self.workIncludes()
+        self.workIncludes()
+        self.workIncludes()
+        self.workIncludes()
         self.definesPreRun()
         self.pythonCodes()
         self.extractSequences()
@@ -159,7 +165,11 @@ class sequenceClass:
             List = self.Subs[Sub]
             logs.log_info('SUB %s %s' % (Sub,List))
         for ind,Line in enumerate(self.Sequence):
-            logs.log_info('SEQ %d %s' % (ind,Line))
+            wrds = Line[0].split()
+            if (wrds!=[])and(wrds[0] in ['include']):
+                logs.log_error('SEQ INCLUDE %d %s' % (ind,Line))
+            else:
+                logs.log_info('SEQ %d %s' % (ind,Line))
 
     def pythonCodes(self):
         Pythons = []
@@ -407,6 +417,7 @@ class sequenceClass:
         if '//' in Line: Line = Line[:Line.index('//')]
         logs.log_write('sequence: %s'%Line,'seq')
 #        print(lnum,Line)
+        veri.force('tb.seqptr',str(lnum))
         self.seq_line(Line,lnum)
 
     def seq_line(self,Line,lnum):
@@ -586,7 +597,9 @@ class sequenceClass:
             return True
 
         elif (wrds[0] == 'seq'):  # commands to myself
-            if wrds[1] == 'import':
+            if wrds[1] == 'listing':
+                veri.listing('tb','100','deep.list')
+            elif wrds[1] == 'import':
                 Module = wrds[2]
                 if Module.endswith('.py'):
                     Module = Module[:-3]

@@ -22,7 +22,7 @@ class uartClass(logs.driverClass):
     def busy(self,Why=False):
         if Why:
             logs.log_info("UART BUSY %s %s %s %s" % (len(self.txQueue),len(self.rxQueue),(self.txWaiting>0),(self.rxWaiting>0)))
-        return (self.txQueue != []) or (self.rxQueue != []) or (self.txWaiting>0) or (self.rxWaiting>0)
+        return (self.rxState!='idle') or (self.txQueue != []) or (self.rxQueue != []) or (self.txWaiting>0) or (self.rxWaiting>0)
       
     def run(self):
         self.runTx()
@@ -131,7 +131,7 @@ class uartClass(logs.driverClass):
                         logs.log_info('UART RX  "%s" '%(self.RxStr[:-1]))
                         self.RxStr = ''
                 except:
-                    logs.log_info('UART RX ERROR |%s|  "%s" '%(Chr,self.RxStr))
+                    logs.log_error('UART RX ERROR |%s|  "%s" '%(Chr,self.RxStr))
                     self.RxStr = ''
 
 #                veri.force('tb.marker','0b'+self.rxByte)

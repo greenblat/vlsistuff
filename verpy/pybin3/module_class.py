@@ -48,7 +48,7 @@ class module_class:
                 self.stat_types[Type] +=1
 
     def sig_width(self,Net):
-        if Net in self.nets:
+        if (type(Net) is str) and (Net in self.nets):
             _,Wid = self.nets[Net]
             if type(Wid) is int:
                 return 1
@@ -135,7 +135,7 @@ class module_class:
         if type(Name) is list:
             if Name[0] == 'subbus':
                 self.add_sig(Name[1],Dir,(eval(str(Name[2])),eval(str(Name[3]))))
-            elif Dir in ['reg','wire']:
+            elif Dir in ['reg','wire','logic']:
                 for Sig in Name:
                     self.add_sig(Sig,Dir,Wid)
             else:
@@ -688,6 +688,8 @@ class module_class:
             if Net[0]=='define':
                 return
             if Net[0]=='sub_slice':
+                return
+            if Net[0]=='sub_slicebit':
                 return
             if Net[0] in ['functioncall','funccall']:
                 return

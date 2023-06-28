@@ -6,6 +6,7 @@ import logs
 Modules = {}
 Instances = {}
 MISSINGS = {}
+CLOCKED = {}
 def main():
     logs.setVar('longest',0)
     Fname = sys.argv[1]
@@ -57,6 +58,7 @@ def createMissings():
         else:
             Modules[Mod] = Hld
             Hld.TERMS.append('dummy')
+            Hld.CLOCKED = {}
             Hld.ARCSFW['dummy'] = []
             for Inst,Pin,Sig in Fth.CONNS:
                 if (Inst == Inst1):
@@ -95,6 +97,10 @@ def instancesDeep(Mods,Path):
 def scanDeep(Mod,Path):
     Hld = Modules[Mod]
     for Term in Hld.TERMS:
+        if Term in Hld.CLOCKED:
+            Clk = Hld.CLOCKED[Term]
+            CLOCKED['.'.join(Path+[Term])] = Clk
+
         travelFW(Term,Mod,Path,[ Path+[Term]])
     if len(Path)==1:
         for Term in Hld.INPUTS:
@@ -108,16 +114,23 @@ def printPath(Kind,Mod,Path):
     Lng = logs.getVar('longest')
     if len(Path) > Lng:
         logs.setVar('longest',len(Path))
-    Pr = '%s %s %d / %d :    %s -> %s \n' % (Kind,Mod,len(Path),Lng,'.'.join(Path[0]),'.'.join(Path[-1]))
+    Start = '.'.join(Path[0])
+    End   = '.'.join(Path[-1])
+    StartClk = 'N'
+    EndClk = 'N'
+    if Start in CLOCKED: StartClk = CLOCKED[Start]
+    if End in CLOCKED: EndClk = CLOCKED[End]
+    Pr = '%s %s %d / %d :   (%s)  %s ->  (%s) %s \n' % (Kind,Mod,len(Path),Lng,StartClk,'.'.join(Path[0]),EndClk,'.'.join(Path[-1]))
     for PP in Path:
         X = '.'.join(PP)
         Add = ''
         if len(PP)>=3:
             Sig = PP[-1]
             Where = PP[-3]
-            print("XXXX",Sig,Where, Sig in Modules[Where].DRIVEN)
-            if Sig in Modules[Where].DRIVEN:
-                Add = Modules[Where].DRIVEN[Sig]
+            if Where in Modules:
+                if Sig in Modules[Where].DRIVEN:
+                    Add = Modules[Where].DRIVEN[Sig]
+#            print("XXXX",Sig,Where, Sig in Modules[Where].DRIVEN)
         Pr += '    %s   %s\n' % (X,Add)
     logs.log_info(Pr)
     PATHS.append( (len(Path),Pr))
@@ -218,6 +231,7 @@ def loadDeep(Works,Sofar):
                     Modules[Son] = Topo.hld
                     Deeper.append(Son)
                 except:
+                    Topo = importlib.import_module(Son)
                     logs.log_warning('missing %s' % Son)
                     MISSINGS[Son] = Mod
                 

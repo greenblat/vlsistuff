@@ -37,6 +37,7 @@ ARCSFW = {}
 DRIVEN = {}
 CONNS = []
 TERMS = []
+CLOCKED = {}
 INPUTS = []
 OUTPUTS = []
 SONS = []
@@ -71,6 +72,7 @@ def buildOne(Mod):
     out.write('hld.ARCSFW = %s\n'%pprint.pformat(ARCSFW))
     out.write('hld.CONNS = %s\n'%pprint.pformat(CONNS))
     out.write('hld.TERMS = %s\n'%pprint.pformat(TERMS))
+    out.write('hld.CLOCKED = %s\n'%pprint.pformat(CLOCKED))
     out.write('hld.INPUTS = %s\n'%pprint.pformat(INPUTS))
     out.write('hld.OUTPUTS = %s\n'%pprint.pformat(OUTPUTS))
     out.write('hld.SONS = %s\n'%pprint.pformat(SONS))
@@ -230,7 +232,9 @@ def builds(Mod):
             elif len(GL) == 3:
                 Outs,Inps = whatConnected(Obj,GL[1]),whatConnected(Obj,GL[0])
                 for D in Inps: 
-                    if D not in TERMS: TERMS.append(D)
+                    if D not in TERMS: 
+                        TERMS.append(D)
+                        CLOCKED[D] = GL[2][0]
 
 
         else:
@@ -240,13 +244,23 @@ def builds(Mod):
                 SetS = support_set(Sig,False)
                 for Src in SetS:
                     CONNS.append((Inst,Pin,Src))
-    for _,Alw,_ in Mod.alwayses:
-        travelAlw(Alw,[],Params,Mod)
+    for Timing,Alw,_ in Mod.alwayses:
+        Clk = getClockFromEdge(Timing)
+        travelAlw(Alw,[],Params,Mod,Clk)
 
     for Net in Mod.nets:
         Dir,_ = Mod.nets[Net]
         if 'output' in Dir: OUTPUTS.append(Net)
         if 'input' in Dir: INPUTS.append(Net)
+
+def getClockFromEdge(Timing):
+    if type(Timing) is list:
+        if Timing[0] == 'list':
+            if (Timing[1][0] == 'edge') and (Timing[1][1] == 'posedge'):
+                return Timing[1][2]
+        elif (Timing[0] == 'edge')and (Timing[0][1] == 'posedge'):
+                return Timing[0][2]
+    return False
 
 def whatConnected(Obj,Pins):
     Res = []
@@ -263,26 +277,26 @@ def driven(Outs,Inst,Type):
 
 
 
-def travelAlw(Alw,Cond,Params,Mod):
+def travelAlw(Alw,Cond,Params,Mod,Clk):
     if type(Alw) is list:
         if Alw[0]=='list':
             for AA in Alw[1:]:
-                travelAlw(AA,Cond,Params,Mod)
+                travelAlw(AA,Cond,Params,Mod,Clk)
             return
         if Alw[0]=='for':
-            travelAlw(Alw[4],Cond,Params,Mod)
+            travelAlw(Alw[4],Cond,Params,Mod,Clk)
             return
         if Alw[0]=='ifelse':
             More = support_set(Alw[1],False)
             print("IFELSE",Alw[2],Alw[3],Cond+More,Params)
-            travelAlw(Alw[2],Cond+More,Params,Mod)
-            travelAlw(Alw[3],Cond+More,Params,Mod)
+            travelAlw(Alw[2],Cond+More,Params,Mod,Clk)
+            travelAlw(Alw[3],Cond+More,Params,Mod,Clk)
             return
 
         if Alw[0]=='if':
             More = support_set(Alw[1],False)
             print("IF",Alw[2],Cond+More,Params)
-            travelAlw(Alw[2],Cond+More,Params,Mod)
+            travelAlw(Alw[2],Cond+More,Params,Mod,Clk)
             return
 
         if Alw[0]=='wait': return
@@ -292,7 +306,7 @@ def travelAlw(Alw,Cond,Params,Mod):
             More = support_set(Alw[1],False)
             for Case in Alw[2]:
                More2 = support_set(Case[0],False) 
-               travelAlw(Case[1],Cond+More+More2,Params,Mod)
+               travelAlw(Case[1],Cond+More+More2,Params,Mod,Clk)
             return
 
         if Alw[0]=='<=':
@@ -300,7 +314,9 @@ def travelAlw(Alw,Cond,Params,Mod):
             adds(Alw[1],Cond,Params)
             SetD = support_set(Alw[1],False)
             for D in SetD: 
-                if D not in TERMS: TERMS.append(D)
+                if D not in TERMS: 
+                    TERMS.append(D)
+                    CLOCKED[D] = Clk
             return
 
         if Alw[0]=='=':
