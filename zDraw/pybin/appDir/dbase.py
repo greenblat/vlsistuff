@@ -904,7 +904,7 @@ class DetailClass:
     def where_inst(self,Inst):
         if Inst not in self.instances:
             logs.log_error('unknown instance %s in %s'%(Inst,self.Module))
-            return
+            return 0,0
         P0 = self.instances[Inst].Point
         return P0
 

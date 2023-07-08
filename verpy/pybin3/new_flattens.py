@@ -1,5 +1,4 @@
 
-import types,string
 from logs import log_error,log_info
 
 import traceback
@@ -20,13 +19,13 @@ def constant_inputs(Current,Env):
             Con = Obj.conns[Pin]
             for Lit,Repl in Lits:
                 if same_expr(Con,Lit,Current):
-                    print('replacement same input %s %s'%(Con,Repl))
+                    log_info('replacement same input %s %s'%(Con,Repl))
                     Obj.conns[Pin]=Repl
                     
 
 def remove_buffers(Current,Env):
     Renames=prepare_trans_table(Current)
-    print('renames len=%d'%len(Renames.keys()))
+    log_info('renames len=%d'%len(Renames.keys()))
     for ind,(Dst,Src,A,B) in enumerate(Current.hard_assigns):
         Src1 = translate_expr(Src,Renames)
         Current.hard_assigns[ind]=(Dst,Src1,A,B)
@@ -71,7 +70,7 @@ def prepare_trans_table(Current):
         if (type(Dst)is str) and (not output_sig(Dst,Current)) and simple_sig_source(Src):
             Holder[str(Dst)]=(Dst,Src)
     for Key in Holder:
-        print('holder',Key,Holder[Key])
+        log_info('holder',Key,Holder[Key])
     for Key in Holder:
         Renames[Key]=Holder[Key]
     Hards=[]
@@ -137,7 +136,7 @@ def flatten(Current,Whome,Env,load_module):
             load_module(Type,Env)
         if Type not in Env.Modules:
              Env.DontFlattens.append(Type)
-             print('dont flatten %s (from %s) because not loaded'%(Type,Current.Module))
+             log_info('dont flatten %s (from %s) because not loaded'%(Type,Current.Module))
         else:
             flatten_inst(Current,Whome,Env.Modules)
     else:
@@ -150,12 +149,12 @@ def flatten(Current,Whome,Env,load_module):
                          load_module(Type,Env)
                      if Type not in Env.Modules:
                          Env.DontFlattens.append(Type)
-                         print('dont flatten %s (from %s) because not loaded'%(Type,Current.Module))
+                         log_info('dont flatten %s (from %s) because not loaded'%(Type,Current.Module))
                      else:
                         flatten_inst(Current,Inst,Env.Modules)
-                        print('FLATTEN',Inst,Type)
+                        log_info('FLATTEN %s %s' %(Inst,Type))
                         dones += 1
-    if dones==0: return False                            
+    if dones==0: return 0,(False,False)                            
     return dones,(Inst,Type)
 
 
@@ -164,7 +163,7 @@ def flatten_deep(Current,Whome,Env,load_module):
     Max = 30
     while (Dones>0) and (Max>0):
         Dones,Who = flatten(Current,Whome,Env,load_module)
-        print('dones',Dones)
+        log_info('flatten dones %d' % Dones)
         Max -= 1
     
 
@@ -204,7 +203,7 @@ def flatten_inst(Current,InstName,modules):
             Current.check_net_def(Sonsig1)
             Current.add_conn(Soninst,Sonpin,Sonsig1)
     if InstName not in Current.insts:
-        logs.log_error('inst %s for flat is not in %s' % (InstName,Current.Module))
+        log_error('inst %s for flat is not in %s' % (InstName,Current.Module))
     Current.del_inst(InstName)
         
 
@@ -241,7 +240,7 @@ def check_instance_against_module(Current,Instobj,modules):
 
     for A2 in Exts:
         if A2 not in Conns:
-            print('check_instance_against_module external pin=%s of module %s not connected at instance=%s in module=%s'%(A2,Type,Instobj.Name,Current.Module))
+            log_info('check_instance_against_module external pin=%s of module %s not connected at instance=%s in module=%s'%(A2,Type,Instobj.Name,Current.Module))
 
 
 
@@ -256,7 +255,7 @@ def prepare_mapping_table(Current,Instobj,modules):
         try:
             (Dir,HsLs)=Son.nets[SonPin]
         except:
-            print('prepare_mapping_table SonPin=%s (%s/%s) is not net in %s '%(SonPin,Instobj.Type,Instobj.Name,Current.Module))
+            log_info('prepare_mapping_table SonPin=%s (%s/%s) is not net in %s '%(SonPin,Instobj.Type,Instobj.Name,Current.Module))
             Dir='wire'
             HsLs=0,0
         if (type(HsLs)is tuple)and(HsLs[0]=='double'):

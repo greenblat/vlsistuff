@@ -55,7 +55,7 @@ def use_wrds(wrds):
        pass    
     elif Key in Table:
         (Nstate,Actions)=Table[Key]
-#        print('state=%s wrds="%s" next=%s actions=%s curly=%s   %s'%(Db.state,wrds,Nstate,Actions,Db.Curly,debug()))
+#        print('%s %s wrds="%s" actions=%s curly=%s   %s'%(Db.state,Nstate,wrds,Actions,Db.Curly,debug()))
         for Action in Actions:
             if Action!='none':
 #                Str = '%s(%s,%s,%s,%s)'%(Action,wrds[0],wrds[1],wrds[2],wrds[3])
@@ -65,6 +65,7 @@ def use_wrds(wrds):
             pop_state()
         else:
             Db.state=Nstate
+        
     else:
         print('error! state=%s lex=%s wrds=%s'%(Db.state,wrds[1],wrds))
         sys.exit()
@@ -192,12 +193,12 @@ def check_curly_bus0(wrds):
 def check_curly_bus(wrds):
     check_curly_bus0(wrds)
     Db.right_assign=Db.Curly[:]
-    Db.Curly=['curly']
+#    Db.Curly=['curly']
 
 def finish_conn_empty(wrds):
     Db.Current.add_conn(Db.Inst,Db.Pin,None)
 def finish_conn(wrds):
-    if Db.Curly!=['curly']:
+    if Db.Curly !=['curly']:
         Conn = Db.Curly
     elif Db.WidthL:
         Conn = ['subbus',Db.Conn,[Db.WidthH,Db.WidthL]]

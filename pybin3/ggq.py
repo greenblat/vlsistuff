@@ -11,6 +11,7 @@ def main():
     onlies = 0
     diffies = 0
     LL = []
+    Onlies = []
     for line in Res:
         if 'differ' in line:
             wrds = line.split()
@@ -22,9 +23,12 @@ def main():
                 diffies += 1
         elif ('Only' in line):
             onlies += 1
+            Onlies.append(line)
     for (F1,F2) in LL:
         print('/bin/cp %s %s' % (F1,F2))
-
+    print('\n\n\n')
+    for line in Onlies:
+        print(line)
     print('onlies %d diffies %d tots %d ' % (onlies,diffies,len(Res)))
                 
 

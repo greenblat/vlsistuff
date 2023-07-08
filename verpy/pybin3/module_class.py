@@ -414,7 +414,14 @@ class module_class:
                 self.insts.pop(Inst)
                 
 
-    def dump_verilog(self,Fout,Flags = {'style':'new','mergehards':False,'endmodule':True}):
+    def dump_verilog(self,Fout=False,Flags = {'style':'new','mergehards':False,'endmodule':True}):
+        ExtF = True
+        if not Fout:
+            ExtF = False
+            Fout = open('%s.dumpv' % self.Module,"w")
+        elif type(Fout) is str:
+            Fout = open(Fout,"w")
+            ExtF = False
         if 'style' not in Flags: Flags['style'] = 'new'
         if 'endmodule' not in Flags: Flags['endmodule'] = True
         if 'mergehards' not in Flags: Flags['mergehards'] = False
@@ -506,6 +513,15 @@ class module_class:
                 Fout.write('assign %s %s %s = %s;\n'%(pr_strength(Strength),pr_dly(Dly),pr_expr(Dst),Src2))
         for Inst in self.insts:
             self.insts[Inst].dump_verilog(Fout)
+        for Dprm in self.defparams:
+            if len(Dprm) == 3:
+                Fout.write('defparam %s.%s %s ;\n' % (Dprm[0],Dprm[2],pr_expr(self.defparams[Dprm])))
+            elif len(Dprm) == 2:
+                Fout.write('defparam %s.%s %s ;\n' % (Dprm[0],Dprm[1],pr_expr(self.defparams[Dprm])))
+            elif len(Dprm) == 1:
+                Fout.write('defparam %s %s ;\n' % (Dprm[0],pr_expr(self.defparams[Dprm])))
+            else:
+                Fout.write('// ERROR: 000%d defparam %s %s ;\n' % (len(Dprm),Dprm,pr_expr(self.defparams[Dprm])))
         for Task in self.tasks:
             self.dump_task(Task,Fout)
         for Func in self.functions:
@@ -531,6 +547,8 @@ class module_class:
     
         if Flags['endmodule']:
             Fout.write('end%s\n\n'%self.Kind)
+        if not ExtF:
+            Fout.close()
         
     def prepareForMerges(self):
         Readies = []
@@ -788,8 +806,8 @@ class module_class:
             self.insts.pop('\\'+Inst)
         else:
             logs.log_error('INST %s not in %s' % (Inst,self.Module))
-            for In in self.insts:
-                logs.log_info('>>> "%s"' % In)
+#            for In in self.insts:
+#                logs.log_info('>>> "%s"' % In)
 
     def relax_instance_wires_names(self):
         Insts = self.insts.keys()
@@ -1222,6 +1240,27 @@ class module_class:
             logs.log_error("explodeBus got %s" % str(Net))
             return []
 
+    def use_defparams(self):
+        for DFPRM in list(self.defparams.keys()):
+            Val = self.defparams[DFPRM]
+            if len(DFPRM) == 1:
+                DFPRM0 = DFPRM[0]
+                ww = DFPRM0.split('.')
+                Inst,Prm  = ww
+    
+            if len(DFPRM) == 3:
+                Inst = DFPRM[0]
+                Prm = DFPRM[2]
+    
+            if Inst not in self.insts:
+                logs.log_error('INST %s of defparam %s is not instance dfprm=%s val=%s' % (Inst,Prm,DFPRM,Val))
+    
+            else:
+                self.insts[Inst].params[Prm] = Val
+                self.defparams.pop(DFPRM)
+    
+
+
 def deepEval(Expr, Params_in):
     if type(Expr) is int:
         return Expr
@@ -1309,6 +1348,7 @@ def support_set(Sig,Bussed=True):
             ind += 1
     return Set
         
+
 
 def support_set__(Sig,Bussed):
     if (Sig=='')or not Sig:             return []
@@ -1420,6 +1460,9 @@ class instance_class:
             File.write('      conn pin=%s sig=%s\n'%(Pin,self.conns[Pin]))
 
 
+
+
+
     def dump_verilog(self,Fout):
         Prms = pr_inst_params(self.params)
         Many = pr_width_param(self.params)
@@ -1450,7 +1493,6 @@ class instance_class:
             try2 = ('\n%s,'%Pref).join(res)
             Fout.write('%s);%s\n'%(try2,Comment))
 
-            
 
 
 
