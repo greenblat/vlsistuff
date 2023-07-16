@@ -104,12 +104,13 @@ def get_width2(Net,Mod):
             W2,W3 = get_width2(Net[3],Mod)
             return max(W0,W2),min(W1,W3)
         if Net[0] == 'subbit':
-            print("XXXXXXX",Net,Mod.nets[Net[1]])
             if (Mod.mems.keys()!=[])and(Net[1] in Mod.mems):
                 Dir,Wid1,Wid2=Mod.mems[Net[1]]
                 H = compute1(Wid1[0],Mod)
                 L = compute1(Wid1[1],Mod)
                 return H-L+1,H-L+1
+            if Net[1] not in Mod.nets:
+                return 0,0
             Dir,Wid = Mod.nets[Net[1]]
             if Wid[0] == 'packed':
                 H = compute1(Wid[2][0],Mod)
@@ -153,7 +154,7 @@ def get_width2(Net,Mod):
 
 
     logs.log_err('rtl_width get_width got %s, cannot determine the width'%str(Net))
-    print(traceback.print_stack())
+#    print(traceback.print_stack())
     return 1,1
         
 def needed_bits(Int):

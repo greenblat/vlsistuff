@@ -28,7 +28,7 @@ def main():
         print('/bin/cp %s %s' % (F1,F2))
     print('\n\n\n')
     for line in Onlies:
-        print(line)
+        print(line[:-1])
     print('onlies %d diffies %d tots %d ' % (onlies,diffies,len(Res)))
                 
 

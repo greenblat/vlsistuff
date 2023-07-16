@@ -2,16 +2,19 @@
 import os,sys,string
 import datetime
 
+AsideDir = 'aside_tmp'
+
 def main():
     Fname = sys.argv[1]
     File = open(Fname)
     Lines = File.readlines()
+    File.close()
 
     Date = datetime.date.today()
     Time = datetime.datetime.now()
     HourDate = str('%02d' % Time.hour)+str('%02d' % Date.day)+str('%02d' % Date.month)+str(Date.year)[2:]
 
-
+    Changed = False
 
 
     Signs = {}
@@ -55,17 +58,25 @@ def main():
                 WasS = Was[:8]
                 if (Now != WasS):
                     New = "%s sign_version = 64'h%08x%s ;\nendmodule\n" % (sign_version,Signature,HourDate)
+                    Changed = True
                 else:
                     New = "%s sign_version = 64'h%s ;\nendmodule\n" % (sign_version,Was)
                 Lines[ind] = New
             else:
                 New = "%s sign_version = 64'h%08x%s ;\nendmodule\n" % (sign_version,Signature,HourDate)
                 Lines[ind] = New
+                Changed = True
             Signature = 0            
-    
+    if Changed: 
+        print("CHANGED %s" % (Module))
+    else:
+        return
+    if not os.path.exists(AsideDir): os.mkdir(AsideDir)
+    os.system('/bin/cp  %s %s/%s.v ' % (Fname,AsideDir,Module))
+    Fout = open(Fname,'w')
     for line in Lines:
-        print(line[:-1])
-
+        Fout.write(line)
+    Fout.close()
 
 def okchar(Chr):
     if Chr in ['\n','\t',' ']: return False

@@ -1643,7 +1643,6 @@ def add_definition(List):
         Wid1 = get_wid(Vars[2])
         Name = get_list(Vars[3])
         if type(Name) is list:
-            print("XXXXXX",Name)
             for Net in Name:
                 Current.add_sig(Net,Dir,('packed',Wid0,Wid1))
         else:

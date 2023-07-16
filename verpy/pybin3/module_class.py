@@ -141,7 +141,8 @@ class module_class:
             else:
                 logs.log_error('add_sig got list: %s %s %s' % (str(Name),Dir,Wid))
             return
-
+        if type(Name) is tuple:
+            return
         if (Dir=='wire')and(Name in self.nets)and(Wid==0):
             return
         if (Dir=='wire')and(Name not in self.nets)and(type(Wid) is int):

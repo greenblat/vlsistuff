@@ -277,8 +277,8 @@ def produce_verilog():
     ofile=open('%s_decoder.v'%(Chip),'w')
     ofile2 = open('%s_h.py'%(Chip),'w')
     ifile=open('%s_decoder.inst'%(Chip),'w')
-    ifile.write('wire pvalidXX; wire [%d:0] popcodXX; wire [31:0] version_code;\n'%(OpcodeWidth-1))
-    ofile.write('module %s_decoder(input [%d:0] opcode,input valid,output not_opcode,output [31:0] version_code\n'%(Chip,OpcodeWidth-1))
+    ifile.write('wire pvalidXX; wire [%d:0] popcodXX; \n'%(OpcodeWidth-1))
+    ofile.write('module %s_decoder(input [%d:0] opcode,input valid,output not_opcode\n'%(Chip,OpcodeWidth-1))
     Fields = collect_fields()
     Flags = collect_flags()
     Keys = instructions.keys()
@@ -307,7 +307,6 @@ def produce_verilog():
         ifile.write('wire XX%s_flag;\n'%(Name))
         III.append('   ,.%s_flag(XX%s_flag)\n'%(Name,Name))
     ofile.write(');\n')
-    ofile.write("assign version_code = 32'hXXXX_XXXX;\n")
     GoodOpCodes = []
     for Name in Keys:
         if ok_name(Name):

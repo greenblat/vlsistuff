@@ -289,12 +289,26 @@ def always_assigns(Current):
             check_src_expr(Current,Always[1])
 
             if is_edged_timing(Always[0]):
+                Time = Always[0]
+                if (Time[0] == 'list') and (len(Time) == 3):
+                    if Time[1][1] in ['posedge','negedge']:
+                        if Time[2][1] in ['posedge','negedge']:
+                            if (type(Always[1]) is list):
+                                if len(Always[1])>2:
+                                    logs.log_errx(114,'unrecognized edged always %s'%(str(Time)))
+                                elif (Always[1][0] != 'ifelse'):
+                                    logs.log_errx(115,'double edged always %s has no ifelse top'%(str(Time)))
+                            else:
+                                logs.log_errx(116,'unrecognized edged always %s'%(str(Type)))
+
+
+
                 scan_statements(Current,Always[1],checker1,('<=','=',Alw),[])
             else:
                 scan_statements(Current,Always[1],checker1,('=','<=',Alw),[])
             Alw += 1
         else:
-            logs.log_err('unrecognized always %d'%(len(Always)))
+            logs.log_errx(117,'unrecognized always %d'%(len(Always)))
 
 def checker1(Current,Item,Params,Stack):
     if not Item:
@@ -513,12 +527,12 @@ def check_src_expr(Current,Item):
         for _,Code in Item[2]:
             check_src_expr(Current,Code)
         return            
-    if (Item[0] == '#'):
+    if (type(Item) is str) and (Item[0] == '#'):
         return            
         
 
     logs.log_err('check src expr %s %s'%(str(Item),type(Item)))
-    traceback.print_stack(None,None,logs.Flogs[0])
+#    traceback.print_stack(None,None,logs.Flogs[0])
 
 def check_bus_usage(Current,Bus,Wid,Where=0):
     if Bus in Current.mems:

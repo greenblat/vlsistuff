@@ -454,8 +454,11 @@ class sequenceClass:
                 Val = list(map(self.eval,wrds[2:]))
                 self.Translates[Var]=Val
             return True
-        if (len(wrds) == 3) and (wrds[1] == '='):
-            Val = self.eval(wrds[2])
+        if (len(wrds) >= 3) and (wrds[1] == '='):
+            List1 = list(map(self.eval,wrds[2:]))
+            Expr = ' '.join(List1)
+            print("EXPR",Expr)
+            Val = self.eval(Expr)
             self.Translates[wrds[0]]=Val
             return 
 

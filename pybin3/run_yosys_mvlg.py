@@ -3,12 +3,10 @@
 import os,sys,string
 import logs
 
+# changed: /Users/iliagreenblat/external_software/OpenROAD-flow-scripts/tools/yosys/passes/proc/proc_dff.cc
+
 LIB_ABC = '/Users/iliagreenblat/clients/libs/synth_libs/small28.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/libs/synth_libs/dff28.lib'
-
-
-
-
 
 LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/messica_no_time.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/messica_no_time.lib'
@@ -21,8 +19,6 @@ LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/messika2.lib'
 
 LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/scmetro_abc.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/scmetro_dff.lib'
-
-
 
 LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
@@ -122,7 +118,8 @@ def main():
         os.system('mvlg_to_one_file.py %s %s.all'%(mvlgFile,Top))
     else:
         os.system('/bin/cp %s %s.all'%(mvlgFile,Top))
-    INC = STR.replace('ALLRTL','%s.all'%(Top))
+    os.system('sv2v -I ../rtl2  %s.all > %s.allv' % (Top,Top))
+    INC = STR.replace('ALLRTL','%s.allv'%(Top))
     INC = INC.replace('TOP',Top)
     INC = INC.replace('LIB_DFF',LIB_DFF)
     INC = INC.replace('LIB_ABC',LIB_ABC)
@@ -130,7 +127,8 @@ def main():
     Finc.write(INC)
     Finc.close()
 #    os.system('/usr/local//Cellar/yosys/0.9_2/bin/yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
-    os.system('/Users/iliagreenblat/external_software/yosys/yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
+#    os.system('/Users/iliagreenblat/external_software/OpenROAD-flow-scripts/tools/install/yosys/bin/yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
+    os.system('/Users/iliagreenblat/external_software/OpenROAD-flow-scripts/tools/yosys/yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
 #    os.system('yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
 
 helpString = '''
