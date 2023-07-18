@@ -1003,7 +1003,7 @@ class driverClass:
         log_correct(Text,Which,Tb,Pstack)
         self.Status[0] += 1
     def log_error(self,Text,Which=0,Tb=True,Pstack=False):
-        log_error(Text,Which,Tb.Pstack)
+        log_error(Text,Which,Tb,Pstack)
         self.Status[1] += 1
     def log_wrong(self,Text,Which=0):
         log_wrong(Text,Which)
@@ -1190,6 +1190,11 @@ def compute_int(Item,Defines):
             return 1
     return 0
 
+
+def without(Dict):
+    if "__builtins__" in Dict:
+        Dict.pop("__builtins__")
+    return Dict 
 
 
 

@@ -32,7 +32,7 @@ class apbSlave(logs.driverClass):
         if wrds[0] == 'ready':
             self.READY = eval(wrds[1])
             return
-        if wrds[0] == 'ram':
+        if wrds[0] in ['write','ram']:
             Addr = self.eval(wrds[1])
             for X in wrds[2:]:
                 Data = self.eval(X)

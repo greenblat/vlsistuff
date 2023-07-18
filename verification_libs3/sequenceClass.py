@@ -456,6 +456,7 @@ class sequenceClass:
             return True
         if (len(wrds) >= 3) and (wrds[1] == '='):
             List1 = list(map(self.eval,wrds[2:]))
+            List1 = list(map(str,List1))
             Expr = ' '.join(List1)
             print("EXPR",Expr)
             Val = self.eval(Expr)
