@@ -5,7 +5,11 @@ import datetime
 AsideDir = 'aside_tmp'
 
 def main():
-    Fname = sys.argv[1]
+    for Fname in sys.argv[1:]:
+        work(Fname)
+
+
+def work(Fname):
     File = open(Fname)
     Lines = File.readlines()
     File.close()

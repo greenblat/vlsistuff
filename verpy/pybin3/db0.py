@@ -1980,7 +1980,7 @@ def get_expr(Item):
         if Item[0]=='*':
             return '*'
     if len(Item)==2:
-        if Item[0] in ['^','~','!','curly']: return Item
+        if Item[0] in ['^','~','!','curly','|','&']: return Item
         try:
             List = DataBase[Item]
         except:

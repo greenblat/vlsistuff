@@ -11,6 +11,7 @@ reg cucu width=72 access=rw desc="this is very important register"
 // access(can be ro wo rw_pulse ro_pulse)  
 array arr width=12 depth=13 access=ro desc="less important"
 // several other options appear in docs
+include filename   = new option, to include
 '''
 
 
@@ -86,8 +87,33 @@ def report2(LINES):
 
 Db = {'items':[],'clocks':[],'regs':[],'fields':[],'splitted':[],'enable_writes':[]}
 
+
+def dealIncludes(Lines):
+    ind = 0
+    while ind<len(Lines):
+        line = Lines[ind]
+        wrds = line.split()
+        if (wrds!=[]) and (wrds[0] == 'include'):
+            Fname = wrds[1]
+            Ftmp = open(Fname)
+            More = Ftmp.readlines()
+            for indx,llx in enumerate(More):
+                wrdsx = llx.split()
+                if ('chip' in llx)and(wrdsx[0] == 'chip'):
+                    More[indx] = ''
+                if ('end' in llx)and(wrdsx[0] == 'end'):
+                    More[indx] = ''
+            Lines = Lines[:ind-1] + More + Lines[ind+1:]
+        else:
+            ind += 1
+    return Lines
+
+
+
 def createLines(File):
     Lines = File.readlines()
+    Lines = dealIncludes(Lines)
+
     Long = ''
     Lnum = 0
     for line in Lines:

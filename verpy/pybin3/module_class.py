@@ -37,6 +37,7 @@ class module_class:
         self.stat_types={}
         self.deepInstNames = True
         self.inventedNets = 0
+        self.remarks = []
     def cleanZeroNets(self):
         return
     def create_stat_types(self):
@@ -427,6 +428,8 @@ class module_class:
         if 'endmodule' not in Flags: Flags['endmodule'] = True
         if 'mergehards' not in Flags: Flags['mergehards'] = False
 
+        for Note in self.remarks:
+            Fout.write('// %s\n' % str(Note))
         logs.setCurrentModule('dump_verilog')
         self.expandInstArrays()
         if Flags['style'] == 'new': 
@@ -435,8 +438,8 @@ class module_class:
             NOIOS,NOIFS=self.dump_old_style_header(Fout)
 
         Hards,Ordered = [],[]
-        if Flags['mergehards'] == True: 
-            Hards,Ordered = self.prepareForMerges()
+#        if Flags['mergehards'] == True: 
+#            Hards,Ordered = self.prepareForMerges()
         for Prm in self.includes:
             Fout.write('`include "%s"\n'%(Prm))
         Lparams = self.orderLocalParams()

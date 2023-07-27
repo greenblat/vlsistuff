@@ -296,8 +296,11 @@ def always_assigns(Current):
                             if (type(Always[1]) is list):
                                 if len(Always[1])>2:
                                     logs.log_errx(114,'unrecognized edged always %s'%(str(Time)))
+                                elif (Always[1][0] == 'list'):
+                                    if (Always[1][1][0] != 'ifelse'):
+                                        logs.log_errx(115,'double edged always %s has no ifelse(x) top (%s)'%(Always[1][1],Time))
                                 elif (Always[1][0] != 'ifelse'):
-                                    logs.log_errx(115,'double edged always %s has no ifelse top'%(str(Time)))
+                                    logs.log_errx(115,'double edged always %s has no ifelse top (%s)'%(Time,Always[1][0]))
                             else:
                                 logs.log_errx(116,'unrecognized edged always %s'%(str(Type)))
 
