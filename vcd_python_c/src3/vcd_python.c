@@ -417,9 +417,12 @@ void conclusions() {
 void simpleToggles() {
     int tot = 0;
     int ii;
+    FILE *flog;
+    flog = fopen("toggles.rpt","w");
     for (ii=0; ii<=maxusedsig; ii++) {
         if (sigs[ii].toggles>0) {
             printf("%d %s\n",sigs[ii].toggles,qqia(sigs[ii].fpath));
+            fprintf(flog,"%d %s\n",sigs[ii].toggles,qqia(sigs[ii].fpath));
             tot += sigs[ii].toggles;
         }
     }
@@ -427,8 +430,10 @@ void simpleToggles() {
     for (ii=0; ii<=maxusedsig; ii++) {
         if (sigs[ii].wasZ>0) {
             printf("%s  was Z\n",qqia(sigs[ii].fpath));
+            fprintf(flog,"%s  was Z\n",qqia(sigs[ii].fpath));
         }
     }
+    fclose(flog);
 }
 
 char s1[longestVal];

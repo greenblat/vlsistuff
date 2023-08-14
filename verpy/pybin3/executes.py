@@ -127,6 +127,7 @@ def execute_line(Line,Env):
             Fname = '%s.dumpv'%Root
         check_directory_exists(Fname)
         Fout = open(Fname,'w')
+        Fout.write("`timescale 1ns / 1ps\n")
         Env.Current.dump_verilog(Fout)
         Fout.close()
         return
@@ -534,7 +535,7 @@ def get_types_deep(Module,Env):
         Part = get_types_deep(Type,Env)
         for Son in Part:
             res[Son]=1
-    Keys = res.keys()
+    Keys = list(res.keys())
     Keys.sort()
     deep_sons_keeper[Module]=Keys
     return Keys 
@@ -555,7 +556,7 @@ def get_all_types(Module,Env):
         Son = This.insts[Inst]
         if Son.Type not in res: 
             res[Son.Type]=1
-    Types = res.keys()
+    Types = list(res.keys())
     Types.sort()
     sons_keeper[Module]=Types
     Env.Modules.pop(Module)

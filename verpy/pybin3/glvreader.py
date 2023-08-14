@@ -4,6 +4,7 @@
 
 import os,sys,string
 from  module_class import module_class
+import logs
 
 def main():
     Fname = sys.argv[1]
@@ -76,6 +77,7 @@ def set_left_assign(wrds):
     elif Db.WidthH:
         Db.assign=['subbit',Db.assign,Db.WidthH]
 
+    Db.right_assign=[]
     Db.WidthH=None
     Db.WidthL=None
     
@@ -86,7 +88,7 @@ def start_assign(wrds):
 
 
 def remember_assign(wrds):
-    Db.right_assign=wrds[0]
+    Db.right_assign.append(wrds[0])
     Db.WidthH=None
     Db.WidthL=None
 
@@ -97,11 +99,22 @@ def set_assign1(wrds):
     Db.state='assign1'
 
 def set_right_assign(wrds):
+    if len(Db.right_assign) == 1:
+        Db.right_assign = Db.right_assign[0]
+    else:
+        Db.right_assign =  logs.bracketize(Db.right_assign)
+        Db.right_assign = makeItExpression(Db.right_assign)
     if Db.WidthH and Db.WidthL:
         Db.right_assign=['subbus',Db.right_assign,Db.WidthH,Db.WidthL]
     elif Db.WidthH:
         Db.right_assign=['subbit',Db.right_assign,Db.WidthH]
     Db.Current.add_hard_assign(Db.assign,Db.right_assign)
+
+def wait_line0(wrds):
+    Db.skip_line = wrds[2]
+
+def wait_line1(wrds):
+    return
 
 def set_module(wrds):
     Db.Module=wrds[0]
@@ -229,6 +242,11 @@ def add_net(Name,Dir,WidthH,WidthL):
 
 Table={}
 TableStr = '''
+idle     define      skip wait_line0
+skip     number      skip wait_line1
+skip     token       skip wait_line1
+skip     /           skip wait_line1
+skip     module      module1 none
 idle     module      module1 none
 module1  token       module2 set_module
 module2  ;           body0 none
@@ -345,7 +363,27 @@ assign2  dig         assign3  remember_assign
 assign2  uhex        assign3  remember_assign
 assign2  hex         assign3  remember_assign
 assign2  token       assign3  remember_assign
+assign2  string       assign3  remember_assign
+assign2  !           assign3  remember_assign
+assign2  ~           assign3  remember_assign
+assign2  (           assign3  remember_assign
 assign2  {           curly0   set_state_assign3 push
+
+assign3  (           assign3  remember_assign
+assign3  )           assign3  remember_assign
+assign3  token       assign3  remember_assign
+assign3  and_and          assign3  remember_assign
+assign3  or_or          assign3  remember_assign
+assign3  |          assign3  remember_assign
+assign3  &          assign3  remember_assign
+assign3  !          assign3  remember_assign
+assign3  ~          assign3  remember_assign
+assign3  ^          assign3  remember_assign
+assign3  <          assign3  remember_assign
+assign3  >          assign3  remember_assign
+assign3  ?          assign3  remember_assign
+assign3  :          assign3  remember_assign
+assign3  number     assign3  remember_assign
 assign3  [           width0   push
 assign3  ;           body0    set_right_assign
 
@@ -358,6 +396,29 @@ for Line in TableLines:
         Table[Key]=(ww[2],ww[3:])
 
 
+def makeItExpression(List):
+    if type(List) is str: return List
+    if type(List) is int: return List
+    if type(List) is tuple: return List
+    if type(List) is list:
+        if len(List) == 2:
+            List[1] = makeItExpression(List[1])
+            return List
+        elif len(List) == 3:
+            OP0 = makeItExpression(List[0])
+            OP1 = makeItExpression(List[2])
+            return [List[1],OP0,OP1]
+        elif len(List) > 4:
+            OP0 = makeItExpression(List[0])
+            OP1 = makeItExpression(List[2])
+            AA = (List[1],OP0,OP1)
+            List2 = [AA] + List[3:]
+            print("IN",List2)
+            OUT =  makeItExpression(List2)
+            print("OUT",OUT)
+            return OUT
+    logs.log_error("bad makeItExpression %s" % str(List))
+    return List
 
 
 if __name__ == '__main__':

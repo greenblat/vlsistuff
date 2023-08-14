@@ -63,11 +63,11 @@ class axiSlaveClass:
 
         return False
     def busyWhy(self):
-        logs.log_info('%s: SLV Busy ar=%d aw=%d w=%d r=%d b=%d b0=%d ' % (self.Name,len(self.arqueue),len(self.awqueue),len(self.wqueue),len(self.rqueue),len(self.bqueue),len(self.bqueue0)),verbose=self.verbose)
+        logs.log_info('%s: SLV Busy ar=%d aw=%d w=%d r=%d b=%d b0=%d ' % (self.Name,len(self.arqueue),len(self.awqueue),len(self.wqueue),len(self.rqueue),len(self.bqueue),len(self.bqueue0)),self.verbose)
         if self.wqueue!=[]:
-            logs.log_info('WQUEUE %x %x %x' % self.wqueue[0],verbose=self.verbose)
+            logs.log_info('WQUEUE %x %x %x' % self.wqueue[0],self.verbose)
         if self.awqueue!=[]:
-            logs.log_info('AWQUEUE %x %x %x %x %x' % self.awqueue[0],verbose=self.verbose)
+            logs.log_info('AWQUEUE %x %x %x %x %x' % self.awqueue[0],self.verbose)
 
     def peek(self,Sig):
         Orig = Sig
@@ -109,7 +109,7 @@ class axiSlaveClass:
             self.Awready = eval(Wrds[1])
         elif Wrds[0] == 'rresp':
             self.badRresp = eval(Wrds[1])
-            logs.log_info('BADRESP of slave set to %x' % self.badRresp,verbose=self.verbose)
+            logs.log_info('BADRESP of slave set to %x' % self.badRresp,self.verbose)
         elif Wrds[0] == 'starvation':
             if Wrds[1] == 'on':
                 self.Starvation = True
@@ -163,7 +163,7 @@ class axiSlaveClass:
         for byte_idx in range(self.busWidth):
             self.Ram[Addr + byte_idx] = (Data >> 8*byte_idx) & 0xff
 
-        logs.log_info('adding %x %x'%(Addr,Data),verbose=self.verbose)
+        logs.log_info('adding %x %x'%(Addr,Data),self.verbose)
         Addr += self.busWidth
         return Addr
 
@@ -228,9 +228,9 @@ class axiSlaveClass:
         self.force('rdata','0x'+rdata)
 
     def rresp(self):
-        logs.log_info(self.Name + ': RRESP %x %x   %s' % (self.badRresp , self.arqueue[0][1],self.arqueue[0]),verbose=self.verbose)
+        logs.log_info(self.Name + ': RRESP %x %x   %s' % (self.badRresp , self.arqueue[0][1],self.arqueue[0]),self.verbose)
         if self.badRresp == self.arqueue[0][1]:
-            logs.log_info(self.Name + ': RRESP ERR %s %s' % (self.rqueue,self.arqueue),verbose=self.verbose)
+            logs.log_info(self.Name + ': RRESP ERR %s %s' % (self.rqueue,self.arqueue),self.verbose)
             return 2
         return 0
 
@@ -300,11 +300,11 @@ class axiSlaveClass:
                     self.bytex = (self.bytex+1) & 0xff
                 rdata = AA + rdata
                 logs.log_info(
-                'axiSlave taken from ram %d bytes  rdata=%s addr=%08x rid=%x burst=%d' % (takenram, rdata, Addr, rid,burst),verbose=self.verbose)
+                'axiSlave taken from ram %d bytes  rdata=%s addr=%08x rid=%x burst=%d' % (takenram, rdata, Addr, rid,burst),self.verbose)
         else:
             rdata = self.read_data_generator()
             rdata = hex(rdata)[2:]
-            logs.log_info(f'[{self.Name}]: reading data from read data generator function rdata = 0x{rdata}, ',verbose=self.verbose)
+            logs.log_info(f'[{self.Name}]: reading data from read data generator function rdata = 0x{rdata}, ',self.verbose)
         self.rqueue.append((rlast,rid,rdata))
 
 
@@ -358,7 +358,7 @@ class axiSlaveClass:
             FirstPage = awaddr & 0xffffe000
             if (FirstPage != LastPage):
                 logs.log_error('slave %s CROSSING 4K write awaddr=%x awlen=%x awsize=%x' % (self.Name,awaddr,awlen,awsize))
-            logs.log_info('axiSlave %s >>>awvalid %x %x %x %x %x'%(self.Name,awburst,awaddr,awlen,awid,awsize),verbose=self.verbose)
+            logs.log_info('axiSlave %s >>>awvalid %x %x %x %x %x'%(self.Name,awburst,awaddr,awlen,awid,awsize),self.verbose)
             self.bqueue0.append(awid)
         else:
             self.force('awready',1)
@@ -373,26 +373,26 @@ class axiSlaveClass:
             wlast = self.peek('wlast')
             wdata = self.peek('wdata')
             self.wqueue.append((wdata,wlast,wstrb))
-            logs.log_info('axiSlave %s written  %x %x %x' % (self.Name,wdata,wlast,wstrb),verbose=self.verbose)
+            logs.log_info('axiSlave %s written  %x %x %x' % (self.Name,wdata,wlast,wstrb),self.verbose)
 
         if len(self.wqueue) == 0: return    
         if (self.awlen<0) and (len(self.awqueue) == 0): return    
         if self.awlen<0:
             self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = self.awqueue.pop(0)
         (wdata,wlast,wstrb) = self.wqueue.pop(0)
-        logs.log_info('axiSlave %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=0x%x 0d%d'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata,wdata),self.Name,verbose=self.verbose)
+        logs.log_info('axiSlave %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=0x%x 0d%d'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata,wdata),self.Name,self.verbose)
         for ii in range(self.busWidth):
             if ((wstrb>>ii)&1)==1:
                 Byte = (wdata>>(ii*8))& 0xff
                 self.Ram[self.awaddr+ii]=Byte
-#                    logs.log_info('axiSlave %s write to  ram %x '%(self.Name,self.awaddr+ii),verbose=self.verbose)
+#                    logs.log_info('axiSlave %s write to  ram %x '%(self.Name,self.awaddr+ii),self.verbose)
         self.awaddr += 1<<self.awsize
         if self.Passive and (self.peek('wready')==0):
             pass
         elif self.awlen==0:
             self.awlen = -1
             if wlast!=1:
-                logs.log_error('axiSlave "%s" %s: prefix=%s addr=%x   no wlast wdata=%d'%(self.Name,self.Path,self.prefix,self.awaddr,wdata),verbose=self.verbose)
+                logs.log_error('axiSlave "%s" %s: prefix=%s addr=%x   no wlast wdata=%d'%(self.Name,self.Path,self.prefix,self.awaddr,wdata),self.verbose)
         else:
             self.awlen -= 1
             if (wlast==1):

@@ -225,6 +225,7 @@ class module_class:
         for Net in List:
             if '[' in Net:
                 Net = Net[:Net.index('[')]
+            
             if (not myExtras(Net))and(Net not in self.nets)and(Net not in self.parameters)and(Net[0] not in '0123456789')and(Net not in self.localparams)and(Net not in self.genvars):
                 logs.log_err('%s: net %s used before defined (%s) %s'%(self.Module,Net,Net in self.nets,'defined localparams %s %s '%(list(self.localparams.keys())[:10],list(self.parameters.keys())[:10])))
                 traceback.print_stack(None,None,logs.Flogs[0])
@@ -518,12 +519,18 @@ class module_class:
         for Inst in self.insts:
             self.insts[Inst].dump_verilog(Fout)
         for Dprm in self.defparams:
+            Space = ''
+            if Dprm[0][0] == '\\': Space = ' '
+
+            Inst = simplestr(Dprm[0])
+
+
             if len(Dprm) == 3:
-                Fout.write('defparam %s.%s %s ;\n' % (Dprm[0],Dprm[2],pr_expr(self.defparams[Dprm])))
+                Fout.write('defparam %s%s.%s  = %s ;\n' % (Inst,Space,Dprm[2],pr_expr(self.defparams[Dprm])))
             elif len(Dprm) == 2:
-                Fout.write('defparam %s.%s %s ;\n' % (Dprm[0],Dprm[1],pr_expr(self.defparams[Dprm])))
+                Fout.write('defparam %s%s.%s = %s ;\n' % (Inst,Space,Dprm[1],pr_expr(self.defparams[Dprm])))
             elif len(Dprm) == 1:
-                Fout.write('defparam %s %s ;\n' % (Dprm[0],pr_expr(self.defparams[Dprm])))
+                Fout.write('defparam %s%s = %s ;\n' % (Inst,Space,pr_expr(self.defparams[Dprm])))
             else:
                 Fout.write('// ERROR: 000%d defparam %s %s ;\n' % (len(Dprm),Dprm,pr_expr(self.defparams[Dprm])))
         for Task in self.tasks:
@@ -1408,7 +1415,8 @@ def support_set__(Sig,Bussed):
         if Sig[0] in OPS:
             return support_set__(Sig[1:],Bussed)
     
-        if Sig[0]in ['question','?']:
+        if Sig[0] in ['question','?']:
+            if type(Sig) is tuple: Sig = list(Sig)
             while len(Sig)<4:  Sig.append('err')
             try:
                 return support_set__(Sig[1],Bussed)+support_set__(Sig[2],Bussed)+support_set__(Sig[3],Bussed)
@@ -2266,7 +2274,7 @@ def is_external_dir(Dir):
 
 
 def myExtras(Token):
-    return Token in '$time $realtime $stime wait # $high $signed empty_begin_end unique_case $display'.split()
+    return Token in '( ) $time $realtime $stime wait # $high $signed empty_begin_end unique_case $display'.split()
 
 def evalz(What):
     try:
@@ -2316,4 +2324,6 @@ def parseBus(Name):
 def simplestr(Txt):
     X = Txt.replace('[','_')
     X = X.replace(']','_')
+    X = X.replace('\\','')
+    X = X.replace('~','_')
     return X

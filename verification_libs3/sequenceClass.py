@@ -319,7 +319,7 @@ class sequenceClass:
     def eval(self,Txt,Bad=False):
         if type(Txt) is int: return Txt
         if Txt in self.Translates: return self.eval(self.Translates[Txt])
-        if Txt[0] == '"': return Txt[1:-1]
+        if Txt[0] == '"': return Txt.replace('"','')
         try:
             Val =  eval(Txt)
             return Val
@@ -640,7 +640,7 @@ class sequenceClass:
                 else:
                     Wrds2.append(Wrd)
             Cmd = wrds[1]+' '+' '.join(Wrds2)
-            logs.log_info('tell %s <- %s' % (Line[:-1],Cmd))
+            logs.log_info('tell %s <- %s   (%s)   2(%s)' % (Line[:-1],Cmd,Wrds,Wrds2))
             self.agents[wrds[0]].action(Cmd)
             return True
         elif (wrds[0] == 'check'):
