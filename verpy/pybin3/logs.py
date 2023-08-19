@@ -241,7 +241,6 @@ def get_param(Param,Default):
         return params[Param][0]
     return Default
 def parse_args():
-    global params
     fnames=[]
     state='idle'
 

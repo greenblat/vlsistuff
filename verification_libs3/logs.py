@@ -295,6 +295,17 @@ def get_param(Param,Default):
 def parse_args():
     global params
     fnames=[]
+    
+    PYVER = sys.argv[0]
+    AA = PYVER.split('/')
+    AA.pop(-1)
+    ExecPath = '/'.join(AA)
+    params['execpath'] = ExecPath
+
+
+
+
+
     state='idle'
     for X in sys.argv[1:]:
         if (state=='idle'):

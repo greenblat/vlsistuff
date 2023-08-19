@@ -17,6 +17,7 @@ def main():
 
 def glv_readfile(File):
     lnum=0
+    Db.restart()
     while 1:
         lnum+=1
         line = File.readline()
@@ -29,6 +30,15 @@ def glv_readfile(File):
 
 class Db_class:
     def __init__(self):
+        self.state='idle'
+        self.used=0
+        self.Module=None
+        self.Modules={}
+        self.Stack=[]
+        self.Curly=['curly']
+        self.Insts=0
+        self.right_assign=''
+    def restart(self):
         self.state='idle'
         self.used=0
         self.Module=None
@@ -226,6 +236,7 @@ def add_wire_assign(wrds):
 
 def add_wire(wrds):
     Db.current_wire = wrds[0]
+    Db.assign = wrds[0]
     add_net(wrds[0],Db.Dir,Db.WidthH,Db.WidthL)
 
 
@@ -286,7 +297,7 @@ defparam3  ;   body0  none
 wire0    [           width0 push
 wire0    token       wire1 add_wire
 wire1    ,           wire0 none
-wire1    =           wire2 none
+wire1    =           assign2 set_left_assign
 wire1    ;           body0 none
 wire2    ubin        wire3 add_wire_assign
 wire3    ;           body0 none

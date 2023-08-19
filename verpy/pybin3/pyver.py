@@ -18,9 +18,11 @@ class EnvironmentClass:
         self.DontFlattens=[]
         self.systemverilog=False
         self.VerilogExtensions=['v','glv','sv']
+        self.params={}
 
-Env = EnvironmentClass()
 def main():
+    global Env
+    Env = EnvironmentClass()
     setupMain(Env)
     do_something(Env.params)
 
@@ -62,6 +64,16 @@ def setupMain(Env):
         logs.record_directory(Fname,Env.SearchDirs)
 
 #    Env.Current = Env.Modules
+
+def load_verilog_file(Fname,Rundir,Env):
+    if not os.path.exists(Fname):
+        logs.log_error('given filename "%s" cannot be read' % Fname)
+    elif Env.GateLevelRead:
+        read_gate_level_verilog_file(Fname,Rundir)
+    else:
+        read_verilog_file(Fname,Rundir,Env)
+
+
 
 def run_lexer(Fname,FnameOut):
     if Env.systemverilog:

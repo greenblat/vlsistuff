@@ -225,7 +225,8 @@ class module_class:
         for Net in List:
             if '[' in Net:
                 Net = Net[:Net.index('[')]
-            
+
+            Net = pureNet(Net)
             if (not myExtras(Net))and(Net not in self.nets)and(Net not in self.parameters)and(Net[0] not in '0123456789')and(Net not in self.localparams)and(Net not in self.genvars):
                 logs.log_err('%s: net %s used before defined (%s) %s'%(self.Module,Net,Net in self.nets,'defined localparams %s %s '%(list(self.localparams.keys())[:10],list(self.parameters.keys())[:10])))
                 traceback.print_stack(None,None,logs.Flogs[0])
@@ -1271,6 +1272,18 @@ class module_class:
                 self.defparams.pop(DFPRM)
     
 
+def pureNet(Net):
+    if type(Net) is str: return Net
+    if type(Net) is int: return Net
+    if type(Net) is tuple:
+        return purrNet(list(Net))
+    if type(Net) is list:
+        if Net[0] == 'subbus': 
+            return pureNet(Net[1])
+        if Net[0] == 'subbit': 
+            return pureNet(Net[1])
+    logs.log_error('pureNet got "%s"' % str(Net))
+    return str(Net)
 
 def deepEval(Expr, Params_in):
     if type(Expr) is int:
