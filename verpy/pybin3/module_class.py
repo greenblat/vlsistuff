@@ -949,6 +949,36 @@ class module_class:
         self.netTable = netTable
         return netTable
 
+    def prepareBusNetTable(self):
+        netTable={}
+        for Net in self.nets:
+            Dir,Wid = self.nets[Net]
+            if 'input' in Dir:
+                netTable[Net] = [(self.Module,'input',Dir)]
+            elif 'output' in Dir:
+                netTable[Net] = [(self.Module,'output',Dir)]
+            elif 'inout' in Dir:
+                netTable[Net] = [(self.Module,'inout',Dir)]
+                
+        for Inst in self.insts:
+            Obj = self.insts[Inst]
+            Type = Obj.Type
+            for Pin in Obj.conns:
+                NN = Obj.conns[Pin]
+                if (type(NN) is list)and(NN[0]=='curly'):
+                    for Item in NN[1:]:
+                        Net = debus(Item)
+                        if Net not in netTable:
+                            netTable[Net]=[]
+                        netTable[Net].append((Inst,Type,Pin))
+                else:
+                    Net = debus(NN)
+                    if Net not in netTable:
+                        netTable[Net]=[]
+                    netTable[Net].append((Inst,Type,Pin))
+        self.netTable = netTable
+        return netTable
+
 
     def relax_name(self,Name,Simple=True):
         if not Name:
@@ -2333,6 +2363,11 @@ def parseBus(Name):
     logs.log_error('PARSE BUS %s' % Name)
     return Name
 
+def debus(Sig):
+    Sig = pr_expr(Sig)
+    if '[' in Sig: return Sig[:Sig.index('[')]
+    if type(Sig) is str: return Sig 
+            
 
 def simplestr(Txt):
     X = Txt.replace('[','_')

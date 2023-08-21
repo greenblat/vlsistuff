@@ -1,6 +1,8 @@
 #! /usr/bin/env python3.10
 
 import os,sys
+import traceback
+import re
 
 # New = os.path.expanduser('~/verpy')
 # sys.path.append(New)
@@ -29,6 +31,7 @@ class EnvironmentClass:
         self.Sons = {}
         self.Fathers = {}
         self.Top = False
+        self.CommandsHistory  = []
 
 Env = EnvironmentClass()
 pyver.Env = Env
@@ -39,9 +42,15 @@ import cmd
 class cmdxClass(cmd.Cmd):
     def do_exit(self,aaa):
         print('thanks and see you again')
+        logs.closeLogs()
+        cleanUp()
+        saveHistory()
         sys.exit()
     def do_quit(self,aaa):
         print('thanks and see you again')
+        logs.closeLogs()
+        cleanUp()
+        saveHistory()
         sys.exit()
     def do_help(self,aaa):
         logs.log_info(helpString.helpString)
@@ -56,11 +65,19 @@ class cmdxClass(cmd.Cmd):
             try:
                 use_command_wrds(wrds)
             except:
-                logs.log_error("Failed: %s " % Txt)
-                use_command_wrds(wrds)
-#            CommandsHistory.append(Txt)
+                logs.log_info("Failed: %s " % Txt)
+                traceback.print_last()
+                traceback.print_last(None,logs.Flogs[0])
+#                use_command_wrds(wrds)
+            Env.CommandsHistory.append(Txt)
         return False
 
+def saveHistory():
+    if len(Env.CommandsHistory) < 3: return
+    Fout = open('cmd.hist','w')
+    for line in Env.CommandsHistory:
+        Fout.write('%s\n' % line)
+    Fout.close()
 
 
 
@@ -137,8 +154,28 @@ def use_command_wrds(wrds):
         Expr = wrds[2]
         Env.Vars[Var] = Expr
 
+    if wrds[0] == 'hist':
+        for Line in Env.CommandsHistory:
+            print(Line)
+        return
+
+    if wrds[0] == 'current':
+        if len(wrds) == 1:
+            logs.log_info('current %s ' % Env.Current.Module)
+            return
+        Module = wrds[1]
+        if Module not in Env.Modules:
+            executes.try_and_load_module(Module,Env)
+        if Module in Env.Modules:
+            Env.Current = Env.Modules[Module]
+            Env.Path = [Module]
+        else:
+            logs.log_info('failed to load %s' % Module)
+        return
 
     if wrds[0] == 'load':
+        if os.path.exists('db0.pickle'):
+            os.system('/bin/rm db0.pickle')
         if len(wrds) == 1:
             use_command_wrds(['loaded'])
             return
@@ -185,6 +222,106 @@ def use_command_wrds(wrds):
         logs.log_info('pwd: %s' % '.'.join(Env.Path))
         return
 
+    if wrds[0] == 'tree_up':
+        if len(wrds) == 1: return
+        Net = wrds[1]
+        Mod = Env.Current
+        if len(wrds) >= 3:
+            Now = wrds[2]
+            if Now not in Env.Modules:
+                executes.try_and_load_module(Now,Env)
+            if Now in Env.Modules:
+                Mod = Env.Modules[Now]
+            else:
+                logs.log_info('failed to load %s' % Now)
+        Ok = True
+        while Ok:
+            if Mod.is_external(Net): 
+                LLL = use_command_wrds(['up',Net,Mod.Module])
+                if not LLL:
+                    Ok = False
+                else:
+                    Mod = LLL[0][0]
+                    Net = LLL[0][1]
+            else:
+                Ok = False
+        logs.log_info('top wire %s %s' % (Mod.Module,Net))
+        tree_down(Net,Mod,Env,[],0)
+        return
+        
+    if wrds[0] == 'tree_down':
+        if len(wrds) == 1: return
+        Net = wrds[1]
+        Mod = Env.Current
+        if len(wrds) >= 3:
+            Now = wrds[2]
+            if Now not in Env.Modules:
+                executes.try_and_load_module(Now,Env)
+            Mod = Env.Modules[Now]
+        tree_down(Net,Mod,Env,[],0)
+        return
+
+
+
+    if wrds[0] == 'up':
+        if len(wrds) == 1: return
+        Net = wrds[1]
+        Mod = Env.Current
+        if len(wrds) >= 3:
+            Now = wrds[2]
+            if Now not in Env.Modules:
+                executes.try_and_load_module(Now,Env)
+            Mod = Env.Modules[Now]
+
+        if not Mod.is_external(Net): 
+            logs.log_info('is not external sig %s in %s' % (Net,Mod.Module))
+            return False
+
+        use_command_wrds(['father',Mod.Module])
+        if Mod.Module not in Env.Fathers:
+            logs.log_info('didnt fine  upper caller of %s' % (Mod.Module))
+            return False
+        Who = Env.Fathers[Mod.Module][0]
+        Fmod = Env.Modules[Who]
+        Found = False
+        LLL = []
+        for Inst in Fmod.insts:
+            Obj = Fmod.insts[Inst]
+#            print("INST %s type %s mod %s" % (Inst,Obj.Type,Mod.Module))
+            if Obj.Type == Mod.Module:
+                for Pin in Obj.conns:
+                    if Pin == Net:
+                        Sig = debus(Obj.conns[Pin])
+                        logs.log_info('in %s, inst %s / %s, pin %s connects to %s' % (Fmod.Module,Inst,Obj.Type,Pin,Sig))    
+                        LLL.append([Fmod,Sig])
+                        Found = True
+        if not Found:
+            logs.log_info('didnt find any conns')
+            return False
+        return LLL
+                        
+
+
+
+
+
+#     if wrds[0] == 'conn':
+#         if len(wrds) == 1: return
+#         Net = wrds[1]
+#         if len(wrds) == 2:
+#             Mod = Env.Current
+#         else:
+#             Now = wrds[2]
+#             if Now not in Env.Modules:
+#                 executes.try_and_load_module(Now,Env)
+#             Mod = Env.Modules[Now]
+#         if Net not in Mod.nets:
+#             
+#             Who = Env.Fathers[Mod.Module][0]
+# 
+
+
+
     if wrds[0] == 'conn':
         if len(wrds) == 1: return
         Net = wrds[1]
@@ -196,43 +333,66 @@ def use_command_wrds(wrds):
                 executes.try_and_load_module(Now,Env)
             Mod = Env.Modules[Now]
         if Net not in Mod.nets:
-            logs.log_info('didnt file net %s in %s' % (Net,Mod.Module))
+            logs.log_info('didnt find net %s in %s' % (Net,Mod.Module))
             return
-        Mod.buildNetTable()    
+        Mod.prepareBusNetTable()    
+        if Net not in Mod.netTable:
+            logs.log_info('no connections for %s in %s' % (Net,Mod.Module))
+            return
         List = Mod.netTable[Net]
         for A,B,C in List:
             logs.log_info('   (%s)  %20s %20s %20s' % (direction(C,B,Env),A,B,C))
         return
     if wrds[0] == 'nets':
-        Ins,Outs,Inouts = [],[],[]
+        Ins,Outs,Inouts,Wires = [],[],[],[]
         if len(wrds) > 1:
             Now = wrds[1]
-            if Now not in Env.Modules:
-                executes.try_and_load_module(Now,Env)
-            Mod = Env.Modules[Now]
+            if Now != '.':
+                if Now not in Env.Modules:
+                    executes.try_and_load_module(Now,Env)
+                if Now not in Env.Modules:
+                    logs.log_error('%s cannot be loaded' % Now)
+                    return
+                Mod = Env.Modules[Now]
+            else:
+                Mod = Env.Current
         else:
             Mod = Env.Current
-        Mod.buildNetTable()    
-        Wi,Wo,Wio = 0,0,0
+
+        if len(wrds) > 2:
+            Pattern = wrds[2]
+        else:
+            Pattern = '*'
+
+
+
+        Mod.prepareBusNetTable()    
+        Wi,Wo,Wio,Wwire = 0,0,0,0
         for Net in Mod.nets:
-            Dir,Wid = Mod.nets[Net]
-            Wids = module_class.pr_wid(Wid)
-            Sig = '%s%s' % (Net,Wids)
-            if 'input' in Dir:  
-                Ins.append(Sig)
-                Wi = max(len(Sig),Wi)
-            if 'output' in Dir: 
-                Outs.append(Sig)
-                Wo = max(len(Sig),Wo)
-            if 'inout' in Dir: 
-                Inouts.append(Sig)
-                Wio = max(len(Sig),Wio)
+            print("XXXXXXX",Pattern,Net)
+            if (Pattern == '*') or re.match(Pattern,Net):
+                Dir,Wid = Mod.nets[Net]
+                Wids = module_class.pr_wid(Wid)
+                Sig = '%s%s' % (Net,Wids)
+                if 'input' in Dir:  
+                    Ins.append(Sig)
+                    Wi = max(len(Sig),Wi)
+                elif 'output' in Dir: 
+                    Outs.append(Sig)
+                    Wo = max(len(Sig),Wo)
+                elif 'inout' in Dir: 
+                    Inouts.append(Sig)
+                    Wio = max(len(Sig),Wio)
+                elif Pattern != '*':
+                    Wires.append(Sig)
+                    Wwire = max(len(Sig),Wwire)
 
         Ins.sort()
         Outs.sort()
         Inouts.sort()
+        Wires.sort()
         Len = max(len(Ins),max(len(Outs),len(Inouts))) 
-        logs.log_info('Nets of %s' % Mod.Module)
+        logs.log_info('Nets of %s Is Os IOs' % Mod.Module)
         for ii in range(Len):
             if (ii<len(Ins)):
                 Ix = Ins[ii]
@@ -257,6 +417,9 @@ def use_command_wrds(wrds):
 
             Head = ' %%%ds %2s   %%%ds %2s   %%%ds  %2s' % (Wi,Ilen,Wo,Olen,Wio,IOlen)
             logs.log_info(Head % (Ix,Ox,IOx))
+        for Wire in Wires:
+            logs.log_info('    wire %s' % Wire)
+
         return
 
     if wrds[0] == 'father':
@@ -307,6 +470,15 @@ def use_command_wrds(wrds):
     if wrds[0] == 'cd':
         where = wrds[1] 
         if where == '..':
+            if len(Env.Path) <2:
+                use_command_wrds(['father',Env.Current.Module])
+                if Env.Current.Module in Env.Fathers:
+                    Who = Env.Fathers[Env.Current.Module][0]
+                    Env.Current = Env.Modules[Who] 
+                    Env.Path = [Who]
+                    
+                return
+
             Env.Path.pop(-1)
             Now = Env.Path[-1]
             if Now not in Env.Modules:
@@ -379,7 +551,17 @@ def use_command_wrds(wrds):
         exec(Str,Env.imports)
         return
 
-    if wrds[0] in ['vi','open']:
+    if wrds[0] in ['open']:
+        if len(wrds) == 1:
+            Now = Env.Top
+        else:
+            Now = wrds[1]
+        Fname = findModuleFname(Now,Env)
+        if Fname:
+            os.system('open -a Textedit %s' % Fname)
+        return
+
+    if wrds[0] in ['vi']:
         if len(wrds) == 1:
             Now = Env.Top
         else:
@@ -446,12 +628,16 @@ def direction(Pin,Type,Env):
         executes.try_and_load_module(Type,Env)
     if Type not in Env.Modules: return '??'
     Mod = Env.Modules[Type]
-    if Pin in Mod.nets:
-        Dir,_ = Mod.nets[Pin]
+    return dirNet(Pin,Mod)
+
+
+def dirNet(Net,Mod):
+    Net = debus(Net)
+    if Net in Mod.nets:
+        Dir,_ = Mod.nets[Net]
         if 'input' in Dir: return 'in'
         if 'output' in Dir: return 'ou'
         if 'inout' in Dir: return 'io'
-
     return '??'
 
 
@@ -514,6 +700,9 @@ def doTheDeepSearch(Now,Env):
             
         
 def readLines(Fname):
+    if not os.path.exists(Fname):
+        logs.log_error('failed to open file %s' % Fname)
+        return []
     File = open(Fname)
     Lines = File.readlines()
     File.close()
@@ -528,11 +717,40 @@ def findPathTo(Now,Env,Path=[]):
         return  findPathTo(Up,Env,[Up[0]] + Path)
     return False,Path
 
+def tree_down(Net,Mod,Env,Dones = [],Lvl=0):
+    logs.log_info('  %s    %s %20s %s' % (dirNet(Net,Mod),Lvl*'  ',Net,Mod.Module))
+#     logs.log_info("TREE DOWN %s %s %s %s" % (dirNet(Net,Mod),Net,Mod.Module,Dones))
+    Mod.prepareBusNetTable()
+    if Net not in Mod.netTable:
+        logs.log_error('tree_down net %s is not in %s' % (Net,Mod.Module))
+        return
+    List = Mod.netTable[Net]
+    for Inst,Type,Pin in List:
+        if Type not in Dones:
+            Dones.append(Type)
+            if Pin not in ['input','output']:
+                if Type not in Env.Modules:
+                    executes.try_and_load_module(Type,Env)
+                if Type in Env.Modules:
+                    tree_down(Pin,Env.Modules[Type],Env,Dones,Lvl+1)
+    
+        
+
+
+
+
 Commands = '''
 import source include glv top set load dirs load_mvlg load_deep pwd conn
 nets father find cd insts ls loaded os vi open
+hist up current
 '''.split()
 
 
+def cleanUp():
+    os.system('/bin/rm xyz_*')
+    os.system('/bin/rm lex.out')
+    os.system('/bin/rm db0.pickle')
+    os.system('/bin/rm yacc.log')
+    os.system('/bin/rm database.dump')
 
 if __name__ == '__main__': main()

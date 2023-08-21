@@ -42,7 +42,7 @@ class apbDriver:
         self.Caller = False
         logs.log_info('apbDriver  ver 30.may.2023')
         self.noList = []
-#        self.force('psel',0)
+        self.force('psel',0)
 #        self.force('pwrite',0)
 #        self.force('penable',0)
         self.Uart = False

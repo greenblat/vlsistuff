@@ -42,7 +42,7 @@ def run_yacc(YaccTableName,Flexname,RunDir,Fname):
     readlexfile(Flexname)
     removePragmas()
     run_machine()
-    reportDb(RunDir)
+    reportDb(RunDir,DataBase)
     Fout.close()
 
 def removePragmas():
@@ -174,7 +174,7 @@ def clean_up(List):
     return Res
 
 
-def reportDb(RunDir):
+def reportDb(RunDir,DataBase):
     for Key in DataBase:
         Fout.write('%s %s\n'%(Key,DataBase[Key]))
     Outf = open('%s/db0.pickle'%RunDir,'wb')

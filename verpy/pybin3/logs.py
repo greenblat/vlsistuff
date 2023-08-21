@@ -14,7 +14,7 @@ PYMONLOG = 'pymon.log'
 WHERE = ''
 
     
-Flogs = [False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False]
+Flogs = {}
 
 
 import time
@@ -96,7 +96,7 @@ def report_errx(Module):
     
 def log_err(Text,Which=0,Tb=True,Pstack=False):
     global Errors,printed_already
-    if (not Flogs[Which]):
+    if (Which not in Flogs):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Errors +=1  
     Flogs[Which].write('@%d: %s %d ERROR: %s\n'%(get_cycles(),WHERE,Errors,Text))
@@ -122,7 +122,7 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
 
 def log_correct(Text,Which=0,Print=True):
     global Corrects
-    if (not Flogs[Which]):
+    if (Which not in Flogs):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Corrects += 1
     veri.force('%s.corrects'%TB,str(Corrects))
@@ -140,7 +140,7 @@ def log_wrong(Text,Which=0):
     global Wrongs
     Wrongs += 1
     veri.force('%s.wrongs'%TB,str(Wrongs))
-    if (not Flogs[Which]):
+    if (Which not in Flogs):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: %d vs %d (err=%d): WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     Flogs[Which].write('@%d: %d vs %d (err=%d): WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
@@ -172,7 +172,7 @@ def log_warning(Text,Which=0):
     global Warnings,printed_already,Flog
     if (Text in printed_already) or not print_warning_messages:
         return
-    if (not Flogs[Which]):
+    if (Which not in Flogs):
         Flogs[Which]= open(PYMONLOG+str(Which),'w')
     print('%d: warning: %s'%(Warnings,Text))
     Flogs[Which].write('%d: warning: %s\n'%(Warnings,Text))
@@ -181,17 +181,22 @@ def log_warning(Text,Which=0):
     Flogs[Which].flush()
 
 def log_write(Text,Which=0):
-    if (not Flogs[Which]):
+    if Which not in Flogs:
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
 #    print('%s'%(Text))
     Flogs[Which].write('%s\n'%(Text))
 
 def log_info(Text,Which=0):
-    if (not Flogs[Which]):
+    if Which not in Flogs:
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: info: %s'%(get_cycles(),Text))
     Flogs[Which].write('@%d: info: %s\n'%(get_cycles(),Text))
     Flogs[Which].flush()
+
+def closeLogs():
+    for Which in Flogs:
+        Flogs[Which].close()
+
 
 def log_finfo(Text,File):
     File.write('@%d: info: %s\n'%(get_cycles(),Text))

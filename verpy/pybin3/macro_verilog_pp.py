@@ -28,8 +28,6 @@ import re
 
 from logs import parse_args
 
-Lines2=[]
-Lines3=[]
 Defined={}
 IncDirs=[]
 LibExt = ['.v']
@@ -77,16 +75,18 @@ def run_main(Params,Dumps='11111',KeepLnum=False):
         print('removing translates')
         Lines= remove_synopsys_on_off(Lines)
 
+    print("ASASASASASAAS",Fnames,len(Lines))
     for ind,line in enumerate(Lines):
         Lines[ind] = ind,line
-    scan0(Lines)
+    Lines2,Lines3 = [],[]
+    scan0(Lines,Lines2,Lines3)
     if Dumps[0] == '1':
         File2 = open('filex0.v','w')
         for line in Lines:
             File2.write(line)
         File2.close()
 
-    scan1(Lines)
+    scan1(Lines,Lines2,Lines3)
     if Dumps[1] == '1':
         File2 = open('filex1.v','w')
         for line in Lines2:
@@ -98,7 +98,7 @@ def run_main(Params,Dumps='11111',KeepLnum=False):
         Def2.append((len(Key),Key,Defined[Key]))
     Def2.sort()
     Def2.reverse()
-    print('computing...')
+    print('computing...',len(Lines3))
     dones=0
     for i,(Num,line) in enumerate(Lines3):
         line = use_defines(line,Def2)
@@ -133,7 +133,7 @@ def run_main(Params,Dumps='11111',KeepLnum=False):
         File4name = OutFileName
     if (Dumps[3] == '1') or (Dumps[4] == '1'): doFile4(Lines4,Lines5,File4name,KeepLnum)
     if Dumps[4] == '1': doFile5(Lines5)
-
+    print('DUMPS',Dumps)
 
 
 def doFile4(Lines4,Lines5,Fname,KeepLnum):
@@ -394,7 +394,7 @@ def remove_comment1(line):
 def needs_work(line):
     return  ('`ifdef' in line)or('`else' in line)or('`endif' in line)or('`define' in line)or('`ifndef' in line)or('`elsif' in line)or('`include' in line)
 
-def scan0(Lines):
+def scan0(Lines,Lines2,Lines3):
     ind=0
     while ind<len(Lines):
         Num,line = Lines[ind]
@@ -453,7 +453,7 @@ def scan0(Lines):
     
 
 
-def scan1(Lines):
+def scan1(Lines,Lines2,Lines3):
     state='idle'    
     queue=[]
     indx=0

@@ -89,9 +89,11 @@ def run_lexer(Fname,FnameOut):
 
 
 def read_verilog_file(Fname,RunDir,Env):
-    global dbx
+#    global dbx
     print('reading0 %s file'%Fname)
     tmpfilename = '/tmp/xyz_%s'%os.getpid()
+    if os.path.exists(tmpfilename):
+        os.system('/bin/rm %s' % tmpfilename)
     Params = { 'fnames':[Fname],'-specify':True,'-o':[tmpfilename]}
     More = Env.params
     if '-d' in More:
