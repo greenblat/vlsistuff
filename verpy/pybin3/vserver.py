@@ -208,6 +208,7 @@ def use_command_wrds(wrds):
         for Fname in Lines:
             Fname = Fname[:-1]
             pyver.load_verilog_file(Fname,'.',Env)
+            logs.record_directory(Fname,Env.SearchDirs)
         return            
     if wrds[0] == 'load_deep':
         if len(wrds) == 3:
@@ -519,6 +520,8 @@ def use_command_wrds(wrds):
                 if Now in Env.Modules:
                     Env.Current = Env.Modules[Now]
                     print("XXXXX",Env.Current.Module,Now)
+            else:
+                Env.Current = Env.Modules[Now]
         if not Env.Current: return
         Insts = {}
         Many = {}
@@ -559,6 +562,8 @@ def use_command_wrds(wrds):
         Fname = findModuleFname(Now,Env)
         if Fname:
             os.system('open -a Textedit %s' % Fname)
+        else:
+            sys.info('cannot open %s  %s' % (Now,Fname))
         return
 
     if wrds[0] in ['vi']:
