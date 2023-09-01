@@ -24,8 +24,16 @@ setenv PYTHONINC2 /usr/include/python$PYTHONVERSION
 # subset of these usually is enough
 setenv VERILOGINC  /home/ilia/intelFPGA/22.1std/questa_fse/include
 
-#uncomment first line if LD_LIBRARY_PATH is predefined.
-#setenv LD_LIBRARY_PATH "${PYTHONLIB}:$LD_LIBRARY_PATH"
 
-#uncomment this line if LD_LIBRARY_PATH is not predefined.
-#setenv LD_LIBRARY_PATH "${PYTHONLIB}"
+if (! $?LD_LIBRARY_PATH) then
+    setenv LD_LIBRARY_PATH "${PYTHONLIB}"
+else
+    if ("$LD_LIBRARY_PATH" == "")  then
+        setenv LD_LIBRARY_PATH "${PYTHONLIB}"
+    else
+        setenv LD_LIBRARY_PATH "${PYTHONLIB}:$LD_LIBRARY_PATH"
+    endif
+endif
+
+
+
