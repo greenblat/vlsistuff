@@ -1,0 +1,28 @@
+#! /bin/csh -f
+
+# Path to vlsistuff directory
+setenv VLSISTUFF /Users/iliagreenblat/vlsistuff
+setenv VPI3 $VLSISTUFF/pyhton-verilog/vpi3
+setenv VERIFICATION_LIB3 $VLSISTUFF/verification_libs3
+
+
+#Paths to python instalation
+setenv PYTHONVERSION 3.10
+# path to where "
+setenv PYTHONLIB  /usr/lib64
+
+# path to where "Python.h"
+setenv PYTHONINC1 /usr/include/python$PYTHONVERSION
+
+#sometimes need second include
+setenv PYTHONINC2 /usr/include/python$PYTHONVERSION
+
+#path to include files like:
+#include "vpi_user.h"
+#include "veriuser.h"
+#include "vpi_user_cds.h"
+# subset of these usually is enough
+setenv VERILOGINC  /home/ilia/intelFPGA/22.1std/questa_fse/include
+
+
+setenv LD_LIBRARY_PATH "$PYTHONLIB:$LD_LIBRARY_PATH"
