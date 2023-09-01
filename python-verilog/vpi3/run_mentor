@@ -1,0 +1,18 @@
+#! /bin/csh -f
+
+#dont forget to source my_vpi3.setup
+
+/bin/rm -R work 
+vlib work
+vlog -work work -sv -f all.files  -O5 
+
+setenv LM_LICENSE_FILE License.dat
+
+
+vsim -work work -batch tb -do "run -all" \
+    -pli $VPI3/vpi7.so  \
+    +acc  \
+    +SEQ=$1
+~
+
+
