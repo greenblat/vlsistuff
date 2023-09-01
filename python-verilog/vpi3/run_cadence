@@ -1,0 +1,18 @@
+#! /bin/csh -f
+
+# example of cadence invocation script
+# make sure to source vpi3.source
+set TEST = $1
+
+
+xrun -64bit \
+    +sv \
+    -access rwc \
+    -timescale 1ns/1ps \
+    tb.v \
+    -top tb \
+    -f long.list \
+    -f artificial.files \
+    ../lib/ig_volt_lib.v \
+    +loadvpi=$VPI3/vpi7.so:vpit_RegisterTfs \
+    +SEQ=tests/$TEST.seq \
