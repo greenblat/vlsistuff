@@ -18,7 +18,7 @@ class hspiceVector(logs.driverClass):
         self.Enable = False
         self.lastLine = ''
 
-    def action(self,Text):
+    def action(self,Text,Orig=[]):
         wrds = Text.split()
         if wrds[0] == 'step':
             self.Step = eval(wrds[1])

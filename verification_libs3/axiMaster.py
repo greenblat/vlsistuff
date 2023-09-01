@@ -104,7 +104,7 @@ class axiMasterClass:
     def force(self,Sig,Val):
         Sig = self.rename(Sig)
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
-    def action(self,Txt):
+    def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         logs.log_info('%s ACTION %s' % (self.Name,Txt))
         if wrds[0] == 'starvation':

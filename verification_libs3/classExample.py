@@ -38,7 +38,7 @@ class vdriverClass(logs.driverClass):
     def onFinish(self):
         return
 
-    def action(self,Txt):
+    def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         if wrds == []: return
         if wrds[0] == 'vdd':

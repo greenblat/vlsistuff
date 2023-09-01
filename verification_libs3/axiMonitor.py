@@ -31,7 +31,7 @@ class axiMonitorClass:
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig,self.Logs)
 
-    def action(self,Txt):
+    def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         if wrds==[]:
             pass

@@ -361,7 +361,7 @@ class sequenceClass:
                 
             
     def runBreak(self):
-        Txt = input("br:") 
+        Txt = input("seq break:") 
         wrds = Txt.split()
         if wrds==[]: return
         if wrds[0] in ['return','resume']:
@@ -641,7 +641,7 @@ class sequenceClass:
                     Wrds2.append(Wrd)
             Cmd = wrds[1]+' '+' '.join(Wrds2)
             logs.log_info('tell %s <- %s   (%s)   2(%s)' % (Line[:-1],Cmd,Wrds,Wrds2))
-            self.agents[wrds[0]].action(Cmd)
+            self.agents[wrds[0]].action(Cmd,wrds[1:])
             return True
         elif (wrds[0] == 'check'):
             BB = makeExpr(wrds[1])

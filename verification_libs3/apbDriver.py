@@ -108,7 +108,7 @@ class apbDriver:
         Who,Act,Addr = self.Backs.pop(0)
         return Act
 
-    def action(self,Cmd):
+    def action(self,Cmd,Orig = []):
         logs.log_info("APB ACTION %s %s" % (self.Name,Cmd))
         if not self.exists('pstrb'):
             self.noList.append('pstrb')

@@ -12,7 +12,7 @@ class vcdoutClass:
         self.Time = 0
         self.started = False
 
-    def action(self,Txt):
+    def action(self,Txt,Orig=[]):
         List = Txt.split()
         if List == []:
             return

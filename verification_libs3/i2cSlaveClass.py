@@ -21,7 +21,7 @@ class i2cSlaveClass(logs.driverClass):
         self.BYTE = ''
         self.state = 'idle'
 
-    def action(self,Txt):
+    def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         if wrds[0] == 'ack':
             self.ACK = eval(wrds[1])

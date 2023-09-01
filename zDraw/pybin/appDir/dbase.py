@@ -256,7 +256,8 @@ class InstanceClass:
             End=WW.End
             if self.it_is_me(End):
                 X,Y = get_pin_location(self.Father.Module,End)
-                self.Father.wires[Wire].List.pop(-1)
+                if self.Father.wires[Wire].List != []:
+                    self.Father.wires[Wire].List.pop(-1)
                 self.Father.wires[Wire].List.append((X,Y))
 #                self.Father.wires[Wire].List =[]
         

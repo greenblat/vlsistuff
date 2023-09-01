@@ -37,7 +37,7 @@ class spiMasterClass(logs.driverClass):
     def busy(self):
         return not self.idle()
 
-    def action(self,Txt):
+    def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         Cmd = wrds[0]
         if Cmd =='send':

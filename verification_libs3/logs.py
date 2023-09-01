@@ -98,7 +98,7 @@ def finish(Txt):
         sys.exit()
 
 
-def action(Txt):
+def action(Txt,Orig=[]):
     global printCorrects,printDebugs,MAXWRONGS,MAXERRORS
     wrds = Txt.split()
     if wrds == []: return
@@ -781,6 +781,8 @@ def keepSimulationAlive():
         log_info('keepSimulationAlive decided to end this simulation (%s)'%Blame)
         if veri: veri.finish()
         
+def cellName(Fname):
+    return fnameCell(Fname)
 def fnameCell(Fname):
     wrds = Fname.split('/')
     wrd0 = wrds[-1]

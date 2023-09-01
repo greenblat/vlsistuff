@@ -59,7 +59,7 @@ class ahbSlave(logs.driverClass):
         if self.seq!=[]:   return True
         return False
 
-    def action(self,Txt):
+    def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         if wrds[0] in BURSTS:
 # ahb wrap4 write 0x1000

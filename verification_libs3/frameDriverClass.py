@@ -57,7 +57,7 @@ class frameDriverClass(logs.driverClass):
     def busy(self):
         return (self.state!='idle')or(self.waiting>0)
 
-    def action(self,Txt):
+    def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         Cmd = wrds[0]
         if Cmd=='run':

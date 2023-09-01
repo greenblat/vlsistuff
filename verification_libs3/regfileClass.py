@@ -75,7 +75,7 @@ class regfilesClass:
         self.regfiles = {}
         self.SeqObj = False
 
-    def action(self,Txt):
+    def action(self,Txt,Orig=[]):
         Dir = parseLine(Txt)
         if not Dir: return
         if 'assign' in Dir:

@@ -94,7 +94,7 @@ class axiSlaveClass:
         #        logs.log_info('AXI FORCE %s  %s'%(Sig,Val))
         veri.force('%s%s' % (self.Path, Sig), str(Val))
 
-    def action(self, Text):
+    def action(self, Text,Orig=[]):
         Wrds = Text.split()
         if Wrds == []:
             pass

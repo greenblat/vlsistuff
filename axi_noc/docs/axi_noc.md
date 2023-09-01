@@ -10,7 +10,7 @@ On-chip memories  Rams, Roms, Flash embedded, Security and more that now i forgo
 To make them into a coherent system, conventional way is to hang them all on a NOC. Network on a chip.
 
 At Virata, years ago, we created ring based NOC, that didn't have masters and slaves and was passing messages at 
-pretty high speed between all members. Instead of Masters and Slaves, all members of the system were sitting in a few circles, passing messages around, until it hit the addressee. (More can be found in my gitHub)
+pretty high speed between all members. Instead of Masters and Slaves, all members of the system were sitting in a few rings, passing messages around, until it hit the addressee. (More can be found in my gitHub)
 
 Sweet memories..., but nowadays all ingredients have AXI, AHB or APB interfaces (and couple more weirder ones).
 
@@ -38,13 +38,13 @@ Complications and restrictions:
 3. For first viable, the AXI is 64 bits data and 32bits address.  
 4. Not all Masters can access all Slaves. There should be easy way to configure that too.
 5. AXI in standard has 4 busses without nebulous  job, that 90% of designs don't know what to do with them: size, prot, cache and qos. In this design, instead, i allocate "extras" bus with configurable width. Do with it whatever. Size will probably creep back in.
-6. Cut combi paths into manageable timing pieces, layout friendly, Latency of clock here and clock there is not a problem. 
+6. Cut combi paths into manageable timing pieces, layout friendly, Delay penalty of clock here and  there is not a problem. 
 7. QOS is for losers.
 8. Keep it simple, focused. Debuggable. Humanly understanble.  I dont expect it to save the world or make coffee. My cat can do that.
 <img src="mycat.jpg" alt="mycat" style="zoom:33%;" />
 
 
-## The idea
+## The idea (like good old Lego)
 We define and implement a limited set of building blocks. Out of this limited set we can compose any NOC we need.
 
  For the first version there are only six modules:

@@ -30,7 +30,7 @@ class i2cMasterClass(logs.driverClass):
         if Sig in self.Renames: Sig = self.Renames[Sig]
         return logs.driverClass.peek(self,Sig)
 
-    def action(self,Txt):
+    def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         Cmd = wrds[0]
         if Cmd =='read7addr':

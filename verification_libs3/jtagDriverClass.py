@@ -33,7 +33,7 @@ class jtagDriverClass(logs.driverClass):
     def eval(self,What):
         return self.SeqObj.evalStr(What)
 
-    def action(self,Txt):
+    def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         if wrds[0] == 'rate':
             self.RATE = self.eval(wrds[1])

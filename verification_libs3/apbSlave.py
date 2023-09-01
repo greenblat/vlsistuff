@@ -27,7 +27,7 @@ class apbSlave(logs.driverClass):
         Who,Act,Addr = self.Backs.pop(0)
         return Act
 
-    def action(self,Cmd):
+    def action(self,Cmd,Orig=[]):
         wrds = Cmd.split()
         if wrds[0] == 'ready':
             self.READY = eval(wrds[1])

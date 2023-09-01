@@ -74,7 +74,7 @@ class axiLiteMasterClass:
         Sig = self.rename(Sig)
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
-    def action(self,Txt):
+    def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         if wrds[0] == 'read':
             self.read(self.eval(wrds[1]),self.Size)
