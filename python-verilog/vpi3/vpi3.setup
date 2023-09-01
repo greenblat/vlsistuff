@@ -1,13 +1,18 @@
 #! /bin/csh -f
 
+# Copy this file to convinient location to source it from.
+# modify the Paths variables to what is  relevant to Your envir.
+
 # Path to vlsistuff directory
 setenv VLSISTUFF /Users/iliagreenblat/vlsistuff
+
+# no need to touch these two.
 setenv VPI3 $VLSISTUFF/pyhton-verilog/vpi3
 setenv VERIFICATION_LIB3 $VLSISTUFF/verification_libs3
 
 
 #Version and Path to python instalation
-setenv PYTHONVERSION 3.10
+setenv PYTHONVERSION 3.11
 # path to where "
 setenv PYTHONLIB  /usr/lib64
 

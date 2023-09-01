@@ -1,18 +1,17 @@
 #! /bin/csh -f
 
-set INC = /Library/Frameworks/Python.framework/Versions/3.8/include/python3.8/
-set LIB = /Library/Frameworks/Python.framework/Versions/3.8/lib
+echo $PYTHONLIB
+
+exit
 
 iverilog-vpi src/vpi3_72.c src/qq64.c \
-    -I$INC \
-    -lpython3.8  \
-    -L$LIB \
+    -I$PYTHONINC1 \
+    -lpython$PYTHONVERSION  \
+    -L$PYTHONLIB \
 
 
 
 
-#    -lpython3.6m  \
-#    -L/Users/ilia/local/lib/ \
 
 
 
