@@ -25,4 +25,4 @@ setenv PYTHONINC2 /usr/include/python$PYTHONVERSION
 setenv VERILOGINC  /home/ilia/intelFPGA/22.1std/questa_fse/include
 
 
-# setenv LD_LIBRARY_PATH "$PYTHONLIB:$LD_LIBRARY_PATH"
+setenv LD_LIBRARY_PATH "${PYTHONLIB}:$LD_LIBRARY_PATH"
