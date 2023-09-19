@@ -852,13 +852,27 @@ class module_class:
             self.check_net_def(Net1)
 
                 
-    def recompute_instance_wires(self):
+    def recompute_instance_wires(self,Env):
         Wires = {}
         for Inst in self.insts:
             Obj=self.insts[Inst]
             for Pin in Obj.conns:
                 Net = Obj.conns[Pin]
                 self.recompute_instance_wires_helper(Net,Wires)
+            Env.try_and_load_module(Obj.Type,Env)
+            if Obj.Type in Env.Modules:
+                Son = Env.Modules[Obj.Type]
+                for Pin in Obj.conns:
+                    Net = Obj.conns[Pin]
+                    if type(Net) is str:
+                        if Pin in Son.nets:
+                            _,Wid = Son.nets[Pin]
+                            if Net in self.nets:
+                                Dir,_ = self.nets[Net]
+                                self.nets[Net] = Dir,Wid
+                            else:
+                                self.nets[Net] = 'wire',Wid
+
 
         Nets = list(self.nets.keys())
         for Net in Nets:
@@ -884,7 +898,12 @@ class module_class:
             elif Net not in Wires:
                 Wires[Net]=(0,0)
         elif isinstance(Net,(tuple,list)):
-            if Net[0] in ['curly']:
+            if Net[0] == 'bin':
+                pass
+            elif Net[0] in ['|']:
+                for Def in Net[1:]:
+                    self.recompute_instance_wires_helper(Def,Wires)
+            elif Net[0] in ['curly']:
                 for Def in Net[1:]:
                     self.recompute_instance_wires_helper(Def,Wires)
             elif Net[0] in ['subbit','subbus']:
@@ -1300,6 +1319,40 @@ class module_class:
             else:
                 self.insts[Inst].params[Prm] = Val
                 self.defparams.pop(DFPRM)
+    def exprWidth(self,Expr):
+        if type(Expr) is str:
+            if Expr in self.nets:
+                return self.sig_width(Expr)
+        if type(Expr) is list:
+            if Expr[0] == 'bin': return evalz(Expr[1])
+            if Expr[0] == 'hex': return evalz(Expr[1])
+            if Expr[0] == 'dig': return evalz(Expr[1])
+            if Expr[0] == 'subbit': return 1
+            if Expr[0] == 'subbus': 
+                if len(Expr) == 4:
+                    Hi = Expr[2]
+                    Lo = Expr[3]
+                    return Hi-Lo+1
+                else:
+                    Hi = Expr[2][0]
+                    Hi = self.compute_int(Hi)
+                    Lo = Expr[2][1]
+                    Lo = self.compute_int(Lo)
+                    return Hi-Lo+1
+            if Expr[0] in ['<','>','!=','==','<=','>=']: return 1 
+            if Expr[0] == 'curly':
+                Wid = 0
+                for Item in Expr[1:]:
+                    Now = self.exprWidth(Item)
+                    Wid += Now
+                return Wid
+            if Expr[0] == 'case':
+                logs.log_info("XXXXX %s" % str(Expr))
+                return 0
+
+
+        logs.log_error("EXPR WIDTH %s %s" % (self.Module,Expr))
+        return 0
     
 
 def pureNet(Net):
@@ -1547,7 +1600,6 @@ class instance_class:
         else:
             try2 = ('\n%s,'%Pref).join(res)
             Fout.write('%s);%s\n'%(try2,Comment))
-
 
 
 

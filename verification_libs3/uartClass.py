@@ -28,7 +28,7 @@ class uartClass(logs.driverClass):
         self.runTx()
         self.runRx()
 
-    def action(self,Str):
+    def action(self,Str,Origs=[]):
         Wrds  = Str.split()
         if Wrds[0]=='txfile':
             Fname = Wrds[1]
@@ -43,6 +43,7 @@ class uartClass(logs.driverClass):
         elif Wrds[0]=='tx':
             for Wrd in Wrds[1:]:
                 self.send(Wrd)
+            logs.log_info("TXUART %s %s" % (self.txd,str(Wrds[1:])),'fpga')    
             self.send('\x0a')
         elif Wrds[0]=='baudrate':
             self.baudRate = eval(Wrds[1])

@@ -1,5 +1,5 @@
 
-DEFAULTWAITGUARD = 1000000
+DEFAULTWAITGUARD = 10000000
 
 import logs
 import veri
@@ -641,6 +641,10 @@ class sequenceClass:
                     Wrds2.append(Wrd)
             Cmd = wrds[1]+' '+' '.join(Wrds2)
             logs.log_info('tell %s <- %s   (%s)   2(%s)' % (Line[:-1],Cmd,Wrds,Wrds2))
+# @259: info: write 0x454 0x19  ['write', 'LVL_classic_end_of_phase_seg1', 'SEG1']
+            ww = Cmd.split()
+            if ww[0] == 'write':
+                logs.log_info('A%s. w%s. //  %s' % (ww[1][2:],ww[2][2:],wrds[1:]),'uart')
             self.agents[wrds[0]].action(Cmd,wrds[1:])
             return True
         elif (wrds[0] == 'check'):

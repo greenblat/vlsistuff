@@ -561,7 +561,7 @@ def use_command_wrds(wrds):
             Now = wrds[1]
         Fname = findModuleFname(Now,Env)
         if Fname:
-            os.system('open -a Textedit %s' % Fname)
+            os.system('gvim %s' % Fname)
         else:
             sys.info('cannot open %s  %s' % (Now,Fname))
         return

@@ -213,6 +213,7 @@ def reorder_loop(Loop):
 def check_integrity(Env,Current):
     logs.setCurrentModule(Current.Module)
     always_assigns(Current)
+    always_assigns_reset(Current)
     register_hard_assigns_usage(Current)
     register_instances_usage(Env,Current)
     check_usage_driven(Current)
@@ -280,6 +281,45 @@ def check_usage_driven(Current):
            logs.log_errx(5,'net %s (%s) dangles from instance '%(Net,Dir))
 
 
+
+def always_assigns_reset(Current):
+    for Always in Current.alwayses:
+        if len(Always) in [2,3]:
+            if is_edged_timing(Always[0]):
+                Ifelse = Always[1]
+                if (Ifelse[0] == 'list') and (len(Ifelse) == 2):
+                    Ifelse = Ifelse[1]
+                    if Ifelse[0] == 'ifelse':
+                        Rsts = getDsts(Ifelse[2])
+                        Alws = getDsts(Ifelse[3])
+                        for Alw in Alws:
+                            if Alw not in Rsts:
+                                logs.log_error("always_assigns_reset missing %s" % Alw)
+                        for Rst in Rsts:
+                            if Rst not in Alws:
+                                logs.log_error("always_assigns_reset spare %s" % Rst)
+                    
+
+def getDsts(Expr):
+    if type(Expr) == list:
+        if (len(Expr) == 3) and (Expr[0] in ['<=','=']):
+            Set = support_set(Expr[1],False)
+            return Set
+        if Expr[0] == 'list':
+            Res = []
+            for Item in Expr[1:]:
+                More = getDsts(Item)
+                Res += More
+            return Res                
+        if Expr[0] == 'if':
+            return getDsts(Expr[2])                
+        if Expr[0] == 'ifelse':
+            return getDsts(Expr[2])+getDsts(Expr[3])
+
+        logs.log_error("getDsts %s " % Expr[0])
+        return []
+    logs.log_error("getDsts0 %s " % Expr)
+    return []
 
 def always_assigns(Current):
     Alw = 1

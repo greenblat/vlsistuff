@@ -82,7 +82,8 @@ class apbSlave(logs.driverClass):
                     logs.log_info('APBSLAVE %s write %x %x' % (self.Name,self.addr,self.wdata))
                 else:
                     if self.addr not in self.RAM:
-                        self.RAM[self.addr] = random.randint(0,0xffffffff)
+#                        self.RAM[self.addr] = random.randint(0,0xffffffff)
+                        self.RAM[self.addr] = self.addr
+                        logs.log_info('APBSLAVE %s invent read %x %x' % (self.Name,self.addr,self.RAM[self.addr]))
                     self.lcl_force('prdata',self.RAM[self.addr])
-                    logs.log_info('APBSLAVE %s read %x %x' % (self.Name,self.addr,self.RAM[self.addr]))
                 self.state = 'idle'

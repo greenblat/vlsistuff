@@ -960,7 +960,7 @@ def bodyDump1(Db,File,Alone):
 
 ROPULSE = '''
 wire REG_rd_sel = pread && (mpaddr=='hADDR);
-reg REG_rd_pulse_reg; always @(posedge pclk)  REG_rd_pulse_reg <= REG_rd_sel;
+reg REG_rd_pulse_reg; always @(posedge pclk or negedge presetn)  if (!presetn) REG_rd_pulse_reg<=0; else REG_rd_pulse_reg <= REG_rd_sel;
 assign REG_pulse = REG_rd_pulse_reg && penable;
 '''
 
@@ -970,7 +970,7 @@ assign REG_wr_sel = pwrite && (mpaddr=='hADDR);
 
 RWPULSE = '''
 wire REG_wr_sel = pwrite && (mpaddr=='hADDR);
-reg REG_wr_pulse_reg; always @(posedge pclk)  REG_wr_pulse_reg <= REG_wr_sel;
+reg REG_wr_pulse_reg; always @(posedge pclk or negedge presetn)  if (!presetn) REG_wr_pulse_reg<=0; else REG_wr_pulse_reg <= REG_wr_sel;
 assign REG_pulse = REG_wr_pulse_reg;
 '''
 
@@ -1116,13 +1116,15 @@ def treatReg(Reg):
             Wid1 = Wid
             Ad = Reg.Addr
             Hi,Lo = busWid-1,0
+            Lim = busWid-1
             while Wid1>0:
-                Line = '        if %s(mpaddr == \'h%x)%s %s[%d:%d] <= (%s[%d:%d] & ~mask) | (wdata & mask);'%(pre_WRITE,Ad,post_WRITE,Name,Hi,Lo,Name,Hi,Lo)
+                Line = '        if %s(mpaddr == \'h%x)%s %s[%d:%d] <= (%s[%d:%d] & ~mask[%d:%d]) | (wdata[%d:%d] & mask[%d:%d]);'%(pre_WRITE,Ad,post_WRITE,Name,Hi,Lo,Name,Hi,Lo,Lim,0 ,Lim,0,Lim,0)
                 LINES[3].append(Line)
                 Ad += Jump
                 Lo += busWid
                 Wid1 -= busWid
                 Hi = min(Wid-1,Hi+busWid)
+                Lim = min(Wid-1,busWid-1)
 
 
         Line = '        %s <= %d\'h%x;'%(Name,Wid,Reset)

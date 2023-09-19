@@ -299,8 +299,14 @@ def use_backup_lines(Path,lines):
             elif (wrds[0]=='clear'):
                 print('clear %s %s'%(os.getcwd(),str(wrds[1:])))
             else:
-                print('check: error!  not a valid .backup keyword ',wrds[0])
-                has_errors(1)
+                Fname0 = wrds[0]
+                if (os.path.exists(Path+'/'+Fname0)):
+                    if os.path.isfile(Path + '/' + Fname0):
+                        Obj.files = Obj.files + [wrd]
+
+                else:
+                    print('check: error!  not a valid .backup keyword ',wrds[0])
+                    has_errors(1)
     return Obj
 
     if '*' in Dirin:
