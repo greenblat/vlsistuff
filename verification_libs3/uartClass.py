@@ -18,15 +18,24 @@ class uartClass(logs.driverClass):
         self.rxByte=''
         self.force(self.rxd,1)
         self.RxStr = ''
+        self.Silence = 100
+        self.silentCounter = 0
 
     def busy(self,Why=False):
+        Busy0 = self.silentCounter < (self.Silence * self.baudRate)
         if Why:
-            logs.log_info("UART BUSY %s %s %s %s" % (len(self.txQueue),len(self.rxQueue),(self.txWaiting>0),(self.rxWaiting>0)))
-        return (self.rxState!='idle') or (self.txQueue != []) or (self.rxQueue != []) or (self.txWaiting>0) or (self.rxWaiting>0)
+            logs.log_info("UART BUSY busy0=%s tx=%s rx=%s wtx=%s wrx=%s" % (Busy0,len(self.txQueue),len(self.rxQueue),(self.txWaiting>0),(self.rxWaiting>0)))
+        return Busy0 or (self.rxState!='idle') or (self.txQueue != []) or (self.rxQueue != []) or (self.txWaiting>0) or (self.rxWaiting>0)
       
     def run(self):
         self.runTx()
         self.runRx()
+        Rxd = self.peek(self.txd)
+        if Rxd == 0:
+            self.silentCounter = 0
+        else:
+            self.silentCounter  += 1
+
 
     def action(self,Str,Origs=[]):
         Wrds  = Str.split()
