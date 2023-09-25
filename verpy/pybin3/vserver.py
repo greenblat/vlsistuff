@@ -739,7 +739,13 @@ def tree_down(Net,Mod,Env,Dones = [],Lvl=0):
                 if Type in Env.Modules:
                     tree_down(Pin,Env.Modules[Type],Env,Dones,Lvl+1)
     
-        
+def draw(Mod):
+    Mod.prepareBusNetTable()
+    for Net in Mod.netTable:
+        List = Mod.netTable[Net]
+        for Inst,Type,Pin in List:
+            return
+    
 
 
 
