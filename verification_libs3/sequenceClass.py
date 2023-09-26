@@ -541,7 +541,24 @@ class sequenceClass:
             Lbl = wrds[1]
             self.jumpLabel(Lbl)
             return
-        elif wrds[0] == 'if':
+        elif (wrds[0] == 'if') and (len(wrds)==2):   # if version: if cond execute till endif, otherwise skip
+            BB = makeExpr(wrds[1])
+            Val = self.evalExpr(BB)
+            if Val: return
+            ind = self.Ptr
+            Guard = 10
+            while (Guard>0) and ('endif' not in self.Sequence[ind][0]):
+                ind += 1
+                Guard -= 1
+                if len(self.Sequence)<=ind: Guard = 0
+            if Guard == 0:
+                logs.log_error("if condition, failed on distance to endif. this is simple 'if', cannot include other ifs")
+                return
+            self.Ptr = ind    
+
+        elif (wrds[0] == 'endif'): return    
+
+        elif (wrds[0] == 'if') and (len(wrds)==3):   # if version: if cond goto label
             BB = makeExpr(wrds[1])
             Val = self.evalExpr(BB)
 #            logs.log_info("EXPRIF %s -> %s %s     %s" % (wrds[1],BB,Val,self.Translates['BB']))

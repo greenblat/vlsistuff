@@ -428,6 +428,13 @@ class connectivityClass:
         for Prm in extParams:
             File.write('+ %s=0\n'%(Prm))
         File.write('\n')
+        File.write('*.PININFO gnd:I vcc:I')
+        for Pin in self.Inps:
+            File.write(' %s:I' % Pin)
+        for Pin in self.Outs:
+            File.write(' %s:O' % Pin)
+        File.write('\n')
+            
         Types,Maxes = assembleArgvTypes()
 
         for Inst in self.Mod.instances:
@@ -474,7 +481,7 @@ class connectivityClass:
 
 
             else:
-                File.write('x%s'%(Name))
+                File.write('x%s / %s $PINS'%(Name,Obj.Type))
                 if Inst in self.Conns:
                     Pins  = self.Conns[Inst]
                     Pins['vcc']='vcc'
@@ -482,13 +489,13 @@ class connectivityClass:
                     Keys = list(Pins.keys())
                     Keys.sort()
                     for Pin in Keys:
-                        File.write(' %s'%(Pins[Pin]))
-                File.write(' %s'%(Obj.Type))
-                if Inst in self.Params:
-                    WL = complexWidthAndLength(self.Params[Inst])
-                    File.write(' %s\n'%WL)
-                else:
-                    File.write('\n')
+                        File.write(' %s=%s'%(Pin,Pins[Pin]))
+#                File.write(' %s'%(Obj.Type))
+#                if Inst in self.Params:
+#                    WL = complexWidthAndLength(self.Params[Inst])
+#                    File.write(' %s\n'%WL)
+#                else:
+                File.write('\n')
         File.write('.ends\n')
         File.write('* x%s \n'%self.Mod.Module)
         for Inp in mPins:
@@ -582,8 +589,8 @@ def assembleArgvTypes():
     Maxes['nmoshv']= 200
     Maxes['pmoshv']= 200
     Types = {}
-    Types['nmos']='nch'
-    Types['pmos']='pch'
+    Types['nmos']='nmos'
+    Types['pmos']='pmos'
     Types['nmoshv']='nch_hv'
     Types['pmoshv']='pch_hv'
     ind=1
