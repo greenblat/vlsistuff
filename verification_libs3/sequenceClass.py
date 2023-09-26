@@ -544,6 +544,7 @@ class sequenceClass:
         elif wrds[0] == 'if':
             BB = makeExpr(wrds[1])
             Val = self.evalExpr(BB)
+#            logs.log_info("EXPRIF %s -> %s %s     %s" % (wrds[1],BB,Val,self.Translates['BB']))
             if not Val:  return
             Lbl = wrds[2]
             self.jumpLabel(Lbl)
@@ -764,10 +765,10 @@ class sequenceClass:
                         Obj.busyWhy()
 
 def makeExpr(Txt):
-    for Chr in '&|<>=()!+-*/':
+    for Chr in '%&|<>=()!+-*/':
         Txt = Txt.replace(Chr,' %s '%Chr)
     Txt  = Txt.replace('  ',' ')
-    for From in ['= =','> =','! =','< =','< <','> >']:
+    for From in ['^','= =','> =','! =','< =','< <','> >']:
         To = From.replace(' ','')
         Txt  = Txt.replace(From,To)
     wrds = Txt.split()

@@ -1,5 +1,5 @@
 
-VERSION = '06sep2022'
+VERSION = '25sep2023'
 WID,HEI = 1200,600
 
 import os,sys,time,traceback
@@ -194,13 +194,18 @@ def main():
                 What = sys.argv[ind]
                 use_command_wrds([What])
                 ind += 1
+            elif Fname in ['-import']:
+                ind += 1
+                What = sys.argv[ind]
+                import_command(What)
+                ind += 1
             elif Fname in ['-source','-include']:
                 ind += 1
                 What = sys.argv[ind]
                 use_command_wrds(['include',What])
                 ind += 1
             else:
-                logs.log_error('"%s" not known'%sys.argv[ind])
+                logs.log_error('"%s" not known (207)'%sys.argv[ind])
                 ind += 1
             
             
@@ -507,6 +512,7 @@ def import_command(Fname):
         Command,Function = my_importing(Fname)
         if Command:
             Glbs.imported[Command] = Function
+            Function()
 
 def __use_command_wrds(wrds):
     if len(wrds)==0:
@@ -532,6 +538,8 @@ def __use_command_wrds(wrds):
 #            if Command:
 #                Glbs.imported[Command] = Function
 
+    elif wrds[0] in ['import']:
+        import_command(wrds[1])
     elif wrds[0] in ['source','include']:
         Fname  = os.path.expanduser(wrds[1]) 
         Fname  = os.path.abspath(Fname) 
