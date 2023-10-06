@@ -21,11 +21,12 @@ LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/scmetro_abc.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/scmetro_dff.lib'
 
 
-LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
-LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
 
 LIB_ABC = '/Users/iliagreenblat/clients/weebit/libs/scs130ms_tt_1.80v_25C.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/weebit/libs/scs130ms_tt_1.80v_25C.lib'
+
+LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
+LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
 
 
 INCFILE = '''

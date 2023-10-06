@@ -32,7 +32,7 @@ class axiSlaveClass:
         self.Fixed = {}
         self.Ram = {}
         self.wready = 0
-        self.WAITREAD = 4
+        self.WAITREAD = 500
         self.WAITWRITE = 0
         self.busWidth = busWidth
         self.Passive = False

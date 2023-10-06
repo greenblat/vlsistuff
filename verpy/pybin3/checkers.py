@@ -19,6 +19,14 @@ def help_main(Env):
         logs.log_err('no module to work on')
         return
     load_sons(Env)
+    Env.Current.buildNetTable()
+    for Net in Env.Current.netTable:
+        List = Env.Current.netTable[Net]
+        if (Net not in ['gnd','vcc']) and (len(List) ==1):
+            logs.log_errx(101,'Net %s has 1 connectivity : %s' % (Net,List))
+        
+    checkZeroMinusOneBug(Env.Current)            
+
     check_integrity(Env,Env.Current)
     check_instance_connections(Env,Env.Current)
     create_drive_table(Env.Current)
@@ -648,7 +656,85 @@ def check_instance_connections(Env,Current):
                     logs.log_errx(113,'connection to pin=%s of %s %s is not signal in  module=%s'%(In,Inst,Type,Current.Module))
 
 
+def checkZeroMinusOneBug(Mod):
+    for _,Body,_ in Mod.alwayses:
+        scanZeroMinusOne(Body)
+    for _,Src,_,_ in Mod.hard_assigns:
+        scanZeroMinusOne(Src)
+        
 
+def scanZeroMinusOne(Body):
+    if type(Body) is list:
+        if Body[0] == 'list':
+            for Item in Body[1:]:
+                scanZeroMinusOne(Item)
+            return
+        if Body[0] == 'ifelse':
+            scanZeroMinusOne(Body[1])
+            scanZeroMinusOne(Body[2])
+            scanZeroMinusOne(Body[3])
+            return
+        if Body[0] == 'if':
+            scanZeroMinusOne(Body[1])
+            scanZeroMinusOne(Body[2])
+            return
+        if Body[0] == '!':
+            scanZeroMinusOne(Body[1])
+            return
+        if Body[0] == '<=':
+            scanZeroMinusOne(Body[1])
+            scanZeroMinusOne(Body[2])
+            return
+        if Body[0] == 'for':
+            return
+        if Body[0] == 'case':
+            for Item in Body[2]:
+                scanZeroMinusOne(Item[1])
+            return
+
+
+        if Body[0] == 'question':
+            scanZeroMinusOne(Body[1])
+            scanZeroMinusOne(Body[2])
+            scanZeroMinusOne(Body[3])
+            return
+        if Body[0] in ['=']:
+            scanZeroMinusOne(Body[2])
+            return
+
+        if Body[0] in ['==','!=']:
+            if (type(Body[1]) is list) and (Body[1][0] in ['-','+']):
+                if (type(Body[1][1]) is int)or (type(Body[1][2]) is int):
+                    logs.log_errx(700,"dangerous comparison %s" % str(Body))
+
+
+            if (type(Body[2]) is list) and (Body[2][0] in ['-','+']):
+                if (type(Body[2][1]) is int)or (type(Body[2][2]) is int):
+                    logs.log_errx(700,"dangerous comparison %s" % str(Body))
+                
+            scanZeroMinusOne(Body[1])
+            scanZeroMinusOne(Body[2])
+            return
+        if Body[0] in ['-','+']:
+            scanZeroMinusOne(Body[1])
+            if len(Body)>2:
+                scanZeroMinusOne(Body[2])
+            return
+        if Body[0] in ['&&','||','|','&','^','>','<','>=','~','>>','<<','*','~&']:
+            scanZeroMinusOne(Body[1])
+            if len(Body)>2:
+                scanZeroMinusOne(Body[2])
+            return
+            
+
+        if Body[0] in ['subbit','subbus','curly','bin','hex','dig','functioncall','empty_begin_end']:
+            return
+
+    if type(Body) is str:
+        return
+    if type(Body) is int:
+        return
+    logs.log_errx(700,("not covered scanZeroMinusOne %s" % str(Body)))
 
 def external_dir(Dir):
     if 'input' in Dir: return True

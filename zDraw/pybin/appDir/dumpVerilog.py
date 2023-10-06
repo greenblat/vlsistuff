@@ -128,6 +128,7 @@ def dumpVerilog(Glbs,Root,File):
                 ObjParams='#(%d,%d)'%(Obj.Point)
 
             File.write('%s %s %s ('%(Obj.Type,ObjParams,Name))
+#            print("XXXXXX",Inst,Obj.Type,Conns[Inst])
             if Inst in Conns:
                 Pref = ''
                 Pins  = Conns[Inst]

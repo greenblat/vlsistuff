@@ -35,7 +35,9 @@ def runNewRtl(Mod):
         else:
             Dly = ''
 
-        if Type.startswith('nandi'):
+        if Type in ['nmos','pmos']:
+            print("XXXXXXXXXXXXXXXXXXXXX")
+        elif Type.startswith('nandi'):
             O,Ins  = typicalConns(Obj.conns,'&',True)
             Mod.hard_assigns.append((O,('~',Ins),'',Dly))
             Mod.insts.pop(Inst)

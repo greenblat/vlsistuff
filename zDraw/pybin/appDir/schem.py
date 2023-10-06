@@ -431,10 +431,6 @@ picture cmos
   pic_circle list=2,1,2.4,1
   pic_pin i i xy=0,0
   pic_pin o o xy=4,0
-  pic_pin cb i xy=2,2
-  pic_pin c_b i xy=2,2
-  pic_pin c_ i xy=2,2
-  pic_pin c i xy=2,-2
   pic_pin gp i xy=2,2
   pic_pin gn i xy=2,-2
 end

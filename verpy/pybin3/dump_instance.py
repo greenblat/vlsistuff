@@ -18,8 +18,8 @@ def help_main(Env,Color=False,Volt=False):
     if '-clean' in Env.params:
         cleanParameters(Mod)
 
-
     dump_instance(Env,Mod,'-simple' in Env.params,'-lower' in Env.params,Color,Volt)
+    print("VOLT %s %s" % (Volt,Env.params))
     dump_empty_module(Mod)
     if '-tb' in Env.params:
         prepare_tb(Mod)
@@ -130,7 +130,8 @@ def dump_instance(Env,Mod,Simple=False,allPinsLowerCase = False,Color = False,Vo
                     Kind,Voltx = DRVS[Sig]
                     Fout.write('reg %s %s = %s;\n'%(wids(Wid),Sig,Voltx))
                 else:
-                    Fout.write('reg %s %s;\n'%(wids(DirHL[1]),Sig))
+                    print("XXXXXX",Sig,Wid)
+                    Fout.write('reg %s %s;\n'%(wids(Wid),Sig))
             elif Color:
                 if isVolt(DRVS,Sig):
                     Fout.write('reg %s [15:0] %s;\n'%(widscolor(DirHL[1]),Sig))
@@ -157,7 +158,7 @@ def dump_instance(Env,Mod,Simple=False,allPinsLowerCase = False,Color = False,Vo
             else:
                 Fout.write('wire %s %s;\n'%(wids(DirHL[1]),Sig))
         elif ('inout' in Dir1):
-            Fout.write('inout_driver drvx_%s(.io(%s),.dflt(1\'b0));\n'%(Sig,Sig))
+            Fout.write('wire %s %s; reg %s tb_%s = 0; assign (pull1,pull0) %s = tb_%s;\n'%(wids(DirHL[1]),Sig,wids(DirHL[1]),Sig,Sig,Sig))
 
     if Color:
         for Sig in Sigs:

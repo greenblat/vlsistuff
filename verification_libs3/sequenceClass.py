@@ -527,10 +527,10 @@ class sequenceClass:
 
         elif wrds[0] == 'endfor':
             Ptr,Cond,End = self.Loops.pop(0)
+            X = End.replace('=',' = ').split()
+            if len(X) == 3:
+                self.Translates[X[0]] = self.eval(X[2])
             if self.eval(Cond):
-                X = End.replace('=',' = ').split()
-                if len(X) == 3:
-                    self.Translates[X[0]] = self.eval(X[2])
                 self.Loops.append((Ptr,Cond,End))
                 self.Ptr = Ptr+1
                 return

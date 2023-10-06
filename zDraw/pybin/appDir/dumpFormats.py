@@ -306,6 +306,15 @@ class connectivityClass:
         else:
             print('CCCCCC')
             Modx = self.createModuleClass()
+            for Inst in Modx.insts:
+                Obj = Modx.insts[Inst]
+                if Obj.Type == 'nmos':
+                    if 'bulk' not in Obj.conns: Obj.conns['bulk'] = 'gnd'
+                if Obj.Type == 'pmos':
+                    if 'bulk' not in Obj.conns: Obj.conns['bulk'] = 'vcc'
+                if Obj.Type == 'cmos':
+                    if 'pbulk' not in Obj.conns: Obj.conns['pbulk'] = 'vcc'
+                    if 'nbulk' not in Obj.conns: Obj.conns['nbulk'] = 'gnd'
             Modx.dump_verilog(File)
 #            self.dumpVerilogHeader(File)
 #            self.dumpGlvVerilog(File)

@@ -60,7 +60,7 @@ def init():
     set_context('printer_box',[1000,1000])
     set_context('pic_text_size',defaultPicTextSize)
     set_context('param_text_size',0)
-    set_context('geom_text_size',1.0)
+    set_context('geom_text_size',0.3)
     set_context('banner','iDraw: greenblat@mac.com +972-54-4927322')
     set_context('grid',0.5)
     set_context('shyParams',['name','size'])
