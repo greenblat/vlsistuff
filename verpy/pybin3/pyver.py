@@ -76,6 +76,7 @@ def load_verilog_file(Fname,Rundir,Env):
 
 
 def run_lexer(Fname,FnameOut):
+    print("XXXXXXX",Env.params['execpath'])
     if Env.systemverilog:
         print('using system verilog parsing')
         os.system('systemverilog_lexer %s %s'%(Fname,FnameOut))

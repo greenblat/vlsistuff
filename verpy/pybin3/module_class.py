@@ -946,6 +946,7 @@ class module_class:
         self.prepareNetTable()
     def prepareNetTable(self):
         netTable={}
+        self.typesTable = {}
         for Net in self.nets:
             Dir,Wid = self.nets[Net]
             if 'input' in Dir:
@@ -958,6 +959,8 @@ class module_class:
         for Inst in self.insts:
             Obj = self.insts[Inst]
             Type = Obj.Type
+            if Type not in self.typesTable: self.typesTable[Type] = []
+            self.typesTable[Type].append(Inst)
             for Pin in Obj.conns:
                 NN = Obj.conns[Pin]
                 if NN and not ((type(NN) is list)and(NN[0]=='curly')):

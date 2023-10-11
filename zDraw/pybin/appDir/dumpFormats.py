@@ -304,7 +304,6 @@ class connectivityClass:
             newRtl.createNewRtl(self.Modx)
             self.Modx.dump_verilog(File)
         else:
-            print('CCCCCC')
             Modx = self.createModuleClass()
             for Inst in Modx.insts:
                 Obj = Modx.insts[Inst]
