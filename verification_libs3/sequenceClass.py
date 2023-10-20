@@ -533,7 +533,9 @@ class sequenceClass:
             if self.eval(Cond):
                 self.Loops.append((Ptr,Cond,End))
                 self.Ptr = Ptr+1
+                logs.log_info("ENDFOR cond=%s ptr=%d  %s  %s" % (Cond,self.Ptr,self.Sequence[self.Ptr],logs.without(self.Translates)))
                 return
+            logs.log_info("AFTER ENDFOR cond=%s ptr=%d  %s  %s" % (Cond,self.Ptr,self.Sequence[self.Ptr],logs.without(self.Translates)))
             self.Ptr += 1
             return
 

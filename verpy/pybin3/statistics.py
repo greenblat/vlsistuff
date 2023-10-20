@@ -1,4 +1,5 @@
 
+import sys
 import logs
 from module_class import support_set
 try:
@@ -6,13 +7,25 @@ try:
 except:
     libx = False
 
+try:
+    import cellLibrary as libx
+except:
+    libx = False
+
+print("LIBX",libx)
+
+
 def help_main(Env):
     Types = {}
     for Module in Env.Modules:
         Mod = Env.Modules[Module]
         logs.log_info('scan %s' % Module)
         gatherInstances(Mod,Types)
-    reportInstances(Types)
+    Lib = False
+#    if '-celllibrary' in Env.params:
+#        Lib = Env.params['-celllibrary'][0]
+        
+    reportInstances(Types,Lib)
     connectivity(Mod)
 
 def connectivity(Mod):
@@ -60,7 +73,7 @@ def gatherInstances(Mod,Types):
         if Type not in Types: Types[Type] = 0
         Types[Type]  += 1
 
-def reportInstances(Types):
+def reportInstances(Types,Lib):
     LL = []
     for Type in Types.keys():
         LL.append((Types[Type],Type))
@@ -69,8 +82,9 @@ def reportInstances(Types):
     LL.reverse()
     Tot = 0
     TotArea = 0
+    TotGates = 0
     Fout = open('mod.csv','w')
-    Fout.write('index,many,tot,type,cell,totcell,totarea\n')
+    Fout.write('index,many,tot,type,cell,totcell,totarea,gate,gates,totgates\n')
     for ind,(Many,Type) in enumerate(LL):
         Area = 0
         if libx:
@@ -80,6 +94,10 @@ def reportInstances(Types):
         Area0 = Many*Area
         TotArea += Area0
         logs.log_info('%5d        %6d  / %6d    %s'%(ind,Many,Tot,Type))
-        Fout.write('%d,%d,%d,%s,%.4f,%.3f,%.2f,,\n'%(ind,Many,Tot,Type,Area,Area0,TotArea))
+        OneGate = Area / 2.8
+        ThisGates = OneGate * Many
+        print("XAXAX",Type,OneGate,Many,ThisGates)
+        TotGates += ThisGates
+        Fout.write('%d,%d,%d,%s,%.4f,%.3f,%.2f,%.2f,%.2f,%.2f,\n'%(ind,Many,Tot,Type,Area,Area0,TotArea,OneGate,ThisGates,TotGates))
     Fout.close()
         

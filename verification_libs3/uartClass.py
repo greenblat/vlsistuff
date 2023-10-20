@@ -130,8 +130,11 @@ class uartClass(logs.driverClass):
                 self.rxState = 'stop'
 #                self.rxQueue.append(self.rxByte)
                 Int = logs.intx(self.rxByte)
+                logs.log_info("MONRX %x" % Int)
                 if ((Int>=0)and(Int<256)):
                     Chr = chr(logs.intx(self.rxByte))
+                    if not Chr.isprintable():
+                        Chr = hex(logs.intx(self.rxByte))
                 else:
                     Chr = '(ERR%s)'%self.rxByte
                 self.RxStr += Chr
@@ -151,7 +154,10 @@ class uartClass(logs.driverClass):
             Rxd = self.peek(self.txd)
             if Rxd==0:
                 logs.log_error('ilia rxd stop bit isnt there')
-            self.rxState='idle'
+            self.rxState='wait1'
+        elif self.rxState=='wait1':
+            Rxd = self.peek(self.txd)
+            if Rxd == 1: self.rxState = 'idle'
 
     def onFinish(self):
         return

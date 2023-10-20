@@ -566,7 +566,7 @@ def cell_dump_description(self,Fout,pythonConnection):
     for (To,Fr,Kind) in self.arcs:
         Fout.write('Desc.add_arc("%s","%s","%s")\n'%(Fr,To,Kind))
     if len(self.pins.keys())==1:
-        Pin = self.pins.keys()[0]
+        Pin = list(self.pins.keys())[0]
         if (self.pins[Pin]['direction']=='output'):
             Func = self.pins[Pin]['function']
             if Func == '1':
@@ -589,7 +589,7 @@ def cell_dump_description(self,Fout,pythonConnection):
                 
 
     elif len(self.pins.keys())==1:
-        Pin = self.pins.keys()[0]
+        Pin = list(self.pins.keys())[0]
         Dir = self.pins[Pin]['direction']
         try:
             Func = synlib_functions.funcify(self.pins[Pin]['function'])

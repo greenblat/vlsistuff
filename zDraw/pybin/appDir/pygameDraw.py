@@ -204,6 +204,11 @@ def main():
                 What = sys.argv[ind]
                 use_command_wrds(['include',What])
                 ind += 1
+            elif Fname in ['-pics']:
+                ind += 1
+                What = sys.argv[ind]
+                use_command_wrds(['pics',What])
+                ind += 1
             else:
                 logs.log_error('"%s" not known (207)'%sys.argv[ind])
                 ind += 1
@@ -559,7 +564,7 @@ def __use_command_wrds(wrds):
         Glbs.finished=True
         stopRunning()
         sys.exit()
-    elif wrds[0] in ['zpicslib','picslib']:
+    elif wrds[0] in ['zpicslib','picslib','pics']:
         Dirs = Glbs.get_context('pics_lib')
         if type(Dirs) is str:
             Dirs = [Dirs]
@@ -671,6 +676,14 @@ def __use_command_wrds(wrds):
         Glbs.adding_text_queue.extend(wrds[1:])
 
     elif 'add' in wrds[0]:
+        Pics = Glbs.get_context('pics_lib')
+        for ind,wrd in enumerate(wrds):
+            if '/' in wrd:
+                Dir,Pic = getDir(wrd)
+                wrds[ind] = Pic
+                Pics.append(Dir)
+        Glbs.set_context('pics_lib',Pics)
+
         List = dbase.findMatches('')
         if len(wrds)==1:
             logs.log_info('loaded pictures:  %s'%str(List))
@@ -815,6 +828,13 @@ def __use_command_wrds(wrds):
         use_command_wrds(wrds)
     else:
         logs.log_error('dont know to %s'%wrds)
+
+#  Dir,Pic = getDir(wrd)
+def getDir(wrd):
+    ww = wrd.split('/')
+    Pic = ww[-1]
+    Path = '/'.join(ww[:-1])
+    return Path,Pic
 
 def load_schematics(newRoot):
     List = list(Glbs.details.keys())

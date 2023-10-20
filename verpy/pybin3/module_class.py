@@ -445,6 +445,9 @@ class module_class:
         for Prm in self.includes:
             Fout.write('`include "%s"\n'%(Prm))
         Lparams = self.orderLocalParams()
+        for Prm in self.localparams:
+            if Prm not in Lparams:
+                Fout.write('localparam %s = "%s";\n'%(pr_expr(Prm),self.localparams[Prm]))
         for Prm in Lparams:
             Fout.write('localparam %s = %s;\n'%(pr_expr(Prm),pr_expr(self.localparams[Prm])))
         for (Name,Dir,Wid) in NOIOS:
@@ -1126,13 +1129,17 @@ class module_class:
         return 'inout' in Dir
 
     def is_external(self,Net):
-        if Net not in self.nets: return False
-        Dir,Wid = self.nets[Net]
-        if 'output' in Dir: return True
-        if 'input' in Dir: return True
-        if 'inout' in Dir: return True
+        if type(Net) is str:
+            if Net not in self.nets: return False
+            Dir,Wid = self.nets[Net]
+            if 'output' in Dir: return True
+            if 'input' in Dir: return True
+            if 'inout' in Dir: return True
+            return False
+        if Net[0] in ('subbus','subbit'):
+            return self.is_external(Net[1])
+        if Net[0] in ('hex','dig','bin'): return False
         return False
-        
 
     def computeWidth(self,Wid):
         if Wid in ['0',0]: return 1

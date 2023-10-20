@@ -239,6 +239,7 @@ class connectivityClass:
 
     def createModuleClass(self):
         self.Modx = module_class.module_class(self.Mod.Module)
+        self.Modx.later = []
         for Inp in self.Inps:
             self.Modx.add_sig(Inp, "input", 0)
         for Out in self.Outs:
@@ -278,7 +279,7 @@ class connectivityClass:
                 Obj.conns = Pins
             if Type in ["gnd", "vcc"]:
                 pass
-            elif Type in ["antenna", "input", "output", "node", "inout"]:
+            elif Type in ["antenna", "output", "input", "node", "inout"]:
                 pass
             else:
                 self.Modx.add_inst(Type, Inst)
@@ -293,7 +294,11 @@ class connectivityClass:
             if Inst in self.Params:
                 Params = self.Params[Inst]
                 for (Prm, Val) in Params:
-                    self.Modx.add_inst_param(Inst, Prm, Val)
+                    if Type == 'output':
+#                        print("XXXX",self.Conns[Inst],Inst,Type,Prm,Val,self.Names[Inst])
+                        self.Modx.localparams['%s_%s' % (Prm,self.Names[Inst])] = Val
+                    else:
+                        self.Modx.add_inst_param(Inst, Prm, Val)
         return self.Modx
 
     def dumpVerilog(self,File,Rtl,User):

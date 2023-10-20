@@ -332,7 +332,7 @@ class axiSlaveClass:
                 if self.peek('bready')==1: 
                     self.bqueue.pop(0)
                 self.force('bid',bid)
-                self.force('bresp',bresp)
+#                self.force('bresp',bresp)
                 self.force('bvalid',1)
         else:
             self.force('bvalid',0)

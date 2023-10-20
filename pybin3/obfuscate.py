@@ -44,14 +44,23 @@ def main():
     Text3 = removeComments0(Text2)
     Defines,Text4 = extractDefines(Text3)
     Wrds = tokenify(Text4)
-    dddd("000000",Wrds)
+##    dddd("000000",Wrds)
+    topInouts,Head = getTopInouts(TOP,Wrds,Prefix)
     Modules,Inouts,Wires = externals(Wrds,Prefix)
-    dddd("000000",Wrds)
-    revork(Wrds,Modules,Inouts,Wires,Seed) 
-    dddd("111111",Wrds)
+##    dddd("000000",Wrds)
+    revork(Wrds,Modules,Inouts,Wires,Seed,[],TOP) 
+##    dddd("111111",Wrds)
     if Dir == '': Dir = '.'
     Ofilename = '%s/%s_fub.%s' % (Dir,Cell,Ext)
-    saveWords(Ofilename,Defines,Wrds,Seed)
+    Fout = open(Ofilename, 'w')
+    saveWords(Fout,Defines,Wrds,Seed)
+    writing(Fout,Head)
+    Fout.write('%s_fubbed %s ( .%s(%s)\n' % (TOP,TOP,TRANS[topInouts[0]],topInouts[0]))
+    for InOut in topInouts[1:]:
+        Fout.write('    ,.%s(%s)\n' % (TRANS[InOut],InOut))
+
+    Fout.write(');\nendmodule\n')
+    Fout.close()
     for Key in TRANS:
         print("%s %s" % (Key,TRANS[Key]))
 
@@ -78,8 +87,19 @@ def translate(Tok,Modules,Inouts,Wires):
 
 
 
-def revork(Wrds,Module,Inouts,Wires,Seed):
+def revork(Wrds,Module,Inouts,Wires,Seed,topInouts,TOP):
+    state = 'idle'
     for ind,Wrd in enumerate(Wrds):
+        Dont = False
+        if state=='idle':
+            if Wrd == 'module': state = 'module'
+        elif state=='module':
+            if Wrd == TOP:
+                state = 'work'
+            else:
+                state = 'idle'
+        elif state=='work':
+            if Wrd == 'endmodule': state = 'idle'
         Wrd = translate(Wrd,Module,Inouts,Wires)
     X = list(TRANS.keys())
     random.shuffle(X)
@@ -93,7 +113,21 @@ def revork(Wrds,Module,Inouts,Wires,Seed):
 
 
     for ind,Wrd in enumerate(Wrds):
-        Wrd = translate(Wrd,Module,Inouts,Wires)
+        Dont = False
+        if state=='idle':
+            if Wrd == 'module': state = 'module'
+        elif state=='module':
+            if Wrd == TOP:
+                state = 'work'
+            else:
+                state = 'idle'
+        elif state=='work':
+            if Wrd == 'endmodule': state = 'idle'
+            Dont = Wrd in topInouts
+        if not Dont:
+            Wrd = translate(Wrd,Module,Inouts,Wires)
+        if Wrd == TOP:
+            Wrd = Wrd + '_fubbed'
         Wrds[ind] = Wrd
         
 
@@ -111,18 +145,18 @@ def  extractDefines(Text):
     return '\n'.join(Defines),'\n'.join(Res)
 
 
-def saveWords(Foutname,Defines,Wrds,Seed):
-    Fout = open(Foutname, 'w')
+def saveWords(Fout,Defines,Wrds,Seed):
 #   Fout.write('// %s\n'%(Seed))
-    print('WRDS',len(Wrds))
     Fout.write('%s\n' % Defines)
     insertSeed(Wrds,Seed)
+    writing(Fout,Wrds)
+
+def writing(Fout,Wrds):
     while Wrds!=[]:
         Out = ''
         while (len(Out)<128)and(Wrds!=[]):
             Out = Out + ' ' + Wrds.pop(0)
         Fout.write('%s\n' % Out)
-    Fout.close()
 
 def insertSeed(Wrds,Seed):
     Wires = []
@@ -192,7 +226,7 @@ def removeComments0(Text):
 
 
 def tokenify(Text):
-    for Chr in './~`!|:<>+=-()*&^%#@,;{}[]':
+    for Chr in '?./~`!|:<>+=-()*&^%#@,;{}[]':
         Text = Text.replace(Chr,' %s '%Chr)
 
     for Duo in ['*  *','!  =','<  =','=  =','<  <','>  >','>  =','&  &','|  |','-  :','+  :','(  *','*  )']:
@@ -209,7 +243,9 @@ def removeLineComments(Text2):
     Lines = Text2.split('\n')
     Lines2 = []
     for Line in Lines:
-        if '//' in Line:
+        if 'timescale' in Line:
+            Line = ''
+        elif '//' in Line:
             Line = Line[:Line.index('//')]
         wrds = Line.split()
         if len(wrds)!=0:
@@ -224,4 +260,15 @@ def cellName(Fname):
     Dir = '/'.join(Wrds0[:-1])
     return Dir,Cell,Ext
 
+def getTopInouts(TOP,Wrds,Prefix):
+    for ind,wrd in enumerate(Wrds):
+        if (wrd == TOP) and (Wrds[ind-1] == 'module'):
+            Tmp = Wrds[ind-1:]
+            if ';' in Tmp:
+                Tmp = Tmp[:Tmp.index(';')+1]
+                _,Inouts,_ = externals(Tmp,Prefix)
+                return Inouts,Tmp
+    print("ERROR!!!!!!")
+    sys.exit()
+    return []
 if __name__ == '__main__': main()
