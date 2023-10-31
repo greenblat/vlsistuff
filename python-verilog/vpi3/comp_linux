@@ -2,7 +2,6 @@
 
 # source vpi3.setup first
 
-
 gcc  -c -O3 src/vpi3_72.c src/qq64.c \
      -Wall \
      -I$PYTHONINC1  \
@@ -11,11 +10,10 @@ gcc  -c -O3 src/vpi3_72.c src/qq64.c \
      -fPIC \
 
 ld   -shared --export-dynamic   -o vpi7.so \
-    vpi3.o qq64.o \
+    vpi3_72.o qq64.o \
     -L/usr/lib \
     -L$PYTHONLIB \
     -lpython$PYTHONVERSION \
     -lc  -lpthread -lutil \
-
 
 

@@ -1,5 +1,5 @@
 
-import sys
+import sys,os
 import logs
 from module_class import support_set
 try:
@@ -17,6 +17,7 @@ print("LIBX",libx)
 
 def help_main(Env):
     Types = {}
+    print("MODULES ",list(Env.Modules.keys()))
     for Module in Env.Modules:
         Mod = Env.Modules[Module]
         logs.log_info('scan %s' % Module)
@@ -25,8 +26,16 @@ def help_main(Env):
 #    if '-celllibrary' in Env.params:
 #        Lib = Env.params['-celllibrary'][0]
         
+    if '-report' in Env.params:
+        Dir = Env.params['-report'][0]
+        if not os.path.exists(Dir):
+            os.mkdir(Dir)
+        Fout = open('%s/%s.insts' % (Dir,Module),'w')
+        saveInstances(Module,Types,Fout)
+        return
+    print("XXXX",Types)
     reportInstances(Types,Lib)
-    connectivity(Mod)
+#    connectivity(Mod)
 
 def connectivity(Mod):
     buildConns(Mod)
@@ -65,6 +74,16 @@ def connect(Net,Pin,Type,Inst):
     CONNS[Net].append((Pin,Type,Inst))
 
 
+def saveInstances(Module,Types,Fout):
+    LL = []
+    for Type in Types.keys():
+        LL.append((Types[Type],Type))
+
+    LL.sort()
+    LL.reverse()
+    for Num,Type in LL:
+        Fout.write('%s %s %s\n' % (Module,Type,Num))
+    Fout.close()
 
 
 def gatherInstances(Mod,Types):
@@ -80,6 +99,7 @@ def reportInstances(Types,Lib):
 
     LL.sort()
     LL.reverse()
+    print("LLLL",LL)
     Tot = 0
     TotArea = 0
     TotGates = 0
@@ -96,7 +116,6 @@ def reportInstances(Types,Lib):
         logs.log_info('%5d        %6d  / %6d    %s'%(ind,Many,Tot,Type))
         OneGate = Area / 2.8
         ThisGates = OneGate * Many
-        print("XAXAX",Type,OneGate,Many,ThisGates)
         TotGates += ThisGates
         Fout.write('%d,%d,%d,%s,%.4f,%.3f,%.2f,%.2f,%.2f,%.2f,\n'%(ind,Many,Tot,Type,Area,Area0,TotArea,OneGate,ThisGates,TotGates))
     Fout.close()

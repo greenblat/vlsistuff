@@ -29,7 +29,7 @@ class serialApb(logs.driverClass):
             self.uart.action(Str)
         elif wrds[0] == 'read':
             Addr = self.eval(wrds[1])
-            self.uart.action('tx A%x.R.' % (Addr))
+            self.uart.action('tx A%x.r.' % (Addr))
         elif wrds[0] == 'ram':
             Addr = self.eval(wrds[1])
             Data = self.eval(wrds[2])

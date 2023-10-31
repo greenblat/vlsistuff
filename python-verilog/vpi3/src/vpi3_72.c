@@ -1458,6 +1458,8 @@ void start_py(char *basemodule) {
     dlopen("libpython3.9.so",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.10.dylib",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.10.so",RTLD_LAZY | RTLD_GLOBAL);
+    dlopen("libpython3.11.dylib",RTLD_LAZY | RTLD_GLOBAL);
+    dlopen("libpython3.11.so",RTLD_LAZY | RTLD_GLOBAL);
     PyImport_AppendInittab("veri", PyInit_veri);
     Py_Initialize();
     PyRun_SimpleString("import veri; print(dir(veri));\n");
