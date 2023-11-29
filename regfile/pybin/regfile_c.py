@@ -28,7 +28,7 @@ def outputStructures(Module,Items,Fch):
     for Item in Items:
         if Item.Kind=='reg':
             if 'description' not in Item.Params: Item.Params['description'] = ''
-            Desc = Item.Params['description'].replace('.',' ')
+            Desc = str(Item.Params['description']).replace('.',' ')
             Name = Item.Name
             Width = Item.Params['width']
             Access = Item.Params['access']

@@ -112,9 +112,12 @@ def produce_md(Module,Db):
         if 'access' not in Item.Params: Item.Params['access']=''
         if 'width' not in Item.Params: Item.Params['width']=0
         if 'description' not in Item.Params: Item.Params['description'] = ''
-        Desc = Item.Params['description'].replace('.',' ')
-        Desc0 = Desc.replace('\\n','<br>')
-        Desc0 = Desc0.replace('\n','<br>')
+        Desc = Item.Params['description']
+        Desc0 = ' '
+        if type(Desc) is str:
+            Desc = Desc.replace('.',' ')
+            Desc0 = Desc.replace('\\n','<br>')
+            Desc0 = Desc0.replace('\n','<br>')
         if Item.Kind=='gap':
             Item.Params['names']=['gap']
         Addr = hex(Item.Addr)
@@ -130,7 +133,7 @@ def produce_md(Module,Db):
             List = [Addr,Item.Name,'**%s**  depth='%Item.Kind,str(Item.Params['depth']),Item.Params['access'],str(Item.Params['width']),Reset,Desc0]
             Fmd.write('|%s|\n'%('|'.join(List)))
         elif Item.Kind != 'gap':
-            List = [Item.Kind,Item.Params['access'],Item.Params['width'],' ',Item.Name,Reset,Addr,Desc.replace('\n',' ')]
+            List = [Item.Kind,Item.Params['access'],Item.Params['width'],' ',Item.Name,Reset,Addr,Desc0.replace('\n',' ')]
             List = [Addr,Item.Name,' ',' ',Item.Params['access'],str(Item.Params['width']),Reset,Desc0]
             Fmd.write('|%s|\n'%('|'.join(List)))
 
@@ -221,9 +224,13 @@ def produce_html(Module,Db):
         if 'access' not in Item.Params: Item.Params['access']=''
         if 'width' not in Item.Params: Item.Params['width']=0
         if 'description' not in Item.Params: Item.Params['description'] = ''
-        Desc = Item.Params['description'].replace('.',' ')
-        Desc0 = Desc.replace('\\n','<br>')
-        Desc0 = Desc0.replace('\n','<br>')
+
+        Desc0 = ' '
+        Desc = Item.Params['description']
+        if type(Desc) is str:
+            Desc = Desc.replace('.',' ')
+            Desc0 = Desc.replace('\\n','<br>')
+            Desc0 = Desc0.replace('\n','<br>')
         if Item.Kind=='gap':
             Item.Params['names']=['gap']
         Addr = hex(Item.Addr)
@@ -241,7 +248,7 @@ def produce_html(Module,Db):
             List = [Item.Kind,Item.Params['access'],8*Item.Params['diff'],' ',Item.Name,'',Addr,Desc.replace('\n',' ')]
             Fcsv.write('%s,%s,%s,%s,%s,%s,%s,%s\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
         else:
-            List = [Item.Kind,Item.Params['access'],Item.Params['width'],' ',Item.Name,Reset,Addr,Desc.replace('\n',' ')]
+            List = [Item.Kind,Item.Params['access'],Item.Params['width'],' ',Item.Name,Reset,Addr,Desc0.replace('\n',' ')]
             Fcsv.write('%s,%s,%s,%s,%s,%s,%s,%s\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],List[7]))
             if List[0] == 'reg': List[0] = '**reg**'
 #            Fmd.write('|%s|%s|%s|%s|%s|%s|%s|%s|\n'%(List[0],List[1],List[2],List[3],List[4],List[5],List[6],Desc0))

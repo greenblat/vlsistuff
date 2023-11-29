@@ -11,28 +11,35 @@ import traceback
 make nice drawing out of hiearchy 
 '''
 
-Fout = open('new.dot','w')
-Fout.write('digraph hierarchy {\n')
 Dones = {}
 def help_main(Env):
     if Env.Current==None:
         logs.log_err('no module to work on')
         return
 
+    Fout = open('%s.dot' % Env.Current.Module,'w')
+    Fout.write('digraph hierarchy {\n')
     Dones[Env.Current.Module]=True
 #    scan_deep(Env,Env.Current,Env.Current.Module,Env.Current.Module,Fout)
+    Stops = []
+    if '-stop' in Env.params:
+        Stops = Env.params['-stop']
+    Splits = []
+    if '-split' in Env.params:
+        Splits = Env.params['-split']
     Dones2 = []
-    scan_deep2(Env,Env.Current,1,Dones2,Fout)
+    print("STOPS",Stops)
+    scan_deep2(Env,Env.Current,6,Dones2,Fout,Stops,Splits)
 
     Fout.write('}\n')
     Fout.close()
-    os.system('dot -Tsvg new.dot -o new.svg')
+    os.system('dot -Tsvg %s.dot -o %s.svg' % (Env.Current.Module,Env.Current.Module))
     secondRun(Env,Env.Current)
     thirdRun(Env,Env.Current)
 
-def scan_deep2(Env,Mod,Deep,Dones,Fout):
-    print("MMMM",Deep,Mod.Module)
+def scan_deep2(Env,Mod,Deep,Dones,Fout,Stops,Splits):
     if Deep == 0: return
+    if Mod.Module in Stops: return
     if Mod.Module in Dones: return
     Inventory = {}
     for Inst in Mod.insts:
@@ -45,12 +52,17 @@ def scan_deep2(Env,Mod,Deep,Dones,Fout):
     LL.sort()
     LL.reverse()
     for Type in LL:
-        Fout.write('%s  -> %s [label="%s"] ; \n'%(Mod.Module,Type,Inventory[Type]))
+        if Type in Splits:
+            Let = logs.incrVar(Type)
+            Fout.write('%s  -> %s_%d [label="%s"] ; \n'%(Mod.Module,Type,Let,Inventory[Type]))
+        else:
+            Fout.write('%s  -> %s [label="%s"] ; \n'%(Mod.Module,Type,Inventory[Type]))
     Dones.append(Mod.Module)
     for Type in LL:
-        Env.try_and_load_module(Type,Env)
-        if Type in Env.Modules:
-            scan_deep2(Env,Env.Modules[Type],Deep-1,Dones,Fout)
+        if Type not in Stops:
+            Env.try_and_load_module(Type,Env)
+            if Type in Env.Modules:
+                scan_deep2(Env,Env.Modules[Type],Deep-1,Dones,Fout,Stops,Splits)
 
 
 

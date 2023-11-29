@@ -1,0 +1,15 @@
+#! /bin/csh -f
+
+# EXAMPLE!! change -load value to appropriete.
+
+vcs -sverilog -debug_access+all -sverilog  -f files.list  +define+UNIT_DELAY \
+    -timescale=1ns/1ps -l comp.log +lint=TFIPC-L \
+   -full64  +vpi -load /home/iliag/software/vpi/vpi7_nc_27.so:vpit_RegisterTfs  \
+   +libext+.v+ \
+   -notice \
+   +vcs+vcdpluson \
+    +error+1000
+
+
+
+
