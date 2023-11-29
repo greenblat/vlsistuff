@@ -1,8 +1,11 @@
 #! /bin/csh -f
 
-echo $PYTHONLIB
+# source first vpi3.setup (your version of that file!)
 
-exit
+
+echo $PYTHONLIB
+echo $PYTHONHOME
+
 
 iverilog-vpi src/vpi3_72.c src/qq64.c \
     -I$PYTHONINC1 \
