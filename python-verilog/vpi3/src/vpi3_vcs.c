@@ -1,7 +1,6 @@
 
-//ILIA: HIGHP is not a best solution!
-
 #include <stdlib.h>             /* for malloc(), getenv() */
+#include <stdbool.h>
 #include <unistd.h>             /* for pipe(), vfork(), getpid(), write() */
 #include <string.h>             /* for strerror() */
 #include <stdio.h>              /* for perror() */
@@ -12,9 +11,9 @@
 #include <netinet/in.h>         /* for tcp sockets */
 #include <sys/socket.h>         /* for socket() */
 #include <sys/stat.h>           /* for stat() */
-#include <time.h>               /* for time */ 
+// #include <time.h>               /* for time */
 
-#include "sys/time.h"
+// #include "sys/time.h"
 #include <Python.h>
 #include <longobject.h>
 
@@ -23,9 +22,7 @@
 
 // #define CVCSIMULATOR 1
 
-#include "vpi_user.h"
-#include "veriuser.h"
-#include "vpi_user_cds.h"
+#include "vcs_vpi_user.h"
 
 
 
@@ -34,7 +31,7 @@
 void alpha_init();
 void qqsa();
 long qqas();
-long qqai(); 
+long qqai();
 long alpha_add();
 long alpha_add_ver2();
 long allocate_rest_alpha();
@@ -45,7 +42,7 @@ int qq_started = 0;
 
 char CannotFindCallBack[1000];
 
-char VERSION[50] = "14.jan.2017";
+char VERSION[50] = "28.nov.2023";
 
 void checkRC(int RC);
 void start_py(char *basemodule);
@@ -129,22 +126,22 @@ PyObject *globals;
 PyObject *locals;
 
 
-int isSimpleExpr(exprHndl) 
+int isSimpleExpr(exprHndl)
         vpiHandle exprHndl ;
 {
-        switch(vpi_get(vpiType, exprHndl)) /* Get the object type */ { 
-                case vpiNet:        
+        switch(vpi_get(vpiType, exprHndl)) /* Get the object type */ {
+                case vpiNet:
                 case vpiNetBit:
-                case vpiReg:        
+                case vpiReg:
                 case vpiRegBit:
-                case vpiIntegerVar: 
-                case vpiRealVar: 
-                case vpiTimeVar:    
-                case vpiParameter: 
+                case vpiIntegerVar:
+                case vpiRealVar:
+                case vpiTimeVar:
+                case vpiParameter:
                 case vpiSpecParam:
                 case vpiVarSelect:
-                case vpiMemoryWord: return (1);        /* It is a simple expression */ 
-                default: return (0);       /* It is not a simple expression */ 
+                case vpiMemoryWord: return (1);        /* It is a simple expression */
+                default: return (0);       /* It is not a simple expression */
         }
 }
 
@@ -165,17 +162,17 @@ PLI_INT32 vpit_basemodule( PLI_BYTE8 *user_data ) {
         return 0;
     }
     iii=0;
-    tfH = vpi_handle(vpiSysTfCall,NULL); 
+    tfH = vpi_handle(vpiSysTfCall,NULL);
     if (!tfH) { vpi_printf("call to basemodule without params\n"); return 0; }
-    argI = vpi_iterate(vpiArgument,tfH); 
+    argI = vpi_iterate(vpiArgument,tfH);
     err = err + vpi_chk_error(&error_info);
-    if (argI) { 
+    if (argI) {
         argH = vpi_scan(argI);
         err = err + vpi_chk_error(&error_info);
-        while (argH && (!err)) { 
+        while (argH && (!err)) {
             iii++;
-            pvalue.format = vpiStringVal; 
-            vpi_get_value(argH, &pvalue); 
+            pvalue.format = vpiStringVal;
+            vpi_get_value(argH, &pvalue);
             err = err + vpi_chk_error(&error_info);
             sprintf(tempstr,"%s",pvalue.value.str);
             vpi_printf( "\n=====starting python with %s basemodule ======\n", tempstr );
@@ -183,7 +180,7 @@ PLI_INT32 vpit_basemodule( PLI_BYTE8 *user_data ) {
             python_started=1;
             return 1;
         }
-    } else vpi_printf(" No arguments.\n"); /* There were no arguments */ 
+    } else vpi_printf(" No arguments.\n"); /* There were no arguments */
     start_py("verilog");
     python_started=1;
     return 0;
@@ -205,29 +202,29 @@ PLI_INT32 vpit_import( PLI_BYTE8 *user_data ) {
         start_py("verilog");
         python_started=1;
     }
-    tfH = vpi_handle(vpiSysTfCall,NULL); 
+    tfH = vpi_handle(vpiSysTfCall,NULL);
     import_done=1;
     if (!tfH) { vpi_printf("call to import python without params\n"); return 0; }
-    argI = vpi_iterate(vpiArgument,tfH); 
+    argI = vpi_iterate(vpiArgument,tfH);
     err = err + vpi_chk_error(&error_info);
-    if (argI) { 
+    if (argI) {
         argH = vpi_scan(argI);
         err = err + vpi_chk_error(&error_info);
-        while (argH && (!err)) { 
+        while (argH && (!err)) {
             if (isSimpleExpr(argH)) /* If argument is a simple */ {
-                pvalue.format = vpiIntVal; 
-                vpi_get_value(argH, &pvalue); 
+                pvalue.format = vpiIntVal;
+                vpi_get_value(argH, &pvalue);
                 sprintf(tempstr,",%d",pvalue.value.integer);
                 strcat(params,tempstr);
             } else if (argH) {
                 if (pos==0) {
-                    pvalue.format = vpiStringVal; 
-                    vpi_get_value(argH, &pvalue); 
+                    pvalue.format = vpiStringVal;
+                    vpi_get_value(argH, &pvalue);
                     err = err + vpi_chk_error(&error_info);
                     strcpy(execstr,pvalue.value.str);
                 } else {
-                    pvalue.format = vpiIntVal; 
-                    vpi_get_value(argH, &pvalue); 
+                    pvalue.format = vpiIntVal;
+                    vpi_get_value(argH, &pvalue);
                     err = err + vpi_chk_error(&error_info);
                     sprintf(tempstr,",%d",pvalue.value.integer);
                     strcat(params,tempstr);
@@ -236,14 +233,14 @@ PLI_INT32 vpit_import( PLI_BYTE8 *user_data ) {
             }
             if (!err) argH = vpi_scan(argI);
             err = err + vpi_chk_error(&error_info);
-        } /* End of WHILE loop through the argument list */ 
+        } /* End of WHILE loop through the argument list */
         if (!err) {
             char Dir[1000],Import[1000];
             int Which=0,Found;
             while (1) {
                 Found = split_for_python(execstr,Dir,Import,Which);
                 if (!Found) {
-                    vpi_printf("given python root file %s could not be loaded. (%d)\n",execstr,Which); /* There were no arguments */ 
+                    vpi_printf("given python root file %s could not be loaded. (%d)\n",execstr,Which); /* There were no arguments */
                     return 0;
                 }
                 if (Dir[0]==0)
@@ -254,17 +251,17 @@ PLI_INT32 vpit_import( PLI_BYTE8 *user_data ) {
                 if (access(temp,F_OK)==0) {
                     if (Dir[0]!=0)
                         sprintf(exe1,"sys.path=sys.path+['%s']\nfrom %s import *\n",Dir,Import);
-                    else 
+                    else
                         sprintf(exe1,"from %s import *\n",Import);
                     int RC = PyRun_SimpleString(exe1);
                     checkRC(RC);
-                    vpi_printf("given python root file %s/%s loaded.\n",Dir,Import); /* There were no arguments */ 
+                    vpi_printf("given python root file %s/%s loaded.\n",Dir,Import); /* There were no arguments */
                     return 0;
                 }
                 Which++;
-            } 
-        } 
-    } else vpi_printf(" No arguments.\n"); /* There were no arguments */ 
+            }
+        }
+    } else vpi_printf(" No arguments.\n"); /* There were no arguments */
     return 0;
 }
 char *getenv();
@@ -290,7 +287,7 @@ int split_for_python(char *Exe,char *Dir,char *Import,int Which) {
     if (temp2[0]=='$') {
         ii=1;
         while (temp2[ii]!='/') {
-            envi[ii-1]=temp2[ii]; 
+            envi[ii-1]=temp2[ii];
             ii++;
         }
         envi[ii-1]=0;
@@ -341,24 +338,24 @@ PLI_INT32 vpit_python( PLI_BYTE8 *user_data )
         python_started=1;
     }
     iii=0;
-    tfH = vpi_handle(vpiSysTfCall,NULL); 
+    tfH = vpi_handle(vpiSysTfCall,NULL);
     if (!tfH) { vpi_printf("call to python without params\n"); return 0; }
 //    vpi_printf("debug0\n");
-    argI = vpi_iterate(vpiArgument,tfH); 
+    argI = vpi_iterate(vpiArgument,tfH);
     err = err + vpi_chk_error(&error_info);
-    if (argI) { 
+    if (argI) {
 //        vpi_printf("debug1 %d\n",iii);
 
         argH = vpi_scan(argI);
         err = err + vpi_chk_error(&error_info);
-        while (argH && (!err)) { 
+        while (argH && (!err)) {
             iii++;
 //            vpi_printf("debug1 1 %d is=%d\n",iii,isSimpleExpr(argH));
             if (isSimpleExpr(argH)) /* If argument is a simple */ {
-                pvalue.format = vpiIntVal; 
-                pvalue.format = vpiBinStrVal; 
+                pvalue.format = vpiIntVal;
+                pvalue.format = vpiBinStrVal;
 //                vpi_printf("debugx\n");
-                vpi_get_value(argH, &pvalue); 
+                vpi_get_value(argH, &pvalue);
 //                vpi_printf("debugy\n");
                 sprintf(tempstr,",'%s'",pvalue.value.str);
                 strcat(params,tempstr);
@@ -369,19 +366,19 @@ PLI_INT32 vpit_python( PLI_BYTE8 *user_data )
 //                vpi_printf("debug1 2 %d pos=%d\n",iii,pos);
                 if (pos==0) {
 //                    vpi_printf("debug1 3 %d pos=%d\n",iii,pos);
-                    pvalue.format = vpiStringVal; 
-                    vpi_get_value(argH, &pvalue); 
+                    pvalue.format = vpiStringVal;
+                    vpi_get_value(argH, &pvalue);
                     err = err + vpi_chk_error(&error_info);
 //                    vpi_printf("ilia string  %s\n",pvalue.value.str);
                     strcpy(execstr,pvalue.value.str);
                 } else {
 //                    vpi_printf("debug1 4 %d pos=%d\n",iii,pos);
-                    pvalue.format = vpiBinStrVal; 
-                    vpi_get_value(argH, &pvalue); 
+                    pvalue.format = vpiBinStrVal;
+                    vpi_get_value(argH, &pvalue);
                     sprintf(tempstr,",'%s'",pvalue.value.str);
                     strcat(params,tempstr);
-//                    pvalue.format = vpiIntVal; 
-//                    vpi_get_value(argH, &pvalue); 
+//                    pvalue.format = vpiIntVal;
+//                    vpi_get_value(argH, &pvalue);
 //                    err = err + vpi_chk_error(&error_info);
 //                    vpi_printf("ilia integer %d\n",pvalue.value.integer);
 //                    sprintf(tempstr,",%d",pvalue.value.integer);
@@ -392,13 +389,13 @@ PLI_INT32 vpit_python( PLI_BYTE8 *user_data )
             }
             if (!err) argH = vpi_scan(argI);
             err = err + vpi_chk_error(&error_info);
-        } /* End of WHILE loop through the argument list */ 
+        } /* End of WHILE loop through the argument list */
         if (!err) {
             Len = strlen(execstr);
             FuncCall = (execstr[Len-1]==')') ;
             if (execstr[Len-1]==')') execstr[Len-1]=0;
             Len = strlen(execstr);
-                
+
             if (strlen(params)!=0) {
                 strcat(execstr,&(params[1]));
 //                if (execstr[Len-1]=='(')
@@ -410,9 +407,9 @@ PLI_INT32 vpit_python( PLI_BYTE8 *user_data )
             int RC = PyRun_SimpleString(execstr);
             checkRC(RC);
             return 0;
-        } 
+        }
 
-    } else vpi_printf(" No arguments.\n"); /* There were no arguments */ 
+    } else vpi_printf(" No arguments.\n"); /* There were no arguments */
 //    vpi_printf("debug2 %d\n",iii);
     return 0;
 }
@@ -444,22 +441,22 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
         start_py("verilog");
         python_started=1;
     }
-    tfH = vpi_handle(vpiSysTfCall,NULL); 
+    tfH = vpi_handle(vpiSysTfCall,NULL);
     if (!tfH) { vpi_printf("call to python without params\n"); return 0; }
-    argI = vpi_iterate(vpiArgument,tfH); 
+    argI = vpi_iterate(vpiArgument,tfH);
     err = err + vpi_chk_error(&error_info);
-    if (argI) { 
+    if (argI) {
         argH = vpi_scan(argI);
         err = err + vpi_chk_error(&error_info);
-        while (argH && (!err)) { 
+        while (argH && (!err)) {
             if (isSimpleExpr(argH)) /* If argument is a simple */ {
-                pvalue.format = vpiBinStrVal; 
-                vpi_get_value(argH, &pvalue); 
+                pvalue.format = vpiBinStrVal;
+                vpi_get_value(argH, &pvalue);
                 sprintf(tempstr," %s",pvalue.value.str);
                 strcat(params,tempstr);
 
-//               pvalue.format = vpiIntVal; 
-//               vpi_get_value(argH, &pvalue); 
+//               pvalue.format = vpiIntVal;
+//               vpi_get_value(argH, &pvalue);
 //                sprintf(tempstr," %d",pvalue.value.integer);
 //                strcat(params,tempstr);
 //                argsx[argsnum] = pvalue.value.integer;
@@ -467,21 +464,21 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
 
             } else if (argH) {
                 if (pos==0) {
-                    pvalue.format = vpiStringVal; 
-                    vpi_get_value(argH, &pvalue); 
+                    pvalue.format = vpiStringVal;
+                    vpi_get_value(argH, &pvalue);
                     err = err + vpi_chk_error(&error_info);
                     strcpy(execstr,pvalue.value.str);
                     strcpy(funcname,execstr);
                 } else {
-                    pvalue.format = vpiBinStrVal; 
-                    vpi_get_value(argH, &pvalue); 
+                    pvalue.format = vpiBinStrVal;
+                    vpi_get_value(argH, &pvalue);
                     sprintf(tempstr," %s",pvalue.value.str);
                     strcat(params,tempstr);
                     argsx[argsnum] = pvalue.value.integer;
                     argsnum++;
 
-//                    pvalue.format = vpiIntVal; 
-//                    vpi_get_value(argH, &pvalue); 
+//                    pvalue.format = vpiIntVal;
+//                    vpi_get_value(argH, &pvalue);
 //                    err = err + vpi_chk_error(&error_info);
 //                    sprintf(tempstr,",%d",pvalue.value.integer);
 //                    strcat(params,tempstr);
@@ -490,12 +487,12 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
             }
             if (!err) argH = vpi_scan(argI);
             err = err + vpi_chk_error(&error_info);
-        } /* End of WHILE loop through the argument list */ 
+        } /* End of WHILE loop through the argument list */
         if (!err) {
             Len = strlen(execstr);
             if (execstr[Len-1]==')') execstr[Len-1]=0;
             Len = strlen(execstr);
-                
+
             if (strlen(params)!=0) {
                 if (execstr[Len-1]=='(')
                     strcat(execstr,&(params[1]));
@@ -505,7 +502,7 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
             strcat(execstr,")");
             PyObject *py_main, *py_dict, *py_temp;
             py_main = PyImport_AddModule("__main__");
-                
+
             if (strcmp(funcname,"HIGHP") == 0) {
                 value.value.integer = HIGHP;
                 value.format = vpiIntVal;/* return the result */
@@ -562,9 +559,9 @@ PLI_INT32 vpit_pythonf( PLI_BYTE8 *user_data )
               HIGHP = value2>>32;
               printf("HIGHP 550 %x\n",HIGHP);
             return 0;
-        } 
+        }
 
-    } else vpi_printf(" No arguments.\n"); /* There were no arguments */ 
+    } else vpi_printf(" No arguments.\n"); /* There were no arguments */
     return 0;
 }
 
@@ -575,7 +572,7 @@ void vpit_RegisterTfs( void )
   { vpiSysTask, 0, "$python", vpit_python, NULL, NULL,NULL },
   { vpiSysTask, 0, "$import", vpit_import, NULL, NULL,NULL },
   { vpiSysTask, 0, "$basemodule", vpit_basemodule, NULL, NULL,NULL },
-  { vpiSysFunc, 0, "$pythonf", vpit_pythonf, NULL, 64,NULL },
+//  { vpiSysFunc, 0, "$pythonf", vpit_pythonf, NULL, 64,NULL },
   { 0, 0, NULL, NULL, NULL, NULL, NULL }
 
 
@@ -584,7 +581,7 @@ void vpit_RegisterTfs( void )
  };
 
  systf_data_p = &(systf_data_list[0]);
- while (systf_data_p->type != 0) { 
+ while (systf_data_p->type != 0) {
     vpi_register_systf(systf_data_p++);
 }
 }
@@ -688,8 +685,8 @@ veri_peek(PyObject *self,PyObject *args) {
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
     }
-    pvalue.format = vpiBinStrVal; 
-    vpi_get_value(handle, &pvalue); 
+    pvalue.format = vpiBinStrVal;
+    vpi_get_value(handle, &pvalue);
     return Py_BuildValue("s", pvalue.value.str);
 }
 
@@ -704,7 +701,7 @@ veri_hpeek(PyObject *self,PyObject *args) {
         return NULL;
     long longi;
     char *ppp;
-    longi = strtol(pathstring,&ppp,0); 
+    longi = strtol(pathstring,&ppp,0);
     handle =  (vpiHandle) longi;
     if (!handle) {
         vpi_printf("\npython: cannot find sig %s for peek\n",pathstring);
@@ -712,8 +709,8 @@ veri_hpeek(PyObject *self,PyObject *args) {
         PyRun_SimpleString(CannotFindCallBack);
         return Py_BuildValue("s", "q");
     }
-    pvalue.format = vpiBinStrVal; 
-    vpi_get_value(handle, &pvalue); 
+    pvalue.format = vpiBinStrVal;
+    vpi_get_value(handle, &pvalue);
     return Py_BuildValue("s", pvalue.value.str);
 }
 
@@ -736,8 +733,8 @@ veri_handle(PyObject *self,PyObject *args) {
     sprintf(temp,"%lu",(long) handle);
     return Py_BuildValue("s", temp);
 }
- 
- 
+
+
 
 
 static PyObject*
@@ -778,8 +775,8 @@ veri_peek_mem(PyObject *self,PyObject *args) {
     }
 //    vpi_printf("\n access2 mem=%s size=%d\n",pathstring,size);
 
-    pvalue.format = vpiBinStrVal; 
-    vpi_get_value(handle2, &pvalue); 
+    pvalue.format = vpiBinStrVal;
+    vpi_get_value(handle2, &pvalue);
     return Py_BuildValue("s", pvalue.value.str);
 }
 
@@ -822,8 +819,8 @@ veri_peek_3d(PyObject *self,PyObject *args) {
 
 
 
-    pvalue.format = vpiBinStrVal; 
-    vpi_get_value(handle3, &pvalue); 
+    pvalue.format = vpiBinStrVal;
+    vpi_get_value(handle3, &pvalue);
     return Py_BuildValue("s", pvalue.value.str);
 }
 
@@ -865,10 +862,10 @@ veri_force(PyObject *self,PyObject *args) {
         return Py_BuildValue("s", "q");
     }
     if ((vstr[0]=='0')&&(vstr[1]=='b')) {
-        pvalue.format = vpiBinStrVal; 
+        pvalue.format = vpiBinStrVal;
         pvalue.value.str = &(vstr[2]);
     } else if ((vstr[0]=='0')&&(vstr[1]=='x')) {
-        pvalue.format = vpiHexStrVal; 
+        pvalue.format = vpiHexStrVal;
         pvalue.value.str = &(vstr[2]);
     } else if (hasDot(vstr)) {
         pvalue.format = vpiRealVal;
@@ -887,7 +884,7 @@ veri_force(PyObject *self,PyObject *args) {
         pvalue.value.str = vstr;
     }
 //    vpi_printf("forcing %s %s\n",pathstring,vstr);
-    vpi_put_value(handle, &pvalue,NULL,vpiNoDelay); 
+    vpi_put_value(handle, &pvalue,NULL,vpiNoDelay);
 //    vpi_printf("after %s\n",pathstring);
     return Py_BuildValue("i", 1);
 }
@@ -911,16 +908,16 @@ veri_hard_force(PyObject *self,PyObject *args) {
         return Py_BuildValue("i", "0");
     }
     if ((vstr[0]=='0')&&(vstr[1]=='b')) {
-        pvalue.format = vpiBinStrVal; 
+        pvalue.format = vpiBinStrVal;
         pvalue.value.str = &(vstr[2]);
     } else if ((vstr[0]=='0')&&(vstr[1]=='x')) {
-        pvalue.format = vpiHexStrVal; 
+        pvalue.format = vpiHexStrVal;
         pvalue.value.str = &(vstr[2]);
     } else {
         pvalue.format = vpiDecStrVal;
         pvalue.value.str = vstr;
     }
-    vpi_put_value(handle, &pvalue,NULL,vpiForceFlag|vpiNoDelay); 
+    vpi_put_value(handle, &pvalue,NULL,vpiForceFlag|vpiNoDelay);
     return Py_BuildValue("i", 1);
 }
 static PyObject*
@@ -938,16 +935,16 @@ veri_release(PyObject *self,PyObject *args) {
         return Py_BuildValue("i", "0");
     }
     if ((vstr[0]=='0')&&(vstr[1]=='b')) {
-        pvalue.format = vpiBinStrVal; 
+        pvalue.format = vpiBinStrVal;
         pvalue.value.str = &(vstr[2]);
     } else if ((vstr[0]=='0')&&(vstr[1]=='x')) {
-        pvalue.format = vpiHexStrVal; 
+        pvalue.format = vpiHexStrVal;
         pvalue.value.str = &(vstr[2]);
     } else {
         pvalue.format = vpiDecStrVal;
         pvalue.value.str = vstr;
     }
-    vpi_put_value(handle, &pvalue,NULL,vpiReleaseFlag); 
+    vpi_put_value(handle, &pvalue,NULL,vpiReleaseFlag);
     return Py_BuildValue("i", 1);
 }
 
@@ -965,22 +962,22 @@ veri_hforce(PyObject *self,PyObject *args) {
 
     if (!PyArg_ParseTuple(args, "ss",&pathstring,&vstr))
         return NULL;
-    longi = strtol(pathstring,&ppp,0); 
+    longi = strtol(pathstring,&ppp,0);
 
 
     handle =  (vpiHandle) longi;
     if ((vstr[0]=='0')&&(vstr[1]=='b')) {
-        pvalue.format = vpiBinStrVal; 
+        pvalue.format = vpiBinStrVal;
         pvalue.value.str = &(vstr[2]);
     } else if ((vstr[0]=='0')&&(vstr[1]=='x')) {
-        pvalue.format = vpiHexStrVal; 
+        pvalue.format = vpiHexStrVal;
         pvalue.value.str = &(vstr[2]);
     } else {
         pvalue.format = vpiDecStrVal;
         pvalue.value.str = vstr;
-    }   
-    vpi_put_value(handle, &pvalue,NULL,vpiNoDelay); 
-    return Py_BuildValue("i", 1); 
+    }
+    vpi_put_value(handle, &pvalue,NULL,vpiNoDelay);
+    return Py_BuildValue("i", 1);
 }
 
 
@@ -1014,16 +1011,16 @@ veri_force_mem(PyObject *self,PyObject *args) {
 //    vpi_printf("forcing mem %s[%s] = %s\n",pathstring,indexstring,vstr);
     handle2 = vpi_handle_by_index(handle, index);
     if ((vstr[0]=='0')&&(vstr[1]=='b')) {
-        pvalue.format = vpiBinStrVal; 
+        pvalue.format = vpiBinStrVal;
         pvalue.value.str = &(vstr[2]);
     } else if ((vstr[0]=='0')&&(vstr[1]=='x')) {
-        pvalue.format = vpiHexStrVal; 
+        pvalue.format = vpiHexStrVal;
         pvalue.value.str = &(vstr[2]);
     } else {
         pvalue.format = vpiDecStrVal;
         pvalue.value.str = vstr;
     }
-    vpi_put_value(handle2, &pvalue,NULL,vpiNoDelay); 
+    vpi_put_value(handle2, &pvalue,NULL,vpiNoDelay);
     return Py_BuildValue("i", 1);
 }
 
@@ -1066,16 +1063,16 @@ veri_force_3d(PyObject *self,PyObject *args) {
 
     vpi_printf("forcing mem %s[%s][%s] = %s\n",pathstring,indexstring,index2string,vstr);
     if ((vstr[0]=='0')&&(vstr[1]=='b')) {
-        pvalue.format = vpiBinStrVal; 
+        pvalue.format = vpiBinStrVal;
         pvalue.value.str = &(vstr[2]);
     } else if ((vstr[0]=='0')&&(vstr[1]=='x')) {
-        pvalue.format = vpiHexStrVal; 
+        pvalue.format = vpiHexStrVal;
         pvalue.value.str = &(vstr[2]);
     } else {
         pvalue.format = vpiDecStrVal;
         pvalue.value.str = vstr;
     }
-    vpi_put_value(handle3, &pvalue,NULL,vpiNoDelay); 
+    vpi_put_value(handle3, &pvalue,NULL,vpiNoDelay);
     return Py_BuildValue("i", 1);
 }
 
@@ -1120,8 +1117,8 @@ veri_scanModuleNext(PyObject *self,PyObject *args) {
 //    printf(">>> %lu  state=%d %d\n",(long) handle, state,Index);
     if (state==0) {
         net_iterator = vpi_iterate(vpiNet, handle);
-        if (!net_iterator) { scanStates[Index]=2; state=2; } 
-        else  { 
+        if (!net_iterator) { scanStates[Index]=2; state=2; }
+        else  {
             state=1;
             scanRun[Index]=net_iterator;
             scanStates[Index]=state;
@@ -1130,11 +1127,11 @@ veri_scanModuleNext(PyObject *self,PyObject *args) {
     if (state==1) {
         net_iterator = scanRun[Index];
         net_handle = vpi_scan(net_iterator);
-        if (!net_handle) { scanStates[Index]=2; state=2; } 
+        if (!net_handle) { scanStates[Index]=2; state=2; }
         else {
             size = vpi_get(vpiSize, net_handle);
-            pvalue.format = vpiBinStrVal; 
-            vpi_get_value(net_handle, &pvalue); 
+            pvalue.format = vpiBinStrVal;
+            vpi_get_value(net_handle, &pvalue);
             sprintf(String,"net   %s [%d]  %s", vpi_get_str(vpiName, net_handle),size,pvalue.value.str);
             return Py_BuildValue("s", String);
         }
@@ -1142,9 +1139,9 @@ veri_scanModuleNext(PyObject *self,PyObject *args) {
 
     if (state==2) {
         net_iterator = vpi_iterate(vpiReg, handle);
-        if (!net_iterator) { 
+        if (!net_iterator) {
             state=4; scanStates[Index]=4;
-        } else { 
+        } else {
             state=3; scanStates[Index]=3;
             scanRun[Index] = net_iterator;
         }
@@ -1153,21 +1150,21 @@ veri_scanModuleNext(PyObject *self,PyObject *args) {
     if (state==3) {
         net_iterator = scanRun[Index];
         net_handle = vpi_scan(net_iterator);
-        if (!net_handle) { 
+        if (!net_handle) {
             state=4; scanStates[Index]=4;
-        } else { 
+        } else {
             size = vpi_get(vpiSize, net_handle);
-            pvalue.format = vpiBinStrVal; 
-            vpi_get_value(net_handle, &pvalue); 
+            pvalue.format = vpiBinStrVal;
+            vpi_get_value(net_handle, &pvalue);
             sprintf(String,"reg   %s [%d]  %s", vpi_get_str(vpiName, net_handle),size,pvalue.value.str);
             return Py_BuildValue("s", String);
         }
     }
     if (state==4) {
         net_iterator = vpi_iterate(vpiRegArray, handle);
-        if (!net_iterator) { 
+        if (!net_iterator) {
             state=6; scanStates[Index]=6;
-        } else { 
+        } else {
             state=5; scanStates[Index]=5;
             scanRun[Index] = net_iterator;
         }
@@ -1175,9 +1172,9 @@ veri_scanModuleNext(PyObject *self,PyObject *args) {
     if (state==5) {
         net_iterator = scanRun[Index];
         net_handle = vpi_scan(net_iterator);
-        if (!net_handle) { 
+        if (!net_handle) {
             state=6; scanStates[Index]=6;
-        } else { 
+        } else {
             size = vpi_get(vpiSize, net_handle);
             sprintf(String,"regArray   %s [%d]  ", vpi_get_str(vpiName, net_handle),size);
             return Py_BuildValue("s", String);
@@ -1185,9 +1182,9 @@ veri_scanModuleNext(PyObject *self,PyObject *args) {
     }
     if (state==6) {
         net_iterator = vpi_iterate(vpiModule, handle);
-        if (!net_iterator) { 
+        if (!net_iterator) {
             state=8; scanStates[Index]=8;
-        } else { 
+        } else {
             state=7; scanStates[Index]=7;
             scanRun[Index] = net_iterator;
         }
@@ -1195,9 +1192,9 @@ veri_scanModuleNext(PyObject *self,PyObject *args) {
     if (state==7) {
         net_iterator = scanRun[Index];
         net_handle = vpi_scan(net_iterator);
-        if (!net_handle) { 
+        if (!net_handle) {
             state=8; scanStates[Index]=8;
-        } else { 
+        } else {
             sprintf(String,"son   %s %s", vpi_get_str(vpiFullName, net_handle),vpi_get_str(vpiFullName, net_handle));
             return Py_BuildValue("s", String);
         }
@@ -1243,8 +1240,8 @@ int printHierarchyDeep(char *pathstring,int depth,FILE *File) {
     if (net_iterator)
        while ((net_handle = vpi_scan(net_iterator))) {
           PLI_INT32 size = vpi_get(vpiSize, net_handle);
-          pvalue.format = vpiBinStrVal; 
-          vpi_get_value(net_handle, &pvalue); 
+          pvalue.format = vpiBinStrVal;
+          vpi_get_value(net_handle, &pvalue);
           strcpy(full0,vpi_get_str(vpiFullName,net_handle));
           strcpy(full1,vpi_get_str(vpiName,net_handle));
           fprintf(File,"net:   %s [%d] = %s     // %s\n", full0,size,pvalue.value.str,full1);
@@ -1253,8 +1250,8 @@ int printHierarchyDeep(char *pathstring,int depth,FILE *File) {
     if (net_iterator)
        while ((net_handle = vpi_scan(net_iterator))) {
           PLI_INT32 size = vpi_get(vpiSize, net_handle);
-          pvalue.format = vpiBinStrVal; 
-          vpi_get_value(net_handle, &pvalue); 
+          pvalue.format = vpiBinStrVal;
+          vpi_get_value(net_handle, &pvalue);
           fprintf(File,"reg:   %s [%d] = %s // %s\n", vpi_get_str(vpiFullName, net_handle),size,pvalue.value.str,vpi_get_str(vpiName,net_handle));
        }
 
@@ -1292,61 +1289,61 @@ int printHierarchyDeep(char *pathstring,int depth,FILE *File) {
 vpiHandle rHandle;
 
 
-static PLI_INT32 callbackRoutine(s_cb_data *cb_data);
-
-    s_vpi_value  value_s;
-    s_vpi_time  time_s,Stime;
-    s_cb_data  cb_data_s;
-
-static PyObject*
-veri_register(PyObject *self,PyObject *args) {
-    vpiHandle handle;
-    char *pathstring,*pythonRoutine;
-    if (!PyArg_ParseTuple(args, "ss",&pathstring,&pythonRoutine))
-        return NULL;
-    if ((pathstring[0]<='9')&&(pathstring[0]>='0')) {
-        long Delay = atol(pathstring);
-        cb_data_s.reason    = cbAfterDelay;
-        time_s.type         = vpiSimTime;
-        Stime.type=vpiSimTime;
-        vpi_get_time(NULL,&Stime);
-        time_s.low    = Delay & 0xffffffff;
-        time_s.high   = (Delay>>32) & 0xffffffff;
-        handle = 0;
-    } else {
-        get_handle(pathstring,&handle);
-        if (!handle) {
-            vpi_printf("\npython: cannot find sig %s for register\n",pathstring);
-            sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('python: cannot find %s for register')\n",pathstring,pathstring);
-            PyRun_SimpleString(CannotFindCallBack);
-            return Py_BuildValue("s", "q");
-        }
-       cb_data_s.reason    = cbValueChange;
-       time_s.type         = vpiSuppressTime;
-    }
-    cb_data_s.user_data = pythonRoutine;
-    cb_data_s.cb_rtn    = callbackRoutine;
-    cb_data_s.time      = &time_s;
-    cb_data_s.value     = 0; //&value_s;
-
-    value_s.format      = vpiIntVal;
-
-    cb_data_s.obj  = handle;
-    
-    rHandle = vpi_register_cb(&cb_data_s);
-    return Py_BuildValue("s", "1");
-}
-             
-int callbackRoutine(p_cb_data cb_data) {
-    char *Routine;
-
-    Routine = (char *) (cb_data->user_data);
-    printf("callback %s\n",Routine);
-    int RC = PyRun_SimpleString(Routine);
-    checkRC(RC);
-    return 0;
-}
-
+// static PLI_INT32 callbackRoutine(s_cb_data *cb_data);
+//
+//     s_vpi_value  value_s;
+//     s_vpi_time  time_s,Stime;
+//     s_cb_data  cb_data_s;
+//
+// static PyObject*
+// veri_register(PyObject *self,PyObject *args) {
+//     vpiHandle handle;
+//     char *pathstring,*pythonRoutine;
+//     if (!PyArg_ParseTuple(args, "ss",&pathstring,&pythonRoutine))
+//         return NULL;
+//     if ((pathstring[0]<='9')&&(pathstring[0]>='0')) {
+//         long Delay = atol(pathstring);
+//         cb_data_s.reason    = cbAfterDelay;
+//         time_s.type         = vpiSimTime;
+//         Stime.type=vpiSimTime;
+//         vpi_get_time(NULL,&Stime);
+//         time_s.low    = Delay & 0xffffffff;
+//         time_s.high   = (Delay>>32) & 0xffffffff;
+//         handle = 0;
+//     } else {
+//         get_handle(pathstring,&handle);
+//         if (!handle) {
+//             vpi_printf("\npython: cannot find sig %s for register\n",pathstring);
+//             sprintf(CannotFindCallBack,"try:\n    cannot_find_sig('%s')\nexcept:\n    print('python: cannot find %s for register')\n",pathstring,pathstring);
+//             PyRun_SimpleString(CannotFindCallBack);
+//             return Py_BuildValue("s", "q");
+//         }
+//        cb_data_s.reason    = cbValueChange;
+//        time_s.type         = vpiSuppressTime;
+//     }
+//     cb_data_s.user_data = pythonRoutine;
+//     cb_data_s.cb_rtn    = callbackRoutine;
+//     cb_data_s.time      = &time_s;
+//     cb_data_s.value     = 0; //&value_s;
+//
+//     value_s.format      = vpiIntVal;
+//
+//     cb_data_s.obj  = handle;
+//
+//     rHandle = vpi_register_cb(&cb_data_s);
+//     return Py_BuildValue("s", "1");
+// }
+//
+// int callbackRoutine(p_cb_data cb_data) {
+//     char *Routine;
+//
+//     Routine = (char *) (cb_data->user_data);
+//     printf("callback %s\n",Routine);
+//     int RC = PyRun_SimpleString(Routine);
+//     checkRC(RC);
+//     return 0;
+// }
+//
 
 void checkRC(int RC) {
     if (RC>=0) return;
@@ -1363,11 +1360,11 @@ veri_stime(PyObject *self,PyObject *args) {
     if (!PyArg_ParseTuple(args, ""))
         return NULL;
     Stime.type=vpiSimTime;
-    vpi_get_time(NULL,&Stime);
-    Result = Stime.high;
-    Result = Result << 32;
-    Result = Result|Stime.low;
-    return Py_BuildValue("l", Result);
+//    vpi_get_time(NULL,&Stime);
+//    Result = Stime.high;
+//    Result = Result << 32;
+//    Result = Result|Stime.low;
+    return Py_BuildValue("l", 999);
 }
 
 static PyObject*
@@ -1399,14 +1396,14 @@ static PyMethodDef VeriMethods[] = {
     {"release", veri_release, METH_VARARGS,
       "Return the number of arguments received by the process."},
     {"listing", veri_listing, METH_VARARGS, "Return the number of arguments received by the process."},
-    {"scanInit", veri_scanModuleInit, METH_VARARGS, "Return the number of arguments received by the process."},
-    {"scanNext", veri_scanModuleNext, METH_VARARGS, "Return the number of arguments received by the process."},
-    {"register", veri_register, METH_VARARGS, "Return the number of arguments received by the process."},
+//    {"scanInit", veri_scanModuleInit, METH_VARARGS, "Return the number of arguments received by the process."},
+//    {"scanNext", veri_scanModuleNext, METH_VARARGS, "Return the number of arguments received by the process."},
+//    {"register", veri_register, METH_VARARGS, "Return the number of arguments received by the process."},
     {"force_mem", veri_force_mem, METH_VARARGS, "Return the number of arguments received by the process."},
     {"force_3d", veri_force_3d, METH_VARARGS, "Return the number of arguments received by the process."},
     {"finish", veri_finish, METH_VARARGS,
      "Return the number of arguments received by the process."},
-    {"stime", veri_stime, METH_VARARGS,
+    {"time", veri_stime, METH_VARARGS,
      "Return the number of arguments received by the process."},
     {"hforce", veri_hforce, METH_VARARGS,
      "Return the number of arguments received by the process."},
@@ -1423,7 +1420,7 @@ void handler(int code) {
     printf("control-C %d\n",wasControlC);
     if (wasControlC) {
         printf("final exit\n");
-    } 
+    }
     wasControlC=1;
 }
 
@@ -1450,14 +1447,16 @@ PyMODINIT_FUNC PyInit_veri(void)
 // If You get it wrong, import random will fail.
 
 void start_py(char *basemodule) {
-    dlopen("libpython3.8.dylib",RTLD_LAZY | RTLD_GLOBAL);
-    dlopen("libpython3.9.dylib",RTLD_LAZY | RTLD_GLOBAL);
+//    dlopen("libpython3.8.dylib",RTLD_LAZY | RTLD_GLOBAL);
+//    dlopen("libpython3.9.dylib",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.10.dylib",RTLD_LAZY | RTLD_GLOBAL);
-    dlopen("libpython3.8.so",RTLD_LAZY | RTLD_GLOBAL);
-    dlopen("libpython3.9.dylib",RTLD_LAZY | RTLD_GLOBAL);
-    dlopen("libpython3.9.so",RTLD_LAZY | RTLD_GLOBAL);
-    dlopen("libpython3.10.dylib",RTLD_LAZY | RTLD_GLOBAL);
+//    dlopen("libpython3.8.so",RTLD_LAZY | RTLD_GLOBAL);
+//    dlopen("libpython3.9.dylib",RTLD_LAZY | RTLD_GLOBAL);
+//    dlopen("libpython3.9.so",RTLD_LAZY | RTLD_GLOBAL);
+//    dlopen("libpython3.10.dylib",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.10.so",RTLD_LAZY | RTLD_GLOBAL);
+//    dlopen("libpython3.11.dylib",RTLD_LAZY | RTLD_GLOBAL);
+//    dlopen("libpython3.11.so",RTLD_LAZY | RTLD_GLOBAL);
     PyImport_AppendInittab("veri", PyInit_veri);
     Py_Initialize();
     PyRun_SimpleString("import veri; print(dir(veri));\n");
@@ -1492,8 +1491,9 @@ void start_py(char *basemodule) {
 void end_py() {
     Py_Finalize();
 }
-int stat64() {printf(">>>error stat64\n"); return 0;}
-int lstat64() {printf(">>>error lstat64\n"); return 0;}
+// int stat64() {printf(">>>error stat64\n"); return 0;}
+// int lstat64() {printf(">>>error lstat64\n"); return 0;}
+
 
 
 
