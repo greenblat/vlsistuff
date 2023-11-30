@@ -65,7 +65,7 @@ class apbSlave(logs.driverClass):
         if self.waiting>0:
             self.waiting -= 1
             return
-#        logs.forceAscii('tb.markstr0',self.state)
+        logs.forceAscii('tb.markstr0',self.state)
         if self.state == 'idle':
             self.lcl_force('pready',0)
             if self.lcl_valid('psel'):
@@ -75,7 +75,10 @@ class apbSlave(logs.driverClass):
                 self.waiting = self.READY
         elif self.state == 'work':
             self.lcl_force('pready',1)
+            self.addr = self.lcl_peek('paddr')
+            self.pwrite = self.lcl_peek('pwrite')
             if self.lcl_valid('penable'):
+                logs.log_info('APBWRITE %s %s write %x' % (self.Name,self.pwrite,self.addr))
                 if self.pwrite == 1:
                     self.wdata = self.lcl_peek('pwdata')
                     self.RAM[self.addr] = self.wdata
