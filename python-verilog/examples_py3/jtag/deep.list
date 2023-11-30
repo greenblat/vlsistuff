@@ -1,0 +1,107 @@
+module: tb tb
+net:   tb.pwrite [1] = 0     // pwrite
+net:   tb.pwdata [32] = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx     // pwdata
+net:   tb.psel [1] = 0     // psel
+net:   tb.penable [1] = 0     // penable
+net:   tb.paddr [16] = xxxxxxxxxxxxxxxx     // paddr
+net:   tb.jtdo [1] = 0     // jtdo
+reg:   Index [32] = 00000000000000000000000000000000 // Index
+reg:   clk [1] = 1 // clk
+reg:   corrects [32] = 00000000000000000000000000000000 // corrects
+reg:   cycles [32] = 00000000000000000000000000011110 // cycles
+reg:   errors [32] = 00000000000000000000000000000000 // errors
+reg:   jtck [1] = 0 // jtck
+reg:   jtdi [1] = 0 // jtdi
+reg:   jtms [1] = 0 // jtms
+reg:   marker [32] = 00000000000000000000000000000000 // marker
+reg:   markstr0 [256] = 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 // markstr0
+reg:   panics [32] = 00000000000000000000000000000000 // panics
+reg:   por_n [1] = 1 // por_n
+reg:   prdata [32] = 00000000000000000000000000000000 // prdata
+reg:   pready [1] = 0 // pready
+reg:   rst_n [1] = 1 // rst_n
+reg:   seqptr [16] = 0000000000000000 // seqptr
+reg:   status [30] = 000000000000000000000000000101 // status
+reg:   testname [1024] = 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011101000110010101110011011101000011000000101110011100110110010101110001 // testname
+reg:   wrongs [32] = 00000000000000000000000000000000 // wrongs
+son:   tb.dut
+module: jtag2apb tb.dut
+net:   tb.dut.clk [1] = 1     // clk
+net:   tb.dut.jtck [1] = 0     // jtck
+net:   tb.dut.jtdi [1] = 0     // jtdi
+net:   tb.dut.jtms [1] = 0     // jtms
+net:   tb.dut.por_n [1] = 1     // por_n
+net:   tb.dut.prdata [32] = 00000000000000000000000000000000     // prdata
+net:   tb.dut.pready [1] = 0     // pready
+net:   tb.dut.psel [1] = 0     // psel
+net:   tb.dut.pulse [1] = 0     // pulse
+net:   tb.dut.ram_ready [1] = 1     // ram_ready
+net:   tb.dut.rst_n [1] = 1     // rst_n
+net:   tb.dut.status [30] = 000000000000000000000000000101     // status
+net:   tb.dut.status0 [1] = 0     // status0
+net:   tb.dut.status1 [1] = 1     // status1
+net:   tb.dut.version [8] = 01010111     // version
+net:   tb.dut.ram_write_sync [1] = 0     // ram_write_sync
+net:   tb.dut.ram_write [1] = 0     // ram_write
+net:   tb.dut.ram_wr_data [32] = 00000000000000000000000000000000     // ram_wr_data
+net:   tb.dut.ram_read_sync [1] = 0     // ram_read_sync
+net:   tb.dut.ram_read [1] = 0     // ram_read
+net:   tb.dut.ram_addr [16] = 0000000000000000     // ram_addr
+net:   tb.dut.penable [1] = 0     // penable
+net:   tb.dut.jtdo [1] = 0     // jtdo
+net:   tb.dut.internal_status [32] = 10000000000000000000000000000101     // internal_status
+net:   tb.dut.control [32] = 00000000000000000000000000000000     // control
+reg:   paddr [16] = xxxxxxxxxxxxxxxx // paddr
+reg:   pwdata [32] = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx // pwdata
+reg:   pwrite [1] = 0 // pwrite
+reg:   ram_rd_data [32] = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx // ram_rd_data
+reg:   state [2] = 00 // state
+reg:   was [1] = 0 // was
+son:   tb.dut.jtag_tap
+son:   tb.dut.level_synchronizer_1
+son:   tb.dut.level_synchronizer_2
+module: jtag_tap tb.dut.jtag_tap
+net:   tb.dut.jtag_tap.jtck_clock [1] = 0     // jtck_clock
+net:   tb.dut.jtag_tap.jtdi_out [1] = 0     // jtdi_out
+net:   tb.dut.jtag_tap.jtms_out [1] = 0     // jtms_out
+net:   tb.dut.jtag_tap.por_n [1] = 1     // por_n
+net:   tb.dut.jtag_tap.ram_rd_data [32] = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx     // ram_rd_data
+net:   tb.dut.jtag_tap.ram_ready [1] = 1     // ram_ready
+net:   tb.dut.jtag_tap.status [32] = 10000000000000000000000000000101     // status
+net:   tb.dut.jtag_tap.version [8] = 01010111     // version
+net:   tb.dut.jtag_tap.xir_tck [1] = 0     // xir_tck
+net:   tb.dut.jtag_tap.xdr_tck [1] = 0     // xdr_tck
+net:   tb.dut.jtag_tap.jtdo_in [1] = 0     // jtdo_in
+net:   tb.dut.jtag_tap.do_incr [1] = 0     // do_incr
+reg:   control [32] = 00000000000000000000000000000000 // control
+reg:   incr_addr [3] = 000 // incr_addr
+reg:   ireg [8] = 00000010 // ireg
+reg:   ram_addr [16] = 0000000000000000 // ram_addr
+reg:   ram_read [1] = 0 // ram_read
+reg:   ram_wr_data [32] = 00000000000000000000000000000000 // ram_wr_data
+reg:   ram_write [1] = 0 // ram_write
+reg:   sreg [32] = 00000000000000000000000000000000 // sreg
+reg:   tap [4] = 0000 // tap
+son:   tb.dut.jtag_tap.jtag_neg_module
+module: jtag_neg_module tb.dut.jtag_tap.jtag_neg_module
+net:   tb.dut.jtag_tap.jtag_neg_module.jtck_clock [1] = 0     // jtck_clock
+net:   tb.dut.jtag_tap.jtag_neg_module.por_n [1] = 1     // por_n
+net:   tb.dut.jtag_tap.jtag_neg_module.sr0 [1] = 0     // sr0
+net:   tb.dut.jtag_tap.jtag_neg_module.tap [4] = 0000     // tap
+reg:   tdo [1] = 0 // tdo
+reg:   xdr_tck [1] = 0 // xdr_tck
+reg:   xir_tck [1] = 0 // xir_tck
+module: level_synchronizer tb.dut.level_synchronizer_1
+net:   tb.dut.level_synchronizer_1.clk [1] = 1     // clk
+net:   tb.dut.level_synchronizer_1.din [1] = 0     // din
+net:   tb.dut.level_synchronizer_1.rst_n [1] = 1     // rst_n
+net:   tb.dut.level_synchronizer_1.dout [1] = 0     // dout
+reg:   sreg0 [1] = 0 // sreg0
+reg:   sreg1 [1] = 0 // sreg1
+module: level_synchronizer tb.dut.level_synchronizer_2
+net:   tb.dut.level_synchronizer_2.clk [1] = 1     // clk
+net:   tb.dut.level_synchronizer_2.din [1] = 0     // din
+net:   tb.dut.level_synchronizer_2.rst_n [1] = 1     // rst_n
+net:   tb.dut.level_synchronizer_2.dout [1] = 0     // dout
+reg:   sreg0 [1] = 0 // sreg0
+reg:   sreg1 [1] = 0 // sreg1

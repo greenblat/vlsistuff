@@ -1,0 +1,8 @@
+VCD info: dumpfile dump.vcd opened for output.
+ Running SEQ=                                                                                                                        test0.seq.
+
+=====starting python ======
+IREG 44 12344400
+IREG 45 33556677
+IREG 42 00000000
+finish called from python

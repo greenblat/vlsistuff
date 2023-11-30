@@ -1,0 +1,15 @@
+#! /bin/csh -f
+
+
+
+
+iverilog  -o tb.vvp -g2012  \
+    rtl/tb.v \
+    rtl/jtag2apb.v   \
+    rtl/jtag_tap.v   \
+    rtl/level_synchronizer.v \
+
+
+
+
+

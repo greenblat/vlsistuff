@@ -1,0 +1,18 @@
+sequence: wait 10
+sequence: define READ_ADDR                   0x41
+sequence: define READ_MEM_32B                0x42
+sequence: define READ_MEM_INCR_ADDR          0x43
+sequence: define WRITE_ADDR                  0x44
+sequence: define WRITE_MEM_32B               0x45
+sequence: define WRITE_MEM_32B_INCRADDR      0x46
+sequence: jtag    rate 10
+sequence: jtag   ir 8 WRITE_ADDR
+sequence: jtag   dr 16 0x1234
+sequence: wait 200
+sequence: jtag   ir 8 WRITE_MEM_32B 
+sequence: jtag   dr 32 0x33556677    
+sequence: wait 200
+sequence: jtag   ir 8 READ_MEM_32B 
+sequence: jtag   dr 32 0x0000000     
+sequence: wait 10000
+sequence: finish
