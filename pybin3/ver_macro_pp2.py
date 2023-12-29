@@ -2,7 +2,7 @@
 """
          usage:    ver_macro_pp2.py   <verilog_files>   [-use_defines] [-y libdir] [-odir out_dir] [-d define]
 
-         this program splits verilog file into seperate modules in output directory.
+         this program splits verilog file into separate modules in output directory.
          each file is called <module>.v
 
          if -use_defines is specified, all defines are replaced, and all ifdef/ifndef are also replaced.
@@ -342,7 +342,7 @@ def split_into_files(wholelib,dir):
                 Module = wrds[0]
                 if (Module[-1]==';'):
                     Module = Module[:-1]
-                if len(Module)>120:
+                if len(Module)>256:
                     Modl = 'longmodule%d' % Longs
                     File=open(dir+'/'+Modl+'.v','w')
                     Longs += 1

@@ -92,6 +92,8 @@ def dump_instance(Env,Mod,Simple=False,allPinsLowerCase = False,Color = False,Vo
         Fout.write('integer    panics;   initial panics=0;\n')
         Fout.write('integer    corrects; initial corrects=0;\n')
         Fout.write('integer    seqptr; initial seqptr=0;\n')
+        Fout.write('reg [255:0] markstr;   initial markstr=0;\n')
+        Fout.write('reg [31:0] mark;   initial mark=0;\n')
         Fout.write('reg [31:0] marker;   initial marker=0;\n')
         Fout.write('reg [31:0] marker0;   initial marker0=0;\n')
         Fout.write('reg [31:0] marker1;   initial marker1=0;\n')

@@ -82,7 +82,7 @@ Mstuff :
     ;
 
 // Define : backtick_undef token | backtick_define token Expr | backtick_include Expr | backtick_timescale  number token '/' number token  ;
-Define : define string | define token | define token Expr | define  number token '/' number token  ;
+Define : define | define string | define token | define token Expr | define  number token '/' number token  ;
 Initial : initial Statement ;
 OneDef : token | token '=' Expr ;
 ManyDefs : ManyDefs ',' OneDef | OneDef ;
@@ -96,6 +96,7 @@ Definition :
     | IntDir Width Width ManyDefs ';'
     | IntDir Width Width Width OneDef ';'
     | IntDir Width token Width ';'
+    | IntDir Width token Width Width ';'
     | IntDir Width Width token ';'
     | IntDir Width Width Width token ';'
     | IntDir token Width ';'

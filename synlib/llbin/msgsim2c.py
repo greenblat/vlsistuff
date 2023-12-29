@@ -362,6 +362,8 @@ def dump_latch(self,Pins):
     RegInd = replacePinNum(Reg,Pins)
     RegnInd = pinNum(Regn,Pins)
     NextInd = pinNum(Next,Pins)
+    if Preset and (Preset[0] == '('): Preset = Preset[1:-1]
+    if Clear and (Clear[0] == '('): Clear = Clear[1:-1]
     if Preset and (Preset[0]=='!'):
         PresetInd = Pins.index(Preset[1:])
     elif (Preset):
@@ -627,9 +629,7 @@ def cell_dump_description(self,Fout,pythonConnection):
     if self.latch:
         Fout.write('Desc.set_job("latch")\n')
         Res = ''
-        print('ASSSSS',self.latch[1])
         for A,B  in self.latch[1]:
-            print("AAAAA",A,B)
             Item = ',"%s": "%s"' % (A,B)
             Res += Item
         Fout.write('Desc.function = { "regs":"%s %s" %s }\n' % (self.latch[0][0],self.latch[0][1],Res))

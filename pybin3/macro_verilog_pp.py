@@ -690,6 +690,14 @@ def relaxName(Txt):
         Txt = Txt.replace(Chr,'_')
     return Txt
 
+REMOVES = '''
+`resetall
+`delay_mode_path
+`suppress_faults
+`enable_portfaults
+`timescale 
+'''.split()
+
 def do_the_specify(Lines):
     ind = 0
     state = 'idle'
@@ -697,7 +705,13 @@ def do_the_specify(Lines):
     while ind < len(Lines):
         Line = Lines[ind]
         if state=='idle':
-            if 'specify' in Line:
+            Pop = False
+            for Token in REMOVES: 
+                if Token in Line:
+                    Pop = True
+            if Pop:
+                Lines.pop(ind)
+            elif 'specify' in Line:
                 state = 'work'
                 Lines.pop(ind)
             else:

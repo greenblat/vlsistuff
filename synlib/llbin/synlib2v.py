@@ -313,6 +313,7 @@ class cellClass:
                     Clocked = Var
                     Clocked = funcify(Clocked)
                     Edge = edged(Clocked)
+                    OrigClk = Var
                 if Prm=='next_state':
                     Next = Var
                     Next = funcify(Next)
@@ -335,7 +336,9 @@ class cellClass:
                 Fout.write('always @(%s or %s) if(%s) %s<=1; else %s<=%s;\n'%(Edge,Preset1,Preset,Reg,Reg,Next))
             else:
                 Fout.write('always @(%s or %s or %s) if(%s) %s<=1; else if (%s) %s<=0; else %s <= %s;\n'%(Edge,Clear1,Preset1,Preset,Reg,Clear,Reg,Reg,Next))
-
+            if 'neg' in Edge: ClkDir = 0
+            if 'pos' in Edge: ClkDir = 1
+            Fout.write('flop_monitor fm(.q(%s),.clk(%s),.cdir(%s));\n' % (Reg,OrigClk,ClkDir))
         elif self.latch!=0:
             Reg =self.latch[0][0]
             Regn =self.latch[0][1]
@@ -895,6 +898,8 @@ def work_cell_items(Cell,Items):
     for Item in Items:
         if Item[0]=='cell_items':
             work_cell_items(Cell,DataBase[Item])
+        elif (len(Item) == 4):
+            pass
         else:
             List = DataBase[Item]
             if Item[0] == 'Ff':
@@ -1082,7 +1087,7 @@ def work_on_pin_items(Cell,Pin,Items):
         elif Items[0][0] == 'state_function':
             Val = get_expr(Items[2])
             add_cell_pin_pair(Cell,Pin,'state_function',Val)
-        elif Items[0][0] in ['receiver_capacitance','fall_capacitance','max_transition','related_ground_pin','max_capacitance','power_down_function','related_power_pin','timing','rise_capacitance','min_capacitance','clock_gate_clock_pin','clock_gate_enable_pin','internal_node','clock_gate_out_pin','clock_gate_test_pin']:
+        elif Items[0][0] in ['related_bias_pin','driver_waveform_rise','driver_waveform_fall','receiver_capacitance','fall_capacitance','max_transition','related_ground_pin','max_capacitance','power_down_function','related_power_pin','timing','rise_capacitance','min_capacitance','clock_gate_clock_pin','clock_gate_enable_pin','internal_node','clock_gate_out_pin','clock_gate_test_pin']:
             pass
         elif Items[0][0] == 'nextstate_type':
             pass

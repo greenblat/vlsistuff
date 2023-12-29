@@ -2419,10 +2419,13 @@ def parseBus(Name):
     Name = Name.replace(']','')
     Name = Name.replace(':',' ')
     W3 = Name.split()
-    if len(W3)==5: return [W3[0],eval(W3[1]),eval(W3[2]),eval(W3[3]),eval(W3[4])]
-    if len(W3)==3: return [W3[0],eval(W3[1]),eval(W3[2])]
-    if len(W3)==2: return [W3[0],eval(W3[1]),eval(W3[1])]
-    logs.log_error('PARSE BUS %s' % Name)
+    try:
+        if len(W3)==5: return [W3[0],eval(W3[1]),eval(W3[2]),eval(W3[3]),eval(W3[4])]
+        if len(W3)==3: return [W3[0],eval(W3[1]),eval(W3[2])]
+        if len(W3)==2: return [W3[0],eval(W3[1]),eval(W3[1])]
+        logs.log_error('PARSE BUS %s' % Name)
+    except:
+        logs.log_error('PARSE BUS %s' % Name)
     return Name
 
 def debus(Sig):
@@ -2436,4 +2439,5 @@ def simplestr(Txt):
     X = X.replace(']','_')
     X = X.replace('\\','')
     X = X.replace('~','_')
+    X = X.replace('.','_')
     return X

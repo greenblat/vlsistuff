@@ -6,6 +6,8 @@ import os,sys,string
 from  module_class import module_class
 import logs
 
+ignoreAssigns = True
+
 def main():
     Fname = sys.argv[1]
     File = open(Fname)
@@ -109,6 +111,7 @@ def set_assign1(wrds):
     Db.state='assign1'
 
 def set_right_assign(wrds):
+    if ignoreAssigns: return
     if len(Db.right_assign) == 1:
         Db.right_assign = Db.right_assign[0]
     else:
@@ -424,11 +427,9 @@ def makeItExpression(List):
             OP1 = makeItExpression(List[2])
             AA = (List[1],OP0,OP1)
             List2 = [AA] + List[3:]
-            print("IN",List2)
             OUT =  makeItExpression(List2)
-            print("OUT",OUT)
             return OUT
-    logs.log_error("bad makeItExpression %s" % str(List))
+    logs.log_error("bad makeItExpression %s" % str(List)[:128])
     return List
 
 

@@ -12,12 +12,10 @@ try:
 except:
     libx = False
 
-print("LIBX",libx)
 
 
 def help_main(Env):
     Types = {}
-    print("MODULES ",list(Env.Modules.keys()))
     for Module in Env.Modules:
         Mod = Env.Modules[Module]
         logs.log_info('scan %s' % Module)
@@ -33,7 +31,6 @@ def help_main(Env):
         Fout = open('%s/%s.insts' % (Dir,Module),'w')
         saveInstances(Module,Types,Fout)
         return
-    print("XXXX",Types)
     reportInstances(Types,Lib)
 #    connectivity(Mod)
 
@@ -99,7 +96,6 @@ def reportInstances(Types,Lib):
 
     LL.sort()
     LL.reverse()
-    print("LLLL",LL)
     Tot = 0
     TotArea = 0
     TotGates = 0

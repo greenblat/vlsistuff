@@ -216,11 +216,11 @@ class axiSlaveClass:
                 self.force('rdata','0x'+rdata)
             return
         (rlast,rid,rdata) = self.rqueue.pop(0)
+        logs.log_info("RAXI len=%d rlast=%s rid=%s" % (len(self.rqueue),rlast,rid))
         if rlast=='wait':
             self.waitread=1
             self.idleread()
             return
-
         self.force('rvalid',1)
         self.force('rlast',rlast)
         self.force('rid',rid)
@@ -251,6 +251,7 @@ class axiSlaveClass:
             arsize=self.peek('arsize')
             self.arqueue.append((arburst,araddr,arlen,arsize))
             self.rqueue.append(('wait',self.WAITREAD,0))
+            print("XXXX0 arlen=",arlen,arsize,araddr,arid)
             for ii in range(arlen):
                 self.readQueue(arlen,ii,arburst,arsize,araddr,arid,0)
             self.readQueue(arlen,arlen,arburst,arsize,araddr,arid,1)
@@ -300,12 +301,13 @@ class axiSlaveClass:
                     self.bytex = (self.bytex+1) & 0xff
                 rdata = AA + rdata
                 logs.log_info(
-                'axiSlave taken from ram %d bytes  rdata=%s addr=%08x rid=%x burst=%d' % (takenram, rdata, Addr, rid,burst),verbose=self.verbose)
+                'axiSlave taken from ram %d bytes  rdata=%s addr=%08x rid=%x burst=%d arlen=%d' % (takenram, rdata, Addr, rid,burst,arlen),verbose=self.verbose)
         else:
             rdata = self.read_data_generator()
             rdata = hex(rdata)[2:]
             logs.log_info(f'[{self.Name}]: reading data from read data generator function rdata = 0x{rdata}, ',verbose=self.verbose)
         self.rqueue.append((rlast,rid,rdata))
+        print("XXXX",len(self.rqueue),'arlen=',arlen,'ii=',ii,rlast,rid,rdata)
 
 
 
