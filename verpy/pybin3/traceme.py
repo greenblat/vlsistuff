@@ -10,7 +10,7 @@ HARDS = 'PLLTS16FFCLAINTB TS1N16FFCLLMBLVTC4096X32M8SWB TS1N16FFCLLSBLVTD1024X72
 def help_main(Env):
     Mod = Env.Current
     if not Mod: return
-    if Mod.Module in HARDS:
+    if (Mod.Module in HARDS) or ('-hard' in sys.argv):
         New = createHardWrapped(Mod)
         ending(New,True)
         return
@@ -19,7 +19,8 @@ def help_main(Env):
         New = createReverseWrap(Mod)
         ending(New,True)
         return
-        
+    if '-noname' not in sys.argv:    
+        addNames(Mod)
 
 
     cleanConns(Mod)
@@ -35,7 +36,9 @@ def help_main(Env):
             Wid2 = ('packed',Wid,(31,0))
             Mod.nets[Net] = Dir,Wid2
 
+    SingleOuts = []
     Alwayses = []
+    Initials = []
     ind = 0
     while ind < len(Mod.hard_assigns):
         (Dst,Src,X0,X1) = Mod.hard_assigns[ind];
@@ -63,32 +66,76 @@ def help_main(Env):
         else:
             Mod.hard_assigns.pop(ind)
             Alwayses.append(('*',('=',('subbit',Dst,0),remodelSrc(Src)),'always'))                
-            Dir,Wid = Mod.nets[Dst]
+            if (type(Dst) is tuple)or(type(Dst) is list):
+                Bus = Dst[1]
+                Dir,Wid = Mod.nets[Bus]
+            else:
+                Dir,Wid = Mod.nets[Dst]
+                Bus = Dst
             if Dir == 'output':
-                Mod.nets[Dst] = 'output reg',Wid
+                Mod.nets[Bus] = 'output reg',Wid
             Vars = getVars(Src)
             for Var in Vars: 
                 Alwayses.append( (('subbit',Var,0),('=',('subbus',Dst,31,1),('subbus',Var,31,1)),'always'))                
+            Initials.append(('=',('subbus',Dst,31,1),0))
     Flops = False
     for ind,(When,Body,Kind)  in enumerate(Mod.alwayses):
         When2 = remodelSrc(When)
         Body2 = remodelBody(Body)
         Mod.alwayses[ind] = (When2,Body2,Kind)
         Flops = True
+        print("WHEN",When,Body)
     Mod.alwayses.extend(Alwayses)
-    for Net in SingleOuts:
-        Mod.nets['name_'+Net] = 'wire',(255,0)
-        Mod.hard_assigns.append(('name_'+Net,('subbit','tb.flops',('subbus',Net,31,1)),'',''))
+    Mod.initials.extend(Initials)
+    if '-noname' not in sys.argv:
+        for Net in SingleOuts:
+            Mod.nets['name_'+Net] = 'wire',(255,0)
+            Mod.hard_assigns.append(('name_'+Net,('subbit','tb.flops',('subbus',Net,31,1)),'',''))
 
     ending(Mod,Flops)
 
+NAMES = []
+def addNames(Mod):
+    Names = [] 
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        for Pin in Obj.conns:
+            Sig = Obj.conns[Pin]
+            Sup = module_class.support_set(Sig,False)
+            for Net in Sup:
+                Dir,Wid = Mod.nets[Net]
+                if type(Wid) is tuple:
+                    NN = '%s[0]' % (Net)
+                else:
+                    NN = Net
+                if NN not in Names: Names.append(NN)
+    
+    for Name in Names:
+        if not Name.startswith('\\'):
+            Bus = Name
+            if '[' in Bus: Bus = Bus[:Bus.index('[')]
+            if Bus.startswith('\\'): Bus = Bus[1:]
+            if Name[0] == '\\': Name = Name+' '
+            Str = 'wire [255:0] name_%s  = {tb.flops[%s[31:1]],8\'d61,(8\'d48+%s[0])};\n' % (Bus,Name,Name)
+            NAMES.append(Str)
+
+
 def ending(Mod,Flops):
+    global FLOPNAME
     if Flops:
         Mod.nets['flopname'] = 'reg',(30,0)
     Fout = open('%s/%s.v' % (DIR,Mod.Module),'w')
     Mod.dump_verilog(Fout,{'endmodule':False})
+    for Nstr in NAMES:
+        Fout.write(Nstr)
     if Flops:
+        if QQ!=[]:
+            Str = ''
+            for Q0 in QQ:
+                Str += '    %s[31:1] = flopname;\n' % Q0
+            FLOPNAME = FLOPNAME.replace('end',Str+'\nend\n')
         Fout.write(FLOPNAME)
+        Fout.write('endmodule\n')
     else:
         Fout.write('endmodule\n')
     Fout.close()
@@ -103,9 +150,10 @@ initial begin
     $sformat(Instance,"%m");
     tb.flops[flopname] = Instance;
 end
-endmodule\n
+
 '''
 
+QQ = []
 def remodelBody(Body):
     if Body[0] == 'ifelse':
         Cond = remodelSrc(Body[1])
@@ -116,6 +164,7 @@ def remodelBody(Body):
         Dst = remodelSrc(Body[1])
         Src = remodelSrc(Body[2])
         Body2 = ['list',[Body[0],Dst,Src],['<=',('subbus',Body[1],31,1),'flopname']]
+        if Body[1] not in QQ: QQ.append(Body[1])
         return Body2 
 
     logs.log_error('BODY %s' %str(Body)) 
@@ -140,9 +189,14 @@ def remodelSrc(Src):
     if Src == '*': return '*'
     if  type(Src) is str: return ('subbit',Src,0)
     if type(Src) is int: return Src
+    if (type(Src) is tuple)or(type(Src) is list) and (Src[0] == 'subbit'):
+        return Src
+    if (type(Src) is tuple)or(type(Src) is list) and (Src[0] == 'hex'):
+        return expandHex(Src)
+
     if Src[0] in ['!','~']:
         Sec = remodelSrc(Src[1])
-        return ('!',Sec)
+        return ('~',Sec)
     if Src[0] in ['&&','||','^','|','&']:
         LL = [Src[0]]
         for XL in Src[1:]:
@@ -165,12 +219,32 @@ def remodelSrc(Src):
         Yes = remodelSrc(Src[2])
         No = remodelSrc(Src[3])
         return ['question',Cond,Yes,No]
+    if Src[0] in ['curly']:
+        Res = ['curly']
+        for X in Src[1:]:
+            Y = remodelSrc(X)
+            Res.append(Y)
+        return Res
         
     logs.log_error('REMODEL %s' % str(Src))
     return Src
 
+def expandHex(Sig):
+    Wid = int(Sig[1])
+    Bin = (32*'0') + bin(int(Sig[2],16))[2:]
+    Bin = Bin[-Wid:]
+    Bin  = Bin.replace('1','OOOOOOON')
+    Bin  = Bin.replace('0','OOOOOOOO')
+    Bin  = Bin.replace('O','0')
+    Bin  = Bin.replace('N','1')
+    return ('hex',32*Wid,Bin)
+
+
 def expandSig(Sig,Mod):
     if (type(Sig) is list) or (type(Sig) is tuple):
+        if (Sig[0] == '!'):
+            X = expandSig(Sig[1],Mod)
+            return ('^',X,1)
         if (Sig[0] == 'subbit') and Sig[2] in [0,'0', (0,0)]:
             Dir,Wid = Mod.nets[Sig[1]]
             if Wid in [0,1,(0,0)]:
@@ -189,16 +263,8 @@ def expandSig(Sig,Mod):
                 Bin  = Bin.replace('N','1')
                 return ('hex',32*Wid,Bin)
         elif (Sig[0] == 'hex'):
-            Wid = int(Sig[1])
-            Bin = (32*'0') + bin(int(Sig[2],16))[2:]
-            Bin = Bin[-Wid:]
-            Bin  = Bin.replace('1','OOOOOOON')
-            Bin  = Bin.replace('0','OOOOOOOO')
-            Bin  = Bin.replace('O','0')
-            Bin  = Bin.replace('N','1')
-            return ('hex',32*Wid,Bin)
+            return expandHex(Sig)
         elif (Sig[0] == 'curly'):
-            print("CCCCCC",Sig)
             for ind,X in enumerate(Sig):
                 if (ind==0):
                     pass
@@ -209,7 +275,6 @@ def expandSig(Sig,Mod):
                     if not New:
                         logs.log_error('expandSig failed on "%s" %s ' % (X,Mod))
                     Sig[ind] = New
-            print("CCCCAAAACC",Sig)
             return Sig
         elif (Sig[0] == 'subbit'):
             return Sig

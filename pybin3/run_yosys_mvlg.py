@@ -39,7 +39,7 @@ opt_expr;
 write_verilog -noattr aa1.glv
 check;
 opt -full;
-flatten;
+# flatten;
 opt_clean;
 techmap; opt
 write_verilog -noattr aa2.glv

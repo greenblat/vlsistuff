@@ -186,16 +186,20 @@ class cellClass:
                 Clear = funcify(Clear,ppp)
                 Clear1 = edged(Clear)
                 Fout.write('always @(%s or %s) if (%s) %s<=0; else %s<= %s;\n'%(Edge,Clear1,Clear,Reg,Reg,Next))
+                Fout.write('initial begin #1; if (%s) %s <= 0; end\n' % (Clear,Reg))
             elif (not Clear): 
                 Preset = funcify(Preset,ppp)
                 Preset1 = edged(Preset)
                 Fout.write('always @(%s or %s) if(%s) %s<=1; else %s<=%s;\n'%(Edge,Preset1,Preset,Reg,Reg,Next))
+                Fout.write('initial begin #1; if (%s) %s <= 1; end\n' % (Preset,Reg))
             else:
                 Clear = funcify(Clear,ppp)
                 Preset = funcify(Preset,ppp)
                 Preset1 = edged(Preset)
                 Clear1 = edged(Clear)
                 Fout.write('always @(%s or %s or %s) if(%s) %s<=1; else if (%s) %s<=0; else %s <= %s;\n'%(Edge,Clear1,Preset1,Preset,Reg,Clear,Reg,Reg,Next))
+#                Fout.write('initial begin #1; if (%s) %s <= 0; end\n' % (Clear,Reg))
+#                Fout.write('initial begin #1; if (%s) %s <= 1; end\n' % (Preset,Reg))
 
         elif self.latch!=0:
             Reg =self.latch[0][0]
@@ -332,13 +336,17 @@ class cellClass:
                 Fout.write('always @(%s) %s <= %s;\n'%(Edge,Reg,Next))
             elif (not Preset): 
                 Fout.write('always @(%s or %s) if (%s) %s<=0; else %s<= %s;\n'%(Edge,Clear1,Clear,Reg,Reg,Next))
+#                Fout.write('initial begin #1; if (%s) %s <= 0; end\n' % (Clear,Reg))
             elif (not Clear): 
                 Fout.write('always @(%s or %s) if(%s) %s<=1; else %s<=%s;\n'%(Edge,Preset1,Preset,Reg,Reg,Next))
+#                Fout.write('initial begin #1; if (%s) %s <= 1; end\n' % (Preset,Reg))
             else:
                 Fout.write('always @(%s or %s or %s) if(%s) %s<=1; else if (%s) %s<=0; else %s <= %s;\n'%(Edge,Clear1,Preset1,Preset,Reg,Clear,Reg,Reg,Next))
+#                Fout.write('initial begin #1; if (%s) %s <= 0; end\n' % (Clear,Reg))
+#                Fout.write('initial begin #1; if (%s) %s <= 1; end\n' % (Preset,Reg))
             if 'neg' in Edge: ClkDir = 0
             if 'pos' in Edge: ClkDir = 1
-            Fout.write('flop_monitor fm(.q(%s),.clk(%s),.cdir(%s));\n' % (Reg,OrigClk,ClkDir))
+            Fout.write('flop_monitor fm(.q(%s),.clk(%s),.cdir(1\'b%s));\n' % (Reg,OrigClk,ClkDir))
         elif self.latch!=0:
             Reg =self.latch[0][0]
             Regn =self.latch[0][1]
