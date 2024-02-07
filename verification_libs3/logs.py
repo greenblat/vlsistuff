@@ -134,9 +134,9 @@ def talk(Eng,Hebrew = '',Arabic = ''):
     if Arabic!="":
         os.system("say -v  Majed   %s" % Arabic)
 
-def log_error(Text,Which=0,Tb=True,Pstack=False):
-    log_err(Text,Which,Tb,Pstack)
-def log_err(Text,Which=0,Tb=True,Pstack=False):
+def log_error(Text,Which=0,Tb=True,Pstack=False,verbose=False):
+    log_err(Text,Which,Tb,Pstack,verbose)
+def log_err(Text,Which=0,Tb=True,Pstack=False,verbose=False):
     global Errors,printed_already
     openFlog(Which)
 #    if (not Flogs[Which]):

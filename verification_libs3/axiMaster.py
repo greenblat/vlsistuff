@@ -36,9 +36,10 @@ class axiMasterClass:
         self.awQueue=[]
         self.wQueue=[]
         self.Rid = 1
+        self.IncrRid = 0
         self.waiting=0
         self.datawidth = 0
-        self.AREADS=[]
+        self.AREADS={}
         self.RDATAS={}
         self.rreadyCount = 0
         self.rreadyOnes = 3
@@ -107,7 +108,12 @@ class axiMasterClass:
     def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         logs.log_info('%s ACTION %s' % (self.Name,Txt))
-        if wrds[0] == 'starvation':
+        if wrds[0] == 'force':
+            Net = Orig[1]
+            Value = wrds[2]
+            print("XXXXXXX",wrds)
+            self.force(Net,Value)
+        elif wrds[0] == 'starvation':
             if wrds[1] in [1,'1','on']:
                 self.Starvation = True
                 veri.force('tb.marker0','5')
@@ -192,7 +198,7 @@ class axiMasterClass:
         if self.awQueue!=[]: return True
         if self.wQueue!=[]: return True
         if self.Bscore!=[]: return True
-        if self.AREADS!=[]: return True
+        if len(self.AREADS)==0: return True
         return False
 
     def makeRead(self,Burst,Len,Address,Size=4,Rid='none'):
@@ -209,19 +215,21 @@ class axiMasterClass:
             for i in range(num_full_writes):
                 Len = 256
                 self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
-                self.AREADS.append((Len,Address,self.Rid,0))
+                if Rid not in self.AREADS: self.AREADS[Rid] = []
+                self.AREADS[Rid].append((Len,Address,Len))
                 self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
                 Mask = (1<<len(self.peekbin('arid')))-1
-                self.Rid = Mask & (1+self.Rid)
+                self.Rid = Mask & (self.IncrRid+self.Rid)
                 Address = Address + int(256 * (1<<Size))
 
         if last_write_length > 0:
             Len = last_write_length
             self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
-            self.AREADS.append((Len,Address,self.Rid,0))
+            if self.Rid not in self.AREADS: self.AREADS[self.Rid] = []
+            self.AREADS[self.Rid].append((Len,Address,Len))
             self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
             Mask = (1<<len(self.peekbin('arid')))-1
-            self.Rid = Mask & (1+self.Rid)
+            self.Rid = Mask & (self.IncrRid+self.Rid)
 
 
 #        traceback.print_stack()
@@ -375,27 +383,32 @@ class axiMasterClass:
             self.manageRready(0)
 
     def readAction(self,rid,rlast,rdatax,widrid,rresp):
-        if self.AREADS == []:
+        if len(self.AREADS) == 0:
             logs.log_error('READ ACTION %s and no AREADS' % (self.Name))
             return
+        if rid not in self.AREADS: 
+            logs.log_error('READ ACTION %s rid=%d and no AREADS' % (self.Name,rid))
+            return
 
-        Len,Addr,Rid,Pos = self.AREADS[0]
-        self.log_info_print('axi Master %s READ len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Len,Addr,Addr+8*Pos,Rid,rid,rlast,rdatax,rresp,self.AREADS))
-        self.AREADS[0] = (Len,Addr,Rid,Pos+1)
+        Len,Addr,Pos = self.AREADS[rid][0]
+        self.log_info_print('axi Master %s READ pos=%d len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Pos,Len,Addr,Addr+8*(Len-Pos),rid,rid,rlast,rdatax,rresp,len(self.AREADS)))
+        if Pos == 1:
+            if rlast != 1:
+                logs.log_error('RLAST not present axi Master %s READ len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Len,Addr,Addr+8*(Len-Pos),rid,rid,rlast,rdatax,rresp,len(self.AREADS)))
+            self.AREADS[rid].pop(0)
+        else:
+            if rlast == 1:
+                logs.log_error('RLAST too early axi Master %s READ len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Len,Addr,Addr+8*(Len-Pos),rid,rid,rlast,rdatax,rresp,len(self.AREADS)))
+            self.AREADS[rid][0] = (Len,Addr,Pos-1)
 
-        if (Rid & ((1<<widrid)-1)) != rid:
-            logs.log_wrong('sent ARID=%d RID=%d'%(Rid,rid))
         if rresp!=0:
-            logs.log_wrong('RRESP came back %s  ADDR=%x  rid=0x%x  name=%s'%(rresp,Addr,Rid,self.Name))
+            logs.log_wrong('RRESP came back %s  ADDR=%x  rid=0x%x  name=%s'%(rresp,Addr,rid,self.Name))
         
         ADDR = Addr + Pos * (1<<self.Size)
         if ADDR not in self.RDATAS: self.RDATAS[ADDR] = []
         self.RDATAS[ADDR].append(rdatax)
         if self.callback:
             self.callback(ADDR,rdatax)
-        if rlast == 1:
-            self.AREADS.pop(0)
-#        self.log_info_print('ADDRDATAS %s len=%d  %s' % (hex(Addr), len(self.RDATAS[Addr]),list(map(hex,self.RDATAS.keys()))))
 
     def runQueue(self):
 #        print('\n\n\n\ 0 RUNQ',self.Queue)

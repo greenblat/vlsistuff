@@ -47,9 +47,11 @@ def prepare_tb(Mod):
         os.system('/bin/mv %s.inst.py verilog.py'%Name)
         
     Fcomp = open('comp','w')
-    Fcomp.write(' #! /bin/csh -f\n')
-    Fcomp.write(' \n\n')
-    Fcomp.write('iverilog  -Wtimescale  -o tb.vvp -g2012 -I ../rtl tb.v \\\n')
+    Fcomp.write('#! /bin/csh -f\n')
+    Fcomp.write('/bin/rm tb.vvp\n\n')
+    Fcomp.write('iverilog  -Wtimescale  -o tb.vvp -g2012 \\\n')
+    Fcomp.write('    -I ../rtl tb.v \\\n')
+    Fcomp.write('    tb.v \\\n')
     Fcomp.write('    ../rtl/%s.v  \\\n\n\n\n'%Name)
     Fcomp.close()
     os.system('chmod +x comp')
@@ -367,8 +369,12 @@ Monitors=[]
 cycles=0
 GIVEUP_TIMEOUT = 1000    # how many cycles to run before retirment. 
 
+import axiSlave
+axis = axiSlave.axiSlaveClass('tb',Monitors)
+import axiMaster
+axi = axiMaster.axiMasterClass('tb',Monitors)
 import sequenceClass
-seq = sequenceClass.sequenceClass('tb',Monitors,'',[])
+seq = sequenceClass.sequenceClass('tb',Monitors,'',[]) # ('axis',axis),('axim',axim)
 
 
 def pymonname(Name):

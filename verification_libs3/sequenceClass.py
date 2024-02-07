@@ -622,7 +622,11 @@ class sequenceClass:
 
         elif (wrds[0] == 'seq'):  # commands to myself
             if wrds[1] == 'listing':
-                veri.listing('tb','100','deep.list')
+                if len(wrds)>2:
+                    Fname = wrds[2]
+                else:
+                    Fname = 'deep.list'
+                veri.listing('tb','100',Fname)
             elif wrds[1] == 'import':
                 Module = wrds[2]
                 if Module.endswith('.py'):
@@ -802,7 +806,7 @@ def makeExpr(Txt):
 def acceptablePath(Word):
     if Word[0] not in string.ascii_letters: return False
     for X in Word[1:]:
-        if X not in ('_'+string.digits + string.ascii_letters): return False
+        if X not in ('._'+string.digits + string.ascii_letters): return False
     return True
 
 HEB0 = "טסט נגמר ללא שגיאות, אבל עם אפס מדויקים "

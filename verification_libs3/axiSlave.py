@@ -143,17 +143,24 @@ class axiSlaveClass:
             for Wrd in Wrds[2:]:
                 Addr = self.addWord(Addr,eval(Wrd))
         elif Wrds[0] == 'waitread':
-            self.WAITREAD = int(Wrds[1])
+            self.WAITREAD = eval(Wrds[1])
         elif Wrds[0] == 'waitwrite':
-            self.WAITWRITE = int(Wrds[1])
+            self.WAITWRITE = eval(Wrds[1])
         elif Wrds[0] == 'buswidth':
-            self.busWidth = int(Wrds[1])
+            self.busWidth = eval(Wrds[1])
         elif Wrds[0] == 'flood':
             Addr0 = eval(Wrds[1])
             Addr1 = eval(Wrds[2])
             Val   = eval(Wrds[3])
             for Add in range(Addr0,Addr1,4):
                 self.addWord(Add,Val)
+        elif Wrds[0] == 'fill_by_addr':
+            logs.log_info('XXXXXXXXXXXXXXXXXXXXXX %s' % str(Wrds))
+            Addr0 = eval(Wrds[1])
+            Addr1 = eval(Wrds[2])
+            for Addr in range(Addr0,Addr1,self.busWidth):
+                self.addWord(Addr,Addr)
+                logs.log_info("ADD %x %x" % (Addr,Addr))
         else:
             logs.log_error('action of axiSlave "%s" failed on "%s"  %s' % (self.Name,Text,Wrds[0]))
 

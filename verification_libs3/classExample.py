@@ -7,7 +7,7 @@ import veri
 class vdriverClass(logs.driverClass):
     def __init__(self,Path,Monitors):
         logs.driverClass.__init__(self,Path,Monitors)
-        if Monitors: Monitors.append(self)
+#        if Monitors: Monitors.append(self)
         self.Queue = []
         self.Width = {}
 

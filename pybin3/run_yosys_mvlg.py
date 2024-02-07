@@ -39,7 +39,7 @@ opt_expr;
 write_verilog -noattr aa1.glv
 check;
 opt -full;
-# flatten;
+flatten;
 opt_clean;
 techmap; opt
 write_verilog -noattr aa2.glv
@@ -52,11 +52,11 @@ opt_expr -full;
 clean
 write_verilog -noattr  TOP.glv
 
-# flatten;
-# opt_merge;
-# opt_expr -full;
-# clean
-# write_verilog -noattr  TOP.flatglv
+flatten;
+opt_merge;
+opt_expr -full;
+clean
+write_verilog -noattr  TOP.flatglv
 
 
 '''
