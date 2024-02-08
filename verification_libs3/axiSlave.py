@@ -90,6 +90,8 @@ class axiSlaveClass:
         Wrds = Text.split()
         if Wrds == []:
             pass
+        elif Wrds[0] == 'test':
+            logs.log_info("TEST XXXXX %s" % Wrds)
         elif Wrds[0] == 'verbose':
             if Wrds[1] in ['yes','1','on']:
                 self.verbose = True

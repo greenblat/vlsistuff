@@ -314,6 +314,7 @@ class sequenceClass:
     def evalh(self,Txt,Bad=False):
         X = self.eval(Txt,Bad)
         if type(X) is int: return hex(X)
+        if type(X) is float: return str(X)
         return X
 
     def eval(self,Txt,Bad=False):
