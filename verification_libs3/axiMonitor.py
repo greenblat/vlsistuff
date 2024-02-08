@@ -27,6 +27,7 @@ class axiMonitorClass:
         self.verbose = True
         self.checkRam = False
         self.verify_read_mem = True
+        self.optionForDma = False
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig,self.Logs)
@@ -35,6 +36,8 @@ class axiMonitorClass:
         wrds = Txt.split()
         if wrds==[]:
             pass
+        elif wrds[0]== 'optionForDma':
+            self.optionForDma = True
         elif wrds[0]== 'verbose':
             self.verbose = eval(wrds[1])
         elif wrds[0]== 'checkRam':
@@ -91,7 +94,8 @@ class axiMonitorClass:
                 (Addr,Len,Size,Burst,Id) = (0,0,0,0,5)
             self.store(self.RAM, self.WADDR,Data,Wstrb)
             self.log_info_msg('AXIMON %s WRITE ad=0x%x wlen=%d data=0x%x (%d) wstrb=%x' % (self.Name,self.WADDR,self.WLEN,Data,Data,Wstrb),Which=self.Logs)
-            logs.log_ensure(((self.WADDR & 0xffff) == Data),"CHECK addr=%x data=%x" % (self.WADDR,Data))
+            if self.optionForDma:
+                logs.log_ensure(((self.WADDR & 0xffff) == Data),"AXIMON CHECK addr=%x data=%x" % (self.WADDR,Data))
             if Burst == 1:
                 self.WADDR += self.dataWidth
             self.WLEN -= 1
