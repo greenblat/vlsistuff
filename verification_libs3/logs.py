@@ -63,6 +63,11 @@ finishCycles = 0
 
 noCycles=False
 Cycles=0
+def set_cycles(Now):
+    global Cycles
+    Cycles = Now
+    return veri
+
 def get_cycles():
     global noCycles,Cycles
     if Cycles>0:

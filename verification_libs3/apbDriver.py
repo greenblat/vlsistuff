@@ -128,6 +128,8 @@ class apbDriver:
             Deg = wrds[1]
             if self.Caller:
                 self.Caller.Translates[Deg]=Act
+        elif wrds[0]=='translate':
+            self.translations[Orig[1]] = Orig[2]
 
         elif wrds[0]=='wait':
             self.wait(wrds[1])

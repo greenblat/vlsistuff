@@ -451,6 +451,9 @@ def strname():
     return N
 FUNCTIONS = '''
 
+def bits(Prm): 
+    return len(bin(Prm))-2
+
 def apb_slave(AWID,DWID):
     print(\'\'\'
   ,input [15:0] paddr

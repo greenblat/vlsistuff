@@ -289,7 +289,10 @@ class sequenceClass:
 
 
     def force(self,Sig,Val):
-        veri.force('%s.%s'%(self.Path,Sig),str(Val))
+        if self.Path == '':
+            veri.force('%s'%(Sig),str(Val))
+        else:
+            veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
     def exists(self,Sig):
         if Sig.startswith(self.Path+'.'):
@@ -465,6 +468,11 @@ class sequenceClass:
             return 
 
         if wrds[0] == 'finish':
+            Line = Line.replace('finish','finish_verilator')
+            self.seq_line(Line,lnum)
+            sys.exit()
+
+        if wrds[0] == 'finish_verilator':
             logs.log_info('finishing on sequence')
             self.agentsFinish()
             logs.talk("",'שלום איליה שים לב' )
@@ -482,7 +490,6 @@ class sequenceClass:
 #            os.system('say -v Majed انتهت المحاكاة' )
             logs.talk('Simulation finished on sequence! we have %s corrects, %s wrongs and %s errors' % (logs.Corrects,logs.Wrongs,logs.Errors))
             logs.finish('sequence %s seed=%d '%(self.testFileName,self.Seed))
-            sys.exit()
         if (wrds[0] == 'marker'):
             veri.force('%s.marker'%TB,wrds[1])
             return True

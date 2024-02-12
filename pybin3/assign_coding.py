@@ -452,6 +452,7 @@ def deal_one_inst(List):
     txtline = ' '.join(List)+' ;'
     x = deal_opcode_width(List)
     if (x):
+        print("WTF",x,List)
         return
     Inst = get_field(List,'instruction','error')
     coding = get_field(List,'coding','error')
@@ -540,6 +541,7 @@ def read_inst_file(File):
         OneDef = wrds[0:X]
         wrds = wrds[X+1:]
         LLL = LLL + [OneDef]
+    print("LLL",LLL)
     return LLL
 
 def gatherQuotes(wrds):
