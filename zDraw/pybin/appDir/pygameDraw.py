@@ -642,6 +642,13 @@ def __use_command_wrds(wrds):
             Glbs.graphicsChanged=True
         else:
             logs.log_error('"%s" is not loaded. use new to open new drawing'%wrds[1])
+    elif wrds[0]=='reload':
+        if (Root!='opening'):
+             Glbs.details.pop(Root)
+             Glbs.set_context('root','opening') 
+             Glbs.graphicsChanged=True
+             load_schematics(Root)
+
     elif wrds[0]=='delete':
         if (Root!='opening'):
              Glbs.details.pop(Root)

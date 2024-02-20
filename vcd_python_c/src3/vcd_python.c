@@ -229,7 +229,7 @@ FILE *Frecords;
 FILE *vcdF0 = NULL;
 FILE *vcdF1 = NULL;
 int vcdCode = 1;
-int intcode();
+int intcode(char *c);
 int diffs (char *A, char *B);
 void do_help() { 
     printf("activation:  vcd_python <vcd_file> <python file> \nPROTOTYPE of python file:\n %s\n",helpstring); 
@@ -241,21 +241,22 @@ void do_dumpvars(char *s) { return; }
 
 char *int2bin(int AA,int Wid,char *tmp);
 void useTriggers();
-void armTriggers();
+void armTriggers(int P,char *Val);
 void conclusions();
-void record();
-void shouldbe();
-void readfile();
-void pushtok();
+void record(long code,long bus,int width, long Kind);
+void shouldbe(char *st,long n);
+void readfile(char *fname);
+void pushtok(char *s,int ind);
+
 void popscope();
-void pushscope();
-void do_value();
-void do_scope();
-void do_var();
-void do_upscope();
-void do_enddefinitions();
+void pushscope(long n);
+void do_value(char *strx,int forReal);
+void do_scope(long n);
+void do_var(long n);
+void do_upscope(long n);
+void do_enddefinitions( char *s);
 void start_python();
-void drive_value();
+void drive_value(char *Val,char *Code,int forReal);
 
 double start_time=0.0;
 double end_time=0.0;
@@ -290,6 +291,8 @@ typedef struct SIG {
     char value[9];
     char traceable;
     int toggles;
+    int toggles2;
+    int changed;
     long wasZ;
 } change_sig;
 
@@ -345,11 +348,7 @@ int psensitive=0;
 
 char option[200],fname1[1000],fname2[1000];
 int toggles = 0;
-int main(argc, argv)
-    int             argc;
-    char           *argv[];
-
-{
+int main( int argc, char *argv[]) {
     int argvx;
 //    char            line[5000];
 //    char             longline[5000];
@@ -362,7 +361,7 @@ int main(argc, argv)
     fname1[0]=0;
     fname2[0]=0;
 /* update hash table maxsize, if wanted */
-    for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].allocated=0; sigs[i].traceable=0; sigs[i].toggles=0; sigs[i].wasZ = 0;} 
+    for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].changed=0;sigs[i].allocated=0; sigs[i].traceable=0; sigs[i].toggles=0; sigs[i].toggles2=0; sigs[i].wasZ = 0;} 
     for (i=0;i<SENSITIVES;i++) armed[i]=0;
     for (i=0;i<SENSITIVES;i++)  sensitive_offset[i]= -1;
     if (argc <= 1) do_help();
@@ -416,17 +415,21 @@ void conclusions() {
 
 void simpleToggles() {
     int tot = 0;
+    int tot2 = 0;
     int ii;
     FILE *flog;
     flog = fopen("toggles.rpt","w");
+    fprintf(flog,"bus toggles, bit toggles, net\n");
+    printf("bus toggles, bit toggles, net\n");
     for (ii=0; ii<=maxusedsig; ii++) {
         if (sigs[ii].toggles>0) {
             printf("%d %s\n",sigs[ii].toggles,qqia(sigs[ii].fpath));
-            fprintf(flog,"%d %s\n",sigs[ii].toggles,qqia(sigs[ii].fpath));
+            fprintf(flog,"%d %d %s\n",sigs[ii].toggles2,sigs[ii].toggles,qqia(sigs[ii].fpath));
             tot += sigs[ii].toggles;
+            tot2 += sigs[ii].toggles2;
         }
     }
-    printf("total %d toggles\n",tot);
+    printf("total %d bit toggles and %d bus toggles2\n",tot,tot2);
     for (ii=0; ii<=maxusedsig; ii++) {
         if (sigs[ii].wasZ>0) {
             printf("%s  was Z\n",qqia(sigs[ii].fpath));
@@ -444,7 +447,7 @@ char s5[longestVal];
 char s6[longestVal];
 char s7[longestVal];
 
-void readfile(fname) char *fname; {
+void readfile(char *fname) {
     char *j;
     char line[longestVal];
     int i;
@@ -696,9 +699,7 @@ void pushscope(long n) {
 void popscope() {
     pscope--;
 }
-long getscope(temp)
-char *temp;
-{
+long getscope(char *temp) {
     int i;
     temp[0]=0;
     for (i=0;i<pscope;i++) {
@@ -819,6 +820,10 @@ void drive_value(char *Val,char *Code,int forReal) {
             fprintf(vcdF1,"%s%s\n",Val,Code);
     }
     sigs[P].toggles += Diffs;
+    if (Diffs!=0) { 
+        sigs[P].toggles2 ++;
+        sigs[P].changed = 1;
+    }
     if (forReal) {
         armTriggers(P,Val);
         useTriggers();
@@ -1144,25 +1149,40 @@ veri_toggles(PyObject *self,PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &notestring))
         return NULL;
     int ii,jj=0;
-    char LongString[longestVal];
     char tmp[1000];
-    sprintf(LongString,"%s = []",notestring);
-    PyRun_SimpleString(LongString);
+    sprintf(tmp,"%s = []",notestring);
+    PyRun_SimpleString(tmp);
     int tot = 0;
     for (ii=0; ii<=maxusedsig; ii++) {
         if (sigs[ii].toggles>0) {
-//            printf("%s (%d) code%d = %8d    %s\n",notestring,jj,ii,sigs[ii].toggles,qqia(sigs[ii].fpath));
-            sprintf(tmp,"%s.append((%d,'%s'))",notestring,sigs[ii].toggles,qqia(sigs[ii].fpath));
+//             sprintf(tmp,"%s.append((%d,'%s'))",notestring,sigs[ii].toggles,qqia(sigs[ii].fpath));
+            sprintf(tmp,"addit((%d,%d,'%s'))",sigs[ii].toggles,sigs[ii].toggles2,qqia(sigs[ii].fpath));
             PyRun_SimpleString(tmp);
-//            if (strlen(LongString)<(longestVal-1000))
-//                strcat(LongString,tmp);
+//            printf("TMP %s\n",tmp);
             tot += sigs[ii].toggles;
             sigs[ii].toggles = 0;
-        } else {
-            if (sigs[ii].value[0]!=0)
-                printf("0x%x %s\n",sigs[ii].value[0],qqia(sigs[ii].fpath));
-//            sprintf(tmp,"%s.append((0x%x,'%s'))",notestring,sigs[ii].value[0],qqia(sigs[ii].fpath));
-//            PyRun_SimpleString(tmp);
+        }
+    }
+    return Py_BuildValue("i", tot);
+}
+
+
+static PyObject*
+veri_changed(PyObject *self,PyObject *args) {
+    char *notestring;
+    if (!PyArg_ParseTuple(args, "s", &notestring))
+        return NULL;
+    int ii,jj=0;
+    char tmp[1000];
+    sprintf(tmp,"%s = []",notestring);
+    PyRun_SimpleString(tmp);
+    int tot = 0;
+    for (ii=0; ii<=maxusedsig; ii++) {
+        if (sigs[ii].changed) {
+            sprintf(tmp,"%s.append(('%s'))",notestring,qqia(sigs[ii].fpath));
+            PyRun_SimpleString(tmp);
+            sigs[ii].changed = 0;
+            tot ++;
         }
     }
     return Py_BuildValue("i", tot);
@@ -1181,6 +1201,7 @@ static PyMethodDef VeriMethods[] = {
     {"sensitive", veri_sensitive, METH_VARARGS,"add to watch list"},
     {"finish", veri_finish, METH_VARARGS, "Return the number of arguments received by the process."},
     {"toggles", veri_toggles, METH_VARARGS, "Return the number of arguments received by the process."},
+    {"changed", veri_changed, METH_VARARGS, "Return the number of arguments received by the process."},
     {NULL, NULL, 0, NULL}
 };
 

@@ -248,8 +248,8 @@ void armTriggers();
 void conclusions();
 void record();
 void shouldbe();
-void readfile();
-void pushtok();
+void readfile(char *fname);
+void pushtok(char *s,int ind);
 void popscope();
 void pushscope();
 void do_value();
@@ -426,7 +426,7 @@ char s5[longestVal];
 char s6[longestVal];
 char s7[longestVal];
 
-void readfile(fname) char *fname; {
+void readfile(char *fname) {
     char *j;
     char line[longestVal];
     int i;

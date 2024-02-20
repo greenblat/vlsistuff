@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-long unsigned qqai();
+long unsigned qqai(char *a);
 
 int p1_a_alloc_at_once = 16384;
 unsigned long minimal_valid=0;
@@ -18,9 +18,8 @@ long  value;
 
 } Anode;
 
-Anode *alpha_add();
-Anode * alpha_add_ver2();
-Anode * allocate_rest_alpha();
+Anode *alpha_add(Anode *arun, char *str);
+Anode * allocate_rest_alpha(Anode *arun, char *str);
 
 Anode *afree=0;
 
@@ -37,15 +36,14 @@ void debug_call(int d) {
     x = d/x;
 }
 
-void check_me(x) int x; {
+void check_me(int x) {
     int i;
     for (i=0;i<256;i++) {
         if (first_access[i]!=check_access[i])
             printf("++++++++ %d %d\n",i,x);
     }
 }
-void p1_clear_anode(anode) Anode *anode;
-{
+void p1_clear_anode(Anode *anode) {
     (*anode).lc =0;
     (*anode).downp =0;
     (*anode).nextp =0;
@@ -100,8 +98,7 @@ void alpha_init()
 }
 
 
-long unsigned qqai(str) char *str;
-{
+long unsigned qqai(char *str) {
     Anode *arun;
     long unsigned j;
     if (str[0]==0) return 0l;
@@ -110,21 +107,17 @@ long unsigned qqai(str) char *str;
 /*    check_me(1); */
     real_ugly_way_to_keep_track_of_new_strings=0;
      j =  (long unsigned) alpha_add(arun,&(str[1])); 
-/*     j =  (int) alpha_add_ver2(arun,&(str[1])); */
-//    printf("qqai %s %lx\n",str,j);
     return j;
 }
     
 
 
-void cucu(ind) int ind;
-{
+void cucu(int ind) {
         printf("ilia error!! %d got qqia empty\n",ind);
 }
 
 
-char *alpha_ia1(ind,str) long unsigned ind; char *str;
-{
+char *alpha_ia1(long unsigned ind, char *str) {
     int a,b,i=0;
     Anode *run;
     char tmp;
@@ -194,68 +187,9 @@ char *qqia(long unsigned ind)
 
 
 
-Anode *alpha_add_ver2(arun,str) Anode *arun; char *str;
-{
-    Anode * last;
-    Anode *hrun;
-    Anode *anode,*newdown,*down,*next,*prevnext;
-    int i;
-    if (str[0]==0) return (Anode *) arun;
-
-    hrun=arun;
-    for (i=0;str[i];i++) {
-        down = (Anode*)(*hrun).downp;
-        if (!down) {
-            last = allocate_rest_alpha(hrun,&(str[i]));
-            real_ugly_way_to_keep_track_of_new_strings=1;
-            return last;
-        } else {
-            if (str[i]<(*down).lc) {
-                last = allocate_rest_alpha(hrun,&(str[i]));
-                newdown = (Anode*)(*hrun).downp; 
-                (*newdown).nextp = (Anode *)down;
-                real_ugly_way_to_keep_track_of_new_strings=1;
-                return last;
-                
-            } else if (str[i]==(*down).lc) {
-                hrun=down;
-            } else {
-                prevnext = down;
-                next = (Anode*)(*down).nextp;
-                while (next && ( (*next).lc < str[i]))  {
-                    prevnext = next;
-                    next = (Anode*)(*next).nextp;
-                }
-                if (!next) {
-                    anode = a1_get_node();
-                    (*anode).lc=str[i];
-                    last = allocate_rest_alpha(anode,&(str[i+1]));
-                    (*prevnext).nextp = (Anode *) anode;
-                    (*anode).fatherp = (Anode *) hrun;
-                    real_ugly_way_to_keep_track_of_new_strings=1;
-                    return last;
-                } else if ((*next).lc == str[i]){
-                    hrun = next;
-                } else {
-                    anode = a1_get_node();
-                    (*anode).lc=str[i];
-                    last = allocate_rest_alpha(anode,&(str[i]));
-    
-                    (*anode).nextp=(Anode *) next;
-                    (*anode).fatherp = (Anode *) hrun;
-                    (*prevnext).nextp = (Anode *) anode;
-                    real_ugly_way_to_keep_track_of_new_strings=1;
-                    return last;                
-                }
-            }
-        }
-    }
-    return (Anode *)hrun;
-}
     
     
-Anode * alpha_add(arun,str) Anode *arun; char *str;
-{
+Anode * alpha_add(Anode *arun, char *str) {
     Anode * last;
     Anode *anode,*newdown,*down,*next,*prevnext;
     if (str[0]==0) return (Anode *) arun;
@@ -306,8 +240,7 @@ Anode * alpha_add(arun,str) Anode *arun; char *str;
     }
 }
 
-Anode * allocate_rest_alpha(arun,str) Anode *arun; char *str;
-{
+Anode * allocate_rest_alpha(Anode *arun, char *str) {
     Anode *anode;
     if (str[0]==0) return (Anode *)arun;
     anode = a1_get_node();
@@ -320,16 +253,14 @@ Anode * allocate_rest_alpha(arun,str) Anode *arun; char *str;
 
 
 
-void qqsa(ind,val) long unsigned ind; long val;
-{
+void qqsa(long unsigned ind,long val) {
     Anode *x;
     x = (Anode *)ind;
 
     (*x).value = val;
 }
 
-long qqas(ind) long unsigned ind;
-{
+long qqas(long unsigned ind) {
     Anode *x;
     x = (Anode *)ind;
 
@@ -340,7 +271,7 @@ long qqas(ind) long unsigned ind;
 
 
 
-
+/***********
 int Index_ilia(s, t)
     char            *s, *t;
 {
@@ -352,7 +283,7 @@ int Index_ilia(s, t)
     }
     return (-1);
 }
-
+*******/
 
 
 

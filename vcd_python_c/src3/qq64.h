@@ -1,12 +1,12 @@
 
 void alpha_init();
-void qqsa();
-long qqas();
-long qqai(); 
-long alpha_add();
-long alpha_add_ver2();
+long qqai(char *); 
+
+// Anode *alpha_add_ver2(Anode *arun, char *str);
 long allocate_rest_alpha();
-char * qqia();
+char * qqia(long a);
+void qqsa(long unsigned ind,long val);
+long qqas(long unsigned ind);
 
 
 

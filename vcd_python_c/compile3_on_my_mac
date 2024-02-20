@@ -3,12 +3,23 @@
 set VERSION = 10
 # this is how i compile on my macbook Pro. for Python3
 
+set PYC = 3.10
+set TAT = 9
+
+set LIB = /opt/homebrew//Cellar/python@$PYC/$PYC.$TAT/Frameworks/Python.framework/Versions/$PYC/lib
+set INC = /opt/homebrew//Cellar/python@$PYC/$PYC.$TAT/Frameworks/Python.framework/Versions/$PYC/include/python$PYC/
+
+set LIB = /opt/homebrew/Cellar/python@3.10/3.10.13/Frameworks/Python.framework/Versions/3.10/lib
+set INC = /opt/homebrew/Cellar/python@3.10/3.10.13/Frameworks/Python.framework/Versions/3.10/include/python3.10
+
+
 gcc -g src3/vcd_python.c  src3/qq64.c  -o vcd_python3 \
-  -I/Library/Frameworks/Python.framework/Versions/3.$VERSION/include/python3.$VERSION/ \
-  -lpython3.$VERSION -L/Library/Frameworks/Python.framework/Versions/3.$VERSION/lib \
+  -I$INC/ \
+  -lpython3.$VERSION -L$LIB \
+
 
 gcc -g src3/vcd_python.c  src3/qq64.c  -o ~/bin/vcd_python3 \
-  -I/Library/Frameworks/Python.framework/Versions/3.$VERSION/include/python3.$VERSION/ \
-  -lpython3.$VERSION -L/Library/Frameworks/Python.framework/Versions/3.$VERSION/lib \
+  -I$INC \
+  -lpython3.$VERSION -L$LIB \
 
 

@@ -45,7 +45,10 @@ def run(Fname,Dirx='.',Base=0):
     Db['BASE'] = Base
     File = open(Dirx + '/' +Fname)
     readFile(File)
-    
+    missParam(Db['chip'].Params,'width',32)
+    missParam(Db['chip'].Params,'addrwid',32)
+    missParam(Db['chip'].Params,'reset','async')
+    missParam(Db['chip'].Params,'empty',0xdeadbeef)
     computeWidthFromFields()
     treatFields()
     assignAddresses()
@@ -1393,6 +1396,9 @@ def apbHead():
 def missParam(Dir,Param,Default):
     if Param in Dir: return
     Dir[Param]=Default
+    if (type(Default) is int) and (Default > 1000):
+        Default = hex(Default)
+    logs.log_info('missingParam added %s = %s' % (Param,Default))
 
 
 def helper0(Finst):

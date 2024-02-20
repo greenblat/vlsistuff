@@ -34,6 +34,7 @@ def help_main(Env):
     Fout.write('}\n')
     Fout.close()
     os.system('dot -Tsvg %s.dot -o %s.svg' % (Env.Current.Module,Env.Current.Module))
+    os.system('dot -Tpng %s.dot -o %s.png' % (Env.Current.Module,Env.Current.Module))
     secondRun(Env,Env.Current)
     thirdRun(Env,Env.Current)
 
@@ -57,6 +58,7 @@ def scan_deep2(Env,Mod,Deep,Dones,Fout,Stops,Splits):
             Fout.write('%s  -> %s_%d [label="%s"] ; \n'%(Mod.Module,Type,Let,Inventory[Type]))
         else:
             Fout.write('%s  -> %s [label="%s"] ; \n'%(Mod.Module,Type,Inventory[Type]))
+        print("INV %s %s  %s" % (Mod.Module,Type,Inventory[Type]))
     Dones.append(Mod.Module)
     for Type in LL:
         if Type not in Stops:

@@ -369,10 +369,10 @@ Monitors=[]
 cycles=0
 GIVEUP_TIMEOUT = 1000    # how many cycles to run before retirment. 
 
-import axiSlave
-axis = axiSlave.axiSlaveClass('tb',Monitors)
-import axiMaster
-axi = axiMaster.axiMasterClass('tb',Monitors)
+#import axiSlave
+#axis = axiSlave.axiSlaveClass('tb',Monitors)
+#import axiMaster
+#axi = axiMaster.axiMasterClass('tb',Monitors)
 import sequenceClass
 seq = sequenceClass.sequenceClass('tb',Monitors,'',[]) # ('axis',axis),('axim',axim)
 
