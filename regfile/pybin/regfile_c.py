@@ -15,7 +15,7 @@ def produce_c_headers(Module,Db):
    Chip = Db['chip']
    Items = Db['items']
    Range = Chip.Addr+4
-   Fch = open('%s_cinc.h'%(Module),'w')
+   Fch = wopen('%s_cinc.h'%(Module))
    Fch.write(HEADER.replace('MODULE',Module).replace('RF_INTERFACE_RGF',Module.upper()))
    outputStructures(Module,Items,Fch)
    outputFields(Items,Fch)

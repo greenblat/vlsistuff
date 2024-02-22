@@ -23,18 +23,37 @@ import xml_regfile2_create
 import regfile_html
 import regfile_c
 
+def wopen(Fname):
+    if (Fdirx!='') and (Fdirx!='.') and not os.path.exists(Fdirx):
+        os.mkdir(Fdirx)
+    Full = '%s/%s' % (Fdirx,Fname)
+    File =  open(Full,'w')
+    return File
+
+regfile_c.wopen = wopen
+regfile_html.wopen = wopen
+xml_regfile2_create.wopen = wopen
+
 def main():
+    global Fdirx
     if len(sys.argv) == 1:
         print(HELPSTRING)
         return
     Fname = sys.argv[1]
+    Fdirx = '.'
+    if len(sys.argv)>2:
+        Fdirx = sys.argv[2]
     Cell,Dir,Ext = logs.fnameCell(Fname)
     if Dir == '': 
         Dir = '.'
+    if Fdirx == '':
+        Fdir = Dir
     if Ext=='':
-        run(Cell,Dir)
+        run(Cell,Fdirx)
     else:
-        run('%s.%s' % (Cell,Ext),Dir)
+        run(Fname,Fdirx)
+
+
 
 def run(Fname,Dirx='.',Base=0):
     global Dir
@@ -43,7 +62,7 @@ def run(Fname,Dirx='.',Base=0):
         Db[Key] = []
     Db['checkNames'] = {}
     Db['BASE'] = Base
-    File = open(Dirx + '/' +Fname)
+    File = open(Fname)
     readFile(File)
     missParam(Db['chip'].Params,'width',32)
     missParam(Db['chip'].Params,'addrwid',32)
@@ -62,7 +81,7 @@ def run(Fname,Dirx='.',Base=0):
     Db['dir']=Dirx
     Db['lines'] = LINES
     Dir = Db['dir']
-    Db['fout'] = open('%s/%s.v'%(Dir,Module),'w')
+    Db['fout'] = wopen('%s.v'%(Module))
     if 'apb' in Params:
         dumpApb(Db)
     elif 'ram' in Params:
@@ -76,7 +95,7 @@ def run(Fname,Dirx='.',Base=0):
 #    report()
 #    report2(LINES)
     if LINES[8]!=[]:
-        Fspl = open('%s.splits'%Module,'w')
+        Fspl = wopen('%s.splits'%Module)
         for Line in LINES[8]:
             Fspl.write(Line+'\n')
         Fspl.close()
@@ -810,7 +829,7 @@ def dumpRam(Postfix,File,Alone):
     File.write(Str)
     Db['module']=Module
 #    bodyDump0(Db,File)
-    Finstram = open('%s.inst' % Module,'w')
+    Finstram = wopen('%s.inst' % Module)
     for Line in LINES[0]:
         forInst(Line,'wire',Finstram)
     Str  = APBInst.replace('MODULE',Module)
@@ -1318,8 +1337,8 @@ def treatRam(Reg):
 
 def dumpDefines():
     Module = Db['chip'].Params['names'][0] 
-    File = open('%s/%s_defs.py'%(Dir,Module),'w')
-    File2 = open('%s/%s_inc.seq'%(Dir,Module),'w')
+    File = wopen('%s_defs.py'%(Module))
+    File2 = wopen('%s_inc.seq'%(Module))
     File.write('ADDR_MAP = {}\n')
     File.write('WIDTH_MAP = {}\n')
     for Line in LINES[5]:
@@ -1365,9 +1384,8 @@ def dumpApb(Db):
     bodyDump0(Db)
     Module = Db['chip'].Params['names'][0] 
     Dir = Db['dir']
-#    Db['fout'] = open('%s/%s.v'%(Dir,Module),'w')
     Str = INSTANCE.replace('MODULE',Db['module'])
-    Finst = open('%s.inst'%Db['module'],'w')
+    Finst = wopen('%s.inst'%Db['module'])
     Finst.write(Str)
     apbHead()
     Temp = helper0(Finst)

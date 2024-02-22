@@ -1,4 +1,5 @@
 
+// by reading second vcd (just header) remove from first vcd all but what appears in second vcd
 
 #include <stdlib.h>
 #include "stdio.h"

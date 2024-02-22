@@ -88,7 +88,7 @@ def produce_md(Module,Db):
     Chip = Db['chip']
     Items = Db['items']
     Range = Chip.Addr+4
-    Fmd = open('%s.md'%(Module),'w')
+    Fmd = wopen('%s.md'%(Module))
     Prmx = Db['chip'].Params
     Keys = list(Prmx.keys())
     Keys.sort()
@@ -149,12 +149,11 @@ def produce_html(Module,Db):
     Items = Db['items']
     Range = Chip.Addr+4
     OpcodeWidth = 16
-    ofile = open('%s_rgf.html'%(Module),'w')
-    Fcsv = open('%s.csv'%(Module),'w')
-#    Fmd = open('%s.md'%(Module),'w')
+    ofile = wopen('%s_rgf.html'%(Module))
+    Fcsv = wopen('%s.csv'%(Module))
+    Fpy = wopen('%s.py'%Module)
+
     Fcsv.write('kind,access,width,pos,name,reset,addr,desc\n')
-#    Fmd.write('# register file "**%s**"\n'%Module)
-    Fpy = open('%s.py'%Module,'w')
     Fpy.write(FPYHEADER)
     Prmx = Db['chip'].Params
     Keys = list(Prmx.keys())

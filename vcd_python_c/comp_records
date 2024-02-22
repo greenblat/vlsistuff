@@ -2,15 +2,10 @@
 
 
 
-gcc src/vcd_records.c -o vcd_records -O3 -std=c99
-gcc src/vcd_trim.c -o vcd_trim -O3 -std=c99
-gcc src/vcd_cut_time.c -o vcd_cut_time -O3 -std=c99
-
-
+gcc src/vcd_records.c -o ~/bin/vcd_records -O3 -std=c99
 gcc src/vcd_trim.c -o ~/bin/vcd_trim -O3 -std=c99
+gcc src/vcd_cut_time.c -o ~/bin/vcd_cut_time -O3 -std=c99
 
-/bin/cp vcd_records ~/bin/
-/bin/cp vcd_trim ~/bin/
-/bin/cp vcd_cut_time ~/bin/
+
 
 

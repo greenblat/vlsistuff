@@ -74,7 +74,8 @@ def negedge():\n\
     for Mon in Monitors: Mon.run()\n\
     cycles += 1\n\
 \n\
-veri.sensitive(CLK,'0',\"negedge()\")\n\
+veri.sensitive(CLK,'0',\"negedge()\",'0')\n\
+veri.sensitive(\"always\",'0',\"ontimechange()\",'0')\n\
 \n\
 class monitorAxiClass:\n\
     def __init__(self,Path,Monitors):\n\

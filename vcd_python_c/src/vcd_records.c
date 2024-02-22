@@ -11,7 +11,10 @@
 FILE *Frecords;
 FILE *Fregs;
 
-void do_help() { return; }
+void do_help() { 
+    printf("produce list of all vcd mentioned nets in hierarchy format\n");
+    printf("vcd_python3 does it also first thing.\n");
+}
 void readfile(char *fname);
 
 int debug = 0;
