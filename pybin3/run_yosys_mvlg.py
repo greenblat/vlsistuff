@@ -52,11 +52,11 @@ opt_expr -full;
 clean
 write_verilog -noattr  TOP.glv
 
-flatten;
-opt_merge;
-opt_expr -full;
-clean
-write_verilog -noattr  TOP.flatglv
+# flatten;
+# opt_merge;
+# opt_expr -full;
+# clean
+# write_verilog -noattr  TOP.flatglv
 
 
 '''

@@ -74,13 +74,14 @@ def work(Fname):
     if Changed: 
         print("CHANGED %s" % (Module))
     else:
-        return
+        return False
     if not os.path.exists(AsideDir): os.mkdir(AsideDir)
     os.system('/bin/cp  %s %s/%s.v ' % (Fname,AsideDir,Module))
     Fout = open(Fname,'w')
     for line in Lines:
         Fout.write(line)
     Fout.close()
+    return HourDate
 
 def okchar(Chr):
     if Chr in ['\n','\t',' ']: return False

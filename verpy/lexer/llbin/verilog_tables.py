@@ -182,7 +182,7 @@ ReservedWordsStr = '''
     table endtable
     signed input output inout wire reg tri0 tri1
     always begin end
-
+assert
 assign deassign
 force release
 

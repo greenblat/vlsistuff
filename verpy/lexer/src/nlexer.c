@@ -113,10 +113,7 @@ int noEol = 0;
 
 char inFileName[300];
 char outFileName[300];
-int main(argc, argv)
-    int             argc;
-    char           *argv[];
-{
+int main(int argc, char *argv[]) {
     char option[300];
     int k,pos=0;
     if (argc==1) { print_help(); return 0; }

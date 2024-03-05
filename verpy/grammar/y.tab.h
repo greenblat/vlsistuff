@@ -154,14 +154,15 @@ extern int yydebug;
     always_ff = 355,               /* always_ff  */
     enum = 356,                    /* enum  */
     typedef = 357,                 /* typedef  */
-    shift_left = 358,              /* shift_left  */
-    shift_right = 359,             /* shift_right  */
-    SignedLeft = 360,              /* SignedLeft  */
-    arith_shift_right = 361,       /* arith_shift_right  */
-    noteqeq = 362,                 /* noteqeq  */
-    Veryequal = 363,               /* Veryequal  */
-    StarStar = 364,                /* StarStar  */
-    UNARY_PREC = 365               /* UNARY_PREC  */
+    assert = 358,                  /* assert  */
+    shift_left = 359,              /* shift_left  */
+    shift_right = 360,             /* shift_right  */
+    SignedLeft = 361,              /* SignedLeft  */
+    arith_shift_right = 362,       /* arith_shift_right  */
+    noteqeq = 363,                 /* noteqeq  */
+    Veryequal = 364,               /* Veryequal  */
+    StarStar = 365,                /* StarStar  */
+    UNARY_PREC = 366               /* UNARY_PREC  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -270,14 +271,15 @@ extern int yydebug;
 #define always_ff 355
 #define enum 356
 #define typedef 357
-#define shift_left 358
-#define shift_right 359
-#define SignedLeft 360
-#define arith_shift_right 361
-#define noteqeq 362
-#define Veryequal 363
-#define StarStar 364
-#define UNARY_PREC 365
+#define assert 358
+#define shift_left 359
+#define shift_right 360
+#define SignedLeft 361
+#define arith_shift_right 362
+#define noteqeq 363
+#define Veryequal 364
+#define StarStar 365
+#define UNARY_PREC 366
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

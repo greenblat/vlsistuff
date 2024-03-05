@@ -772,6 +772,12 @@ def get_statement(Item):
         logs.log_warning('needs care. initial def in genvar ')
         return
      
+    Vars = matches.matches(List,'assert !Expr ;')
+    if Vars:
+        return
+    Vars = matches.matches(List,'assert ( !Expr ) else !Statement')
+    if Vars:
+        return
 
     logs.log_err(' db0: untreated statement len=%d list="%s"'%(len(List),List),True)
     return []

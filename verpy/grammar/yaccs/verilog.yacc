@@ -23,6 +23,7 @@
 %token newver
 %token return
 %token always_comb always_ff enum typedef
+%token assert
 
 %right '?' ':' 
 %left '|' 
@@ -285,6 +286,8 @@ Statement :
     | Pragma
     | assign LSH '=' Expr ';'
     | return token ';'
+    | assert '(' Expr ')' ';'
+    | assert '(' Expr ')' else Statement 
     ;
 
 
