@@ -48,6 +48,7 @@ class axiSlaveClass:
         self.read_data_generator = None
         self.verbose = True
         self.errorReadFromUnknown = False
+        self.waitWready = 0
 
     def onFinish(self):
         if self.busy(): self.busyWhy();
@@ -148,6 +149,7 @@ class axiSlaveClass:
             self.WAITREAD = eval(Wrds[1])
         elif Wrds[0] == 'waitwrite':
             self.WAITWRITE = eval(Wrds[1])
+            logs.log_info("AXI_SLAVE: WAITWRITE = %d" % self.WAITWRITE)
         elif Wrds[0] == 'buswidth':
             self.busWidth = eval(Wrds[1])
         elif Wrds[0] == 'flood':
@@ -354,7 +356,8 @@ class axiSlaveClass:
             pass
         elif self.Awready == 0:
             self.force('awready',0)
-            pass
+        elif (self.peek('awvalid')==1) and (len(self.awqueue)>=8):
+            self.force('awready',0)
         elif self.peek('awvalid')==1:
             self.force('awready',1)
             awburst=self.peek('awburst')
@@ -374,17 +377,24 @@ class axiSlaveClass:
         else:
             self.force('awready',1)
 
-        self.force('wready',1)
         self.wready = 0
-
+        self.force('marker3',self.waitWready)
         if self.Passive and (self.peek('wready')==0):
             pass
-        elif (self.peek('wvalid')==1)and(self.peek('wready') == 1):
+        elif (self.waitWready>0):
+            self.waitWready -= 1
+            if self.waitWready==0: 
+                self.force('wready',1)
+            else:
+                self.force('wready',0)
+        elif (self.peek('wvalid')==1):
+            self.force('wready',1)
             wstrb = self.peek('wstrb')
             wlast = self.peek('wlast')
             wdata = self.peek('wdata')
             self.wqueue.append((wdata,wlast,wstrb))
             logs.log_info('axiSlave %s written  %x %x %x' % (self.Name,wdata,wlast,wstrb) ,verbose=self.verbose)
+            self.waitWready = self.WAITWRITE
 
         if len(self.wqueue) == 0: return    
         if (self.awlen<0) and (len(self.awqueue) == 0): return    
