@@ -372,8 +372,9 @@ class axiSlaveClass:
             FirstPage = awaddr & 0xffffe000
             if (FirstPage != LastPage):
                 logs.log_error('slave %s CROSSING 4K write awaddr=%x awlen=%x awsize=%x' % (self.Name,awaddr,awlen,awsize))
-            logs.log_info('axiSlave %s >>>awvalid %x %x %x %x %x'%(self.Name,awburst,awaddr,awlen,awid,awsize) ,verbose=self.verbose)
+            logs.log_info('AxiSlave %s >>>awvalid %x %x %x %x %x'%(self.Name,awburst,awaddr,awlen,awid,awsize) ,verbose=self.verbose)
             self.bqueue0.append(awid)
+            logs.log_info("BQUEUE0 APPEND %s" % str(self.bqueue0))
         else:
             self.force('awready',1)
 
@@ -387,21 +388,23 @@ class axiSlaveClass:
                 self.force('wready',1)
             else:
                 self.force('wready',0)
-        elif (self.peek('wvalid')==1):
+                return
+        if (self.peek('wvalid')==1)and(self.waitWready==0):
             self.force('wready',1)
             wstrb = self.peek('wstrb')
             wlast = self.peek('wlast')
             wdata = self.peek('wdata')
             self.wqueue.append((wdata,wlast,wstrb))
-            logs.log_info('axiSlave %s written  %x %x %x' % (self.Name,wdata,wlast,wstrb) ,verbose=self.verbose)
+#            logs.log_info('AXISLAVE0 %s written  wdata=%x wlast=%x wstrb=%x awlen=%d   que=%s' % (self.Name,wdata,wlast,wstrb,self.awlen,self.wqueue) ,verbose=self.verbose)
             self.waitWready = self.WAITWRITE
 
         if len(self.wqueue) == 0: return    
         if (self.awlen<0) and (len(self.awqueue) == 0): return    
         if self.awlen<0:
             self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = self.awqueue.pop(0)
+#        logs.log_info("AXISLAVE1 %s %s " % (self.waitWready,nicew(self.wqueue)))
         (wdata,wlast,wstrb) = self.wqueue.pop(0)
-        logs.log_info('axiSlave %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=0x%x 0d%d'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata,wdata),self.Name ,verbose=self.verbose)
+#        logs.log_info('AXISLAVE2 %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=0x%x 0d%d'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata,wdata),self.Name ,verbose=True)
         for ii in range(self.busWidth):
             if ((wstrb>>ii)&1)==1:
                 Byte = (wdata>>(ii*8))& 0xff
@@ -421,12 +424,18 @@ class axiSlaveClass:
                 self.awlen = -1
 
         if (wlast==1):
-#                logs.log_info('BQUEUE0 %s' % (self.bqueue0))
+            logs.log_info('BQUEUE0 %s' % (self.bqueue0))
             self.bqueue.append(('wait',2))
             if self.bqueue0 == []:
                 logs.log_error('axiSlave %s: BQUEUE0 is empty, more lasts than awvalids' % self.Name)
                 self.bqueue0.append(0)
             self.bqueue.append((self.bqueue0.pop(0),0))
-#                logs.log_info('BQUEUE %s' % (self.bqueue))
+            logs.log_info('BQUEUE %s' % (self.bqueue))
 
+def nicew(Queue):
+    res = []
+    for A,B,C in Queue:
+        Str = '(%x,%x,%x)' % (A,B,C)
+        res.append(Str)
+    return ''.join(res)
 
