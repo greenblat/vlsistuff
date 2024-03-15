@@ -6,7 +6,7 @@ import os,sys,string
 from  module_class import module_class
 import logs
 
-ignoreAssigns = True
+ignoreAssigns = False
 
 def main():
     Fname = sys.argv[1]
@@ -121,6 +121,7 @@ def set_right_assign(wrds):
         Db.right_assign=['subbus',Db.right_assign,Db.WidthH,Db.WidthL]
     elif Db.WidthH:
         Db.right_assign=['subbit',Db.right_assign,Db.WidthH]
+    print('HARDASS',Db.assign,Db.right_assign)
     Db.Current.add_hard_assign(Db.assign,Db.right_assign)
 
 def wait_line0(wrds):
@@ -235,6 +236,7 @@ def finish_conn(wrds):
     Db.Current.add_conn(Db.Inst,Db.Pin,Conn)
 
 def add_wire_assign(wrds):
+    print('HARDASS2',Db.current_wire,wrds[0])
     Db.Current.add_hard_assign(Db.current_wire,wrds[0])
 
 def add_wire(wrds):

@@ -23,8 +23,12 @@ LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/scmetro_dff.lib'
 LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
 
+
 LIB_ABC = '/Users/iliagreenblat/clients/weebit/libs/scs130ms_tt_1.80v_25C.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/weebit/libs/scs130ms_tt_1.80v_25C.lib'
+
+LIB_ABC = '/Users/iliagreenblat/projects/3legged_syblib/lut3lib.lib'
+LIB_DFF = '/Users/iliagreenblat/projects/3legged_syblib/dff.lib'
 
 INCFILE = '''
 read_liberty -lib LIB_ABC
@@ -72,7 +76,7 @@ opt;
 check;
 clean;
 opt -full;
-opt_rmdff;
+### opt_rmdff;
 opt_merge;
 opt_expr -full;
 write_verilog -noattr TOP.flat

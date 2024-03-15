@@ -155,7 +155,11 @@ def add_module(Key):
     Current = mcl.module_class(Module)
     Modules[Module]=Current
     logs.log_info('addmodule %s (%s)'%(Module,Modules.keys()))
-    if len(List)==5:
+    if len(List)==4:
+        Lhead = DataBase[List[2]]
+        Lbody = []
+        Lparams=[]
+    elif len(List)==5:
         Lhead = DataBase[List[2]]
         Lbody = DataBase[List[3]]
         Lparams=[]
@@ -169,7 +173,7 @@ def add_module(Key):
             Expr = get_expr(List[2])
             add_module_define(Var,Expr)
     else:
-       logs.log_err('dont know to deal with %d %s'%(len(List),List))
+       logs.log_err('dont know to deal with module of len=%d %s'%(len(List),List))
        return
     if (len(Lparams)>0):
          add_module_params(Lparams)
