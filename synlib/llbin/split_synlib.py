@@ -52,7 +52,7 @@ def use_line2(line):
             Cell = cell_line(line)
             open_cell(Cell,line)
             Opens=1
-            Header.append(' library (tcbn28hpcplusbwp35p140tt1v25c) {\n')
+            Header.append(' library (mylib) {\n')
         elif ok_line(line):
             pass
             # Header.append(line)
@@ -90,12 +90,12 @@ def open_cell(Cell,line):
     Fout = open('syntmp/%s.lib'%Cell,'w')
     print('open %s'%Cell)
     for line0 in Header:
-        Fout.write(line0)
+        Fout.write('// '+line0)
     Fout.write(line)
 
 def close_cell(line):
     Fout.write(line)
-    Fout.write('}\n')
+    Fout.write('// '+'}\n')
     Fout.close()
     
 def has_bad_vibes(line):

@@ -185,6 +185,15 @@ def extract_codelins(lines):
 
 Routines = '''
 
+def get_argv(Name,Default):
+    WW = sys.argv[1].split()
+    for Arg in WW:
+        if Arg.startswith(Name+'='):
+            xx = Arg.split('=')
+            return eval(xx[1])
+    return Default
+
+
 def argv(Ind):
     WW = sys.argv[1].split()
     if Ind<len(WW):
