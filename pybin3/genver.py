@@ -190,7 +190,10 @@ def get_argv(Name,Default):
     for Arg in WW:
         if Arg.startswith(Name+'='):
             xx = Arg.split('=')
-            return eval(xx[1])
+            try:
+                return eval(xx[1])
+            except:
+                return xx[1]
     return Default
 
 
