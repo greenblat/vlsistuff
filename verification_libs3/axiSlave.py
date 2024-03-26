@@ -46,7 +46,7 @@ class axiSlaveClass:
         self.force('bresp',0)
         self.force('bvalid',0)
         self.read_data_generator = None
-        self.verbose = True
+        self.verbose = False
         self.errorReadFromUnknown = False
         self.waitWready = 0
 
@@ -92,7 +92,7 @@ class axiSlaveClass:
         if Wrds == []:
             pass
         elif Wrds[0] == 'test':
-            logs.log_info("TEST XXXXX %s" % Wrds)
+            logs.log_info("TEST XXXXX %s" % Wrds,verbose=self.verbose)
         elif Wrds[0] == 'verbose':
             if Wrds[1] in ['yes','1','on']:
                 self.verbose = True
@@ -149,7 +149,7 @@ class axiSlaveClass:
             self.WAITREAD = eval(Wrds[1])
         elif Wrds[0] == 'waitwrite':
             self.WAITWRITE = eval(Wrds[1])
-            logs.log_info("AXI_SLAVE: WAITWRITE = %d" % self.WAITWRITE)
+            logs.log_info("AXI_SLAVE: WAITWRITE = %d" % self.WAITWRITE,verbose=self.verbose)
         elif Wrds[0] == 'buswidth':
             self.busWidth = eval(Wrds[1])
         elif Wrds[0] == 'flood':
@@ -159,12 +159,12 @@ class axiSlaveClass:
             for Add in range(Addr0,Addr1,4):
                 self.addWord(Add,Val)
         elif Wrds[0] == 'fill_by_addr':
-            logs.log_info('XXXXXXXXXXXXXXXXXXXXXX %s' % str(Wrds))
+            logs.log_info('XXXXXXXXXXXXXXXXXXXXXX %s' % str(Wrds),verbose=self.verbose)
             Addr0 = eval(Wrds[1])
             Addr1 = eval(Wrds[2])
             for Addr in range(Addr0,Addr1,self.busWidth):
                 self.addWord(Addr,Addr)
-                logs.log_info("ADD %x %x" % (Addr,Addr))
+                logs.log_info("ADD %x %x" % (Addr,Addr),verbose=self.verbose)
         else:
             logs.log_error('action of axiSlave "%s" failed on "%s"  %s' % (self.Name,Text,Wrds[0]))
 
@@ -227,7 +227,7 @@ class axiSlaveClass:
                 self.force('rdata','0x'+rdata)
             return
         (rlast,rid,rdata) = self.rqueue.pop(0)
-        logs.log_info("RAXI len=%d rlast=%s rid=%s" % (len(self.rqueue),rlast,rid))
+        logs.log_info("RAXI len=%d rlast=%s rid=%s" % (len(self.rqueue),rlast,rid),verbose=self.verbose)
         if rlast=='wait':
             self.waitread=1
             self.idleread()
@@ -374,7 +374,7 @@ class axiSlaveClass:
                 logs.log_error('slave %s CROSSING 4K write awaddr=%x awlen=%x awsize=%x' % (self.Name,awaddr,awlen,awsize))
             logs.log_info('AxiSlave %s >>>awvalid %x %x %x %x %x'%(self.Name,awburst,awaddr,awlen,awid,awsize) ,verbose=self.verbose)
             self.bqueue0.append(awid)
-            logs.log_info("BQUEUE0 APPEND %s" % str(self.bqueue0))
+            logs.log_info("BQUEUE0 APPEND %s" % str(self.bqueue0),verbose=self.verbose)
         else:
             self.force('awready',1)
 
@@ -402,7 +402,7 @@ class axiSlaveClass:
         if (self.awlen<0) and (len(self.awqueue) == 0): return    
         if self.awlen<0:
             self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = self.awqueue.pop(0)
-#        logs.log_info("AXISLAVE1 %s %s " % (self.waitWready,nicew(self.wqueue)))
+#        logs.log_info("AXISLAVE1 %s %s " % (self.waitWready,nicew(self.wqueue)),verbose=self.verbose)
         (wdata,wlast,wstrb) = self.wqueue.pop(0)
 #        logs.log_info('AXISLAVE2 %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=0x%x 0d%d'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata,wdata),self.Name ,verbose=True)
         for ii in range(self.busWidth):
@@ -424,13 +424,13 @@ class axiSlaveClass:
                 self.awlen = -1
 
         if (wlast==1):
-            logs.log_info('BQUEUE0 %s' % (self.bqueue0))
+            logs.log_info('BQUEUE0 %s' % (self.bqueue0),verbose=self.verbose)
             self.bqueue.append(('wait',2))
             if self.bqueue0 == []:
                 logs.log_error('axiSlave %s: BQUEUE0 is empty, more lasts than awvalids' % self.Name)
                 self.bqueue0.append(0)
             self.bqueue.append((self.bqueue0.pop(0),0))
-            logs.log_info('BQUEUE %s' % (self.bqueue))
+            logs.log_info('BQUEUE %s' % (self.bqueue),verbose=self.verbose)
 
 def nicew(Queue):
     res = []
