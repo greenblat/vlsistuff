@@ -12,6 +12,9 @@ def work(Dir):
     Cellar = os.path.expanduser('~/cellar')
     if not os.path.exists(Cellar):
         os.mkdir(Cellar)
+    if not os.path.exists(Dir):
+        print("No directory %s" % Dir)
+        return
     List = os.listdir(Dir)
     for Fname in List:
         if Fname.endswith('.v'):
