@@ -243,6 +243,7 @@ syncfifo #(DWID+4+2+1,4) r_fifo (.clk(clk),.rst_n(rst_n),.vldin(r_vldin)
 assign rvalid = !r_empty;
 
 
+wire [63:0]  sign_version = 64'h0007e11522060424 ;
 endmodule
 
 

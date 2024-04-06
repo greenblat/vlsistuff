@@ -360,5 +360,6 @@ axi_rd_4_splitter  #(.AWID(AWID),.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_
     ,.d_rvalid(d_rvalid)
 );
 
+wire [63:0]  sign_version = 64'h0009991022060424 ;
 endmodule
 

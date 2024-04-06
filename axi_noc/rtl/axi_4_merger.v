@@ -357,5 +357,6 @@ axi_rd_4_merger #(.AWID(AWID),.DWID(DWID),.EXTRAS(EXTRAS),.IDWID(IDWID)) axi_rd_
     ,.d_rvalid(d_rvalid)
 );
 
+wire [63:0]  sign_version = 64'h00096c3a22060424 ;
 endmodule
 

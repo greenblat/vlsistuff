@@ -159,7 +159,6 @@ class axiSlaveClass:
             for Add in range(Addr0,Addr1,4):
                 self.addWord(Add,Val)
         elif Wrds[0] == 'fill_by_addr':
-            logs.log_info('XXXXXXXXXXXXXXXXXXXXXX %s' % str(Wrds),verbose=self.verbose)
             Addr0 = eval(Wrds[1])
             Addr1 = eval(Wrds[2])
             for Addr in range(Addr0,Addr1,self.busWidth):
@@ -262,7 +261,6 @@ class axiSlaveClass:
             arsize=self.peek('arsize')
             self.arqueue.append((arburst,araddr,arlen,arsize))
             self.rqueue.append(('wait',self.WAITREAD,0))
-            print("XXXX0 arlen=",arlen,arsize,araddr,arid)
             for ii in range(arlen):
                 self.readQueue(arlen,ii,arburst,arsize,araddr,arid,0)
             self.readQueue(arlen,arlen,arburst,arsize,araddr,arid,1)
@@ -318,7 +316,6 @@ class axiSlaveClass:
             rdata = hex(rdata)[2:]
             logs.log_info(f'[{self.Name}]: reading data from read data generator function rdata = 0x{rdata}, ',verbose=self.verbose)
         self.rqueue.append((rlast,rid,rdata))
-        print("XXXX",len(self.rqueue),'arlen=',arlen,'ii=',ii,rlast,rid,rdata)
 
 
 

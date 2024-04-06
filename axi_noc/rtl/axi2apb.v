@@ -284,5 +284,6 @@ assign psel = pread || ipwrite || (pstate>0) ;
 assign penable = (pstate==1)||(pstate==3)||(pstate==8)||(pstate==10);
 assign rresp = presp;
 assign pwrite = (pstate==8) || (pstate==10);
+wire [63:0]  sign_version = 64'h00083c0b22060424 ;
 endmodule
 

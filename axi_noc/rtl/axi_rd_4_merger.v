@@ -285,6 +285,7 @@ always @(posedge clk or negedge rst_n) begin
             d_rcount <= d_rcount - 1;
     end
 end
+wire [63:0]  sign_version = 64'h000a2b9022060424 ;
 endmodule
 
 

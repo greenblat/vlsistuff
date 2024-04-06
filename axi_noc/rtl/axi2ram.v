@@ -235,5 +235,6 @@ assign rresp = (run_size>3) || ((run_addr>>3)>=(1<<RAMSIZE));
 
 
 
+wire [63:0]  sign_version = 64'h000742ff22060424 ;
 endmodule
 

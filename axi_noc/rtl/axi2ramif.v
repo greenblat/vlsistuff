@@ -230,5 +230,6 @@ assign ram_wdata = work_wdata;
 
 
 
+wire [63:0]  sign_version = 64'h0006b32a22060424 ;
 endmodule
 

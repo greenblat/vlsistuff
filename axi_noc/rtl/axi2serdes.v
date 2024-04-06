@@ -73,5 +73,6 @@ assign inok = in_fifo_count<5;
 
 
 
+wire [63:0]  sign_version = 64'h0001eff822060424 ;
 endmodule
 

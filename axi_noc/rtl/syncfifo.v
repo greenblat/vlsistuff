@@ -53,6 +53,7 @@ end
 //         if (readout)  $display("@%d  READOUT %m cnt=%d  %h",tb.cycles,count,dout);
 //     end
 //end
+wire [63:0]  sign_version = 64'h0001af0422060424 ;
 endmodule
 
 

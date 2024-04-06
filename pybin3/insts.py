@@ -903,9 +903,12 @@ def produce_asm_driver():
         Coding=instructions[Inst].coding
         Coding1=toAsm(Inst,Coding)
         (Mask,Data)=build_expr(Coding)
+        H = Data.index('h')
+        Hex = Data[H+1:]
+#        print("XXXXXX",Inst,Coding,Coding1,Mask,Data)
         Flags = ','.join(instructions[Inst].flags)
-#        ofile.write('Coding["%s"]=(0x%s,%s)\n'%(Inst,Data[4:],Coding1))
-        ofile.write('    add_coding("%s",0x%s,%s,"%s","%s","%s")\n'%(Inst,Data[4:],Coding1,Pattern,Translate,Flags))
+#        ofile.write('Coding["%s"]=(0x%s,%s)\n'%(Inst,Hex,Coding1))
+        ofile.write('    add_coding("%s",0x%s,%s,"%s","%s","%s")\n'%(Inst,Hex,Coding1,Pattern,Translate,Flags))
     ofile.close()    
 
 

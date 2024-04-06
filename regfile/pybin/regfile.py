@@ -752,6 +752,7 @@ MODULE MODULE (.pclk(pclk),.presetn(presetn)
     ,.prdata(prdata),.prdata_wire(),.pwdata(pwdata),.pstrb(pstrb)
     ,.pready(pready),.pslverr(pselverr)
     ,.penable(penable)
+    ,.pready()
 '''
 
 
@@ -1369,7 +1370,7 @@ wire [1023:0] ZEROES = 1024'b0;
 MODULE rgf (.pclk(pclk),.presetn(presetn),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
     ,.pwdata(pwdata),.prdata(prdata),.prdata_wire(prdata_wire)
     ,.pstrb(pstrb),.last_wdata(last_wdata)
-    ,.penable(penable)
+    ,.penable(penable),.pready()
 '''
 
 APB2RAM = '''

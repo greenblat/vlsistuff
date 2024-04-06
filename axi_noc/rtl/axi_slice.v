@@ -160,6 +160,7 @@ syncfifo #(.WID(DWID+IDWID+1+2),.DEPTH(2)) r_fifo (
     ,.count(),.overflow()
 );
 
+wire [63:0]  sign_version = 64'h0004686322060424 ;
 endmodule
 
 

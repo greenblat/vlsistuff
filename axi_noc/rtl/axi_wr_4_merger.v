@@ -1,7 +1,23 @@
 
-module axi_wr_4_merger #(parameter AWID=32,parameter IDWID=4, parameter DWID=64, parameter WSTRB=DWID/8, parameter EXTRAS=8) (
+module axi_wr_4_merger #(parameter AWID=32,parameter IDWID=4, parameter DWID=32, parameter WSTRB=DWID/8, parameter EXTRAS=8) (
     input clk, input rst_n
 
+    ,input [3:0] a_awmst
+    ,input [3:0] b_awmst
+    ,input [3:0] c_awmst
+    ,input [3:0] d_awmst
+    ,output [3:0] a_bmst
+    ,output [3:0] b_bmst
+    ,output [3:0] c_bmst
+    ,output [3:0] d_bmst
+
+    ,output [3:0] awmst
+    ,input [3:0] bmst
+
+    ,input [15:0] from_a
+    ,input [15:0] from_b
+    ,input [15:0] from_c
+    ,input [15:0] from_d
 
     ,input [IDWID-1:0] a_awid
     ,input [AWID-1:0] a_awaddr
@@ -107,18 +123,17 @@ assign c_awready = !c_aw_full;
 wire d_aw_full,d_aw_empty;
 assign d_awready = !d_aw_full;
 
-localparam AWIDE = 3 + IDWID + AWID + 8 + EXTRAS + 2 ;
-wire [AWIDE-1:0] new_a_aw_entry =   { a_awsize, a_awextras ,a_awid, a_awburst, a_awlen, a_awaddr };
-wire [AWIDE-1:0] new_b_aw_entry =   { b_awsize, b_awextras ,b_awid, b_awburst, b_awlen, b_awaddr };
-wire [AWIDE-1:0] new_c_aw_entry =   { c_awsize, c_awextras ,c_awid, c_awburst, c_awlen, c_awaddr };
-wire [AWIDE-1:0] new_d_aw_entry =   { d_awsize, d_awextras ,d_awid, d_awburst, d_awlen, d_awaddr };
+localparam AWIDE = 4 + 3 + IDWID + AWID + 8 + EXTRAS + 2 ;
+wire [AWIDE-1:0] new_a_aw_entry =   { a_awmst, a_awsize, a_awextras ,a_awid, a_awburst, a_awlen, a_awaddr };
+wire [AWIDE-1:0] new_b_aw_entry =   { b_awmst, b_awsize, b_awextras ,b_awid, b_awburst, b_awlen, b_awaddr };
+wire [AWIDE-1:0] new_c_aw_entry =   { c_awmst, c_awsize, c_awextras ,c_awid, c_awburst, c_awlen, c_awaddr };
+wire [AWIDE-1:0] new_d_aw_entry =   { d_awmst, d_awsize, d_awextras ,d_awid, d_awburst, d_awlen, d_awaddr };
 
 wire [AWIDE-1:0] a_active_aw_entry;
 wire [AWIDE-1:0] b_active_aw_entry;
 wire [AWIDE-1:0] c_active_aw_entry;
 wire [AWIDE-1:0] d_active_aw_entry;
 
-wire readout_a_aw_fifo,readout_b_aw_fifo,readout_c_aw_fifo,readout_d_aw_fifo;
 
 reg [7:0] a_bcount,b_bcount,c_bcount,d_bcount;
 always @(posedge clk or negedge rst_n) begin
@@ -128,23 +143,23 @@ always @(posedge clk or negedge rst_n) begin
         if (a_awvalid && a_awready && !(a_bvalid && a_bready)) a_bcount <= a_bcount + 1;
         else if (a_bvalid && a_bready && !(a_awvalid && a_awready)) a_bcount <= a_bcount - 1;
 
-        if (awready && readout_b_aw_fifo && !(b_bvalid && b_bready)) b_bcount <= b_bcount + 1;
-        else if (b_bvalid && b_bready && !(awready && readout_b_aw_fifo)) b_bcount <= b_bcount - 1;
+        if (b_awvalid && b_awready && !(b_bvalid && b_bready)) b_bcount <= b_bcount + 1;
+        else if (b_bvalid && b_bready && !(b_awvalid && b_awready)) b_bcount <= b_bcount - 1;
 
-        if (awready && readout_c_aw_fifo && !(c_bvalid && c_bready)) c_bcount <= c_bcount + 1;
-        else if (c_bvalid && c_bready && !(awready && readout_c_aw_fifo)) c_bcount <= c_bcount - 1;
+        if (c_awvalid && c_awready && !(c_bvalid && c_bready)) c_bcount <= c_bcount + 1;
+        else if (c_bvalid && c_bready && !(c_awvalid && c_awready)) c_bcount <= c_bcount - 1;
 
-        if (awready && readout_d_aw_fifo && !(d_bvalid && d_bready)) d_bcount <= d_bcount + 1;
-        else if (d_bvalid && d_bready && !(awready && readout_d_aw_fifo)) d_bcount <= d_bcount - 1;
-
+        if (d_awvalid && d_awready && !(d_bvalid && d_bready)) d_bcount <= d_bcount + 1;
+        else if (d_bvalid && d_bready && !(d_awvalid && d_awready)) d_bcount <= d_bcount - 1;
     end
 end
 
-
+wire panic_a_aw_fifo,panic_b_aw_fifo,panic_c_aw_fifo,panic_d_aw_fifo;
+wire start_d,start_c,start_b,start_a;
 syncfifo #(AWIDE,2) a_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(a_awvalid && a_awready && !a_aw_full)
     ,.din(new_a_aw_entry)
     ,.empty(a_aw_empty),.full(a_aw_full)
-    ,.readout(readout_a_aw_fifo)
+    ,.readout(start_a)
     ,.dout(a_active_aw_entry)
     ,.count()
     ,.softreset(1'b0)
@@ -154,16 +169,17 @@ syncfifo #(AWIDE,2) a_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(a_awvalid && a_awr
 syncfifo #(AWIDE,2) b_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(b_awvalid && b_awready && !b_aw_full)
     ,.din(new_b_aw_entry)
     ,.empty(b_aw_empty),.full(b_aw_full)
-    ,.readout(readout_b_aw_fifo)
+    ,.readout(start_b)
     ,.dout(b_active_aw_entry)
     ,.count()
     ,.softreset(1'b0)
     ,.overflow(panic_b_aw_fifo)
 );
+
 syncfifo #(AWIDE,2) c_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(c_awvalid && c_awready && !c_aw_full)
     ,.din(new_c_aw_entry)
     ,.empty(c_aw_empty),.full(c_aw_full)
-    ,.readout(readout_c_aw_fifo)
+    ,.readout(start_c)
     ,.dout(c_active_aw_entry)
     ,.count()
     ,.softreset(1'b0)
@@ -172,165 +188,89 @@ syncfifo #(AWIDE,2) c_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(c_awvalid && c_awr
 syncfifo #(AWIDE,2) d_aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(d_awvalid && d_awready && !d_aw_full)
     ,.din(new_d_aw_entry)
     ,.empty(d_aw_empty),.full(d_aw_full)
-    ,.readout(readout_d_aw_fifo)
+    ,.readout(start_d)
     ,.dout(d_active_aw_entry)
     ,.count()
     ,.softreset(1'b0)
     ,.overflow(panic_d_aw_fifo)
 );
 
+
+
+
+
+
 wire a_win_fifo_empty,a_win_fifo_full;
 wire b_win_fifo_empty,b_win_fifo_full;
 wire c_win_fifo_empty,c_win_fifo_full;
 wire d_win_fifo_empty,d_win_fifo_full;
 
-reg working_a,working_b,working_c,working_d;
 wire burst_end = wvalid && wready && wlast;
 
-wire eligible_a = !a_aw_empty && !a_win_fifo_empty;
-wire eligible_b = !b_aw_empty && !b_win_fifo_empty;
-wire eligible_c = !c_aw_empty && !c_win_fifo_empty;
-wire eligible_d = !d_aw_empty && !d_win_fifo_empty;
 
-wire all_idle = !working_a && !working_b && !working_c && !working_d;
-wire a_winner,b_winner,c_winner,d_winner;
-wire start_a = eligible_a && (all_idle) && awready && wready && (a_bcount<8) && a_winner;
-wire start_b = eligible_b && (all_idle) && awready && wready && (b_bcount<8) && b_winner;
-wire start_c = eligible_c && (all_idle) && awready && wready && (c_bcount<8) && c_winner;
-wire start_d = eligible_d && (all_idle) && awready && wready && (d_bcount<8) && d_winner;
+wire request_a = !a_aw_empty && !a_win_fifo_empty && (a_bcount<8) ;
+wire request_b = !b_aw_empty && !b_win_fifo_empty && (b_bcount<8) ;
+wire request_c = !c_aw_empty && !c_win_fifo_empty && (c_bcount<8) ;
+wire request_d = !d_aw_empty && !d_win_fifo_empty && (d_bcount<8) ;
+wire any_start = start_d|| start_c|| start_b|| start_a;
 
-wire longer_a = a_active_aw_entry[7+AWID:AWID] != 0;
-wire longer_b = b_active_aw_entry[7+AWID:AWID] != 0;
-wire longer_c = c_active_aw_entry[7+AWID:AWID] != 0;
-wire longer_d = d_active_aw_entry[7+AWID:AWID] != 0;
-
-
-always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-        working_a <=0; working_b <=0; working_c <=0; working_d <=0; 
-    end else begin
-        if (start_a) begin
-            working_a <= longer_a; working_b <= 0; working_c <= 0; working_d <= 0;
-        end else if (start_b) begin
-            working_a <= 0; working_b <= longer_b; working_c <= 0; working_d <= 0;
-        end else if (start_c) begin
-            working_a <= 0; working_b <= 0; working_c <= longer_c; working_d <= 0;
-        end else if (start_d) begin
-            working_a <= 0; working_b <= 0; working_c <= 0; working_d <= longer_d;
-        end else if (burst_end) begin
-            working_a <= 0; working_b <= 0; working_c <= 0; working_d <= 0;
-        end
-    end
-end
-        
-
-
-
-assign readout_a_aw_fifo =  start_a;
-assign readout_b_aw_fifo =  start_b && !start_a;
-assign readout_c_aw_fifo =  start_c && !start_b && !start_a;
-assign readout_d_aw_fifo =  start_d && !start_c && !start_b && !start_a;
-
-
-reg [7:0] a_pri_count,b_pri_count,c_pri_count,d_pri_count;
-always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-        a_pri_count <= 0;b_pri_count <= 0;c_pri_count <= 0;d_pri_count <= 0;
-    end else begin
-        if (readout_a_aw_fifo) 
-            a_pri_count <= 0;
-        else if (eligible_a) 
-            a_pri_count <= a_pri_count + (a_pri_count<255);
-
-        if (readout_b_aw_fifo) 
-            b_pri_count <= 0;
-        else if (eligible_b) 
-            b_pri_count <= b_pri_count + (b_pri_count<255);
-
-        if (readout_c_aw_fifo) 
-            c_pri_count <= 0;
-        else if (eligible_c) 
-            c_pri_count <= c_pri_count + (c_pri_count<255);
-
-        if (readout_d_aw_fifo) 
-            d_pri_count <= 0;
-        else if (eligible_d) 
-            d_pri_count <= d_pri_count + (d_pri_count<255);
-        else 
-            d_pri_count <= 0;
-    end
-end
-
-wire a_greater_than_b = a_pri_count >= b_pri_count;
-
-wire a_greater_than_c = a_pri_count >= c_pri_count;
-wire a_greater_than_d = a_pri_count >= d_pri_count;
-
-wire b_greater_than_c = b_pri_count >= c_pri_count;
-wire b_greater_than_d = b_pri_count >= d_pri_count;
-
-wire c_greater_than_d = c_pri_count >= d_pri_count;
-
-assign a_winner = (a_pri_count>0) && a_greater_than_b && a_greater_than_c && a_greater_than_d ;
-assign b_winner = (b_pri_count>0) && !a_winner  && b_greater_than_c && b_greater_than_d ;
-assign c_winner = (c_pri_count>0) && !a_winner && !b_winner && c_greater_than_d ;
-assign d_winner = (d_pri_count>0) && !a_winner && !b_winner && !c_winner;
-
-
-wire [3:0] orig_wid;
-assign {awsize, awextras ,orig_wid,awburst,awlen,awaddr} = 
-    (readout_a_aw_fifo) ? a_active_aw_entry :
-    (readout_b_aw_fifo) ? b_active_aw_entry :
-    (readout_c_aw_fifo) ? c_active_aw_entry :
-    (readout_d_aw_fifo) ? d_active_aw_entry :
+wire [AWIDE+2-1:0] aw_in_entry = 
+    start_a ? {2'b00,a_active_aw_entry} :
+    start_b ? {2'b01,b_active_aw_entry} :
+    start_c ? {2'b10,c_active_aw_entry} :
+    start_d ? {2'b11,d_active_aw_entry} :
     0;
 
-assign awid = 
-    (readout_a_aw_fifo) ? 1 :
-    (readout_b_aw_fifo) ? 2 :
-    (readout_c_aw_fifo) ? 3 :
-    (readout_d_aw_fifo) ? 4 :
-    0;
+wire [AWIDE-1:0] active_aw_entry;
+wire aw_fifo_empty,aw_fifo_full;
+wire readout_aw_fifo;
 
 
 
-wire panic_readout = (0+readout_a_aw_fifo+readout_b_aw_fifo+readout_c_aw_fifo+readout_d_aw_fifo)>1;
+wire eligible_a = request_a && !aw_fifo_full ;
+wire eligible_b = request_b && !aw_fifo_full ;
+wire eligible_c = request_c && !aw_fifo_full ;
+wire eligible_d = request_d && !aw_fifo_full ;
 
-wire [IDWID-1:0] x_a_bid,x_b_bid,x_c_bid,x_d_bid;
-syncfifo_sampled #(IDWID,8) a_b_fifo (.clk(clk),.rst_n(rst_n)
-    ,.vldin(readout_a_aw_fifo)
-    ,.din(orig_wid)
-    ,.empty(),.full()
-    ,.readout(bvalid && (bid==1)) ,.dout(x_a_bid)
-    ,.count() ,.softreset(1'b0)
-    ,.overflow(panic_a_b_fifo)
+// awready && wready : might cause glitches. if changed in the middle of arbitration.
+
+axi_round_robin #(4) rr0 (.clk(clk),.rst_n(rst_n)
+    ,.requests({eligible_d,eligible_c,eligible_b,eligible_a})
+    ,.grants({start_d,start_c,start_b,start_a})
+    ,.pos()
 );
 
-syncfifo_sampled #(IDWID,8) b_b_fifo (.clk(clk),.rst_n(rst_n)
-    ,.vldin(readout_b_aw_fifo)
-    ,.din(orig_wid)
-    ,.empty(),.full()
-    ,.readout(bvalid && (bid==2)) ,.dout(x_b_bid)
-    ,.count() ,.softreset(1'b0)
-    ,.overflow(panic_b_b_fifo)
+wire [1:0] origin;
+syncfifo #(AWIDE+2,2) aw_fifo (.clk(clk),.rst_n(rst_n),.vldin(any_start)
+    ,.din(aw_in_entry)
+    ,.empty(aw_fifo_empty),.full(aw_fifo_full)
+    ,.readout(readout_aw_fifo)
+    ,.dout({origin,active_aw_entry})
+    ,.count()
+    ,.softreset(1'b0)
+    ,.overflow(panic_aw_fifo)
 );
 
-syncfifo_sampled #(IDWID,8) c_b_fifo (.clk(clk),.rst_n(rst_n)
-    ,.vldin(readout_c_aw_fifo)
-    ,.din(orig_wid)
-    ,.empty(),.full()
-    ,.readout(bvalid && (bid==3)) ,.dout(x_c_bid)
-    ,.count() ,.softreset(1'b0)
-    ,.overflow(panic_c_b_fifo)
+assign awvalid = !aw_fifo_empty;
+assign readout_aw_fifo  = awvalid && awready;
+assign {awmst, awsize, awextras ,awid,awburst,awlen,awaddr} = active_aw_entry;
+
+
+wire [1:0] take_from; 
+syncfifo #(2,16) rw_fifo (.clk(clk),.rst_n(rst_n),.vldin(readout_aw_fifo)
+    ,.din(origin)
+    ,.empty(rw_fifo_empty),.full(rw_fifo_full)
+    ,.readout(wvalid && wready && wlast)
+    ,.dout(take_from)
+    ,.count()
+    ,.softreset(1'b0)
+    ,.overflow(panic_rw_fifo)
 );
-syncfifo_sampled #(IDWID,8) d_b_fifo (.clk(clk),.rst_n(rst_n)
-    ,.vldin(readout_d_aw_fifo)
-    ,.din(orig_wid)
-    ,.empty(),.full()
-    ,.readout(bvalid && (bid==4)) ,.dout(x_d_bid)
-    ,.count() ,.softreset(1'b0)
-    ,.overflow(panic_d_b_fifo)
-);
+
+
+
+
+
 
 
 wire b_out_empty,b_out_full;
@@ -338,52 +278,49 @@ assign bready  =  !b_out_full;
 wire [IDWID-1:0] inbid;
 wire [1:0] inbresp;
 wire y_bready;
-wire [IDWID-1:0] x_bid = 
-    (bid==1) ? x_a_bid : 
-    (bid==2) ? x_b_bid : 
-    (bid==3) ? x_c_bid : 
-    (bid==4) ? x_d_bid : 
-    0;
 
-
-wire [IDWID-1:0] y_bid;
-
-syncfifo_sampled #(IDWID+IDWID+2,2) b_out_fifo (.clk(clk),.rst_n(rst_n)
+wire [3:0] inbmst;
+wire panic_b_out_fifo;
+syncfifo_sampled #(4+IDWID+2,2) b_out_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(bvalid)
-    ,.din({x_bid,bid,bresp})
+    ,.din({bmst,bid,bresp})
     ,.empty(b_out_empty),.full(b_out_full)
-    ,.readout(y_bready) ,.dout({y_bid,inbid,inbresp})
+    ,.readout(y_bready) ,.dout({inbmst,inbid,inbresp})
     ,.count() ,.softreset(1'b0)
     ,.overflow(panic_b_out_fifo)
 );
 
-assign a_bid = y_bid;
-assign b_bid = y_bid;
-assign c_bid = y_bid;
-assign d_bid = y_bid;
+assign a_bid = inbid;
+assign b_bid = inbid;
+assign c_bid = inbid;
+assign d_bid = inbid;
+assign a_bmst = inbmst;
+assign b_bmst = inbmst;
+assign c_bmst = inbmst;
+assign d_bmst = inbmst;
 
 assign a_bresp = inbresp;
 assign b_bresp = inbresp;
 assign c_bresp = inbresp;
 assign d_bresp = inbresp;
 
-assign a_bvalid = !b_out_empty && (inbid==1);
-assign b_bvalid = !b_out_empty && (inbid==2);
-assign c_bvalid = !b_out_empty && (inbid==3);
-assign d_bvalid = !b_out_empty && (inbid==4);
+assign a_bvalid = !b_out_empty && from_a[inbmst];
+assign b_bvalid = !b_out_empty && from_b[inbmst];
+assign c_bvalid = !b_out_empty && from_c[inbmst];
+assign d_bvalid = !b_out_empty && from_d[inbmst];
 
 assign y_bready = 
     b_out_empty ? 0 :
-    (inbid==1) ? a_bready :
-    (inbid==2) ? b_bready :
-    (inbid==3) ? c_bready :
-    (inbid==4) ? d_bready :
+    a_bvalid ? a_bready :
+    b_bvalid ? b_bready :
+    c_bvalid ? c_bready :
+    d_bvalid ? d_bready :
     0;
 
-wire readout_a_win_fifo = wready && (readout_a_aw_fifo || working_a)  && !a_win_fifo_empty;
-wire readout_b_win_fifo = wready && (readout_b_aw_fifo || working_b) && !b_win_fifo_empty;
-wire readout_c_win_fifo = wready && (readout_c_aw_fifo || working_c) && !c_win_fifo_empty;
-wire readout_d_win_fifo = wready && (readout_d_aw_fifo || working_d) && !d_win_fifo_empty;
+wire readout_a_win_fifo = wready && !rw_fifo_empty && (take_from==0) && !a_win_fifo_empty;
+wire readout_b_win_fifo = wready && !rw_fifo_empty && (take_from==1) && !b_win_fifo_empty;
+wire readout_c_win_fifo = wready && !rw_fifo_empty && (take_from==2) && !c_win_fifo_empty;
+wire readout_d_win_fifo = wready && !rw_fifo_empty && (take_from==3) && !d_win_fifo_empty;
 
 wire [DWID+WSTRB+1-1:0] a_wentry;
 assign a_wready = !a_win_fifo_full;
@@ -391,7 +328,7 @@ syncfifo #(DWID+WSTRB+1,2) a_win_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(a_wvalid && !a_win_fifo_full)
     ,.din({a_wlast,a_wstrb,a_wdata})
     ,.empty(a_win_fifo_empty),.full(a_win_fifo_full)
-    ,.readout(readout_a_win_fifo) ,.dout(a_wentry)
+    ,.readout(readout_a_win_fifo & wready) ,.dout(a_wentry)
     ,.count() ,.softreset(1'b0) ,.overflow()
 );
 
@@ -401,7 +338,7 @@ syncfifo #(DWID+WSTRB+1,2) b_win_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(b_wvalid && !b_win_fifo_full)
     ,.din({b_wlast,b_wstrb,b_wdata})
     ,.empty(b_win_fifo_empty),.full(b_win_fifo_full)
-    ,.readout(readout_b_win_fifo) ,.dout(b_wentry)
+    ,.readout(readout_b_win_fifo & wready) ,.dout(b_wentry)
     ,.count() ,.softreset(1'b0) ,.overflow()
 );
 
@@ -411,10 +348,9 @@ syncfifo #(DWID+WSTRB+1,2) c_win_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(c_wvalid && !c_win_fifo_full)
     ,.din({c_wlast,c_wstrb,c_wdata})
     ,.empty(c_win_fifo_empty),.full(c_win_fifo_full)
-    ,.readout(readout_c_win_fifo) ,.dout(c_wentry)
+    ,.readout(readout_c_win_fifo & wready) ,.dout(c_wentry)
     ,.count() ,.softreset(1'b0) ,.overflow()
 );
-
 
 wire [DWID+WSTRB+1-1:0] d_wentry;
 assign d_wready = !d_win_fifo_full;
@@ -422,10 +358,9 @@ syncfifo #(DWID+WSTRB+1,2) d_win_fifo (.clk(clk),.rst_n(rst_n)
     ,.vldin(d_wvalid && !d_win_fifo_full)
     ,.din({d_wlast,d_wstrb,d_wdata})
     ,.empty(d_win_fifo_empty),.full(d_win_fifo_full)
-    ,.readout(readout_d_win_fifo) ,.dout(d_wentry)
+    ,.readout(readout_d_win_fifo & wready) ,.dout(d_wentry)
     ,.count() ,.softreset(1'b0) ,.overflow()
 );
-
 
 
 assign {wlast,wstrb,wdata} = 
@@ -435,9 +370,8 @@ assign {wlast,wstrb,wdata} =
     readout_d_win_fifo ? d_wentry :
     0;
 
-assign wvalid = readout_a_win_fifo || readout_b_win_fifo || readout_c_win_fifo || readout_d_win_fifo;
+assign wvalid = readout_a_win_fifo || readout_b_win_fifo || readout_c_win_fifo || readout_d_win_fifo ;
 
-assign awvalid = readout_a_aw_fifo || readout_b_aw_fifo || readout_c_aw_fifo || readout_d_aw_fifo;
 
 
 
@@ -448,6 +382,7 @@ wire panic_dcount = (d_bcount==0) && (d_bvalid && d_bready);
 
 
 
+wire [63:0]  sign_version = 64'h000d55bd21060424 ;
 endmodule
 
 
