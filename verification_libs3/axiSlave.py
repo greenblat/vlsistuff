@@ -214,7 +214,7 @@ class axiSlaveClass:
             self.idleread()
             return
         if self.peek('rready')==0: 
-            (rlast,rid,rdata) = self.rqueue[0]
+            (rlast,rid,rdata,Addr) = self.rqueue[0]
             if rlast=='wait':
                 self.waitread=1
                 self.idleread()
@@ -222,11 +222,11 @@ class axiSlaveClass:
                 self.force('rvalid',1)
                 self.force('rlast',rlast)
                 self.force('rid',rid)
-                self.force('rresp',self.rresp())
+                self.force('rresp',self.rresp(Addr))
                 self.force('rdata','0x'+rdata)
             return
-        (rlast,rid,rdata) = self.rqueue.pop(0)
-        logs.log_info("RAXI len=%d rlast=%s rid=%s" % (len(self.rqueue),rlast,rid),verbose=self.verbose)
+        (rlast,rid,rdata,Addr) = self.rqueue.pop(0)
+        logs.log_info("RAXI len=%d rlast=%s rid=%s addr=%x" % (len(self.rqueue),rlast,rid,Addr),verbose=self.verbose)
         if rlast=='wait':
             self.waitread=1
             self.idleread()
@@ -234,13 +234,13 @@ class axiSlaveClass:
         self.force('rvalid',1)
         self.force('rlast',rlast)
         self.force('rid',rid)
-        self.force('rresp',self.rresp())
+        self.force('rresp',self.rresp(Addr))
         self.force('rdata','0x'+rdata)
 
-    def rresp(self):
+    def rresp(self,Addr):
         logs.log_info(self.Name + ': RRESP %x %x   %s' % (self.badRresp , self.arqueue[0][1],self.arqueue[0]),verbose=self.verbose)
-        if self.badRresp == self.arqueue[0][1]:
-            logs.log_info(self.Name + ': RRESP ERR %s %s' % (self.rqueue,self.arqueue),verbose=self.verbose)
+        logs.log_info(self.Name + ': RRESP %x %x   %s' % (self.badRresp , self.arqueue[0][1],self.arqueue[0]),verbose=True)
+        if self.badRresp == Addr:
             return 2
         return 0
 
@@ -260,7 +260,7 @@ class axiSlaveClass:
             arlen=self.peek('arlen')
             arsize=self.peek('arsize')
             self.arqueue.append((arburst,araddr,arlen,arsize))
-            self.rqueue.append(('wait',self.WAITREAD,0))
+            self.rqueue.append(('wait',self.WAITREAD,0,0))
             for ii in range(arlen):
                 self.readQueue(arlen,ii,arburst,arsize,araddr,arid,0)
             self.readQueue(arlen,arlen,arburst,arsize,araddr,arid,1)
@@ -315,7 +315,7 @@ class axiSlaveClass:
             rdata = self.read_data_generator()
             rdata = hex(rdata)[2:]
             logs.log_info(f'[{self.Name}]: reading data from read data generator function rdata = 0x{rdata}, ',verbose=self.verbose)
-        self.rqueue.append((rlast,rid,rdata))
+        self.rqueue.append((rlast,rid,rdata,Addr))
 
 
 
