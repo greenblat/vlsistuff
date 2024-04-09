@@ -378,6 +378,10 @@ def peekBus(Bus,Wid,Base=''):
 def force(Sig,Val):
     veri.force(Sig,str(Val))
 
+def force_str(Sig,Val):
+    Str = str2hex(Val)
+    veri.force(Sig,Str)
+
 def peek(Sig):
     X = veri_peek(Sig)
     if MODE == 'verilator':
