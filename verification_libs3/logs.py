@@ -982,6 +982,8 @@ class driverClass:
         if Next!=[]:
             self.Forces.extend(Next)
 
+    def force_str(self,Sig,Val):
+        force_str('%s%s' % (self.Path,Sig),Val)
 
     def force(self,Sig,Val,Future = 0):
         if Future>0:
