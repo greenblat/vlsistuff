@@ -239,7 +239,6 @@ class axiSlaveClass:
 
     def rresp(self,Addr):
         logs.log_info(self.Name + ': RRESP %x %x   %s' % (self.badRresp , self.arqueue[0][1],self.arqueue[0]),verbose=self.verbose)
-        logs.log_info(self.Name + ': RRESP %x %x   %s' % (self.badRresp , self.arqueue[0][1],self.arqueue[0]),verbose=True)
         if self.badRresp == Addr:
             return 2
         return 0

@@ -49,6 +49,7 @@ end
 //         if (readout === 1'bx) $display("READOUT X %m");
 //     end
 // end
+wire [63:0]  sign_version = 64'h0001815a14240424 ;
 endmodule
 
 

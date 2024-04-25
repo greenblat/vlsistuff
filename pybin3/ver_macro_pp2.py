@@ -342,6 +342,8 @@ def split_into_files(wholelib,dir):
                 Module = wrds[0]
                 if (Module[-1]==';'):
                     Module = Module[:-1]
+                Module = relax(Module)
+
                 if len(Module)>256:
                     Modl = 'longmodule%d' % Longs
                     File=open(dir+'/'+Modl+'.v','w')
@@ -382,6 +384,11 @@ def split_into_files(wholelib,dir):
                 state=0
             else:
                 File.write(line)
+
+def relax(Txt):
+    for Chr in "'.\\/$=":
+        Txt = Txt.replace(Chr,'_')
+    return Txt
 
 def has_end(word):
     if (word=='endmodule'):

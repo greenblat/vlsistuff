@@ -169,7 +169,7 @@ class sequenceClass:
             if (wrds!=[])and(wrds[0] in ['include']):
                 logs.log_error('SEQ INCLUDE %d %s' % (ind,Line))
             else:
-                logs.log_info('SEQ %d %s' % (ind,Line))
+                logs.log_info('SEQ %d %s' % (ind,Line),verbose=False)
 
     def pythonCodes(self):
         Pythons = []
@@ -612,7 +612,7 @@ class sequenceClass:
                 Guard = self.eval(wrds[2])
                 self.Guardian=Guard
                 Lnum = self.Sequence[self.Ptr][1]
-                logs.log_info('GUARDIAN started %d at line %s' % (Guard,Lnum))
+                logs.log_info('GUARDIAN %s started %s at line %s' % (wrds,Guard,Lnum))
 
             if (self.Guardian % 10000) == 1:
                 Lnum = self.Sequence[self.Ptr][1]

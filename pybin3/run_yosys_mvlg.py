@@ -23,15 +23,14 @@ LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/scmetro_dff.lib'
 LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/basic_no_timing.lib'
 
-LIB_ABC = '/Users/iliagreenblat/clients/weebit/libs/scs130ms_tt_1.80v_25C.lib'
-LIB_DFF = '/Users/iliagreenblat/clients/weebit/libs/scs130ms_tt_1.80v_25C.lib'
-
 LIB_ABC = '/Users/iliagreenblat/projects/3legged_synlib/lut4packed.lib'
 LIB_DFF = '/Users/iliagreenblat/projects/3legged_synlib/dff.lib'
 
 LIB_ABC = '/Users/iliagreenblat/clients/ingongyama/libs/tsmc.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/ingongyama/libs/tsmc.lib'
 
+LIB_ABC = '/Users/iliagreenblat/clients/weebit/libs/scs130ms_tt_1.80v_25C.lib'
+LIB_DFF = '/Users/iliagreenblat/clients/weebit/libs/scs130ms_tt_1.80v_25C.lib'
 
 INCFILE = '''
 read_liberty -lib LIB_ABC
@@ -54,9 +53,11 @@ write_verilog -noattr aa2.glv
 dfflibmap -liberty LIB_DFF
 abc -liberty  LIB_ABC
 ## opt_rmdff;
+hilomap -locell TIELO Y -hicell TIEHI Y
 opt_merge;
 opt_expr -full;
 clean
+opt_clean -purge
 write_verilog -noattr  TOP.glv
 
 # flatten;
@@ -78,10 +79,12 @@ clean;
 opt;
 check;
 clean;
+opt_clean -purge
 opt -full;
 ### opt_rmdff;
 opt_merge;
 opt_expr -full;
+opt_clean -purge
 write_verilog -noattr TOP.flat
 '''
 

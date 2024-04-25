@@ -1,54 +1,36 @@
 
-// THIS IS NOT A WORKING CODE, JUST ATTEMPT TO BUILD ONE
+//sourced from:   https://github.com/greenblat/vlsistuff.git   ::: rtl_library/fifos/rtl
+// MIT license: do whatever
 
 module syncfifo_shared_4 #(parameter WID=32, parameter DEPTH=8) (
-    ,input clk, input rst_n, input softreset
-    ,input vldin[3:0], input [3:0] [WID-1:0] din
+     input clk, input rst_n, input softreset
+    ,input vldin, input [WID-1:0] din, input [1:0] destination
     ,input [3:0] readout, output [3:0] [WID-1:0] dout
-    ,output [3:0] full
+    ,output full
     ,output [3:0] empty
     ,output [15:0] count
+    ,output overflow
 
 );
 
-reg [DEPTH-1:0] bufs [WID-1:0];
+localparam AWID = $clog2(DEPTH);
+reg [DEPTH-1:0] [WID-1:0] bufs ;
 
-localpram AWID = $clog2(DEPTH); 
+reg [DEPTH-1:0] occupied;
+wire [AWID:0] first_free;
+find_first_zero #(.WID(DEPTH)) zero (.din(occupied),.dout(first_free));
+assign full = &occupied;
+
+assign overflow = full && vldin;
 
 wire [3:0] [AWID-1:0] ptr;
-
-wire [2:0] writes = 0+readout[0]+readout[1]+readout[2]+readout[3];
-localparam INIT = 0;
-multififo_w4_r4 #(.WIDTH(AWID),.DEPTH(DEPTH),.INIT(0)) (
-    .clk(clk),.rst_n(rst_n),.softreset(softreset)
-    ,.writes(writes),.din()
-    ,.reads(reads) ,.dout()
-    ,.taken()
-    ,.count(count)
-    ,.frees(frees)
-);
-
-
-
-
-
-
-
-
-
-integer ii;
-reg nonfree;
-always @* begin
-    ii = 0;
-    while ((ii<DEPTH) && (occupied[ii])) ii = ii+1;
-end
-wire nofrees = &occupied;
 
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         occupied <= 0;
     end else begin
-        if (written && !nofrees) occupied[ii] <= 1; 
+        if (vldin && !full)   occupied[first_free] <= 1;
+
         if (readout[0] && !empty[0]) occupied[ptr[0]] <= 0; 
         if (readout[1] && !empty[1]) occupied[ptr[1]] <= 0; 
         if (readout[2] && !empty[2]) occupied[ptr[2]] <= 0; 
@@ -56,48 +38,59 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
+always @(posedge clk) begin
+    if (vldin && !full)   bufs[first_free] <= din;
+end 
+
+assign dout[0] = empty[0] ? 0 :bufs[ptr[0]];
+assign dout[1] = empty[1] ? 0 :bufs[ptr[1]];
+assign dout[2] = empty[2] ? 0 :bufs[ptr[2]];
+assign dout[3] = empty[3] ? 0 :bufs[ptr[3]];
+
+
+
 
 wire [3:0] int_full;
 
+wire [3:0] count0,count1,count2,count3;
 syncfifo #(AWID,DEPTH) ptr_0_fifo (.clk(clk),.rst_n(rst_n)
-    ,.vldin(vldin[0] && !full[0]) ,.din(din[0])
+    ,.vldin(vldin && !full && (destination==0)) ,.din(first_free[AWID-1:0])
     ,.empty(empty[0]),.full(int_full[0])
     ,.readout(readout[0] && !empty[0])
     ,.dout(ptr[0])
     ,.softreset(softreset)
-    ,.count() ,.overflow()
+    ,.count(count0)
 );
 
 syncfifo #(AWID,DEPTH) ptr_1_fifo (.clk(clk),.rst_n(rst_n)
-    ,.vldin(vldin[1] && !full[1]) ,.din(din[1])
+    ,.vldin(vldin && !full && (destination==1)) ,.din(first_free[AWID-1:0])
     ,.empty(empty[1]),.full(int_full[1])
     ,.readout(readout[1] && !empty[1])
     ,.dout(ptr[1])
     ,.softreset(softreset)
-    ,.count() ,.overflow()
+    ,.count(count1)
 );
 
 syncfifo #(AWID,DEPTH) ptr_2_fifo (.clk(clk),.rst_n(rst_n)
-    ,.vldin(vldin[2] && !full[2]) ,.din(din[2])
+    ,.vldin(vldin && !full && (destination==2)) ,.din(first_free[AWID-1:0])
     ,.empty(empty[2]),.full(int_full[2])
     ,.readout(readout[2] && !empty[2])
     ,.dout(ptr[2])
     ,.softreset(softreset)
-    ,.count() ,.overflow()
+    ,.count(count2)
 );
 
 syncfifo #(AWID,DEPTH) ptr_3_fifo (.clk(clk),.rst_n(rst_n)
-    ,.vldin(vldin[3] && !full[3]) ,.din(din[3])
+    ,.vldin(vldin && !full && (destination==3)) ,.din(first_free[AWID-1:0])
     ,.empty(empty[3]),.full(int_full[3])
     ,.readout(readout[3] && !empty[3])
     ,.dout(ptr[3])
     ,.softreset(softreset)
-    ,.count() ,.overflow()
+    ,.count(count3)
 );
 
+assign count = 0+count0+count1+count2+count3;
 
-
-
-
+wire [63:0]  sign_version = 64'h0003064409250424 ;
 endmodule
 

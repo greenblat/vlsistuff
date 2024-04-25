@@ -159,6 +159,7 @@ end
 assign panic4 = dbgrd>dbgwr;
 
 
+wire [63:0]  sign_version = 64'h0005019914240424 ;
 endmodule
 
 

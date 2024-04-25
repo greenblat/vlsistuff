@@ -79,6 +79,7 @@ def cell_dump_msgsim_c(self,Fcc,pythonConnection):
         print('bus',Bus,Dir,bType,What)
         for ii in range(Width):
             Pin = '%s[%d]'%(Bus,ii)
+            Pin = Pin.replace('"','')
             self.pins[Pin]={'direction':Dir}
 
     Pins = list(self.pins.keys())
@@ -92,6 +93,8 @@ def cell_dump_msgsim_c(self,Fcc,pythonConnection):
     if self.ff:
         Reg = self.ff[0][0]
         Regn = self.ff[0][1]
+        Reg = Reg.replace('"','')
+        Regn = Regn.replace('"','')
         Pins.append(Reg)
         Pins.append(Regn)
         Pins.append('next')
@@ -101,6 +104,8 @@ def cell_dump_msgsim_c(self,Fcc,pythonConnection):
     if self.latch:
         Reg = self.latch[0][0]
         Regn = self.latch[0][1]
+        Reg = Reg.replace('"','')
+        Regn = Regn.replace('"','')
         Pins.append(Reg)
         Pins.append(Regn)
         Pins.append('next')
@@ -109,6 +114,9 @@ def cell_dump_msgsim_c(self,Fcc,pythonConnection):
         self.pins['next']={'direction':'output'}
 
     Pins.sort()
+    for ind,Pin in enumerate(Pins):
+        Pins[ind] = Pin.replace('"','')
+        
     Numpins = len(Pins)
     Fcc.write('//pinsOrder["%s"] =  %s\n'%(self.Name,str(Pins))) 
     Fcc.write('//Pairs %s\n'%str(self.pairs))
@@ -239,7 +247,6 @@ def dump_ff(self,Pins):
                 Preset = Preset[1:-1]
             self.PinJobs[Preset]='set'
     Bef = Next
-    print('>>>>>>>>',Next)
     Nextf = makeCfunc(Next,Pins)
     Clockedf = makeCfunc(Clocked,Pins)
     ClockedInd = pinNum(Clocked,Pins)
@@ -503,7 +510,8 @@ def dumpOutputs(self,Pins):
     Numpins = len(Pins)
 
     Str=''
-
+    print("pins %s" % (list(self.pins.keys())))
+    print("Pins %s" % (str(Pins)))
     for ind,Out in enumerate(Pins):
         Dir = self.pins[Out]['direction']
         if Dir=='output':

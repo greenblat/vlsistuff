@@ -39,6 +39,7 @@ Pair :
 
 Pairs : Pairs Pair | Pair ;
 toks : toks ',' Token | Token ;
+tukens : tukens ',' tuken | tuken ;
 Exprs : Expr ',' Expr | Expr ;
 
 Value : String | Floating | Number ;
@@ -61,7 +62,7 @@ Pin : pin '(' tuken ')' '{' pin_items '}' | pin '(' Token ',' Token ')' '{' pin_
 pin_items : pin_items pin_item | pin_item ;
 pin_item : Pair |Timing ;
 
-Ff : ff '(' toks ')' '{' Pairs '}' ;
+Ff : ff '(' tukens ')' '{' Pairs '}'  ;
 Statetable : statetable '(' Exprs ')' '{' Pairs '}' ;
 Latch : latch '(' toks ')' '{' Pairs '}' ;
 Test_cell : test_cell '(' ')' '{' test_cell_items '}' ;

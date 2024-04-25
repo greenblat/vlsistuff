@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
 
 import os,sys
 import pickle
@@ -13,14 +13,15 @@ Reduces = {}
 
 def main():
     YaccFname = sys.argv[1]
-    os.system('yacc -dv %s'%YaccFname)
+    os.system('yacc -dv %s '%YaccFname)
+#    os.system('yacc -dv %s -Wcounterexamples'%YaccFname)
     File = open('y.output')
     work1(File)
     work2()
-    Outf = open('yacc.pickle','wb')
-    pickle.dump(Rules,Outf)
-    pickle.dump(States,Outf)
-    Outf.close()
+#    Outf = open('yacc.pickle','w')
+#    pickle.dump(Rules,Outf)
+#    pickle.dump(States,Outf)
+#    Outf.close()
     report()
     mysave()
 def mysave():
@@ -38,15 +39,14 @@ def rework_list(State,List):
     if len(List)<2:
         return
 
-    ind=-1
+    ind = -1
     for i in range(len(List)):
         A,B,C = List[i]
         if (A=='reduce')and(B=='$default'):
             if ind<0:
                 ind=i
             else:
-                pass
-#                print('ilia rework list got %s'%List)
+                print('ilia rework list got %s'%List)
     if ind>=0:
         X = List.pop(ind)
         List.append(X)
@@ -75,19 +75,18 @@ def use_line(wrds):
     if (db.state=='idle'):
         if wrds[0]=='Grammar':
             db.state='rules'
-        elif wrds[0]=='State':
+        elif (len(wrds) == 2) and (wrds[0] in ['state','State']):
             db.state='state'
             db.inState=wrds[1]
             States[wrds[1]]=[]
     elif (db.state=='rules'):
-        if (wrds[0]=='state'):
+        if (len(wrds) == 2) and (wrds[0] in ['state','State']):
             db.state='state'
             db.inState=wrds[1]
             States[wrds[1]]=[]
         elif (wrds[0]=='Terminals,'):
             db.state='idle'
         elif is_num(wrds[0]):
-            print("XXXX",wrds)
             if wrds[1][-1]==':':
                 db.Rule=wrds[1][:-1]
                 X = wrds[2:]
@@ -101,12 +100,12 @@ def use_line(wrds):
                     Rules[wrds[0]]=(db.Rule,[])
                 else:
                     Rules[wrds[0]]=(db.Rule,wrds[2:])
-        else:
-            print("WRDS",db.state,wrds)
 
 
     elif (db.state=='state'):
-        if (wrds[0]=='state'):
+        if wrds==[]:
+            pass
+        elif (len(wrds) == 2) and (wrds[0] in ['state','State']):
             db.state='state'
             db.inState=wrds[1]
             States[wrds[1]]=[]
@@ -114,7 +113,6 @@ def use_line(wrds):
             db.rule=wrds[:]
         elif len(wrds)<2:
             pass
-#            print("WWW",wrds)
         elif wrds[1]=='shift,':
             Tok = clean_token(wrds[0])
             State = wrds[-1]
@@ -127,8 +125,6 @@ def use_line(wrds):
         elif (wrds[1]=='go')and(wrds[2]=='to')and(wrds[3]=='state'):
             Rstate= ('goto',wrds[0],wrds[4])
             States[db.inState].append(Rstate)
-        else:
-            print("WRDS",db.state,wrds)
 
 def use_reduces():
     for State,Goto in Reduces:

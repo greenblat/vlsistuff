@@ -128,12 +128,14 @@ def deal_cell(LL):
         if Lb2:
             taken=True
             Pin = Lb2['Pin']
+            Pin = Pin.replace('"','')
             Cells[Name].pins[Pin]={}
             Items = Lb2['Items']
             if len(Items[0])==4:
                 Lb3 = match('?Param : ?Val ;',Items)
                 if Lb3:
                     Param,Val = (Lb3['Param'].replace('"',''),Lb3['Val'].replace('"',''))
+                    Pin = Pin.replace('"','')
                     Cells[Name].pins[Pin][Param]=Val
             else:
                  for Thing in Lb2['Items']:
@@ -143,6 +145,7 @@ def deal_cell(LL):
                      else:
                          LLx=Thing
                      if Lparam:
+                         Pin = Pin.replace('"','')
                          Cells[Name].pins[Pin][Lparam[0]]=Lparam[1]
                      elif (LLx[0][0] in ['timing']):
                          LLy = DataBase[LLx[4]]

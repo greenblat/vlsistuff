@@ -12,5 +12,6 @@ end
 
 assign dout = sr[1];
 
+wire [63:0]  sign_version = 64'h000048c214240424 ;
 endmodule
 

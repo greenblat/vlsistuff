@@ -141,6 +141,7 @@ async_stage #(WID) stage7 (
     ,.rdata(rdata7) ,.readx(readx7) ,.rempty(rempty7)
     ,.wdata(wdata) ,.wfull(wfull7) ,.writex(writex7)
 );
+wire [63:0]  sign_version = 64'h0004854d14240424 ;
 endmodule
 
 

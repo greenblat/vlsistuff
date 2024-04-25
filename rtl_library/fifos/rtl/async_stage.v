@@ -35,6 +35,7 @@ always @(posedge rclk or negedge rst_nr) begin
         end
     end
 end
+wire [63:0]  sign_version = 64'h0001068714240424 ;
 endmodule
 
 
