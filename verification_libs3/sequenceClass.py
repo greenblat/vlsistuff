@@ -419,7 +419,7 @@ class sequenceClass:
         self.Ptr += 1
         if '#' in Line: Line = Line[:Line.index('#')]
         if '//' in Line: Line = Line[:Line.index('//')]
-        logs.log_write('sequence: %s'%Line,'seq')
+        logs.log_write('@%d: sequence: %s'%(logs.get_cycles(),Line),'seq')
 #        print(lnum,Line)
         veri.force('tb.seqptr',str(lnum))
         self.seq_line(Line,lnum)

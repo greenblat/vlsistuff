@@ -37,6 +37,7 @@ def help_main(Env):
     os.system('dot -Tpng %s.dot -o %s.png' % (Env.Current.Module,Env.Current.Module))
     secondRun(Env,Env.Current)
     thirdRun(Env,Env.Current)
+    preparePythonHierarch(Env,Env.Current)
 
 def scan_deep2(Env,Mod,Deep,Dones,Fout,Stops,Splits):
     if Deep == 0: return
@@ -79,6 +80,25 @@ def scan_deep(Env,Mod,Ftype,Finst,Fout):
             if Type in Env.Modules:
                 scan_deep(Env,Env.Modules[Type],Type,Inst,Fout)
                 
+def preparePythonHierarch(Env,Mod):
+    Fhier = open('%s_hier.py' % Mod.Module,'w')
+    Fhier.write('HIER = {}\n')
+    __preparePythonHierarch(Env,Mod,Mod.Module,Fhier)
+    Fhier.close()
+
+def __preparePythonHierarch(Env,Mod,Path,Fhier):
+    for Inst in Mod.insts:
+        Type = Mod.insts[Inst].Type
+        Pathd = Path + '.' + Inst
+        registerPath(Pathd,Inst,Type,Fhier)
+        if Type in Env.Modules:
+            Down = Env.Modules[Type]
+            __preparePythonHierarch(Env,Down,Pathd,Fhier)
+            
+def registerPath(Pathd,Inst,Type,Fhier):
+    Fhier.write('HIER["%s"] = "%s","%s"\n' % (Pathd,Type,Inst))
+        
+
 
 def thirdRun(Env,Mod):
     Queue = [Mod.Module]

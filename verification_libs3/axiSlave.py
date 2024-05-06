@@ -40,6 +40,8 @@ class axiSlaveClass:
         self.Initial = True
         self.badRresp =  0
         self.Awready = 1
+        self.Arready = 1
+        self.Arready_int = 1
         self.force('bid',0)
         self.force('rid',0)
         self.force('rresp',0)
@@ -110,6 +112,10 @@ class axiSlaveClass:
 
         elif Wrds[0] == 'awready':
             self.Awready = eval(Wrds[1])
+            self.force('awready',self.Awready)
+        elif Wrds[0] == 'arready':
+            self.Arready = eval(Wrds[1])
+            self.force('arready',self.Arready)
         elif Wrds[0] == 'rresp':
             self.badRresp = eval(Wrds[1])
             logs.log_info('BADRESP of slave set to %x' % self.badRresp,verbose=self.verbose)
@@ -177,30 +183,41 @@ class axiSlaveClass:
         Addr += self.busWidth
         return Addr
 
+    def run_a(self):   # run this nano before def run(self):
+        if self.Initial:
+            self.force('awready',self.Awready)
+            self.force('wready',1)
+            self.force('arready',self.Arready)
+        if self.Starvation:
+            self.force('awready',0)
+            self.force('wready',0)
+            self.force('arready',self.Arready)
+            if self.peek('rready')==1: self.force('rvalid',0) 
+            if self.peek('bready')==1: self.force('bvalid',0) 
+            return
+        if len(self.arqueue)>6:
+            self.force('arready',0)
+            self.Arready_int = 0
+        else:
+            self.force('arready',1)
+            self.Arready_int = 1
+
     def run(self):
         if self.Initial:
             self.Initial = False
-            self.force('awready',self.Awready)
-            self.force('wready',1)
-            self.force('arready',1)
             self.force('bid',0)
             self.force('rid',0)
             self.force('rresp',0)
             self.force('bresp',0)
             self.force('bvalid',0)
         if self.Starvation:
-            self.force('awready',0)
-            self.force('wready',0)
-            self.force('arready',0)
-            if self.peek('rready')==1: self.force('rvalid',0) 
-            if self.peek('bready')==1: self.force('bvalid',0) 
             return
-#        pudb.set_trace()
         self.reading()
         self.writing()
         self.sendrqueue()
 
     def sendrqueue(self):
+        veri.force('tb.rqueuelen',hex(len(self.rqueue)))
         if self.waitread>0:
             self.waitread -= 1
             self.idleread()
@@ -224,6 +241,7 @@ class axiSlaveClass:
                 self.force('rid',rid)
                 self.force('rresp',self.rresp(Addr))
                 self.force('rdata','0x'+rdata)
+                logs.log_info('RDATA %x addr=%x rid=%d rlast=%d' % (rdata,Addr,rid.rlast),verbose=self.verbose)
             return
         (rlast,rid,rdata,Addr) = self.rqueue.pop(0)
         logs.log_info("RAXI len=%d rlast=%s rid=%s addr=%x" % (len(self.rqueue),rlast,rid,Addr),verbose=self.verbose)
@@ -248,28 +266,32 @@ class axiSlaveClass:
         self.force('rlast',0)
         self.force('rdata',0)
 
+
+
+
     def reading(self):
-        if len(self.arqueue)>4:
-            self.force('arready',0)
-        elif self.peek('arvalid')==1:
-            self.force('arready',1)
+
+        Arready = self.Arready_int
+
+        if self.peek('arvalid')==1:
             arid=self.peek('arid')
             arburst=self.peek('arburst')
             araddr=self.peek('araddr')
             arlen=self.peek('arlen')
             arsize=self.peek('arsize')
-            self.arqueue.append((arburst,araddr,arlen,arsize))
-            self.rqueue.append(('wait',self.WAITREAD,0,0))
-            for ii in range(arlen):
-                self.readQueue(arlen,ii,arburst,arsize,araddr,arid,0)
-            self.readQueue(arlen,arlen,arburst,arsize,araddr,arid,1)
-            self.rqueue.append('pop')
-                
-            LastAddr = (araddr + (arlen+1)*(1<<arsize))-1
-            LastPage = LastAddr & 0xffffe000
-            FirstPage = araddr & 0xffffe000
-            if (FirstPage != LastPage):
-                logs.log_error('slave %s CROSSING 4K read araddr=%x arlen=%x arsize=%x' % (self.Name,araddr,arlen,arsize))
+            if Arready == 1:
+                self.arqueue.append((arburst,araddr,arlen,arsize))
+                self.rqueue.append(('wait',self.WAITREAD,0,0))
+                for ii in range(arlen):
+                    self.readQueue(arlen,ii,arburst,arsize,araddr,arid,0)
+                self.readQueue(arlen,arlen,arburst,arsize,araddr,arid,1)
+                self.rqueue.append('pop')
+                    
+                LastAddr = (araddr + (arlen+1)*(1<<arsize))-1
+                LastPage = LastAddr & 0xffffe000
+                FirstPage = araddr & 0xffffe000
+                if (FirstPage != LastPage):
+                    logs.log_error('slave %s CROSSING 4K read araddr=%x arlen=%x arsize=%x' % (self.Name,araddr,arlen,arsize))
                 
     def readQueue(self,arlen,ii,burst,arsize,addr,rid,rlast):
         Incr = 1<<arsize
@@ -311,7 +333,7 @@ class axiSlaveClass:
                 logs.log_info(
                 'axiSlave taken from ram %d bytes  rdata=%s addr=%08x rid=%x burst=%d arlen=%d' % (takenram, rdata, Addr, rid,burst,arlen),verbose=self.verbose)
         else:
-            rdata = self.read_data_generator()
+            rdata = self.read_data_generator(Addr1)
             rdata = hex(rdata)[2:]
             logs.log_info(f'[{self.Name}]: reading data from read data generator function rdata = 0x{rdata}, ',verbose=self.verbose)
         self.rqueue.append((rlast,rid,rdata,Addr))
@@ -435,3 +457,14 @@ def nicew(Queue):
         res.append(Str)
     return ''.join(res)
 
+
+def prqueue(Queue):
+    Str = '%d ' % len(Queue)
+    for Obj in Queue:
+        try:
+            (rlast,rid,rdata,Addr) = Obj
+            Now  = ' %s.%s.%s.0x%x' % (rlast,rid,rdata,Addr)
+        except:
+            Now  = ' %s' % str(Obj)
+        Str += Now
+    return Str

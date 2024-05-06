@@ -8,6 +8,7 @@ Wrongs = 0
 Warnings = 0   
 printDebugs = set()
 printCorrects = True
+friend_support = False
 MAXWRONGS = 2000
 MAXERRORS = 2000
 PYMONLOG = 'pymon.log'
@@ -155,6 +156,8 @@ def log_err(Text,Which=0,Tb=True,Pstack=False,verbose=False):
         veri.force('tracer.errors',str(Errors))
     elif Tb: 
         if veri: veri.force('%serrors'%TB,str(Errors))
+    if friend_support:
+        friend_support.wrongscorrects(Wrongs,Corrects,Errors,get_cycles())
 
 
     if (Errors>MAXERRORS):
@@ -179,6 +182,8 @@ def log_correct(Text,Which=0,Print=True):
     if Print:
         print('@%d: %d vs %d (err=%d) ___CORRECT: %s'%(get_cycles(),Corrects,Wrongs,Errors,Text))
     Flogs[Which].write('@%d: %d vs %d (err=%d) ___CORRECT: %s\n'%(get_cycles(),Corrects,Wrongs,Errors,Text))
+    if friend_support:
+        friend_support.wrongscorrects(Wrongs,Corrects,Errors,get_cycles())
 
 def log_ensure(Cond,Text,Which=0,print_correct=True):
     if Cond:
@@ -205,6 +210,8 @@ def log_wrong(Text,Which=0):
         talk("",'יותר מדי שגיאות')
         log_info('max wrongs reached (%d). bailing out. (MAXWRONGS==%d)'%(Wrongs,MAXWRONGS),Which)
         finish('max wrongs reached')
+    if friend_support:
+        friend_support.wrongscorrects(Wrongs,Corrects,Errors,get_cycles())
 
 def finish_now(Text='.'):
     global Flog
@@ -565,7 +572,7 @@ def panicFinish(Reason,ContinueFor=20):
 def closeLogs():
     for X in Flogs:
         Flogs[X].flush()
-
+    if friend_support: friend_support.finish()
 
       
 def finishing(Txt='"not given"',ContinueFor=20):
