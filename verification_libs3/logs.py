@@ -185,9 +185,9 @@ def log_correct(Text,Which=0,Print=True):
     if friend_support:
         friend_support.wrongscorrects(Wrongs,Corrects,Errors,get_cycles())
 
-def log_ensure(Cond,Text,Which=0,print_correct=True):
+def log_ensure(Cond,Text,Which=0):
     if Cond:
-        log_correct(Text,Which,print_correct)
+        log_correct(Text,Which,True)
     else:
         log_wrong(Text,Which)
     

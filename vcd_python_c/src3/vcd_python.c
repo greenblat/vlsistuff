@@ -582,6 +582,8 @@ void pushtok(char *s,int ind) {
         else if (n==qqai("$dumpports")) { 
             state=Dumpvars;
             search=1;
+        } else if (n==qqai("$dumpall")) { 
+            state=Dumpvars;
         } else if (n==qqai("$dumpvars")) { 
             state=Dumpvars;
             //search=1;
