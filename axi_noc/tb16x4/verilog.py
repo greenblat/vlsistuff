@@ -127,7 +127,7 @@ class driverMonitor(logs.driverClass):
         msts[Mst].makeRead(1,Len,Addr,3)
         return
 
-    def action(self,Txt):
+    def action(self,Txt,Orig):
         if 'wr_enable' in Txt: 
             self.WrEnable = True
             return

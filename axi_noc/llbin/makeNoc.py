@@ -327,17 +327,23 @@ INSTHEADER = '''
 module tb;
 parameter IDWID=4; parameter DWID=64; parameter EXTRAS=8; parameter WSTRB=DWID/8;
 
-reg [31:0] cycles;   initial cycles=0;
-reg [31:0] errors;   initial errors=0;
-reg [31:0] wrongs;   initial wrongs=0;
-reg [31:0] Panics;   initial Panics=0;
-reg [31:0] corrects; initial corrects=0;
+integer    cycles;   initial cycles=0;
+integer    errors;   initial errors=0;
+integer    wrongs;   initial wrongs=0;
+integer    Panics;   initial Panics=0;
+integer    corrects; initial corrects=0;
 reg [31:0] marker;   initial marker=0;
 reg [31:0] marker0;   initial marker0=0;
 reg [31:0] marker1;   initial marker1=0;
 reg [31:0] marker2;   initial marker2=0;
 reg [31:0] marker3;   initial marker3=0;
 reg [31:0] Index;   initial Index=0;
+integer    rqueuelen;   initial rqueuelen=0;
+reg [31:0] seqptr;   initial seqptr=0;
+reg [31:0] slv0_marker3;   initial slv0_marker3=0;
+reg [31:0] slv1_marker3;   initial slv1_marker3=0;
+reg [31:0] slv2_marker3;   initial slv2_marker3=0;
+reg [31:0] slv3_marker3;   initial slv3_marker3=0;
 
 
 

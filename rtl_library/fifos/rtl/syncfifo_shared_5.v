@@ -2,7 +2,7 @@
 
 module syncfifo_shared_5 #(parameter WID=32, parameter DEPTH=8) (
      input clk, input rst_n, input softreset
-    ,input vldin[4:0], input [4:0] [WID-1:0] din
+    ,input [4:0] vldin, input [4:0] [WID-1:0] din
     ,input [4:0] readout, output [4:0] [WID-1:0] dout
     ,output [4:0] full
     ,output [4:0] empty

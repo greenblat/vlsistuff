@@ -6,7 +6,7 @@ comp
 ~/verification_libs3/scanDeepListForPanics.py 
 ~/verification_libs3/scanDeepListForPanics.py deep.list count
 
-simv +SEQ=$TEST.seq +LOG=$TEST
+simv $TEST.seq +LOG=$TEST
 
 
 

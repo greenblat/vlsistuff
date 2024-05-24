@@ -3,30 +3,37 @@
 module tb;
 parameter IDWID=4; parameter DWID=64; parameter EXTRAS=8; parameter WSTRB=DWID/8;
 
-reg [31:0] cycles;   initial cycles=0;
-reg [31:0] errors;   initial errors=0;
-reg [31:0] wrongs;   initial wrongs=0;
-reg [31:0] Panics;   initial Panics=0;
-reg [31:0] corrects; initial corrects=0;
+integer    cycles;   initial cycles=0;
+integer    errors;   initial errors=0;
+integer    wrongs;   initial wrongs=0;
+integer    Panics;   initial Panics=0;
+integer    corrects; initial corrects=0;
 reg [31:0] marker;   initial marker=0;
 reg [31:0] marker0;   initial marker0=0;
 reg [31:0] marker1;   initial marker1=0;
 reg [31:0] marker2;   initial marker2=0;
 reg [31:0] marker3;   initial marker3=0;
 reg [31:0] Index;   initial Index=0;
+integer    rqueuelen;   initial rqueuelen=0;
+reg [31:0] seqptr;   initial seqptr=0;
+reg [31:0] slv0_marker3;   initial slv0_marker3=0;
+reg [31:0] slv1_marker3;   initial slv1_marker3=0;
+reg [31:0] slv2_marker3;   initial slv2_marker3=0;
+reg [31:0] slv3_marker3;   initial slv3_marker3=0;
 
 
 
 reg clk; reg rst_n;
+integer clk_HALFPERIOD = 100;
 always begin
     clk = 0;
-    #10;
+    #(clk_HALFPERIOD);
     clk = 1;
     #3;
     $python("negedge()");
     #3;
     $python("auxs()");
-    #4;
+    #(clk_HALFPERIOD-6);
 end
 initial begin
     $dumpvars(0,tb);
@@ -35,12 +42,13 @@ initial begin
     rst_n = 1;
 end
 
-reg  [2:0] slv0_awsize ; initial slv0_awsize = 0;
-reg  [2:0] slv0_arsize ; initial slv0_arsize = 0;
+// reg  [2:0] slv0_awsize ; initial slv0_awsize = 0;
+// reg  [2:0] slv0_arsize ; initial slv0_arsize = 0;
 
 wire  [IDWID-1:0] slv0_arid ;
 wire  [31:0] slv0_araddr ;
 wire  [7:0] slv0_arlen ;
+wire  [2:0] slv0_arsize ;
 wire  [EXTRAS-1:0] slv0_arextras ;
 wire  [1:0] slv0_arburst ;
 wire  slv0_arvalid ;
@@ -55,6 +63,7 @@ wire  slv0_rready ;
 wire  [IDWID-1:0] slv0_awid ;
 wire  [31:0] slv0_awaddr ;
 wire  [7:0] slv0_awlen ;
+wire  [2:0] slv0_awsize ;
 wire  [EXTRAS-1:0] slv0_awextras ;
 wire  [1:0] slv0_awburst ;
 wire  slv0_awvalid ;
@@ -74,12 +83,13 @@ initial slv0_awready = 0;
 initial slv0_rvalid = 0;
 initial slv0_bvalid = 0;
 
-reg  [2:0] slv1_awsize ; initial slv1_awsize = 0;
-reg  [2:0] slv1_arsize ; initial slv1_arsize = 0;
+// reg  [2:0] slv1_awsize ; initial slv1_awsize = 0;
+// reg  [2:0] slv1_arsize ; initial slv1_arsize = 0;
 
 wire  [IDWID-1:0] slv1_arid ;
 wire  [31:0] slv1_araddr ;
 wire  [7:0] slv1_arlen ;
+wire  [2:0] slv1_arsize ;
 wire  [EXTRAS-1:0] slv1_arextras ;
 wire  [1:0] slv1_arburst ;
 wire  slv1_arvalid ;
@@ -94,6 +104,7 @@ wire  slv1_rready ;
 wire  [IDWID-1:0] slv1_awid ;
 wire  [31:0] slv1_awaddr ;
 wire  [7:0] slv1_awlen ;
+wire  [2:0] slv1_awsize ;
 wire  [EXTRAS-1:0] slv1_awextras ;
 wire  [1:0] slv1_awburst ;
 wire  slv1_awvalid ;
@@ -113,12 +124,13 @@ initial slv1_awready = 0;
 initial slv1_rvalid = 0;
 initial slv1_bvalid = 0;
 
-reg  [2:0] slv2_awsize ; initial slv2_awsize = 0;
-reg  [2:0] slv2_arsize ; initial slv2_arsize = 0;
+// reg  [2:0] slv2_awsize ; initial slv2_awsize = 0;
+// reg  [2:0] slv2_arsize ; initial slv2_arsize = 0;
 
 wire  [IDWID-1:0] slv2_arid ;
 wire  [31:0] slv2_araddr ;
 wire  [7:0] slv2_arlen ;
+wire  [2:0] slv2_arsize ;
 wire  [EXTRAS-1:0] slv2_arextras ;
 wire  [1:0] slv2_arburst ;
 wire  slv2_arvalid ;
@@ -133,6 +145,7 @@ wire  slv2_rready ;
 wire  [IDWID-1:0] slv2_awid ;
 wire  [31:0] slv2_awaddr ;
 wire  [7:0] slv2_awlen ;
+wire  [2:0] slv2_awsize ;
 wire  [EXTRAS-1:0] slv2_awextras ;
 wire  [1:0] slv2_awburst ;
 wire  slv2_awvalid ;
@@ -152,12 +165,13 @@ initial slv2_awready = 0;
 initial slv2_rvalid = 0;
 initial slv2_bvalid = 0;
 
-reg  [2:0] slv3_awsize ; initial slv3_awsize = 0;
-reg  [2:0] slv3_arsize ; initial slv3_arsize = 0;
+// reg  [2:0] slv3_awsize ; initial slv3_awsize = 0;
+// reg  [2:0] slv3_arsize ; initial slv3_arsize = 0;
 
 wire  [IDWID-1:0] slv3_arid ;
 wire  [31:0] slv3_araddr ;
 wire  [7:0] slv3_arlen ;
+wire  [2:0] slv3_arsize ;
 wire  [EXTRAS-1:0] slv3_arextras ;
 wire  [1:0] slv3_arburst ;
 wire  slv3_arvalid ;
@@ -172,6 +186,7 @@ wire  slv3_rready ;
 wire  [IDWID-1:0] slv3_awid ;
 wire  [31:0] slv3_awaddr ;
 wire  [7:0] slv3_awlen ;
+wire  [2:0] slv3_awsize ;
 wire  [EXTRAS-1:0] slv3_awextras ;
 wire  [1:0] slv3_awburst ;
 wire  slv3_awvalid ;
@@ -191,12 +206,13 @@ initial slv3_awready = 0;
 initial slv3_rvalid = 0;
 initial slv3_bvalid = 0;
 
-reg  [2:0] mst0_awsize ; initial mst0_awsize = 0;
-reg  [2:0] mst0_arsize ; initial mst0_arsize = 0;
+// reg  [2:0] mst0_awsize ; initial mst0_awsize = 0;
+// reg  [2:0] mst0_arsize ; initial mst0_arsize = 0;
 
 reg  [IDWID-1:0] mst0_arid ;
 reg  [31:0] mst0_araddr ;
 reg  [7:0] mst0_arlen ;
+reg  [2:0] mst0_arsize ;
 reg  [EXTRAS-1:0] mst0_arextras ;
 reg  [1:0] mst0_arburst ;
 reg  mst0_arvalid ;
@@ -211,6 +227,7 @@ reg  mst0_rready ;
 reg  [IDWID-1:0] mst0_awid ;
 reg  [31:0] mst0_awaddr ;
 reg  [7:0] mst0_awlen ;
+reg  [2:0] mst0_awsize ;
 reg  [EXTRAS-1:0] mst0_awextras ;
 reg  [1:0] mst0_awburst ;
 reg  mst0_awvalid ;
@@ -231,12 +248,13 @@ initial mst0_arvalid = 0;
 initial mst0_awvalid = 0;
 initial mst0_rready = 0;
 
-reg  [2:0] mst1_awsize ; initial mst1_awsize = 0;
-reg  [2:0] mst1_arsize ; initial mst1_arsize = 0;
+// reg  [2:0] mst1_awsize ; initial mst1_awsize = 0;
+// reg  [2:0] mst1_arsize ; initial mst1_arsize = 0;
 
 reg  [IDWID-1:0] mst1_arid ;
 reg  [31:0] mst1_araddr ;
 reg  [7:0] mst1_arlen ;
+reg  [2:0] mst1_arsize ;
 reg  [EXTRAS-1:0] mst1_arextras ;
 reg  [1:0] mst1_arburst ;
 reg  mst1_arvalid ;
@@ -251,6 +269,7 @@ reg  mst1_rready ;
 reg  [IDWID-1:0] mst1_awid ;
 reg  [31:0] mst1_awaddr ;
 reg  [7:0] mst1_awlen ;
+reg  [2:0] mst1_awsize ;
 reg  [EXTRAS-1:0] mst1_awextras ;
 reg  [1:0] mst1_awburst ;
 reg  mst1_awvalid ;
@@ -271,12 +290,13 @@ initial mst1_arvalid = 0;
 initial mst1_awvalid = 0;
 initial mst1_rready = 0;
 
-reg  [2:0] mst10_awsize ; initial mst10_awsize = 0;
-reg  [2:0] mst10_arsize ; initial mst10_arsize = 0;
+// reg  [2:0] mst10_awsize ; initial mst10_awsize = 0;
+// reg  [2:0] mst10_arsize ; initial mst10_arsize = 0;
 
 reg  [IDWID-1:0] mst10_arid ;
 reg  [31:0] mst10_araddr ;
 reg  [7:0] mst10_arlen ;
+reg  [2:0] mst10_arsize ;
 reg  [EXTRAS-1:0] mst10_arextras ;
 reg  [1:0] mst10_arburst ;
 reg  mst10_arvalid ;
@@ -291,6 +311,7 @@ reg  mst10_rready ;
 reg  [IDWID-1:0] mst10_awid ;
 reg  [31:0] mst10_awaddr ;
 reg  [7:0] mst10_awlen ;
+reg  [2:0] mst10_awsize ;
 reg  [EXTRAS-1:0] mst10_awextras ;
 reg  [1:0] mst10_awburst ;
 reg  mst10_awvalid ;
@@ -311,12 +332,13 @@ initial mst10_arvalid = 0;
 initial mst10_awvalid = 0;
 initial mst10_rready = 0;
 
-reg  [2:0] mst11_awsize ; initial mst11_awsize = 0;
-reg  [2:0] mst11_arsize ; initial mst11_arsize = 0;
+// reg  [2:0] mst11_awsize ; initial mst11_awsize = 0;
+// reg  [2:0] mst11_arsize ; initial mst11_arsize = 0;
 
 reg  [IDWID-1:0] mst11_arid ;
 reg  [31:0] mst11_araddr ;
 reg  [7:0] mst11_arlen ;
+reg  [2:0] mst11_arsize ;
 reg  [EXTRAS-1:0] mst11_arextras ;
 reg  [1:0] mst11_arburst ;
 reg  mst11_arvalid ;
@@ -331,6 +353,7 @@ reg  mst11_rready ;
 reg  [IDWID-1:0] mst11_awid ;
 reg  [31:0] mst11_awaddr ;
 reg  [7:0] mst11_awlen ;
+reg  [2:0] mst11_awsize ;
 reg  [EXTRAS-1:0] mst11_awextras ;
 reg  [1:0] mst11_awburst ;
 reg  mst11_awvalid ;
@@ -351,12 +374,13 @@ initial mst11_arvalid = 0;
 initial mst11_awvalid = 0;
 initial mst11_rready = 0;
 
-reg  [2:0] mst12_awsize ; initial mst12_awsize = 0;
-reg  [2:0] mst12_arsize ; initial mst12_arsize = 0;
+// reg  [2:0] mst12_awsize ; initial mst12_awsize = 0;
+// reg  [2:0] mst12_arsize ; initial mst12_arsize = 0;
 
 reg  [IDWID-1:0] mst12_arid ;
 reg  [31:0] mst12_araddr ;
 reg  [7:0] mst12_arlen ;
+reg  [2:0] mst12_arsize ;
 reg  [EXTRAS-1:0] mst12_arextras ;
 reg  [1:0] mst12_arburst ;
 reg  mst12_arvalid ;
@@ -371,6 +395,7 @@ reg  mst12_rready ;
 reg  [IDWID-1:0] mst12_awid ;
 reg  [31:0] mst12_awaddr ;
 reg  [7:0] mst12_awlen ;
+reg  [2:0] mst12_awsize ;
 reg  [EXTRAS-1:0] mst12_awextras ;
 reg  [1:0] mst12_awburst ;
 reg  mst12_awvalid ;
@@ -391,12 +416,13 @@ initial mst12_arvalid = 0;
 initial mst12_awvalid = 0;
 initial mst12_rready = 0;
 
-reg  [2:0] mst13_awsize ; initial mst13_awsize = 0;
-reg  [2:0] mst13_arsize ; initial mst13_arsize = 0;
+// reg  [2:0] mst13_awsize ; initial mst13_awsize = 0;
+// reg  [2:0] mst13_arsize ; initial mst13_arsize = 0;
 
 reg  [IDWID-1:0] mst13_arid ;
 reg  [31:0] mst13_araddr ;
 reg  [7:0] mst13_arlen ;
+reg  [2:0] mst13_arsize ;
 reg  [EXTRAS-1:0] mst13_arextras ;
 reg  [1:0] mst13_arburst ;
 reg  mst13_arvalid ;
@@ -411,6 +437,7 @@ reg  mst13_rready ;
 reg  [IDWID-1:0] mst13_awid ;
 reg  [31:0] mst13_awaddr ;
 reg  [7:0] mst13_awlen ;
+reg  [2:0] mst13_awsize ;
 reg  [EXTRAS-1:0] mst13_awextras ;
 reg  [1:0] mst13_awburst ;
 reg  mst13_awvalid ;
@@ -431,12 +458,13 @@ initial mst13_arvalid = 0;
 initial mst13_awvalid = 0;
 initial mst13_rready = 0;
 
-reg  [2:0] mst14_awsize ; initial mst14_awsize = 0;
-reg  [2:0] mst14_arsize ; initial mst14_arsize = 0;
+// reg  [2:0] mst14_awsize ; initial mst14_awsize = 0;
+// reg  [2:0] mst14_arsize ; initial mst14_arsize = 0;
 
 reg  [IDWID-1:0] mst14_arid ;
 reg  [31:0] mst14_araddr ;
 reg  [7:0] mst14_arlen ;
+reg  [2:0] mst14_arsize ;
 reg  [EXTRAS-1:0] mst14_arextras ;
 reg  [1:0] mst14_arburst ;
 reg  mst14_arvalid ;
@@ -451,6 +479,7 @@ reg  mst14_rready ;
 reg  [IDWID-1:0] mst14_awid ;
 reg  [31:0] mst14_awaddr ;
 reg  [7:0] mst14_awlen ;
+reg  [2:0] mst14_awsize ;
 reg  [EXTRAS-1:0] mst14_awextras ;
 reg  [1:0] mst14_awburst ;
 reg  mst14_awvalid ;
@@ -471,12 +500,13 @@ initial mst14_arvalid = 0;
 initial mst14_awvalid = 0;
 initial mst14_rready = 0;
 
-reg  [2:0] mst15_awsize ; initial mst15_awsize = 0;
-reg  [2:0] mst15_arsize ; initial mst15_arsize = 0;
+// reg  [2:0] mst15_awsize ; initial mst15_awsize = 0;
+// reg  [2:0] mst15_arsize ; initial mst15_arsize = 0;
 
 reg  [IDWID-1:0] mst15_arid ;
 reg  [31:0] mst15_araddr ;
 reg  [7:0] mst15_arlen ;
+reg  [2:0] mst15_arsize ;
 reg  [EXTRAS-1:0] mst15_arextras ;
 reg  [1:0] mst15_arburst ;
 reg  mst15_arvalid ;
@@ -491,6 +521,7 @@ reg  mst15_rready ;
 reg  [IDWID-1:0] mst15_awid ;
 reg  [31:0] mst15_awaddr ;
 reg  [7:0] mst15_awlen ;
+reg  [2:0] mst15_awsize ;
 reg  [EXTRAS-1:0] mst15_awextras ;
 reg  [1:0] mst15_awburst ;
 reg  mst15_awvalid ;
@@ -511,12 +542,13 @@ initial mst15_arvalid = 0;
 initial mst15_awvalid = 0;
 initial mst15_rready = 0;
 
-reg  [2:0] mst2_awsize ; initial mst2_awsize = 0;
-reg  [2:0] mst2_arsize ; initial mst2_arsize = 0;
+// reg  [2:0] mst2_awsize ; initial mst2_awsize = 0;
+// reg  [2:0] mst2_arsize ; initial mst2_arsize = 0;
 
 reg  [IDWID-1:0] mst2_arid ;
 reg  [31:0] mst2_araddr ;
 reg  [7:0] mst2_arlen ;
+reg  [2:0] mst2_arsize ;
 reg  [EXTRAS-1:0] mst2_arextras ;
 reg  [1:0] mst2_arburst ;
 reg  mst2_arvalid ;
@@ -531,6 +563,7 @@ reg  mst2_rready ;
 reg  [IDWID-1:0] mst2_awid ;
 reg  [31:0] mst2_awaddr ;
 reg  [7:0] mst2_awlen ;
+reg  [2:0] mst2_awsize ;
 reg  [EXTRAS-1:0] mst2_awextras ;
 reg  [1:0] mst2_awburst ;
 reg  mst2_awvalid ;
@@ -551,12 +584,13 @@ initial mst2_arvalid = 0;
 initial mst2_awvalid = 0;
 initial mst2_rready = 0;
 
-reg  [2:0] mst3_awsize ; initial mst3_awsize = 0;
-reg  [2:0] mst3_arsize ; initial mst3_arsize = 0;
+// reg  [2:0] mst3_awsize ; initial mst3_awsize = 0;
+// reg  [2:0] mst3_arsize ; initial mst3_arsize = 0;
 
 reg  [IDWID-1:0] mst3_arid ;
 reg  [31:0] mst3_araddr ;
 reg  [7:0] mst3_arlen ;
+reg  [2:0] mst3_arsize ;
 reg  [EXTRAS-1:0] mst3_arextras ;
 reg  [1:0] mst3_arburst ;
 reg  mst3_arvalid ;
@@ -571,6 +605,7 @@ reg  mst3_rready ;
 reg  [IDWID-1:0] mst3_awid ;
 reg  [31:0] mst3_awaddr ;
 reg  [7:0] mst3_awlen ;
+reg  [2:0] mst3_awsize ;
 reg  [EXTRAS-1:0] mst3_awextras ;
 reg  [1:0] mst3_awburst ;
 reg  mst3_awvalid ;
@@ -591,12 +626,13 @@ initial mst3_arvalid = 0;
 initial mst3_awvalid = 0;
 initial mst3_rready = 0;
 
-reg  [2:0] mst4_awsize ; initial mst4_awsize = 0;
-reg  [2:0] mst4_arsize ; initial mst4_arsize = 0;
+// reg  [2:0] mst4_awsize ; initial mst4_awsize = 0;
+// reg  [2:0] mst4_arsize ; initial mst4_arsize = 0;
 
 reg  [IDWID-1:0] mst4_arid ;
 reg  [31:0] mst4_araddr ;
 reg  [7:0] mst4_arlen ;
+reg  [2:0] mst4_arsize ;
 reg  [EXTRAS-1:0] mst4_arextras ;
 reg  [1:0] mst4_arburst ;
 reg  mst4_arvalid ;
@@ -611,6 +647,7 @@ reg  mst4_rready ;
 reg  [IDWID-1:0] mst4_awid ;
 reg  [31:0] mst4_awaddr ;
 reg  [7:0] mst4_awlen ;
+reg  [2:0] mst4_awsize ;
 reg  [EXTRAS-1:0] mst4_awextras ;
 reg  [1:0] mst4_awburst ;
 reg  mst4_awvalid ;
@@ -631,12 +668,13 @@ initial mst4_arvalid = 0;
 initial mst4_awvalid = 0;
 initial mst4_rready = 0;
 
-reg  [2:0] mst5_awsize ; initial mst5_awsize = 0;
-reg  [2:0] mst5_arsize ; initial mst5_arsize = 0;
+// reg  [2:0] mst5_awsize ; initial mst5_awsize = 0;
+// reg  [2:0] mst5_arsize ; initial mst5_arsize = 0;
 
 reg  [IDWID-1:0] mst5_arid ;
 reg  [31:0] mst5_araddr ;
 reg  [7:0] mst5_arlen ;
+reg  [2:0] mst5_arsize ;
 reg  [EXTRAS-1:0] mst5_arextras ;
 reg  [1:0] mst5_arburst ;
 reg  mst5_arvalid ;
@@ -651,6 +689,7 @@ reg  mst5_rready ;
 reg  [IDWID-1:0] mst5_awid ;
 reg  [31:0] mst5_awaddr ;
 reg  [7:0] mst5_awlen ;
+reg  [2:0] mst5_awsize ;
 reg  [EXTRAS-1:0] mst5_awextras ;
 reg  [1:0] mst5_awburst ;
 reg  mst5_awvalid ;
@@ -671,12 +710,13 @@ initial mst5_arvalid = 0;
 initial mst5_awvalid = 0;
 initial mst5_rready = 0;
 
-reg  [2:0] mst6_awsize ; initial mst6_awsize = 0;
-reg  [2:0] mst6_arsize ; initial mst6_arsize = 0;
+// reg  [2:0] mst6_awsize ; initial mst6_awsize = 0;
+// reg  [2:0] mst6_arsize ; initial mst6_arsize = 0;
 
 reg  [IDWID-1:0] mst6_arid ;
 reg  [31:0] mst6_araddr ;
 reg  [7:0] mst6_arlen ;
+reg  [2:0] mst6_arsize ;
 reg  [EXTRAS-1:0] mst6_arextras ;
 reg  [1:0] mst6_arburst ;
 reg  mst6_arvalid ;
@@ -691,6 +731,7 @@ reg  mst6_rready ;
 reg  [IDWID-1:0] mst6_awid ;
 reg  [31:0] mst6_awaddr ;
 reg  [7:0] mst6_awlen ;
+reg  [2:0] mst6_awsize ;
 reg  [EXTRAS-1:0] mst6_awextras ;
 reg  [1:0] mst6_awburst ;
 reg  mst6_awvalid ;
@@ -711,12 +752,13 @@ initial mst6_arvalid = 0;
 initial mst6_awvalid = 0;
 initial mst6_rready = 0;
 
-reg  [2:0] mst7_awsize ; initial mst7_awsize = 0;
-reg  [2:0] mst7_arsize ; initial mst7_arsize = 0;
+// reg  [2:0] mst7_awsize ; initial mst7_awsize = 0;
+// reg  [2:0] mst7_arsize ; initial mst7_arsize = 0;
 
 reg  [IDWID-1:0] mst7_arid ;
 reg  [31:0] mst7_araddr ;
 reg  [7:0] mst7_arlen ;
+reg  [2:0] mst7_arsize ;
 reg  [EXTRAS-1:0] mst7_arextras ;
 reg  [1:0] mst7_arburst ;
 reg  mst7_arvalid ;
@@ -731,6 +773,7 @@ reg  mst7_rready ;
 reg  [IDWID-1:0] mst7_awid ;
 reg  [31:0] mst7_awaddr ;
 reg  [7:0] mst7_awlen ;
+reg  [2:0] mst7_awsize ;
 reg  [EXTRAS-1:0] mst7_awextras ;
 reg  [1:0] mst7_awburst ;
 reg  mst7_awvalid ;
@@ -751,12 +794,13 @@ initial mst7_arvalid = 0;
 initial mst7_awvalid = 0;
 initial mst7_rready = 0;
 
-reg  [2:0] mst8_awsize ; initial mst8_awsize = 0;
-reg  [2:0] mst8_arsize ; initial mst8_arsize = 0;
+// reg  [2:0] mst8_awsize ; initial mst8_awsize = 0;
+// reg  [2:0] mst8_arsize ; initial mst8_arsize = 0;
 
 reg  [IDWID-1:0] mst8_arid ;
 reg  [31:0] mst8_araddr ;
 reg  [7:0] mst8_arlen ;
+reg  [2:0] mst8_arsize ;
 reg  [EXTRAS-1:0] mst8_arextras ;
 reg  [1:0] mst8_arburst ;
 reg  mst8_arvalid ;
@@ -771,6 +815,7 @@ reg  mst8_rready ;
 reg  [IDWID-1:0] mst8_awid ;
 reg  [31:0] mst8_awaddr ;
 reg  [7:0] mst8_awlen ;
+reg  [2:0] mst8_awsize ;
 reg  [EXTRAS-1:0] mst8_awextras ;
 reg  [1:0] mst8_awburst ;
 reg  mst8_awvalid ;
@@ -791,12 +836,13 @@ initial mst8_arvalid = 0;
 initial mst8_awvalid = 0;
 initial mst8_rready = 0;
 
-reg  [2:0] mst9_awsize ; initial mst9_awsize = 0;
-reg  [2:0] mst9_arsize ; initial mst9_arsize = 0;
+// reg  [2:0] mst9_awsize ; initial mst9_awsize = 0;
+// reg  [2:0] mst9_arsize ; initial mst9_arsize = 0;
 
 reg  [IDWID-1:0] mst9_arid ;
 reg  [31:0] mst9_araddr ;
 reg  [7:0] mst9_arlen ;
+reg  [2:0] mst9_arsize ;
 reg  [EXTRAS-1:0] mst9_arextras ;
 reg  [1:0] mst9_arburst ;
 reg  mst9_arvalid ;
@@ -811,6 +857,7 @@ reg  mst9_rready ;
 reg  [IDWID-1:0] mst9_awid ;
 reg  [31:0] mst9_awaddr ;
 reg  [7:0] mst9_awlen ;
+reg  [2:0] mst9_awsize ;
 reg  [EXTRAS-1:0] mst9_awextras ;
 reg  [1:0] mst9_awburst ;
 reg  mst9_awvalid ;
@@ -835,15 +882,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.slv0_araddr(slv0_araddr[31:0])
     ,.slv0_arburst(slv0_arburst[1:0])
     ,.slv0_arextras(slv0_arextras[(EXTRAS - 1):0])
-    ,.slv0_arid(slv0_arid[(IDWID - 1):0])
-    ,.slv0_arlen(slv0_arlen[7:0])
+    ,.slv0_arid(slv0_arid)
+    ,.slv0_arlen(slv0_arlen)
+    ,.slv0_arsize(slv0_arsize)
     ,.slv0_arready(slv0_arready)
     ,.slv0_arvalid(slv0_arvalid)
     ,.slv0_awaddr(slv0_awaddr[31:0])
     ,.slv0_awburst(slv0_awburst[1:0])
     ,.slv0_awextras(slv0_awextras[(EXTRAS - 1):0])
     ,.slv0_awid(slv0_awid[(IDWID - 1):0])
-    ,.slv0_awlen(slv0_awlen[7:0])
+    ,.slv0_awlen(slv0_awlen)
+    ,.slv0_awsize(slv0_awsize)
     ,.slv0_awready(slv0_awready)
     ,.slv0_awvalid(slv0_awvalid)
     ,.slv0_bid(slv0_bid[(IDWID - 1):0])
@@ -866,15 +915,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.slv1_araddr(slv1_araddr[31:0])
     ,.slv1_arburst(slv1_arburst[1:0])
     ,.slv1_arextras(slv1_arextras[(EXTRAS - 1):0])
-    ,.slv1_arid(slv1_arid[(IDWID - 1):0])
-    ,.slv1_arlen(slv1_arlen[7:0])
+    ,.slv1_arid(slv1_arid)
+    ,.slv1_arlen(slv1_arlen)
+    ,.slv1_arsize(slv1_arsize)
     ,.slv1_arready(slv1_arready)
     ,.slv1_arvalid(slv1_arvalid)
     ,.slv1_awaddr(slv1_awaddr[31:0])
     ,.slv1_awburst(slv1_awburst[1:0])
     ,.slv1_awextras(slv1_awextras[(EXTRAS - 1):0])
     ,.slv1_awid(slv1_awid[(IDWID - 1):0])
-    ,.slv1_awlen(slv1_awlen[7:0])
+    ,.slv1_awlen(slv1_awlen)
+    ,.slv1_awsize(slv1_awsize)
     ,.slv1_awready(slv1_awready)
     ,.slv1_awvalid(slv1_awvalid)
     ,.slv1_bid(slv1_bid[(IDWID - 1):0])
@@ -897,15 +948,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.slv2_araddr(slv2_araddr[31:0])
     ,.slv2_arburst(slv2_arburst[1:0])
     ,.slv2_arextras(slv2_arextras[(EXTRAS - 1):0])
-    ,.slv2_arid(slv2_arid[(IDWID - 1):0])
-    ,.slv2_arlen(slv2_arlen[7:0])
+    ,.slv2_arid(slv2_arid)
+    ,.slv2_arlen(slv2_arlen)
+    ,.slv2_arsize(slv2_arsize)
     ,.slv2_arready(slv2_arready)
     ,.slv2_arvalid(slv2_arvalid)
     ,.slv2_awaddr(slv2_awaddr[31:0])
     ,.slv2_awburst(slv2_awburst[1:0])
     ,.slv2_awextras(slv2_awextras[(EXTRAS - 1):0])
     ,.slv2_awid(slv2_awid[(IDWID - 1):0])
-    ,.slv2_awlen(slv2_awlen[7:0])
+    ,.slv2_awlen(slv2_awlen)
+    ,.slv2_awsize(slv2_awsize)
     ,.slv2_awready(slv2_awready)
     ,.slv2_awvalid(slv2_awvalid)
     ,.slv2_bid(slv2_bid[(IDWID - 1):0])
@@ -928,15 +981,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.slv3_araddr(slv3_araddr[31:0])
     ,.slv3_arburst(slv3_arburst[1:0])
     ,.slv3_arextras(slv3_arextras[(EXTRAS - 1):0])
-    ,.slv3_arid(slv3_arid[(IDWID - 1):0])
-    ,.slv3_arlen(slv3_arlen[7:0])
+    ,.slv3_arid(slv3_arid)
+    ,.slv3_arlen(slv3_arlen)
+    ,.slv3_arsize(slv3_arsize)
     ,.slv3_arready(slv3_arready)
     ,.slv3_arvalid(slv3_arvalid)
     ,.slv3_awaddr(slv3_awaddr[31:0])
     ,.slv3_awburst(slv3_awburst[1:0])
     ,.slv3_awextras(slv3_awextras[(EXTRAS - 1):0])
     ,.slv3_awid(slv3_awid[(IDWID - 1):0])
-    ,.slv3_awlen(slv3_awlen[7:0])
+    ,.slv3_awlen(slv3_awlen)
+    ,.slv3_awsize(slv3_awsize)
     ,.slv3_awready(slv3_awready)
     ,.slv3_awvalid(slv3_awvalid)
     ,.slv3_bid(slv3_bid[(IDWID - 1):0])
@@ -959,15 +1014,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst0_araddr(mst0_araddr[31:0])
     ,.mst0_arburst(mst0_arburst[1:0])
     ,.mst0_arextras(mst0_arextras[(EXTRAS - 1):0])
-    ,.mst0_arid(mst0_arid[(IDWID - 1):0])
-    ,.mst0_arlen(mst0_arlen[7:0])
+    ,.mst0_arid(mst0_arid)
+    ,.mst0_arlen(mst0_arlen)
+    ,.mst0_arsize(mst0_arsize)
     ,.mst0_arready(mst0_arready)
     ,.mst0_arvalid(mst0_arvalid)
     ,.mst0_awaddr(mst0_awaddr[31:0])
     ,.mst0_awburst(mst0_awburst[1:0])
     ,.mst0_awextras(mst0_awextras[(EXTRAS - 1):0])
     ,.mst0_awid(mst0_awid[(IDWID - 1):0])
-    ,.mst0_awlen(mst0_awlen[7:0])
+    ,.mst0_awlen(mst0_awlen)
+    ,.mst0_awsize(mst0_awsize)
     ,.mst0_awready(mst0_awready)
     ,.mst0_awvalid(mst0_awvalid)
     ,.mst0_bid(mst0_bid[(IDWID - 1):0])
@@ -989,15 +1046,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst1_araddr(mst1_araddr[31:0])
     ,.mst1_arburst(mst1_arburst[1:0])
     ,.mst1_arextras(mst1_arextras[(EXTRAS - 1):0])
-    ,.mst1_arid(mst1_arid[(IDWID - 1):0])
-    ,.mst1_arlen(mst1_arlen[7:0])
+    ,.mst1_arid(mst1_arid)
+    ,.mst1_arlen(mst1_arlen)
+    ,.mst1_arsize(mst1_arsize)
     ,.mst1_arready(mst1_arready)
     ,.mst1_arvalid(mst1_arvalid)
     ,.mst1_awaddr(mst1_awaddr[31:0])
     ,.mst1_awburst(mst1_awburst[1:0])
     ,.mst1_awextras(mst1_awextras[(EXTRAS - 1):0])
     ,.mst1_awid(mst1_awid[(IDWID - 1):0])
-    ,.mst1_awlen(mst1_awlen[7:0])
+    ,.mst1_awlen(mst1_awlen)
+    ,.mst1_awsize(mst1_awsize)
     ,.mst1_awready(mst1_awready)
     ,.mst1_awvalid(mst1_awvalid)
     ,.mst1_bid(mst1_bid[(IDWID - 1):0])
@@ -1019,15 +1078,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst10_araddr(mst10_araddr[31:0])
     ,.mst10_arburst(mst10_arburst[1:0])
     ,.mst10_arextras(mst10_arextras[(EXTRAS - 1):0])
-    ,.mst10_arid(mst10_arid[(IDWID - 1):0])
-    ,.mst10_arlen(mst10_arlen[7:0])
+    ,.mst10_arid(mst10_arid)
+    ,.mst10_arlen(mst10_arlen)
+    ,.mst10_arsize(mst10_arsize)
     ,.mst10_arready(mst10_arready)
     ,.mst10_arvalid(mst10_arvalid)
     ,.mst10_awaddr(mst10_awaddr[31:0])
     ,.mst10_awburst(mst10_awburst[1:0])
     ,.mst10_awextras(mst10_awextras[(EXTRAS - 1):0])
     ,.mst10_awid(mst10_awid[(IDWID - 1):0])
-    ,.mst10_awlen(mst10_awlen[7:0])
+    ,.mst10_awlen(mst10_awlen)
+    ,.mst10_awsize(mst10_awsize)
     ,.mst10_awready(mst10_awready)
     ,.mst10_awvalid(mst10_awvalid)
     ,.mst10_bid(mst10_bid[(IDWID - 1):0])
@@ -1049,15 +1110,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst11_araddr(mst11_araddr[31:0])
     ,.mst11_arburst(mst11_arburst[1:0])
     ,.mst11_arextras(mst11_arextras[(EXTRAS - 1):0])
-    ,.mst11_arid(mst11_arid[(IDWID - 1):0])
-    ,.mst11_arlen(mst11_arlen[7:0])
+    ,.mst11_arid(mst11_arid)
+    ,.mst11_arlen(mst11_arlen)
+    ,.mst11_arsize(mst11_arsize)
     ,.mst11_arready(mst11_arready)
     ,.mst11_arvalid(mst11_arvalid)
     ,.mst11_awaddr(mst11_awaddr[31:0])
     ,.mst11_awburst(mst11_awburst[1:0])
     ,.mst11_awextras(mst11_awextras[(EXTRAS - 1):0])
     ,.mst11_awid(mst11_awid[(IDWID - 1):0])
-    ,.mst11_awlen(mst11_awlen[7:0])
+    ,.mst11_awlen(mst11_awlen)
+    ,.mst11_awsize(mst11_awsize)
     ,.mst11_awready(mst11_awready)
     ,.mst11_awvalid(mst11_awvalid)
     ,.mst11_bid(mst11_bid[(IDWID - 1):0])
@@ -1079,15 +1142,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst12_araddr(mst12_araddr[31:0])
     ,.mst12_arburst(mst12_arburst[1:0])
     ,.mst12_arextras(mst12_arextras[(EXTRAS - 1):0])
-    ,.mst12_arid(mst12_arid[(IDWID - 1):0])
-    ,.mst12_arlen(mst12_arlen[7:0])
+    ,.mst12_arid(mst12_arid)
+    ,.mst12_arlen(mst12_arlen)
+    ,.mst12_arsize(mst12_arsize)
     ,.mst12_arready(mst12_arready)
     ,.mst12_arvalid(mst12_arvalid)
     ,.mst12_awaddr(mst12_awaddr[31:0])
     ,.mst12_awburst(mst12_awburst[1:0])
     ,.mst12_awextras(mst12_awextras[(EXTRAS - 1):0])
     ,.mst12_awid(mst12_awid[(IDWID - 1):0])
-    ,.mst12_awlen(mst12_awlen[7:0])
+    ,.mst12_awlen(mst12_awlen)
+    ,.mst12_awsize(mst12_awsize)
     ,.mst12_awready(mst12_awready)
     ,.mst12_awvalid(mst12_awvalid)
     ,.mst12_bid(mst12_bid[(IDWID - 1):0])
@@ -1109,15 +1174,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst13_araddr(mst13_araddr[31:0])
     ,.mst13_arburst(mst13_arburst[1:0])
     ,.mst13_arextras(mst13_arextras[(EXTRAS - 1):0])
-    ,.mst13_arid(mst13_arid[(IDWID - 1):0])
-    ,.mst13_arlen(mst13_arlen[7:0])
+    ,.mst13_arid(mst13_arid)
+    ,.mst13_arlen(mst13_arlen)
+    ,.mst13_arsize(mst13_arsize)
     ,.mst13_arready(mst13_arready)
     ,.mst13_arvalid(mst13_arvalid)
     ,.mst13_awaddr(mst13_awaddr[31:0])
     ,.mst13_awburst(mst13_awburst[1:0])
     ,.mst13_awextras(mst13_awextras[(EXTRAS - 1):0])
     ,.mst13_awid(mst13_awid[(IDWID - 1):0])
-    ,.mst13_awlen(mst13_awlen[7:0])
+    ,.mst13_awlen(mst13_awlen)
+    ,.mst13_awsize(mst13_awsize)
     ,.mst13_awready(mst13_awready)
     ,.mst13_awvalid(mst13_awvalid)
     ,.mst13_bid(mst13_bid[(IDWID - 1):0])
@@ -1139,15 +1206,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst14_araddr(mst14_araddr[31:0])
     ,.mst14_arburst(mst14_arburst[1:0])
     ,.mst14_arextras(mst14_arextras[(EXTRAS - 1):0])
-    ,.mst14_arid(mst14_arid[(IDWID - 1):0])
-    ,.mst14_arlen(mst14_arlen[7:0])
+    ,.mst14_arid(mst14_arid)
+    ,.mst14_arlen(mst14_arlen)
+    ,.mst14_arsize(mst14_arsize)
     ,.mst14_arready(mst14_arready)
     ,.mst14_arvalid(mst14_arvalid)
     ,.mst14_awaddr(mst14_awaddr[31:0])
     ,.mst14_awburst(mst14_awburst[1:0])
     ,.mst14_awextras(mst14_awextras[(EXTRAS - 1):0])
     ,.mst14_awid(mst14_awid[(IDWID - 1):0])
-    ,.mst14_awlen(mst14_awlen[7:0])
+    ,.mst14_awlen(mst14_awlen)
+    ,.mst14_awsize(mst14_awsize)
     ,.mst14_awready(mst14_awready)
     ,.mst14_awvalid(mst14_awvalid)
     ,.mst14_bid(mst14_bid[(IDWID - 1):0])
@@ -1169,15 +1238,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst15_araddr(mst15_araddr[31:0])
     ,.mst15_arburst(mst15_arburst[1:0])
     ,.mst15_arextras(mst15_arextras[(EXTRAS - 1):0])
-    ,.mst15_arid(mst15_arid[(IDWID - 1):0])
-    ,.mst15_arlen(mst15_arlen[7:0])
+    ,.mst15_arid(mst15_arid)
+    ,.mst15_arlen(mst15_arlen)
+    ,.mst15_arsize(mst15_arsize)
     ,.mst15_arready(mst15_arready)
     ,.mst15_arvalid(mst15_arvalid)
     ,.mst15_awaddr(mst15_awaddr[31:0])
     ,.mst15_awburst(mst15_awburst[1:0])
     ,.mst15_awextras(mst15_awextras[(EXTRAS - 1):0])
     ,.mst15_awid(mst15_awid[(IDWID - 1):0])
-    ,.mst15_awlen(mst15_awlen[7:0])
+    ,.mst15_awlen(mst15_awlen)
+    ,.mst15_awsize(mst15_awsize)
     ,.mst15_awready(mst15_awready)
     ,.mst15_awvalid(mst15_awvalid)
     ,.mst15_bid(mst15_bid[(IDWID - 1):0])
@@ -1199,15 +1270,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst2_araddr(mst2_araddr[31:0])
     ,.mst2_arburst(mst2_arburst[1:0])
     ,.mst2_arextras(mst2_arextras[(EXTRAS - 1):0])
-    ,.mst2_arid(mst2_arid[(IDWID - 1):0])
-    ,.mst2_arlen(mst2_arlen[7:0])
+    ,.mst2_arid(mst2_arid)
+    ,.mst2_arlen(mst2_arlen)
+    ,.mst2_arsize(mst2_arsize)
     ,.mst2_arready(mst2_arready)
     ,.mst2_arvalid(mst2_arvalid)
     ,.mst2_awaddr(mst2_awaddr[31:0])
     ,.mst2_awburst(mst2_awburst[1:0])
     ,.mst2_awextras(mst2_awextras[(EXTRAS - 1):0])
     ,.mst2_awid(mst2_awid[(IDWID - 1):0])
-    ,.mst2_awlen(mst2_awlen[7:0])
+    ,.mst2_awlen(mst2_awlen)
+    ,.mst2_awsize(mst2_awsize)
     ,.mst2_awready(mst2_awready)
     ,.mst2_awvalid(mst2_awvalid)
     ,.mst2_bid(mst2_bid[(IDWID - 1):0])
@@ -1229,15 +1302,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst3_araddr(mst3_araddr[31:0])
     ,.mst3_arburst(mst3_arburst[1:0])
     ,.mst3_arextras(mst3_arextras[(EXTRAS - 1):0])
-    ,.mst3_arid(mst3_arid[(IDWID - 1):0])
-    ,.mst3_arlen(mst3_arlen[7:0])
+    ,.mst3_arid(mst3_arid)
+    ,.mst3_arlen(mst3_arlen)
+    ,.mst3_arsize(mst3_arsize)
     ,.mst3_arready(mst3_arready)
     ,.mst3_arvalid(mst3_arvalid)
     ,.mst3_awaddr(mst3_awaddr[31:0])
     ,.mst3_awburst(mst3_awburst[1:0])
     ,.mst3_awextras(mst3_awextras[(EXTRAS - 1):0])
     ,.mst3_awid(mst3_awid[(IDWID - 1):0])
-    ,.mst3_awlen(mst3_awlen[7:0])
+    ,.mst3_awlen(mst3_awlen)
+    ,.mst3_awsize(mst3_awsize)
     ,.mst3_awready(mst3_awready)
     ,.mst3_awvalid(mst3_awvalid)
     ,.mst3_bid(mst3_bid[(IDWID - 1):0])
@@ -1259,15 +1334,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst4_araddr(mst4_araddr[31:0])
     ,.mst4_arburst(mst4_arburst[1:0])
     ,.mst4_arextras(mst4_arextras[(EXTRAS - 1):0])
-    ,.mst4_arid(mst4_arid[(IDWID - 1):0])
-    ,.mst4_arlen(mst4_arlen[7:0])
+    ,.mst4_arid(mst4_arid)
+    ,.mst4_arlen(mst4_arlen)
+    ,.mst4_arsize(mst4_arsize)
     ,.mst4_arready(mst4_arready)
     ,.mst4_arvalid(mst4_arvalid)
     ,.mst4_awaddr(mst4_awaddr[31:0])
     ,.mst4_awburst(mst4_awburst[1:0])
     ,.mst4_awextras(mst4_awextras[(EXTRAS - 1):0])
     ,.mst4_awid(mst4_awid[(IDWID - 1):0])
-    ,.mst4_awlen(mst4_awlen[7:0])
+    ,.mst4_awlen(mst4_awlen)
+    ,.mst4_awsize(mst4_awsize)
     ,.mst4_awready(mst4_awready)
     ,.mst4_awvalid(mst4_awvalid)
     ,.mst4_bid(mst4_bid[(IDWID - 1):0])
@@ -1289,15 +1366,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst5_araddr(mst5_araddr[31:0])
     ,.mst5_arburst(mst5_arburst[1:0])
     ,.mst5_arextras(mst5_arextras[(EXTRAS - 1):0])
-    ,.mst5_arid(mst5_arid[(IDWID - 1):0])
-    ,.mst5_arlen(mst5_arlen[7:0])
+    ,.mst5_arid(mst5_arid)
+    ,.mst5_arlen(mst5_arlen)
+    ,.mst5_arsize(mst5_arsize)
     ,.mst5_arready(mst5_arready)
     ,.mst5_arvalid(mst5_arvalid)
     ,.mst5_awaddr(mst5_awaddr[31:0])
     ,.mst5_awburst(mst5_awburst[1:0])
     ,.mst5_awextras(mst5_awextras[(EXTRAS - 1):0])
     ,.mst5_awid(mst5_awid[(IDWID - 1):0])
-    ,.mst5_awlen(mst5_awlen[7:0])
+    ,.mst5_awlen(mst5_awlen)
+    ,.mst5_awsize(mst5_awsize)
     ,.mst5_awready(mst5_awready)
     ,.mst5_awvalid(mst5_awvalid)
     ,.mst5_bid(mst5_bid[(IDWID - 1):0])
@@ -1319,15 +1398,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst6_araddr(mst6_araddr[31:0])
     ,.mst6_arburst(mst6_arburst[1:0])
     ,.mst6_arextras(mst6_arextras[(EXTRAS - 1):0])
-    ,.mst6_arid(mst6_arid[(IDWID - 1):0])
-    ,.mst6_arlen(mst6_arlen[7:0])
+    ,.mst6_arid(mst6_arid)
+    ,.mst6_arlen(mst6_arlen)
+    ,.mst6_arsize(mst6_arsize)
     ,.mst6_arready(mst6_arready)
     ,.mst6_arvalid(mst6_arvalid)
     ,.mst6_awaddr(mst6_awaddr[31:0])
     ,.mst6_awburst(mst6_awburst[1:0])
     ,.mst6_awextras(mst6_awextras[(EXTRAS - 1):0])
     ,.mst6_awid(mst6_awid[(IDWID - 1):0])
-    ,.mst6_awlen(mst6_awlen[7:0])
+    ,.mst6_awlen(mst6_awlen)
+    ,.mst6_awsize(mst6_awsize)
     ,.mst6_awready(mst6_awready)
     ,.mst6_awvalid(mst6_awvalid)
     ,.mst6_bid(mst6_bid[(IDWID - 1):0])
@@ -1349,15 +1430,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst7_araddr(mst7_araddr[31:0])
     ,.mst7_arburst(mst7_arburst[1:0])
     ,.mst7_arextras(mst7_arextras[(EXTRAS - 1):0])
-    ,.mst7_arid(mst7_arid[(IDWID - 1):0])
-    ,.mst7_arlen(mst7_arlen[7:0])
+    ,.mst7_arid(mst7_arid)
+    ,.mst7_arlen(mst7_arlen)
+    ,.mst7_arsize(mst7_arsize)
     ,.mst7_arready(mst7_arready)
     ,.mst7_arvalid(mst7_arvalid)
     ,.mst7_awaddr(mst7_awaddr[31:0])
     ,.mst7_awburst(mst7_awburst[1:0])
     ,.mst7_awextras(mst7_awextras[(EXTRAS - 1):0])
     ,.mst7_awid(mst7_awid[(IDWID - 1):0])
-    ,.mst7_awlen(mst7_awlen[7:0])
+    ,.mst7_awlen(mst7_awlen)
+    ,.mst7_awsize(mst7_awsize)
     ,.mst7_awready(mst7_awready)
     ,.mst7_awvalid(mst7_awvalid)
     ,.mst7_bid(mst7_bid[(IDWID - 1):0])
@@ -1379,15 +1462,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst8_araddr(mst8_araddr[31:0])
     ,.mst8_arburst(mst8_arburst[1:0])
     ,.mst8_arextras(mst8_arextras[(EXTRAS - 1):0])
-    ,.mst8_arid(mst8_arid[(IDWID - 1):0])
-    ,.mst8_arlen(mst8_arlen[7:0])
+    ,.mst8_arid(mst8_arid)
+    ,.mst8_arlen(mst8_arlen)
+    ,.mst8_arsize(mst8_arsize)
     ,.mst8_arready(mst8_arready)
     ,.mst8_arvalid(mst8_arvalid)
     ,.mst8_awaddr(mst8_awaddr[31:0])
     ,.mst8_awburst(mst8_awburst[1:0])
     ,.mst8_awextras(mst8_awextras[(EXTRAS - 1):0])
     ,.mst8_awid(mst8_awid[(IDWID - 1):0])
-    ,.mst8_awlen(mst8_awlen[7:0])
+    ,.mst8_awlen(mst8_awlen)
+    ,.mst8_awsize(mst8_awsize)
     ,.mst8_awready(mst8_awready)
     ,.mst8_awvalid(mst8_awvalid)
     ,.mst8_bid(mst8_bid[(IDWID - 1):0])
@@ -1409,15 +1494,17 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst9_araddr(mst9_araddr[31:0])
     ,.mst9_arburst(mst9_arburst[1:0])
     ,.mst9_arextras(mst9_arextras[(EXTRAS - 1):0])
-    ,.mst9_arid(mst9_arid[(IDWID - 1):0])
-    ,.mst9_arlen(mst9_arlen[7:0])
+    ,.mst9_arid(mst9_arid)
+    ,.mst9_arlen(mst9_arlen)
+    ,.mst9_arsize(mst9_arsize)
     ,.mst9_arready(mst9_arready)
     ,.mst9_arvalid(mst9_arvalid)
     ,.mst9_awaddr(mst9_awaddr[31:0])
     ,.mst9_awburst(mst9_awburst[1:0])
     ,.mst9_awextras(mst9_awextras[(EXTRAS - 1):0])
     ,.mst9_awid(mst9_awid[(IDWID - 1):0])
-    ,.mst9_awlen(mst9_awlen[7:0])
+    ,.mst9_awlen(mst9_awlen)
+    ,.mst9_awsize(mst9_awsize)
     ,.mst9_awready(mst9_awready)
     ,.mst9_awvalid(mst9_awvalid)
     ,.mst9_bid(mst9_bid[(IDWID - 1):0])
@@ -1436,4 +1523,23 @@ x16x4 dut ( .clk(clk),.rst_n(rst_n)
     ,.mst9_wstrb(mst9_wstrb[(WSTRB - 1):0])
     ,.mst9_wvalid(mst9_wvalid)
 );
+
+
+reg [1023:0] testname;
+initial begin
+   if ($value$plusargs("LOG=%s",testname)) begin 
+        $python("pymonname()",testname);
+    end  
+
+
+    if ($value$plusargs("SEQ=%s",testname)) begin 
+         $display(" Running SEQ= %s.",testname); 
+    end else begin
+        testname = 0; 
+        $display(" default test");
+    end  
+    #10; 
+    if (testname!=0) $python("sequence()",testname);
+end 
 endmodule
+

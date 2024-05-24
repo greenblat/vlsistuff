@@ -54,6 +54,7 @@ class axiMasterClass:
         self.WVALID = False
         self.Size = 2
         self.WSTRB = -1 
+        self.WSTRBS =  []
         self.AXI3 = False
         self.Bscore = []
         self.Starvation = False
@@ -136,7 +137,16 @@ class axiMasterClass:
         elif wrds[0]=='axi4':
             self.AXI3 = False
         elif wrds[0]=='wstrb':
+            if self.WSTRBS!=[]:
+                for ww in wrds[1:]:
+                    Val = eval(ww)
+                    self.WSTRBS.append(Val)
+                return
             self.WSTRB = eval(wrds[1])
+            if len(wrds)>2:
+                for ww in wrds[2:]:
+                    Val = eval(ww)
+                    self.WSTRBS.append(Val)
         elif wrds[0]=='write_illegal':
             self.makeWriteIllegal(eval(wrds[1]),eval(wrds[2]),eval(wrds[3]),eval(wrds[4]),eval(wrds[5]),list(map(eval,wrds[6:])))
         elif wrds[0]=='write':
@@ -298,6 +308,7 @@ class axiMasterClass:
             Wstrb = (1<<(1<<Size))-1
             if self.WSTRB>0:
                 Wstrb = self.WSTRB
+                if self.WSTRBS!=[]: self.WSTRB = self.WSTRBS.pop(0)
             Str = 'force wvalid=1 wdata=%s wstrb=0x%x wlast=%d'%(Wdata,Wstrb,Wlast)
             if self.AXI3:
                 Str += ' wid=%d'%self.Rid

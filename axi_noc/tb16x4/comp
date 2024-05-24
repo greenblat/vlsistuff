@@ -16,6 +16,7 @@ iverilog -o tb.vvp  -g2012  \
     ../rtl/syncfifo.v \
     ../rtl/syncfifo_sampled.v \
     ../rtl/axi2ram.v \
+    ../rtl/axi_round_robin.v \
 
 
 

@@ -130,7 +130,7 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 
-localparam AWIDE =  3 + IDWID + ADWID + 8  +2;
+localparam AWIDE =  3 + IDWID + AWID + 8  +2;
 wire [AWIDE-1:0] new_aw_entry =   {awsize, awid ,awaddr ,awlen , awburst };
 wire aw_full;
 wire [AWIDE-1:0] active_aw_entry;
@@ -175,7 +175,7 @@ syncfifo_sampled #(1+WSTRB+DWID,4) w_fifo (.clk(clk),.rst_n(rst_n),.vldin(wvalid
 
 assign readout_aw_fifo = pwrite && work_wlast && working_w;
 wire readout_ar_fifo = working_r && run_rlast &&  pread_dly;
-localparam ARIDE = 3+IDWID+2+8+ADWID;
+localparam ARIDE = 3+IDWID+2+8+AWID;
 wire [ARIDE-1:0] new_ar_entry =  {arsize,arid,arburst,arlen,araddr};
  wire [ARIDE-1:0]  active_ar_entry;
 syncfifo_sampled #(ARIDE,4) ar_fifo (.clk(clk),.rst_n(rst_n),.vldin(arvalid && arready)

@@ -4,6 +4,7 @@
     ,output [IDWID-1:0] slv0_arid
     ,output [31:0] slv0_araddr
     ,output [7:0] slv0_arlen
+    ,output [2:0] slv0_arsize
     ,output [EXTRAS-1:0] slv0_arextras
     ,output [1:0] slv0_arburst
     ,output slv0_arvalid
@@ -18,6 +19,7 @@
     ,output [IDWID-1:0] slv0_awid
     ,output [31:0] slv0_awaddr
     ,output [7:0] slv0_awlen
+    ,output [2:0] slv0_awsize
     ,output [EXTRAS-1:0] slv0_awextras
     ,output [1:0] slv0_awburst
     ,output slv0_awvalid
@@ -35,6 +37,7 @@
     ,output [IDWID-1:0] slv1_arid
     ,output [31:0] slv1_araddr
     ,output [7:0] slv1_arlen
+    ,output [2:0] slv1_arsize
     ,output [EXTRAS-1:0] slv1_arextras
     ,output [1:0] slv1_arburst
     ,output slv1_arvalid
@@ -49,6 +52,7 @@
     ,output [IDWID-1:0] slv1_awid
     ,output [31:0] slv1_awaddr
     ,output [7:0] slv1_awlen
+    ,output [2:0] slv1_awsize
     ,output [EXTRAS-1:0] slv1_awextras
     ,output [1:0] slv1_awburst
     ,output slv1_awvalid
@@ -66,6 +70,7 @@
     ,output [IDWID-1:0] slv2_arid
     ,output [31:0] slv2_araddr
     ,output [7:0] slv2_arlen
+    ,output [2:0] slv2_arsize
     ,output [EXTRAS-1:0] slv2_arextras
     ,output [1:0] slv2_arburst
     ,output slv2_arvalid
@@ -80,6 +85,7 @@
     ,output [IDWID-1:0] slv2_awid
     ,output [31:0] slv2_awaddr
     ,output [7:0] slv2_awlen
+    ,output [2:0] slv2_awsize
     ,output [EXTRAS-1:0] slv2_awextras
     ,output [1:0] slv2_awburst
     ,output slv2_awvalid
@@ -97,6 +103,7 @@
     ,output [IDWID-1:0] slv3_arid
     ,output [31:0] slv3_araddr
     ,output [7:0] slv3_arlen
+    ,output [2:0] slv3_arsize
     ,output [EXTRAS-1:0] slv3_arextras
     ,output [1:0] slv3_arburst
     ,output slv3_arvalid
@@ -111,6 +118,7 @@
     ,output [IDWID-1:0] slv3_awid
     ,output [31:0] slv3_awaddr
     ,output [7:0] slv3_awlen
+    ,output [2:0] slv3_awsize
     ,output [EXTRAS-1:0] slv3_awextras
     ,output [1:0] slv3_awburst
     ,output slv3_awvalid
@@ -128,6 +136,7 @@
     ,input [IDWID-1:0] mst0_arid
     ,input [31:0] mst0_araddr
     ,input [7:0] mst0_arlen
+    ,input [2:0] mst0_arsize
     ,input [EXTRAS-1:0] mst0_arextras
     ,input [1:0] mst0_arburst
     ,input mst0_arvalid
@@ -142,6 +151,7 @@
     ,input [IDWID-1:0] mst0_awid
     ,input [31:0] mst0_awaddr
     ,input [7:0] mst0_awlen
+    ,input [2:0] mst0_awsize
     ,input [EXTRAS-1:0] mst0_awextras
     ,input [1:0] mst0_awburst
     ,input mst0_awvalid
@@ -159,6 +169,7 @@
     ,input [IDWID-1:0] mst1_arid
     ,input [31:0] mst1_araddr
     ,input [7:0] mst1_arlen
+    ,input [2:0] mst1_arsize
     ,input [EXTRAS-1:0] mst1_arextras
     ,input [1:0] mst1_arburst
     ,input mst1_arvalid
@@ -173,6 +184,7 @@
     ,input [IDWID-1:0] mst1_awid
     ,input [31:0] mst1_awaddr
     ,input [7:0] mst1_awlen
+    ,input [2:0] mst1_awsize
     ,input [EXTRAS-1:0] mst1_awextras
     ,input [1:0] mst1_awburst
     ,input mst1_awvalid
@@ -190,6 +202,7 @@
     ,input [IDWID-1:0] mst10_arid
     ,input [31:0] mst10_araddr
     ,input [7:0] mst10_arlen
+    ,input [2:0] mst10_arsize
     ,input [EXTRAS-1:0] mst10_arextras
     ,input [1:0] mst10_arburst
     ,input mst10_arvalid
@@ -204,6 +217,7 @@
     ,input [IDWID-1:0] mst10_awid
     ,input [31:0] mst10_awaddr
     ,input [7:0] mst10_awlen
+    ,input [2:0] mst10_awsize
     ,input [EXTRAS-1:0] mst10_awextras
     ,input [1:0] mst10_awburst
     ,input mst10_awvalid
@@ -221,6 +235,7 @@
     ,input [IDWID-1:0] mst11_arid
     ,input [31:0] mst11_araddr
     ,input [7:0] mst11_arlen
+    ,input [2:0] mst11_arsize
     ,input [EXTRAS-1:0] mst11_arextras
     ,input [1:0] mst11_arburst
     ,input mst11_arvalid
@@ -235,6 +250,7 @@
     ,input [IDWID-1:0] mst11_awid
     ,input [31:0] mst11_awaddr
     ,input [7:0] mst11_awlen
+    ,input [2:0] mst11_awsize
     ,input [EXTRAS-1:0] mst11_awextras
     ,input [1:0] mst11_awburst
     ,input mst11_awvalid
@@ -252,6 +268,7 @@
     ,input [IDWID-1:0] mst12_arid
     ,input [31:0] mst12_araddr
     ,input [7:0] mst12_arlen
+    ,input [2:0] mst12_arsize
     ,input [EXTRAS-1:0] mst12_arextras
     ,input [1:0] mst12_arburst
     ,input mst12_arvalid
@@ -266,6 +283,7 @@
     ,input [IDWID-1:0] mst12_awid
     ,input [31:0] mst12_awaddr
     ,input [7:0] mst12_awlen
+    ,input [2:0] mst12_awsize
     ,input [EXTRAS-1:0] mst12_awextras
     ,input [1:0] mst12_awburst
     ,input mst12_awvalid
@@ -283,6 +301,7 @@
     ,input [IDWID-1:0] mst13_arid
     ,input [31:0] mst13_araddr
     ,input [7:0] mst13_arlen
+    ,input [2:0] mst13_arsize
     ,input [EXTRAS-1:0] mst13_arextras
     ,input [1:0] mst13_arburst
     ,input mst13_arvalid
@@ -297,6 +316,7 @@
     ,input [IDWID-1:0] mst13_awid
     ,input [31:0] mst13_awaddr
     ,input [7:0] mst13_awlen
+    ,input [2:0] mst13_awsize
     ,input [EXTRAS-1:0] mst13_awextras
     ,input [1:0] mst13_awburst
     ,input mst13_awvalid
@@ -314,6 +334,7 @@
     ,input [IDWID-1:0] mst14_arid
     ,input [31:0] mst14_araddr
     ,input [7:0] mst14_arlen
+    ,input [2:0] mst14_arsize
     ,input [EXTRAS-1:0] mst14_arextras
     ,input [1:0] mst14_arburst
     ,input mst14_arvalid
@@ -328,6 +349,7 @@
     ,input [IDWID-1:0] mst14_awid
     ,input [31:0] mst14_awaddr
     ,input [7:0] mst14_awlen
+    ,input [2:0] mst14_awsize
     ,input [EXTRAS-1:0] mst14_awextras
     ,input [1:0] mst14_awburst
     ,input mst14_awvalid
@@ -345,6 +367,7 @@
     ,input [IDWID-1:0] mst15_arid
     ,input [31:0] mst15_araddr
     ,input [7:0] mst15_arlen
+    ,input [2:0] mst15_arsize
     ,input [EXTRAS-1:0] mst15_arextras
     ,input [1:0] mst15_arburst
     ,input mst15_arvalid
@@ -359,6 +382,7 @@
     ,input [IDWID-1:0] mst15_awid
     ,input [31:0] mst15_awaddr
     ,input [7:0] mst15_awlen
+    ,input [2:0] mst15_awsize
     ,input [EXTRAS-1:0] mst15_awextras
     ,input [1:0] mst15_awburst
     ,input mst15_awvalid
@@ -376,6 +400,7 @@
     ,input [IDWID-1:0] mst2_arid
     ,input [31:0] mst2_araddr
     ,input [7:0] mst2_arlen
+    ,input [2:0] mst2_arsize
     ,input [EXTRAS-1:0] mst2_arextras
     ,input [1:0] mst2_arburst
     ,input mst2_arvalid
@@ -390,6 +415,7 @@
     ,input [IDWID-1:0] mst2_awid
     ,input [31:0] mst2_awaddr
     ,input [7:0] mst2_awlen
+    ,input [2:0] mst2_awsize
     ,input [EXTRAS-1:0] mst2_awextras
     ,input [1:0] mst2_awburst
     ,input mst2_awvalid
@@ -407,6 +433,7 @@
     ,input [IDWID-1:0] mst3_arid
     ,input [31:0] mst3_araddr
     ,input [7:0] mst3_arlen
+    ,input [2:0] mst3_arsize
     ,input [EXTRAS-1:0] mst3_arextras
     ,input [1:0] mst3_arburst
     ,input mst3_arvalid
@@ -421,6 +448,7 @@
     ,input [IDWID-1:0] mst3_awid
     ,input [31:0] mst3_awaddr
     ,input [7:0] mst3_awlen
+    ,input [2:0] mst3_awsize
     ,input [EXTRAS-1:0] mst3_awextras
     ,input [1:0] mst3_awburst
     ,input mst3_awvalid
@@ -438,6 +466,7 @@
     ,input [IDWID-1:0] mst4_arid
     ,input [31:0] mst4_araddr
     ,input [7:0] mst4_arlen
+    ,input [2:0] mst4_arsize
     ,input [EXTRAS-1:0] mst4_arextras
     ,input [1:0] mst4_arburst
     ,input mst4_arvalid
@@ -452,6 +481,7 @@
     ,input [IDWID-1:0] mst4_awid
     ,input [31:0] mst4_awaddr
     ,input [7:0] mst4_awlen
+    ,input [2:0] mst4_awsize
     ,input [EXTRAS-1:0] mst4_awextras
     ,input [1:0] mst4_awburst
     ,input mst4_awvalid
@@ -469,6 +499,7 @@
     ,input [IDWID-1:0] mst5_arid
     ,input [31:0] mst5_araddr
     ,input [7:0] mst5_arlen
+    ,input [2:0] mst5_arsize
     ,input [EXTRAS-1:0] mst5_arextras
     ,input [1:0] mst5_arburst
     ,input mst5_arvalid
@@ -483,6 +514,7 @@
     ,input [IDWID-1:0] mst5_awid
     ,input [31:0] mst5_awaddr
     ,input [7:0] mst5_awlen
+    ,input [2:0] mst5_awsize
     ,input [EXTRAS-1:0] mst5_awextras
     ,input [1:0] mst5_awburst
     ,input mst5_awvalid
@@ -500,6 +532,7 @@
     ,input [IDWID-1:0] mst6_arid
     ,input [31:0] mst6_araddr
     ,input [7:0] mst6_arlen
+    ,input [2:0] mst6_arsize
     ,input [EXTRAS-1:0] mst6_arextras
     ,input [1:0] mst6_arburst
     ,input mst6_arvalid
@@ -514,6 +547,7 @@
     ,input [IDWID-1:0] mst6_awid
     ,input [31:0] mst6_awaddr
     ,input [7:0] mst6_awlen
+    ,input [2:0] mst6_awsize
     ,input [EXTRAS-1:0] mst6_awextras
     ,input [1:0] mst6_awburst
     ,input mst6_awvalid
@@ -531,6 +565,7 @@
     ,input [IDWID-1:0] mst7_arid
     ,input [31:0] mst7_araddr
     ,input [7:0] mst7_arlen
+    ,input [2:0] mst7_arsize
     ,input [EXTRAS-1:0] mst7_arextras
     ,input [1:0] mst7_arburst
     ,input mst7_arvalid
@@ -545,6 +580,7 @@
     ,input [IDWID-1:0] mst7_awid
     ,input [31:0] mst7_awaddr
     ,input [7:0] mst7_awlen
+    ,input [2:0] mst7_awsize
     ,input [EXTRAS-1:0] mst7_awextras
     ,input [1:0] mst7_awburst
     ,input mst7_awvalid
@@ -562,6 +598,7 @@
     ,input [IDWID-1:0] mst8_arid
     ,input [31:0] mst8_araddr
     ,input [7:0] mst8_arlen
+    ,input [2:0] mst8_arsize
     ,input [EXTRAS-1:0] mst8_arextras
     ,input [1:0] mst8_arburst
     ,input mst8_arvalid
@@ -576,6 +613,7 @@
     ,input [IDWID-1:0] mst8_awid
     ,input [31:0] mst8_awaddr
     ,input [7:0] mst8_awlen
+    ,input [2:0] mst8_awsize
     ,input [EXTRAS-1:0] mst8_awextras
     ,input [1:0] mst8_awburst
     ,input mst8_awvalid
@@ -593,6 +631,7 @@
     ,input [IDWID-1:0] mst9_arid
     ,input [31:0] mst9_araddr
     ,input [7:0] mst9_arlen
+    ,input [2:0] mst9_arsize
     ,input [EXTRAS-1:0] mst9_arextras
     ,input [1:0] mst9_arburst
     ,input mst9_arvalid
@@ -607,6 +646,7 @@
     ,input [IDWID-1:0] mst9_awid
     ,input [31:0] mst9_awaddr
     ,input [7:0] mst9_awlen
+    ,input [2:0] mst9_awsize
     ,input [EXTRAS-1:0] mst9_awextras
     ,input [1:0] mst9_awburst
     ,input mst9_awvalid
@@ -625,6 +665,7 @@
 wire [IDWID-1:0] merger0_merger4_arid ;
 wire [31:0] merger0_merger4_araddr ;
 wire [7:0] merger0_merger4_arlen ;
+wire [2:0] merger0_merger4_arsize ;
 wire [EXTRAS-1:0] merger0_merger4_arextras ;
 wire [1:0] merger0_merger4_arburst ;
 wire merger0_merger4_arvalid ;
@@ -639,6 +680,7 @@ wire merger0_merger4_rready ;
 wire [IDWID-1:0] merger0_merger4_awid ;
 wire [31:0] merger0_merger4_awaddr ;
 wire [7:0] merger0_merger4_awlen ;
+wire [2:0] merger0_merger4_awsize ;
 wire [EXTRAS-1:0] merger0_merger4_awextras ;
 wire [1:0] merger0_merger4_awburst ;
 wire merger0_merger4_awvalid ;
@@ -659,15 +701,17 @@ axi_4_merger merger0 (
     ,.araddr(merger0_merger4_araddr[31:0])
     ,.arburst(merger0_merger4_arburst[1:0])
     ,.arextras(merger0_merger4_arextras[(EXTRAS - 1):0])
-    ,.arid(merger0_merger4_arid[(IDWID - 1):0])
-    ,.arlen(merger0_merger4_arlen[7:0])
+    ,.arid(merger0_merger4_arid)
+    ,.arlen(merger0_merger4_arlen)
+    ,.arsize(merger0_merger4_arsize)
     ,.arready(merger0_merger4_arready)
     ,.arvalid(merger0_merger4_arvalid)
     ,.awaddr(merger0_merger4_awaddr[31:0])
     ,.awburst(merger0_merger4_awburst[1:0])
     ,.awextras(merger0_merger4_awextras[(EXTRAS - 1):0])
-    ,.awid(merger0_merger4_awid[3:0])
-    ,.awlen(merger0_merger4_awlen[7:0])
+    ,.awid(merger0_merger4_awid)
+    ,.awlen(merger0_merger4_awlen)
+    ,.awsize(merger0_merger4_awsize)
     ,.awready(merger0_merger4_awready)
     ,.awvalid(merger0_merger4_awvalid)
     ,.bid(merger0_merger4_bid[(IDWID - 1):0])
@@ -690,15 +734,17 @@ axi_4_merger merger0 (
     ,.a_araddr(mst0_araddr[31:0])
     ,.a_arburst(mst0_arburst[1:0])
     ,.a_arextras(mst0_arextras[(EXTRAS - 1):0])
-    ,.a_arid(mst0_arid[(IDWID - 1):0])
-    ,.a_arlen(mst0_arlen[7:0])
+    ,.a_arid(mst0_arid)
+    ,.a_arlen(mst0_arlen)
+    ,.a_arsize(mst0_arsize)
     ,.a_arready(mst0_arready)
     ,.a_arvalid(mst0_arvalid)
     ,.a_awaddr(mst0_awaddr[31:0])
     ,.a_awburst(mst0_awburst[1:0])
     ,.a_awextras(mst0_awextras[(EXTRAS - 1):0])
-    ,.a_awid(mst0_awid[(IDWID - 1):0])
-    ,.a_awlen(mst0_awlen[7:0])
+    ,.a_awid(mst0_awid)
+    ,.a_awlen(mst0_awlen)
+    ,.a_awsize(mst0_awsize)
     ,.a_awready(mst0_awready)
     ,.a_awvalid(mst0_awvalid)
     ,.a_bid(mst0_bid[(IDWID - 1):0])
@@ -720,15 +766,17 @@ axi_4_merger merger0 (
     ,.b_araddr(mst1_araddr[31:0])
     ,.b_arburst(mst1_arburst[1:0])
     ,.b_arextras(mst1_arextras[(EXTRAS - 1):0])
-    ,.b_arid(mst1_arid[(IDWID - 1):0])
-    ,.b_arlen(mst1_arlen[7:0])
+    ,.b_arid(mst1_arid)
+    ,.b_arlen(mst1_arlen)
+    ,.b_arsize(mst1_arsize)
     ,.b_arready(mst1_arready)
     ,.b_arvalid(mst1_arvalid)
     ,.b_awaddr(mst1_awaddr[31:0])
     ,.b_awburst(mst1_awburst[1:0])
     ,.b_awextras(mst1_awextras[(EXTRAS - 1):0])
-    ,.b_awid(mst1_awid[(IDWID - 1):0])
-    ,.b_awlen(mst1_awlen[7:0])
+    ,.b_awid(mst1_awid)
+    ,.b_awlen(mst1_awlen)
+    ,.b_awsize(mst1_awsize)
     ,.b_awready(mst1_awready)
     ,.b_awvalid(mst1_awvalid)
     ,.b_bid(mst1_bid[(IDWID - 1):0])
@@ -750,15 +798,17 @@ axi_4_merger merger0 (
     ,.c_araddr(mst2_araddr[31:0])
     ,.c_arburst(mst2_arburst[1:0])
     ,.c_arextras(mst2_arextras[(EXTRAS - 1):0])
-    ,.c_arid(mst2_arid[(IDWID - 1):0])
-    ,.c_arlen(mst2_arlen[7:0])
+    ,.c_arid(mst2_arid)
+    ,.c_arlen(mst2_arlen)
+    ,.c_arsize(mst2_arsize)
     ,.c_arready(mst2_arready)
     ,.c_arvalid(mst2_arvalid)
     ,.c_awaddr(mst2_awaddr[31:0])
     ,.c_awburst(mst2_awburst[1:0])
     ,.c_awextras(mst2_awextras[(EXTRAS - 1):0])
-    ,.c_awid(mst2_awid[(IDWID - 1):0])
-    ,.c_awlen(mst2_awlen[7:0])
+    ,.c_awid(mst2_awid)
+    ,.c_awlen(mst2_awlen)
+    ,.c_awsize(mst2_awsize)
     ,.c_awready(mst2_awready)
     ,.c_awvalid(mst2_awvalid)
     ,.c_bid(mst2_bid[(IDWID - 1):0])
@@ -780,15 +830,17 @@ axi_4_merger merger0 (
     ,.d_araddr(mst3_araddr[31:0])
     ,.d_arburst(mst3_arburst[1:0])
     ,.d_arextras(mst3_arextras[(EXTRAS - 1):0])
-    ,.d_arid(mst3_arid[(IDWID - 1):0])
-    ,.d_arlen(mst3_arlen[7:0])
+    ,.d_arid(mst3_arid)
+    ,.d_arlen(mst3_arlen)
+    ,.d_arsize(mst3_arsize)
     ,.d_arready(mst3_arready)
     ,.d_arvalid(mst3_arvalid)
     ,.d_awaddr(mst3_awaddr[31:0])
     ,.d_awburst(mst3_awburst[1:0])
     ,.d_awextras(mst3_awextras[(EXTRAS - 1):0])
-    ,.d_awid(mst3_awid[(IDWID - 1):0])
-    ,.d_awlen(mst3_awlen[7:0])
+    ,.d_awid(mst3_awid)
+    ,.d_awlen(mst3_awlen)
+    ,.d_awsize(mst3_awsize)
     ,.d_awready(mst3_awready)
     ,.d_awvalid(mst3_awvalid)
     ,.d_bid(mst3_bid[(IDWID - 1):0])
@@ -812,6 +864,7 @@ axi_4_merger merger0 (
 wire [IDWID-1:0] merger1_merger4_arid ;
 wire [31:0] merger1_merger4_araddr ;
 wire [7:0] merger1_merger4_arlen ;
+wire [2:0] merger1_merger4_arsize ;
 wire [EXTRAS-1:0] merger1_merger4_arextras ;
 wire [1:0] merger1_merger4_arburst ;
 wire merger1_merger4_arvalid ;
@@ -826,6 +879,7 @@ wire merger1_merger4_rready ;
 wire [IDWID-1:0] merger1_merger4_awid ;
 wire [31:0] merger1_merger4_awaddr ;
 wire [7:0] merger1_merger4_awlen ;
+wire [2:0] merger1_merger4_awsize ;
 wire [EXTRAS-1:0] merger1_merger4_awextras ;
 wire [1:0] merger1_merger4_awburst ;
 wire merger1_merger4_awvalid ;
@@ -846,15 +900,17 @@ axi_4_merger merger1 (
     ,.araddr(merger1_merger4_araddr[31:0])
     ,.arburst(merger1_merger4_arburst[1:0])
     ,.arextras(merger1_merger4_arextras[(EXTRAS - 1):0])
-    ,.arid(merger1_merger4_arid[(IDWID - 1):0])
-    ,.arlen(merger1_merger4_arlen[7:0])
+    ,.arid(merger1_merger4_arid)
+    ,.arlen(merger1_merger4_arlen)
+    ,.arsize(merger1_merger4_arsize)
     ,.arready(merger1_merger4_arready)
     ,.arvalid(merger1_merger4_arvalid)
     ,.awaddr(merger1_merger4_awaddr[31:0])
     ,.awburst(merger1_merger4_awburst[1:0])
     ,.awextras(merger1_merger4_awextras[(EXTRAS - 1):0])
-    ,.awid(merger1_merger4_awid[3:0])
-    ,.awlen(merger1_merger4_awlen[7:0])
+    ,.awid(merger1_merger4_awid)
+    ,.awlen(merger1_merger4_awlen)
+    ,.awsize(merger1_merger4_awsize)
     ,.awready(merger1_merger4_awready)
     ,.awvalid(merger1_merger4_awvalid)
     ,.bid(merger1_merger4_bid[(IDWID - 1):0])
@@ -877,15 +933,17 @@ axi_4_merger merger1 (
     ,.a_araddr(mst4_araddr[31:0])
     ,.a_arburst(mst4_arburst[1:0])
     ,.a_arextras(mst4_arextras[(EXTRAS - 1):0])
-    ,.a_arid(mst4_arid[(IDWID - 1):0])
-    ,.a_arlen(mst4_arlen[7:0])
+    ,.a_arid(mst4_arid)
+    ,.a_arlen(mst4_arlen)
+    ,.a_arsize(mst4_arsize)
     ,.a_arready(mst4_arready)
     ,.a_arvalid(mst4_arvalid)
     ,.a_awaddr(mst4_awaddr[31:0])
     ,.a_awburst(mst4_awburst[1:0])
     ,.a_awextras(mst4_awextras[(EXTRAS - 1):0])
-    ,.a_awid(mst4_awid[(IDWID - 1):0])
-    ,.a_awlen(mst4_awlen[7:0])
+    ,.a_awid(mst4_awid)
+    ,.a_awlen(mst4_awlen)
+    ,.a_awsize(mst4_awsize)
     ,.a_awready(mst4_awready)
     ,.a_awvalid(mst4_awvalid)
     ,.a_bid(mst4_bid[(IDWID - 1):0])
@@ -907,15 +965,17 @@ axi_4_merger merger1 (
     ,.b_araddr(mst5_araddr[31:0])
     ,.b_arburst(mst5_arburst[1:0])
     ,.b_arextras(mst5_arextras[(EXTRAS - 1):0])
-    ,.b_arid(mst5_arid[(IDWID - 1):0])
-    ,.b_arlen(mst5_arlen[7:0])
+    ,.b_arid(mst5_arid)
+    ,.b_arlen(mst5_arlen)
+    ,.b_arsize(mst5_arsize)
     ,.b_arready(mst5_arready)
     ,.b_arvalid(mst5_arvalid)
     ,.b_awaddr(mst5_awaddr[31:0])
     ,.b_awburst(mst5_awburst[1:0])
     ,.b_awextras(mst5_awextras[(EXTRAS - 1):0])
-    ,.b_awid(mst5_awid[(IDWID - 1):0])
-    ,.b_awlen(mst5_awlen[7:0])
+    ,.b_awid(mst5_awid)
+    ,.b_awlen(mst5_awlen)
+    ,.b_awsize(mst5_awsize)
     ,.b_awready(mst5_awready)
     ,.b_awvalid(mst5_awvalid)
     ,.b_bid(mst5_bid[(IDWID - 1):0])
@@ -937,15 +997,17 @@ axi_4_merger merger1 (
     ,.c_araddr(mst6_araddr[31:0])
     ,.c_arburst(mst6_arburst[1:0])
     ,.c_arextras(mst6_arextras[(EXTRAS - 1):0])
-    ,.c_arid(mst6_arid[(IDWID - 1):0])
-    ,.c_arlen(mst6_arlen[7:0])
+    ,.c_arid(mst6_arid)
+    ,.c_arlen(mst6_arlen)
+    ,.c_arsize(mst6_arsize)
     ,.c_arready(mst6_arready)
     ,.c_arvalid(mst6_arvalid)
     ,.c_awaddr(mst6_awaddr[31:0])
     ,.c_awburst(mst6_awburst[1:0])
     ,.c_awextras(mst6_awextras[(EXTRAS - 1):0])
-    ,.c_awid(mst6_awid[(IDWID - 1):0])
-    ,.c_awlen(mst6_awlen[7:0])
+    ,.c_awid(mst6_awid)
+    ,.c_awlen(mst6_awlen)
+    ,.c_awsize(mst6_awsize)
     ,.c_awready(mst6_awready)
     ,.c_awvalid(mst6_awvalid)
     ,.c_bid(mst6_bid[(IDWID - 1):0])
@@ -967,15 +1029,17 @@ axi_4_merger merger1 (
     ,.d_araddr(mst7_araddr[31:0])
     ,.d_arburst(mst7_arburst[1:0])
     ,.d_arextras(mst7_arextras[(EXTRAS - 1):0])
-    ,.d_arid(mst7_arid[(IDWID - 1):0])
-    ,.d_arlen(mst7_arlen[7:0])
+    ,.d_arid(mst7_arid)
+    ,.d_arlen(mst7_arlen)
+    ,.d_arsize(mst7_arsize)
     ,.d_arready(mst7_arready)
     ,.d_arvalid(mst7_arvalid)
     ,.d_awaddr(mst7_awaddr[31:0])
     ,.d_awburst(mst7_awburst[1:0])
     ,.d_awextras(mst7_awextras[(EXTRAS - 1):0])
-    ,.d_awid(mst7_awid[(IDWID - 1):0])
-    ,.d_awlen(mst7_awlen[7:0])
+    ,.d_awid(mst7_awid)
+    ,.d_awlen(mst7_awlen)
+    ,.d_awsize(mst7_awsize)
     ,.d_awready(mst7_awready)
     ,.d_awvalid(mst7_awvalid)
     ,.d_bid(mst7_bid[(IDWID - 1):0])
@@ -999,6 +1063,7 @@ axi_4_merger merger1 (
 wire [IDWID-1:0] merger2_merger4_arid ;
 wire [31:0] merger2_merger4_araddr ;
 wire [7:0] merger2_merger4_arlen ;
+wire [2:0] merger2_merger4_arsize ;
 wire [EXTRAS-1:0] merger2_merger4_arextras ;
 wire [1:0] merger2_merger4_arburst ;
 wire merger2_merger4_arvalid ;
@@ -1013,6 +1078,7 @@ wire merger2_merger4_rready ;
 wire [IDWID-1:0] merger2_merger4_awid ;
 wire [31:0] merger2_merger4_awaddr ;
 wire [7:0] merger2_merger4_awlen ;
+wire [2:0] merger2_merger4_awsize ;
 wire [EXTRAS-1:0] merger2_merger4_awextras ;
 wire [1:0] merger2_merger4_awburst ;
 wire merger2_merger4_awvalid ;
@@ -1033,15 +1099,17 @@ axi_4_merger merger2 (
     ,.araddr(merger2_merger4_araddr[31:0])
     ,.arburst(merger2_merger4_arburst[1:0])
     ,.arextras(merger2_merger4_arextras[(EXTRAS - 1):0])
-    ,.arid(merger2_merger4_arid[(IDWID - 1):0])
-    ,.arlen(merger2_merger4_arlen[7:0])
+    ,.arid(merger2_merger4_arid)
+    ,.arlen(merger2_merger4_arlen)
+    ,.arsize(merger2_merger4_arsize)
     ,.arready(merger2_merger4_arready)
     ,.arvalid(merger2_merger4_arvalid)
     ,.awaddr(merger2_merger4_awaddr[31:0])
     ,.awburst(merger2_merger4_awburst[1:0])
     ,.awextras(merger2_merger4_awextras[(EXTRAS - 1):0])
-    ,.awid(merger2_merger4_awid[3:0])
-    ,.awlen(merger2_merger4_awlen[7:0])
+    ,.awid(merger2_merger4_awid)
+    ,.awlen(merger2_merger4_awlen)
+    ,.awsize(merger2_merger4_awsize)
     ,.awready(merger2_merger4_awready)
     ,.awvalid(merger2_merger4_awvalid)
     ,.bid(merger2_merger4_bid[(IDWID - 1):0])
@@ -1064,15 +1132,17 @@ axi_4_merger merger2 (
     ,.a_araddr(mst8_araddr[31:0])
     ,.a_arburst(mst8_arburst[1:0])
     ,.a_arextras(mst8_arextras[(EXTRAS - 1):0])
-    ,.a_arid(mst8_arid[(IDWID - 1):0])
-    ,.a_arlen(mst8_arlen[7:0])
+    ,.a_arid(mst8_arid)
+    ,.a_arlen(mst8_arlen)
+    ,.a_arsize(mst8_arsize)
     ,.a_arready(mst8_arready)
     ,.a_arvalid(mst8_arvalid)
     ,.a_awaddr(mst8_awaddr[31:0])
     ,.a_awburst(mst8_awburst[1:0])
     ,.a_awextras(mst8_awextras[(EXTRAS - 1):0])
-    ,.a_awid(mst8_awid[(IDWID - 1):0])
-    ,.a_awlen(mst8_awlen[7:0])
+    ,.a_awid(mst8_awid)
+    ,.a_awlen(mst8_awlen)
+    ,.a_awsize(mst8_awsize)
     ,.a_awready(mst8_awready)
     ,.a_awvalid(mst8_awvalid)
     ,.a_bid(mst8_bid[(IDWID - 1):0])
@@ -1094,15 +1164,17 @@ axi_4_merger merger2 (
     ,.b_araddr(mst9_araddr[31:0])
     ,.b_arburst(mst9_arburst[1:0])
     ,.b_arextras(mst9_arextras[(EXTRAS - 1):0])
-    ,.b_arid(mst9_arid[(IDWID - 1):0])
-    ,.b_arlen(mst9_arlen[7:0])
+    ,.b_arid(mst9_arid)
+    ,.b_arlen(mst9_arlen)
+    ,.b_arsize(mst9_arsize)
     ,.b_arready(mst9_arready)
     ,.b_arvalid(mst9_arvalid)
     ,.b_awaddr(mst9_awaddr[31:0])
     ,.b_awburst(mst9_awburst[1:0])
     ,.b_awextras(mst9_awextras[(EXTRAS - 1):0])
-    ,.b_awid(mst9_awid[(IDWID - 1):0])
-    ,.b_awlen(mst9_awlen[7:0])
+    ,.b_awid(mst9_awid)
+    ,.b_awlen(mst9_awlen)
+    ,.b_awsize(mst9_awsize)
     ,.b_awready(mst9_awready)
     ,.b_awvalid(mst9_awvalid)
     ,.b_bid(mst9_bid[(IDWID - 1):0])
@@ -1124,15 +1196,17 @@ axi_4_merger merger2 (
     ,.c_araddr(mst10_araddr[31:0])
     ,.c_arburst(mst10_arburst[1:0])
     ,.c_arextras(mst10_arextras[(EXTRAS - 1):0])
-    ,.c_arid(mst10_arid[(IDWID - 1):0])
-    ,.c_arlen(mst10_arlen[7:0])
+    ,.c_arid(mst10_arid)
+    ,.c_arlen(mst10_arlen)
+    ,.c_arsize(mst10_arsize)
     ,.c_arready(mst10_arready)
     ,.c_arvalid(mst10_arvalid)
     ,.c_awaddr(mst10_awaddr[31:0])
     ,.c_awburst(mst10_awburst[1:0])
     ,.c_awextras(mst10_awextras[(EXTRAS - 1):0])
-    ,.c_awid(mst10_awid[(IDWID - 1):0])
-    ,.c_awlen(mst10_awlen[7:0])
+    ,.c_awid(mst10_awid)
+    ,.c_awlen(mst10_awlen)
+    ,.c_awsize(mst10_awsize)
     ,.c_awready(mst10_awready)
     ,.c_awvalid(mst10_awvalid)
     ,.c_bid(mst10_bid[(IDWID - 1):0])
@@ -1154,15 +1228,17 @@ axi_4_merger merger2 (
     ,.d_araddr(mst11_araddr[31:0])
     ,.d_arburst(mst11_arburst[1:0])
     ,.d_arextras(mst11_arextras[(EXTRAS - 1):0])
-    ,.d_arid(mst11_arid[(IDWID - 1):0])
-    ,.d_arlen(mst11_arlen[7:0])
+    ,.d_arid(mst11_arid)
+    ,.d_arlen(mst11_arlen)
+    ,.d_arsize(mst11_arsize)
     ,.d_arready(mst11_arready)
     ,.d_arvalid(mst11_arvalid)
     ,.d_awaddr(mst11_awaddr[31:0])
     ,.d_awburst(mst11_awburst[1:0])
     ,.d_awextras(mst11_awextras[(EXTRAS - 1):0])
-    ,.d_awid(mst11_awid[(IDWID - 1):0])
-    ,.d_awlen(mst11_awlen[7:0])
+    ,.d_awid(mst11_awid)
+    ,.d_awlen(mst11_awlen)
+    ,.d_awsize(mst11_awsize)
     ,.d_awready(mst11_awready)
     ,.d_awvalid(mst11_awvalid)
     ,.d_bid(mst11_bid[(IDWID - 1):0])
@@ -1186,6 +1262,7 @@ axi_4_merger merger2 (
 wire [IDWID-1:0] merger3_merger4_arid ;
 wire [31:0] merger3_merger4_araddr ;
 wire [7:0] merger3_merger4_arlen ;
+wire [2:0] merger3_merger4_arsize ;
 wire [EXTRAS-1:0] merger3_merger4_arextras ;
 wire [1:0] merger3_merger4_arburst ;
 wire merger3_merger4_arvalid ;
@@ -1200,6 +1277,7 @@ wire merger3_merger4_rready ;
 wire [IDWID-1:0] merger3_merger4_awid ;
 wire [31:0] merger3_merger4_awaddr ;
 wire [7:0] merger3_merger4_awlen ;
+wire [2:0] merger3_merger4_awsize ;
 wire [EXTRAS-1:0] merger3_merger4_awextras ;
 wire [1:0] merger3_merger4_awburst ;
 wire merger3_merger4_awvalid ;
@@ -1220,15 +1298,17 @@ axi_4_merger merger3 (
     ,.araddr(merger3_merger4_araddr[31:0])
     ,.arburst(merger3_merger4_arburst[1:0])
     ,.arextras(merger3_merger4_arextras[(EXTRAS - 1):0])
-    ,.arid(merger3_merger4_arid[(IDWID - 1):0])
-    ,.arlen(merger3_merger4_arlen[7:0])
+    ,.arid(merger3_merger4_arid)
+    ,.arlen(merger3_merger4_arlen)
+    ,.arsize(merger3_merger4_arsize)
     ,.arready(merger3_merger4_arready)
     ,.arvalid(merger3_merger4_arvalid)
     ,.awaddr(merger3_merger4_awaddr[31:0])
     ,.awburst(merger3_merger4_awburst[1:0])
     ,.awextras(merger3_merger4_awextras[(EXTRAS - 1):0])
-    ,.awid(merger3_merger4_awid[3:0])
-    ,.awlen(merger3_merger4_awlen[7:0])
+    ,.awid(merger3_merger4_awid)
+    ,.awlen(merger3_merger4_awlen)
+    ,.awsize(merger3_merger4_awsize)
     ,.awready(merger3_merger4_awready)
     ,.awvalid(merger3_merger4_awvalid)
     ,.bid(merger3_merger4_bid[(IDWID - 1):0])
@@ -1251,15 +1331,17 @@ axi_4_merger merger3 (
     ,.a_araddr(mst12_araddr[31:0])
     ,.a_arburst(mst12_arburst[1:0])
     ,.a_arextras(mst12_arextras[(EXTRAS - 1):0])
-    ,.a_arid(mst12_arid[(IDWID - 1):0])
-    ,.a_arlen(mst12_arlen[7:0])
+    ,.a_arid(mst12_arid)
+    ,.a_arlen(mst12_arlen)
+    ,.a_arsize(mst12_arsize)
     ,.a_arready(mst12_arready)
     ,.a_arvalid(mst12_arvalid)
     ,.a_awaddr(mst12_awaddr[31:0])
     ,.a_awburst(mst12_awburst[1:0])
     ,.a_awextras(mst12_awextras[(EXTRAS - 1):0])
-    ,.a_awid(mst12_awid[(IDWID - 1):0])
-    ,.a_awlen(mst12_awlen[7:0])
+    ,.a_awid(mst12_awid)
+    ,.a_awlen(mst12_awlen)
+    ,.a_awsize(mst12_awsize)
     ,.a_awready(mst12_awready)
     ,.a_awvalid(mst12_awvalid)
     ,.a_bid(mst12_bid[(IDWID - 1):0])
@@ -1281,15 +1363,17 @@ axi_4_merger merger3 (
     ,.b_araddr(mst13_araddr[31:0])
     ,.b_arburst(mst13_arburst[1:0])
     ,.b_arextras(mst13_arextras[(EXTRAS - 1):0])
-    ,.b_arid(mst13_arid[(IDWID - 1):0])
-    ,.b_arlen(mst13_arlen[7:0])
+    ,.b_arid(mst13_arid)
+    ,.b_arlen(mst13_arlen)
+    ,.b_arsize(mst13_arsize)
     ,.b_arready(mst13_arready)
     ,.b_arvalid(mst13_arvalid)
     ,.b_awaddr(mst13_awaddr[31:0])
     ,.b_awburst(mst13_awburst[1:0])
     ,.b_awextras(mst13_awextras[(EXTRAS - 1):0])
-    ,.b_awid(mst13_awid[(IDWID - 1):0])
-    ,.b_awlen(mst13_awlen[7:0])
+    ,.b_awid(mst13_awid)
+    ,.b_awlen(mst13_awlen)
+    ,.b_awsize(mst13_awsize)
     ,.b_awready(mst13_awready)
     ,.b_awvalid(mst13_awvalid)
     ,.b_bid(mst13_bid[(IDWID - 1):0])
@@ -1311,15 +1395,17 @@ axi_4_merger merger3 (
     ,.c_araddr(mst14_araddr[31:0])
     ,.c_arburst(mst14_arburst[1:0])
     ,.c_arextras(mst14_arextras[(EXTRAS - 1):0])
-    ,.c_arid(mst14_arid[(IDWID - 1):0])
-    ,.c_arlen(mst14_arlen[7:0])
+    ,.c_arid(mst14_arid)
+    ,.c_arlen(mst14_arlen)
+    ,.c_arsize(mst14_arsize)
     ,.c_arready(mst14_arready)
     ,.c_arvalid(mst14_arvalid)
     ,.c_awaddr(mst14_awaddr[31:0])
     ,.c_awburst(mst14_awburst[1:0])
     ,.c_awextras(mst14_awextras[(EXTRAS - 1):0])
-    ,.c_awid(mst14_awid[(IDWID - 1):0])
-    ,.c_awlen(mst14_awlen[7:0])
+    ,.c_awid(mst14_awid)
+    ,.c_awlen(mst14_awlen)
+    ,.c_awsize(mst14_awsize)
     ,.c_awready(mst14_awready)
     ,.c_awvalid(mst14_awvalid)
     ,.c_bid(mst14_bid[(IDWID - 1):0])
@@ -1341,15 +1427,17 @@ axi_4_merger merger3 (
     ,.d_araddr(mst15_araddr[31:0])
     ,.d_arburst(mst15_arburst[1:0])
     ,.d_arextras(mst15_arextras[(EXTRAS - 1):0])
-    ,.d_arid(mst15_arid[(IDWID - 1):0])
-    ,.d_arlen(mst15_arlen[7:0])
+    ,.d_arid(mst15_arid)
+    ,.d_arlen(mst15_arlen)
+    ,.d_arsize(mst15_arsize)
     ,.d_arready(mst15_arready)
     ,.d_arvalid(mst15_arvalid)
     ,.d_awaddr(mst15_awaddr[31:0])
     ,.d_awburst(mst15_awburst[1:0])
     ,.d_awextras(mst15_awextras[(EXTRAS - 1):0])
-    ,.d_awid(mst15_awid[(IDWID - 1):0])
-    ,.d_awlen(mst15_awlen[7:0])
+    ,.d_awid(mst15_awid)
+    ,.d_awlen(mst15_awlen)
+    ,.d_awsize(mst15_awsize)
     ,.d_awready(mst15_awready)
     ,.d_awvalid(mst15_awvalid)
     ,.d_bid(mst15_bid[(IDWID - 1):0])
@@ -1373,6 +1461,7 @@ axi_4_merger merger3 (
 wire [IDWID-1:0] merger4_splitter0_arid ;
 wire [31:0] merger4_splitter0_araddr ;
 wire [7:0] merger4_splitter0_arlen ;
+wire [2:0] merger4_splitter0_arsize ;
 wire [EXTRAS-1:0] merger4_splitter0_arextras ;
 wire [1:0] merger4_splitter0_arburst ;
 wire merger4_splitter0_arvalid ;
@@ -1387,6 +1476,7 @@ wire merger4_splitter0_rready ;
 wire [IDWID-1:0] merger4_splitter0_awid ;
 wire [31:0] merger4_splitter0_awaddr ;
 wire [7:0] merger4_splitter0_awlen ;
+wire [2:0] merger4_splitter0_awsize ;
 wire [EXTRAS-1:0] merger4_splitter0_awextras ;
 wire [1:0] merger4_splitter0_awburst ;
 wire merger4_splitter0_awvalid ;
@@ -1407,15 +1497,17 @@ axi_4_merger merger4 (
     ,.araddr(merger4_splitter0_araddr[31:0])
     ,.arburst(merger4_splitter0_arburst[1:0])
     ,.arextras(merger4_splitter0_arextras[(EXTRAS - 1):0])
-    ,.arid(merger4_splitter0_arid[(IDWID - 1):0])
-    ,.arlen(merger4_splitter0_arlen[7:0])
+    ,.arid(merger4_splitter0_arid)
+    ,.arlen(merger4_splitter0_arlen)
+    ,.arsize(merger4_splitter0_arsize)
     ,.arready(merger4_splitter0_arready)
     ,.arvalid(merger4_splitter0_arvalid)
     ,.awaddr(merger4_splitter0_awaddr[31:0])
     ,.awburst(merger4_splitter0_awburst[1:0])
     ,.awextras(merger4_splitter0_awextras[(EXTRAS - 1):0])
-    ,.awid(merger4_splitter0_awid[3:0])
-    ,.awlen(merger4_splitter0_awlen[7:0])
+    ,.awid(merger4_splitter0_awid)
+    ,.awlen(merger4_splitter0_awlen)
+    ,.awsize(merger4_splitter0_awsize)
     ,.awready(merger4_splitter0_awready)
     ,.awvalid(merger4_splitter0_awvalid)
     ,.bid(merger4_splitter0_bid[(IDWID - 1):0])
@@ -1438,15 +1530,17 @@ axi_4_merger merger4 (
     ,.a_araddr(merger0_merger4_araddr[31:0])
     ,.a_arburst(merger0_merger4_arburst[1:0])
     ,.a_arextras(merger0_merger4_arextras[(EXTRAS - 1):0])
-    ,.a_arid(merger0_merger4_arid[(IDWID - 1):0])
-    ,.a_arlen(merger0_merger4_arlen[7:0])
+    ,.a_arid(merger0_merger4_arid)
+    ,.a_arlen(merger0_merger4_arlen)
+    ,.a_arsize(merger0_merger4_arsize)
     ,.a_arready(merger0_merger4_arready)
     ,.a_arvalid(merger0_merger4_arvalid)
     ,.a_awaddr(merger0_merger4_awaddr[31:0])
     ,.a_awburst(merger0_merger4_awburst[1:0])
     ,.a_awextras(merger0_merger4_awextras[(EXTRAS - 1):0])
-    ,.a_awid(merger0_merger4_awid[(IDWID - 1):0])
-    ,.a_awlen(merger0_merger4_awlen[7:0])
+    ,.a_awid(merger0_merger4_awid)
+    ,.a_awlen(merger0_merger4_awlen)
+    ,.a_awsize(merger0_merger4_awsize)
     ,.a_awready(merger0_merger4_awready)
     ,.a_awvalid(merger0_merger4_awvalid)
     ,.a_bid(merger0_merger4_bid[(IDWID - 1):0])
@@ -1468,15 +1562,17 @@ axi_4_merger merger4 (
     ,.b_araddr(merger1_merger4_araddr[31:0])
     ,.b_arburst(merger1_merger4_arburst[1:0])
     ,.b_arextras(merger1_merger4_arextras[(EXTRAS - 1):0])
-    ,.b_arid(merger1_merger4_arid[(IDWID - 1):0])
-    ,.b_arlen(merger1_merger4_arlen[7:0])
+    ,.b_arid(merger1_merger4_arid)
+    ,.b_arlen(merger1_merger4_arlen)
+    ,.b_arsize(merger1_merger4_arsize)
     ,.b_arready(merger1_merger4_arready)
     ,.b_arvalid(merger1_merger4_arvalid)
     ,.b_awaddr(merger1_merger4_awaddr[31:0])
     ,.b_awburst(merger1_merger4_awburst[1:0])
     ,.b_awextras(merger1_merger4_awextras[(EXTRAS - 1):0])
-    ,.b_awid(merger1_merger4_awid[(IDWID - 1):0])
-    ,.b_awlen(merger1_merger4_awlen[7:0])
+    ,.b_awid(merger1_merger4_awid)
+    ,.b_awlen(merger1_merger4_awlen)
+    ,.b_awsize(merger1_merger4_awsize)
     ,.b_awready(merger1_merger4_awready)
     ,.b_awvalid(merger1_merger4_awvalid)
     ,.b_bid(merger1_merger4_bid[(IDWID - 1):0])
@@ -1498,15 +1594,17 @@ axi_4_merger merger4 (
     ,.c_araddr(merger2_merger4_araddr[31:0])
     ,.c_arburst(merger2_merger4_arburst[1:0])
     ,.c_arextras(merger2_merger4_arextras[(EXTRAS - 1):0])
-    ,.c_arid(merger2_merger4_arid[(IDWID - 1):0])
-    ,.c_arlen(merger2_merger4_arlen[7:0])
+    ,.c_arid(merger2_merger4_arid)
+    ,.c_arlen(merger2_merger4_arlen)
+    ,.c_arsize(merger2_merger4_arsize)
     ,.c_arready(merger2_merger4_arready)
     ,.c_arvalid(merger2_merger4_arvalid)
     ,.c_awaddr(merger2_merger4_awaddr[31:0])
     ,.c_awburst(merger2_merger4_awburst[1:0])
     ,.c_awextras(merger2_merger4_awextras[(EXTRAS - 1):0])
-    ,.c_awid(merger2_merger4_awid[(IDWID - 1):0])
-    ,.c_awlen(merger2_merger4_awlen[7:0])
+    ,.c_awid(merger2_merger4_awid)
+    ,.c_awlen(merger2_merger4_awlen)
+    ,.c_awsize(merger2_merger4_awsize)
     ,.c_awready(merger2_merger4_awready)
     ,.c_awvalid(merger2_merger4_awvalid)
     ,.c_bid(merger2_merger4_bid[(IDWID - 1):0])
@@ -1528,15 +1626,17 @@ axi_4_merger merger4 (
     ,.d_araddr(merger3_merger4_araddr[31:0])
     ,.d_arburst(merger3_merger4_arburst[1:0])
     ,.d_arextras(merger3_merger4_arextras[(EXTRAS - 1):0])
-    ,.d_arid(merger3_merger4_arid[(IDWID - 1):0])
-    ,.d_arlen(merger3_merger4_arlen[7:0])
+    ,.d_arid(merger3_merger4_arid)
+    ,.d_arlen(merger3_merger4_arlen)
+    ,.d_arsize(merger3_merger4_arsize)
     ,.d_arready(merger3_merger4_arready)
     ,.d_arvalid(merger3_merger4_arvalid)
     ,.d_awaddr(merger3_merger4_awaddr[31:0])
     ,.d_awburst(merger3_merger4_awburst[1:0])
     ,.d_awextras(merger3_merger4_awextras[(EXTRAS - 1):0])
-    ,.d_awid(merger3_merger4_awid[(IDWID - 1):0])
-    ,.d_awlen(merger3_merger4_awlen[7:0])
+    ,.d_awid(merger3_merger4_awid)
+    ,.d_awlen(merger3_merger4_awlen)
+    ,.d_awsize(merger3_merger4_awsize)
     ,.d_awready(merger3_merger4_awready)
     ,.d_awvalid(merger3_merger4_awvalid)
     ,.d_bid(merger3_merger4_bid[(IDWID - 1):0])
@@ -1563,15 +1663,17 @@ axi_4_splitter splitter0 (
     ,.araddr(merger4_splitter0_araddr[31:0])
     ,.arburst(merger4_splitter0_arburst[1:0])
     ,.arextras(merger4_splitter0_arextras[(EXTRAS - 1):0])
-    ,.arid(merger4_splitter0_arid[(IDWID - 1):0])
-    ,.arlen(merger4_splitter0_arlen[7:0])
+    ,.arid(merger4_splitter0_arid)
+    ,.arlen(merger4_splitter0_arlen)
+    ,.arsize(merger4_splitter0_arsize)
     ,.arready(merger4_splitter0_arready)
     ,.arvalid(merger4_splitter0_arvalid)
     ,.awaddr(merger4_splitter0_awaddr[31:0])
     ,.awburst(merger4_splitter0_awburst[1:0])
     ,.awextras(merger4_splitter0_awextras[(EXTRAS - 1):0])
-    ,.awid(merger4_splitter0_awid[3:0])
-    ,.awlen(merger4_splitter0_awlen[7:0])
+    ,.awid(merger4_splitter0_awid)
+    ,.awlen(merger4_splitter0_awlen)
+    ,.awsize(merger4_splitter0_awsize)
     ,.awready(merger4_splitter0_awready)
     ,.awvalid(merger4_splitter0_awvalid)
     ,.bid(merger4_splitter0_bid[(IDWID - 1):0])
@@ -1593,15 +1695,17 @@ axi_4_splitter splitter0 (
     ,.a_araddr(slv0_araddr[31:0])
     ,.a_arburst(slv0_arburst[1:0])
     ,.a_arextras(slv0_arextras[(EXTRAS - 1):0])
-    ,.a_arid(slv0_arid[(IDWID - 1):0])
-    ,.a_arlen(slv0_arlen[7:0])
+    ,.a_arid(slv0_arid)
+    ,.a_arlen(slv0_arlen)
+    ,.a_arsize(slv0_arsize)
     ,.a_arready(slv0_arready)
     ,.a_arvalid(slv0_arvalid)
     ,.a_awaddr(slv0_awaddr[31:0])
     ,.a_awburst(slv0_awburst[1:0])
     ,.a_awextras(slv0_awextras[(EXTRAS - 1):0])
-    ,.a_awid(slv0_awid[(IDWID - 1):0])
-    ,.a_awlen(slv0_awlen[7:0])
+    ,.a_awid(slv0_awid)
+    ,.a_awlen(slv0_awlen)
+    ,.a_awsize(slv0_awsize)
     ,.a_awready(slv0_awready)
     ,.a_awvalid(slv0_awvalid)
     ,.a_bid(slv0_bid[(IDWID - 1):0])
@@ -1622,15 +1726,17 @@ axi_4_splitter splitter0 (
     ,.b_araddr(slv1_araddr[31:0])
     ,.b_arburst(slv1_arburst[1:0])
     ,.b_arextras(slv1_arextras[(EXTRAS - 1):0])
-    ,.b_arid(slv1_arid[(IDWID - 1):0])
-    ,.b_arlen(slv1_arlen[7:0])
+    ,.b_arid(slv1_arid)
+    ,.b_arlen(slv1_arlen)
+    ,.b_arsize(slv1_arsize)
     ,.b_arready(slv1_arready)
     ,.b_arvalid(slv1_arvalid)
     ,.b_awaddr(slv1_awaddr[31:0])
     ,.b_awburst(slv1_awburst[1:0])
     ,.b_awextras(slv1_awextras[(EXTRAS - 1):0])
-    ,.b_awid(slv1_awid[(IDWID - 1):0])
-    ,.b_awlen(slv1_awlen[7:0])
+    ,.b_awid(slv1_awid)
+    ,.b_awlen(slv1_awlen)
+    ,.b_awsize(slv1_awsize)
     ,.b_awready(slv1_awready)
     ,.b_awvalid(slv1_awvalid)
     ,.b_bid(slv1_bid[(IDWID - 1):0])
@@ -1651,15 +1757,17 @@ axi_4_splitter splitter0 (
     ,.c_araddr(slv2_araddr[31:0])
     ,.c_arburst(slv2_arburst[1:0])
     ,.c_arextras(slv2_arextras[(EXTRAS - 1):0])
-    ,.c_arid(slv2_arid[(IDWID - 1):0])
-    ,.c_arlen(slv2_arlen[7:0])
+    ,.c_arid(slv2_arid)
+    ,.c_arlen(slv2_arlen)
+    ,.c_arsize(slv2_arsize)
     ,.c_arready(slv2_arready)
     ,.c_arvalid(slv2_arvalid)
     ,.c_awaddr(slv2_awaddr[31:0])
     ,.c_awburst(slv2_awburst[1:0])
     ,.c_awextras(slv2_awextras[(EXTRAS - 1):0])
-    ,.c_awid(slv2_awid[(IDWID - 1):0])
-    ,.c_awlen(slv2_awlen[7:0])
+    ,.c_awid(slv2_awid)
+    ,.c_awlen(slv2_awlen)
+    ,.c_awsize(slv2_awsize)
     ,.c_awready(slv2_awready)
     ,.c_awvalid(slv2_awvalid)
     ,.c_bid(slv2_bid[(IDWID - 1):0])
@@ -1682,13 +1790,15 @@ axi_4_splitter splitter0 (
     ,.d_arextras(slv3_arextras[(EXTRAS - 1):0])
     ,.d_arid(slv3_arid[(IDWID - 1):0])
     ,.d_arlen(slv3_arlen[7:0])
+    ,.d_arsize(slv3_arsize)
     ,.d_arready(slv3_arready)
     ,.d_arvalid(slv3_arvalid)
     ,.d_awaddr(slv3_awaddr[31:0])
     ,.d_awburst(slv3_awburst[1:0])
     ,.d_awextras(slv3_awextras[(EXTRAS - 1):0])
-    ,.d_awid(slv3_awid[(IDWID - 1):0])
-    ,.d_awlen(slv3_awlen[7:0])
+    ,.d_awid(slv3_awid)
+    ,.d_awlen(slv3_awlen)
+    ,.d_awsize(slv3_awsize)
     ,.d_awready(slv3_awready)
     ,.d_awvalid(slv3_awvalid)
     ,.d_bid(slv3_bid[(IDWID - 1):0])
@@ -1708,23 +1818,4 @@ axi_4_splitter splitter0 (
     ,.d_wvalid(slv3_wvalid)
 
 );
-
-
-reg [1023:0] testname;
-initial begin
-   if ($value$plusargs("LOG=%s",testname)) begin 
-        $python("pymonname()",testname);
-    end  
-
-
-    if ($value$plusargs("SEQ=%s",testname)) begin 
-         $display(" Running SEQ= %s.",testname); 
-    end else begin
-        testname = 0; 
-        $display(" default test");
-    end  
-    #10; 
-    if (testname!=0) $python("sequence()",testname);
-end 
 endmodule
-

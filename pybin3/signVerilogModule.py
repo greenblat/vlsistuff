@@ -13,6 +13,8 @@ def work(Fname):
     File = open(Fname)
     Lines = File.readlines()
     File.close()
+    Abs = os.path.abspath(Fname)
+#    print(Abs)
 
     Date = datetime.date.today()
     Time = datetime.datetime.now()
@@ -61,13 +63,13 @@ def work(Fname):
                 Now = '%08x' % Signature
                 WasS = Was[:8]
                 if (Now != WasS):
-                    New = "%s sign_version = 64'h%08x%s ;\nendmodule\n" % (sign_version,Signature,HourDate)
+                    New = "%s sign_version = 64'h%08x%s ;\nendmodule\n// from %s" % (sign_version,Signature,HourDate,Abs)
                     Changed = True
                 else:
-                    New = "%s sign_version = 64'h%s ;\nendmodule\n" % (sign_version,Was)
+                    New = "%s sign_version = 64'h%s ;\nendmodule\n// from %s" % (sign_version,Was,Abs)
                 Lines[ind] = New
             else:
-                New = "%s sign_version = 64'h%08x%s ;\nendmodule\n" % (sign_version,Signature,HourDate)
+                New = "%s sign_version = 64'h%08x%s ;\nendmodule\n// from %s\n" % (sign_version,Signature,HourDate,Abs)
                 Lines[ind] = New
                 Changed = True
             Signature = 0            
