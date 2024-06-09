@@ -210,6 +210,7 @@ class axiSlaveClass:
             self.force('rresp',0)
             self.force('bresp',0)
             self.force('bvalid',0)
+            self.force('arready',1)
         if self.Starvation:
             return
         self.reading()
@@ -217,7 +218,7 @@ class axiSlaveClass:
         self.sendrqueue()
 
     def sendrqueue(self):
-        veri.force('tb.rqueuelen',hex(len(self.rqueue)))
+#         veri.force('tb.rqueuelen',hex(len(self.rqueue)))
         if self.waitread>0:
             self.waitread -= 1
             self.idleread()
@@ -241,7 +242,7 @@ class axiSlaveClass:
                 self.force('rid',rid)
                 self.force('rresp',self.rresp(Addr))
                 self.force('rdata','0x'+rdata)
-                logs.log_info('RDATA %x addr=%x rid=%d rlast=%d' % (rdata,Addr,rid.rlast),verbose=self.verbose)
+                logs.log_info('RDATA %s addr=%s rid=%d rlast=%d' % (rdata,Addr,rid,rlast),verbose=self.verbose)
             return
         (rlast,rid,rdata,Addr) = self.rqueue.pop(0)
         logs.log_info("RAXI len=%d rlast=%s rid=%s addr=%x" % (len(self.rqueue),rlast,rid,Addr),verbose=self.verbose)
@@ -288,10 +289,11 @@ class axiSlaveClass:
                 self.rqueue.append('pop')
                     
                 LastAddr = (araddr + (arlen+1)*(1<<arsize))-1
-                LastPage = LastAddr & 0xffffe000
-                FirstPage = araddr & 0xffffe000
+                X =  (araddr + (arlen+1)*(1<<arsize))
+                LastPage = LastAddr & 0xfffff000
+                FirstPage = araddr & 0xfffff000
                 if (FirstPage != LastPage):
-                    logs.log_error('slave %s CROSSING 4K read araddr=%x arlen=%x arsize=%x' % (self.Name,araddr,arlen,arsize))
+                    logs.log_error('slave %s CROSSING 4K read araddr=%x arlen=%x arsize=%x X=%x  (la=%x lp=%x fp=%x)' % (self.Name,araddr,arlen,arsize,X,LastAddr,LastPage,FirstPage))
                 
     def readQueue(self,arlen,ii,burst,arsize,addr,rid,rlast):
         Incr = 1<<arsize
@@ -350,6 +352,7 @@ class axiSlaveClass:
             veri.force('tb.marker2',str(self.awlen & 0xffff))
         if self.Name == 'SLV3':
             veri.force('tb.marker3',str(self.awlen & 0xffff))
+        logs.log_info('WRITING bwait=%d %s %s' % (self.bwaiting, self.bqueue,self.bqueue0))
         if self.bwaiting>0:
             self.bwaiting -= 1
             self.force('bvalid',0)
@@ -388,16 +391,17 @@ class axiSlaveClass:
             LastAddr = (awaddr + (awlen+1)*(1<<awsize))-1
             LastPage = LastAddr & 0xffffe000
             FirstPage = awaddr & 0xffffe000
+            logs.log_info('PAGES first=%x last=%x   addr=%x lastad=%x' % (FirstPage,LastPage,awaddr,LastAddr))
             if (FirstPage != LastPage):
-                logs.log_error('slave %s CROSSING 4K write awaddr=%x awlen=%x awsize=%x' % (self.Name,awaddr,awlen,awsize))
+                logs.log_error('slave %s CROSSING 4K write awaddr=%x awlen=%x awsize=%x  (%x %x %x)' % (self.Name,awaddr,awlen,awsize,LastAddr,LastPage,FirstPage))
             logs.log_info('AxiSlave %s >>>awvalid %x %x %x %x %x'%(self.Name,awburst,awaddr,awlen,awid,awsize) ,verbose=self.verbose)
             self.bqueue0.append(awid)
-            logs.log_info("BQUEUE0 APPEND %s" % str(self.bqueue0),verbose=self.verbose)
+            logs.log_info("BQUEUE0 APPEND %s" % str(self.bqueue0),verbose=True)
         else:
             self.force('awready',1)
 
         self.wready = 0
-        self.force('marker3',self.waitWready)
+#        self.force('marker3',self.waitWready)
         if self.Passive and (self.peek('wready')==0):
             pass
         elif (self.waitWready>0):
@@ -443,7 +447,7 @@ class axiSlaveClass:
 
         if (wlast==1):
             logs.log_info('BQUEUE0 %s' % (self.bqueue0),verbose=self.verbose)
-            self.bqueue.append(('wait',2))
+            self.bqueue.append(('wait',30))
             if self.bqueue0 == []:
                 logs.log_error('axiSlave %s: BQUEUE0 is empty, more lasts than awvalids' % self.Name)
                 self.bqueue0.append(0)

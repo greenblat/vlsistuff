@@ -47,6 +47,8 @@ class apbDriver:
 #        self.force('penable',0)
         self.Uart = False
 
+    def callback(self,Txt):
+        return
     def onFinish(self):
         return
     def exists(self,Sig):
@@ -315,7 +317,7 @@ class apbDriver:
                         Val = 0
                     else:
                         Val = eval(Val)
-                    self.force('mark',Val)
+#                    self.force('mark',Val)
                 elif Sig=='marker':
                     logs.log_info('marker from APB %s'%self.Name)
                     if Val[0] in self.markers:
@@ -340,6 +342,7 @@ class apbDriver:
                     else: 
                         logs.log_info('apb %s addr=%x %s read act=%x who=%s'%(Exp,Addr,self.Name,Act,self.rename(Who)))
                         self.Backs.append((Who,Act,Addr))
+                        self.callback('%s rdata=%x addr=%x' % (Who,Act,Addr))
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 elif Sig=='popif':
