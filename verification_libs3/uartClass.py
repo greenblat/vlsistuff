@@ -19,14 +19,15 @@ class uartClass(logs.driverClass):
         self.rxByte=''
         self.force(self.rxd,1)
         self.RxStr = ''
-        self.Silence = 100
+        self.Silence = 8
         self.silentCounter = 0
 
     def busy(self,Why=False):
         Busy0 = self.silentCounter < (self.Silence * self.baudRate)
+#        logs.log_info("UARTBUSYU %s %s %s %s | %s %s %s" % (self.silentCounter, self.Silence , self.baudRate,self.Silence * self.baudRate,self.rxState,self.txQueue,self.rxQueue))
         if Why:
             logs.log_info("UART BUSY busy0=%s tx=%s rx=%s wtx=%s wrx=%s" % (Busy0,len(self.txQueue),len(self.rxQueue),(self.txWaiting>0),(self.rxWaiting>0)))
-        return Busy0 or (self.rxState!='idle') or (self.txQueue != []) or (self.rxQueue != []) or (self.txWaiting>0) or (self.rxWaiting>0)
+        return Busy0 or (self.txQueue != []) or (self.rxQueue != [])  # or (self.txWaiting>0) or (self.rxWaiting>0)
       
     def run(self):
         self.runTx()
@@ -145,11 +146,20 @@ class uartClass(logs.driverClass):
         elif self.rxState=='stop':
             Rxd = self.peek(self.txd)
             if Rxd==0:
-                logs.log_error('ilia rxd stop bit isnt there')
+                logs.log_info('ilia: rxd stop bit isnt there, is it break?')
             self.rxState='wait1'
+            self.rxWaiting = self.baudRate
+            self.zeroes = 0
         elif self.rxState=='wait1':
             Rxd = self.peek(self.txd)
-            if Rxd == 1: self.rxState = 'idle'
+            self.zeroes += 1
+            self.rxWaiting = self.baudRate
+            if Rxd == 1: 
+                if self.zeroes >= 3:
+                    logs.log_info('RX BREAK')
+                self.rxState = 'idle'
+                self.zeroes = 0
+                self.rxWaiting = 0
 
     def onFinish(self):
         return
