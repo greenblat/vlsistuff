@@ -18,6 +18,8 @@ if 'PYMONLOG' in os.environ:
 notTalking = True
 def onFinish(): return
 
+scoreBoards = {}
+
 
 def pymonname(Fname):
     global PYMONLOG
@@ -1225,6 +1227,16 @@ def without(Dict):
     if "__builtins__" in Dict:
         Dict.pop("__builtins__")
     return Dict 
+
+
+def getParams(Str):
+    Res = {}
+    wrds = Str.split()
+    for wrd in wrds:
+        ww = wrd.split('=')
+        if len(ww) == 2:
+            Res[ww[0]] = ww[1]
+    return Res 
 
 
 

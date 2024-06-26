@@ -4,13 +4,14 @@ import logs
 
 
 class uartClass(logs.driverClass):
-    def __init__(self,Path,Monitors,rxd='rxd',txd='txd'):
+    def __init__(self,Path,Monitors,rxd='rxd',txd='txd',name='noname'):
         logs.driverClass.__init__(self,Path,Monitors)
         self.rxd = rxd
         self.txd = txd
         self.baudRate = 100*32
         self.txQueue = []
         self.txWaiting=0
+        self.Name= name
 
         self.rxState = 'idle'
         self.rxQueue = []
@@ -130,25 +131,16 @@ class uartClass(logs.driverClass):
                 self.rxState = 'stop'
 #                self.rxQueue.append(self.rxByte)
                 Int = logs.intx(self.rxByte)
-                logs.log_info("MONRX %x" % Int)
-                if ((Int>=0)and(Int<256)):
-                    Chr = chr(logs.intx(self.rxByte))
-                    if not Chr.isprintable():
-                        Chr = hex(logs.intx(self.rxByte))
-                else:
-                    Chr = '(ERR%s)'%self.rxByte
-                self.RxStr += Chr
-#                logs.log_info('uart rxByte %s   "%s" '%(self.rxByte,self.RxStr))
-                try:
-                    if ord(Chr) <= 10:
-                        logs.log_info('UART RX  "%s" '%(self.RxStr[:-1]))
-                        self.RxStr = ''
-                except:
-                    logs.log_error('UART RX ERROR |%s|  "%s" '%(Chr,self.RxStr))
+                if Int >= 0 :
+                    Chr = chr(Int)
+                    if Chr.isprintable():
+                        self.RxStr += Chr
+                    else:
+                        Chr = '(0x%02x)'%Int
+                        self.RxStr += Chr
+                    logs.log_info('UART RX %s|  "%s" '%(Chr,self.RxStr))
                     self.RxStr = ''
 
-#                veri.force('tb.marker','0b'+self.rxByte)
-                self.rxByte=''
             self.rxWaiting = self.baudRate
         elif self.rxState=='stop':
             Rxd = self.peek(self.txd)

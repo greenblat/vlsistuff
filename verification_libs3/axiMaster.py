@@ -64,6 +64,7 @@ class axiMasterClass:
         self.write_data_generator = write_data_generator
         self.verbose = True
         self.fix_write_bid = False
+        self.denyBready = False
 
     def cannot_find_sig(self,Sig):
         logs.log_error('CANNOT FIND SIG %s' % Sig)
@@ -110,10 +111,11 @@ class axiMasterClass:
     def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         logs.log_info('%s ACTION %s' % (self.Name,Txt))
-        if wrds[0] == 'force':
+        if wrds[0] == 'denyBready':
+            self.denyBready = self.eval(wrds[1])
+        elif wrds[0] == 'force':
             Net = Orig[1]
             Value = wrds[2]
-            print("XXXXXXX",wrds)
             self.force(Net,Value)
         elif wrds[0] == 'starvation':
             if wrds[1] in [1,'1','on']:
@@ -459,7 +461,9 @@ class axiMasterClass:
        
     
     def runB(self):
-        if self.peek('bvalid')==1:
+        if self.denyBready:
+            self.force('bready','0')
+        elif self.peek('bvalid')==1:
             Bid = self.peek('bid')
             Bresp = self.peek('bresp')
             if self.Bscore == []:
