@@ -549,7 +549,6 @@ void pushtok(char *s,int ind) {
         run_time=atof(&(s[1]));
         LASTCHANGE++;
         if (AlwaysMode) {
-            printf("ALW %f\n", run_time);
             PyRun_SimpleString(functionTime);
             state=Values;
             return;
