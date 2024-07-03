@@ -33,12 +33,12 @@ def help_main(Env):
     Fout.write("INS= '''\n")
     for In in Ins:
         Fout.write(' %s\n' % In)
-    Fout.write("'''..split()\n\n")
+    Fout.write("'''.split()\n\n")
 
     Fout.write("OUS= '''\n")
     for Ou in Ous:
         Fout.write(' %s\n' % Ou)
-    Fout.write("'''..split()\n\n")
+    Fout.write("'''.split()\n\n")
 
     Fout.close()
 
