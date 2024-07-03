@@ -810,7 +810,7 @@ void drive_value(char *Val,char *Code,int forReal) {
         strcpy(sigs[P].value,Val);
         char nnn[100];
         strcpy(nnn,qqia(sigs[P].name));
-        printf(">>>> %s %s" ,nnn,Val);
+        printf(">>>> %s %s\n" ,nnn,Val);
     } else {
         Diffs = diffs(sigs[P].allocated,Val);
         strcpy(sigs[P].allocated,Val);
