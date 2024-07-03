@@ -50,7 +50,7 @@ def singlesInc(Mod):
     Ins,Ous = [],[]
     for Net in Mod.nets:
         Dir,Wid  = Mod.nets[Net]
-        if Wid <= 1:
+        if (type(Wid) is int) and (Wid <= 1):
             Nets = [Net]
         else:
             H,L = Wid
