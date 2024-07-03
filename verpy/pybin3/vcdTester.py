@@ -22,7 +22,7 @@ def help_main(Env):
     singlesInc(Mod)
 
 def bussesInc(Mod):
-    Fout = open('bussed_inouts.py' % Mod.Module,'w')
+    Fout = open('bussed_inouts.py','w')
     Ins,Ous = [],[]
     for Net in Mod.nets:
         Dir,Wid  = Mod.nets[Net]
@@ -46,7 +46,7 @@ def bussesInc(Mod):
     Fout.close()
 
 def singlesInc(Mod):
-    Fout = open('singles_inouts.py' % Mod.Module,'w')
+    Fout = open('singles_inouts.py','w')
     Ins,Ous = [],[]
     for Net in Mod.nets:
         Dir,Wid  = Mod.nets[Net]
