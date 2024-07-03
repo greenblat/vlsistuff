@@ -238,7 +238,6 @@ void do_help() {
     printf("\n\n\nBIGGER EXAMPLE:\n %s\n",EXAMPLE); 
     exit(0); }
 void check_x(int i) { return; }
-void do_dumpvars(char *s) { return; }
 
 char *int2bin(int AA,int Wid,char *tmp);
 void useTriggers();
@@ -262,6 +261,7 @@ void drive_value(char *Val,char *Code,int forReal);
 double start_time=0.0;
 double end_time=0.0;
 int state=Idle;
+void do_dumpvars(char *s) { state=Values; return; }
 double run_time=0.0;
 int linenum;
 int LASTCHANGE=0;
