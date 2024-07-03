@@ -50,7 +50,7 @@ def prepare_tb(Mod):
     Fcomp.write('#! /bin/csh -f\n')
     Fcomp.write('/bin/rm tb.vvp\n\n')
     Fcomp.write('iverilog  -Wtimescale  -o tb.vvp -g2012 \\\n')
-    Fcomp.write('    -I ../rtl tb.v \\\n')
+    Fcomp.write('    -I ../rtl \\\n')
     Fcomp.write('    tb.v \\\n')
     Fcomp.write('    ../rtl/%s.v  \\\n\n\n\n'%Name)
     Fcomp.close()

@@ -28,6 +28,7 @@ setenv PYTHONINC2 /usr/include/python$PYTHONVERSION
 #include "vpi_user_cds.h"
 #include "vcs_vpi_user.h"
 # subset of these usually is enough
+# not needed for icarus iverilog!
 setenv VERILOGINC  /home/ilia/intelFPGA/22.1std/questa_fse/include
 
 

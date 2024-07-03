@@ -19,6 +19,29 @@ def help_main(Env):
     Fout.write(Epilog)
     Fout.close()
 
+    Fout = open('%s.inouts' % Mod.Module,'w')
+    Ins,Ous = [],[]
+    for Net in Mod.nets:
+        Dir,Wid  = Mod.nets[Net]
+        if 'input' in Dir:
+            Ins.append(Net)
+        elif 'output' in Dir:
+            Ous.append(Net)
+    Ins.sort()
+    Ous.sort()
+
+    Fout.write("INS= '''\n")
+    for In in Ins:
+        Fout.write(' %s\n' % In)
+    Fout.write("'''..split()\n\n")
+
+    Fout.write("OUS= '''\n")
+    for Ou in Ous:
+        Fout.write(' %s\n' % Ou)
+    Fout.write("'''..split()\n\n")
+
+    Fout.close()
+
 Epilog = '''
 
 initial begin

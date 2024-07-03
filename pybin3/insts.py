@@ -49,6 +49,7 @@ def main():
     produce_html(1)
     produce_html(2)
     produce_csv()
+    produce_md()
     produce_asm_driver()
     produce_py_simulator()
     produce_c_decoder()
@@ -603,6 +604,36 @@ def produce_csv():
         File.write(',%s\n'%expl)
     File.close()
 
+
+
+def produce_md():
+    File = open('%s_table.md'%(Chip),'w')
+    line0,line1  = [],[]
+    for ii in range(OpcodeWidth-1,-1,-1):
+        line0.append(str(ii))
+        line1.append('-')
+        
+    line0 = '|'.join(line0)
+    line1 = '|'.join(line1)
+        
+    File.write('|id|inst|%s|comment|\n' % line0)
+    File.write('|-|-|%s|-|\n' % line1)
+    explanation = ''
+    lll=[]
+    for Inst in instructions:
+        lll = lll + [(instructions[Inst].id,Inst)]
+    lll.sort()
+    for (id,Inst) in lll:
+        File.write('|%s|%s'%(id,Inst))
+        run_on_csv_coding(instructions[Inst].coding,File,'|')
+        expl = instructions[Inst].oneliner.replace('.',' ')
+        expl = expl.replace('"','')
+        File.write('|%s|\n'%expl)
+    File.close()
+
+
+
+
 def produce_html(Which):
     global color,othercolor
     ofile = open('%s_table%d.html'%(Chip,Which),'w')
@@ -669,20 +700,19 @@ def produce_html(Which):
 def get_inst_explanation(Inst):
     return '???'
 
-def run_on_csv_coding(wrds,File):
-#    wrds = gather_busses(wrds)
+def run_on_csv_coding(wrds,File,Coma=','):
     for word in wrds:
         if (word=='1'):
-            File.write(',1')
+            File.write('%s1' % Coma)
         elif (word=='0'):
-            File.write(',0')
+            File.write('%s0' % Coma)
         elif (type(word) is str):
-            File.write(',%s'%str(word))
+            File.write('%s%s'%(Coma,str(word)))
         elif (type(word) is tuple):
             (Bus,ind1,ind2)=word
             text = '%s[%d:%d]'%(Bus,ind1,ind2)
             many = ind1-ind2+1
-            File.write(',%s'%str(many))
+            File.write('%s%s'%(Coma,str(many)))
         else:
             print('error! ilia, coding field bad ',word, wrds)
 
