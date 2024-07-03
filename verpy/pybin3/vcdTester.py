@@ -54,7 +54,7 @@ def singlesInc(Mod):
             Nets = [Net]
         else:
             H,L = Wid
-            Nets = p[
+            Nets = []
             for Ind in range(H,L-1,-1):
                 Sig = '%s[%s]' % (Net,Ind)
                 Nets.append(Sig)
