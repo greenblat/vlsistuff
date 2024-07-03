@@ -549,6 +549,7 @@ void pushtok(char *s,int ind) {
         run_time=atof(&(s[1]));
         LASTCHANGE++;
         if (AlwaysMode) {
+            printf("ALW %f\n", run_time);
             PyRun_SimpleString(functionTime);
             state=Values;
             return;
@@ -807,6 +808,9 @@ void drive_value(char *Val,char *Code,int forReal) {
     if (Width<=8) {
         Diffs = diffs(sigs[P].value,Val);
         strcpy(sigs[P].value,Val);
+        char nnn[100];
+        strcpy(nnn,qqia(sigs[P].name));
+        printf(">>>> %s %s" ,nnn,Val);
     } else {
         Diffs = diffs(sigs[P].allocated,Val);
         strcpy(sigs[P].allocated,Val);
