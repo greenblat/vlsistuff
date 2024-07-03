@@ -1,4 +1,4 @@
-
+####### This is template. change BASE and CLK ##########################
 import os,sys
 import veri
 
