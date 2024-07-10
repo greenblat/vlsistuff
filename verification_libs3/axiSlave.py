@@ -31,6 +31,7 @@ class axiSlaveClass:
         self.Translates = {}
         self.Fixed = {}
         self.Ram = {}
+        self.RAM = self.Ram
         self.wready = 0
         self.WAITREAD = 500
         self.WAITWRITE = 0
@@ -352,7 +353,7 @@ class axiSlaveClass:
             veri.force('tb.marker2',str(self.awlen & 0xffff))
         if self.Name == 'SLV3':
             veri.force('tb.marker3',str(self.awlen & 0xffff))
-        logs.log_info('WRITING bwait=%d %s %s' % (self.bwaiting, self.bqueue,self.bqueue0))
+#        logs.log_info('WRITING bwait=%d %s %s' % (self.bwaiting, self.bqueue,self.bqueue0))
         if self.bwaiting>0:
             self.bwaiting -= 1
             self.force('bvalid',0)

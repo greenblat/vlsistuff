@@ -418,7 +418,7 @@ class sequenceClass:
             lnum = 999
         self.Ptr += 1
         if '#' in Line: Line = Line[:Line.index('#')]
-        if '//' in Line: Line = Line[:Line.index('//')]
+#        if '//' in Line: Line = Line[:Line.index('//')]
         logs.log_write('@%d: sequence: %s'%(logs.get_cycles(),Line),'seq')
 #        print(lnum,Line)
         veri.force('tb.seqptr',str(lnum))
@@ -531,6 +531,7 @@ class sequenceClass:
             X = wrds[1].replace('=',' = ').split()
             if len(X) == 3:
                 self.Translates[X[0]] = self.eval(X[2])
+            print("FOR",self.Ptr,wrds[2],wrds[3])
             self.Loops.append((self.Ptr,wrds[2],wrds[3]))
 
         elif wrds[0] == 'endfor':
@@ -799,7 +800,7 @@ def makeExpr(Txt):
     for Chr in '%&|<>=()!+-*/':
         Txt = Txt.replace(Chr,' %s '%Chr)
     Txt  = Txt.replace('  ',' ')
-    for From in ['^','= =','> =','! =','< =','< <','> >']:
+    for From in ['^','= =','> =','! =','< =','< <','> >','/ /']:
         To = From.replace(' ','')
         Txt  = Txt.replace(From,To)
     wrds = Txt.split()

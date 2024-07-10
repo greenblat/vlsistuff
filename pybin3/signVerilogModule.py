@@ -39,9 +39,14 @@ def work(Fname):
         elif (len(wrds)>=4) and (wrds[0] == 'wire') and (wrds[1] == '[63:0]') and (wrds[2] == 'sign_version'):
             Signs[Module] = ind,wrds[4][4:]
             Lines.pop(ind)
+            ind -= 1
         elif (len(wrds)>=3) and (wrds[0] == 'assign') and (wrds[1] == 'sign_version'):
             Signs[Module] = ind,wrds[3][4:]
             Lines.pop(ind)
+            ind -= 1
+        elif ('FROMFILE' in line):
+            Lines.pop(ind)
+            ind -= 1
         ind += 1
     Signature = 0            
     sign_version = 'wire [63:0] '
@@ -63,7 +68,7 @@ def work(Fname):
                 Now = '%08x' % Signature
                 WasS = Was[:8]
                 if (Now != WasS):
-                    New = "%s sign_version = 64'h%08x%s ;\nendmodule\n// from %s" % (sign_version,Signature,HourDate,Abs)
+                    New = "%s sign_version = 64'h%08x%s ;\nendmodule\n// FROMFILE %s" % (sign_version,Signature,HourDate,Abs)
                     Changed = True
                 else:
                     New = "%s sign_version = 64'h%s ;\nendmodule\n// from %s" % (sign_version,Was,Abs)
