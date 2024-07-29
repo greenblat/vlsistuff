@@ -51,7 +51,9 @@ def work(Fname):
     Signature = 0            
     sign_version = 'wire [63:0] '
     for ind,line in enumerate(Lines):
+        Was = Signature
         Signature = computeIt(Signature,line)
+#        print("MODULE %s %08x %08x  line=%s" % (Module,Was,Signature,line[:-1]))
         ll = line.replace('#',' ')
         ll = ll.replace('(',' ')
         wrds = ll.split()
@@ -62,19 +64,21 @@ def work(Fname):
             Module = wrds[1]
         elif wrds[0] == 'endmodule':
             if Module in Signs:
+#                print("SIGN %s %08x  %s" % (Module,Signature,Signs))
                 _,Was = Signs[Module]
                 Int = int(Was,16)
                 Sign = Int>>32
                 Now = '%08x' % Signature
                 WasS = Was[:8]
                 if (Now != WasS):
-                    New = "%s sign_version = 64'h%08x%s ;\nendmodule\n// FROMFILE %s" % (sign_version,Signature,HourDate,Abs)
+                    print("%s now=%s <> was=%s" % (Module,Now,WasS))
+                    New = "%s sign_version = 64'h%08x%s ;\nendmodule\n// FROMFILE %s\n\n" % (sign_version,Signature,HourDate,Abs)
                     Changed = True
                 else:
-                    New = "%s sign_version = 64'h%s ;\nendmodule\n// from %s" % (sign_version,Was,Abs)
+                    New = "%s sign_version = 64'h%s ;\nendmodule\n" % (sign_version,Was)
                 Lines[ind] = New
             else:
-                New = "%s sign_version = 64'h%08x%s ;\nendmodule\n// from %s\n" % (sign_version,Signature,HourDate,Abs)
+                New = "%s sign_version = 64'h%08x%s ;\nendmodule\n" % (sign_version,Signature,HourDate)
                 Lines[ind] = New
                 Changed = True
             Signature = 0            
