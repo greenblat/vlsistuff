@@ -80,7 +80,7 @@ def buildOne(Mod):
     out.write('hld.DRIVEN = %s\n'%pprint.pformat(DRIVEN))
     out.close()
 
-def getCosts(Src):
+def getCosts(Src,Deep):
     SetS = support_set(Src,False)
     if type(Src) is str:
         if Src in SetS:
@@ -90,7 +90,7 @@ def getCosts(Src):
     elif type(Src) is list:
         if Src == []: return []
         if len(Src) == 1:
-            return getCosts(Src[0])
+            return getCosts(Src[0],Deep+1)
         if Src[0] in ['hex','bin','dig']:
             return []
         elif Src[0] in ['subbus']:
@@ -102,40 +102,40 @@ def getCosts(Src):
                 return [(Src[1],2)]
         elif Src[0] in ['>>','<<']:
             if type(Src[2]) is int:
-                return getCosts(Src[1])
+                return getCosts(Src[1],Deep+1)
             else:
-                Costs =  getCosts(Src[1])
+                Costs =  getCosts(Src[1],Deep+1)
                 return mergeCosts(Costs,Costs,2)
         elif Src[0] in ['*']:
-            Csts0 = getCosts(Src[1])
-            Csts1 = getCosts(Src[2])
+            Csts0 = getCosts(Src[1],Deep+1)
+            Csts1 = getCosts(Src[2],Deep+1)
             return mergeCosts(Csts0,Csts1,4)
         elif Src[0] in ['+','-']:
-            Csts0 = getCosts(Src[1])
+            Csts0 = getCosts(Src[1],Deep+1)
             if len(Src)==3:
-                Csts1 = getCosts(Src[2])
+                Csts1 = getCosts(Src[2],Deep+1)
                 return mergeCosts(Csts0,Csts1,2)
             return mergeCosts(Csts0,[],2)
         elif Src[0] in ['!','~']:
-            Csts0 = getCosts(Src[1])
+            Csts0 = getCosts(Src[1],Deep+1)
             return mergeCosts(Csts0,[],1)
 
         elif Src[0] in ['&','&&','|','||','^','>','<','>=','<=','==','!=']:
-            Csts0 = getCosts(Src[1])
+            Csts0 = getCosts(Src[1],Deep+1)
             if len(Src) == 3:
-                Csts1 = getCosts(Src[2])
+                Csts1 = getCosts(Src[2],Deep+1)
                 Cost =  mergeCosts(Csts0,Csts1,1)
                 return Cost
             if len(Src) == 2:
-                Csts0 =  getCosts(Src[1])
+                Csts0 =  getCosts(Src[1],Deep+1)
                 Cost =  mergeCosts(Csts0,[],1)
                 return Cost
 
 
         elif Src[0] in ['question']:
-            Csts0 = getCosts(Src[1])
-            Csts1 = getCosts(Src[2])
-            Csts2 = getCosts(Src[3])
+            Csts0 = getCosts(Src[1],Deep+1)
+            Csts1 = getCosts(Src[2],Deep+1)
+            Csts2 = getCosts(Src[3],Deep+1)
             Csts3 =  mergeCosts(Csts1,Csts2,1)
             Cost =  mergeCosts(Csts0,Csts3,1)
             print("QUESTION",Cost,Src)
@@ -143,11 +143,19 @@ def getCosts(Src):
         elif Src[0] in ['curly']:
             Csts = []
             for Item in Src[1:]:
-                Cost = getCosts(Item)
+                Cost = getCosts(Item,Deep+1)
                 Csts = mergeCosts(Csts,Cost,0)
             return Csts                
                 
-    logs.log_error('failed cost %s' % str(Src))
+    if type(Src) is list:
+        Csts = []
+        for Sig in Src:
+            Cost = getCosts(Sig,Deep+1)
+            Csts = mergeCosts(Csts,Cost,0)
+        return Csts
+
+
+    logs.log_error('failed deep=%s cost %s' % (str(Deep),Src))
     return []
     
 def mergeCosts(Cost0,Cost1,Add):
@@ -166,7 +174,8 @@ def mergeCosts(Cost0,Cost1,Add):
     
 
 def costIt(Dst,Src):
-    Costs =  getCosts(Src)
+#    print('COSTIT dst=%s src=%s' % (Dst,Src))
+    Costs =  getCosts(Src,0)
     SetD = support_set(Dst,False)
     for D in SetD:
         for (S,Cost) in Costs:

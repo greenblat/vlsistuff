@@ -1975,10 +1975,10 @@ def pr_wid(Wid):
         logs.log_err('wid is none error')
         traceback.print_stack(None,None,logs.Flogs[0])
         return 'wid is none error!!'
-    if Wid==0:
-        return ''
     if type(Wid) is int:
-        return '[%s:0]'%(pr_expr(Wid))
+        if Wid<2:
+            return ''
+        return '[%s:0]'%(pr_expr(Wid-1))
     if (len(Wid)==3)and(Wid[0]=='double'):
         return '%s%s'%(pr_wid((Wid[2][1],Wid[2][0])),pr_wid(Wid[1]))
         

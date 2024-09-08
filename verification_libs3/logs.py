@@ -100,7 +100,7 @@ def finish(Txt):
     if finishReason:
         finishReason(Txt,Errors,Wrongs,Corrects)
     else:
-        log_info('finishing %s with errors=%d wrongs=%d corrects=%d'%(Txt,Errors,Wrongs,Corrects))
+        log_info('finishing %s with errors=%d wrongs=%d corrects=%d warning=%d'%(Txt,Errors,Wrongs,Corrects,Warnings))
         closeLogs()
         if veri: veri.finish()
         sys.exit()
@@ -253,8 +253,8 @@ def log_warning(Text,Which=0):
     if (Text in printed_already):
         return
     openFlog(Which)
-    print('%d: __WARNING: %s'%(Warnings,Text))
-    Flogs[Which].write('%d: __WARNING: %s\n'%(Warnings,Text))
+    print('%d: ___WARNING: %s'%(Warnings,Text))
+    Flogs[Which].write('%d: ___WARNING: %s\n'%(Warnings,Text))
     printed_already[Text]=1
     Warnings +=1  
 

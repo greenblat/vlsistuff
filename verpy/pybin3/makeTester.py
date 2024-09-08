@@ -2,11 +2,11 @@
 import os,sys
 import veri
 
-from io_signals import *
-SIGS = INS
+import io_signals
+SIGS = io_signals.INS
 
-BASE = 'ml_sysmem_pbank_2m_128_512_tb.i_sysmem_bank.sysmem_pbank_2m_128or512'
-CLK = BASE + '.clk'
+BASE = io_signals.BASE
+CLK = BASE + '.' + io_signals.CLK
 
 New = os.path.expanduser('~/vlsistuff/verification_libs3')
 sys.path.append(New)

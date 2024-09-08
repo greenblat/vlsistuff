@@ -122,6 +122,9 @@ class apbDriver:
             else:
                 self.read(wrds[1],wrds[2])
         elif wrds[0]=='write':
+            if len(wrds)<3:
+                logs.log_error('apb write command too short %s' % Cmd)
+                return
             Mark = False
             if len(wrds)>3: Mark = wrds[3]
             self.write(wrds[1],wrds[2],Mark)

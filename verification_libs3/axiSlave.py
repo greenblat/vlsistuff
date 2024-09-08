@@ -52,6 +52,7 @@ class axiSlaveClass:
         self.verbose = False
         self.errorReadFromUnknown = False
         self.waitWready = 0
+        self.was_arvalid  = 0
 
     def onFinish(self):
         if self.busy(): self.busyWhy();
@@ -200,7 +201,8 @@ class axiSlaveClass:
             self.force('arready',0)
             self.Arready_int = 0
         else:
-            self.force('arready',1)
+            self.force('arready',1)   # self.was_arvalid)
+            self.was_arvalid = self.peek('arvalid')
             self.Arready_int = 1
 
     def run(self):
@@ -211,7 +213,7 @@ class axiSlaveClass:
             self.force('rresp',0)
             self.force('bresp',0)
             self.force('bvalid',0)
-            self.force('arready',1)
+            self.force('arready',0)
         if self.Starvation:
             return
         self.reading()

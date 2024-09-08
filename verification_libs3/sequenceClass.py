@@ -488,7 +488,7 @@ class sequenceClass:
                 else:
                     logs.talk(HEB1.replace('@',str(logs.Corrects)))
 #            os.system('say -v Majed انتهت المحاكاة' )
-            logs.talk('Simulation finished on sequence! we have %s corrects, %s wrongs and %s errors' % (logs.Corrects,logs.Wrongs,logs.Errors))
+            logs.talk('Simulation finished on sequence! we have %s corrects, %s wrongs %d warnings and %s errors' % (logs.Corrects,logs.Wrongs,logs.Warnings,logs.Errors))
             logs.finish('sequence %s seed=%d '%(self.testFileName,self.Seed))
         if (wrds[0] == 'marker'):
             veri.force('%s.marker'%TB,wrds[1])
@@ -676,8 +676,8 @@ class sequenceClass:
             logs.log_info('tell %s <- %s   (%s)   2(%s)' % (Line[:-1],Cmd,Wrds,Wrds2))
 # @259: info: write 0x454 0x19  ['write', 'LVL_classic_end_of_phase_seg1', 'SEG1']
             ww = Cmd.split()
-            if ww[0] == 'write':
-                logs.log_info('A%s. w%s. //  %s' % (ww[1][2:],ww[2][2:],wrds[1:]),'uart')
+#            if ww[0] == 'write':
+#                logs.log_info('A%s. w%s. //  %s' % (ww[1][2:],ww[2][2:],wrds[1:]),'uart')
             self.agents[wrds[0]].action(Cmd,wrds[1:])
             return True
         elif (wrds[0] == 'check'):
@@ -781,6 +781,7 @@ class sequenceClass:
             self.onFinishes()
         for Agent in self.agents:
             Obj = self.agents[Agent]
+            Obj.onFinish()
             if 'onFinish' in dir(Obj):
                 try:
                     Obj.onFinish()
