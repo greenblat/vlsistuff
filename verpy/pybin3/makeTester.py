@@ -4,6 +4,7 @@ import veri
 
 import io_signals
 SIGS = io_signals.INS
+OUS = io_signals.OUS
 
 BASE = io_signals.BASE
 CLK = BASE + '.' + io_signals.CLK
@@ -17,6 +18,10 @@ def conclusions():
     Fout.write('    $finish;\n')
     Fout.write('end\n')
     Fout.close()
+    Fcmp.write('    if (wrongs>0) $display("TEST FAILED wrongs=%d corrects=%d",wrongs,corrects);\n')
+    Fcmp.write('    else if (corrects>0) $display("TEST SUCCESS wrongs=%d corrects=%d",wrongs,corrects);\n')
+    Fcmp.write('end\n')
+    Fcmp.close()
     if CURRENT[2]>1:
         Fout2.write('    repeat (%d) begin %s %s end\n' % (CURRENT[2],CURRENT[1][:-1],CURRENT[0][:-1]))
     else:
@@ -41,7 +46,7 @@ def valid(Sig,Base=BASE):
     X = peekbin(Sig,Base)
     return X=='1'
 
-wasTime = [0,0,0]
+wasTime = [0,0,0,0]
 def timeDiff(Which):
     Now = veri.stime()
     Diff = Now-wasTime[Which]
@@ -50,6 +55,8 @@ def timeDiff(Which):
 
 Fout = open('tester.include','w')
 Fout2 = open('tester_clk.include','w')
+Fcmp = open('tester_chk.include','w')
+Fcmp.write('initial begin\n')
 Fout.write('integer cycle = 0;\n')
 Fout.write('initial begin\n')
 Fout2.write('initial begin\n')
@@ -66,10 +73,12 @@ def posedge():
     CLKLINES[1] = '    #%d; clk = 1; cycle = cycle + 1;\n' % Diff
 
 VALUES = {}
+OUTVALUES = {}
 WIDS = {}
 for Sig in SIGS: VALUES[Sig] = "x"
+for Sig in OUS: OUTVALUES[Sig] = "x"
 
-TIMEDIFF = [0,0,0,0]
+TIMEDIFF = [0,0,0,0,0,1]
 CLOCKS = 0
 def negedge():
     global CLOCKS
@@ -110,6 +119,32 @@ def negedge():
     else:
         TIMEDIFF[2] += Diff
             
+
+
+    Diff = timeDiff(3)
+    TIMEDIFF[4] = Diff * 10
+    dones = 0
+    for Sig in OUS:
+        Now = peek(Sig)
+        Was = OUTVALUES[Sig]
+        if Was != Now:
+            dones += 1
+    if dones>0:
+        Fcmp.write('    #%d;\n' % (TIMEDIFF[5]+Diff))
+        TIMEDIFF[5] = 0
+        for Sig in OUS:
+            Now = peek(Sig)
+            Was = OUTVALUES[Sig]
+            if Was != Now:
+                if Now>=0:
+                    Fcmp.write('     compare(%s,%s%s,"%s"); \n' % (Sig,WIDS[Sig],verilogvalue(Now),Sig))
+                OUTVALUES[Sig] = Now
+    else:
+        TIMEDIFF[5] += Diff
+            
+
+
+
 def verilogvalue(Now):
     if Now < 0 :
         return "'bx"

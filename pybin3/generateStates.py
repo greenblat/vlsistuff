@@ -4,6 +4,10 @@ import os,sys,string
 SETUP = {'file':'localparams','state':'state'}
 def main():
     Fname = sys.argv[1]
+    if len(sys.argv)>2:
+        Prefix = sys.argv[2]
+    else:
+        Prefix = ''
     File = open(Fname)
     Lines = File.readlines()
     States = parseLines(Lines)
@@ -17,7 +21,7 @@ def main():
         Ones = Ones & 3
         Code = (Ones<<Wid) + ind
         CODES[State] = Code
-    Fout = open('%s.vh' % SETUP['file'],'w')
+    Fout = open('%s%s.vh' % (Prefix,SETUP['file']),'w')
     for State in States:
         Fout.write('localparam %s = %d\'h%x;\n' % (State,Wid+2,CODES[State]))
     Fout.write('reg [%d:0] %s;\n' % (Wid+1,STATE))
@@ -38,15 +42,15 @@ def main():
     Fout.write(STR)
     Fout.close() 
 
-    monitorModule(CODES,Wid,SETUP['file'],SETUP['state'])
-    stateInSetModule(CODES,Wid,SETUP['file'],SETUP['state'])
+    monitorModule(Prefix,CODES,Wid,SETUP['file'],SETUP['state'])
+    stateInSetModule(Prefix,CODES,Wid,SETUP['file'],SETUP['state'])
 
-def  monitorModule(CODES,Wid,FILE,STATE):
-    Fout = open('%s_mon.v' % FILE,'w')
+def  monitorModule(Prefix,CODES,Wid,FILE,STATE):
+    Fout = open('%s%s_mon.v' % (Prefix,FILE),'w')
     Max = 0
     for state in CODES:
         Max = max(Max,len(state))
-    Fout.write('module %s_mon ( input [%d:0] %s, output [%d:0] STR);\n' % (STATE,Wid+1,STATE,(Max-1)*8))
+    Fout.write('module %s%s_mon ( input [%d:0] %s, output [%d:0] STR);\n' % (Prefix,STATE,Wid+1,STATE,(Max-1)*8))
 
     Fout.write('assign STR = \n')
     for state in CODES:
@@ -57,12 +61,12 @@ def  monitorModule(CODES,Wid,FILE,STATE):
     Fout.write('endmodule\n\n')
     Fout.close()
 
-def stateInSetModule(CODES,Wid,FILE,STATE):
-    Fout = open('%s_in_set.v' % FILE,'w')
+def stateInSetModule(Prefix,CODES,Wid,FILE,STATE):
+    Fout = open('%s%s_in_set.v' % (Prefix,FILE),'w')
     Max = 0
     for state in CODES:
         Max = max(Max,len(state))
-    Fout.write('module %s_in_set ( input [%d:0] %s, output vld);\n' % (STATE,Wid+1,STATE))
+    Fout.write('module %s%s_in_set ( input [%d:0] %s, output vld);\n' % (Prefix,STATE,Wid+1,STATE))
 
     Fout.write('assign vld = \n      ')
     LL = []
@@ -79,15 +83,15 @@ def stateInSetModule(CODES,Wid,FILE,STATE):
 
 
 NEXTFUNC = '''
-function [WID:0] next_STATE ( input [WID:0] state );
-reg [222:0] count;
-reg [1:0] ones;
-begin
-    count = state[222:0]+1;
-    ones = 0 + BITS ;
-    next_state = {ones,count};
-end
-endfunction
+// function [WID:0] next_STATE ( input [WID:0] state );
+// reg [222:0] count;
+// reg [1:0] ones;
+// begin
+//     count = state[222:0]+1;
+//     ones = 0 + BITS ;
+//     next_state = {ones,count};
+// end
+// endfunction
 '''
 def parseLines(Lines):
     States = []

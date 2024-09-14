@@ -32,14 +32,15 @@ NONSEQ = 2
 BUSY = 1
 IDLE = 0
 
-class ahbSlave(logs.driverClass):
-    def __init__(self,Path,Monitors,Translations={},Name='noName'):
+class ahbSlaveClass(logs.driverClass):
+    def __init__(self,Path,Monitors,Prefix,Name='noName'):
         logs.driverClass.__init__(self,Path,Monitors)
         self.Path = Path
         self.Name=Name
         self.RAM = {}
         self.waiting=0
-        self.translations=Translations
+        self.translations={}
+        self.Prefix = Prefix
         self.hrdata = 0
         self.haddr = 0
         self.writing = False
@@ -93,14 +94,14 @@ class ahbSlave(logs.driverClass):
         return self.force(Sig,Val)
 
     def run(self):
-        veri.force("tracer.ddd0",hex(self.tr_peek('hwdata')))
+#        veri.force("tracer.ddd0",hex(self.tr_peek('hwdata')))
         if self.writing:
             self.writing = False
             self.RAM[self.haddr] = self.tr_peek('hwdata')
             if self.Active:
                 self.tr_force('hresp',0)
             logs.log_info('AHB slave %s :got written addr=%x data=%x'%(self.Name,self.haddr,self.RAM[self.haddr] ))
-            veri.force("tracer.ccc",hex(self.tr_peek('hwdata')))
+#            veri.force("tracer.ccc",hex(self.tr_peek('hwdata')))
         if self.waiting>0:
             self.waiting -= 1
             return
