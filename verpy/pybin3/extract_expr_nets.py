@@ -34,6 +34,8 @@ def extract_sigs(Src,All=False):
             return [Src[0]]
         if Src[0]=='edge':
             return extract_sigs(Src[2],All)
+        if Src[0]=='sub_slice':
+            return [Src[1]]
         if Src[0]=='subbus':
             return [Src[1]]
         if Src[0]=='subbit':

@@ -246,6 +246,7 @@ def register_instances_usage(Env,Current):
                     else:
                         incr_driven(Net,(Pin,Type))
                 else:
+                    print("NNN",Net,Sig)
                     Mentioned[Net]=1
     for Param in Current.parameters:
         Mentioned[Param]=1
@@ -740,7 +741,7 @@ def external_dir(Dir):
     if 'input' in Dir: return True
     if 'output' in Dir: return True
     if 'inout' in Dir: return True
-    if Dir in ['wire','reg','integer','signed']:
+    if Dir in ['logic','wire','reg','integer','signed']:
         return False
     logs.log_err('external dir got "%s"'%(Dir))
     return False
