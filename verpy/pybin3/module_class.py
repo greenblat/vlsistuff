@@ -2,6 +2,7 @@ import types,string,sys,os
 import logs
 import traceback
 import matches
+import math
 
 logs.print_warning_messages = False
 
@@ -209,7 +210,6 @@ class module_class:
     def add_parameter(self,Name,Expr):
         self.parameters[Name]=Expr
     def add_localparam(self,Name,Expr):
-        logs.log_info('adding localparam %s %s'%(Name,Expr))
         self.localparams[Name]=Expr
 
     def add_hard_assign(self,Dst,Src,Strength='',Delay=''):
@@ -1199,6 +1199,9 @@ class module_class:
                 _, Wid = self.nets[Net]
                 if Wid == 0:
                     return [(Net, Pin)]
+                elif type(Wid) is list:
+                    print("ISLIST",Net,Wid)
+                    return []
                 elif type(Wid) is tuple:
                     if len(Wid) == 2:
                         Low, High = Wid
@@ -1278,9 +1281,15 @@ class module_class:
             run = 0
             Lo = int(Lo)
             Hi = int(Hi)
-            for ind in range(Lo, Hi + 1):
-                Res.append((f"{Bus}[{ind}]", f"{Pin}[{run}]"))
-                run += 1
+            if (Lo<0)or(Hi<0): Hi,Lo = 31,0
+            if Lo<=Hi:
+                for ind in range(Lo, Hi + 1):
+                    Res.append((f"{Bus}[{ind}]", f"{Pin}[{run}]"))
+                    run += 1
+            else:
+                for ind in range(Lo, Hi-1,-1):
+                    Res.append((f"{Bus}[{ind}]", f"{Pin}[{run}]"))
+                    run += 1
             return Res
         elif (type(Net) is list) and (Net[0] == "sub_slicebit"):
             Bus = Net[1]
@@ -1385,7 +1394,10 @@ def deepEval(Expr, Params_in):
         return int(Expr)
 
     Params = Params_in.copy()
-    #    print("deepEval",pr_expr(Expr),Params)
+    if "__builtins__" in Params.keys():
+        Params.pop("__builtins__")
+    if (type(Expr) is str) and (Expr in Params):
+        return deepEval(Params[Expr],Params)
     Keys = list(Params.keys())
     for Prm in Keys:
         Val = Params[Prm]
@@ -1395,28 +1407,40 @@ def deepEval(Expr, Params_in):
             if "__builtins__" in Params.keys():
                 Params.pop("__builtins__")
             Params[Prm] = Val2
-
+        if type(Val) is list:
+            if Val[0] == 'functioncall':
+                if Val[1] == '$clog2':
+                    Params[Prm] = deepEval(Val[2][0], Params)
+            else:
+                Params[Prm] = pr_expr(Val)
+                Params[Prm] = deepEval(pr_expr(Val), Params)
     try:
         Exp0 = eval(pr_expr(Expr), Params, {"math": math})
     except:
         if "__builtins__" in Params.keys():
             Params.pop("__builtins__")
         logs.log_error(f"deepEval2 {pr_expr(Expr)} {Params}")
-        return 0
+        return -1
 
     if type(Exp0) is int:
         return str(Exp0)
+    if type(Exp0) is list:
+        Exp0 = pr_expr(Expr)
+    try:
+        Exp1 = eval(Exp0, Params, {"math": math})
+        if type(Exp1) is int:
+            return str(Exp1)
+        Exp2 = eval(Exp1, Params, {"math": math})
+        if type(Exp2) is int:
+            return Exp2
+        Exp3 = eval(Exp2, Params, {"math": math})
+        return Exp3
+    except:
+        if "__builtins__" in Params.keys():
+            Params.pop("__builtins__")
+        print("EXP1 %s %s" % (str(Exp0),Params))
 
-    Exp1 = eval(Exp0, Params, {"math": math})
-    if type(Exp1) is int:
-        return str(Exp1)
-
-    Exp2 = eval(Exp1, Params, {"math": math})
-    if type(Exp2) is int:
-        return Exp2
-
-    Exp3 = eval(Exp2, Params, {"math": math})
-    return Exp3
+    return 0
 
 
 def dump_always(Always,Fout):
@@ -1454,7 +1478,6 @@ OPS =  ['%','~&','~|','**','~^','^','=','>=','=>','*','/','<','>','+','-','~','!
 KEYWORDS = ('subbit subbus curly while else sub_slice sub_slicebit taskcall functioncall named_begin unsigned if for ifelse edge posedge negedge list case casex casez default double_sub wait #').split()
 
 def support_set(Sig,Bussed=True):
-#    traceback.print_stack(None,None,logs.Flogs[0])
     Set = support_set__(Sig,Bussed)
     Set.sort()
     ind=0
@@ -1954,7 +1977,6 @@ def pr_dly(Dly):
     if Dly=='':
         return ''
     res=[]
-    print("DLY",Dly)
     for (A,B) in Dly:
         res.append(pr_expr(B))
     return '#(%s)'%(', '.join(res))

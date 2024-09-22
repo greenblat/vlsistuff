@@ -142,6 +142,20 @@ def talk(Eng,Hebrew = '',Arabic = ''):
     if Arabic!="":
         os.system("say -v  Majed   %s" % Arabic)
 
+
+def keep_error(Text):
+    if not  os.path.exists('~/cellar/errors.keep'):
+        Fout = open('~/cellar/errors.keep','w')
+        Fout.write('%s\n' % Text)
+        Fout.close()
+        return
+
+    Fout = open('~/cellar/errors.keep','w')
+    Fout.write('%s\n' % Text)
+    Fout.close()
+    return
+
+
 def log_error(Text,Which=0,Tb=True,Pstack=False,verbose=False):
     log_err(Text,Which,Tb,Pstack,verbose)
 def log_err(Text,Which=0,Tb=True,Pstack=False,verbose=False):
@@ -365,12 +379,22 @@ def intx(Val):
     if 'z' in Val: return -1
     if 'q' in Val: return -1
     if '-' in Val: return -1
-    try:
-        return int(Val,2)
-    except:
-        print('ERROR logs.intx got INTX',type(Val),'"%s"'%Val)
-        traceback.print_stack(file=Flogs[0])
-        return 99999999
+    x = list(Val)
+    x.sort()
+    if x[0] in '23456789abcdef':
+        try:
+            return int(Val,16)
+        except:
+            print('ERROR logs.intx got INTX',type(Val),'"%s"'%Val)
+            traceback.print_stack(file=Flogs[0])
+            return 99999999
+    else:
+        try:
+            return int(Val,2)
+        except:
+            print('ERROR logs.intx got INTX',type(Val),'"%s"'%Val)
+            traceback.print_stack(file=Flogs[0])
+            return 99999999
 
 
 def peekBus(Bus,Wid,Base=''):

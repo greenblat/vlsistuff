@@ -1,5 +1,5 @@
 
-import sys,types,string,os
+import sys,types,os
 import traceback
 Errors = 0   
 Corrects = 0   
@@ -77,6 +77,22 @@ def log_fatal(Text,Which=0):
     if finishReason:
         finishReason('FATAL! %s'%Text,Errors+1,Wrongs,Corrects)
     sys.exit()
+
+
+def keep_error(Text):
+    NewName = os.path.expanduser('~')
+    Fname = '%s/cellar/errors.keep' % NewName
+    if not os.path.exists(Fname):
+        Fout = open(Fname,'w')
+        Fout.write('%s\n' % Text)
+        Fout.close()
+        return
+
+    Fout = open(Fname,'a')
+    Fout.write('%s\n' % Text)
+    Fout.close()
+    return
+
 
 def log_error(Text,Which=0,Tb=True,Pstack=False):
     log_err(Text,Which,Tb,Pstack)

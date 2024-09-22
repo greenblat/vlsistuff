@@ -13,14 +13,35 @@ New = os.path.expanduser('~/vlsistuff/verification_libs3')
 sys.path.append(New)
 import logs
 
+COMPARE = '''
+
+task compare(input [31:0] aa, input [31:0] bb, input [127:0] sig);
+begin
+    if (cycles>2) begin
+        if (aa==bb) begin
+            $display("@%d: CORRECT! %s 0x%h ",cycles,sig,aa);
+            corrects <= corrects + 1;
+        end  else begin
+            $display("@%d: WRONG! %s exp=%h act=%h ",cycles,sig,bb,aa);
+            wrongs <= wrongs + 1;
+        end
+    end
+end
+endtask
+'''
+
 def conclusions():
     Fout.write('    #%d;\n' % TIMEDIFF[3])
+    Fout.write('    $display("FINISHING: corrects = %d, wrongs = %d errors=%d",corrects,wrongs,errors);\n')
+    Fout.write('if( (corrects>0)&(wrongs==0) & (errors==0)) $display("TEST PASSED!");\n')
+    Fout.write('else  $display("TEST FAILED!");\n')
     Fout.write('    $finish;\n')
     Fout.write('end\n')
     Fout.close()
     Fcmp.write('    if (wrongs>0) $display("TEST FAILED wrongs=%d corrects=%d",wrongs,corrects);\n')
     Fcmp.write('    else if (corrects>0) $display("TEST SUCCESS wrongs=%d corrects=%d",wrongs,corrects);\n')
     Fcmp.write('end\n')
+    Fcmp.write(COMPARE)
     Fcmp.close()
     if CURRENT[2]>1:
         Fout2.write('    repeat (%d) begin %s %s end\n' % (CURRENT[2],CURRENT[1][:-1],CURRENT[0][:-1]))
@@ -57,7 +78,6 @@ Fout = open('tester.include','w')
 Fout2 = open('tester_clk.include','w')
 Fcmp = open('tester_chk.include','w')
 Fcmp.write('initial begin\n')
-Fout.write('integer cycle = 0;\n')
 Fout.write('initial begin\n')
 Fout2.write('initial begin\n')
 cycles = 0
@@ -69,8 +89,8 @@ CURRENT = ['','',0]
 def posedge():
     global cycles
     Diff = timeDiff(1)
-#    Fout2.write('    #%d; clk = 1; cycle = cycle + 1;\n' % Diff)
-    CLKLINES[1] = '    #%d; clk = 1; cycle = cycle + 1;\n' % Diff
+#    Fout2.write('    #%d; clk = 1; cycles = cycles + 1;\n' % Diff)
+    CLKLINES[1] = '    #%d; clk = 1; cycles = cycles + 1;\n' % Diff
 
 VALUES = {}
 OUTVALUES = {}

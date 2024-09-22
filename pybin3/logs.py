@@ -87,6 +87,19 @@ def log_fatal(Text,Which=0):
         finishReason('FATAL! %s'%Text,Errors+1,Wrongs,Corrects)
     sys.exit()
 
+
+def keep_error(Text):
+    if not  os.path.exists('~/cellar/errors.keep'):
+        Fout = open(''~/errors.keep','w')
+        Fout.write('%s\n' % Text)
+        Fout.close()
+        return
+
+    Fout = open('~/cellar/errors.keep','w')
+    Fout.write('%s\n' % Text)
+    Fout.close()
+    return
+
 def log_error(Text,Which=0,Tb=True,Pstack=False):
     log_err(Text,Which,Tb,Pstack)
 def log_err(Text,Which=0,Tb=True,Pstack=False):
