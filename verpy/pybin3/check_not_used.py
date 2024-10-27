@@ -2,6 +2,7 @@
 import os,sys
 import logs
 import importlib
+import module_class
 INPS = []
 OUTS = []
 
@@ -11,15 +12,57 @@ LOOKED = []
 
 def help_main(Env):
     Mod = Env.Current
+    computeParams(Mod)
     gatherIoBits(Mod)
     gatherParams(Mod)
     gatherInstMentioned(Mod)
     gatherAssignMentioned(Mod)
     gatherAlwaysMentioned(Mod)
-#    for Sig in DRIVEN: print('DR %s' % Sig)
-#    for Sig in INPS: print('INP %s' % Sig)
+    unusedPins(Mod)
     drivenReport(Mod)
     mentionedReport(Mod)
+
+def computeParams(Mod):
+    Mod.params = {}
+    for Prm in Mod.parameters:
+        Mod.params[Prm] = initialX(Mod.parameters[Prm])
+    for Prm in Mod.localparams:
+        Mod.params[Prm] = initialX(Mod.localparams[Prm])
+
+    Keys = list(Mod.params.keys())
+    for Prm in Keys:
+        Val = Mod.params[Prm]
+        if type(Val) is not int:
+            Vals = module_class.pr_expr(Val)
+            try:
+                X = eval(Vals,Mod.params)
+                Mod.params[Prm] = X
+            except:
+                pass
+    if "__builtins__" in Mod.params.keys():
+        Mod.params.pop("__builtins__")
+    
+    for Net in Mod.nets:
+        Dir,Wid = Mod.nets[Net]
+        if ((type(Wid) is list) or (type(Wid) is tuple)) and (len(Wid) == 2):
+            Hi_s = module_class.pr_expr(Wid[0])
+            Hi = eval(Hi_s,Mod.params)
+
+            Lo_s = module_class.pr_expr(Wid[1])
+            Lo = eval(Lo_s,Mod.params)
+            Mod.nets[Net] = Dir,(Hi,Lo)
+
+
+
+def initialX(Val):
+    if type(Val) is int: return Val
+    if type(Val) is str:
+        try:
+            return eval(Val)
+        except:
+            return Val
+    return Val
+
 
 def gatherParams(Mod):
     for Prm in Mod.localparams:
@@ -87,6 +130,11 @@ def gatherAlways(Alw,Mod):
                 return Res
             elif Alw[0] == 'empty_begin_end':
                 return []
+            elif Alw[0] == 'functioncall':
+                if (Alw[1] == '$display'): 
+                    return []
+                else:
+                    logs.log_error('functioncall got %s' % (str(Alws)))
                 
         if type(Alw) is str:
             addToLooked([Alw],Mod)
@@ -157,6 +205,29 @@ def is_output(Pin,Module):
 
 
 
+def unusedPins(Mod):
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        Pins = list(Obj.conns.keys())
+        for In in HOLDS[Obj.Type].INPUTS:
+            if In in Pins:
+                Pins.remove(In)
+            else:
+                logs.log_error('INPUT PIN %s of %s is not connected in %s %s' % (In,Obj.Type,Inst,Mod.Module))
+
+        for Ou in HOLDS[Obj.Type].OUTPUTS:
+            if Ou in Pins:
+                Pins.remove(Ou)
+            else:
+                logs.log_error('OUTPUT PIN %s of %s is not connected in %s %s' % (Ou,Obj.Type,Inst,Mod.Module))
+
+        if Pins!=[]:
+            logs.log_error('EXTRA %s %s %s CONNS %s' % (Inst,Obj.Type,Mod.Module,Pins))
+
+
+
+
+
 
 def gatherInstMentioned(Mod):
     for Inst in Mod.insts:
@@ -181,6 +252,13 @@ def actuals(Sig):
     if type(Sig) is list:
         if (Sig==[]): return []
         if (Sig[0] == 'edge'): return [Sig[2]]
+        if (Sig[0] == 'functioncall'):
+            Res = []
+            for Item in Sig[2]:
+                More = actuals(Item)
+                Res.extend(More)
+            return Res
+            
         if (Sig[0] == 'list'):
             Res = []
             for Item in Sig[1:]:
@@ -191,7 +269,7 @@ def actuals(Sig):
         if (Sig[0] == 'dig'): return []
         if (Sig[0] == 'hex'): return []
         if (Sig[0] in ['subbit','subbus']): return [Sig]
-        if Sig[0] in ['~&','~^','^','~','/','*','+','-','>=','<=','>','!','question','<','|','&','==','!=','||','&&']:
+        if Sig[0] in ['<<','>>','~&','~^','^','~','/','*','+','-','>=','<=','>','!','question','<','|','&','==','!=','||','&&']:
             Res = []
             for Item in Sig[1:]:
                 More = actuals(Item)

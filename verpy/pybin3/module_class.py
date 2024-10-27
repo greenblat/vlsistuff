@@ -1192,6 +1192,8 @@ class module_class:
     def explodeBus(self, Net, Pin, Expected=0):
         if not Net:
             return []
+        elif type(Net) is int:
+            return []
         elif type(Net) is str:
             if Net in self.parameters:
                 return self.explodeBus(self.parameters[Net], Pin, Expected)
@@ -1200,7 +1202,6 @@ class module_class:
                 if Wid == 0:
                     return [(Net, Pin)]
                 elif type(Wid) is list:
-                    print("ISLIST",Net,Wid)
                     return []
                 elif type(Wid) is tuple:
                     if len(Wid) == 2:
@@ -1265,6 +1266,8 @@ class module_class:
         elif (type(Net) is list) and (Net[0] == "subbit"):
             return [(f"{Net[1]}[{Net[2]}]", Pin)]
 
+        elif (type(Net) is list) and (Net[0] in ['+','-']):
+            return []
         elif (type(Net) is list) and (Net[0] == "subbus"):
             Bus = Net[1]
             if len(Net) == 3:
@@ -1317,7 +1320,7 @@ class module_class:
                 Res.append((["bin", 1, (Val >> ii) & 1], f"{Pin}[{ii}]"))
             return Res
         else:
-            logs.log_error("explodeBus got %s" % str(Net))
+            logs.log_error("explodeBus got %s %s" % (str(Net),type(Net)))
             return []
 
     def use_defparams(self):
@@ -1394,6 +1397,10 @@ def deepEval(Expr, Params_in):
         return int(Expr)
 
     Params = Params_in.copy()
+    for Prm in Params:
+        Val = Params[Prm]
+        if (type(Val) is str) and Val.isnumeric():
+            Params[Prm] = eval(Val)
     if "__builtins__" in Params.keys():
         Params.pop("__builtins__")
     if (type(Expr) is str) and (Expr in Params):
@@ -1438,7 +1445,6 @@ def deepEval(Expr, Params_in):
     except:
         if "__builtins__" in Params.keys():
             Params.pop("__builtins__")
-        print("EXP1 %s %s" % (str(Exp0),Params))
 
     return 0
 

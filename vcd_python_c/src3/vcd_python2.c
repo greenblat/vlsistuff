@@ -1023,12 +1023,12 @@ veri_exists(PyObject *self,PyObject *args) {
 
 static PyObject*
 veri_sensitive(PyObject *self,PyObject *args) {
-    char *pathstring,*val,*function;
+    char *pathstring,*val,*function,*offset;
     char Str[10000];
     long handle;
     Str[0]='x';
     Str[1]=0;
-    if (!PyArg_ParseTuple(args, "sss",&pathstring,&val,&function))
+    if (!PyArg_ParseTuple(args, "ssss",&pathstring,&val,&function,&offset))
         return NULL;
 
     if (strcmp(pathstring,"always")==0) {
@@ -1108,10 +1108,12 @@ veri_force(PyObject *self,PyObject *args) {
     } else if ((Len>2)  && (vstr[0] == '0')&& (vstr[1] == 'b')) {
         XX = (int)strtol( &vstr[2], NULL, 2);
         fprintf(Outf,"b%s %s\n",&vstr[2],codeintstr);
+//        printf("FORCEBIN %s %s %d\n",pathstring,&vstr[2],XX);
     } else {
         XX = atoi(vstr);
         int2bin(XX,wid,tmp);
         fprintf(Outf,"b%s %s\n",tmp,codeintstr);
+//        printf("FORCEDEC %s %s %d %s\n",pathstring,vstr,XX,tmp);
     }
 
     return Py_BuildValue("i", 0);

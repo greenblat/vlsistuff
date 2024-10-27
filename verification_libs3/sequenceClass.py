@@ -435,7 +435,7 @@ class sequenceClass:
         if wrds[0] == 'logfile':
             logs.setLogfileName(wrds[1],0)
             return True
-        if wrds[0] == 'wait':
+        if wrds[0] in ('wait','run'):
             self.waiting = self.eval(wrds[1])
             return True
         if wrds[0] == 'exec':

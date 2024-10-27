@@ -90,7 +90,7 @@ def log_fatal(Text,Which=0):
 
 def keep_error(Text):
     if not  os.path.exists('~/cellar/errors.keep'):
-        Fout = open(''~/errors.keep','w')
+        Fout = open('~/errors.keep','w')
         Fout.write('%s\n' % Text)
         Fout.close()
         return
