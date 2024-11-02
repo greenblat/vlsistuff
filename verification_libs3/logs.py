@@ -267,10 +267,14 @@ def log_warning(Text,Which=0):
     if (Text in printed_already):
         return
     openFlog(Which)
-    print('%d: ___WARNING: %s'%(Warnings,Text))
-    Flogs[Which].write('%d: ___WARNING: %s\n'%(Warnings,Text))
-    printed_already[Text]=1
     Warnings +=1  
+    print('@%d: %d: ___WARNING: %s'%(get_cycles(),Warnings,Text))
+    Flogs[Which].write('@%d: %d: ___WARNING: %s\n'%(get_cycles(),Warnings,Text))
+    printed_already[Text]=1
+    if TRACE:
+        veri.force('tracer.warnings',str(Errors))
+    elif veri and veri.exists('%swarnings'%TB):
+        veri.force('%swarnings'%TB,str(Warnings))
 
 def log_write(Text,Which=0):
     openFlog(Which)

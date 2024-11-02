@@ -91,6 +91,7 @@ def dump_instance(Env,Mod,Simple=False,allPinsLowerCase = False,Color = False,Vo
         Fout.write('integer    cycles;   initial cycles=0;\n')
         Fout.write('integer    errors;   initial errors=0;\n')
         Fout.write('integer    wrongs;   initial wrongs=0;\n')
+        Fout.write('integer    warnings;   initial warnings=0;\n')
         Fout.write('integer    panics;   initial panics=0;\n')
         Fout.write('integer    corrects; initial corrects=0;\n')
         Fout.write('integer    seqptr; initial seqptr=0;\n')
