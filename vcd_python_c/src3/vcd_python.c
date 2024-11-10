@@ -947,11 +947,12 @@ veri_changes(PyObject *self,PyObject *args) {
 static PyObject*
 veri_exists(PyObject *self,PyObject *args) {
     char *pathstring;
-    long handle;
     if (!PyArg_ParseTuple(args, "s",&pathstring))
         return NULL;
-    handle = get_handle(pathstring);
-    if (!handle) {
+    long Psig =  qqas(qqai(pathstring));
+
+    if (Psig == 99999999) {
+        printf("\npython: cannot find sig %s for peek\n",pathstring);
         return Py_BuildValue("s", "0");
     }
     return Py_BuildValue("s", "1");
