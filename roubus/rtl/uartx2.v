@@ -2,7 +2,7 @@
 
 module uartx2(
     input rxd,
-    output rxd txd,
+    output txd,
     output [7:0] status,
     input [7:0] txdata,
     output [7:0] rxdata,

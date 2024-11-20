@@ -152,6 +152,9 @@ class sequenceClass:
             if len(Line)>1:
                 if Line[-1] == '\n': Line = Line[:-1]
                 self.Sequence.append((Line,lnum))
+                Wrds = Line.split()
+                if (Wrds!=[]) and (Wrds[0] == 'searchpath'):
+                    self.searchPath.append(Wrds[1])
         self.searchPath.append(os.path.abspath(os.path.dirname(Filename)))
         self.workIncludes()
         self.workIncludes()
@@ -267,15 +270,27 @@ class sequenceClass:
                     Fname = os.path.expandvars(Fname)
                     Fname = os.path.abspath(Fname)
                     Found = False
+                    print("DBG %s %s " % (wrds[1],Fname))
                     if os.path.exists(Fname):
                         Lines = open(Fname).readlines()
                         for x,Line in enumerate(Lines):
                             Seq.append((Line,1000+x))
                         Found = True
                         Dones = True
+
+                    if 'PYINCLUDE' in os.environ:
+                        Try = os.environ['PYINCLUDE'] +  '/' + wrds[1]
+                        if os.path.exists(Try):
+                            Lines = open(Try).readlines()
+                            for x,Line in enumerate(Lines):
+                                Seq.append((Line,1000+x))
+                            Found = True
+                            Dones = True
+
+
                     for Path in self.searchPath:
-                        if (not Found) and os.path.exists('%s/%s'%(Path,Fname)):
-                            Lines = open('%s/%s'%(Path,Fname)).readlines()
+                        if (not Found) and os.path.exists('%s/%s'%(Path,wrds[1])):
+                            Lines = open('%s/%s'%(Path,wrds[1])).readlines()
                             for xx,LL in enumerate(Lines):
                                 Seq.append((LL,xx)) 
                             Found = True
@@ -323,6 +338,7 @@ class sequenceClass:
     def eval(self,Txt,Bad=False):
         if type(Txt) is int: return Txt
         if Txt in self.Translates: return self.eval(self.Translates[Txt])
+#        print("EVALLLL",Txt,Txt in self.Translates,list(self.Translates.keys()))
         if Txt[0] == '"': return Txt.replace('"','')
         try:
             Val =  eval(Txt)
@@ -394,7 +410,7 @@ class sequenceClass:
                     self.Guardian -= 1
                     if self.Guardian==0:
                         Lnum = self.Sequence[self.Ptr][1]
-                        logs.log_error('Guardian expired %s at line %s'%(self.waitNotBusy,Lnum))
+                        logs.log_error('Guardian expired %s at line %s  seq=%s'%(self.waitNotBusy,Lnum,self.Sequence[self.Ptr]))
                         logs.log_error('          %s'%(self.agents[self.waitNotBusy].busy(True)))
                         self.agents[self.waitNotBusy].busy()
                         self.agentsFinish()
@@ -467,6 +483,10 @@ class sequenceClass:
             self.Translates[wrds[0]]=Val
             return 
 
+        if wrds[0] == 'quit':
+            Line = Line.replace('quit','finish_verilator')
+            self.seq_line(Line,lnum)
+            sys.exit()
         if wrds[0] == 'finish':
             Line = Line.replace('finish','finish_verilator')
             self.seq_line(Line,lnum)
@@ -581,6 +601,8 @@ class sequenceClass:
             Time = eval(wrds[0][1:])
             self.Timed[Time] = ' '.join(wrds[1:])
             logs.log_info('TIMED added %d %s' % (Time,self.Timed[Time]))
+        elif (wrds[0] == 'searchpath'):
+            pass
         elif (wrds[0] == 'force'):
             Ind = 1
             while Ind < len(wrds):
@@ -603,7 +625,7 @@ class sequenceClass:
                 self.Guardian -= 1
                 if self.Guardian==0:
                     Lnum = self.Sequence[self.Ptr][1]
-                    logs.log_error('Guardian expired at line %s'%(Lnum))
+                    logs.log_error('waitUntil Guardian expired at line %s   x=%s'%(Lnum,self.Sequence[self.Ptr]))
                     self.agentsFinish()
                     logs.finish('Guardian expired %s  at line %s'%(self.testFileName,Lnum))
                     logs.talk('Hei Ilia  simulation finished on guardian!')

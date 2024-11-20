@@ -68,7 +68,6 @@ def main():
 
 
 
-
         
 
 
@@ -128,6 +127,8 @@ def produce_documentation(doclines):
     global color,othercolor
     ofile = open('%s_doc.html'%(Chip),'w')
     ofile.write(header_string%(Chip))
+    mdfile = open('%s_doc.md'%(Chip),'w')
+    mdfile.write('# MLCPU instruction set\n')
     for wrds in doclines:
         if (wrds[0]=='header'):
              ofile.write('%s <br>\n'%(' '.join(wrds[1:])))
@@ -152,12 +153,14 @@ def produce_documentation(doclines):
         for (id,Inst2) in lll:
             if (Inst2==Inst):
                 produce_page_for_instruction(ofile,Inst,doclines)
+                produce_md_for_instruction(mdfile,Inst,doclines)
 
 
 
 
     ofile.write(tail_string)
     ofile.close()
+    mdfile.close()
 
 def do_bits(ofile):
     rng = list(range(0,OpcodeWidth))
@@ -176,7 +179,7 @@ def produce_page_for_instruction(ofile,Inst,doclines):
     expl = instructions[Inst].oneliner.replace('.',' ')
     expl = expl.replace('<<',' shiftleft ')
     expl = expl.replace('>>',' shiftright ')
-    ofile.write('<h3 align="left">"%s"</h3>\n'%(expl))
+    ofile.write('<13 align="left">"%s"</h3>\n'%(expl))
     ofile.write(table_header_string.replace('OPCODEWIDTH',str(OpcodeWidth)))
     do_bits(ofile)
     ofile.write('<tr bgcolor='+color+'>\n')
@@ -202,6 +205,29 @@ def produce_page_for_instruction(ofile,Inst,doclines):
     ofile.write('</td> </tr> </tabler>\n')
 
 
+def produce_md_for_instruction(ofile,Inst,doclines):
+    ofile.write('## %s\n' % Inst)
+    expl = instructions[Inst].oneliner.replace('.',' ')
+    expl = expl.replace('<<',' shiftleft ')
+    expl = expl.replace('>>',' shiftright ')
+    expl = expl.replace('<h3>','')
+    expl = expl.replace('</h3>','')
+    ofile.write('    **%s**\n' % expl)
+    run_on_md_coding(instructions[Inst].coding,ofile)
+    Flgs=''
+    for Txt in instructions[Inst].flags:
+        if (len(Txt)>8)and(Txt[:8]=='updates_'):
+            Flgs = Flgs + Txt[8:]
+    if (Flgs==''):
+        ofile.write('Flags affected: None\n')
+    else:
+        ofile.write('Flags affected: %s\n'%(Flgs))
+
+    use_doclines(Inst,ofile,doclines)
+    ofile.write('\n')
+
+
+
 
 def get_inst_explanation(Inst):
     return '???'
@@ -224,6 +250,21 @@ def run_on_coding(wrds,ofile):
             ofile.write('<td  align="center" colspan='+str(many)+'>'+text+'</td>\n')
         else:
             print('error! ilia, coding field bad ',word, wrds)
+
+def run_on_md_coding(wrds,ofile):
+#    wrds = gather_busses(wrds)
+
+    
+    Jstr = '|'.join(wrds)
+    Len = len(wrds)
+    J0 =  ''
+    for I in wrds:
+        J0 += ' | '
+    J1 = J0.replace(' ','x')
+    J0 = J0.replace('  ',' ')
+    ofile.write('|%s|\n' % J1)
+    ofile.write('|%s|\n' % J0)
+    ofile.write('|%s|\n' % Jstr)
 
 def gather_busses(wrds):
     res = []
