@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 import os,sys,string
 import datetime
+import zlib
 
 AsideDir = 'aside_tmp'
 
@@ -19,6 +20,7 @@ def work(Fname):
     Date = datetime.date.today()
     Time = datetime.datetime.now()
     HourDate = str('%02d' % Time.hour)+str('%02d' % Date.day)+str('%02d' % Date.month)+str(Date.year)[2:]
+    HourDate = str('%02d' % Date.day)+str('%02d' % Date.month)+str(Date.year)[2:]
 
     Changed = False
 
@@ -50,10 +52,11 @@ def work(Fname):
         ind += 1
     Signature = 0            
     sign_version = 'wire [63:0] '
+    Adler = zlib.adler32(b'Ilia G',1)
     for ind,line in enumerate(Lines):
         Was = Signature
-        Signature = computeIt(Signature,line)
-#        print("MODULE %s %08x %08x  line=%s" % (Module,Was,Signature,line[:-1]))
+        Signature,Adler = computeIt(Signature,Adler,line)
+#        print("MODULE %s %08x %08x %08x  line=%s" % (Module,Was,Signature,Adler,line[:-1]))
         ll = line.replace('#',' ')
         ll = ll.replace('(',' ')
         wrds = ll.split()
@@ -64,15 +67,15 @@ def work(Fname):
             Module = wrds[1]
         elif wrds[0] == 'endmodule':
             if Module in Signs:
-#                print("SIGN %s %08x  %s" % (Module,Signature,Signs))
+#                print("SIGN %s %08x %08x  %s" % (Module,Signature,Adler,Signs))
                 _,Was = Signs[Module]
                 Int = int(Was,16)
                 Sign = Int>>32
-                Now = '%08x' % Signature
-                WasS = Was[:8]
+                Now = '%05x%05x' % (Adler & 0xfffff,Signature & 0xfffff)
+                WasS = Was[:10]
                 if (Now != WasS):
                     print("%s now=%s <> was=%s" % (Module,Now,WasS))
-                    New = "%s sign_version = 64'h%08x%s ;\nendmodule\n// FROMFILE %s\n\n" % (sign_version,Signature,HourDate,Abs)
+                    New = "%s sign_version = 64'h%s%s ;\nendmodule\n// FROMFILE %05x %05x %s :: %s\n\n" % (sign_version,Now,HourDate,Adler & 0xfffff,Signature & 0xfffff,HourDate,Abs)
                     Changed = True
                 else:
                     New = "%s sign_version = 64'h%s ;\nendmodule\n" % (sign_version,Was)
@@ -99,10 +102,13 @@ def okchar(Chr):
     return True
 
 
-def computeIt(Signin,line):
+def computeIt(Signin,Adler,line):
     X = map(ord,filter(okchar,list(line)))
     Mid = sum(X)
-    return Signin + Mid
+    Y = map(ord,filter(okchar,list(line)))
+    Adl = zlib.adler32(bytes(list(Y)),Adler)
+#    print("%d XXXXXXX %08x %08x %s   %s  ||%s" % (Mid,Adler,Adl,list(X),line,list(Y)))
+    return (Signin + Mid), Adl
 
 
 if __name__ == '__main__': main()

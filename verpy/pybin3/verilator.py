@@ -242,9 +242,9 @@ STR0 = '''
 char VVV[50000];
 char *getValue(char *path) {
 '''
-STR1 ='     if (strcmp(path,"NET")==0) { sprintf(VVV,"%0LLx",top->NET); return VVV;}\n'
-STR1_1 ='     if (strcmp(path,"NET")==0) { sprintf(VVV,"%0LLlx",top->NET); return VVV;}\n'
-STR1_2 ='     if (strcmp(path,"NET")==0) { sprintf(VVV,LLL,TOP); return VVV;}\n'
+STR1 ='     if (strcmp(path,"NET")==0) { snprintf(VVV,5000,"%0LLx",top->NET); return VVV;}\n'
+STR1_1 ='     if (strcmp(path,"NET")==0) { snprintf(VVV,5000,"%0LLlx",top->NET); return VVV;}\n'
+STR1_2 ='     if (strcmp(path,"NET")==0) { snprintf(VVV,5000,LLL,TOP); return VVV;}\n'
 
 STR2 = '''
     printf("error! net=%s is not defined for peek\\n",path);

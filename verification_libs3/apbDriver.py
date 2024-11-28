@@ -337,6 +337,7 @@ class apbDriver:
                     self.waiting0=int(Val)
                 elif Sig=='catch':
                     Who,Exp,Addr = Val
+                    Exp = self.eval(Exp)
                     Act = self.peek(Who)
                     if type(Exp) is types.FunctionType:
                         Exp(Act)
