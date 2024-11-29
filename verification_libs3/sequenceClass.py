@@ -338,7 +338,6 @@ class sequenceClass:
     def eval(self,Txt,Bad=False):
         if type(Txt) is int: return Txt
         if Txt in self.Translates: return self.eval(self.Translates[Txt])
-#        print("EVALLLL",Txt,Txt in self.Translates,list(self.Translates.keys()))
         if Txt[0] == '"': return Txt.replace('"','')
         try:
             Val =  eval(Txt)
@@ -478,7 +477,6 @@ class sequenceClass:
             List1 = list(map(self.eval,wrds[2:]))
             List1 = list(map(str,List1))
             Expr = ' '.join(List1)
-            print("EXPR",Expr)
             Val = self.eval(Expr)
             self.Translates[wrds[0]]=Val
             return 
@@ -777,7 +775,9 @@ class sequenceClass:
         Wrds = Wrds1[:]
         for ind,Wrd in enumerate(Wrds):
             if (str(Wrd)[0] in '_'+string.ascii_letters)and(Wrd not in ['or','and','not']):
-                if Wrd in self.Translates:
+                if type(Wrd) is bool:
+                    Wrds[ind] = Wrd
+                elif Wrd in self.Translates:
                     self.Defs[Wrd]=self.Translates[Wrd]
                     Wrds[ind]=self.Translates[Wrd]
                 elif self.exists(Wrd):
@@ -787,15 +787,16 @@ class sequenceClass:
                     Wrds[ind]=Val
 
         Txt = ' '.join(map(str,Wrds))
+        Txt = Txt.replace(' ( )','()')
 
         if Txt == '': return 0
         try:
-            X = eval(Txt,self.Defs,self.Translates)
+            X = self.eval(Txt)    # ,self.Defs,self.Translates)
             return X
         except:
-            logs.log_error('evaluation of %s failed'%Txt,0,True,True)
+            logs.log_error('evaluation of "%s" failed'%Txt,0,True,True)
 #            logs.log_info('TRANSLATES %s'%(str(self.Translates)))
-            logs.log_info('RDS %s'%(str(Wrds)))
+#            logs.log_info('SEQUENCE RDS %s'%(str(Wrds)))
             return 0
 
     def agentsFinish(self):
@@ -823,6 +824,7 @@ def makeExpr(Txt):
     for Chr in '%&|<>=()!+-*/':
         Txt = Txt.replace(Chr,' %s '%Chr)
     Txt  = Txt.replace('  ',' ')
+    Txt = Txt.replace(' ( )','()')
     for From in ['^','= =','> =','! =','< =','< <','> >','/ /']:
         To = From.replace(' ','')
         Txt  = Txt.replace(From,To)
