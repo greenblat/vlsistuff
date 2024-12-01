@@ -702,8 +702,13 @@ class sequenceClass:
             return True
         elif (wrds[0] == 'check'):
             BB = makeExpr(wrds[1])
+            Comment = ' '
+            if len(wrds)>2: Comment = ' '.join(wrds[2:])
             Val = self.evalExpr(BB)
-            logs.log_ensure(Val,'CHECK of %s == %s  vars=%s %s '%(wrds[1],Val,self.DEFS,' '.join(wrds[2:]))) 
+            if (type(Val) is int)or(type(Val) is bool):
+                logs.log_ensure(Val,'CHECK of %s == %s  vars=%s %s '%(wrds[1],Val,self.DEFS,Comment)) 
+            else:
+                logs.log_error('CHECK failed eval:  of %s == %s  vars=%s %s '%(wrds[1],Val,self.DEFS,Comment)) 
         elif (wrds[0] in ['correct','wrong','print','say']):
             Res = ''
             for Wrd in wrds[1:]:
