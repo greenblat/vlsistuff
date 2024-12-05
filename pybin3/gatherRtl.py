@@ -12,8 +12,9 @@ def main():
                 os.system('cat %s/%s' % (Dir,Fname))
 
 def goodEnds(Fname):
-    if Fname.endswith('.v') or Fname.endswith('.rdl') or Fname.endswith('.vvv'): return True
-    if Fname.endswith('.sv') return True
+    Ends = '.v .sv .rdl .vvv'.split()
+    for End in Ends:
+        if Fname.endswith(End): return True
     return False
 
 main()
