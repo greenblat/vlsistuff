@@ -264,13 +264,14 @@ class sequenceClass:
                 wrds = Line.split()
                 if (len(wrds)==0)or(wrds[0][0] in '#/'):
                     pass
+                elif (wrds[0]=='searchpath'):
+                    self.searchPath.append(wrds[1])
                 elif (wrds[0]=='include'):
                     Fname = wrds[1]
                     Fname = os.path.expanduser(Fname)
                     Fname = os.path.expandvars(Fname)
                     Fname = os.path.abspath(Fname)
                     Found = False
-                    print("DBG %s %s " % (wrds[1],Fname))
                     if os.path.exists(Fname):
                         Lines = open(Fname).readlines()
                         for x,Line in enumerate(Lines):
@@ -310,12 +311,14 @@ class sequenceClass:
             veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
     def exists(self,Sig):
+        Orig = Sig
         if Sig.startswith(self.Path+'.'):
             Sig = Sig.replace(self.Path+'.','')
         elif Sig.startswith(self.Path):
             Sig = Sig.replace(self.Path,'')
             
         Full = '%s.%s'%(self.Path,Sig)
+#        logs.log_info('EXISTS orig=%s : full=%s' % (Orig,Full))
         if veri.exists(Full)=='0': return False
         return True
 
@@ -468,7 +471,6 @@ class sequenceClass:
             if len(wrds)==3:
                 Val = self.eval(wrds[2])
                 self.Translates[Var]=Val
-#                logs.log_info('DBG %s %s "%s"   %s' % (Var,Val,wrds,logs.without(self.Translates)))
             elif len(wrds)>3:
                 Val = list(map(self.eval,wrds[2:]))
                 self.Translates[Var]=Val
@@ -790,7 +792,7 @@ class sequenceClass:
                     self.Defs[Wrd]=Val
                     self.DEFS.append((Wrd,Val))
                     Wrds[ind]=Val
-
+#        logs.log_info('DBG wrds=%s %s' % (Wrds,self.Translates))
         Txt = ' '.join(map(str,Wrds))
         Txt = Txt.replace(' ( )','()')
 

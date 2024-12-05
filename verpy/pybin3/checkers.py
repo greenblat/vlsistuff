@@ -20,16 +20,24 @@ def help_main(Env):
         return
     load_sons(Env)
     Env.Current.buildNetTable()
+    create_drive_table(Env.Current)
+    
     for Net in Env.Current.netTable:
+        if '[' in Net: Net = Net[:Net.index('[')]
         List = Env.Current.netTable[Net]
         if (Net not in ['gnd','vcc']) and (len(List) ==1):
-            logs.log_errx(101,'Net %s has 1 connectivity : %s' % (Net,List))
+            Bus = Net
+#            logs.log_info('%s >>>0 %s' % ((Bus,Net),list(TableDrives.keys())))
+#            logs.log_info('>>>1 %s' % list(InvTableDrives.keys()))
+#            logs.log_info('>>>2 %s' % list(Env.Current.netTable.keys()))
+            if (Bus not in TableDrives)and (Bus not in InvTableDrives):
+                if (Bus not in EdgeTableDrives)and (Bus not in InvEdgeTableDrives):
+                    logs.log_errx(101,'Net %s / %s has 1 connectivity : %s' % (Net,Bus,List))
         
     checkZeroMinusOneBug(Env.Current)            
 
     check_integrity(Env,Env.Current)
     check_instance_connections(Env,Env.Current)
-    create_drive_table(Env.Current)
     look_for_loops(Env.Current)
     look_for_short_loops(Env.Current)
     look_for_pass_throughs(Env.Current)
@@ -106,7 +114,8 @@ def create_always_drive_tables(Current):
             if not is_edged_timing(Always[0]):
                 scan_statements(Current,Always[1],drive_assist1,[[]],[])
             else:
-                scan_statements(Current,Always[1],drive_assist2,[[]],[])
+                Clks = support_set(Always[0])
+                scan_statements(Current,Always[1],drive_assist2,[[]],Clks)
         else:
             logs.log_err('unrecognized always %d'%(len(Always)))
 
@@ -137,6 +146,9 @@ def drive_assist2(Current,Item,Params,Stack):
             Stcks = support_set(Stack)
             for Src in Srcs+Stcks:
                 add_edged_drives(Dst,Src)
+
+
+
     if Item[0] == '=':
         logs.log_errx(112,'"=" assign in edged always %s' % str(Item))
         

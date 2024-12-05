@@ -2,6 +2,7 @@
 import veri
 import logs
 
+# this class actually plays UART, drives txd and monitors rxd. No more hardware needed.
 
 class uartClass(logs.driverClass):
     def __init__(self,Path,Monitors,rxd='rxd',txd='txd',name='noname'):

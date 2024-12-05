@@ -40,14 +40,19 @@ def scanBody(Body,Mod):
 
 
 def printout(Expr,Other,Which,Mod):
-    Pos = 0
     LL = Expr[1:]
     LL.reverse()
     Res = []
+    Offset = 0
+    if (type(Other) is list) and (Other[0] == 'subbus'):
+        Offset = Other[2][1]
+    Pos = Offset
     for Item in LL:
         Wid = Mod.exprWidth(Item)
         Pitem = Mod.pr_expr(Item)
-        Res.append((Pitem,Wid,Pos+Wid-1,Pos))
+        Hi = (Pos+Wid-1) % 32
+        Lo = Pos % 32
+        Res.append((Pitem,Wid,Pos+Wid-1,Pos,' [%s:%s]' % (Hi,Lo)))
         Pos += Wid
     logs.log_info("%s:  %s = " % (Which,Other))
     for X in Res:

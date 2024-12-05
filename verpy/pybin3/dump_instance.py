@@ -374,8 +374,13 @@ GIVEUP_TIMEOUT = 1000    # how many cycles to run before retirment.
 #axis = axiSlave.axiSlaveClass('tb',Monitors)
 #import axiMaster
 #axi = axiMaster.axiMasterClass('tb',Monitors)
+#import apbDriver
+#apb = apbDriver.apbDriver('tb',Monitors)
+#import apbSlave
+#apbs = apbSlave.apbSlave('tb',Monitors)
 import sequenceClass
-seq = sequenceClass.sequenceClass('tb',Monitors,'',[]) # ('axis',axis),('axim',axim)
+seq = sequenceClass.sequenceClass('tb',Monitors,'',[])
+seq = sequenceClass.sequenceClass('tb',Monitors,'',[('apb',apb),('apbs',apbs),('axis',axis),('axim',axim)])
 
 
 def pymonname(Name):
@@ -401,6 +406,7 @@ def cannot_find_sig(Sig):
 class driverMonitor(logs.driverClass):
     def __init__(self,Path,Monitors):
         logs.driverClass.__init__(self,Path,Monitors)
+# the commented out lines below are already included, here just for info
 #        Monitors.append(self)
 #        self.Path = Path
 #        self.state='idle'
@@ -431,8 +437,17 @@ class driverMonitor(logs.driverClass):
         if self.valid('validin')and self.valid('takenin'):
             return
 
+    def action(self,Txt,Orig=[]):
+        wrds = Txt.split()
+        if wrds==[]: return
+        elif (wrds[0] == doSomething):
+            do something more here
+        else:
+            logs.log_error('action "%s" of not recognized')
+
+
 # example of driver class usage
-# driverMonitor('tb',Monitors)
+# drv =  driverMonitor('tb',Monitors)
 
 
 

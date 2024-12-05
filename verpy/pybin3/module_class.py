@@ -966,8 +966,9 @@ class module_class:
             self.typesTable[Type].append(Inst)
             for Pin in Obj.conns:
                 NN = Obj.conns[Pin]
-                if NN and not ((type(NN) is list)and(NN[0]=='curly')):
-                    Net = hashit(NN)
+                Supset = support_set(NN,False)
+                for AA in Supset:
+                    Net = hashit(AA)
                     if Net not in netTable:
                         netTable[Net]=[]
                     netTable[Net].append((Inst,Type,Pin))
@@ -1361,7 +1362,7 @@ class module_class:
                     Lo = Expr[2][1]
                     Lo = self.compute_int(Lo)
                     return Hi-Lo+1
-            if Expr[0] in ['<','>','!=','==','<=','>=']: return 1 
+            if Expr[0] in ['!','&&','||','<','>','!=','==','<=','>=']: return 1 
             if Expr[0] == 'curly':
                 Wid = 0
                 for Item in Expr[1:]:

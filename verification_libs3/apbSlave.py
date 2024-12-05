@@ -26,7 +26,17 @@ class apbSlave(logs.driverClass):
     def prdata(self):
         Who,Act,Addr = self.Backs.pop(0)
         return Act
-
+    def write(self,Addr,Data):
+        if type(Data) is list:
+            for Dd in Data:
+                self.write(Addr,Dd)
+                Addr += 4
+        else:
+            self.RAM[Addr] = Data
+            if self.Uart:
+                self.Uart('ram',Addr,Data)
+        logs.log_info('SLV "%s" RAM %s -> [%s]' % (self.Name,hex(Addr)))
+        
     def action(self,Cmd,Orig=[]):
         wrds = Cmd.split()
         if wrds[0] == 'ready':
