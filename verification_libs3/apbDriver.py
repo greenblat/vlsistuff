@@ -141,12 +141,12 @@ class apbDriver:
         else:
             logs.log_error('action not recogninzed "%s"'%Cmd)
 
-    def read1(self,Addr,expData='none'):
+    def read1(self,Addr,expData='None'):
         if type(Addr) is str:
             Addr = self.translate(Addr)
         self.queue1.append(('read',Addr,expData))
 
-    def read(self,Addr,expData='none'):
+    def read(self,Addr,expData='None'):
         if type(Addr) is str:
             Addr = self.translate(Addr)
         self.queue0.append(('read',Addr,expData))

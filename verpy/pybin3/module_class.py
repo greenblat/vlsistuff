@@ -947,7 +947,7 @@ class module_class:
 
     def buildNetTable(self):
         self.prepareNetTable()
-    def prepareNetTable(self):
+    def prepareNetTable(self,Bussed=False):
         netTable={}
         self.typesTable = {}
         for Net in self.nets:
@@ -966,7 +966,7 @@ class module_class:
             self.typesTable[Type].append(Inst)
             for Pin in Obj.conns:
                 NN = Obj.conns[Pin]
-                Supset = support_set(NN,False)
+                Supset = support_set(NN,Bussed)
                 for AA in Supset:
                     Net = hashit(AA)
                     if Net not in netTable:

@@ -5,6 +5,7 @@ def main():
     Dir1 = sys.argv[1]
     Dir2 = sys.argv[2]
     Cmd = 'diff -qbBw %s %s' % (Dir1,Dir2) 
+#    Cmd = 'mydiff.qq  %s %s' % (Dir1,Dir2) 
     X = os.popen(Cmd)
     Res = X.readlines()
     X.close()
