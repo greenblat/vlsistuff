@@ -230,7 +230,7 @@ class axiMasterClass:
                 Len = 256
                 self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
                 if Rid not in self.AREADS: self.AREADS[Rid] = []
-                self.AREADS[Rid].append((Len,Address,Len))
+                self.AREADS[Rid].append((Len,Address,Size,Len))
                 self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
                 Mask = (1<<len(self.peekbin('arid')))-1
                 self.Rid = Mask & (self.IncrRid+self.Rid)
@@ -240,7 +240,7 @@ class axiMasterClass:
             Len = last_write_length
             self.Queue.append(('ar','force arvalid=1 arburst=%s arlen=%s araddr=%s arsize=%s arid=%s'%(Burst,Len-1,Address,Size,self.Rid)))
             if self.Rid not in self.AREADS: self.AREADS[self.Rid] = []
-            self.AREADS[self.Rid].append((Len,Address,Len))
+            self.AREADS[self.Rid].append((Len,Address,Size,Len))
             self.Queue.append(('ar','force arvalid=0 arburst=0 arlen=0 araddr=0 arsize=0 arid=0'))
             Mask = (1<<len(self.peekbin('arid')))-1
             self.Rid = Mask & (self.IncrRid+self.Rid)
@@ -428,16 +428,17 @@ class axiMasterClass:
             logs.log_error('READ ACTION %s rid=%d and no AREADS' % (self.Name,rid))
             return
 
-        Len,Addr,Pos = self.AREADS[rid][0]
-        self.log_info_print('axi Master %s READ pos=%d len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Pos,Len,Addr,Addr+8*(Len-Pos),rid,rid,rlast,rdatax,rresp,len(self.AREADS)))
+        Len,Addr,Size,Pos = self.AREADS[rid][0]
+        Mul = 1<<Size
+        self.log_info_print('axi Master %s READ pos=%d len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Pos,Len,Addr,Addr+Mul*(Len-Pos),rid,rid,rlast,rdatax,rresp,len(self.AREADS)))
         if Pos == 1:
             if rlast != 1:
-                logs.log_error('RLAST not present axi Master %s READ len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Len,Addr,Addr+8*(Len-Pos),rid,rid,rlast,rdatax,rresp,len(self.AREADS)))
+                logs.log_error('RLAST not present axi Master %s READ len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Len,Addr,Addr+Mul*(Len-Pos),rid,rid,rlast,rdatax,rresp,len(self.AREADS)))
             self.AREADS[rid].pop(0)
         else:
             if rlast == 1:
-                logs.log_error('RLAST too early axi Master %s READ len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Len,Addr,Addr+8*(Len-Pos),rid,rid,rlast,rdatax,rresp,len(self.AREADS)))
-            self.AREADS[rid][0] = (Len,Addr,Pos-1)
+                logs.log_error('RLAST too early axi Master %s READ len=%x addr0=%x addr=%x arid=%x || rid=%x rlast=%x data=%x  rresp=%d  areads= %s' % (self.Name,Len,Addr,Addr+Mul*(Len-Pos),rid,rid,rlast,rdatax,rresp,len(self.AREADS)))
+            self.AREADS[rid][0] = (Len,Addr,Size,Pos-1)
 
         if rresp!=0:
             logs.log_wrong('RRESP came back %s  ADDR=%x  rid=0x%x  name=%s'%(rresp,Addr,rid,self.Name))
