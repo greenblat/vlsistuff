@@ -336,17 +336,19 @@ class apbDriver:
                 elif Sig=='wait':
                     self.waiting0=int(Val)
                 elif Sig=='catch':
-                    Who,Exp,Addr = Val
-                    Exp = self.eval(Exp)
-                    Act = self.peek(Who)
-                    if type(Exp) is types.FunctionType:
-                        Exp(Act)
-                    elif type(Exp) is int:
-                        logs.log_ensure((Exp==Act),'apb addr=%x %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(Addr,self.Name,Act,Exp,Exp,Exp,self.rename(Who)),2)
-                    else: 
-                        logs.log_info('apb %s addr=%x %s read act=%x who=%s'%(Exp,Addr,self.Name,Act,self.rename(Who)))
-                        self.Backs.append((Who,Act,Addr))
-                        self.callback('%s rdata=%x addr=%x' % (Who,Act,Addr))
+                    pready = self.peek('pready')
+                    if (pready == 1):
+                        Who,Exp,Addr = Val
+                        Exp = self.eval(Exp)
+                        Act = self.peek(Who)
+                        if type(Exp) is types.FunctionType:
+                            Exp(Act)
+                        elif type(Exp) is int:
+                            logs.log_ensure((Exp==Act),'apb addr=%x %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(Addr,self.Name,Act,Exp,Exp,Exp,self.rename(Who)),2)
+                        else: 
+                            logs.log_info('apb %s addr=%x %s read act=%x who=%s'%(Exp,Addr,self.Name,Act,self.rename(Who)))
+                            self.Backs.append((Who,Act,Addr))
+                            self.callback('%s rdata=%x addr=%x' % (Who,Act,Addr))
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 elif Sig=='popif':
@@ -450,17 +452,19 @@ class apbDriver:
                 elif Sig=='wait':
                     self.waiting1=int(Val)
                 elif Sig=='catch':
-                    Who,Exp,Addr = Val
-                    X = self.peek(Who)
-                    logs.log_info('catch %s %s'%(Who,Exp))
-                    if type(Exp) is function:
-                        Exp(X)
-                    elif type(Exp)== int:
-                        logs.log_ensure((Exp==Act),'apb addr=%x %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(Addr,self.Name,Act,Exp,Exp,Exp,self.rename(Who)),2)
-                    else: 
-                        Exp0 = eval(Exp,self.renames)
-                        logs.log_info('apb %s read act=%x exp=%s (%x) (0d%d)   who=%s'%(self.Name,X,Exp,Exp0,Exp0,self.rename(Who)))
-                        self.Backs.append((Who,Act,Addr))
+                    pready = self.peek('pready')
+                    if (pready == 1):
+                        Who,Exp,Addr = Val
+                        X = self.peek(Who)
+                        logs.log_info('catch %s %s'%(Who,Exp))
+                        if type(Exp) is function:
+                            Exp(X)
+                        elif type(Exp)== int:
+                            logs.log_ensure((Exp==Act),'apb addr=%x %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(Addr,self.Name,Act,Exp,Exp,Exp,self.rename(Who)),2)
+                        else: 
+                            Exp0 = eval(Exp,self.renames)
+                            logs.log_info('apb %s read act=%x exp=%s (%x) (0d%d)   who=%s'%(self.Name,X,Exp,Exp0,Exp0,self.rename(Who)))
+                            self.Backs.append((Who,Act,Addr))
 
                 elif Sig=='until':
                     self.installUntil(Val,0)

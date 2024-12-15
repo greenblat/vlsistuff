@@ -807,7 +807,7 @@ void drive_value(char *Val,char *Code,int forReal) {
     if (Width<=8) {
         Diffs = diffs(sigs[P].value,Val);
         strcpy(sigs[P].value,Val);
-        char nnn[100];
+        char nnn[1000];
         strcpy(nnn,qqia(sigs[P].name));
     } else {
         Diffs = diffs(sigs[P].allocated,Val);

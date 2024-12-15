@@ -290,6 +290,14 @@ class axiMasterClass:
 
 
     def writeDatasLoop(self,Len,Size,Address,Wdatas):
+        BusWid = len(self.peekbin('rdata'))
+        if BusWid == 32: BusSize = 2
+        if BusWid == 64: BusSize = 3
+        if BusWid == 128: BusSize = 4
+        if BusWid == 256: BusSize = 5
+        if BusWid == 512: BusSize = 6
+
+
         for ii in range(Len):
             if type(Wdatas) is int:
                 Wdata = Wdatas
@@ -307,14 +315,29 @@ class axiMasterClass:
                 Wlast=1
             else:
                 Wlast = 0
-            Wstrb = (1<<(1<<Size))-1
+
             if self.WSTRB>0:
                 Wstrb = self.WSTRB
-                if self.WSTRBS!=[]: self.WSTRB = self.WSTRBS.pop(0)
+            elif self.WSTRBS!=[]: 
+                self.WSTRB = self.WSTRBS.pop(0)
+            elif BusSize == Size:
+                Wstrb = (1<<(1<<Size))-1
+            elif (BusSize == (1+Size)):
+                if (Address & (1<<Size)) == 0: 
+                    Wstrb = (1<<(1<<Size))-1
+                else:
+                    Wstrb = ((1<<(1<<Size))-1)<<(1<<Size)
+            else:
+                logs.log_info("NNONONONONO")
+            logs.log_info("WWWWW0 bus=%d size=%d addr=%x wstrb=%x" % (BusSize,Size,Address,self.WSTRB))
+            logs.log_info("WWWWW bus=%d size=%d addr=%x wstrb=%x" % (BusSize,Size,Address,Wstrb))
+
+
             Str = 'force wvalid=1 wdata=%s wstrb=0x%x wlast=%d'%(Wdata,Wstrb,Wlast)
             if self.AXI3:
                 Str += ' wid=%d'%self.Rid
             self.Queue.append(('w',Str))
+            Address += (1<<Size)
 
         Str = 'force wvalid=0 wdata=0 wstrb=0 wlast=0'
         if self.AXI3:
