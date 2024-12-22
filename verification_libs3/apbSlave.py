@@ -87,12 +87,24 @@ class apbSlave(logs.driverClass):
             self.lcl_force('pready',1)
             self.addr = self.lcl_peek('paddr')
             self.pwrite = self.lcl_peek('pwrite')
+            self.pstrb = self.lcl_peek('pstrb')
             if self.lcl_valid('penable'):
                 logs.log_info('APBWRITE %s %s write %x' % (self.Name,self.pwrite,self.addr))
                 if self.pwrite == 1:
                     self.wdata = self.lcl_peek('pwdata')
-                    self.RAM[self.addr] = self.wdata
-                    logs.log_info('APBSLAVE %s write %x %x' % (self.Name,self.addr,self.wdata))
+                    if self.addr&0xfffc not in self.RAM:
+                        was = 0
+                    else:
+                        was = self.RAM[self.addr&0xfffc]
+                    mask = 0
+                    if self.pstrb & 1: mask = 0xff
+                    if self.pstrb & 2: mask += 0xff00
+                    if self.pstrb & 4: mask += 0xff0000
+                    if self.pstrb & 8: mask += 0xff000000
+
+                    now_data = was & ~mask | self.wdata & mask
+                    self.RAM[self.addr&0xfffc] = now_data
+                    logs.log_info('APBSLAVE %s write %x %x strb=%x now_data=%x' % (self.Name,self.addr,self.wdata,self.pstrb,now_data))
                 else:
                     if self.addr not in self.RAM:
 #                        self.RAM[self.addr] = random.randint(0,0xffffffff)
