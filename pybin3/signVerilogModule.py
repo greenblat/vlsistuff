@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 import os,sys,string
 import datetime
-import zlib
+# import zlib
 
 AsideDir = 'aside_tmp'
 
@@ -52,10 +52,11 @@ def work(Fname):
         ind += 1
     Signature = 0            
     sign_version = 'wire [63:0] '
-    Adler = zlib.adler32(b'Ilia G',1)
+#    Adler = zlib.adler32(b'Ilia G',1)
+    Adler2  = adler32(b'Ilia G',(0,1))
     for ind,line in enumerate(Lines):
         Was = Signature
-        Signature,Adler = computeIt(Signature,Adler,line)
+        Signature,Adler2 = computeIt(Signature,Adler2,line)
 #        print("MODULE %s %08x %08x %08x  line=%s" % (Module,Was,Signature,Adler,line[:-1]))
         ll = line.replace('#',' ')
         ll = ll.replace('(',' ')
@@ -67,15 +68,17 @@ def work(Fname):
             Module = wrds[1]
         elif wrds[0] == 'endmodule':
             if Module in Signs:
-#                print("SIGN %s %08x %08x  %s" % (Module,Signature,Adler,Signs))
+#                print("SIGN mod=%s sign=%08x adl=%08x adl2=%0xx,%04x  %s" % (Module,Signature,Adler,Adler2[0],Adler2[1],Signs))
                 _,Was = Signs[Module]
                 Int = int(Was,16)
                 Sign = Int>>32
+                Adler = 0xfffff & ((Adler2[0]<<16)  | Adler2[1])
                 Now = '%05x%05x' % (Adler & 0xfffff,Signature & 0xfffff)
                 WasS = Was[:10]
                 if (Now != WasS):
                     print("%s now=%s <> was=%s" % (Module,Now,WasS))
-                    New = "%s sign_version = 64'h%s%s ;\nendmodule\n// FROMFILE %05x %05x %s :: %s\n\n" % (sign_version,Now,HourDate,Adler & 0xfffff,Signature & 0xfffff,HourDate,Abs)
+                    New = "%s sign_version = 64'h%s%s ;\nendmodule\n" % (sign_version,Now,HourDate)
+                    New += "// FROMFILE %05x %05x :: %s\n\n" % (Adler,Signature & 0xfffff,Abs)
                     Changed = True
                 else:
                     New = "%s sign_version = 64'h%s ;\nendmodule\n" % (sign_version,Was)
@@ -102,13 +105,24 @@ def okchar(Chr):
     return True
 
 
-def computeIt(Signin,Adler,line):
+def computeIt(Signin,Adler2,line):
     X = map(ord,filter(okchar,list(line)))
     Mid = sum(X)
     Y = map(ord,filter(okchar,list(line)))
-    Adl = zlib.adler32(bytes(list(Y)),Adler)
+    Z = list(Y)
+    Z2 = Z[:]
+#    Adl = zlib.adler32(bytes(Z),Adler)
+    Adl2 = adler32(Z2,Adler2)
 #    print("%d XXXXXXX %08x %08x %s   %s  ||%s" % (Mid,Adler,Adl,list(X),line,list(Y)))
-    return (Signin + Mid), Adl
+    return (Signin + Mid), Adl2
 
+
+MOD_ADLER = 65521
+def adler32(plain_text, ba ):
+    b,a = ba
+    for plain_chr in plain_text:
+        a = (a + plain_chr) % MOD_ADLER
+        b = (b + a) % MOD_ADLER
+    return b,a
 
 if __name__ == '__main__': main()
