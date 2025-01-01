@@ -7,8 +7,11 @@ SIGS = io_signals.INS
 OUS = io_signals.OUS
 
 BASE = io_signals.BASE
-CLK = BASE + '.' + io_signals.CLK
 
+for Clk in io_signals.CLKS:
+    if Clk in SIGS:
+        SIGS.remove(Clk)
+CLKS =  io_signals.CLKS
 New = os.path.expanduser('~/vlsistuff/verification_libs3')
 sys.path.append(New)
 import logs
@@ -96,11 +99,79 @@ VALUES = {}
 OUTVALUES = {}
 WIDS = {}
 for Sig in SIGS: VALUES[Sig] = "x"
+for Sig in CLKS: VALUES[Sig] = "x"
 for Sig in OUS: OUTVALUES[Sig] = "x"
 
 TIMEDIFF = [0,0,0,0,0,1]
 CLOCKS = 0
+wastime = 0
+owastime = 0
+clktime = 0
+
+Initial = 5
 def negedge():
+    global wastime,owastime,Initial,clktime
+
+    cdones = 0 
+    for Sig in CLKS:
+        Now = peek(Sig)
+        Was = VALUES[Sig]
+        if Was != Now:
+            cdones += 1
+    if cdones>0:
+        now = veri.stime()
+        Diff = now-clktime
+        clktime = now
+        Fout2.write('    #%d;\n' % (Diff))
+        for Sig in CLKS:
+            Now = peek(Sig)
+            Was = VALUES[Sig]
+            if Was != Now:
+                Fout2.write('     %s = %s%s;\n' % (Sig,WIDS[Sig],verilogvalue(Now)))
+                VALUES[Sig] = Now
+
+
+
+    dones = 0
+    for Sig in SIGS:
+        Now = peek(Sig)
+        Was = VALUES[Sig]
+        if Was != Now:
+            dones += 1
+    if dones>0:
+        now = veri.stime()
+        Diff = now-wastime
+        wastime = now
+        Fout.write('    #%d;\n' % (Diff))
+        for Sig in SIGS:
+            Now = peek(Sig)
+            Was = VALUES[Sig]
+            if Was != Now:
+                Fout.write('     %s = %s%s;\n' % (Sig,WIDS[Sig],verilogvalue(Now)))
+                VALUES[Sig] = Now
+
+    odones = 0
+    for Sig in OUS:
+        Now = peek(Sig)
+        Was = OUTVALUES[Sig]
+        if Was != Now:
+            odones += 1
+    if odones>0:
+        now = veri.stime()
+        Diff = now-owastime
+        owastime = now
+        Fcmp.write('    #%d;\n' % (Diff+Initial))
+        Initial = 0
+        for Sig in OUS:
+            Now = peek(Sig)
+            Was = OUTVALUES[Sig]
+            if Was != Now:
+                if Now>=0:
+                    Fcmp.write('     compare(%s,%s%s,"%s"); \n' % (Sig,WIDS[Sig],verilogvalue(Now),Sig))
+                OUTVALUES[Sig] = Now
+
+
+def __negedge():
     global CLOCKS
     Diff1 = timeDiff(1)
     CLKLINES[0] = '    #%d; clk = 0;\n' % Diff1
@@ -127,6 +198,7 @@ def negedge():
         Was = VALUES[Sig]
         if Was != Now:
             dones += 1
+    print("DONES",dones)
     if dones>0:
         Fout.write('    #%d;\n' % (TIMEDIFF[2]+Diff))
         TIMEDIFF[2] = 0
@@ -170,7 +242,7 @@ def verilogvalue(Now):
         return "'bx"
     return "'h%x" % Now 
 
-veri.sensitive(CLK,'0','negedge()','0')
-veri.sensitive(CLK,'1','posedge()','0')
+veri.sensitive('always','0','negedge()','0')
+# veri.sensitive('always','1','posedge()','0')
 
 

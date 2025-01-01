@@ -109,6 +109,6 @@ class apbSlave(logs.driverClass):
                     Addr = self.addr & 0xfffffffc;
                     if Addr not in self.RAM:
                         self.RAM[Addr] = self.addr
-                        logs.log_info('APBSLAVE %s invent read %x %x' % (self.Name,self.addr,self.RAM[self.addr]))
+                        logs.log_info('APBSLAVE %s invent read %x %x' % (self.Name,self.addr,self.RAM[Addr]))
                     self.lcl_force('prdata',self.RAM[Addr])
                 self.state = 'idle'

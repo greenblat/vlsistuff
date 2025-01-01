@@ -14,6 +14,12 @@ def help_main(Env):
             TB.nets[Net] = 'wire',Wid
             Obj.conns[Net] = Net
 
+    TB.nets['errors'] = 'integer',0
+    TB.nets['wrongs'] = 'integer',0
+    TB.nets['warnings'] = 'integer',0
+    TB.nets['corrects'] = 'integer',0
+    TB.nets['cycles'] = 'integer',0
+    TB.nets['clk'] = 'reg',0
     Fout = open('%s.tb' % Mod.Module,'w')
     TB.dump_verilog(Fout,{'style':'new','mergehards':False,'endmodule':False})
     Fout.write(Epilog)
@@ -83,8 +89,17 @@ Epilog = '''
 
 initial begin
     $dumpvars(0,tb);
+    wrongs = 0;
+    errors = 0;
+    corrects = 0;
+    warnings = 0;
+    cycles = 0;
 end
-`include "tester.include"
+    `include "tester_clk.include"
+    `include "tester.include"
+    `include "tester_chk.include"
+
+
 
 endmodule
 
