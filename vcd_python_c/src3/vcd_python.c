@@ -349,6 +349,7 @@ int psensitive=0;
 
 char option[200],fname1[1000],fname2[1000];
 int toggles = 0;
+char invokation[1000];
 int main( int argc, char *argv[]) {
     int argvx;
 //    char            line[5000];
@@ -361,14 +362,19 @@ int main( int argc, char *argv[]) {
     Valex[0]=0;
     fname1[0]=0;
     fname2[0]=0;
+
+
 /* update hash table maxsize, if wanted */
     for (i=0;i<maxsig;i++) { sigs[i].code=-1; sigs[i].changed=0;sigs[i].allocated=0; sigs[i].traceable=0; sigs[i].toggles=0; sigs[i].toggles2=0; sigs[i].wasZ = 0;} 
     for (i=0;i<SENSITIVES;i++) armed[i]=0;
     for (i=0;i<SENSITIVES;i++)  sensitive_offset[i]= -1;
     if (argc <= 1) do_help();
+    strcpy(invokation,"invokation = '");
     if (argc > 1) {
         for (k = 2; k <= argc; k++) {
             strcpy(option, *++argv);
+            strcat(invokation," ");
+            strcat(invokation,option);
             if (strcmp(option,"-debug")==0) {
                 debug=1;
             } else if (strcmp(option,"-help")==0) {
@@ -1248,6 +1254,8 @@ void start_python() {
     else
         sprintf(temp,"toggles = False\nINITFILE = '%s'\n%s",fname2,scriptStart);
     PyRun_SimpleString(temp);
+    strcat(invokation,"'");
+    PyRun_SimpleString(invokation);
     globals = PyDict_New();
     if (!globals) exit(2);
     PyDict_SetItemString(globals, "__builtins__", PyEval_GetBuiltins());

@@ -6,7 +6,7 @@
 
 - should use src3 for python3
 - this should produce vcd_python executable right here.
-- You need decent python 3.7 (or 8 or 9)  on Your system.
+- You need decent python 3.7 (or 8,9,10,11,12 or 13)  on Your system.
 - especially library. Most problems come from the location of these libraries and setup of $LD_LIBRARY_PATH or similar $DYLD.....
 
 Once past these problems,  
@@ -17,12 +17,19 @@ to activate vcd_python: (as shown in "run") :
 
 vcd_python3 <VCDFILE> <PYTHONFILE>   [-start Time] [-end Time]
 
+(the invokation line is used to create "invokation" varible in python, so it is possible to add parameters for python )
+
 (mind You, some options were not debugged yet).
 
 
 1. import veri    # this connects python to C.
 2. veri.peek(Net)   is used to peek on values in VCD.
-3.  use: veri.sensitive('tb.clk','0',"negedge()")
+3.  use: veri.sensitive('tb.clk','0',"negedge()","0")
+    last parameter is delay in timepoints of the vcd from negedge of clk
+4.  use: veri.sensitive('always','0',"negedge()","0")
+    "always" means negedge is called on every new timepoint.
+
+
 
 try it and the see the speed.
 
