@@ -1681,6 +1681,7 @@ def pr_timing(List):
 
 def pr_stmt(List,Pref='',Begin=False):
     if List==None: return '%s;'%Pref
+    if List == 'no_op': return 'no_op;'
     if type(List) is tuple:
         return pr_stmt(list(List),Pref,Begin)
     if (type(List) is int):
@@ -1773,7 +1774,7 @@ def pr_stmt(List,Pref='',Begin=False):
             Cond = clean_br(pr_expr(List[1]))
             Yes = pr_stmt(List[2],Pref+'    ',True)
             return '%sif(%s) begin\n%s%send\n'%(Pref,Cond,Yes,Pref)
-        if List[0] in ['functioncall','funccall']:
+        if List[0] in ['functioncall','funccall','syscall']:
             res = map(pr_expr,List[2])
             res2 = ','.join(res)
             return '%s%s(%s);\n'%(Pref,List[1],res2)

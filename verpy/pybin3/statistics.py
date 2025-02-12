@@ -3,16 +3,18 @@ import sys,os
 import logs
 from module_class import support_set
 try:
-    import skywater as libx
+    import skywaterLib as libx
 except:
     libx = False
-
-try:
-    import cellLibrary as libx
-except:
-    libx = False
-
-
+print("LIBX",libx)
+if not libx:
+    try:
+        import cellLibrary as libx
+    except:
+        libx = False
+    
+def getGateCount(Cell):
+    return eval(libx.cellLib[Cell].properties['area'])
 
 def help_main(Env):
     Types = {}
@@ -31,7 +33,8 @@ def help_main(Env):
         Fout = open('%s/%s.insts' % (Dir,Module),'w')
         saveInstances(Module,Types,Fout)
         return
-    reportInstances(Types,Lib)
+    OneGate = getGateCount('scs130ms_nand2_2')
+    reportInstances(Types,Lib,OneGate)
 #    connectivity(Mod)
 
 def connectivity(Mod):
@@ -89,7 +92,7 @@ def gatherInstances(Mod,Types):
         if Type not in Types: Types[Type] = 0
         Types[Type]  += 1
 
-def reportInstances(Types,Lib):
+def reportInstances(Types,Lib,OneGate):
     LL = []
     for Type in Types.keys():
         LL.append((Types[Type],Type))
@@ -104,15 +107,15 @@ def reportInstances(Types,Lib):
     for ind,(Many,Type) in enumerate(LL):
         Area = 0
         if libx:
-            if Type in libx.CellLib:
-                Area = eval(libx.CellLib[Type].properties['area'])
+            if Type in libx.cellLib:
+                Area = eval(libx.cellLib[Type].properties['area'])
         Tot += Many
         Area0 = Many*Area
         TotArea += Area0
         logs.log_info('%5d        %6d  / %6d    %s'%(ind,Many,Tot,Type))
-        OneGate = Area / 2.8
-        ThisGates = OneGate * Many
+        Gate = Area / OneGate
+        ThisGates = Gate * Many
         TotGates += ThisGates
-        Fout.write('%d,%d,%d,%s,%.4f,%.3f,%.2f,%.2f,%.2f,%.2f,\n'%(ind,Many,Tot,Type,Area,Area0,TotArea,OneGate,ThisGates,TotGates))
+        Fout.write('%d,%d,%d,%s,%.4f,%.3f,%.2f,%.2f,%.2f,%.2f,\n'%(ind,Many,Tot,Type,Area,Area0,TotArea,Gate,ThisGates,TotGates))
     Fout.close()
         

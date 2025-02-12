@@ -12,6 +12,7 @@ class apbDriverLocal(logs.driverClass):
         self.Prefix = Prefix
         self.Nick = Nickname
         self.Backs = []
+        self.uart = False
 
     def onFinish(self):
         return
@@ -52,10 +53,14 @@ class apbDriverLocal(logs.driverClass):
         if self.Queue == []: return
         Head =  self.Queue.pop(0)
         if Head[0] == 'write':
+            if self.uart: self.uart(self.Nick,Head)
+            logs.log_info("APBAA %s %s ad=%s da=%s" % (self.Nick,Head[0],Head[1],Head[2]))
             self.force('xwrite',1)
             self.force('xaddr',Head[1])
             self.force('xwdata',Head[2])
         elif Head[0] == 'read':
+            if self.uart: self.uart(self.Nick,Head)
+            logs.log_info("APBAA %s %s ad=%s" % (self.Nick,Head[0],Head[1]))
             self.force('xread',1)
             self.force('xaddr',Head[1])
             self.reading = self.eval(Head[1])

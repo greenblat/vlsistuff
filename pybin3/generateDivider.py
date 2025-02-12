@@ -192,7 +192,10 @@ def addReg(Width,widIn,nameIn,nameOut,Fout):
             Fout.write('reg [%d:0] %s;\n'%(Width-1,nameOut))
         else:
             Fout.write('reg %s;\n'%(nameOut))
-    Fout.write('always @(posedge clk) if (en) %s <= %s;\n'%(nameOut,In))
+    if 'vld' in In:
+        Fout.write('always @(posedge clk) if (en) %s <= %s; else %s <= 0;\n'%(nameOut,In,nameOut))
+    else:
+        Fout.write('always @(posedge clk) if (en) %s <= %s;\n'%(nameOut,In))
 #    Fout.write('inu_ff #(.DATA_WIDTH(%d)) %s_reg (.clk(clk),.rst_n(rst_n),.en(en),.d(%s),.q(%s));\n'%(Width,nameOut,In,nameOut))
 
 def reportPipe(Macro,Depth):

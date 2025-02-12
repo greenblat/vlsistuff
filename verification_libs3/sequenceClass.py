@@ -643,6 +643,9 @@ class sequenceClass:
                     
             BB = makeExpr(wrds[1])
             Val = self.evalExpr(BB)
+            if type(Val) is str:
+                logs.log_error("EVALUNTIL %s %s %s   line %s" % (wrds[1],BB,Val,Lnum))
+                return True
             if not Val: 
                 self.Ptr -= 1
                 return True

@@ -1,0 +1,27 @@
+#! /bin/csh -f
+
+
+
+pylint $1 | grep -v "snake_case naming style" | \
+    grep -v C0116 | \
+    grep -v C0321 | \
+    grep -v C0209 | \
+    grep -v C0301 | \
+    grep -v C0325 | \
+    grep -v C0114 | \
+    grep -v W0123 | \
+    grep -v C0103 | \
+    grep -v W0122 | \
+    grep -v C0206 | \
+    grep -v C0123 | \
+    grep -v W0718 | \
+    grep -v W0702 | \
+    tee log.mypylint
+
+
+wc log.mypylint
+
+
+
+
+
