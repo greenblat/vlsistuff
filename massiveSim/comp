@@ -2,7 +2,7 @@
 #! /bin/csh -f
 /bin/rm tb.vvp
 iverilog    -o tb.vvp -g2012 \
-    minitb.v \
+    tb.v \
     rtl/agent.v \
     rtl/syncfifo.v \
     rtl/mul16x16.v \

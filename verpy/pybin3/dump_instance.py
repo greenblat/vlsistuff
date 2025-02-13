@@ -440,8 +440,9 @@ class driverMonitor(logs.driverClass):
     def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         if wrds==[]: return
-        elif (wrds[0] == doSomething):
-            do something more here
+        elif (wrds[0] == "doSomething"):
+            pass
+#            do something more here
         else:
             logs.log_error('action "%s" of not recognized')
 

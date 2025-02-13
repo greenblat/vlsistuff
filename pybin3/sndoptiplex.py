@@ -5,6 +5,11 @@ import datetime
 
 def main():
     Fname = sys.argv[1]
+    if os.path.is_dir(Fname):
+        os.system('tar czf tmp.tgz %s' % Fname)
+        return
+    print('not dir')
+    return
     ww = Fname.split('/')
     Dst = ww[-1]
     client = paramiko.SSHClient()
