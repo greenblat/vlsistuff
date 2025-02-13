@@ -4,8 +4,23 @@ import time
 import shutil
 import os, sys, select
 
+
+NewName = os.path.expanduser('~')
+if os.path.exists('%s/vlsistuff' % NewName):
+    sys.path.append('%s/vlsistuff/verification_libs3'%NewName)
+elif 'VLSISTUFF' in os.environ:
+    sys.path.append('%s/verification_libs3'%os.environ['VLSISTUFF'])
+else:
+    print("please set VLSISTUFF to where You cloned vlsistuff repository. like:  /home/cucu/softs/vlsistuff")
+    sys.exit()
+
+
+
+
+
 Fout = False
-simv_command = "vvp  -M/Users/iliagreenblat/vlsistuff/python-verilog/vpi3 -mvpi3_local  tb.vvp +PRM0=XXX"
+simv_command = "vvp  -MHOME/vlsistuff/python-verilog/vpi3 -mvpi3_local  tb.vvp +PRM0=XXX"
+simv_command = simv_command.replace('HOME',NewName)
 
 PROC = 0
 def simv_runner(proc_id, queue, response_queue):
