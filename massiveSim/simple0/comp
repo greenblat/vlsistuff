@@ -1,0 +1,10 @@
+#! /bin/csh -f
+
+
+iverilog -o tb.vvp -g2012 \
+    tb.v \
+    rtl/agent_flow.v \
+    rtl/syncfifo.v \
+    rtl/math_subsys.v \
+    rtl/divider_u128_u128_64.v \
+    rtl/mul16x16.v \

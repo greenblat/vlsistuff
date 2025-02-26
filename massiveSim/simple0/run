@@ -1,0 +1,31 @@
+#! /bin/csh -f
+/bin/rm a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 c0
+comp
+simvx a1 a0   &
+simvx a2 a1   &
+simvx a3 a2   &
+simvx a4 a3   &
+
+simvx a5 a4   &
+simvx a6 a5   &
+simvx a7 a6   &
+simvx a8 a7   &
+
+simvx a9 a8   &
+simvx b0 a9   &
+simvx b1 b0   &
+simvx b2 b1   &
+simvx b3 b2   &
+simvx b4 b3   &
+simvx b5 b4   &
+simvx b6 b5   &
+simvx b7 b6   &
+simvx b8 b7   &
+simvx b9 b8   &
+simvx c0 b9   &
+
+
+/bin/cp big_a0 a0
+
+
+

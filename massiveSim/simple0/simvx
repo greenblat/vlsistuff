@@ -1,0 +1,7 @@
+#! /bin/csh -f
+
+# setenv PYVERILOG "$*"
+vvp   -M/Users/iliagreenblat/vlsistuff/python-verilog/vpi3 -mvpi3_local -lver.log.$1 tb.vvp +PRM0=$1 +PRM1=$2
+
+
+
