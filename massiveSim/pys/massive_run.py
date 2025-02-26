@@ -34,7 +34,7 @@ def main():
     generateIngress(queue)
     playingNoc(queue,response_queue)
         
-    time.sleep(1)
+    time.sleep(5)
     for II in range(RUNNERS):
         queue[II].put('finish')
 
