@@ -13,6 +13,7 @@ class apbDriverLocal(logs.driverClass):
         self.Nick = Nickname
         self.Backs = []
         self.uart = False
+        self.Expected = {}
 
     def onFinish(self):
         return
@@ -29,6 +30,7 @@ class apbDriverLocal(logs.driverClass):
             Addr = wrds[1]
             Data = wrds[2]
             self.Queue.append(('write',Addr,Data))
+            self.Expected[eval(Addr)] = eval(Data)
         elif wrds[0] == 'read':
             Addr = wrds[1]
             Back = -1
@@ -41,8 +43,13 @@ class apbDriverLocal(logs.driverClass):
     def run(self):
         if self.reading>=0:
             if self.peek('xvalid') == 1:
-                logs.log_info("APBM %s %x %x" % (self.Prefix,self.reading,self.peek('xrdata')))
-                self.Backs.append(('read',self.peek('xrdata'),self.reading))
+                Rdata = self.peek('xrdata')
+                logs.log_info("APBM %s %x %x" % (self.Prefix,self.reading,Rdata))
+                self.Backs.append(('read',Rdata,self.reading))
+
+                if (Rdata>=0) and (self.reading in self.Expected):
+                    Exp = self.Expected[self.reading]
+                    logs.log_ensure(Rdata == Exp,"Read Back from APB exp=0x%x act=0x%x addr=0x%x" % (Exp,Rdata,self.reading))
                 self.reading = -1
 
         if self.peek('xidle') == 0: 

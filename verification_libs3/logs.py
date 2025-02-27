@@ -928,8 +928,11 @@ class driverClass:
         self.Status = [0,0,0,0]
         self.cycles = 0
         self.Forces = []
+        self.SeqObj = False
     def eval(self,Item):
-        return self.SeqObj.eval(Item)
+        if self.SeqObj:
+            return self.SeqObj.eval(Item)
+        return eval(Item)
 
     def fullname(self,Sig):
         Fname = '%s%s%s' % (self.Path,self.Prefix,Sig)
