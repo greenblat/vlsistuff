@@ -54,9 +54,14 @@ def getWid(Wid):
         return Val
     if type(Wid) is tuple:
         H,L = Wid
-        return H-L+1
+        HH = module_class.pr_expr(H)
+        HI = eval(HH)
+        return HI-L+1
     print("BADWID %s" % str(Wid))
     return 1
+
+
+
     
 HELPERS = '''
 module dffin #(parameter WID=1) ( input clk, input scanin, input din, output reg dout, output [WID-1:0] qout);
