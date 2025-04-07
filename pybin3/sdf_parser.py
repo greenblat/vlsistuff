@@ -5,6 +5,8 @@ sys.path.append('/Users/iliagreenblat/verification_libs3')
 import logs
 logs.Tb = False
 from skywater import CellLib
+def hashit(LL):
+    return str(LL)
 Dones = []
 class cellClass:
     def __init__(self,List):
@@ -78,6 +80,7 @@ class cellClass:
                 if (Up<0): Up = 0
                 if (Down<0): Down = 0
                 Cond = Item[1:-1]
+                Cond = list(map(hashit,Cond))
                 Cond = ''.join(Cond)
                 Expr = normalizeExpr(Cond)
                 self.Iopaths.append((Expr,Src,Dst,Up,Down))
@@ -250,7 +253,8 @@ def main():
     for Cell in CELLS:
         CELLS[Cell].create_vcode(Fout,Ftbl)
         CELLS[Cell].create_interconnects(Fic)
-
+    
+    maxDelays()
     Fout.close()
     Ftbl.close()
     Fic.close()
@@ -270,6 +274,30 @@ def main():
         Cell = prep(Cell)
         Fout.write('INSTANCES[%s] =  %s(%s,table_%s)\n' % (Cell,Type,Cell,Cell.replace('"','')))
     Fout.close()        
+
+
+def maxDelays():
+    DLY = {}
+    for Cell in CELLS:
+        Path = CELLS[Cell].Iopaths
+        Dly = 0
+        for _,_,X,Dly0,Dly1 in Path:
+            Max  = max(Dly0,Dly1)
+            Dly = max(Dly,Max)
+            if (Cell,X) in DLY:
+                Was = DLY[(Cell,X)]
+                if Dly>Was:
+                    DLY[(Cell,X)] = Dly
+            else:
+                DLY[(Cell,X)] = Dly
+    LL = []
+    for  Cell,X in DLY:
+        Dly = DLY[(Cell,X)] 
+        LL.append((Dly,Cell,X))
+    LL.sort()
+    for Dly,Cell,X in LL:
+        print(">>>>>>",Dly,Cell,X)
+
 
 
 def generateCell(Type,Fout):

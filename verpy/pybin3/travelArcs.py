@@ -145,6 +145,7 @@ def travelFW(Net,Mod,instPath,netPath):
     Src = ppPath(netPath[0])
     Len = len(netPath)
     Here = ppPath(instPath + [Net])
+    print(">>>",Net,Mod,Here)
     if ((Here,Src) in DONES)and(DONES[(Here,Src)]>=Len):
         return
     if Net == 'finishing':

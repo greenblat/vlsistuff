@@ -575,7 +575,7 @@ void vpit_RegisterTfs( void )
   { vpiSysTask, 0, "$python", vpit_python, NULL, NULL,NULL },
   { vpiSysTask, 0, "$import", vpit_import, NULL, NULL,NULL },
   { vpiSysTask, 0, "$basemodule", vpit_basemodule, NULL, NULL,NULL },
-  { vpiSysFunc, 0, "$pythonf", vpit_pythonf, NULL, 64,NULL },
+  { vpiSysFunc, 0, "$pythonf", vpit_pythonf, NULL, NULL,NULL },
   { 0, 0, NULL, NULL, NULL, NULL, NULL }
 
 
@@ -1450,16 +1450,18 @@ PyMODINIT_FUNC PyInit_veri(void)
 // If You get it wrong, import random will fail.
 
 void start_py(char *basemodule) {
-    dlopen("libpython3.8.dylib",RTLD_LAZY | RTLD_GLOBAL);
-    dlopen("libpython3.9.dylib",RTLD_LAZY | RTLD_GLOBAL);
-    dlopen("libpython3.10.dylib",RTLD_LAZY | RTLD_GLOBAL);
-    dlopen("libpython3.8.so",RTLD_LAZY | RTLD_GLOBAL);
-    dlopen("libpython3.9.dylib",RTLD_LAZY | RTLD_GLOBAL);
-    dlopen("libpython3.9.so",RTLD_LAZY | RTLD_GLOBAL);
-    dlopen("libpython3.10.dylib",RTLD_LAZY | RTLD_GLOBAL);
-    dlopen("libpython3.10.so",RTLD_LAZY | RTLD_GLOBAL);
+//     dlopen("libpython3.8.dylib",RTLD_LAZY | RTLD_GLOBAL);
+//     dlopen("libpython3.9.dylib",RTLD_LAZY | RTLD_GLOBAL);
+//     dlopen("libpython3.10.dylib",RTLD_LAZY | RTLD_GLOBAL);
+//     dlopen("libpython3.8.so",RTLD_LAZY | RTLD_GLOBAL);
+//     dlopen("libpython3.9.dylib",RTLD_LAZY | RTLD_GLOBAL);
+//     dlopen("libpython3.9.so",RTLD_LAZY | RTLD_GLOBAL);
+//     dlopen("libpython3.10.dylib",RTLD_LAZY | RTLD_GLOBAL);
+//     dlopen("libpython3.10.so",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.11.dylib",RTLD_LAZY | RTLD_GLOBAL);
     dlopen("libpython3.11.so",RTLD_LAZY | RTLD_GLOBAL);
+    dlopen("libpython3.13.dylib",RTLD_LAZY | RTLD_GLOBAL);
+    dlopen("libpython3.13.so",RTLD_LAZY | RTLD_GLOBAL);
     PyImport_AppendInittab("veri", PyInit_veri);
     Py_Initialize();
     PyRun_SimpleString("import veri; print(dir(veri));\n");

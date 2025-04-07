@@ -121,7 +121,7 @@ def set_right_assign(wrds):
         Db.right_assign=['subbus',Db.right_assign,Db.WidthH,Db.WidthL]
     elif Db.WidthH:
         Db.right_assign=['subbit',Db.right_assign,Db.WidthH]
-    print('HARDASS',Db.assign,Db.right_assign)
+#    print('HARDASS',Db.assign,Db.right_assign)
     Db.Current.add_hard_assign(Db.assign,Db.right_assign)
 
 def wait_line0(wrds):
@@ -236,7 +236,7 @@ def finish_conn(wrds):
     Db.Current.add_conn(Db.Inst,Db.Pin,Conn)
 
 def add_wire_assign(wrds):
-    print('HARDASS2',Db.current_wire,wrds[0])
+#    print('HARDASS2',Db.current_wire,wrds[0])
     Db.Current.add_hard_assign(Db.current_wire,wrds[0])
 
 def add_wire(wrds):
@@ -345,6 +345,7 @@ conn2    ubin        conn3 set_conn0
 conn2    hex         conn3 set_conn0
 conn2    uhex        conn3 set_conn0
 conn2    dig         conn3 set_conn0
+conn2    number      conn3 set_conn0
 conn2    )           inst3 finish_conn_empty
 conn2    {           curly0 set_state_conn3 push
 conn3    )           inst3 finish_conn
@@ -380,6 +381,7 @@ assign2  uhex        assign3  remember_assign
 assign2  hex         assign3  remember_assign
 assign2  token       assign3  remember_assign
 assign2  string       assign3  remember_assign
+assign2  number       assign3  remember_assign
 assign2  !           assign3  remember_assign
 assign2  ~           assign3  remember_assign
 assign2  (           assign3  remember_assign

@@ -100,8 +100,9 @@ class module_class:
             self.add_sig(Name,Dir,Wid)
     def add_sig(self,Name,Dir,Wid):
         if Wid==1: Wid=0
+        if (Name == '&&'): breakIt() 
         if (type(Name) is str)and('{' in Name):
-            return
+            return Name
         if (type(Name) is str)and('[' in Name)and (Name[0] != '\\'):
             BB = parseBus(Name)
             if len(BB) == 3:
@@ -111,15 +112,19 @@ class module_class:
                 return self.add_sig(BB[0],Dir,('packed',(BB[1],BB[2]),(BB[3],BB[4])))
             else:
                 logs.log_error('add_sig got %d %s' % (len(BB),BB))
+                return BB
 
         if Name=='':
-            Name = 'net_%d'%self.inventedNets
+            Name = 'net_%dx'%self.inventedNets
+#            if Name == 'net_3x':  breakIt();
             self.inventedNets += 1
             self.add_sig(Name,Dir,Wid)
+#            print("ADDSIG",Name)
             return Name
         if (type(Name) is str)and(Name[0] in '0123456789'): return Name
         if Dir not in ['input wire','output wire','wire','reg','input','output','output reg','integer','inout','tri0','tri1','output reg signed','wire signed','signed wire','reg signed','output signed','input logic','output logic','logic','genvar','output signed','input signed','wire signed','inout wire']:
             logs.log_error('add_sig got of %s dir="%s"'%(Name,Dir))
+            return Name
             
         if Dir=='genvar':
             self.genvars[Name]=True
@@ -131,28 +136,29 @@ class module_class:
             logs.log_info('repeat??')
             traceback.print_stack(None,None,logs.Flogs[0])
             sys.exit()
-            return
+            return Name
 
 
         if type(Name) is list:
             if Name[0] == 'subbus':
                 self.add_sig(Name[1],Dir,(eval(str(Name[2])),eval(str(Name[3]))))
+                return Name
             elif Dir in ['reg','wire','logic']:
                 for Sig in Name:
                     self.add_sig(Sig,Dir,Wid)
             else:
                 logs.log_error('add_sig got list: %s %s %s' % (str(Name),Dir,Wid))
-            return
+            return Name
         if type(Name) is tuple:
-            return
+            return Name
         if (Dir=='wire')and(Name in self.nets)and(Wid==0):
-            return
+            return Name
         if (Dir=='wire')and(Name not in self.nets)and(type(Wid) is int):
             if Wid<2: 
                 self.nets[Name] = ('wire',0)
             else:
                 self.nets[Name] = ('wire',(Wid-1,0))
-            return
+            return Name
         if (Dir=='reg')and(Name in self.nets):
             Pdir,Pwid=self.nets[Name]
             if (type(Wid) is tuple)and(type(Pwid) is tuple):
@@ -168,10 +174,11 @@ class module_class:
                logs.log_error('module %s sig %s got reg but was=%s'%(self.Module,Name,Pdir))
                return
             self.nets[Name]='output reg',Wid
-            return
+            return Name
         if Name in self.nets:
             WasDir,WasWid = self.nets[Name]
             logs.log_warning('net %s defined twice? was=%s,%s  now=%s,%s'%(Name,WasDir,WasWid,Dir,Wid))
+            return Name
         else:
             WasDir='wire'
             WasWid=0
@@ -199,7 +206,7 @@ class module_class:
             logs.log_err('add_sig %s (%s) got width %s'%(Name,Dir,Wid))
             traceback.print_stack(None,None,logs.Flogs[0])
 
-
+        return Name
 
     def add_mem(self,Name,Dir,Wid,Wid2):
         if type(Name) is list:
@@ -716,6 +723,10 @@ class module_class:
             self.check_net_def(list(Net))
             return
         if type(Net) is list:
+            if Net[0]=='bus':
+                for NN in Net[1:]:
+                    self.check_net_def(NN)
+                return                    
             if Net[0]=='dotted':
                 return
             if Net[0]=='define':
@@ -1063,7 +1074,7 @@ class module_class:
                         else:
                             self.netsTable[Sigx].append((Inst,Type,Pin))
          
-    def compute_int(self,Item):
+    def compute_int(self,Item,Shout=True):
         if type(Item) is int:
             return Item
         if type(Item) is str:
@@ -1071,31 +1082,38 @@ class module_class:
                 return int(Item)
             if Item in self.parameters:
                 X = self.parameters[Item]
-                return self.compute_int(X)
+                return self.compute_int(X,Shout)
             if Item in self.localparams:
                 X = self.localparams[Item]
-                return self.compute_int(X)
+                return self.compute_int(X,Shout)
     
         if type(Item) is list:
             if Item[0] in ['-','+','*','/','==']:
-                A = self.compute_int(Item[1])
-                B = self.compute_int(Item[2])
+                A = self.compute_int(Item[1],Shout)
+                B = self.compute_int(Item[2],Shout)
                 try:
                     return int(eval('%s%s%s'%(A,Item[0],B)))
                 except:
                     return [Item[0],A,B]
             if Item[0] in ['dig']:
-                return self.compute_int(Item[2])
+                return self.compute_int(Item[2],Shout)
             if Item[0] in ['functioncall']:
                 if Item[1]=='$clog2':
-                    Val = self.compute_int(Item[2][0])
+                    Val = self.compute_int(Item[2][0],Shout)
                     Wid = len(bin(int(Val)+1))-2
                     return Wid
             if Item[0] == 'subbit':
                 return Item
-        logs.log_err('compute_int failed on "%s" %s'%(str(Item),self.Module),False)
-        traceback.print_stack(None,None,logs.Flogs[0])
-        return 0
+            if Item[0] == 'hex':
+                return int(Item[2],16)
+            if Item[0] == 'dig':
+                return int(Item[2],10)
+            if Item[0] == 'bin':
+                return int(Item[2],2)
+        if Shout:
+            logs.log_err('compute_int failed on "%s" %s'%(str(Item),self.Module),False)
+            traceback.print_stack(None,None,logs.Flogs[0])
+        return 'str'
 
 
 
@@ -1642,6 +1660,29 @@ class instance_class:
             Fout.write('%s);%s\n'%(try2,Comment))
 
 
+def expr_width(Expr,Mod):
+    if type(Expr) is str:
+        if Expr in Mod.nets:
+            return Mod.sig_width(Expr)
+        else:
+            logs.log_error('expr_width %s' % str(Expr))
+            return 1
+    if type(Expr) is int: return 32
+
+    if type(Expr) is list:
+        if Expr[0] in ['hex','dig','bin']: return Expr[1]
+        if Expr[0] == 'bus': return len(Expr)-1
+        if Expr[0] == 'subbus':
+            Hi = Expr[2][0]
+            Lo = Expr[2][1]
+            return  Hi-Lo+1
+
+    logs.log_error('expr_width %s' % str(Expr))
+    return 1
+
+
+
+
 
 
 def pr_width_param(Dir):
@@ -2036,6 +2077,9 @@ def pr_expr(What):
         return pr_replace(What)
     if not What:
         return ''
+    if What[0]=='bus':
+        X = ['curly']+What[1:]
+        return pr_expr(X)
     if What[0]=='wire':
         return What[1]
     if (len(What)>1)and(What[1]=='token'):
@@ -2471,3 +2515,83 @@ def simplestr(Txt):
     X = X.replace('~','_')
     X = X.replace('.','_')
     return X
+
+def breakIt():
+    print("BREAK %d %d %d" % 'no')
+
+def splitBits(Expr,Mod,Mwid=64):
+    if type(Expr) is int: 
+        Res = [] 
+        for ii in range(Mwid):
+            X = (Expr>>ii) & 1
+            if (X==1):
+                Res.append('vcc')
+                Mod.add_sig('vcc','input',0)
+            else:
+                Res.append('gnd')
+                Mod.add_sig('gnd','input',0)
+        Res.reverse()    
+        return Res
+
+    if type(Expr) is str:
+        if Expr in Mod.parameters:
+            Val = splitBits(Mod.parameters[Expr],Mod)
+            return Val
+        if Expr in Mod.localparams:
+            Val = splitBits(Mod.localparams[Expr],Mod)
+            return Val
+
+        if Expr in Mod.nets:
+            _,Wid = Mod.nets[Expr]
+            if Wid in [0,1,'0','1']:
+                return [Expr]
+            if type(Wid) is int:
+                print("SPLIT ERROR",Expr)
+                return [Expr]
+            if type(Wid) is tuple:
+                if Wid[0] == 'packed':
+                    Hi1 = Mod.compute_int(Wid[1][0])
+                    Lo1 = Mod.compute_int(Wid[1][1])
+                    Hi = max(Hi1,Lo1)
+                    Lo = min(Hi1,Lo1)
+                    
+                    Hi2 = Mod.compute_int(Wid[2][0])
+                    Lo2 = Mod.compute_int(Wid[2][1])
+
+                    Hi_ = max(Hi2,Lo2)
+                    Lo_ = min(Hi2,Lo2)
+                    Res = ['bus']
+                    while Lo2<= Hi2:
+                        HH = Hi
+                        while Lo_<= HH:
+                            Res.append('%s[%s][%s]' % (Expr,Hi2,HH))
+                            HH -= 1
+                        Hi2 -= 1
+                    return Res
+                else:
+                    Hi,Lo = Wid
+                    Hi = Mod.compute_int(Hi)
+                    Lo = Mod.compute_int(Lo)
+                    Res = ['bus']
+                    while Lo <= Hi:
+                        Sig = '%s[%s]' % (Expr,Hi)
+                        Res.append(Sig)
+                        Hi -= 1
+                    return Res
+            logs.log_error('splitBits %s failed' % str(Expr))
+
+    if type(Expr) is list:
+        if len(Expr) == 1:
+            return splitBits(Expr[0],Mod,Mwid)
+        if Expr[0] == 'subbit':
+            return ['%s[%s]' % (Expr[1],Expr[2])]
+        if Expr[0] == 'curly':
+            return Expr[1:]
+    if type(Expr) is str: return [Expr]
+
+    print("ERROR EXPR SPLIT",Expr)
+    breakIt()
+    return [Expr]
+
+
+    

@@ -10,8 +10,10 @@ LOGS = []
 def main():
     loadup()
     buildHierarchy()
+    print("HLDS",list(HLDS.keys()))
     for Mod in HLDS:
         Hld = HLDS[Mod]
+        print("HLD TERMS",Hld.TERMS)
         for Reg in Hld.TERMS:
             travel(Hld,Reg,[(Hld.Name,Reg)])
 
@@ -23,7 +25,7 @@ def main():
 
 
 def travel(Hld,Net,Sofar):
-#    logs.log_info('%s %s    %s'%(Hld.Name,Net,Sofar))
+    logs.log_info('%s %s    %s'%(Hld.Name,Net,Sofar))
     if len(Sofar)>1:
         Head = Sofar[0] 
         if Head in Sofar[1:]:

@@ -11,6 +11,7 @@ class vcdoutClass:
         self.Wids = {}
         self.Time = 0
         self.started = False
+        self.were = False
 
     def action(self,Txt,Orig=[]):
         List = Txt.split()
@@ -71,6 +72,7 @@ class vcdoutClass:
         self.File.close()
 
     def force(self,Sig,Value):
+        self.were = True
         if Sig in self.Wids:
             Wid = self.Wids[Sig]
         else:
@@ -83,16 +85,21 @@ class vcdoutClass:
             elif Value == 'z':
                 VV = 'z'*Wid
             else:
-                VV = bin(eval(Value))[2:]
+                VV = bin(eval(str(Value)))[2:]
             self.File.write('b%s %s\n' % (VV,self.Codes[Sig]))
     def atime(self,Value):
         iValue = eval(Value)
         self.File.write('#%s\n' % (iValue))
         self.Time = iValue
     def rtime(self,Value):
-        iValue = eval(Value)
+        if type(Value) is int:
+            iValue = Value
+        else:
+            iValue = eval(Value)
         self.Time += iValue
-        self.File.write('#%s\n' % (self.Time))
+        if self.were:
+            self.File.write('#%s\n' % (self.Time))
+        self.were = False
 
 VCD_HEADER = '''
 $date

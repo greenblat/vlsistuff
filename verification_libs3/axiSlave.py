@@ -373,8 +373,9 @@ class axiSlaveClass:
                 self.force('bvalid',1)
         else:
             self.force('bvalid',0)
-
+        logs.log_info('AWQUEUE len=%d awvalid=%d awready=%d' % (len(self.awqueue),self.peek('awvalid'),self.Awready))
         if len(self.awqueue)>1000:
+            logs.log_warning("AWQUEUE is very long")
             self.force('awready',self.Awready)
         elif self.Passive and (self.peek('awready')==0):
             pass

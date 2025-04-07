@@ -64,6 +64,7 @@ def help_main(Env):
 
 def buildOne(Mod):
     builds(Mod)
+    print("DRIVEN",DRIVEN)
     if not os.path.exists('arcs'):
         os.mkdir('arcs')
     out = open('arcs/%s.py'%Mod.Module,'w')
@@ -182,22 +183,30 @@ def costIt(Dst,Src):
             COSTS[(D,S)] = Cost
 
 
-def adds(Dst,Src,Nons):
+def adds(Dst,Src,Nons,Where):
     SetS = support_set(Src,False)
-    SetD = support_set(Dst,False)
+    if Dst[0] == 'subbit':
+        SetD = support_set(Dst[1],False)
+    else:
+        SetD = support_set(Dst,False)
+    print("ADDS dst=",Dst,' src=',Src,' setS',SetS,'setD',SetD)
     SetS = cleanNons(SetS,Nons+SetD)
     Cost = costIt(Dst,Src)
     for Out in SetD:
         if Out not in ARCSBK:
             ARCSBK[Out] = []
         for In in SetS:
-            if In not in ARCSBK[Out]: ARCSBK[Out].append(In)
+            if In not in ARCSBK[Out]: 
+                ARCSBK[Out].append(In)
+                print("ADDS0",Where,'out=',Out,'in=',In)
 
     for In in SetS:
         if In not in ARCSFW:
             ARCSFW[In] = []
         for Out in SetD:
-            if Out not in ARCSFW[In]: ARCSFW[In].append(Out)
+            if Out not in ARCSFW[In]: 
+                ARCSFW[In].append(Out)
+                print("ADDS1",Where,'out=',Out,'in=',In)
 
 def cleanNons(Lst,Nons):
     for Non in Nons:
@@ -214,6 +223,26 @@ GATELEVEL['EFX_FF'] = [('CE', 'D'), ('Q'),('CLK','SR')]
 GATELEVEL['EFX_GBUFCE'] = [('CE', 'I'), ('O')]
 GATELEVEL['EFX_RAM_5K'] = [('RADDR', 'RE', 'WADDR','WE','WDATA','WCLKE'),('RDATA'),('RCLK','WCLK')]
 
+
+GATELEVEL['bufx'] = [('a'),('x')]
+GATELEVEL['inv'] = [('a'),('x')]
+GATELEVEL['or2'] = [('a','b'),('x')]
+GATELEVEL['or3'] = [('a','b','c'),('x')]
+GATELEVEL['or4'] = [('a','b','c','d'),('x')]
+GATELEVEL['and2'] = [('a','b'),('x')]
+GATELEVEL['and3'] = [('a','b','c'),('x')]
+GATELEVEL['and4'] = [('a','b','c','d'),('x')]
+GATELEVEL['adder'] = [('a','b'),('x')]
+GATELEVEL['multiplier'] = [('a','b'),('x')]
+GATELEVEL['subtractor'] = [('a','b'),('x')]
+GATELEVEL['mux2'] = [('a','b','sel'),('x')]
+GATELEVEL['select'] = [('a','b','sel'),('x')]
+GATELEVEL['select_bus'] = [('a','b','sel'),('x')]
+GATELEVEL['select_bus_lit'] = [('a','sel'),('x')]
+GATELEVEL['comparator'] = [('a','b'),('x')]
+GATELEVEL['comparator_lit'] = [('a'),('x')]
+GATELEVEL['flipflop'] = [('d','en'),('q'),('clk','rst_n')]
+
 if os.path.exists('gatelevel.py'):
     print('importing gatelevel')
     from gatelevel import GATELEVEL
@@ -228,18 +257,22 @@ def builds(Mod):
 
 
     for Dst,Src,_,_ in Mod.hard_assigns:
-        adds(Dst,Src,Params)
+        adds(Dst,Src,Params,'hard_assign')
                 
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
+        print("INST",Obj.Type,Obj.Type in GATELEVEL)
         if Obj.Type in GATELEVEL:
             GL = GATELEVEL[Obj.Type]
+            print("GL",Obj.Type,len(GL),GL,Obj.Type in GATELEVEL)
             if len(GL) == 2:
                 Outs,Inps = whatConnected(Obj,GL[1]),whatConnected(Obj,GL[0])
-                adds(Outs,Inps,[])
+                print(">0>>>",Obj.Type,Outs,Inps)
+                adds(Outs,Inps,[],'instance_glv')
                 driven(Outs,Inst,Obj.Type)
             elif len(GL) == 3:
                 Outs,Inps = whatConnected(Obj,GL[1]),whatConnected(Obj,GL[0])
+                print(">1>>>",Obj.Type,Outs,Inps)
                 for D in Inps: 
                     if D not in TERMS: 
                         TERMS.append(D)
@@ -276,7 +309,7 @@ def whatConnected(Obj,Pins):
     for Pin in Pins:
         if Pin in Obj.conns:
             Sig = Obj.conns[Pin]
-            if Sig[0] not in ['0','1']:
+            if Sig[0] not in ['0','1','vcc','gnd']:
                 Res.append(Sig)
     return Res
 
@@ -319,8 +352,9 @@ def travelAlw(Alw,Cond,Params,Mod,Clk):
             return
 
         if Alw[0]=='<=':
-            adds(Alw[1],Alw[2],Params)
-            adds(Alw[1],Cond,Params)
+            Str = '<= %s %s' % (Alw[1],Alw[2])
+            adds(Alw[1],Alw[2],Params,Str)
+            adds(Alw[1],Cond,Params,'<=cond')
             SetD = support_set(Alw[1],False)
             for D in SetD: 
                 if D not in TERMS: 
@@ -329,8 +363,8 @@ def travelAlw(Alw,Cond,Params,Mod,Clk):
             return
 
         if Alw[0]=='=':
-            adds(Alw[1],Alw[2],Params)
-            adds(Alw[1],Cond,Params)
+            adds(Alw[1],Alw[2],Params,'=')
+            adds(Alw[1],Cond,Params,'=cond')
             return
 
         if Alw[0]=='functioncall':
