@@ -16,8 +16,9 @@ def main():
     Top = Way[-1][:-3]
     Topo = importlib.import_module(Top)
     Modules[Top] = Topo.hld
-    print("DIRDIR",Top,dir(Topo.hld))
+#    print("DIRDIR",Top,dir(Topo.hld))
     loadDeep([Top],[Top])
+    logs.log_info("LOADED %s" % list(Modules.keys()))
     createMissings()
     Instances[Top] = Top
     instancesDeep([Top],[Top])
@@ -96,12 +97,12 @@ def instancesDeep(Mods,Path):
 
 def scanDeep(Mod,Path):
     Hld = Modules[Mod]
-    for Term in Hld.TERMS:
+    for Term in Hld.STARTS:
         if Term in Hld.CLOCKED:
             Clk = Hld.CLOCKED[Term]
             CLOCKED['.'.join(Path+[Term])] = Clk
 
-        travelFW(Term,Mod,Path,[ Path+[Term]])
+        travelFW(Term,Mod,Path,[ Path+[Term+ str(Hld.STARTS[Term])]])
     if len(Path)==1:
         for Term in Hld.INPUTS:
             travelFW(Term,Mod,Path,[ Path+[Term]])
@@ -116,6 +117,7 @@ def printPath(Kind,Mod,Path):
         logs.setVar('longest',len(Path))
     Start = '.'.join(Path[0])
     End   = '.'.join(Path[-1])
+    if Start == End: return
     StartClk = 'N'
     EndClk = 'N'
     if Start in CLOCKED: StartClk = CLOCKED[Start]
@@ -124,10 +126,18 @@ def printPath(Kind,Mod,Path):
     for PP in Path:
         X = '.'.join(PP)
         Add = ''
+        if len(PP)==2:
+            Sig = PP[1]
+            Where = PP[0]
+            if Where in Modules:
+                if Sig in Modules[Where].DRIVEN:
+                    Add = Modules[Where].DRIVEN[Sig]
+
         if len(PP)>=3:
             Sig = PP[-1]
             Where = PP[-3]
             if Where in Modules:
+                print("Where ",Where,Sig, Sig in Modules[Where].DRIVEN)
                 if Sig in Modules[Where].DRIVEN:
                     Add = Modules[Where].DRIVEN[Sig]
 #            print("XXXX",Sig,Where, Sig in Modules[Where].DRIVEN)
@@ -145,7 +155,6 @@ def travelFW(Net,Mod,instPath,netPath):
     Src = ppPath(netPath[0])
     Len = len(netPath)
     Here = ppPath(instPath + [Net])
-    print(">>>",Net,Mod,Here)
     if ((Here,Src) in DONES)and(DONES[(Here,Src)]>=Len):
         return
     if Net == 'finishing':
@@ -180,11 +189,13 @@ def travelFW(Net,Mod,instPath,netPath):
             Keyx = (instPath[-1],Net)
             if Net in Hld.TERMS:
                 pass
-            elif Keyx in upHld.instPinTable:
+            if Keyx in upHld.instPinTable:
                 upSig = upHld.instPinTable[Keyx]
                 if upSig == 'rst_nn':
                     print('RST_NN',upSig,Type,instPath[:-1],upNetPath)
                 travelFW(upSig,Type,instPath[:-1],upNetPath)
+        elif Net in Hld.TERMS:
+            printPath('PATHT',Mod,netPath+[instPath+[Net]])
         else:
             printPath('PATH1',Mod,netPath+[instPath+[Net]])
         return
@@ -193,7 +204,7 @@ def travelFW(Net,Mod,instPath,netPath):
     Arcs = Hld.ARCSFW[Net]
     for End in Arcs:
         if End in Hld.TERMS:
-            printPath('PATH2',Mod,netPath+[instPath+[End]])
+            printPath('PATH2',Mod,netPath+[instPath+[End+str(Hld.DRIVEN[End])]]+[instPath+[End+str(Hld.TERMS[End])]])
         if (End in Hld.OUTPUTS) and (len(instPath)==1):
             printPath('PATH3',Mod,netPath+[instPath+[End]])
         elif (End in Hld.OUTPUTS) and (len(instPath)>1):

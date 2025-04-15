@@ -2348,7 +2348,7 @@ def relax_name(Name,Simple=True):
     return Name        
 
 def hashit(End):    
-    if type(End) is list:
+    if (type(End) is list) or (type(End) is tuple):
         if End[0]=='subbit': return pr_expr(End)
         if End[0]=='subbus': return pr_expr(End)
         for X in End:
@@ -2557,16 +2557,16 @@ def splitBits(Expr,Mod,Mwid=64):
                     
                     Hi2 = Mod.compute_int(Wid[2][0])
                     Lo2 = Mod.compute_int(Wid[2][1])
-
                     Hi_ = max(Hi2,Lo2)
                     Lo_ = min(Hi2,Lo2)
+
                     Res = ['bus']
-                    while Lo2<= Hi2:
-                        HH = Hi
+                    while Lo<= Hi:
+                        HH = Hi_
                         while Lo_<= HH:
-                            Res.append('%s[%s][%s]' % (Expr,Hi2,HH))
+                            Res.append('%s[%s][%s]' % (Expr,Hi,HH))
                             HH -= 1
-                        Hi2 -= 1
+                        Hi -= 1
                     return Res
                 else:
                     Hi,Lo = Wid
@@ -2580,11 +2580,30 @@ def splitBits(Expr,Mod,Mwid=64):
                     return Res
             logs.log_error('splitBits %s failed' % str(Expr))
 
-    if type(Expr) is list:
+    if (type(Expr) is tuple) or (type(Expr) is list):
         if len(Expr) == 1:
             return splitBits(Expr[0],Mod,Mwid)
-        if Expr[0] == 'subbit':
-            return ['%s[%s]' % (Expr[1],Expr[2])]
+        if Expr[0] == 'bus':
+            return Expr[1:]
+        elif Expr[0] == 'subbit':
+            Dir,Wid = Mod.nets[Expr[1]]
+            if type(Wid) is tuple:
+                if Wid[0] == 'packed':
+                    print("EXPR",Expr,Wid)
+                    Hi2 = Mod.compute_int(Wid[2][0])
+                    Lo2 = Mod.compute_int(Wid[2][1])
+                    Hi_ = max(Hi2,Lo2)
+                    Lo_ = min(Hi2,Lo2)
+
+                    Res = ['bus']
+                    while Lo_<= Hi_:
+                        Res.append('%s[%s][%s]' % (Expr[1],Expr[2],Hi_))
+                        Hi_ -= 1
+                    return Res
+                elif len(Wid) == 2:
+                    return ['%s[%s]' % (Expr[1],Expr[2])]
+                else:
+                    print("ERROR! %s %s" % (Expr,Wid))
         if Expr[0] == 'curly':
             return Expr[1:]
     if type(Expr) is str: return [Expr]

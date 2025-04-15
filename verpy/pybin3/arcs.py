@@ -36,7 +36,8 @@ ARCSBK = {}
 ARCSFW = {}
 DRIVEN = {}
 CONNS = []
-TERMS = []
+TERMS = {}
+STARTS = {}
 CLOCKED = {}
 INPUTS = []
 OUTPUTS = []
@@ -53,7 +54,7 @@ def help_main(Env):
         ARCSBK = {}
         ARCSFW = {}
         CONNS = []
-        TERMS = []
+        TERMS = {}
         INPUTS = []
         OUTPUTS = []
         SONS = []
@@ -64,12 +65,10 @@ def help_main(Env):
 
 def buildOne(Mod):
     builds(Mod)
-    print("DRIVEN",DRIVEN)
     if not os.path.exists('arcs'):
         os.mkdir('arcs')
     out = open('arcs/%s.py'%Mod.Module,'w')
     out.write(STRING.replace('NAME',Mod.Module))
-    out.write('hld.ARCSBK = %s\n'%pprint.pformat(ARCSBK))
     out.write('hld.ARCSFW = %s\n'%pprint.pformat(ARCSFW))
     out.write('hld.CONNS = %s\n'%pprint.pformat(CONNS))
     out.write('hld.TERMS = %s\n'%pprint.pformat(TERMS))
@@ -78,7 +77,9 @@ def buildOne(Mod):
     out.write('hld.OUTPUTS = %s\n'%pprint.pformat(OUTPUTS))
     out.write('hld.SONS = %s\n'%pprint.pformat(SONS))
     out.write('hld.COSTS = %s\n'%pprint.pformat(COSTS))
+    out.write('hld.STARTS = %s\n'%pprint.pformat(STARTS))
     out.write('hld.DRIVEN = %s\n'%pprint.pformat(DRIVEN))
+    out.write('hld.ARCSBK = %s\n'%pprint.pformat(ARCSBK))
     out.close()
 
 def getCosts(Src,Deep):
@@ -189,7 +190,7 @@ def adds(Dst,Src,Nons,Where):
         SetD = support_set(Dst[1],False)
     else:
         SetD = support_set(Dst,False)
-    print("ADDS dst=",Dst,' src=',Src,' setS',SetS,'setD',SetD)
+#    print("ADDS dst=",Dst,' src=',Src,' setS',SetS,'setD',SetD)
     SetS = cleanNons(SetS,Nons+SetD)
     Cost = costIt(Dst,Src)
     for Out in SetD:
@@ -198,7 +199,7 @@ def adds(Dst,Src,Nons,Where):
         for In in SetS:
             if In not in ARCSBK[Out]: 
                 ARCSBK[Out].append(In)
-                print("ADDS0",Where,'out=',Out,'in=',In)
+#                print("ADDS0",Where,'out=',Out,'in=',In)
 
     for In in SetS:
         if In not in ARCSFW:
@@ -206,7 +207,7 @@ def adds(Dst,Src,Nons,Where):
         for Out in SetD:
             if Out not in ARCSFW[In]: 
                 ARCSFW[In].append(Out)
-                print("ADDS1",Where,'out=',Out,'in=',In)
+#                print("ADDS1",Where,'out=',Out,'in=',In)
 
 def cleanNons(Lst,Nons):
     for Non in Nons:
@@ -226,22 +227,32 @@ GATELEVEL['EFX_RAM_5K'] = [('RADDR', 'RE', 'WADDR','WE','WDATA','WCLKE'),('RDATA
 
 GATELEVEL['bufx'] = [('a'),('x')]
 GATELEVEL['inv'] = [('a'),('x')]
+GATELEVEL['xor2'] = [('a','b'),('x')]
 GATELEVEL['or2'] = [('a','b'),('x')]
 GATELEVEL['or3'] = [('a','b','c'),('x')]
 GATELEVEL['or4'] = [('a','b','c','d'),('x')]
 GATELEVEL['and2'] = [('a','b'),('x')]
 GATELEVEL['and3'] = [('a','b','c'),('x')]
 GATELEVEL['and4'] = [('a','b','c','d'),('x')]
-GATELEVEL['adder'] = [('a','b'),('x')]
-GATELEVEL['multiplier'] = [('a','b'),('x')]
-GATELEVEL['subtractor'] = [('a','b'),('x')]
-GATELEVEL['mux2'] = [('a','b','sel'),('x')]
-GATELEVEL['select'] = [('a','b','sel'),('x')]
-GATELEVEL['select_bus'] = [('a','b','sel'),('x')]
-GATELEVEL['select_bus_lit'] = [('a','sel'),('x')]
-GATELEVEL['comparator'] = [('a','b'),('x')]
-GATELEVEL['comparator_lit'] = [('a'),('x')]
-GATELEVEL['flipflop'] = [('d','en'),('q'),('clk','rst_n')]
+
+COMPLEX = {}
+COMPLEX['adder'] = [('a','b'),('x')]
+COMPLEX['right'] = [('a','b'),('x')]
+COMPLEX['shiftright'] = [('a','b'),('x')]
+COMPLEX['shiftleft'] = [('a','b'),('x')]
+COMPLEX['adder_lit'] = [('a','b'),('x')]
+COMPLEX['multiplier'] = [('a','b'),('x')]
+COMPLEX['subtractor'] = [('a','b'),('x')]
+COMPLEX['subtractor_lit'] = [('a','b'),('x')]
+COMPLEX['mux2'] = [('a','b','sel'),('x')]
+COMPLEX['select'] = [('a','b','sel'),('x')]
+COMPLEX['select_bus'] = [('a','b','sel'),('x')]
+COMPLEX['select_bus_lit'] = [('a','sel'),('x')]
+COMPLEX['comparator'] = [('a','b'),('x')]
+COMPLEX['comparator_lit'] = [('a'),('x')]
+COMPLEX['flipflop'] = [('d','en'),('q'),('clk','rst_n')]
+
+
 
 if os.path.exists('gatelevel.py'):
     print('importing gatelevel')
@@ -257,28 +268,42 @@ def builds(Mod):
 
 
     for Dst,Src,_,_ in Mod.hard_assigns:
-        adds(Dst,Src,Params,'hard_assign')
+        adds(Dst,Src,['vcc','gnd']+Params,'hard_assign')
                 
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
-        print("INST",Obj.Type,Obj.Type in GATELEVEL)
         if Obj.Type in GATELEVEL:
             GL = GATELEVEL[Obj.Type]
-            print("GL",Obj.Type,len(GL),GL,Obj.Type in GATELEVEL)
             if len(GL) == 2:
                 Outs,Inps = whatConnected(Obj,GL[1]),whatConnected(Obj,GL[0])
-                print(">0>>>",Obj.Type,Outs,Inps)
-                adds(Outs,Inps,[],'instance_glv')
+                adds(Outs,Inps,['vcc','gnd'],'instance_glv')
                 driven(Outs,Inst,Obj.Type)
             elif len(GL) == 3:
                 Outs,Inps = whatConnected(Obj,GL[1]),whatConnected(Obj,GL[0])
-                print(">1>>>",Obj.Type,Outs,Inps)
                 for D in Inps: 
                     if D not in TERMS: 
                         TERMS.append(D)
                         CLOCKED[D] = GL[2][0]
-
-
+        elif Obj.Type in COMPLEX:
+            Arcs = getComplexArcs(Obj)
+            if Obj.Type == 'flipflop':
+                print("FFF",Mod.Module,Inst,Obj.Type,len(Arcs))
+            for Fr,To in Arcs:
+                if (Fr in Obj.conns) and (To in Obj.conns):
+#                    if Obj.Type == 'flipflop':print("XXXX",Inst,Obj.Type,Fr,To)
+                    Frnet = Obj.conns[Fr]
+                    Tonet = Obj.conns[To]
+                    adds(Tonet,Frnet,[],'inst_complex')    
+                    driven([Tonet],Obj.Name,Obj.Type)
+            Ds,Qs,Clk = getFlipFlop(Obj)
+            for D in Ds: 
+                if D not in TERMS: 
+                    TERMS[D] = (Obj.Type,Inst)
+                    CLOCKED[D] = Clk
+            for Q in Qs: 
+                if Q not in STARTS: 
+                    STARTS[Q] = (Obj.Type,Inst)
+                    CLOCKED[Q] = Clk
         else:
             SONS.append((Inst,Obj.Type))
             for Pin in Obj.conns:
@@ -294,6 +319,127 @@ def builds(Mod):
         Dir,_ = Mod.nets[Net]
         if 'output' in Dir: OUTPUTS.append(Net)
         if 'input' in Dir: INPUTS.append(Net)
+
+
+def getFlipFlop(Obj):
+    if Obj.Type != 'flipflop': return [],[],''
+    Clk = Obj.conns['clk']
+    Wid = Obj.params['WID']
+    Ds = []
+    Qs = []
+    if Wid == 1:
+        Ds.append(Obj.conns['d'])
+        Qs.append(Obj.conns['q'])
+        return Ds,Qs,Clk
+
+    for ii in range(Wid):
+        Ds.append(Obj.conns['d_%d_' % ii])
+        Qs.append(Obj.conns['q_%d_' % ii])
+    return Ds,Qs,Clk
+
+def getComplexArcs(Obj):
+    Type = Obj.Type
+    Params = makeInts(Obj.params)
+
+    Res = []
+    if Type == 'mux2':
+        Wid = Params['WID']
+        for ii in range(Wid):
+            Res.append( ('yes_%d_'%ii,'x_%d_'%ii) )
+            Res.append( ('no_%d_'%ii,'x_%d_'%ii) )
+            Res.append( ('sel','x_%d_'%ii) )
+        return Res            
+
+    if Type == 'comparator_lit':
+        Wid = Params['WID']
+        for ii in range(Wid):
+            Res.append( ('a_%d_'%ii,'x') )
+        return Res            
+    if Type == 'comparator':
+        Wida = Params['WIDA']
+        Widb = Params['WIDB']
+        for ii in range(Wida):
+            Res.append( ('a_%d_'%ii,'x') )
+        for ii in range(Widb):
+            Res.append( ('b_%d_'%ii,'x') )
+        return Res            
+    if Type == 'multiplier':
+        Wid = Params['WID']
+        for ii in range(Wid):
+            for jj in range(Wid):
+                Res.append( ('a_%d_'%jj,'x_%d_'%ii) )
+                Res.append( ('b_%d_'%jj,'x_%d_'%ii) )
+        return Res            
+    if Type == 'adder':
+        Wid = Params['WID']
+        for ii in range(Wid):
+            for jj in range(ii,Wid):
+                Res.append( ('a_%d_'%jj,'x_%d_'%ii) )
+                Res.append( ('b_%d_'%jj,'x_%d_'%ii) )
+        return Res            
+    if Type == 'adder_lit':
+        Wid = Params['WID']
+        for ii in range(Wid):
+            for jj in range(ii,Wid):
+                Res.append( ('a_%d_'%jj,'x_%d_'%ii) )
+        return Res            
+
+    if Type == 'subtractor':
+        Wid = Params['WID']
+        for ii in range(Wid):
+            for jj in range(ii,Wid):
+                Res.append( ('a_%d_'%jj,'x_%d_'%ii) )
+                Res.append( ('b_%d_'%jj,'x_%d_'%ii) )
+        return Res            
+    if Type == 'subtractor_lit':
+        Wid = Params['WID']
+        for ii in range(Wid):
+            for jj in range(ii,Wid):
+                Res.append( ('a_%d_'%jj,'x_%d_'%ii) )
+        return Res            
+
+    if Type == 'select_bus':
+        Wid = Params['WID']
+        Depth = Params['DEPTH']
+        Bits = len(bin(Depth))-2
+        for ii in range(Wid):
+            for jj in range(Depth):
+                kk = jj*Wid + ii
+                Res.append( ('a_%d_'%kk,'x_%d_'%ii) )
+            for bb in range(Bits):
+                Res.append( ('b_%d_'%bb,'x_%d_'%ii) )
+        return Res            
+                    
+    if Type == 'shiftleft':
+        Wid = Params['WID']
+        Bits = len(bin(Wid))-2
+        for ii in range(Wid):
+            for jj in range(ii,Wid):
+                Res.append( ('a_%d_'%jj,'x_%d_'%ii) )
+            for bb in range(Bits):
+                Res.append( ('b_%d_'%bb,'x_%d_'%ii) )
+        return Res            
+                    
+    if Type == 'shiftright':
+        Wid = Params['WID']
+        Bits = len(bin(Wid))-2
+        for ii in range(Wid):
+            for jj in range(Wid-1,ii-1,-1):
+                Res.append( ('a_%d_'%jj,'x_%d_'%ii) )
+            for bb in range(Bits):
+                Res.append( ('b_%d_'%bb,'x_%d_'%ii) )
+        return Res            
+                    
+
+
+    if Type == 'flipflop':
+#        Wid = Params['WID']
+#        for ii in range(Wid):
+#            Res.append( ('clk','q_%d_'%ii) )
+        return Res
+
+    print(Type,Params,list(Obj.conns.keys()))
+    return []
 
 def getClockFromEdge(Timing):
     if type(Timing) is list:
@@ -374,5 +520,14 @@ def travelAlw(Alw,Cond,Params,Mod,Clk):
 
     logs.log_error('ARCS %s: alw %s' % (Mod.Module,Alw))
 
-
+def makeInts(Params):
+    for Key in Params:
+        Val = Params[Key]
+        if type(Val) is str:
+            try:
+                Valx = eval(Val)
+                Params[Key] = Valx
+            except:
+                pass
+    return Params
 
