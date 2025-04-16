@@ -2351,6 +2351,9 @@ def hashit(End):
     if (type(End) is list) or (type(End) is tuple):
         if End[0]=='subbit': return pr_expr(End)
         if End[0]=='subbus': return pr_expr(End)
+        if End[0] == 'bus':
+            if len(End) == 2: return End[1]
+            End = End[1:]
         for X in End:
             RR = []
             if type(X) is list:

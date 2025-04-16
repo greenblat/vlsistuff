@@ -54,9 +54,9 @@ def useParams(Mod):
                 for Prm,Val in Rename:
                     NewName += '_'+str(Val)
                     Mod.Module = NewName
-
 def help_main(Env):
     Mod = Env.Current
+    Mod.MUX2S = {}
     useParams(Mod)
     replaceFunctions(Mod)
     instances(Mod)
@@ -83,6 +83,13 @@ def help_main(Env):
     optimize0.zeroDriveRound(Mod,Ones,'B')
     dumpver(Mod,'%s.bef5' % Mod.Module)
     optimize0.zeroDriveRound(Mod,[],'C')
+    dumpver(Mod,'%s.bef6' % Mod.Module)
+    Done = 1
+    Rnd = 0
+    while Done > 0 :
+        Done = optimize0.similarGatesRound(Mod,'D'+ str(Rnd))
+        Rnd += 1
+    optimize0.zeroDriveRound(Mod,Ones,'E')
     dumpver(Mod,'glv/%s.v' % Mod.Module)
 
 def dumpver(Mod,Fname):
@@ -283,17 +290,33 @@ def ejectPartials(Mod,Partials):
             for Dst in EJECTS:
                 List = EJECTS[Dst]
                 Code = compatible(II,Bus,Dst)
-                print("AAAAA",II,Dst," list= ",List,Code)
+                logs.log_info("COMPATIBLE ii=%s dst=%s list=%s code=%s" % (II,Dst,List,Code))
                 if Code:
                     And = 0
                     if Code != 1:
                         And = ['==',Code,II]
                     for  Src,Cond,TT in List:
-                        if Wid == 1:
-                            Line = Src
+                        if Wid0 == 1:
+                            Bits0 = synth0(Src,Mod,1)
+                            Sbits = splitBits(Bits0,Mod,Wid)  
+                            if Bits0 == 0:
+                                Line = 'gnd'
+                            elif Bits0 == 1:
+                                Line = 'vcc'
+                            elif (type(Bits0) is list) and (Bits0[0] == 'bus'):
+                                if len(Bits0) == 2:
+                                    Line = Bits0[1]
+                                else:
+                                    Line = Bits0[II+1]
+                            else:
+                                if len(Sbits) == 2:
+                                    Line = Sbits[1]
+                                else:
+                                    Line = Sbits[-1]
+                            logs.log_info("NOEXTRACTBIT bus=%s wid=%s wid0=%s src=%s ii=%s line=%s" % (Bus,Wid,Wid0,Src,II,Line))
                         else:
                             Line = extractBit(Src,II,Wid0,Mod)
-                            print("EXTRACTBIT wid0=",Wid0,'src=',Src,'ii=',II,'line=',Line)
+                            logs.log_info("EXTRACTBIT bus=%s wid=%s wid0=%s src=%s ii=%s line=%s" % (Bus,Wid,Wid0,Src,II,Line))
 
                         if And:
                             Cnd.append( ['&&',And,Cond] )
@@ -302,7 +325,7 @@ def ejectPartials(Mod,Partials):
                             Cnd.append(Cond)
                             Dats.append( (Cond,Line))
                     Dats.reverse()
-                    print("DATS",Wid0,Cnd,Dats,II)
+                    logs.log_info("DATS %s wid0=%s ii=%s dats=%s cnd=%s" % (Bus,Wid0,II,Dats,Cnd))
                     if (len(Dats)>1):
                         XX = ['bus']
                         for ii in range(Wid0): XX.append('gnd')
@@ -312,13 +335,10 @@ def ejectPartials(Mod,Partials):
                         TT = List[0][2]
                     else:
                        Dat = Dats[0][1]
-#                       print("XOOOOO",Cond)
-#                       Cnd = Cond
-            print("BEFORE CODE",II,Bus,' dat=',Dat,Cnd,Wid0)        
+            logs.log_info("BEFORE CODE ii=%s bus=%s dat=%s cnd=%s wid0=%s" %(II,Bus,Dat,Cnd,Wid0))
             Src0 = synth0(Dat,Mod,Wid0)
             if (type(Src0) is list)and (len(Src0) == 1): Src0 = Src0[0]
-            print("AFTER CODE0",II,Bus,Src0)        
-            print("AFTER CODE",II,Src0)        
+            logs.log_info("AFTER CODE0 ii=%s bus=%s src0=%s" % (II,Bus,Src0))
             if Cnd == []:
                 Cond0 = 'vcc'
                 Mod.add_sig('vcc','input',0)
@@ -338,8 +358,12 @@ def ejectPartials(Mod,Partials):
 def extractBit(Src,II,Wid,Mod):
     if type(Src) is str:
         if Src in Mod.nets:
-            _,Wid = Mod.nets[Src]
-            if type(Wid) is tuple: return ['subbit',Src,II]
+            _,Wid1 = Mod.nets[Src]
+            if type(Wid) is tuple:
+                if Wid[0] == 'packed':
+                    return extractBit(['subbus',Src,(Wid[1][0],Wid[1][1]) ], II,Wid,Mod)
+                else:
+                    return extractBit(['subbus',Src,(Wid[0],Wid[1])],II,Wid,Mod)
             return Src
     if type(Src) is int:
         X = (Src>>II) & 1
@@ -739,8 +763,8 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             return Out
 
         if Src[0] == 'question':
-            Yes = synth0(Src[2],Mod,Mwid,Depth+1)
-            Yes = splitBits(Yes,Mod,Mwid)
+            Yes0 = synth0(Src[2],Mod,Mwid,Depth+1)
+            Yes = splitBits(Yes0,Mod,Mwid)
             if Yes[0] == 'bus': Yes = Yes[1:]
             No = synth0(Src[3],Mod,Mwid,Depth+1)
             No = splitBits(No,Mod,Mwid)
@@ -758,6 +782,7 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             Out = Mod.add_sig('','wire',Last+1)
             if len(Yes)>1: Yes = ['curly']+Yes
             if len(No)>1: No = ['curly']+No
+            logs.log_info('QUEST OUT=%s yes=%s src2=%s yes0=%s mwid=%d' % (Out,Yes,Src[2],Yes0,Mwid))
             if (Yes==No):
                 return Yes
             elif (Yes==['vcc']) and (No == ['gnd']):
@@ -765,8 +790,12 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
                 return Cond
             else:
                 Cond = synth0(Src[1],Mod,Mwid,Depth+1)
+                Key = str([('sel',Cond),('yes',Yes),('no',No)])
+                if Key in Mod.MUX2S:
+                    return Mod.MUX2S[Key]
                 Obj = Mod.add_inst_conns('mux2','',[('sel',Cond),('yes',Yes),('no',No),('x',Out)])
                 Obj.params['WID'] = Last+1
+                Mod.MUX2S[Key] = Out
                 return Out
 
         if Src[0] in ['>>']:
@@ -971,7 +1000,7 @@ def makeWide(List,Type,Mod):
 def addInstX(Type,List,Mod):
     Type = Type + str(len(List))
     Out = Mod.add_sig('','wire',1)
-    Pins = 'a b c d'. split()
+    Pins = 'a b c d e f g h'. split()
     Pins = Pins[:len(List)]
     LL = [('x',Out)]
     for ind,Pin in enumerate(Pins):

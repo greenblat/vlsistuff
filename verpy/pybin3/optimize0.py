@@ -13,16 +13,16 @@ def zeroDriveRound(Mod,Ones,Round):
         if (Dir == 'wire') and (Net in Mod.netTable):
             List = Mod.netTable[Net]
             if len(List) == 1:
-                logs.log_info("(%d) ONE %s %s" % (Cnt,Net,List))
+                logs.log_info("(%s) %d ONE %s %s" % (Round,Cnt,Net,List))
                 Cnt += 1
                 Inst,Type,Pin = List[0]
                 if Inst in Ones:
-                    logs.log_info("REMOVE ONE %s %s" % (Net,List))
+                    logs.log_info("REMOVE %s ONE %s %s" % (Round,Net,List))
                     Mod.insts.pop(Inst)
             elif len(List) == 0:
-                logs.log_info("ZERO CONNECT %s" % (Net))
+                logs.log_info("ZERO %s CONNECT %s" % (Round,Net))
         elif (Dir == 'wire') and (Net not in Mod.netTable):
-            logs.log_info("ZERO NOCONNS %s" % (Net))
+            logs.log_info("ZERO %s NOCONNS %s" % (Round,Net))
             RM.append(Net)
     for Net in RM:
         Mod.nets.pop(Net)
@@ -101,6 +101,7 @@ def makeByBits(Mod):
                     Obj.conns['%s_%d_' % (Pin,ind)] = Bit
             elif len(Bits) == 1:
                 Bit = module_class.hashit(Expr)
+                print("EXPR",Expr,Bit)
                 Bit = Bit.replace('[','_')
                 Bit = Bit.replace(']','_')
                 Obj.conns[Pin] = Bit
@@ -116,3 +117,91 @@ def makeByBits(Mod):
                 Mod.nets[Bit] = Dir,1
             Mod.nets.pop(Net)
 
+
+def similarGatesRound(Mod,Round):
+    SIGNATURES = {}
+    Removed = 0
+    bufxs = 0
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        Signature = getSignature(Obj)
+        if Signature:
+            if Signature in SIGNATURES:
+                SIGNATURES[Signature].append(Inst)
+            else:
+                SIGNATURES[Signature] = [Inst]
+                
+    for Signature in SIGNATURES:
+        List = SIGNATURES[Signature]
+        if len(List)>1:
+            LL = Signature.split()
+            if LL[0] == 'inv':
+                Removed += mergeSimilars(Mod,List,LL[0])
+            elif LL[0].startswith('and') or LL[0].startswith('or') :
+                Removed += mergeSimilars(Mod,List,LL[0])
+            elif LL[0] == 'bufx':
+                bufxs += 1
+            else:
+                logs.log_info('SIMILAR %s  %s : %s' % (Round,Signature,List))
+    logs.log_info("REMOVED %s SIMILARS %d, left %d bufx" % (Round,Removed,bufxs))
+    return Removed
+
+def mergeSimilars(Mod,List,Type):
+    Xs = []
+    Givens = 0
+    Best = False
+    Ins = []
+    Removed = 0
+    for Inst in List:
+        Obj = Mod.insts[Inst]
+        X = Obj.conns['x']
+        Xs.append(X)
+        if not Best: Best = X
+        if not X.startswith('net_'):
+            Best = X
+            Givens += 1
+        for Pin in Obj.conns:
+            if Pin != 'x':
+                Ins.append(Obj.conns[Pin])
+    if Givens == 0:
+        if Type == 'inv': 
+            Out = '%s_n' % Ins[0]
+        else:
+            Out = Best
+    elif Givens == 1:
+        Out = Best
+    else:
+        logs.log_warning("TWO GIVENS for %s %s" % (Type,List))
+        return 0
+
+    for II in List[1:]:
+        Mod.insts.pop(II)
+        Removed += 1
+    Mod.insts[List[0]].conns['x'] = Out
+    Mod.buildNetTable()
+    for X in Xs:
+        if (X in Mod.netTable):
+            Clist = Mod.netTable[X]
+            for (Instx,Typex,Pinx) in Clist:
+                if Pinx != 'x':
+                    Mod.insts[Instx].conns[Pinx] = Out
+
+    return Removed
+
+
+def typeIsBasic(Type):
+    if Type.startswith('and'): return True
+    if Type.startswith('or'): return True
+    if Type.startswith('inv'): return True
+    if Type.startswith('bufx'): return True
+    return False
+
+def getSignature(Obj):
+    Type = Obj.Type
+    if not typeIsBasic(Type): return False
+    Ins = []
+    for Pin in Obj.conns:
+        if (Pin != 'x'): Ins.append(Obj.conns[Pin])
+    Ins.sort()
+    Sign = '%s %s' % (Type,' '.join(Ins))
+    return Sign

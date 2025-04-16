@@ -231,6 +231,10 @@ GATELEVEL['xor2'] = [('a','b'),('x')]
 GATELEVEL['or2'] = [('a','b'),('x')]
 GATELEVEL['or3'] = [('a','b','c'),('x')]
 GATELEVEL['or4'] = [('a','b','c','d'),('x')]
+GATELEVEL['or5'] = [('a','b','c','d','e'),('x')]
+GATELEVEL['or6'] = [('a','b','c','d','e','f'),('x')]
+GATELEVEL['or7'] = [('a','b','c','d','e','f','g'),('x')]
+GATELEVEL['or8'] = [('a','b','c','d','e','f','g','h'),('x')]
 GATELEVEL['and2'] = [('a','b'),('x')]
 GATELEVEL['and3'] = [('a','b','c'),('x')]
 GATELEVEL['and4'] = [('a','b','c','d'),('x')]
@@ -328,6 +332,7 @@ def getFlipFlop(Obj):
     Ds = []
     Qs = []
     if Wid == 1:
+        print("GETFLIPFLIP %s %s" % (Obj.Name,Obj.conns))
         Ds.append(Obj.conns['d'])
         Qs.append(Obj.conns['q'])
         return Ds,Qs,Clk
