@@ -1360,15 +1360,29 @@ class module_class:
             else:
                 self.insts[Inst].params[Prm] = Val
                 self.defparams.pop(DFPRM)
+
     def exprWidth(self,Expr):
         if type(Expr) is str:
             if Expr in self.nets:
                 return self.sig_width(Expr)
         if type(Expr) is list:
+            if Expr == []:
+                logs.log_error('EMPTY Expr')
+                breakIt()
             if Expr[0] == 'bin': return evalz(Expr[1])
             if Expr[0] == 'hex': return evalz(Expr[1])
             if Expr[0] == 'dig': return evalz(Expr[1])
-            if Expr[0] == 'subbit': return 1
+            if Expr[0] == 'subbit': 
+                Bus = Expr[1]
+                _,Wid = self.nets[Bus]
+                if type(Wid) is tuple:
+                    if Wid[0] == 'packed':
+                        Hi2 = self.compute_int(Wid[2][0])
+                        Lo2 = self.compute_int(Wid[2][1])
+                        Hi_ = max(Hi2,Lo2)
+                        Lo_ = min(Hi2,Lo2)
+                        return Hi_-Lo_+1
+                return 1
             if Expr[0] == 'subbus': 
                 if len(Expr) == 4:
                     Hi = Expr[2]
@@ -1381,6 +1395,8 @@ class module_class:
                     Lo = self.compute_int(Lo)
                     return Hi-Lo+1
             if Expr[0] in ['!','&&','||','<','>','!=','==','<=','>=']: return 1 
+            if Expr[0] == 'bus':
+                return len(Expr)-1
             if Expr[0] == 'curly':
                 Wid = 0
                 for Item in Expr[1:]:
@@ -1658,28 +1674,6 @@ class instance_class:
         else:
             try2 = ('\n%s,'%Pref).join(res)
             Fout.write('%s);%s\n'%(try2,Comment))
-
-
-def expr_width(Expr,Mod):
-    if type(Expr) is str:
-        if Expr in Mod.nets:
-            return Mod.sig_width(Expr)
-        else:
-            logs.log_error('expr_width %s' % str(Expr))
-            return 1
-    if type(Expr) is int: return 32
-
-    if type(Expr) is list:
-        if Expr[0] in ['hex','dig','bin']: return Expr[1]
-        if Expr[0] == 'bus': return len(Expr)-1
-        if Expr[0] == 'subbus':
-            Hi = Expr[2][0]
-            Lo = Expr[2][1]
-            return  Hi-Lo+1
-
-    logs.log_error('expr_width %s' % str(Expr))
-    return 1
-
 
 
 

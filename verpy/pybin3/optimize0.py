@@ -183,7 +183,7 @@ def mergeSimilars(Mod,List,Type):
         if (X in Mod.netTable):
             Clist = Mod.netTable[X]
             for (Instx,Typex,Pinx) in Clist:
-                if Pinx != 'x':
+                if (Pinx != 'x')and(Instx in Mod.insts):
                     Mod.insts[Instx].conns[Pinx] = Out
 
     return Removed

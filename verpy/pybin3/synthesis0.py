@@ -1,6 +1,9 @@
 import string
 import sys
 import logs
+def stam():
+    return 0
+logs.get_cycles = stam
 
 
 import optimize0
@@ -61,9 +64,9 @@ def help_main(Env):
     replaceFunctions(Mod)
     instances(Mod)
     for Dst,Src,_,_ in Mod.hard_assigns:
-        Wid = Mod.sig_width(Dst)
+        Wid = Mod.exprWidth(Dst)
         Src0 = synth0(Src,Mod,Wid)
-        print("HARD",Dst,Src,Src0)
+        print("HARD",Wid,Dst,Src,Src0)
         merge(Dst,Src0,Mod)
     Mod.hard_assigns = []
     dumpver(Mod,'%s.bef0' % Mod.Module)
@@ -91,6 +94,7 @@ def help_main(Env):
         Rnd += 1
     optimize0.zeroDriveRound(Mod,Ones,'E')
     dumpver(Mod,'glv/%s.v' % Mod.Module)
+    checker(Mod)
 
 def dumpver(Mod,Fname):
     File = open(Fname,'w')
@@ -295,7 +299,8 @@ def ejectPartials(Mod,Partials):
                     And = 0
                     if Code != 1:
                         And = ['==',Code,II]
-                    for  Src,Cond,TT in List:
+                    for  Ind,(Src,Cond,TT) in enumerate(List):
+                        logs.log_info('COMP2 which=%d ii=%s dst=%s src=%s cond=%s tt=%s' % (Ind,II,Dst,Src,Cond,TT))
                         if Wid0 == 1:
                             Bits0 = synth0(Src,Mod,1)
                             Sbits = splitBits(Bits0,Mod,Wid)  
@@ -355,23 +360,34 @@ def ejectPartials(Mod,Partials):
             Obj.params['WID'] = Wid0
             print("CODE FLOP",Bus,II,Src0,Cond0);
 
+def int2bus(Wid,Int):
+    res = []
+    for ii in range(Wid):
+        if (Int>>ii) & 1:
+            res.append('vcc')
+        else:
+            res.append('gnd')
+    res.reverse()
+    return ['bus']+res
+
+        
+
 def extractBit(Src,II,Wid,Mod):
     if type(Src) is str:
         if Src in Mod.nets:
             _,Wid1 = Mod.nets[Src]
-            if type(Wid) is tuple:
-                if Wid[0] == 'packed':
-                    return extractBit(['subbus',Src,(Wid[1][0],Wid[1][1]) ], II,Wid,Mod)
+            if type(Wid1) is tuple:
+                if Wid1[0] == 'packed':
+                    return extractBit(['subbus',Src,(Wid1[1][0],Wid1[1][1]) ], II,Wid,Mod)
                 else:
-                    return extractBit(['subbus',Src,(Wid[0],Wid[1])],II,Wid,Mod)
+                    return extractBit(['subbus',Src,(Wid1[0],Wid1[1])],II,Wid,Mod)
             return Src
     if type(Src) is int:
-        X = (Src>>II) & 1
-        return X
+        return int2bus(Wid,Src) 
     if type(Src) is list:
         if Src[0] == 'bin':
-            if len(Src[2])<=II: return 0
-            return Src[2][II]
+            Val = int(Src[1],2)
+            return int2bus(Wid,Val)
         if Src[0] == 'subbus':
             Hi = Src[2][0]
             Lo = Src[2][1]
@@ -382,11 +398,15 @@ def extractBit(Src,II,Wid,Mod):
                 Hi2 = Lo + Wid -1
                 return ['subbus',Src[1],(Hi2,Lo)]
         if Src[0] == 'bus':
-            XX = Src[:]
-            XX.reverse()
-            return XX[II]
+            if (Wid == 1):
+                XX = Src[:]
+                XX.reverse()
+                return XX[II]
+            else:
+                return Src
     
     Cond0 = synth0(Src,Mod,Wid)
+    print("EXTRACTBIT",Src,Cond0,II)
     return extractBit(Cond0,II,Wid,Mod)
     
 
@@ -518,6 +538,7 @@ KNOWNS = {}
 def splitBits(Expr,Mod,Mwid=64 ):
     if type(Expr) is int:
         Res = []
+        print("HARD XXYY",Expr,Mwid)
         for ii in range(Mwid):
             X = (Expr>>ii) & 1
             if (X==1):
@@ -556,6 +577,8 @@ def splitBits(Expr,Mod,Mwid=64 ):
                 Hi -= 1
             return Res
     if type(Expr) is list:
+        if len(Expr) == 0:
+            return ['vdd']
         if len(Expr) == 1:
             return splitBits(Expr[0],Mod,Mwid)
         if Expr[0] == 'bus':
@@ -567,6 +590,14 @@ def splitBits(Expr,Mod,Mwid=64 ):
             return  Res
         if Expr[0] == 'subbus':
             return synth0(Expr,Mod,Mwid)
+
+        if Expr[0] == 'curly':
+            Res = []
+            for Ex in Expr[1:]:
+                More = splitBits(Ex,Mod)
+                Res.extend(More)
+            return Res                
+
 
         if Expr[0] == 'subbit':
             Bus = Expr[1]
@@ -581,9 +612,11 @@ def splitBits(Expr,Mod,Mwid=64 ):
                 Obj = Mod.add_inst_conns('select','',[('a',Expr[1]),('b',BB),('x',Out)])
                 L1 = Mod.sig_width(Bus)
                 Obj.params['WID'] = L1
+                logs.log_info('SUBBITX %s %s out=%s l1=%s' % (Bus,Key,Out,L1))
                 KNOWNS[Key] = Out
                 return [Out]
             else:
+                print("SUBBIT2",Bus,Expr)
                 _,Wid = Mod.nets[Bus]
                 if (type(Wid) is tuple):
                     if Wid[0] == 'packed':
@@ -595,9 +628,12 @@ def splitBits(Expr,Mod,Mwid=64 ):
                         W2 = max(W2_0,W2_1)
                         BB = synth0(Expr[2],Mod)
                         Key = '%s,%s' % (Expr[1],BB)
+                        print("SUBBIT3",Bus,Expr,Key,Key in KNOWNS)
                         if Key in KNOWNS: 
+                            print("SUBBIT33",Bus,Expr,Key,KNOWNS[Key])
                             return KNOWNS[Key][:]
                         Out = Mod.add_sig('','wire',W2)
+                        print("SUBBIT4",Out,Bus,Expr,Key,Key in KNOWNS)
                         if type(BB) is int:
                             Obj = Mod.add_inst_conns('select_bus_lit','',[('a',Expr[1]),('x',Out)])
                             Obj.params['LIT'] = BB
@@ -606,7 +642,8 @@ def splitBits(Expr,Mod,Mwid=64 ):
                         Obj.params['WID'] = W2
                         Obj.params['DEPTH'] = W1
                         Res = splitBits(Out,Mod)
-                        KNOWNS[Key] = Res
+                        print("SUBBIT5",Bus,Key,Expr,Res)
+                        KNOWNS[Key] = Res[:]
                         return Res
     if type(Expr) is str: return [Expr]
 
@@ -629,7 +666,7 @@ def singleIndexBus(Bus,Mod):
 
 COMPARES = ['==','!=','<','<=','>','=>','>=']
 def synth0(Src,Mod,Mwid=64,Depth=0):
-    logs.log_info('SYNTH0 %s src=%s' % (Depth,Src))
+    logs.log_info('HARD SYNTH0 %s mwid=%d src=%s' % (Depth,Mwid,Src))
     Res = synth0__(Src,Mod,Mwid,Depth)
     if (type(Res) is str) and (Res in Mod.nets):
         logs.log_info('SYNTH1 %s res=%s net=%s src=%s' % (Depth,Res,Mod.nets[Res],Src))
@@ -641,7 +678,11 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
     if type(Src) is str: 
         if '.' in Src: return 0
         return Src
-    if type(Src) is int: return Src & ((1<<Mwid)-1)
+    if type(Src) is int: 
+        XX =  Src & ((1<<Mwid)-1)
+        print("HARD XXYY",XX,Mwid)
+        XY = splitBits(XX,Mod,Mwid)
+        return XY
     if type(Src) is list:
         if len(Src) == 0:
             return 'gnd'
@@ -782,7 +823,7 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             Out = Mod.add_sig('','wire',Last+1)
             if len(Yes)>1: Yes = ['curly']+Yes
             if len(No)>1: No = ['curly']+No
-            logs.log_info('QUEST OUT=%s yes=%s src2=%s yes0=%s mwid=%d' % (Out,Yes,Src[2],Yes0,Mwid))
+            logs.log_info('QUEST mwid=%d OUT=%s yes=%s src2=%s src3=%s  yes0=%s no=%s' % (Mwid,Out,Yes,Src[2],Src[3],Yes0,No))
             if (Yes==No):
                 return Yes
             elif (Yes==['vcc']) and (No == ['gnd']):
@@ -800,30 +841,48 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
 
         if Src[0] in ['>>']:
             AA = synth0(Src[1],Mod,Mwid,Depth+1)
-            L1 = Mod.sig_width(AA)
+            L1 = Mod.exprWidth(AA)
             BB = synth0(Src[2],Mod,Mwid,Depth+1)
-            Out = Mod.add_sig('','wire',1)
+            Out = Mod.add_sig('','wire',Mwid)
             Obj = Mod.add_inst_conns('shiftright','',[('a',AA),('b',BB),('x',Out)])
-            Obj.params['WID'] = L1
+            Obj.params['WID'] = Mwid
             return Out
 
         if Src[0] in ['<<']:
-            AA = synth0(Src[1],Mod,Depth+1)
-            L1 = Mod.sig_width(AA)
-            BB = synth0(Src[2],Mod,Depth+1)
-            Out = Mod.add_sig('','wire',L1)
+            AA = synth0(Src[1],Mod,Mwid,Depth+1)
+            L1 = Mod.exprWidth(AA)
+            BB = synth0(Src[2],Mod,Mwid,Depth+1)
+            Out = Mod.add_sig('','wire',Mwid)
             Obj = Mod.add_inst_conns('shiftleft','',[('a',AA),('b',BB),('x',Out)])
-            Obj.params['WID'] = L1
+            Obj.params['WID'] = Mwid
             return Out
 
         if Src[0] in ['*']:
             AA = synth0(Src[1],Mod,Mwid,Depth+1)
-            L1 = Mod.sig_width(AA)
+            L1 = Mod.exprWidth(AA)
             BB = synth0(Src[2],Mod,Mwid,Depth+1)
-            L2 = Mod.sig_width(BB)
+            L2 = Mod.exprWidth(BB)
             Out = Mod.add_sig('','wire',(L1+L2))
             Obj = Mod.add_inst_conns('multiplier','',[('a',AA),('b',BB),('x',Out)])
             Obj.params['WID'] = L1+L2
+            return Out
+        if Src[0] in ['/']:
+            AA = synth0(Src[1],Mod,Mwid,Depth+1)
+            L1 = Mod.exprWidth(AA)
+            BB = synth0(Src[2],Mod,Mwid,Depth+1)
+            L2 = Mod.exprWidth(BB)
+            Out = Mod.add_sig('','wire',L1)
+            Obj = Mod.add_inst_conns('divider','',[('a',AA),('b',BB),('x',Out)])
+            Obj.params['WID'] = L1
+            return Out
+        if Src[0] in ['%']:
+            AA = synth0(Src[1],Mod,Mwid,Depth+1)
+            L1 = Mod.exprWidth(AA)
+            BB = synth0(Src[2],Mod,Mwid,Depth+1)
+            L2 = Mod.exprWidth(BB)
+            Out = Mod.add_sig('','wire',L1)
+            Obj = Mod.add_inst_conns('remainder','',[('a',AA),('b',BB),('x',Out)])
+            Obj.params['WID'] = L1
             return Out
 
         if Src[0] in COMPARES:
@@ -833,7 +892,7 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             if type(B0) is int:
                 AA = synth0(Src[1],Mod,Mwid,Depth+1)
                 Obj = Mod.add_inst_conns('comparator_lit','',[('a',AA),('x',Out)])
-                L1 = expr_width(Src[1],Mod)
+                L1 = Mod.exprWidth(Src[1])
                 Obj.params['WID'] = L1
                 Obj.params['LIT'] = B0
                 Kind = COMPARES.index(Src[0])
@@ -844,8 +903,8 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             AA = synth0(Src[1],Mod,Mwid,Depth+1)
             BB = synth0(Src[2],Mod,Mwid,Depth+1)
             Obj = Mod.add_inst_conns('comparator','',[('a',AA),('b',BB),('x',Out)])
-            L1 = Mod.sig_width(AA)
-            L2 = Mod.sig_width(BB)
+            L1 = Mod.exprWidth(AA)
+            L2 = Mod.exprWidth(BB)
             Obj.params['WIDA'] = L1
             Obj.params['WIDB'] = L2
             Kind = COMPARES.index(Src[0])
@@ -906,12 +965,10 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
         if Src[0] == 'repeat':
             Many = Mod.compute_int(Src[1])
             Rep = synth0(Src[2],Mod,Mwid,Depth+1)
-            Sbits = splitBits(Rep,Mod)
+            if Rep[0] == 'bus': Rep.pop(0)
             Res = ['bus']
-            while Sbits!= []:
-                Pop = Sbits.pop(0)
-                if Pop[0] == 'bus': Pop = Pop[1:]
-                Res.extend(Sbits)
+            for X in range(Many):
+                Res.extend(Rep)
             return Res
         
         if Src[0] == 'bin':
@@ -931,6 +988,18 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             return Res                
 
         if Src[0] == 'subbit':
+#            Bus = Src[1]
+#            Ind = Src[2]
+#            Wid = chunkWidth(Bus,Mod)
+#            Wid0 = lineWidth(Bus,Mod)
+#
+#            if Wid0 == 1:
+#                if (type(Ind) is int) and singleIndexBus(Bus,Mod):
+#                    return ['%s[%d]' % (Bus,Ind)]
+#                elif singleIndexBus(Bus,Mod):
+#                    BB = synth0(Expr[2],Mod,Mwid)
+#                
+
             return splitBits(Src,Mod)
         if Src[0] == 'subbus':
             Net = Src[1]
@@ -1100,5 +1169,215 @@ def expr_width(Expr,Mod):
     logs.log_error('expr_width %s' % str(Expr))
     return 1
 
+def checker(Mod):
+    Mod.buildNetTable()
+    Oks = 0
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        Type = Obj.Type
+        if Type in 'xor2 and2 or2 or3 or4 or5 or6 or7 or8 and3 and4 and5 and6 and7 and8 bufx inv'.split():
+            Oks += checkSimple(Obj,Mod)
+        elif Type in 'adder subtractor multiplier divider remainder'.split():
+            Oks += checkArith(Obj,Mod)
+        elif Type == 'mux2':
+            Oks += checkMux2(Obj,Mod)
+        elif Type == 'flipflop':            
+            Oks += checkFlipFlop(Obj,Mod)
+        elif Type in 'shiftleft shiftright'.split():            
+            Oks += checkShifts(Obj,Mod)
+        elif Type == 'comparator_lit':            
+            Oks += checkComparatorLit(Obj,Mod)
+        elif Type == 'comparator':            
+            Oks += checkComparator(Obj,Mod)
+        elif Type == 'adder_lit':            
+            Oks += checkAdderLit(Obj,Mod)
+        elif Type == 'subtractor_lit':            
+            Oks += checkSubtractorLit(Obj,Mod)
+        elif Type == 'select_bus':            
+            Oks += checkSelectBus(Obj,Mod)
+        elif Type == 'select':            
+            Oks += checkSelect(Obj,Mod)
+        else:
+            logs.log_error('ADD %s to checkers' % Type)
+    logs.log_info('CORRECTS %s  ERRORS %s' % (Oks,logs.Errors))
+def checkComparatorLit(Obj,Mod):
+    Wid = Obj.params['WID']
+    As,Xs = 0,0
+    for Pin in Obj.conns:
+        Sig = Obj.conns[Pin]
+        if Pin[0] == 'x': Xs += 1
+        elif Pin[0] == 'a': As += 1
+    if (As!=Wid) or (Xs!=1):
+        logs.log_error('ComparatorLit %s %s as=%d x=%d wid=%d' % (Obj.Type,Obj.Name,As,Xs,Wid))
+        return 0
+    else:
+        return 1
+
+def checkComparator(Obj,Mod):
+    Wida = Obj.params['WIDA']
+    Widb = Obj.params['WIDB']
+    As,Bs,Xs = 0,0,0
+    for Pin in Obj.conns:
+        Sig = Obj.conns[Pin]
+        if Pin[0] == 'x': Xs += 1
+        elif Pin[0] == 'a': As += 1
+        elif Pin[0] == 'b': Bs += 1
+    if (As!=Wida) or (Bs!=Widb) or (Xs!=1):
+        logs.log_error('Comparator %s %s as=%d bs=%d x=%d wid=%d:%d' % (Obj.Type,Obj.Name,As,Bs,Xs,Wida,Widb))
+        return 0
+    else:
+        return 1
 
 
+def checkAdderLit(Obj,Mod):
+    Wid = Obj.params['WID']
+    As,Xs = 0,0
+    for Pin in Obj.conns:
+        Sig = Obj.conns[Pin]
+        if Pin[0] == 'x': Xs += 1
+        elif Pin[0] == 'a': As += 1
+    if (Xs != Wid) or (As != Wid):
+        logs.log_error('ARITHLIT %s %s wid=%d xs=%d a=%d ' % (Obj.Type,Obj.Name,Wid,Xs,As))
+        return 0
+    else:
+        return 1
+
+
+def checkSubtractorLit(Obj,Mod):
+    Wid = Obj.params['WID']
+    As,Xs = 0,0
+    for Pin in Obj.conns:
+        Sig = Obj.conns[Pin]
+        if Pin[0] == 'x': Xs += 1
+        elif Pin[0] == 'a': As += 1
+    if (Xs != Wid) or (As != Wid):
+        logs.log_error('ARITHLIT %s %s wid=%d xs=%d a=%d ' % (Obj.Type,Obj.Name,Wid,Xs,As))
+        return 0
+    else:
+        return 1
+
+def checkSelectBus(Obj,Mod):
+    Wid = Obj.params['WID']
+    Depth = Obj.params['DEPTH']
+
+    As,Bs,Xs = 0,0,0
+    for Pin in Obj.conns:
+        Sig = Obj.conns[Pin]
+        if Pin[0] == 'x': Xs += 1
+        elif Pin[0] == 'a': As += 1
+        elif Pin[0] == 'b': Bs += 1
+    if (Xs != Wid) or (As != (Depth*Wid)):
+        logs.log_error('SELECTBUS %s %s wid=%d*%d xs=%d a=%d b=%d ' % (Obj.Type,Obj.Name,Wid,Depth,Xs,As,Bs))
+        return 0
+    else:
+        return 1
+
+
+def checkSelect(Obj,Mod):
+    Wid = Obj.params['WID']
+
+    As,Bs,Xs = 0,0,0
+    for Pin in Obj.conns:
+        Sig = Obj.conns[Pin]
+        if Pin[0] == 'x': Xs += 1
+        elif Pin[0] == 'a': As += 1
+        elif Pin[0] == 'b': Bs += 1
+    if (Xs != 1) or (As != Wid):
+        logs.log_error('SELECT %s %s wid=%d*%d xs=%d a=%d b=%d ' % (Obj.Type,Obj.Name,Wid,Depth,Xs,As,Bs))
+        return 0
+    else:
+        return 1
+
+
+
+
+def checkArith(Obj,Mod):
+    Wid = Obj.params['WID']
+    As,Bs,Xs = 0,0,0
+    for Pin in Obj.conns:
+        Sig = Obj.conns[Pin]
+        if Pin[0] == 'x': Xs += 1
+        elif Pin[0] == 'a': As += 1
+        elif Pin[0] == 'b': Bs += 1
+    if (Xs != Wid) or (As != Wid) or (Bs != Wid):
+        logs.log_error('ARITH %s %s wid=%d xs=%d a=%d b=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs))
+        return 0
+    else:
+        return 1
+
+
+def checkMux2(Obj,Mod):
+    Wid = Obj.params['WID']
+    As,Bs,Xs,Sel = 0,0,0,0
+    for Pin in Obj.conns:
+        Sig = Obj.conns[Pin]
+        if Pin[0] == 'x': Xs += 1
+        elif Pin.startswith('yes'): As += 1
+        elif Pin.startswith('no'): Bs += 1
+        elif Pin == 'sel':
+            Sel += 1
+    if (Xs != Wid) or (As != Wid) or (Bs != Wid) or (Sel!=1):
+        logs.log_error('MUX2 %s %s wid=%d xs=%d yes=%d no=%d sel=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs,Sel))
+        return 0
+    else:
+        return 1
+
+
+
+
+def checkFlipFlop(Obj,Mod):
+    Wid = Obj.params['WID']
+    Ds,Qs,En,Clk,Rst = 0,0,0,0,0
+    for Pin in Obj.conns:
+        Sig = Obj.conns[Pin]
+        if Pin[0] == 'q': Qs += 1
+        elif Pin[0] == 'd': Ds += 1
+        elif Pin == 'en': En += 1
+        elif Pin == 'clk': Clk += 1
+        elif Pin == 'rst_n': Rst += 1
+
+    if (Qs != Wid) or (Ds != Wid) or (En!=1) or (Clk!=1) or (Rst!=1):
+        logs.log_error('FLIPFLOP %s %s wid=%d qs=%d ds=%d' % (Obj.Type,Obj.Name,Wid,Qs,Ds))
+        return 0
+    else:
+        return 1
+
+
+
+
+def checkShifts(Obj,Mod):
+    Wid = Obj.params['WID']
+    As,Bs,Xs = 0,0,0
+    for Pin in Obj.conns:
+        Sig = Obj.conns[Pin]
+        if Pin[0] == 'a': As += 1
+        elif Pin[0] == 'b': Bs += 1
+        elif Pin[0] == 'x': Xs += 1
+
+    if (As != Wid) or (Xs != Wid):
+        logs.log_error('SHIFTER %s %s wid=%d xs=%d as=%d bs=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs))
+        return 0
+    else:
+        return 1
+
+
+
+def checkSimple(Obj,Mod):
+    Type = Obj.Type
+    Inst = Obj.Name
+    Len = len(list(Obj.conns.keys()))
+    Bads = 0
+    if  (Len==2):
+        if Type not in ['bufx','inv']:
+            logs.log_error('checkSimple of %s failed on %s' % (Type,Inst,list(Obj.conns.keys())))
+            Bads += 1
+    for Pin in Obj.conns:
+        if (Pin != 'x'):
+            Sig = Obj.conns[Pin]
+            List  = Mod.netTable[Sig]
+            if len(List) < 2:
+                logs.log_error('checkSimple input pin %s / %s  is not driven in %s / %s' % (Pin,Sig,Type,Inst))
+                Bads += 1
+    if Bads>0: return 0        
+    return 1
+    
