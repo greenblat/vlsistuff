@@ -202,7 +202,7 @@ def dealEjects(Mod):
 def ejectFulls(Mod,Fulls):
     for Dst in Fulls:
         List = EJECTS[Dst]
-        Wid0 = Mod.sig_width(Dst)
+        Wid0 = Mod.exprWidth(Dst)
         if len(List) > 1:
             Dats = []
             Cnd = ['||']
@@ -221,7 +221,6 @@ def ejectFulls(Mod,Fulls):
             Cnd = List[0][1]
             Dat = List[0][0]
             TT = List[0][2]
-
 
         Src0 = synth0(Dat,Mod,Wid0)
         if Cnd == []: 
@@ -340,25 +339,26 @@ def ejectPartials(Mod,Partials):
                         TT = List[0][2]
                     else:
                        Dat = Dats[0][1]
-            logs.log_info("BEFORE CODE ii=%s bus=%s dat=%s cnd=%s wid0=%s" %(II,Bus,Dat,Cnd,Wid0))
-            Src0 = synth0(Dat,Mod,Wid0)
-            if (type(Src0) is list)and (len(Src0) == 1): Src0 = Src0[0]
-            logs.log_info("AFTER CODE0 ii=%s bus=%s src0=%s" % (II,Bus,Src0))
-            if Cnd == []:
-                Cond0 = 'vcc'
-                Mod.add_sig('vcc','input',0)
-            else:
-                Cond0 = synth0(Cnd,Mod,Wid0)
-            if TT == 2:
-                Rst = 'vcc'
-            elif TT[0] == 0:
-                Rst = TT[2]
-            else:
-                Rst = 'vcc'
-                Mod.add_sig('vcc','input',0)
-            Obj = Mod.add_inst_conns('flipflop','%s_reg_%s' % (Bus,II),[('clk',TT[1]),('rst_n',Rst),('d',Src0),('en',Cond0),('q',['subbit',Bus,II])])
-            Obj.params['WID'] = Wid0
-            print("CODE FLOP",Bus,II,Src0,Cond0);
+            if Dats != []:
+                logs.log_info("BEFORE CODE ii=%s bus=%s dat=%s cnd=%s wid0=%s" %(II,Bus,Dat,Cnd,Wid0))
+                Src0 = synth0(Dat,Mod,Wid0)
+                if (type(Src0) is list)and (len(Src0) == 1): Src0 = Src0[0]
+                logs.log_info("AFTER CODE0 ii=%s bus=%s src0=%s" % (II,Bus,Src0))
+                if Cnd == []:
+                    Cond0 = 'vcc'
+                    Mod.add_sig('vcc','input',0)
+                else:
+                    Cond0 = synth0(Cnd,Mod,Wid0)
+                if TT == 2:
+                    Rst = 'vcc'
+                elif TT[0] == 0:
+                    Rst = TT[2]
+                else:
+                    Rst = 'vcc'
+                    Mod.add_sig('vcc','input',0)
+                Obj = Mod.add_inst_conns('flipflop','%s_reg_%s' % (Bus,II),[('clk',TT[1]),('rst_n',Rst),('d',Src0),('en',Cond0),('q',['subbit',Bus,II])])
+                Obj.params['WID'] = Wid0
+                print("CODE FLOP",Bus,II,Src0,Cond0);
 
 def int2bus(Wid,Int):
     res = []
@@ -677,10 +677,12 @@ def synth0(Src,Mod,Mwid=64,Depth=0):
 def synth0__(Src,Mod,Mwid=64,Depth=0):
     if type(Src) is str: 
         if '.' in Src: return 0
+        A0 = Mod.compute_int(Src,False)
+        if type(A0) is int:
+            return synth0(['dig',str(Mwid),str(A0)],Mod,Mwid,Depth)
         return Src
     if type(Src) is int: 
         XX =  Src & ((1<<Mwid)-1)
-        print("HARD XXYY",XX,Mwid)
         XY = splitBits(XX,Mod,Mwid)
         return XY
     if type(Src) is list:
@@ -693,8 +695,9 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             LL = []
             for X in Src[1:]:
                 A = synth0(X,Mod,Mwid,Depth+1)
-                if A!='vcc':
-                    LL.append(A)
+                A0 = makeNotEqZero(A,Mod)
+                if A0!='vcc':
+                    LL.append(A0)
             Len = len(LL)
             Out = makeWide(LL,'and',Mod)
             return Out
@@ -709,9 +712,7 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             return Out
 
         if Src[0] == '^':
-            A = synth0(Src[1],Mod,Mwid,Depth+1)
-            B = synth0(Src[2],Mod,Mwid,Depth+1)
-            Out = addInst2('xor2','',A,B,Mod)
+            Out = makeWideGate('xor2',Mod,Mwid,Src[1],Src[2],Depth)
             return Out
             
 
@@ -721,6 +722,11 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             Len = len(AA)
             Out = makeWide(AA,'or',Mod)
             Mod.add_sig(Out,'wire',1)
+            return Out
+
+        if Src[0] == '~&':
+            LL = synth0(Src[1],Mod,Mwid,Depth+1)
+            Out = makeWide(LL,'nand',Mod)
             return Out
 
 
@@ -734,6 +740,8 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
 
 
         if Src[0] == '&':
+            Out = makeWideGate('and2',Mod,Mwid,Src[1],Src[2],Depth)
+            return Out
             A = synth0(Src[1],Mod,Mwid,Depth+1)
             B = synth0(Src[2],Mod,Mwid,Depth+1)
             AA = splitBits(A,Mod)
@@ -747,10 +755,12 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             for ind in range(Len):
                 A0 = AA[ind] 
                 B0 = BB[ind] 
-                addInst2('and2',('subbit',Out,ind),A0,B0,Mod)
+                addInst2('and2',['subbit',Out,ind],A0,B0,Mod)
             return Out
 
         if Src[0] == '|':
+            Out = makeWideGate('or2',Mod,Mwid,Src[1],Src[2],Depth)
+            return Out
             A = synth0(Src[1],Mod,Mwid,Depth+1)
             B = synth0(Src[2],Mod,Mwid,Depth+1)
             AA = splitBits(A,Mod)
@@ -799,8 +809,9 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
 
 
         if Src[0] == '!':
-            A = synth0(Src[1],Mod,Mwid,Depth+1)
-            Out = addInst1('inv','',A,Mod)
+            AA = synth0(Src[1],Mod,Mwid,Depth+1)
+            print("YYYYYYYYYYY",Src[1],AA,Mwid)
+            Out = addInst1('inv','',AA,Mod)
             return Out
 
         if Src[0] == 'question':
@@ -825,6 +836,12 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             if len(No)>1: No = ['curly']+No
             logs.log_info('QUEST mwid=%d OUT=%s yes=%s src2=%s src3=%s  yes0=%s no=%s' % (Mwid,Out,Yes,Src[2],Src[3],Yes0,No))
             if (Yes==No):
+                if Yes == ['gnd']:
+                    Res = ['bus']
+                    for ii in range(Mwid):
+                        Res.append('gnd')
+                    return Res
+                logs.log_info('YESNO %s' %(str(Yes)))
                 return Yes
             elif (Yes==['vcc']) and (No == ['gnd']):
                 Cond = synth0(Src[1],Mod,Mwid,Depth+1)
@@ -888,7 +905,12 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
         if Src[0] in COMPARES:
             Out = Mod.add_sig('','wire',1)
 
+            A0 = Mod.compute_int(Src[1],False)
             B0 = Mod.compute_int(Src[2],False)
+            if (type(B0) is int) and (type(A0) is int):
+                if (A0 == B0) and (Src[0] in ['==','>=','=<','<=']): return 'vcc'
+                if (A0 != B0) and (Src[0] in ['!=','>','<']): return 'vcc'
+                return 'gnd'
             if type(B0) is int:
                 AA = synth0(Src[1],Mod,Mwid,Depth+1)
                 Obj = Mod.add_inst_conns('comparator_lit','',[('a',AA),('x',Out)])
@@ -913,6 +935,7 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             
         if Src[0] in ['~']:
             AA = synth0(Src[1],Mod,Mwid,Depth+1)
+            print("YYYYYYYYYYY",Src[1],AA,Mwid)
             Bits = splitBits(AA,Mod)
             L1 = Mod.sig_width(AA)
             Out = Mod.add_sig('','wire',L1)
@@ -926,7 +949,7 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
         if (Src[0] == '-') and (len(Src) ==2):
             AA = synth0(0,Mod,Mwid,Depth+1)
             BB = synth0(Src[1],Mod,Mwid,Depth+1)
-            L2 = Mod.sig_width(BB)
+            L2 = Mod.exprWidth(BB)
             Out = Mod.add_sig('','wire',L2)
             Obj = Mod.add_inst_conns('subtractor','',[('a',AA),('b',BB),('x',Out)])
             Obj.params['WID'] = L2
@@ -940,7 +963,7 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
 
             if (type(B0) is int): 
                 AA = synth0(Src[1],Mod,Mwid,Depth+1)
-                L1 = Mod.sig_width(AA)
+                L1 = Mod.exprWidth(AA)
                 Out = Mod.add_sig('','wire',1+L1)
                 if Src[0] == '+': Type = 'adder_lit'
                 if Src[0] == '-': Type = 'subtractor_lit'
@@ -949,11 +972,25 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
                 Obj.params['LIT'] = B0
                 return Out
 
+            if (type(A0) is int): 
+                BB = synth0(Src[2],Mod,Mwid,Depth+1)
+                L1 = Mod.exprWidth(BB)
+                Out = Mod.add_sig('','wire',1+L1)
+                if Src[0] == '+': Type = 'adder_lit'
+                if Src[0] == '-': Type = 'subtractor_lit'
+                Obj = Mod.add_inst_conns(Type,'',[('a',BB),('x',Out)])
+                Obj.params['WID'] = L1+1
+                Obj.params['LIT'] = A0
+                return Out
+
+
+
+
 
             AA = synth0(Src[1],Mod,Mwid,Depth+1)
             BB = synth0(Src[2],Mod,Mwid,Depth+1)
-            L1 = Mod.sig_width(AA)
-            L2 = Mod.sig_width(BB)
+            L1 = Mod.exprWidth(AA)
+            L2 = Mod.exprWidth(BB)
             Out = Mod.add_sig('','wire',1+max(L1,L2))
 
             if Src[0] == '+': Type = 'adder'
@@ -1025,6 +1062,32 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
 
     logs.log_error("SYNTH0 %s %s " % (type(Src),Src))
     return Src
+
+
+
+def makeWideGate(Gate,Mod,Mwid,Src1,Src2,Depth):
+    A = synth0(Src1,Mod,Mwid,Depth+1)
+    B = synth0(Src2,Mod,Mwid,Depth+1)
+    AA = splitBits(A,Mod)
+    BB = splitBits(B,Mod)
+    if AA[0] == 'bus': AA = AA[1:]
+    if BB[0] == 'bus': BB = BB[1:]
+    AA.reverse()
+    BB.reverse()
+    Len = min(len(AA),len(BB))
+    Out = Mod.add_sig('','wire',Len)
+    for ind in range(Len):
+        A0 = AA[ind] 
+        B0 = BB[ind] 
+        OO = ('subbit',Out,ind)
+        if A0 == 'gnd': addInst1('bufx',OO,B0,Mod)
+        elif (A0 == 'vcc') or (B0 == 'vcc'): addInst1('bufx',OO,'vcc',Mod)
+        elif B0 == 'gnd': addInst1('bufx',OO,A0,Mod)
+        else: 
+            addInst2(Gate,OO,A0,B0,Mod)
+    return Out
+
+
 
 def getBit(List,ind):
     if len(List)>ind: return List[ind]
@@ -1119,7 +1182,9 @@ def instances(Mod):
             Sig = Obj.conns[Pin]
             if needsSynth(Sig):
                 Res = synth0(Sig,Mod)
-                Obj.conns[Pin] = Res
+                print("INSTANCE",Sig,Res)
+                Bits = splitBits(Res,Mod)
+                Obj.conns[Pin] = Bits
         Keys = list(Obj.params.keys())
         Keys.sort()
         if Keys!=[]:
@@ -1136,7 +1201,7 @@ def needsSynth(Sig):
     if type(Sig) is str: return False
     if type(Sig) is int: return False
     if type(Sig) is list:
-        if Sig[0] in ['curly','hex','dig','bin','subbus','subbit']: return True
+        if Sig[0] in ['question','curly','hex','dig','bin','subbus','subbit']: return True
         if Sig[0] in Ops: return True
     return False
 
@@ -1169,13 +1234,44 @@ def expr_width(Expr,Mod):
     logs.log_error('expr_width %s' % str(Expr))
     return 1
 
+def makeNotEqZero(AA,Mod):
+    if AA == 'vcc': return 'vcc'
+    if AA == 'gnd': return 'gnd'
+    if type(AA) is int:
+        if AA==0: return 'gnd'
+        return 'vcc'
+    if type(AA) is str:
+        if AA in Mod.nets:
+            _,Wid = Mod.nets[AA]
+            if Wid in [0,1,'0','1']: return AA
+            if type(Wid) is tuple:
+                Expr = ['!=',AA,0]
+                return synth0(Expr,Mod,1)
+
+    if type(AA) is list:
+        if AA[0] == 'subbit': return AA
+        if AA[0] == 'subbus':
+            Expr = ['!=',AA,0]
+            return synth0(Expr,Mod,1)
+        if AA[0] == 'bus':
+            if 'vcc' in AA: return 'vcc'
+            return 'gnd'
+            
+    logs.log_error('makeNotEqZero got "%s"' % str(AA))
+    return AA
+        
+
+
+
+
+
 def checker(Mod):
     Mod.buildNetTable()
     Oks = 0
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
         Type = Obj.Type
-        if Type in 'xor2 and2 or2 or3 or4 or5 or6 or7 or8 and3 and4 and5 and6 and7 and8 bufx inv'.split():
+        if Type in 'nand8 xor2 and2 or2 or3 or4 or5 or6 or7 or8 and3 and4 and5 and6 and7 and8 bufx inv'.split():
             Oks += checkSimple(Obj,Mod)
         elif Type in 'adder subtractor multiplier divider remainder'.split():
             Oks += checkArith(Obj,Mod)
@@ -1228,6 +1324,9 @@ def checkComparator(Obj,Mod):
     else:
         return 1
 
+def diff1(A,B):
+    Abs = abs(A-B)
+    return Abs>1
 
 def checkAdderLit(Obj,Mod):
     Wid = Obj.params['WID']
@@ -1236,7 +1335,7 @@ def checkAdderLit(Obj,Mod):
         Sig = Obj.conns[Pin]
         if Pin[0] == 'x': Xs += 1
         elif Pin[0] == 'a': As += 1
-    if (Xs != Wid) or (As != Wid):
+    if diff1(Xs,Wid) or diff1(As,Wid):
         logs.log_error('ARITHLIT %s %s wid=%d xs=%d a=%d ' % (Obj.Type,Obj.Name,Wid,Xs,As))
         return 0
     else:
@@ -1250,7 +1349,7 @@ def checkSubtractorLit(Obj,Mod):
         Sig = Obj.conns[Pin]
         if Pin[0] == 'x': Xs += 1
         elif Pin[0] == 'a': As += 1
-    if (Xs != Wid) or (As != Wid):
+    if diff1(Xs,Wid) or diff1(As,Wid):
         logs.log_error('ARITHLIT %s %s wid=%d xs=%d a=%d ' % (Obj.Type,Obj.Name,Wid,Xs,As))
         return 0
     else:
@@ -1282,7 +1381,7 @@ def checkSelect(Obj,Mod):
         if Pin[0] == 'x': Xs += 1
         elif Pin[0] == 'a': As += 1
         elif Pin[0] == 'b': Bs += 1
-    if (Xs != 1) or (As != Wid):
+    if (Xs != 1) or diff1(As,Wid):
         logs.log_error('SELECT %s %s wid=%d*%d xs=%d a=%d b=%d ' % (Obj.Type,Obj.Name,Wid,Depth,Xs,As,Bs))
         return 0
     else:
@@ -1299,7 +1398,12 @@ def checkArith(Obj,Mod):
         if Pin[0] == 'x': Xs += 1
         elif Pin[0] == 'a': As += 1
         elif Pin[0] == 'b': Bs += 1
-    if (Xs != Wid) or (As != Wid) or (Bs != Wid):
+    if Obj.Type == 'multiplier':
+        if diff1(Xs,Wid) or diff1(As,Wid//2) or diff1(Bs,Wid//2):
+            logs.log_error('ARITH %s %s wid=%d xs=%d a=%d b=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs))
+            return 0
+        return 1
+    elif diff1(Xs,Wid) or diff1(As,Wid) or diff1(Bs,Wid):
         logs.log_error('ARITH %s %s wid=%d xs=%d a=%d b=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs))
         return 0
     else:
@@ -1316,7 +1420,13 @@ def checkMux2(Obj,Mod):
         elif Pin.startswith('no'): Bs += 1
         elif Pin == 'sel':
             Sel += 1
-    if (Xs != Wid) or (As != Wid) or (Bs != Wid) or (Sel!=1):
+    if diff1(Xs,Wid) or (Sel!=1):
+        logs.log_error('MUX2 %s %s wid=%d xs=%d yes=%d no=%d sel=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs,Sel))
+        return 0
+    elif diff1(As,Wid) and diff1(Bs,Wid) :
+        logs.log_error('MUX2 %s %s wid=%d xs=%d yes=%d no=%d sel=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs,Sel))
+        return 0
+    elif (As==1) or (Bs==1) :
         logs.log_error('MUX2 %s %s wid=%d xs=%d yes=%d no=%d sel=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs,Sel))
         return 0
     else:
@@ -1336,7 +1446,7 @@ def checkFlipFlop(Obj,Mod):
         elif Pin == 'clk': Clk += 1
         elif Pin == 'rst_n': Rst += 1
 
-    if (Qs != Wid) or (Ds != Wid) or (En!=1) or (Clk!=1) or (Rst!=1):
+    if diff1(Qs,Wid) or (diff1(Ds,Wid) and not (Ds>Wid)) or (En!=1) or (Clk!=1) or (Rst!=1):
         logs.log_error('FLIPFLOP %s %s wid=%d qs=%d ds=%d' % (Obj.Type,Obj.Name,Wid,Qs,Ds))
         return 0
     else:

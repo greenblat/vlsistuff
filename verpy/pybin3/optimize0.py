@@ -61,6 +61,7 @@ def optimize0(Mod):
         Obj = Mod.insts[Inst]
         if Obj.Type in ['and2','or2']:
             Ins = [Obj.Type,module_class.hashit(Obj.conns['a']),module_class.hashit(Obj.conns['b'])]
+            print("iYYXXXX",Inst,Ins)
             Ins.sort()
             Ins = tuple(Ins)
 

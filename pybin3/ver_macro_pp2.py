@@ -34,6 +34,7 @@ def work_on_lines(lines,filename):
     total = len(lines)
     sofar=0
     guard=0
+    lines = joinLines(lines)
     Tempname = 'ver_macro_pp.temp'+str(Tempindex)
     Tempindex=Tempindex+1
     Temp = open(Tempname,'w')
@@ -138,6 +139,23 @@ def deal_include(fname1,Ydirs,filename):
         print('return include ',len(ilines),len(mlines),fname2)
     return mlines
 
+def joinLines(lines):
+    Out = ''
+    Olines = []
+    for line in lines:
+        if len(line)>1:
+            if line[-1] == '\n':
+                line = line[:-1]
+            if line[-1] == '\\':
+                Out += line[:-1]
+            elif Out!='':
+                Olines.append(Out+line+'\n')
+                Out = ''
+            else:
+                Olines.append(line+'\n')
+    return Olines
+
+    
 
 
 def work_on_file(fname):

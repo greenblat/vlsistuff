@@ -406,6 +406,8 @@ class module_class:
             Obj = self.insts[Inst]
             if 'inst_width' in Obj.params:
                 (Hi,Lo) = Obj.params['inst_width'][1]
+                Hi  = self.compute_int(Hi)
+                Lo  = self.compute_int(Lo)
                 Wid = Hi-Lo+1
                 for Ind in range(Hi,Lo-1,-1):
                     New = self.add_inst(Obj.Type,Inst+'_'+str(Ind))
@@ -1365,6 +1367,11 @@ class module_class:
         if type(Expr) is str:
             if Expr in self.nets:
                 return self.sig_width(Expr)
+            if Expr in self.localparams:
+                return 32
+            if Expr in self.parameters:
+                return 32
+
         if type(Expr) is list:
             if Expr == []:
                 logs.log_error('EMPTY Expr')
@@ -1407,6 +1414,8 @@ class module_class:
                 logs.log_info("XXXXX %s" % str(Expr))
                 return 0
 
+            if Expr[0] in ['&','|','^']: 
+                return self.exprWidth(Expr[1])
 
         logs.log_error("EXPR WIDTH %s %s" % (self.Module,Expr))
         return 0
