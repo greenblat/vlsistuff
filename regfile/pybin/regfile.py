@@ -12,6 +12,9 @@ reg cucu width=72 access=rw desc="this is very important register"
 array arr width=12 depth=13 access=ro desc="less important"
 // several other options appear in docs
 include filename   = new option, to include
+
+regfile.py aaa.regfile <directory_for_outputs>  [-unpacked]
+
 '''
 
 
@@ -35,14 +38,21 @@ regfile_html.wopen = wopen
 xml_regfile2_create.wopen = wopen
 
 def main():
-    global Fdirx
+    global Fdirx,Unpacked
+    Unpacked = False
     if len(sys.argv) == 1:
         print(HELPSTRING)
         return
     Fname = sys.argv[1]
     Fdirx = '.'
-    if len(sys.argv)>2:
-        Fdirx = sys.argv[2]
+    for Prm in sys.argv[1:]:
+        if Prm[0] == '-':
+            if '-unp' in Prm:
+                Unpacked = True
+                print("UNPACKED")
+        elif (Prm != Fname):
+            Fdirx = Prm
+
     Cell,Dir,Ext = logs.fnameCell(Fname)
     if Dir == '': 
         Dir = '.'
@@ -328,6 +338,8 @@ def getParams(Lnum,wrds):
                 ww = [ww[0],Join]
             AA = examine(Lnum,ww[1])
             Res[ww[0]] = AA
+            if ww[0] == 'wid': 
+                Res['width'] = AA
         else:
             Nn.append(wrd)
     Res['names']=Nn
@@ -357,6 +369,7 @@ def expandBits(Name,Wid,Bits):
     if Wid<Bits:
         Line = '{%d\'b0,%s}'%(Bits-Wid,Name)
         return Line
+    logs.log_error('expandBits %s %s %s' % (Name,Wid,Bits))    
     return 'ERROR%s'%Name
     
 
@@ -846,7 +859,10 @@ def dumpRam(Postfix,File,Alone):
 def forInst(Line,Which,Finst):
     wrds = Line.split()
     if wrds[1] == 'reg': wrds.pop(1)
-    Sig = wrds[-1]
+    if len(wrds) == 4:
+        Sig = wrds[-2]
+    else:
+        Sig = wrds[-1]
     if Which == 'wire':
         if len(wrds) == 3:
             Finst.write('wire %s %s;\n' % (wrds[1],Sig))
@@ -1218,7 +1234,10 @@ def treatArray(Reg):
     Dep = getPrm(Reg,'depth',32)
     Name= getPrm(Reg,'names',['err'])[0]
     if 'external' in Access:
-        Line = '    ,input [%d:0] [%d:0] %s'%(Dep-1,Wid-1,Name)
+        if Unpacked:
+            Line = '    ,input [%d:0] %s [0:%d] '%(Wid-1,Name,Dep-1)
+        else:
+            Line = '    ,input [%d:0] [%d:0] %s'%(Dep-1,Wid-1,Name)
         LINES[0].append(Line)
         Line = '    ,output %s_rd_pulse'%(Name)
         LINES[0].append(Line)
@@ -1237,7 +1256,10 @@ def treatArray(Reg):
         LINES[4].append(Str)
 
     elif outAccess(Access):
-        Line = '    ,output reg [%d:0] [%d:0] %s'%(Dep-1,Wid-1,Name)
+        if Unpacked:
+            Line = '    ,output reg [%d:0] %s [0:%d]'%(Wid-1,Name,Dep-1)
+        else:
+            Line = '    ,output reg [%d:0] [%d:0] %s'%(Dep-1,Wid-1,Name)
         LINES[0].append(Line)
         Ad = Reg.Addr
         Line = '        %s <= %d\'h%x;'%(Name,Dep*Wid,Reset)
@@ -1249,7 +1271,10 @@ def treatArray(Reg):
             Ad += simpleAdvanceAddr(Reg)
 
     elif ('ro' in Access):
-        Line = '    ,input [%d:0] [%d:0] %s'%(Dep-1,Wid-1,Name)
+        if Unpacked:
+            Line = '    ,input [%d:0] %s [0:%d]'%(Wid-1,Name,Dep-1)
+        else:
+            Line = '    ,input [%d:0] [%d:0] %s'%(Dep-1,Wid-1,Name)
         LINES[0].append(Line)
     Ad = Reg.Addr
     busWid = Db['chip'].Params['width']
@@ -1429,7 +1454,11 @@ def helper0(Finst):
 #        print('HELPER0',Reg, (Wrds[-1] not in FIELDED_REGS),(Wrds[-1] in EXTERNAL_REGS), (Wrds[-1] in EXTERNAL_FIELDS))
         if (Wrds[-1] not in FIELDED_REGS)or(Wrds[-1] in EXTERNAL_REGS)or (Wrds[-1] in EXTERNAL_FIELDS):
             Db['fout'].write(Li+'\n')
-            Finst.write('    ,.%s(%s)\n'%(Wrds[-1],Wrds[-1]))
+            if len(Wrds) == 4:
+                Sig = Wrds[-2]
+            else:
+                Sig = Wrds[-1]
+            Finst.write('    ,.%s(%s)\n'%(Sig,Sig))
         else:
             Li = Li.replace('input','wire')
             Li = Li.replace('output','wire')
@@ -1457,7 +1486,11 @@ def enclosingModule(Temp,Finst):
     for Li in LINES[7]:
          Db['fout'].write('%s\n'%Li)
          wrds = Li.split()
-         Finst.write('    ,.%s(%s)\n'%(wrds[-1],wrds[-1]))
+         if len(wrds) == 4:
+            Sig = wrds[-2]
+         else:
+            Sig = wrds[-1]
+         Finst.write('    ,.%s(%s)\n'%(Sig,Sig))
     Db['fout'].write(');\n')
     Finst.write(');\n')
 
@@ -1481,8 +1514,12 @@ def enclosingModule(Temp,Finst):
     Db['fout'].write(Str)
     for Li in LINES[0]:
         wrds = Li.split()
-        Conn = wrds[-1]
-        Conn2 = wrds[-1]
+        if len(wrds) == 4:
+            Conn = wrds[-2]
+            Conn2 = wrds[-2]
+        else:
+            Conn = wrds[-1]
+            Conn2 = wrds[-1]
         if Conn in Db['splits']:
             RR = Db['splits'][Conn]
             Acc = RR.Params['access']
