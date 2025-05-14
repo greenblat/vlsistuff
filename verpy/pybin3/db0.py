@@ -273,6 +273,9 @@ def add_module_params(List1):
 
 def add_module_header(List0):
     Dir = False
+    Vars = matches.matches(List0,'(  ) ;')
+    if True: return
+
     Vars = matches.matches(List0,'( !Header_list ) ;')
     if Vars:
         List2 = flattenList(Vars[0])

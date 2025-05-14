@@ -58,7 +58,7 @@ def setupMain(Env):
         if not os.path.exists(Fname):
             logs.log_error('given filename "%s" cannot be read' % Fname)
         elif Env.GateLevelRead:
-            Env.read_gate_level_verilog_file(Fname,Env.rundir)
+            Env.read_gate_level_verilog_file(Fname,Env.rundir,Env)
         else:
             Env.read_verilog_file(Fname,Env.rundir,Env)
         logs.record_directory(Fname,Env.SearchDirs)
@@ -69,13 +69,19 @@ def load_verilog_file(Fname,Rundir,Env):
     if not os.path.exists(Fname):
         logs.log_error('given filename "%s" cannot be read' % Fname)
     elif Env.GateLevelRead:
-        read_gate_level_verilog_file(Fname,Rundir)
+        read_gate_level_verilog_file(Fname,Rundir,Env)
     else:
         read_verilog_file(Fname,Rundir,Env)
 
+def loadVerilogModule(Fname,Env,As=False):
+    load_verilog_file(Fname,'.',Env)
+    if As:
+        Latest = Env.Latest
+        Move = Env.Modules.pop(Latest)
+        Env.Modules[As] = Move
 
 
-def run_lexer(Fname,FnameOut):
+def run_lexer(Fname,FnameOut,Env):
     print("XXXXXXX",Env.params['execpath'])
     if Env.systemverilog:
         print('using system verilog parsing')
@@ -108,7 +114,7 @@ def read_verilog_file(Fname,RunDir,Env):
     macro_verilog_pp.run_main(Params,'00010',True)
 
 
-    run_lexer(tmpfilename,'%s/lex.out'%RunDir)
+    run_lexer(tmpfilename,'%s/lex.out'%RunDir,Env)
     os.system('/bin/mv %s .'%tmpfilename)
     if Env.systemverilog:
         from vyaccer3 import run_yacc
@@ -124,11 +130,12 @@ def read_verilog_file(Fname,RunDir,Env):
     for Mod in Locals:
         if not Env.Current: Env.Current=Locals[Mod]
         Env.Modules[Mod]=Locals[Mod]
+        Env.Latest = Mod
 
 
-def read_gate_level_verilog_file(Fname,RunDir):
+def read_gate_level_verilog_file(Fname,RunDir,Env):
     logs.log_info('gatelevel readfile %s'%Fname)
-    run_lexer(Fname,'%s/lex.out'%RunDir)
+    run_lexer(Fname,'%s/lex.out'%RunDir,Env)
     File = open('%s/lex.out'%RunDir)
     Locals = glv_readfile(File)
 #    print('>>GLVGLV>>>>>>>',Locals,Fname)
@@ -137,6 +144,7 @@ def read_gate_level_verilog_file(Fname,RunDir):
     for Mod in Locals:
         if not Env.Current: Env.Current=Locals[Mod]
         Env.Modules[Mod]=Locals[Mod]
+        Env.Latest = Mod
 
 
 
