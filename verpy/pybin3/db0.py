@@ -274,7 +274,7 @@ def add_module_params(List1):
 def add_module_header(List0):
     Dir = False
     Vars = matches.matches(List0,'(  ) ;')
-    if True: return
+    if Vars: return
 
     Vars = matches.matches(List0,'( !Header_list ) ;')
     if Vars:
@@ -1306,7 +1306,11 @@ def add_always(List):
         Current.add_always(Statement,When,Kind)
     elif len(List)==2:
         Statement = get_statement(List[1])
-        Current.add_always(Statement)
+        print("ADDALL2",Kind)
+        if Kind == 'always_comb':
+            Current.add_always(Statement,'*','always')
+        else:
+            Current.add_always(Statement)
     else:
         logs.log_err('bad always %s'%List)
 def add_initial(List):
@@ -2008,6 +2012,7 @@ def get_expr(Item):
 
 
         if len(List)==1:
+            if List[0][0]in ['always_comb']: return 'always_comb'
             if List[0][0]in ['always','always_comb','always_ff','always_latch']: return 'always'
             if List[0][0]in ['always','always_comb','always_ff']: return List[0][0]
             if List[0][0]=='Expr':

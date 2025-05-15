@@ -115,7 +115,7 @@ def report2(LINES):
     for Key in LINES:
         LL = LINES[Key]
         for Li in LL:
-            logs.log_info('%s: %s'%(Key,Li))
+            logs.log_info('R2: %s: %s'%(Key,Li))
 
 Db = {'items':[],'clocks':[],'regs':[],'fields':[],'splitted':[],'enable_writes':[]}
 
@@ -1490,6 +1490,7 @@ def enclosingModule(Temp,Finst):
             Sig = wrds[-2]
          else:
             Sig = wrds[-1]
+         print("LENC",Li,wrds,Sig)
          Finst.write('    ,.%s(%s)\n'%(Sig,Sig))
     Db['fout'].write(');\n')
     Finst.write(');\n')
@@ -1515,8 +1516,12 @@ def enclosingModule(Temp,Finst):
     for Li in LINES[0]:
         wrds = Li.split()
         if len(wrds) == 4:
-            Conn = wrds[-2]
-            Conn2 = wrds[-2]
+            if Unpacked:
+                Conn = wrds[-2]
+                Conn2 = wrds[-2]
+            else:
+                Conn = wrds[-1]
+                Conn2 = wrds[-1]
         else:
             Conn = wrds[-1]
             Conn2 = wrds[-1]
