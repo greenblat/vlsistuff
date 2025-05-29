@@ -1,16 +1,16 @@
 #! /bin/csh -f
 
-set VERSION = 10
 # this is how i compile on my macbook Pro. for Python3
 
-set PYC = 3.10
+set PYC = 3.13
 set TAT = 9
+set VERSION = 13
 
 set LIB = /opt/homebrew//Cellar/python@$PYC/$PYC.$TAT/Frameworks/Python.framework/Versions/$PYC/lib
 set INC = /opt/homebrew//Cellar/python@$PYC/$PYC.$TAT/Frameworks/Python.framework/Versions/$PYC/include/python$PYC/
 
-set LIB = /opt/homebrew/Cellar/python@3.10/3.10.13/Frameworks/Python.framework/Versions/3.10/lib
-set INC = /opt/homebrew/Cellar/python@3.10/3.10.13/Frameworks/Python.framework/Versions/3.10/include/python3.10
+set LIB = /opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib
+set INC = /opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/include/python3.13
 
 
 gcc -g src3/vcd_python.c  src3/qq64.c  -o vcd_python3 \

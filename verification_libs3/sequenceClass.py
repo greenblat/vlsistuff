@@ -63,6 +63,7 @@ class sequenceClass:
         self.Translates['float2int'] = logs.float2binary
         self.Timed = {}
         self.Loops = []
+        self.Pulsed = []
         self.Break = False 
         self.AGENTS = AGENTS
         for NickObj in AGENTS:
@@ -403,6 +404,8 @@ class sequenceClass:
             return
         self.runSons()
         self.runTimed()
+        for Sig,Val in self.Pulsed:
+            self.force(Sig,Val)
         if self.waiting>0:
             self.waiting -= 1
             return True
@@ -603,6 +606,18 @@ class sequenceClass:
             logs.log_info('TIMED added %d %s' % (Time,self.Timed[Time]))
         elif (wrds[0] == 'searchpath'):
             pass
+        elif (wrds[0] == 'force_pulse'):
+            Ind = 1
+            while Ind < len(wrds):
+                print("WWW",len(wrds),Ind)
+                if len(wrds) == (Ind+1): wrds.append('1')
+                BB = makeExpr(wrds[Ind+1])
+                Val = self.evalExpr(BB)
+                Was = self.peek(wrds[Ind])
+                self.Pulsed.append((wrds[Ind],Was))
+                self.force(wrds[Ind],Val)
+                Ind += 2
+            return True
         elif (wrds[0] == 'force'):
             Ind = 1
             while Ind < len(wrds):

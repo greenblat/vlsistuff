@@ -13,7 +13,7 @@ PYMONLOG = 'pymon.log'
 
 WHERE = ''
 
-    
+print("VERPY LOGS")    
 Flogs = {}
 
 

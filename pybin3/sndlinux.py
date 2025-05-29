@@ -10,7 +10,7 @@ def main():
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    client.connect('192.168.68.121', username='ilia',password='talnirran')   # ,key_filename='')
+    client.connect('192.168.68.124', username='ilia',password='talnirran')   # ,key_filename='')
     print ("copying")
     sftp = client.open_sftp()
     sftp.put(Fname,'/home/ilia/%s' % (Dst))

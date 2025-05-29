@@ -20,6 +20,7 @@ def onFinish(): return
 
 scoreBoards = {}
 
+print("VERIF LOGS")
 
 def pymonname(Fname):
     global PYMONLOG
@@ -416,6 +417,8 @@ def force(Sig,Val):
     veri.force(Sig,str(Val))
 
 def force_str(Sig,Val):
+    if type(Val) is not str:
+        Val = 'error'
     Str = str2hex(Val)
     veri.force(Sig,Str)
 

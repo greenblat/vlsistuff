@@ -1,57 +1,38 @@
 
-import sys,types,string,os
+import sys,types,os
 import traceback
 Errors = 0   
 Corrects = 0   
 Wrongs = 0   
 Warnings = 0   
 print_debug_messages=0
+print_warning_messages= True
 MAXWRONGS = 2000
-MAXERRORS = 2000
+MAXERRORS = 2000000
 PYMONLOG = 'pymon.log'
 
 WHERE = ''
 
-    
-Flogs = [False,False,False,False]
+print("VERPY LOGS")    
+Flogs = {}
 
 
 import time
 printed_already={}
 
-Flog = False
-Flog2 = False
-Flog3 = False
-Flog4 = False
 TB = 'tb'
 try:
     import veri
 except:
-    veri = False
-    import sys
-    def stime():
-        return 0
-    def peek(Sig):
-        return '0'
-    def force(Sig,Val):
-        return
-    def finish():
-        sys.exit()
+    import fakeVeri as veri
 
 finishCycles = 0
-
-def pymonFileName(logFileName):
-    global Flog
-    if Flog:
-        Flog.close()
-    Flog = open(logFileName,'w')
 
 
 noCycles=False
 Cycles=0
 def get_cycles():
     global noCycles
-    if not veri: return 0
     if noCycles:
         return veri.stime()
     else:
@@ -64,6 +45,16 @@ def get_cycles():
     return Now
 
 finishReason = False
+
+MODULE = ['none']
+def currentModule():
+    return MODULE[0]
+
+def setCurrentModule(Module):
+    MODULE[0]=Module
+
+
+
 
 def finish(Txt):
     if finishReason:
@@ -89,22 +80,39 @@ def log_fatal(Text,Which=0):
 
 
 def keep_error(Text):
-    if not  os.path.exists('~/cellar/errors.keep'):
-        Fout = open('~/errors.keep','w')
+    NewName = os.path.expanduser('~')
+    Fname = '%s/cellar/errors.keep' % NewName
+    if not os.path.exists(Fname):
+        Fout = open(Fname,'w')
         Fout.write('%s\n' % Text)
         Fout.close()
         return
 
-    Fout = open('~/cellar/errors.keep','w')
+    Fout = open(Fname,'a')
     Fout.write('%s\n' % Text)
     Fout.close()
     return
 
+
 def log_error(Text,Which=0,Tb=True,Pstack=False):
     log_err(Text,Which,Tb,Pstack)
+ERRS = {}
+def log_errx(Kind,Text,Which=0,Tb=True,Pstack=False):
+    if Kind not in ERRS:
+        ERRS[Kind] = []
+    ERRS[Kind].append(Text)
+def report_errx(Module):
+    Keys = list(ERRS.keys())
+    Keys.sort()
+    Keys.reverse()
+    for Key in Keys:
+        List = ERRS[Key]
+        for Txt in List:
+            log_err('___E%03d  %s    @%s' % (Key,Txt,Module))
+    
 def log_err(Text,Which=0,Tb=True,Pstack=False):
     global Errors,printed_already
-    if (not Flogs[Which]):
+    if (Which not in Flogs):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Errors +=1  
     Flogs[Which].write('@%d: %s %d ERROR: %s\n'%(get_cycles(),WHERE,Errors,Text))
@@ -114,6 +122,7 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
     if Tb:
         veri.force('%s.errors'%TB,str(Errors))
 
+    Flogs[Which].flush()
 
     if (Errors>MAXERRORS):
         log_info('max errors reached (%d). bailing out. (MAXERRORS==%d)'%(Errors,MAXERRORS),Which)
@@ -129,7 +138,7 @@ def log_err(Text,Which=0,Tb=True,Pstack=False):
 
 def log_correct(Text,Which=0,Print=True):
     global Corrects
-    if (not Flogs[Which]):
+    if (Which not in Flogs):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Corrects += 1
     veri.force('%s.corrects'%TB,str(Corrects))
@@ -147,7 +156,7 @@ def log_wrong(Text,Which=0):
     global Wrongs
     Wrongs += 1
     veri.force('%s.wrongs'%TB,str(Wrongs))
-    if (not Flogs[Which]):
+    if (Which not in Flogs):
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: %d vs %d (err=%d): WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     Flogs[Which].write('@%d: %d vs %d (err=%d): WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
@@ -177,25 +186,33 @@ def finish_now(Text='.'):
 
 def log_warning(Text,Which=0):
     global Warnings,printed_already,Flog
-    if (Text in printed_already):
+    if (Text in printed_already) or not print_warning_messages:
         return
-    if (not Flogs[Which]):
+    if (Which not in Flogs):
         Flogs[Which]= open(PYMONLOG+str(Which),'w')
     print('%d: warning: %s'%(Warnings,Text))
     Flogs[Which].write('%d: warning: %s\n'%(Warnings,Text))
     printed_already[Text]=1
     Warnings +=1  
+    Flogs[Which].flush()
 
 def log_write(Text,Which=0):
-    if (not Flogs[Which]):
+    if Which not in Flogs:
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
 #    print('%s'%(Text))
     Flogs[Which].write('%s\n'%(Text))
+
 def log_info(Text,Which=0):
-    if (not Flogs[Which]):
+    if Which not in Flogs:
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: info: %s'%(get_cycles(),Text))
     Flogs[Which].write('@%d: info: %s\n'%(get_cycles(),Text))
+    Flogs[Which].flush()
+
+def closeLogs():
+    for Which in Flogs:
+        Flogs[Which].close()
+
 
 def log_finfo(Text,File):
     File.write('@%d: info: %s\n'%(get_cycles(),Text))
@@ -227,6 +244,8 @@ def log_infox(Text,Where,Print=False):
         print('@%d:     %s\n'%(get_cycles(),Text))
 
 
+def log_debug(Text):
+    log_dbg(Text)
 def log_dbg(Text):
     if (print_debug_messages):
         print('dbg: ',Text)
@@ -243,9 +262,18 @@ def get_param(Param,Default):
         return params[Param][0]
     return Default
 def parse_args():
-    global params
     fnames=[]
     state='idle'
+
+    PYVER = sys.argv[0]
+    AA = PYVER.split('/')
+    AA.pop(-1)
+    ExecPath = '/'.join(AA)
+    params['execpath'] = ExecPath
+
+
+
+
     for X in sys.argv[1:]:
         if (state=='idle'):
             if (X[0]=='-'):
@@ -276,7 +304,7 @@ def endsWith(Long,Short):
 
 
 def startsWith(Long,Short):
-    if type(Long) is not str: return False
+    if type(Long) is str: return False
     if Short not in Long: return False
     return  Long.index(Short)==0 
 
@@ -294,11 +322,9 @@ def intx(Val):
         return int(Val)
 
 def peek(Sig):
-    if not veri: return 0
     V  = intx(veri.peek(Sig))
     return V
 def valid(Sig):
-    if not veri: return 0
     V  = intx(veri.peek(Sig))
     return V==1
 
@@ -705,7 +731,7 @@ def extract_base_name(Fname):
     return CC[0]
 
 def mustKey(Dir,Key,Msg=''):
-    if type(Key) is [list,tuple]:
+    if isinstance(Key,(list,tuple)):
         for Ak in Key:
             mustKey(Dir,Ak,Msg)
     elif Key in Dir: return
@@ -731,6 +757,17 @@ def bracketize(List):
         else:
             curr.append(X)
     return curr
+
+
+
+def record_directory(Fname,SearchDirs):
+    wrds = Fname.split('/')
+    wrds = wrds[:-1]
+    Dir = '/'.join(wrds)
+    if (len(Dir)==0):
+        Dir = '.'
+    if (Dir not in SearchDirs):
+        SearchDirs.append(Dir)
 
 
 
@@ -786,6 +823,47 @@ class driverClass:
         log_error('run() of driverClass is supposed to be replaced')
 
 
+def check_directory_exists(Fname):
+    if '/' not in Fname:
+        return
+    wrds = Fname.split('/')
+    wrds = wrds[:-1]
+    res=wrds.pop(0)
+    while 1:
+        if not os.path.exists(res):
+            os.mkdir(res)
+        if wrds==[]:
+            return
+        res = res +'/'+wrds.pop(0)
+
+
+def splitQuotes(Txt):
+    Str = ''
+    state = 'idle'
+    for Chr in Txt:
+        if state=='idle':
+            if Chr=='"':
+                state='work'
+                Str += Chr
+            else:
+                Str += Chr
+        elif state=='work':
+            if Chr=='"':
+                state='idle'
+                Str += Chr
+            elif Chr==' ':
+                Str += 'SPACE$SPACE'
+            else:
+                Str += Chr
+    Wrds = Str.split()
+    for ind,Wrd in enumerate(Wrds):
+        X = Wrd.replace('SPACE$SPACE',' ')
+        Wrds[ind] = X
+    return Wrds
+
+def pStack(Txt=''):
+    if Txt!='': print(Txt)
+    traceback.print_stack()
 
 
 

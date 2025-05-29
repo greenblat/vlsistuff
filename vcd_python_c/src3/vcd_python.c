@@ -348,6 +348,7 @@ int psensitive=0;
 
 
 char option[200],fname1[1000],fname2[1000];
+char forpy[1000];
 int toggles = 0;
 char invokation[1000];
 int main( int argc, char *argv[]) {
@@ -362,6 +363,7 @@ int main( int argc, char *argv[]) {
     Valex[0]=0;
     fname1[0]=0;
     fname2[0]=0;
+    forpy[0] = 0;
 
 
 /* update hash table maxsize, if wanted */
@@ -384,9 +386,14 @@ int main( int argc, char *argv[]) {
                   start_time=atof(option);
                   k++;
             } else if (strcmp(option,"-end")==0) {
-                    strcpy(option, *++argv);
+                  strcpy(option, *++argv);
                   end_time=atof(option);
                   k++;
+            } else if (strcmp(option,"-p")==0) {
+                strcpy(option, *++argv);
+                strcat(forpy," ");
+                strcat(forpy,option);
+                k++;
             } else if (strcmp(option,"-toggles")==0) {
                 toggles = 1;
             } else if (fname1[0]==0) strcpy(fname1,option); 
@@ -972,7 +979,7 @@ veri_sensitive(PyObject *self,PyObject *args) {
     Str[0]='x';
     Str[1]=0;
     int hasOffset = -1;
-    printf(">>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+//    printf(">>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 //    if (PyArg_ParseTuple(args, "sss",&pathstring,&val,&function))
 //        hasOffset = 1;
     if (PyArg_ParseTuple(args, "ssss",&pathstring,&val,&function,&offset))
@@ -1131,6 +1138,39 @@ veri_peek(PyObject *self,PyObject *args) {
 
 
 
+static PyObject*
+veri_siglist(PyObject *self,PyObject *args) {
+    char *pathstring,*vstr,*filename;
+    FILE *File;
+    if (!PyArg_ParseTuple(args, "s",&pathstring))
+        return NULL;
+    int Len = strlen(pathstring); 
+    char Full[1000];
+    char pvalue[100000];
+    char *Rest;
+    pvalue[0] = 0;
+    for (int ii=0; ii<=maxusedsig; ii++) {
+        strcpy(Full,qqia(sigs[ii].fpath));
+        Full[Len] = 0;
+        if (strcmp(Full,pathstring)==0) {
+            Rest = &(Full[Len+1]); 
+            int Dots = 0;
+            for (int jj=0;Rest[jj];jj++) if (Rest[jj] == '.') Dots ++;
+            if (Dots == 0) {
+                int Wide = sigs[ii].wide;
+                strcpy(Full,qqia(sigs[ii].fpath)); 
+//                printf("FULL %s|%d\n",Full,Wide);
+                strcat(pvalue," ");
+                strcat(pvalue,Rest);
+                sprintf(Rest,"|%d",Wide);
+                strcat(pvalue,Rest);
+            }
+        }
+    }
+    return Py_BuildValue("s", pvalue);
+}
+
+
 
 static PyObject*
 veri_listing(PyObject *self,PyObject *args) {
@@ -1210,6 +1250,7 @@ static PyMethodDef VeriMethods[] = {
     {"stime", veri_stime, METH_VARARGS, "Return the number of arguments received by the process."},
     {"changes", veri_changes, METH_VARARGS, "Return the number of arguments received by the process."},
     {"listing", veri_listing, METH_VARARGS, "Return the number of arguments received by the process."},
+    {"siglist", veri_siglist, METH_VARARGS, "based on full path, print all signals."},
     {"sensitive", veri_sensitive, METH_VARARGS,"add to watch list"},
     {"finish", veri_finish, METH_VARARGS, "Return the number of arguments received by the process."},
     {"toggles", veri_toggles, METH_VARARGS, "Return the number of arguments received by the process."},
@@ -1249,6 +1290,8 @@ void start_python() {
     char temp[10000];
     PyImport_AppendInittab("veri", PyInit_veri);
     Py_Initialize();
+    sprintf(temp,"argvMore = \"%s\"\n",forpy);
+    PyRun_SimpleString(temp);
     if (toggles) 
         sprintf(temp,"toggles = True\nINITFILE = '%s'\n%s",fname2,scriptStart);
     else

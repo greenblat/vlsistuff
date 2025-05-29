@@ -297,6 +297,8 @@ class module_class:
             File.write('    always %s\n'%(str(Alw)))
         for Alw in self.generates:
             File.write('    generate %s\n'%(str(Alw)))
+        for Alw in self.initials:
+            File.write('    initials %s\n'%(str(Alw)))
         for Inst in self.insts:
             self.insts[Inst].dump(File)
         File.write('endmodule\n')
@@ -1416,6 +1418,8 @@ class module_class:
 
             if Expr[0] in ['&','|','^']: 
                 return self.exprWidth(Expr[1])
+            if Expr[0] == 'question':
+                return self.exprWidth(Expr[2])
 
         logs.log_error("EXPR WIDTH %s %s" % (self.Module,Expr))
         return 0
