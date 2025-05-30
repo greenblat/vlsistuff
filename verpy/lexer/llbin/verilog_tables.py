@@ -37,7 +37,7 @@ Letters = LowLetters+CapLetters
 Digits='0123456789'
 Alphas = Letters+Digits+'_'
 AlphasPlus = Alphas + '.' + '$'
-HexDig = Digits+'abcdef'+'ABCDEF'+'_'+'xX'
+HexDig = Digits+'abcdef'+'ABCDEF'+'_'+'zZxX'
 BinDig = '01_xzXZ?'
 Singles = '?.,[]{}#@()~%^;:/+-*'
 Doubles = '~-=!<>&|'
