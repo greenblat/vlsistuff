@@ -1490,7 +1490,6 @@ def enclosingModule(Temp,Finst):
             Sig = wrds[-2]
          else:
             Sig = wrds[-1]
-         print("LENC",Li,wrds,Sig)
          Finst.write('    ,.%s(%s)\n'%(Sig,Sig))
     Db['fout'].write(');\n')
     Finst.write(');\n')

@@ -13,16 +13,16 @@ def zeroDriveRound(Mod,Ones,Round):
         if (Dir == 'wire') and (Net in Mod.netTable):
             List = Mod.netTable[Net]
             if len(List) == 1:
-                logs.log_info("(%s) %d ONE %s %s" % (Round,Cnt,Net,List))
+#                logs.log_info("(%s) %d ONE %s %s" % (Round,Cnt,Net,List))
                 Cnt += 1
                 Inst,Type,Pin = List[0]
                 if Inst in Ones:
-                    logs.log_info("REMOVE %s ONE %s %s" % (Round,Net,List))
+#                    logs.log_info("REMOVE %s ONE %s %s" % (Round,Net,List))
                     Mod.insts.pop(Inst)
             elif len(List) == 0:
                 logs.log_info("ZERO %s CONNECT %s" % (Round,Net))
         elif (Dir == 'wire') and (Net not in Mod.netTable):
-            logs.log_info("ZERO %s NOCONNS %s" % (Round,Net))
+#            logs.log_info("ZERO %s NOCONNS %s" % (Round,Net))
             RM.append(Net)
     for Net in RM:
         Mod.nets.pop(Net)
@@ -36,22 +36,23 @@ def bufx_round(Mod,Round):
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
         if Obj.Type == 'bufx':
-            In = Obj.conns['a']
-            Out = Obj.conns['x']
-            if In.startswith('net_'):
-                List = Mod.netTable[In]
-                if len(List) == 2:
-                    logs.log_info(" (%d) TWO buf=%s in=%s out=%s  list=%s" % (Cnt,Inst,In,Out,List))   
-                    Cnt += 1
-                    if List[0][0] != Inst:
-                        DrvInst = List[0][0]
-                        DrvPin  = List[0][2]
-                    else:
-                        DrvInst = List[1][0]
-                        DrvPin  = List[1][2]
-                    Drv = Mod.insts[DrvInst]
-                    Drv.conns[DrvPin] = Out
-                    Ones.append(Inst)        
+            if 'a' in Obj.conns:
+                In = Obj.conns['a']
+                Out = Obj.conns['x']
+                if In.startswith('net_'):
+                    List = Mod.netTable[In]
+                    if len(List) == 2:
+#                        logs.log_info(" (%d) TWO buf=%s in=%s out=%s  list=%s" % (Cnt,Inst,In,Out,List))   
+                        Cnt += 1
+                        if List[0][0] != Inst:
+                            DrvInst = List[0][0]
+                            DrvPin  = List[0][2]
+                        else:
+                            DrvInst = List[1][0]
+                            DrvPin  = List[1][2]
+                        Drv = Mod.insts[DrvInst]
+                        Drv.conns[DrvPin] = Out
+                        Ones.append(Inst)        
     return Ones                
 
 
@@ -61,7 +62,6 @@ def optimize0(Mod):
         Obj = Mod.insts[Inst]
         if Obj.Type in ['and2','or2']:
             Ins = [Obj.Type,module_class.hashit(Obj.conns['a']),module_class.hashit(Obj.conns['b'])]
-            print("iYYXXXX",Inst,Ins)
             Ins.sort()
             Ins = tuple(Ins)
 
@@ -75,7 +75,7 @@ def optimize0(Mod):
     for Key in Table2:
         List = Table2[Key]
         if len(List) > 1:
-            print("KEY",Key,"LIST",Table2[Key])
+#            print("KEY",Key,"LIST",Table2[Key])
             Saves += len(List)-1
 
 
@@ -86,7 +86,7 @@ def makeByBits(Mod):
         for Pin in Pins:
             Expr = Obj.conns[Pin]
             if (type(Expr) is list) and (len(Expr) == 1): Expr = Expr[0]
-            print("DBG: inst=%s type=%s pin=%s expr=%s" % (Inst,Obj.Type,Pin,Expr))
+#            print("DBG: inst=%s type=%s pin=%s expr=%s" % (Inst,Obj.Type,Pin,Expr))
             if not Expr:
                print("EMPTY CONN %s %s inst=%s pin=%s" % (Mod.Module,Obj.Type,Inst,Pin)) 
                Bits = []
@@ -102,7 +102,7 @@ def makeByBits(Mod):
                     Obj.conns['%s_%d_' % (Pin,ind)] = Bit
             elif len(Bits) == 1:
                 Bit = module_class.hashit(Expr)
-                print("EXPR",Expr,Bit)
+#                print("EXPR",Expr,Bit)
                 Bit = Bit.replace('[','_')
                 Bit = Bit.replace(']','_')
                 Obj.conns[Pin] = Bit
@@ -131,7 +131,7 @@ def similarGatesRound(Mod,Round):
                 SIGNATURES[Signature].append(Inst)
             else:
                 SIGNATURES[Signature] = [Inst]
-                
+    print("SIGN %s out of %s " % (len(list(SIGNATURES.keys())),len(list(Mod.insts.keys()))))
     for Signature in SIGNATURES:
         List = SIGNATURES[Signature]
         if len(List)>1:

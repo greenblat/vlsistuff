@@ -1,5 +1,5 @@
 import string
-import sys
+import os,sys
 import logs
 def stam():
     return 0
@@ -7,6 +7,7 @@ logs.get_cycles = stam
 
 
 import optimize0
+import pprint
 
 
 PaternEdge0 = ['list', ['edge', 'posedge', 'Clk' ], ['edge', 'negedge', 'Rst' ]]
@@ -14,6 +15,18 @@ PaternEdge1 = ['edge', 'posedge', 'Clk' ]
 PaternEdge2 = ['*' ]
 
 Patterns = [PaternEdge0,PaternEdge1,PaternEdge2]
+
+DbgDumps =  '-dbg'  in sys.argv
+
+BRICKS = '''
+    select select_bus adder  adder_lit  and2  bufx  comparator  comparator_lit
+    mpflipflop mflipflop flipflop  inv  mux2
+    xor2
+    or2  or3  or4  or5 or6 or7 or8
+    shiftright_lit shiftleft_lit shiftleft  shiftright  subtractor  subtractor_lit multiplier
+'''.split()
+
+
 
 def match(What,Pattern,Vars):
     if What == Pattern: return True,Vars
@@ -59,49 +72,108 @@ def useParams(Mod):
                     Mod.Module = NewName
 def help_main(Env):
     Mod = Env.Current
+    if not Mod: 
+        logs.log_error('no current in Env')
+        return
     Mod.MUX2S = {}
+    if '-redo' not in sys.argv:
+        if os.path.exists('pys/%s.py' % Mod.Module):
+            print('have pys already %s' % Mod.Module)
+            return
+    
+    buildSons(Mod,Env)
     useParams(Mod)
+    computeParams(Mod,4)
+    preprocess(Mod)
+    dumpver(Mod,'%s.prep0' % Mod.Module)
+    always(Mod)
+    dumpver(Mod,'%s.befz' % Mod.Module)
     replaceFunctions(Mod)
+    dumpver(Mod,'%s.befy' % Mod.Module)
     instances(Mod)
+    dumpver(Mod,'%s.befx' % Mod.Module)
     for Dst,Src,_,_ in Mod.hard_assigns:
         Wid = Mod.exprWidth(Dst)
         Src0 = synth0(Src,Mod,Wid)
         print("HARD",Wid,Dst,Src,Src0)
         merge(Dst,Src0,Mod)
+    dumpver(Mod,'%s.befw' % Mod.Module)
     Mod.hard_assigns = []
     dumpver(Mod,'%s.bef0' % Mod.Module)
     always(Mod)
-    dumpver(Mod,'%s.bef1' % Mod.Module)
+#    dumpver(Mod,'%s.bef1' % Mod.Module)
     clearBufs(Mod)
     removeParams(Mod)
-    dumpver(Mod,'%s.bef2' % Mod.Module)
+#    dumpver(Mod,'%s.bef2' % Mod.Module)
     optimize0.optimize0(Mod)
     dumpver(Mod,'%s.bef3' % Mod.Module)
     optimize0.makeByBits(Mod)
     optimize0.optimize0(Mod)
     optimize0.zeroDriveRound(Mod,[],'A')
     Ones = optimize0.bufx_round(Mod,'A')
-    dumpver(Mod,'%s.bef4' % Mod.Module)
+#    dumpver(Mod,'%s.bef4' % Mod.Module)
     optimize0.bufx_round(Mod,'B')
     optimize0.zeroDriveRound(Mod,Ones,'B')
-    dumpver(Mod,'%s.bef5' % Mod.Module)
+#    dumpver(Mod,'%s.bef5' % Mod.Module)
     optimize0.zeroDriveRound(Mod,[],'C')
-    dumpver(Mod,'%s.bef6' % Mod.Module)
+#    dumpver(Mod,'%s.bef6' % Mod.Module)
     Done = 1
     Rnd = 0
     while Done > 0 :
         Done = optimize0.similarGatesRound(Mod,'D'+ str(Rnd))
+        print("similarGatesRound %s %s" % (Rnd,Done))
         Rnd += 1
     optimize0.zeroDriveRound(Mod,Ones,'E')
+    checker(Mod,Env)
+    if not os.path.exists('glv'): os.mkdir('glv')
     dumpver(Mod,'glv/%s.v' % Mod.Module)
-    checker(Mod)
+    dump_python(Mod)
+    keep_save()
+    Flog = open('pymon.log0')
+    Lines = Flog.read()
+    if not os.path.exists('logs'): os.mkdir('logs')
+    Flog = open('logs/%s.log' % (Mod.Module),'w')
+    Flog.write(Lines)
+    Flog.close()
+
+def dump_python(Mod):
+    if not os.path.exists('pys'): os.mkdir('pys')
+    Fout = open("pys/%s.py" % Mod.Module,'w')
+    Fout.write('INSTS = {}\n')
+    Fout.write("NETS = ")
+    pprint.pprint(Mod.nets,Fout)
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst] 
+        Conns = pprint.pformat(Obj.conns)
+        Params = pprint.pformat(Obj.params)
+        Fout.write('INSTS["%s"] = ("%s",%s,%s)\n' % (Inst,Obj.Type,Params,Conns))
+
+    Fout.close()
+
+    
 
 def dumpver(Mod,Fname):
+    if not DbgDumps: return
     File = open(Fname,'w')
     Mod.dump_verilog(File)
     File.close()
 
-
+def computeParams(Mod,Deep):
+    Done = True
+    for Prm in Mod.parameters:
+        Val = Mod.parameters[Prm]
+        if type(Val) is not int:
+            Val2 = Mod.compute_int(Val)
+            Mod.parameters[Prm] = Val2
+            Done = False
+    for Prm in Mod.localparams:
+        Val = Mod.localparams[Prm]
+        if type(Val) is not int:
+            Val2 = Mod.compute_int(Val)
+            Mod.localparams[Prm] = Val2
+            Done = False
+    if (not Done) and (Deep>0):
+        computeParams(Mod,Deep-1)
 
 
 def removeParams(Mod):
@@ -155,10 +227,12 @@ def lineWidth(Bus,Mod):
 
 
 EJECTS = {}
+ASYNCS = {}
 def always(Mod):
-    global EJECTS
+    global EJECTS,ASYNCS
     for Alw in Mod.alwayses:
         EJECTS = {}
+        ASYNCS = {}
         Edge = Alw[0]
         Body = Alw[1]
         if (len(Body) == 2) and (Body[0] == 'list'): Body = Body[1]
@@ -168,6 +242,7 @@ def always(Mod):
                 Vars = Vars[1]
                 if ind==0:
                     if Body[0] == 'ifelse':
+                        scanDeep(Body[2],Body[1],(0,Vars['Clk'],Vars['Rst']),Mod,True)   
                         scanDeep(Body[3],[],(0,Vars['Clk'],Vars['Rst']),Mod)   
                     else:
                         logs.log_error("always bad %s" % str(Body[2]))
@@ -191,18 +266,83 @@ def predealEjects(Mod):
             if Key not in Fulls: Fulls.append(Key)
     for Bus in Partials:
         if Bus in Fulls:  Fulls.remove(Bus)
+    logs.log_info('PARTIALS %s' % str(Partials))
     return Partials,Fulls
 
+def printEJECTS():
+    logs.log_info("DSTLIST: %s" % str(DSTLISTS))
+    for Key in EJECTS:
+        List = EJECTS[Key]
+        logs.log_info('EJECT %s' % Key)
+        for Item in List:
+            logs.log_info('      %s' % str(Item))
 
 def dealEjects(Mod):
+    printEJECTS()
     Partials,Fulls = predealEjects(Mod)        
-    ejectFulls(Mod,Fulls)
-    ejectPartials(Mod,Partials)
+    ejectFulls2(Mod,Fulls)
+    ejectPartials2(Mod,Partials)
+
+def ejectFulls2(Mod,Fulls):
+    for Dst in Fulls:
+        List = EJECTS[Dst]
+        Wid0 = Mod.exprWidth(Dst)
+        logs.log_info("FULL %s len=%s wid=%s list=%s" % (Dst,len(List),Wid0,List))
+        TT = List[0][2]
+        if (len(List) == 1):
+            Obj = Mod.add_inst_conns('flipflop','%s_reg' % Dst,[('clk',TT[1]),('q',Dst)])
+            Obj.params['WID'] = Wid0
+            if Dst in ASYNCS:
+                AS = ASYNCS[Dst][0]
+                Default = AS[0]
+                Obj.params['ASYNC'] = Default
+                if (len(AS[1]) == 2) and (AS[1][0] in ('~','!')):
+                    Obj.conns['rst_n'] = AS[1][1]
+                else:
+                    Obj.conns['rst'] = synth0(AS[1],Mod,1)
+            else:
+                Obj.conns['rst_n'] = 'vcc'
+            Port = List[0]
+            Src0 = synth0(Port[0],Mod,Wid0)
+            if Port[1] == []: 
+                Cond = 'vcc'
+            else:
+                Cond = synth0(Port[1],Mod,1)
+            Obj.conns['en'] = Cond
+            Obj.conns['d'] = Src0
+            return
+
+
+
+        Obj = Mod.add_inst_conns('mflipflop','%s_reg' % Dst,[('clk',TT[1]),('q',Dst)])
+        Obj.params['WID'] = Wid0
+        Obj.params['PORTS'] = len(List)
+        if Dst in ASYNCS:
+            AS = ASYNCS[Dst][0]
+            Default = AS[0]
+            Obj.params['ASYNC'] = Default
+            if (len(AS[1]) == 2) and (AS[1][0] in ('~','!')):
+                Obj.conns['rst_n'] = AS[1][1]
+            else:
+                Obj.conns['rst'] = synth0(AS[1],Mod,1)
+        for ind,Port in enumerate(List):
+            Src0 = synth0(Port[0],Mod,Wid0)
+            if Port[1] == []: 
+                Cond = 'vcc'
+            else:
+                Cond = synth0(Port[1],Mod,1)
+            Obj.conns['en%d'% ind] = Cond
+            Obj.conns['d%d'% ind] = Src0
+
+
+#    sys.exit()
+
 
 def ejectFulls(Mod,Fulls):
     for Dst in Fulls:
         List = EJECTS[Dst]
         Wid0 = Mod.exprWidth(Dst)
+        logs.log_info("FULL %s len=%s wid=%s list=%s" % (Dst,len(List),Wid0,List))
         if len(List) > 1:
             Dats = []
             Cnd = ['||']
@@ -236,7 +376,9 @@ def ejectFulls(Mod,Fulls):
             Rst = 'vcc'
             Mod.add_sig('vcc','input',0)
 #        Src1 = Mod.pr_expr(Src0)
+        logs.log_info("FULL2 %s len=%s wid=%s list=%s" % (Dst,len(List),Wid0,List))
         if (TT == 2) or (TT[0] in [0,1,2]):
+            logs.log_info("FULL3 TT=%s %s len=%s wid=%s list=%s  dsts=%s " % (TT,Dst,len(List),Wid0,List,Dst in DSTLISTS))
             if Dst in DSTLISTS:
                 Dst = DSTLISTS[Dst]
                 if Dst[0] == 'subbit':
@@ -280,8 +422,147 @@ def ejectFulls(Mod,Fulls):
                 Wid0 = Mod.sig_width(Dst)
                 Obj.params['WID'] = Wid0
         elif TT[0] in [2]:
-            print("222222",Src0,Cond0,Dst)
+            logs.log_error("222222 %s %s %s" %(Src0,Cond0,Dst))
 
+# ILIA
+
+def ejectPartials2(Mod,Partials):
+    for Bus in Partials:
+        Wid = Mod.exprWidth(Bus)
+        _,WW = Mod.nets[Bus]
+        Wid1 = -1
+        if (type(WW) is tuple) and (WW[0] == 'packed'):
+            H1,L1 = WW[1]
+            H2,L2 = WW[2]
+            H1 = Mod.pr_expr(H1)
+            L1 = Mod.pr_expr(L1)
+            H2 = Mod.pr_expr(H2)
+            L2 = Mod.pr_expr(L2)
+            if type(H1) is str:
+                H1 = eval(H1,Mod.parameters,Mod.localparams)
+            if type(L1) is str:
+                L1 = eval(L1,Mod.parameters,Mod.localparams)
+            if type(H2) is str:
+                H2 = eval(H2,Mod.parameters,Mod.localparams)
+            if type(L2) is str:
+                L2 = eval(L2,Mod.parameters,Mod.localparams)
+            Wid1 = H1-L1+1
+            print("H2",H2,"L2",L2)
+            Wid2 = H2-L2+1
+
+        Ports = []
+        for Dst in EJECTS:
+            if included(Dst,Bus):
+                List = EJECTS[Dst]
+                Ports.append((Dst,List))
+        TT = Ports[0][1][0][2]
+        Obj = Mod.add_inst_conns('mpflipflop','%s_reg' % Bus,[('clk',TT[1]),('q',Bus)])
+        Obj.params['PORTS'] = len(Ports)
+        Obj.params['WID'] = Wid
+        if Wid1>0:
+            Obj.params['DEPTH'] = Wid1
+            Obj.params['LINE'] = Wid2
+        if Bus in ASYNCS:
+            AS = ASYNCS[Bus][0]
+            Default = AS[0]
+            Obj.params['ASYNC'] = Default
+            if (len(AS[1]) == 2) and (AS[1][0] in ('~','!')):
+                Obj.conns['rst_n'] = AS[1][1]
+            else:
+                Obj.conns['rst'] = synth0(AS[1],Mod,1)
+
+        for ind,(Dst,Port) in enumerate(Ports):
+            PP = Port[0]
+            Src0 = synth0(PP[0],Mod,Wid)
+            if PP[1] == []:
+                Cond = 'vcc'
+            else:
+                Cond = synth0(PP[1],Mod,1)
+            Obj.conns['en%d'% ind] = Cond
+            Obj.conns['d%d'% ind] = Src0
+            Wid0 = Mod.exprWidth(Dst)
+            Obj.params['wid%d'% ind] = Wid0
+            Ind0,Ind1 = indexify(Dst,Mod)
+            if Ind0 == Ind1:
+                print("IND2 %s " % Ind0)
+                if type(Ind0) is int:
+                    Obj.params['pos%d'% ind] = Ind0
+                else:
+                    Obj.conns['pos%d'% ind] = Ind0
+            elif Ind0>=0:
+                Obj.params['lo%d'% ind] = Ind0
+                Obj.params['hi%d'% ind] = Ind1
+                
+                
+
+
+def busify_x(Sig):
+    if (type(Sig) is str)and('[' in Sig)and(Sig[-1]==']')and(Sig[0]!='\\'):
+        ind = Sig.index('[')
+        Net = Sig[:ind]
+        Inds = Sig[ind+1:-1]
+        if ':' in Inds:
+            ww = Inds.split(':')
+            return ['subbus',Net,ww[0],ww[1]]
+        return ['subbit',Net,Inds]
+    return Sig
+
+
+def indexify(Dst,Mod):
+    Sig = busify_x(Dst)
+    print("INDEX",Dst,Sig)
+    if Sig[0] == 'subbit':
+        try:
+            Ind0 = eval(Sig[2],Mod.parameters,Mod.localparams)
+        except:
+            Ind0 = Sig[2]
+        Ind1 = Ind0
+        return Ind0,Ind1
+    if Sig[0] == 'subbus':
+        Ind0 = eval(Sig[2])
+        Ind1 = eval(Sig[3])
+        return Ind0,Ind1
+    return -1,-3
+
+
+def included(Dst,Bus):
+    if Dst == Bus: return True
+    if not Dst.startswith(Bus): return False
+    if '[' in Dst:
+        Base = Dst[:Dst.index('[')]
+        return Base == Bus
+    return False
+
+def aaa():
+        for Dst in EJECTS:
+            List = EJECTS[Dst]
+        TT = List[0][2]
+        Obj = Mod.add_inst_conns('mflipflop','%s_reg' % Dst,[('clk',TT[1]),('q',Dst)])
+        Obj.params['WID'] = Wid
+        Obj.params['PORTS'] = len(List)
+
+        if (3<4):
+            if Dst in ASYNCS:
+                AS = ASYNCS[Dst][0]
+                Default = AS[0]
+                Obj.params['ASYNC'] = Default
+                if (len(AS[1]) == 2) and (AS[1][0] in ('~','!')):
+                    Obj.conns['rst_n'] = AS[1][1]
+                else:
+                    Obj.conns['rst'] = synth0(AS[1],Mod,1)
+            else:
+                Obj.conns['rst_n'] = 'vcc'
+
+        if Dst in ASYNCS:
+            AS = ASYNCS[Dst][0]
+            Default = AS[0]
+            Obj.params['ASYNC'] = Default
+            if (len(AS[1]) == 2) and (AS[1][0] in ('~','!')):
+                Obj.conns['rst_n'] = AS[1][1]
+            else:
+                Obj.conns['rst'] = synth0(AS[1],Mod,1)
+        for ind,Port in enumerate(List):
+            Src0 = synth0(Port[0],Mod,Wid0)
 
 def ejectPartials(Mod,Partials):
     for Bus in Partials:
@@ -293,10 +574,10 @@ def ejectPartials(Mod,Partials):
             for Dst in EJECTS:
                 List = EJECTS[Dst]
                 Code = compatible(II,Bus,Dst)
-                logs.log_info("COMPATIBLE ii=%s dst=%s list=%s code=%s" % (II,Dst,List,Code))
+                logs.log_info("COMPATIBLE ii=%s dst=%s list=%s code=%s bus=%s wid=%s wid0=%s " % (II,Dst,List,Code,Bus,Wid,Wid0))
                 if Code:
                     And = 0
-                    if Code != 1:
+                    if type(Code) is not int:
                         And = ['==',Code,II]
                     for  Ind,(Src,Cond,TT) in enumerate(List):
                         logs.log_info('COMP2 which=%d ii=%s dst=%s src=%s cond=%s tt=%s' % (Ind,II,Dst,Src,Cond,TT))
@@ -322,6 +603,7 @@ def ejectPartials(Mod,Partials):
                             Line = extractBit(Src,II,Wid0,Mod)
                             logs.log_info("EXTRACTBIT bus=%s wid=%s wid0=%s src=%s ii=%s line=%s" % (Bus,Wid,Wid0,Src,II,Line))
 
+                        logs.log_info('CND dst=%s code=%s and=%s cond=%s' % (Dst,Code,And,Cond))
                         if And:
                             Cnd.append( ['&&',And,Cond] )
                             Dats.append( (['&&',And,Cond],Line))
@@ -418,6 +700,13 @@ def compatible(Ind,Bus,Dst):
         B0 = Dst[:Dst.index('[')]
         if B0 != Bus: return False
         I0 = Dst[Dst.index('[')+1:-1]
+        if ':' in I0:
+            ww = I0.split(':')
+            Hi = eval(ww[0])
+            Lo = eval(ww[1])
+            if (Ind>=Lo) and (Ind<=Hi):
+                return '%s[%s]' % (Bus,Ind)
+            return False
         if I0[0] in '0123456789': 
             I1 = eval(I0)
             if I1 != Ind: return False
@@ -428,15 +717,16 @@ def compatible(Ind,Bus,Dst):
     logs.log_error("COMPATIBLE %s %s %s" % (Ind,Bus,Dst))
     return False
 
-def scanDeep(Body,Sofar,Kind,Mod):
+def scanDeep(Body,Sofar,Kind,Mod,Async=False):
+    if Body[0] == 'for': return 0
     if type(Body) is list:
         if Body[0] == '<=':
-            eject(Body[1],Body[2],Sofar,Kind,Mod)
+            eject(Body[1],Body[2],Sofar,Kind,Mod,Async)
         elif Body[0] == '=':
-            eject(Body[1],Body[2],Sofar,Kind,Mod)
+            eject(Body[1],Body[2],Sofar,Kind,Mod,Async)
         elif Body[0] == 'list':
             for Item in Body[1:]:
-                scanDeep(Item,Sofar,Kind,Mod)
+                scanDeep(Item,Sofar,Kind,Mod,Async)
         elif Body[0] == 'ifelse':
             Cond = Body[1]
             if Sofar == []:
@@ -445,31 +735,39 @@ def scanDeep(Body,Sofar,Kind,Mod):
             else:
                 DeepY = ['&&',Cond,Sofar]
                 DeepN = ['&&',['!',Cond],Sofar]
-            scanDeep(Body[2],DeepY,Kind,Mod)
-            scanDeep(Body[3],DeepN,Kind,Mod)
+            scanDeep(Body[2],DeepY,Kind,Mod,Async)
+            scanDeep(Body[3],DeepN,Kind,Mod,Async)
         elif Body[0] == 'if':
             Cond = Body[1]
             if Sofar == []:
                 DeepY = [Cond]
             else:
                 DeepY = ['&&',Cond,Sofar]
-            scanDeep(Body[2],DeepY,Kind,Mod)
+            scanDeep(Body[2],DeepY,Kind,Mod,Async)
         else:
-            logs.log_error('scanDeep failed on %s' % str(Body))
+            logs.log_error('scanDeep failed on async=%s  body=%s' % (Async,Body))
 
     else:
-        logs.log_error('scanDeep failed on %s' % str(Body))
+        logs.log_error('scanDeep failed on %s' % (str(Body),Async))
+
 DSTLISTS = {}        
-def eject(Dst,Src,Cond,Kind,Mod):
+def eject(Dst,Src,Cond,Kind,Mod,Async):
     if type(Dst) is list:
-        X = Mod.pr_expr(Dst)
-        if X not in DSTLISTS:
-            DSTLISTS[X] = Dst
-        Dst = X
-    if Dst in EJECTS:
-        EJECTS[Dst].append((Src,Cond,Kind))
+        Dst0 = Mod.pr_expr(Dst)
     else:
-        EJECTS[Dst] = [(Src,Cond,Kind)]
+        Dst0 = Dst
+    if Dst0 not in DSTLISTS:
+        DSTLISTS[Dst0] = Dst
+    if Async:
+        if Dst0 in ASYNCS:
+            ASYNCS[Dst0].append((Src,Cond,Kind))
+        else:
+            ASYNCS[Dst0] = [(Src,Cond,Kind)]
+        return
+    if Dst0 in EJECTS:
+        EJECTS[Dst0].append((Src,Cond,Kind))
+    else:
+        EJECTS[Dst0] = [(Src,Cond,Kind)]
 
 def clearBufs(Mod):
     Renames,Bufs = getRenames(Mod)
@@ -523,7 +821,7 @@ def merge(Dst,Src,Mod):
     Dbits = splitBits(Dst,Mod,Wid)
     if Sbits[0] == 'bus': Sbits.pop(0)
     if Dbits[0] == 'bus': Dbits.pop(0)
-    print("MERGE",Dst,len(Sbits),len(Dbits))
+#    print("MERGE",Dst,Wid,'sbits=',len(Sbits),'dbits=',len(Dbits))
     while (Sbits!=[]) and (Dbits!=[]):
         SB = Sbits.pop(-1) 
         DB = Dbits.pop(-1) 
@@ -531,14 +829,13 @@ def merge(Dst,Src,Mod):
     while Dbits!=[]:
         DB = Dbits.pop(-1) 
         addInst1('bufx',DB,'gnd',Mod)
-    print("MERGE2",Dst,len(Sbits),len(Dbits))
+#    print("MERGE2",Dst,len(Sbits),len(Dbits))
         
 
 KNOWNS = {}
 def splitBits(Expr,Mod,Mwid=64 ):
     if type(Expr) is int:
         Res = []
-        print("HARD XXYY",Expr,Mwid)
         for ii in range(Mwid):
             X = (Expr>>ii) & 1
             if (X==1):
@@ -566,16 +863,38 @@ def splitBits(Expr,Mod,Mwid=64 ):
             if type(Wid) is int:
                 logs.log_error("SPLIT %s" % str(Expr))
                 return [Expr]
-            Hi,Lo = Wid
-            Hi = Mod.compute_int(Hi)
-            Lo = Mod.compute_int(Lo)
-            Run = Lo
-            Res = ['bus']
-            while Lo <= Hi:
-                Sig = '%s[%s]' % (Expr,Hi)
-                Res.append(Sig)
-                Hi -= 1
-            return Res
+            if len(Wid) == 2:
+                Hi,Lo = Wid
+                Hi = Mod.compute_int(Hi)
+                Lo = Mod.compute_int(Lo)
+                Run = Lo
+                Res = ['bus']
+                while Lo <= Hi:
+                    Sig = '%s[%s]' % (Expr,Hi)
+                    Res.append(Sig)
+                    Hi -= 1
+                return Res
+            elif (len(Wid) == 3) and (Wid[0] == 'packed'):
+                Hi0,Lo0 = Wid[1]
+                Hi0 = Mod.compute_int(Hi0)
+                Lo0 = Mod.compute_int(Lo0)
+                Hi1,Lo1 = Wid[2]
+                Hi1 = Mod.compute_int(Hi1)
+                Lo1 = Mod.compute_int(Lo1)
+                Res = ['bus']
+                while Lo0 <= Hi0:
+                    II = Hi1
+                    while II >= Lo1:
+                        Sig = '%s[%s][%s]' % (Expr,Hi0,II)
+                        Res.append(Sig)
+                        II -= 1
+                    Hi0 -= 1
+                return Res
+
+            else:
+                logs.log_error("SPLIT WID  %s %s" % (Wid,str(Expr)))
+                return [Expr]
+
     if type(Expr) is list:
         if len(Expr) == 0:
             return ['vdd']
@@ -616,15 +935,14 @@ def splitBits(Expr,Mod,Mwid=64 ):
                 KNOWNS[Key] = Out
                 return [Out]
             else:
-                print("SUBBIT2",Bus,Expr)
                 _,Wid = Mod.nets[Bus]
                 if (type(Wid) is tuple):
                     if Wid[0] == 'packed':
-                        W1_0 = Mod.compute_int(Wid[1][0])-Mod.compute_int(Wid[1][1])+1
-                        W1_1 = Mod.compute_int(Wid[1][1])-Mod.compute_int(Wid[1][0])+1
+                        W1_0 = Mod.compute_int(Wid[1][0],False)-Mod.compute_int(Wid[1][1],False)+1
+                        W1_1 = Mod.compute_int(Wid[1][1],False)-Mod.compute_int(Wid[1][0],False)+1
                         W1 = max(W1_0,W1_1)
-                        W2_0 = Mod.compute_int(Wid[2][0])-Mod.compute_int(Wid[2][1])+1
-                        W2_1 = Mod.compute_int(Wid[2][1])-Mod.compute_int(Wid[2][0])+1
+                        W2_0 = Mod.compute_int(Wid[2][0],False)-Mod.compute_int(Wid[2][1],False)+1
+                        W2_1 = Mod.compute_int(Wid[2][1],False)-Mod.compute_int(Wid[2][0],False)+1
                         W2 = max(W2_0,W2_1)
                         BB = synth0(Expr[2],Mod)
                         Key = '%s,%s' % (Expr[1],BB)
@@ -668,10 +986,10 @@ COMPARES = ['==','!=','<','<=','>','=>','>=']
 def synth0(Src,Mod,Mwid=64,Depth=0):
     logs.log_info('HARD SYNTH0 %s mwid=%d src=%s' % (Depth,Mwid,Src))
     Res = synth0__(Src,Mod,Mwid,Depth)
-    if (type(Res) is str) and (Res in Mod.nets):
-        logs.log_info('SYNTH1 %s res=%s net=%s src=%s' % (Depth,Res,Mod.nets[Res],Src))
-    else:
-        logs.log_info('SYNTH1 %s %s %s' % (Depth,Src,Res))
+#    if (type(Res) is str) and (Res in Mod.nets):
+#        logs.log_info('SYNTH1 %s res=%s net=%s src=%s' % (Depth,Res,Mod.nets[Res],Src))
+#    else:
+#        logs.log_info('SYNTH1 %s %s %s' % (Depth,Src,Res))
     return Res
 
 def synth0__(Src,Mod,Mwid=64,Depth=0):
@@ -708,6 +1026,7 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
                 if A!='gnd':
                     LL.append(A)
             Len = len(LL)
+            if Len==0: return 'vcc'
             Out = makeWide(LL,'or',Mod)
             return Out
 
@@ -742,43 +1061,9 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
         if Src[0] == '&':
             Out = makeWideGate('and2',Mod,Mwid,Src[1],Src[2],Depth)
             return Out
-            A = synth0(Src[1],Mod,Mwid,Depth+1)
-            B = synth0(Src[2],Mod,Mwid,Depth+1)
-            AA = splitBits(A,Mod)
-            BB = splitBits(B,Mod)
-            if AA[0] == 'bus': AA = AA[1:]
-            if BB[0] == 'bus': BB = BB[1:]
-            AA.reverse()
-            BB.reverse()
-            Len = min(len(AA),len(BB))
-            Out = Mod.add_sig('','wire',Len)
-            for ind in range(Len):
-                A0 = AA[ind] 
-                B0 = BB[ind] 
-                addInst2('and2',['subbit',Out,ind],A0,B0,Mod)
-            return Out
 
         if Src[0] == '|':
             Out = makeWideGate('or2',Mod,Mwid,Src[1],Src[2],Depth)
-            return Out
-            A = synth0(Src[1],Mod,Mwid,Depth+1)
-            B = synth0(Src[2],Mod,Mwid,Depth+1)
-            AA = splitBits(A,Mod)
-            BB = splitBits(B,Mod)
-            if AA[0] == 'bus': AA = AA[1:]
-            if BB[0] == 'bus': BB = BB[1:]
-            AA.reverse()
-            BB.reverse()
-            Len = min(len(AA),len(BB))
-            Out = Mod.add_sig('','wire',Len)
-            for ind in range(Len):
-                A0 = AA[ind] 
-                B0 = BB[ind] 
-                OO = ('subbit',Out,ind)
-                if A0 == 'gnd': addInst1('bufx',OO,B0,Mod)
-                elif (A0 == 'vcc') or (B0 == 'vcc'): addInst1('bufx',OO,'vcc',Mod)
-                elif B0 == 'gnd': addInst1('bufx',OO,A0,Mod)
-                else: addInst2('or2',OO,A0,B0,Mod)
             return Out
             
         if Src[0] == 'dig':
@@ -810,7 +1095,6 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
 
         if Src[0] == '!':
             AA = synth0(Src[1],Mod,Mwid,Depth+1)
-            print("YYYYYYYYYYY",Src[1],AA,Mwid)
             Out = addInst1('inv','',AA,Mod)
             return Out
 
@@ -834,7 +1118,7 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             Out = Mod.add_sig('','wire',Last+1)
             if len(Yes)>1: Yes = ['curly']+Yes
             if len(No)>1: No = ['curly']+No
-            logs.log_info('QUEST mwid=%d OUT=%s yes=%s src2=%s src3=%s  yes0=%s no=%s' % (Mwid,Out,Yes,Src[2],Src[3],Yes0,No))
+#            logs.log_info('QUEST mwid=%d OUT=%s yes=%s src2=%s src3=%s  yes0=%s no=%s' % (Mwid,Out,Yes,Src[2],Src[3],Yes0,No))
             if (Yes==No):
                 if Yes == ['gnd']:
                     Res = ['bus']
@@ -859,6 +1143,15 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
         if Src[0] in ['>>']:
             AA = synth0(Src[1],Mod,Mwid,Depth+1)
             L1 = Mod.exprWidth(AA)
+            Src2 = Mod.compute_int(Src[2],False)
+            if type(Src2) is int:
+                Out = Mod.add_sig('','wire',Mwid)
+                Obj = Mod.add_inst_conns('shiftright_lit','',[('a',AA),('x',Out)])
+                Obj.params['WID'] = Mwid
+                Obj.params['shift'] = Src2
+                return Out
+
+
             BB = synth0(Src[2],Mod,Mwid,Depth+1)
             Out = Mod.add_sig('','wire',Mwid)
             Obj = Mod.add_inst_conns('shiftright','',[('a',AA),('b',BB),('x',Out)])
@@ -868,8 +1161,15 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
         if Src[0] in ['<<']:
             AA = synth0(Src[1],Mod,Mwid,Depth+1)
             L1 = Mod.exprWidth(AA)
-            BB = synth0(Src[2],Mod,Mwid,Depth+1)
             Out = Mod.add_sig('','wire',Mwid)
+            Src2 = Mod.compute_int(Src[2],False)
+            if type(Src2) is int:
+                Obj = Mod.add_inst_conns('shiftleft_lit','',[('a',AA),('x',Out)])
+                Obj.params['WID'] = Mwid
+                Obj.params['shift'] = Src2
+                return Out
+
+            BB = synth0(Src[2],Mod,Mwid,Depth+1)
             Obj = Mod.add_inst_conns('shiftleft','',[('a',AA),('b',BB),('x',Out)])
             Obj.params['WID'] = Mwid
             return Out
@@ -914,7 +1214,9 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             if type(B0) is int:
                 AA = synth0(Src[1],Mod,Mwid,Depth+1)
                 Obj = Mod.add_inst_conns('comparator_lit','',[('a',AA),('x',Out)])
-                L1 = Mod.exprWidth(Src[1])
+#                L1 = Mod.exprWidth(Src[1])
+                L1 = Mod.exprWidth(AA)
+                logs.log_info('COMPARES aa=%s B0=%s src1=%s' % (AA,B0,Src[1]))
                 Obj.params['WID'] = L1
                 Obj.params['LIT'] = B0
                 Kind = COMPARES.index(Src[0])
@@ -935,7 +1237,6 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             
         if Src[0] in ['~']:
             AA = synth0(Src[1],Mod,Mwid,Depth+1)
-            print("YYYYYYYYYYY",Src[1],AA,Mwid)
             Bits = splitBits(AA,Mod)
             L1 = Mod.sig_width(AA)
             Out = Mod.add_sig('','wire',L1)
@@ -1143,7 +1444,14 @@ def addInstX(Type,List,Mod):
 def addInst2(Type,Out,A,B,Mod):
     if Out == '':
         Out = Mod.add_sig('','wire',1)
+    if type(A) is list:
+        print("addInst2A",Type,Out,A,B)
+        breakIt();
+    if type(B) is list:
+        print("addInst2B",Type,Out,A,B)
+        breakIt();
     Mod.add_inst_conns(Type,'',[('a',A),('b',B),('x',Out)])
+#    Mod.add_inst_conns(Type,'',[('a',A),('b',B),('x',Out)])
     return Out
 
 def addInst1(Type,D,S,Mod):
@@ -1163,6 +1471,10 @@ def replaceFunction(Src,Mod):
     if type(Src) is list:
         if Src[0] == 'functioncall':
             Func = Src[1]
+            if Func == '$clog2':
+                Val = Src[2][0]
+                Val = Mod.compute_int(Val)
+                return Val
             Def = Mod.functions[Func]
             Wid = Def[0]
             Out = Mod.add_sig('','wire',Wid)
@@ -1178,23 +1490,24 @@ def instances(Mod):
     Insts = list(Mod.insts.keys())
     for Inst in Insts:
         Obj = Mod.insts[Inst]
-        for Pin in Obj.conns:
-            Sig = Obj.conns[Pin]
-            if needsSynth(Sig):
-                Res = synth0(Sig,Mod)
-                print("INSTANCE",Sig,Res)
-                Bits = splitBits(Res,Mod)
-                Obj.conns[Pin] = Bits
-        Keys = list(Obj.params.keys())
-        Keys.sort()
-        if Keys!=[]:
-            Type = Obj.Type
-            for Key in Keys:
-                Val = Obj.params[Key]
-                Val = Mod.compute_int(Val)
-                Type += '_' + str(Val)
-            Obj.Type = Type
-        Obj.params = {}
+        if Obj.Type not in BRICKS:
+            for Pin in Obj.conns:
+                Sig = Obj.conns[Pin]
+                if needsSynth(Sig):
+                    Res = synth0(Sig,Mod)
+                    Bits = splitBits(Res,Mod)
+                    logs.log_info("INSTANCE %s %s %s %s " % (Obj.Type,Sig,Res,Bits))
+                    Obj.conns[Pin] = Bits
+            Keys = list(Obj.params.keys())
+            Keys.sort()
+            if Keys!=[]:
+                Type = Obj.Type
+                for Key in Keys:
+                    Val = Obj.params[Key]
+                    Val = Mod.compute_int(Val)
+                    Type += '_' + str(Val)
+                Obj.Type = Type
+            Obj.params = {}
 
 Ops = '| || & && ^ ~ - + * >> << >= => <= =< < >'
 def needsSynth(Sig):
@@ -1247,8 +1560,16 @@ def makeNotEqZero(AA,Mod):
             if type(Wid) is tuple:
                 Expr = ['!=',AA,0]
                 return synth0(Expr,Mod,1)
+        elif '[' in AA:
+            Bus = AA[:AA.index('[')]
+            if Bus in Mod.nets:
+                return AA
+        else:                
+            logs.log_error('STR and not a NET "%s"' % (AA))
+            return AA
 
     if type(AA) is list:
+        if len(AA) == 1: return makeNotEqZero(AA[0],Mod)
         if AA[0] == 'subbit': return AA
         if AA[0] == 'subbus':
             Expr = ['!=',AA,0]
@@ -1260,18 +1581,82 @@ def makeNotEqZero(AA,Mod):
     logs.log_error('makeNotEqZero got "%s"' % str(AA))
     return AA
         
+Parametrized = []
+def buildSons(Mod,Env):
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        Type = Obj.Type
+        Params = list(Obj.params.keys())
+        Params.sort()
+        LLL = ''
+        if Params != []:
+            for Prm in Params:
+                Val = Obj.params[Prm]
+                if type(Val) is not int:
+                    Val2 = Mod.compute_int(Val)
+                    Val = Val2
+                Type += '_%s' % Val
+                LLL += ' %s=%s'% (Prm,Val)
+            Parametrized.append((Obj.Type,Type,LLL))
+        else:
+            keep_system('pyver.py ../rtl/%s.v -do synthesis0 -do clean' % (Type))
+    for Type,FullType,LLL in Parametrized:
+        if not os.path.exists('glv/%s.v' % FullType):
+            logs.log_info('GENERATE %s from %s  %s' % (FullType,Type,LLL))
+            keep_system('pyver.py ../rtl/%s.v -do synthesis0 -do clean -define "%s"' % (Type,LLL))
+KEEPS = []
+def keep_system(Txt):
+    KEEPS.append(Txt+'\n')
+    
+def keep_save():
+    if not os.path.exists('todo.keeps'):
+        Lines = []
+    else:
+        Fout = open('todo.keeps')
+        Lines = Fout.readlines()
+        Fout.close()
+    for line in KEEPS:
+        if line not in Lines:
+            Lines.append(line)
+
+    Fout = open('todo.keeps','w')
+    for line in Lines:
+        Fout.write('%s' % line)
+    Fout.close()
 
 
 
 
+GLVS = '''
+    nand8 xor2 and2 or2 or3 or4 or5 or6 or7 or8 and3 and4 and5 and6 and7 and8 bufx inv
+    mux2 mflipflop mpflipflop flipflop shiftleft shiftright comparator_lit comparator
+    adder subtractor multiplier divider remainder
+    adder adder_lit subtractor subtractor_lit
+    shiftright_lit shiftleft_lit
+    select select_bus
+'''.split()
 
-def checker(Mod):
+def checker(Mod,Env):
     Mod.buildNetTable()
     Oks = 0
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
         Type = Obj.Type
-        if Type in 'nand8 xor2 and2 or2 or3 or4 or5 or6 or7 or8 and3 and4 and5 and6 and7 and8 bufx inv'.split():
+        if os.path.exists('glv/%s.v' % Type):
+            if Type not in Env.Modules:
+                Fname = 'glv/%s.v' % Type
+                Env.read_gate_level_verilog_file(Fname,Env.rundir,Env)
+            Son = Env.Modules[Type]
+            for Pin in Obj.conns:
+                if Obj.conns[Pin] and (Pin not in Son.nets):
+                    logs.log_error('missing net %s of %s in inst %s' % (Pin,Type,Inst))
+            for Net in Son.nets:
+                Dir,_ = Son.nets[Net]
+                if Dir in ['input']:
+                    if Net not in Obj.conns:
+                        logs.log_error('missing input %s of %s in inst %s' % (Net,Type,Inst))
+            
+        elif Type in 'nand8 xor2 and2 or2 or3 or4 or5 or6 or7 or8 and3 and4 and5 and6 and7 and8 bufx inv'.split():
             Oks += checkSimple(Obj,Mod)
         elif Type in 'adder subtractor multiplier divider remainder'.split():
             Oks += checkArith(Obj,Mod)
@@ -1279,8 +1664,14 @@ def checker(Mod):
             Oks += checkMux2(Obj,Mod)
         elif Type == 'flipflop':            
             Oks += checkFlipFlop(Obj,Mod)
+        elif Type == 'mflipflop':            
+            Oks += checkMFlipFlop(Obj,Mod)
+        elif Type == 'mpflipflop':            
+            Oks += checkMPFlipFlop(Obj,Mod)
         elif Type in 'shiftleft shiftright'.split():            
             Oks += checkShifts(Obj,Mod)
+        elif Type in 'shiftleft_lit shiftright_lit'.split():            
+            Oks += checkShiftsLit(Obj,Mod)
         elif Type == 'comparator_lit':            
             Oks += checkComparatorLit(Obj,Mod)
         elif Type == 'comparator':            
@@ -1304,7 +1695,7 @@ def checkComparatorLit(Obj,Mod):
         if Pin[0] == 'x': Xs += 1
         elif Pin[0] == 'a': As += 1
     if (As!=Wid) or (Xs!=1):
-        logs.log_error('ComparatorLit %s %s as=%d x=%d wid=%d' % (Obj.Type,Obj.Name,As,Xs,Wid))
+        logs.log_error('%s ComparatorLit %s %s as=%d x=%d wid=%d' % (Mod.Module,Obj.Type,Obj.Name,As,Xs,Wid))
         return 0
     else:
         return 1
@@ -1399,11 +1790,21 @@ def checkArith(Obj,Mod):
         elif Pin[0] == 'a': As += 1
         elif Pin[0] == 'b': Bs += 1
     if Obj.Type == 'multiplier':
-        if diff1(Xs,Wid) or diff1(As,Wid//2) or diff1(Bs,Wid//2):
+        if diff1(Xs,Wid) or diff1((As+Bs),Wid):
             logs.log_error('ARITH %s %s wid=%d xs=%d a=%d b=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs))
             return 0
         return 1
+    elif not diff1(Xs,Wid) and not diff1(As,Wid) and (Bs<As):
+        Pins = list(Obj.conns.keys())
+        for Pin in Pins:
+            if Pin[0] == 'a':
+                Num = Pin[1:]
+                Dpin = 'b%s' % Num
+                if Dpin not in Obj.conns:
+                    Obj.conns[Dpin] = 'gnd'
+        return 1
     elif diff1(Xs,Wid) or diff1(As,Wid) or diff1(Bs,Wid):
+
         logs.log_error('ARITH %s %s wid=%d xs=%d a=%d b=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs))
         return 0
     else:
@@ -1421,19 +1822,23 @@ def checkMux2(Obj,Mod):
         elif Pin == 'sel':
             Sel += 1
     if diff1(Xs,Wid) or (Sel!=1):
-        logs.log_error('MUX2 %s %s wid=%d xs=%d yes=%d no=%d sel=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs,Sel))
+        logs.log_error('MUX2 E0 %s %s wid=%d xs=%d yes=%d no=%d sel=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs,Sel))
         return 0
     elif diff1(As,Wid) and diff1(Bs,Wid) :
-        logs.log_error('MUX2 %s %s wid=%d xs=%d yes=%d no=%d sel=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs,Sel))
+        logs.log_error('MUX2 E1 %s %s wid=%d xs=%d yes=%d no=%d sel=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs,Sel))
         return 0
-    elif (As==1) or (Bs==1) :
-        logs.log_error('MUX2 %s %s wid=%d xs=%d yes=%d no=%d sel=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs,Sel))
+    elif ((As==1) or (Bs==1) ) and (Xs>1) :
+        logs.log_error('MUX2 E2 %s %s wid=%d xs=%d yes=%d no=%d sel=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs,Sel))
         return 0
     else:
         return 1
 
 
+def checkMFlipFlop(Obj,Mod):
+    return 1
 
+def checkMPFlipFlop(Obj,Mod):
+    return 1
 
 def checkFlipFlop(Obj,Mod):
     Wid = Obj.params['WID']
@@ -1445,7 +1850,17 @@ def checkFlipFlop(Obj,Mod):
         elif Pin == 'en': En += 1
         elif Pin == 'clk': Clk += 1
         elif Pin == 'rst_n': Rst += 1
-
+    if (Qs==Wid) and (Ds<Wid) and (En==1) and (Clk==1) and (Rst <= 1):
+        Pins = list(Obj.conns.keys())
+        for Pin in Pins:
+            if Pin[0] == 'q':
+                Num = Pin[1:]
+                Dpin = 'd%s' % Num
+                if Dpin not in Obj.conns:
+                    Obj.conns[Dpin] = 'gnd'
+        return 1
+        
+    
     if diff1(Qs,Wid) or (diff1(Ds,Wid) and not (Ds>Wid)) or (En!=1) or (Clk!=1) or (Rst!=1):
         logs.log_error('FLIPFLOP %s %s wid=%d qs=%d ds=%d' % (Obj.Type,Obj.Name,Wid,Qs,Ds))
         return 0
@@ -1453,6 +1868,8 @@ def checkFlipFlop(Obj,Mod):
         return 1
 
 
+def checkShiftsLit(Obj,Mod):
+    return 1
 
 
 def checkShifts(Obj,Mod):
@@ -1464,11 +1881,25 @@ def checkShifts(Obj,Mod):
         elif Pin[0] == 'b': Bs += 1
         elif Pin[0] == 'x': Xs += 1
 
+    if Obj.Type == 'shiftright':
+        if (As>Wid) and (Xs == Wid):
+            Obj.params['WID'] = As
+            expandCons(Obj,'a','x','')
+            return 1
     if (As != Wid) or (Xs != Wid):
         logs.log_error('SHIFTER %s %s wid=%d xs=%d as=%d bs=%d' % (Obj.Type,Obj.Name,Wid,Xs,As,Bs))
         return 0
     else:
         return 1
+
+def expandCons(Obj,From,To,What = ''):
+    Pins = list(Obj.conns.keys())
+    for Pin in Pins:
+        if Pin.startswith(From):
+            Ind = Pin[len(From):]
+            Tpin = To+Ind
+            if Tpin not in Obj.conns:
+                Obj.conns[Tpin] = What
 
 
 
@@ -1491,3 +1922,59 @@ def checkSimple(Obj,Mod):
     if Bads>0: return 0        
     return 1
     
+def preprocess(Mod):
+    for Ind,(Dst,Src,A,B) in enumerate(Mod.hard_assigns):
+        Dst = rework(Dst,Mod)
+        Src = rework(Src,Mod)
+        Mod.hard_assigns[Ind] = (Dst,Src,A,B)
+    for ind,Alw in enumerate(Mod.alwayses):
+        Body = Alw[1]
+        if (len(Body) == 2) and (Body[0] == 'list'): Body = Body[1]
+        print("BODY",len(Body))
+        Body2 = []
+        for Item in Body:
+            A1 = scanDeepRework(Item,Mod)
+            Body2.append(A1)
+        Mod.alwayses[ind] = [Alw[0],Body2,Alw[2]]
+
+def scanDeepRework(Body,Mod):
+    return rework(Body,Mod)
+REWORKDONES = {}
+def rework(Expr,Mod):
+    if type(Expr) is str: return Expr
+    if type(Expr) is int: return Expr
+    if type(Expr) is list:
+        if Expr[0] == 'subbit':
+            Bus = Expr[1]
+            Ind = Expr[2]
+            if type(Ind) is list:
+                if Ind[0] == 'subbus':
+                    Wid = Mod.exprWidth(Ind)
+                    New = '%s_%s_%s' % (Ind[1],Ind[2][0],Ind[2][1])
+                    if New in REWORKDONES:
+                        return ['subbit',Bus,New]
+                    Mod.add_sig(New,'wire',Wid) 
+                    Mod.hard_assigns.append((New,Ind,'',''))
+                    REWORKDONES[New] = Ind
+                    return ['subbit',Bus,New]
+                else:
+                    return Expr
+            else:
+                return Expr
+        else:
+            Res = []
+            for Item in Expr:
+                Rep = rework(Item,Mod)
+                Res.append(Rep)
+            return Res
+    elif type(Expr) is tuple:
+        Res = []
+        for Item in Expr:
+            Rep = rework(Item,Mod)
+            Res.append(Rep)
+        return tuple(Res)
+
+    logs.log_error("rework %s" % str(Expr))
+    return Expr
+
+

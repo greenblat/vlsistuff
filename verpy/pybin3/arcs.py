@@ -286,7 +286,7 @@ def builds(Mod):
                 Outs,Inps = whatConnected(Obj,GL[1]),whatConnected(Obj,GL[0])
                 for D in Inps: 
                     if D not in TERMS: 
-                        TERMS.append(D)
+                        TERMS[D] = (Obj.Type,Inst)
                         CLOCKED[D] = GL[2][0]
         elif Obj.Type in COMPLEX:
             Arcs = getComplexArcs(Obj)
@@ -338,8 +338,10 @@ def getFlipFlop(Obj):
         return Ds,Qs,Clk
 
     for ii in range(Wid):
-        Ds.append(Obj.conns['d_%d_' % ii])
-        Qs.append(Obj.conns['q_%d_' % ii])
+        Dpin = 'd_%d_' % ii 
+        Qpin = 'a_%d_' % ii 
+        if Dpin in Obj.conns: Ds.append(Obj.conns[Dpin])
+        if Qpin in Obj.conns: Qs.append(Obj.conns[Qpin])
     return Ds,Qs,Clk
 
 def getComplexArcs(Obj):
@@ -509,7 +511,7 @@ def travelAlw(Alw,Cond,Params,Mod,Clk):
             SetD = support_set(Alw[1],False)
             for D in SetD: 
                 if D not in TERMS: 
-                    TERMS.append(D)
+                    TERMS[D] = Alw[2]
                     CLOCKED[D] = Clk
             return
 

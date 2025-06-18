@@ -39,6 +39,36 @@ class module_class:
         self.deepInstNames = True
         self.inventedNets = 0
         self.remarks = []
+
+    def computeParams(self,Deep):
+        Done = True
+        for Prm in list(self.parameters.keys()):
+            if Prm != '__builtins__':
+                Val = self.parameters[Prm]
+                if type(Val) is not int:
+                    print("SVAL0",Prm,Val)
+                    Sval = pr_expr(Val) 
+                    print("SVAL1",Sval)
+                    Val2 = eval(Sval,self.parameters,self.localparams)
+                    print("SVAL2",Val2)
+                    if type(Val2) is float: Val2 = int(Val2)
+                    print("SVAL3",Val2)
+                    self.parameters[Prm] = Val2
+                    Done = False
+        for Prm in list(self.localparams.keys()):
+            Val = self.localparams[Prm]
+            if type(Val) is not int:
+                print("SVALL",Val,type(Val))
+                Sval = pr_expr(Val) 
+                print("SVALL",Sval,type(Sval))
+                Val2 = eval(Sval,self.parameters,self.localparams)
+                if type(Val2) is float: Val2 = int(Val2)
+                self.localparams[Prm] = Val2
+                Done = False
+        if (not Done) and (Deep>0):
+            self.computeParams(Deep-1)
+
+
     def cleanZeroNets(self):
         return
     def create_stat_types(self):
@@ -105,7 +135,10 @@ class module_class:
             return Name
         if (type(Name) is str)and('[' in Name)and (Name[0] != '\\'):
             BB = parseBus(Name)
-            if len(BB) == 3:
+            if len(BB) == 2:
+                Bus,Hi  = BB
+                return self.add_sig(['subbit',Bus,Hi],Dir,Wid)
+            elif len(BB) == 3:
                 Bus,Hi,Lo  = BB
                 return self.add_sig(['subbus',Bus,Hi,Lo],Dir,Wid)
             elif len(BB) == 5:
@@ -1092,7 +1125,7 @@ class module_class:
                 return self.compute_int(X,Shout)
     
         if type(Item) is list:
-            if Item[0] in ['-','+','*','/','==']:
+            if Item[0] in ['<<','>>','-','+','*','/','==']:
                 A = self.compute_int(Item[1],Shout)
                 B = self.compute_int(Item[2],Shout)
                 try:
@@ -1373,6 +1406,10 @@ class module_class:
                 return 32
             if Expr in self.parameters:
                 return 32
+            if '[' in Expr:
+                www = parseBus0(Expr)
+                return self.exprWidth(www)
+                
 
         if type(Expr) is list:
             if Expr == []:
@@ -1396,6 +1433,7 @@ class module_class:
                 if len(Expr) == 4:
                     Hi = Expr[2]
                     Lo = Expr[3]
+                    print("XXXXXX",Hi,Lo)
                     return Hi-Lo+1
                 else:
                     Hi = Expr[2][0]
@@ -2367,6 +2405,7 @@ def hashit(End):
                 RR.append(tuple(X))
             else:
                 RR.append(X)
+        if len(End) == 1: return hashit(End[0])
         return tuple(RR)
     else:
         return End 
@@ -2496,9 +2535,22 @@ def allIn(Sup,Base):
         if A not in Base: return False
     return True
 
-def parseBus(Name):
+def parseBus0(Name):
     if Name[0] == '\\': return Name
     if '[' not in Name: return Name
+
+    Bus = Name[:Name.index('[')]
+    Inds = Name[Name.index('[')+1:-1]
+    if ':' in Inds:
+        ww = Inds.split(':')
+        if len(ww) == 2:
+            return ['subbus',Bus,evalz(ww[0]),evalz(ww[1])]
+        logs.log_error('parseBus0 got "%s"' % Name)
+        return Name
+    else:
+        return ['subbit',Bus,evalz(Inds)]
+
+def parseBus(Name):
     Name = Name.replace('[',' ')
     Name = Name.replace(']','')
     Name = Name.replace(':',' ')
@@ -2506,7 +2558,7 @@ def parseBus(Name):
     try:
         if len(W3)==5: return [W3[0],eval(W3[1]),eval(W3[2]),eval(W3[3]),eval(W3[4])]
         if len(W3)==3: return [W3[0],eval(W3[1]),eval(W3[2])]
-        if len(W3)==2: return [W3[0],eval(W3[1]),eval(W3[1])]
+        if len(W3)==2: return [W3[0],eval(W3[1])]
         logs.log_error('PARSE BUS %s' % Name)
     except:
         logs.log_error('PARSE BUS %s' % Name)
@@ -2595,11 +2647,25 @@ def splitBits(Expr,Mod,Mwid=64):
             return splitBits(Expr[0],Mod,Mwid)
         if Expr[0] == 'bus':
             return Expr[1:]
+        elif Expr[0] == 'subbus':
+            if len(Expr) == 4:
+                Hi = Expr[2]
+                Lo = Expr[3]
+            else:
+                Hi = Expr[2][0]
+                Lo = Expr[2][1]
+            Bus = Expr[1]
+            Res = ['bus']
+            Hi = Mod.compute_int(Hi)
+            Lo = Mod.compute_int(Lo)
+            while Lo <= Hi:
+                Res.append('%s[%s]' % (Bus,Lo))
+                Lo += 1
+            return Res
         elif Expr[0] == 'subbit':
             Dir,Wid = Mod.nets[Expr[1]]
             if type(Wid) is tuple:
                 if Wid[0] == 'packed':
-                    print("EXPR",Expr,Wid)
                     Hi2 = Mod.compute_int(Wid[2][0])
                     Lo2 = Mod.compute_int(Wid[2][1])
                     Hi_ = max(Hi2,Lo2)

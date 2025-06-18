@@ -75,7 +75,6 @@ def run_main(Params,Dumps='11111',KeepLnum=False):
         print('removing translates')
         Lines= remove_synopsys_on_off(Lines)
 
-    print("ASASASASASAAS",Fnames,len(Lines))
     for ind,line in enumerate(Lines):
         Lines[ind] = ind,line
     Lines2,Lines3 = [],[]
