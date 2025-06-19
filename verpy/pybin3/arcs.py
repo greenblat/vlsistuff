@@ -186,6 +186,7 @@ def costIt(Dst,Src):
 
 def adds(Dst,Src,Nons,Where):
     SetS = support_set(Src,False)
+    if not Dst: return
     if Dst[0] == 'subbit':
         SetD = support_set(Dst[1],False)
     else:
@@ -280,6 +281,7 @@ def builds(Mod):
             GL = GATELEVEL[Obj.Type]
             if len(GL) == 2:
                 Outs,Inps = whatConnected(Obj,GL[1]),whatConnected(Obj,GL[0])
+                print("INST",Inst,Obj.Type,GL,'outs=',Outs,'inps=',Inps)
                 adds(Outs,Inps,['vcc','gnd'],'instance_glv')
                 driven(Outs,Inst,Obj.Type)
             elif len(GL) == 3:

@@ -137,7 +137,7 @@ def printPath(Kind,Mod,Path):
             Sig = PP[-1]
             Where = PP[-3]
             if Where in Modules:
-                print("Where ",Where,Sig, Sig in Modules[Where].DRIVEN)
+#                print("Where ",Where,Sig, Sig in Modules[Where].DRIVEN)
                 if Sig in Modules[Where].DRIVEN:
                     Add = Modules[Where].DRIVEN[Sig]
 #            print("XXXX",Sig,Where, Sig in Modules[Where].DRIVEN)
@@ -204,7 +204,11 @@ def travelFW(Net,Mod,instPath,netPath):
     Arcs = Hld.ARCSFW[Net]
     for End in Arcs:
         if End in Hld.TERMS:
-            printPath('PATH2',Mod,netPath+[instPath+[End+str(Hld.DRIVEN[End])]]+[instPath+[End+str(Hld.TERMS[End])]])
+            if End in Hld.DRIVEN:
+                PP = str(Hld.DRIVEN[End])
+            else:
+                PP = str(End)
+            printPath('PATH2',Mod,netPath+[instPath+[End+'?'+PP]]+[instPath+[End+str(Hld.TERMS[End])]])
         if (End in Hld.OUTPUTS) and (len(instPath)==1):
             printPath('PATH3',Mod,netPath+[instPath+[End]])
         elif (End in Hld.OUTPUTS) and (len(instPath)>1):
