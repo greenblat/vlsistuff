@@ -609,7 +609,6 @@ class sequenceClass:
         elif (wrds[0] == 'force_pulse'):
             Ind = 1
             while Ind < len(wrds):
-                print("WWW",len(wrds),Ind)
                 if len(wrds) == (Ind+1): wrds.append('1')
                 BB = makeExpr(wrds[Ind+1])
                 Val = self.evalExpr(BB)
