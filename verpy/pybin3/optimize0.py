@@ -61,16 +61,17 @@ def optimize0(Mod):
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
         if Obj.Type in ['and2','or2']:
-            Ins = [Obj.Type,module_class.hashit(Obj.conns['a']),module_class.hashit(Obj.conns['b'])]
-            Ins.sort()
-            Ins = tuple(Ins)
-
-            X = Obj.conns['x']
-
-            if Ins not in Table2:
-                Table2[Ins] = [(Inst,X)]
-            else:
-                Table2[Ins].append((Inst,X))
+            if 'b' in Obj.conns:
+                Ins = [Obj.Type,module_class.hashit(Obj.conns['a']),module_class.hashit(Obj.conns['b'])]
+                Ins.sort()
+                Ins = tuple(Ins)
+    
+                X = Obj.conns['x']
+    
+                if Ins not in Table2:
+                    Table2[Ins] = [(Inst,X)]
+                else:
+                    Table2[Ins].append((Inst,X))
     Saves = 0
     for Key in Table2:
         List = Table2[Key]

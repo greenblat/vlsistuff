@@ -449,8 +449,10 @@ def treatFields():
                 logs.log_error('#%d: fields not legal access %s for %s'%(RegObj.Lnum,Access,Name))
         if inAccess(Access)and('0' in Cover):
             Ranges = getRanges(Cover)
-            for Lo,Hi in Ranges:
-                LINES[6].append('assign %s[%d:%d] = 0;'%(Reg,Hi,Lo))
+            for Lo0,Hi0 in Ranges:
+                Lo = min(Lo0,Hi0)
+                Hi = max(Lo0,Hi0)
+                LINES[6].append('assign %s[%d:%d] = %d\'b0;  // %s '%(Reg,Hi,Lo,Hi-Lo+1,Cover))
 
 def findObj(List,Name):
     for Obj in List:
@@ -467,6 +469,7 @@ def getRanges(List):
             if List[ii]=='0':
                 state = 'work'
                 Lo = ii
+                Hi = ii
         elif state=='work':
             if List[ii]=='1':
                 state = 'idle'

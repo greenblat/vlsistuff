@@ -79,7 +79,7 @@ def help_main(Env):
     if '-redo' not in sys.argv:
         if os.path.exists('pys/%s.py' % Mod.Module):
             print('have pys already %s' % Mod.Module)
-            return
+            # return
     
     buildSons(Mod,Env)
     useParams(Mod)
@@ -104,7 +104,7 @@ def help_main(Env):
 #    dumpver(Mod,'%s.bef1' % Mod.Module)
     clearBufs(Mod)
     removeParams(Mod)
-#    dumpver(Mod,'%s.bef2' % Mod.Module)
+    dumpver(Mod,'%s.bef2' % Mod.Module)
     optimize0.optimize0(Mod)
     dumpver(Mod,'%s.bef3' % Mod.Module)
     optimize0.makeByBits(Mod)
@@ -126,7 +126,7 @@ def help_main(Env):
     optimize0.zeroDriveRound(Mod,Ones,'E')
     checker(Mod,Env)
     if not os.path.exists('glv'): os.mkdir('glv')
-    dumpver(Mod,'glv/%s.v' % Mod.Module)
+    dumpver(Mod,'glv/%s.v' % Mod.Module,True)
     dump_python(Mod)
     keep_save()
     Flog = open('pymon.log0')
@@ -152,8 +152,8 @@ def dump_python(Mod):
 
     
 
-def dumpver(Mod,Fname):
-    if not DbgDumps: return
+def dumpver(Mod,Fname,Overide=False):
+    if not Overide and not DbgDumps: return
     File = open(Fname,'w')
     Mod.dump_verilog(File)
     File.close()
@@ -1031,9 +1031,16 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
             return Out
 
         if Src[0] == '^':
-            Out = makeWideGate('xor2',Mod,Mwid,Src[1],Src[2],Depth)
-            return Out
-            
+            if len(Src) == 3:
+                Out = makeWideGate('xor2',Mod,Mwid,Src[1],Src[2],Depth)
+                return Out
+            elif len(Src) == 2:
+                A = synth0(Src[1],Mod,Mwid,Depth+1)
+                AA = splitBits(A,Mod)
+                Len = len(AA)
+                Out = makeWide(AA,'xor',Mod)
+                return Out
+                
 
         if (Src[0] == '|') and (len(Src) ==2):
             A = synth0(Src[1],Mod,Mwid,Depth+1)
@@ -1493,6 +1500,8 @@ def instances(Mod):
         if Obj.Type not in BRICKS:
             for Pin in Obj.conns:
                 Sig = Obj.conns[Pin]
+                if (Pin == 'cs') and (Obj.Type == 'mem_sp_be_8192x65'):
+                    print("NEED",Inst,Obj.Type,Pin,Sig,needsSynth(Sig))
                 if needsSynth(Sig):
                     Res = synth0(Sig,Mod)
                     Bits = splitBits(Res,Mod)
@@ -1509,7 +1518,7 @@ def instances(Mod):
                 Obj.Type = Type
             Obj.params = {}
 
-Ops = '| || & && ^ ~ - + * >> << >= => <= =< < >'
+Ops = '! ~ | || & && ^ ~ - + * >> << >= => <= =< < >'
 def needsSynth(Sig):
     if type(Sig) is str: return False
     if type(Sig) is int: return False
@@ -1581,13 +1590,34 @@ def makeNotEqZero(AA,Mod):
     logs.log_error('makeNotEqZero got "%s"' % str(AA))
     return AA
         
+STDPARAMS = {}
+STDPARAMS[('syncfifo','0')] = 'WID'
+STDPARAMS[('syncfifo','1')] = 'DEPTH'
+STDPARAMS[('syncfifo_v2','0')] = 'WID'
+STDPARAMS[('syncfifo_v2','1')] = 'DEPTH'
 Parametrized = []
 def buildSons(Mod,Env):
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
         Type = Obj.Type
+        Params = {}
+        for Prm in Obj.params:
+            Prmx = str(Prm)
+            if Prmx[0] in '0123456789':
+                Key = (Type,Prmx)
+                if Key in STDPARAMS:
+                    Name = STDPARAMS[Key]
+                    Params[Name] = Obj.params[Prm]
+                else:
+                    logs.log_error('BUILDSONS key=%s not given' % str(Key))
+                    Params[Prm] = Obj.params[Prmx] 
+            else:
+                Params[Prm] = Obj.params[Prmx] 
+        Obj.params = Params
+
         Params = list(Obj.params.keys())
         Params.sort()
+
         LLL = ''
         if Params != []:
             for Prm in Params:
@@ -1628,7 +1658,7 @@ def keep_save():
 
 
 GLVS = '''
-    nand8 xor2 and2 or2 or3 or4 or5 or6 or7 or8 and3 and4 and5 and6 and7 and8 bufx inv
+    nand8 xor2 xor8 and2 or2 or3 or4 or5 or6 or7 or8 and3 and4 and5 and6 and7 and8 bufx inv
     mux2 mflipflop mpflipflop flipflop shiftleft shiftright comparator_lit comparator
     adder subtractor multiplier divider remainder
     adder adder_lit subtractor subtractor_lit

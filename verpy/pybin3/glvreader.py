@@ -285,6 +285,7 @@ body0    output      wire0   set_output
 body0    inout       wire0   set_inout
 body0    wire        wire0   set_wire
 body0    reg        wire0   set_wire
+body0    integer        wire0   set_wire
 body0    endmodule   idle   none
 body0    defparam   defparam0  none
 body0    pragma1     pragma0 none
