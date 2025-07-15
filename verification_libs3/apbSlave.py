@@ -14,6 +14,7 @@ class apbSlave(logs.driverClass):
         self.READY = 0
         self.Name = Name
         self.Uart = False
+        logs.log_info('APB SLV %s %s' % (Name,__file__))
 
 
     def onFinish(self):
@@ -35,7 +36,7 @@ class apbSlave(logs.driverClass):
             self.RAM[Addr] = Data
             if self.Uart:
                 self.Uart('ram',Addr,Data)
-        logs.log_info('SLV "%s" RAM %s -> [%s]' % (self.Name,hex(Addr)))
+        logs.log_info('SLV "%s" RAM %s -> [%s]' % (self.Name,hex(Data),hex(Addr)))
         
     def action(self,Cmd,Orig=[]):
         wrds = Cmd.split()
@@ -92,10 +93,10 @@ class apbSlave(logs.driverClass):
                 logs.log_info('APBWRITE %s %s write %x' % (self.Name,self.pwrite,self.addr))
                 if self.pwrite == 1:
                     self.wdata = self.lcl_peek('pwdata')
-                    if self.addr&0xfffc not in self.RAM:
+                    if self.addr&0xfffffffc not in self.RAM:
                         was = 0
                     else:
-                        was = self.RAM[self.addr&0xfffc]
+                        was = self.RAM[self.addr&0xfffffffc]
                     mask = 0
                     if self.pstrb & 1: mask = 0xff
                     if self.pstrb & 2: mask += 0xff00
@@ -103,11 +104,12 @@ class apbSlave(logs.driverClass):
                     if self.pstrb & 8: mask += 0xff000000
 
                     now_data = was & ~mask | self.wdata & mask
-                    self.RAM[self.addr&0xfffc] = now_data
+                    self.RAM[self.addr&0xfffffffc] = now_data
                     logs.log_info('APBSLAVE %s write %x %x strb=%x now_data=%x' % (self.Name,self.addr,self.wdata,self.pstrb,now_data))
                 else:
                     Addr = self.addr & 0xfffffffc;
                     if Addr not in self.RAM:
+                        logs.log_info('APBSLAVE %s invent read %x %s' % (self.Name,self.addr,list(map(hex,self.RAM.keys()))))
                         self.RAM[Addr] = self.addr
                         logs.log_info('APBSLAVE %s invent read %x %x' % (self.Name,self.addr,self.RAM[Addr]))
                     self.lcl_force('prdata',self.RAM[Addr])

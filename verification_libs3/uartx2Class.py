@@ -1,7 +1,6 @@
 
 import logs
 import veri
-import string
 
 
 class uartx2Class:
