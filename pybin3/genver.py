@@ -82,20 +82,26 @@ endmodule
 # this is the end of the example!!!!
 '''
 
-import os,sys,string
+import os,sys
 
+PYST = '#'
+PYRE = PYST+'<'
 
-BigHead='# -*- encoding: UTF8 -*-\nimport os,sys,string\n'
+BigHead='# -*- encoding: UTF8 -*-\nimport os,sys\n'
 
 INCLUDE = '''
 def include(Fname):
     lines = open(Fname).read()
     print(lines)
+
+'''
+OPEN = '''
+outFile = open("FNAME","w")
 '''
     
 BigHead += INCLUDE
-
 def main():
+    global PYST,PYRE
     if len(sys.argv)==1:
         print(HelpString)
         return
@@ -107,7 +113,20 @@ def main():
         w2 = w1[-1].split('.')
         Top=w2[0]
         FnameOut = '%s.v'%Top
-    run(Fname,FnameOut,sys.argv[3:])
+    if '-pyst' in sys.argv:
+        PYST = getOper(sys.argv,'-pyst')
+        PYRE = PYRE.replace('#',PYST)
+        
+        
+    Big2 = run(Fname,FnameOut,sys.argv[3:])
+    Open = OPEN.replace('FNAME',FnameOut)
+    Big2  = Open + Big2
+    try:
+        exec(Big2,globals())
+    except:
+        print(Big2)
+        print("FAILED")
+        exec(Big2)
 
 def sameNameV(Fname):   
     w1 = Fname.split('/')
@@ -117,6 +136,10 @@ def sameNameV(Fname):
     FnameOut = '%s/%s.v'%(Path,Top)
     return FnameOut
 
+def getOper(Argv,Key):
+    if Key not in Argv: return False
+    Ind = Argv.index(Key)
+    return Argv[Ind+1]
 
 
 def run(Fname,FnameOut,Args):
@@ -125,7 +148,8 @@ def run(Fname,FnameOut,Args):
     File.close()
     if not FnameOut:
         FnameOut = sameNameV(Fname)
-    runFromLines(lines,FnameOut,Args)
+    Big2 = runFromLines(lines,FnameOut,Args)
+    return Big2
 
 def runFromLines(lines,FnameOut,Args):
     global Code0,Strings
@@ -145,15 +169,22 @@ def runFromLines(lines,FnameOut,Args):
     Big.append(Routines)
     for X in Code0:
         Big.append(X)
-    Fout = open('execme.py','w')
-    Fout.write(FUNCTIONS)
-    for LL in Big:
-        if LL[-1]!='\n': LL += '\n'
-        Fout.write(LL)
-    Fout.close()
-    More = ' '.join(Args)
-    Work = 'python3 execme.py "%s" > %s'%(More,FnameOut)
-    os.system(Work)
+
+    Big = [FUNCTIONS] + Big 
+    Big2 = '\n'.join(Big)
+    Big2 = Big2.replace('\n\n','\n')
+#    print(Big2)
+    return Big2
+
+#    Fout = open('execme.py','w')
+#    Fout.write(FUNCTIONS)
+#    for LL in Big:
+#        if LL[-1]!='\n': LL += '\n'
+#        Fout.write(LL)
+#    Fout.close()
+#    More = ' '.join(Args)
+#    Work = 'python3 execme.py "%s" > %s'%(More,FnameOut)
+#    os.system(Work)
 #    os.system('/bin/rm  execme.py')
 
 def rework_backs(Str):
@@ -208,7 +239,6 @@ def clog2(In):
     return len(bin(In))-2
 
 Vars={}
-import string
 def formati(Var,Val):
     if len(Val)==0:
         return '<>1<>'
@@ -271,7 +301,7 @@ def print_Strings(Str):
     res.reverse()
     for _,Var,Val in res:
         X = X.replace(Var,formati(Var,Val))
-    print(X[:-1])
+    print(X[:-1],sep=" ", end="\\n", file=outFile)
         
 
 
@@ -346,15 +376,15 @@ def prepare1(lines):
                     Strings[Sname]=Str
                     Str=''
                     Code0.append("print_Strings('%s')\n"%Sname)
-            elif (len(line)>0)and(line[0]=='#'):
+            elif (len(line)>0)and(line.startswith(PYST)):
                 if (Str!=''):
                     Sname = strname()
                     Strings[Sname]=Str
                     Str=''
                     Code0.append("print_Strings('%s')\n"%Sname)
-                Code0.append(line[1:])
-                Indent = calc_indent(line[1:])
-                seek_vars(line[1:])
+                Code0.append(line[len(PYST):])
+                Indent = calc_indent(line[len(PYST):])
+                seek_vars(line[len(PYST):])
                 state='code'
             else:
                 Str = Str + line
@@ -367,46 +397,46 @@ def prepare1(lines):
                 seek_vars(line)
         elif (state=='code'):
             wrds = line.split()
-            if (len(line)>0)and(line[0]=='#')and(Str!=''):
+            if (len(line)>0)and(line.startswith(PYST))and(Str!=''):
                 Sname = strname()
                 Strings[Sname]=Str
                 Str=''
                 Code0.append("%sprint_Strings('%s')\n"%(Indent,Sname))
                 
-            if (len(line)>0)and(len(wrds)>0)and(wrds[0]=='#')and(len(wrds)==1):
+            if (len(line)>0)and(len(wrds)>0)and(wrds[0].startswith(PYST))and(len(wrds)==1):
                 state='idle'
 #                Code0.append('Vars={}')    
                 Indent=''
-            elif (len(line)>2)and(line[:2]=='#<'):
+            elif (len(line)>2)and(line.startswith(PYRE)):
                 Indent = Indent[4:]
                 state='code'
-            elif (len(line)>0)and(line[0]=='#'):
-                Code0.append(line[1:])
-                Indent = calc_indent(line[1:])
-                seek_vars(line[1:])
+            elif (len(line)>0)and(line.startswith(PYST)):
+                Code0.append(line[len(PYST):])
+                Indent = calc_indent(line[len(PYST):])
+                seek_vars(line[len(PYST):])
             else:
                 state='string'
                 Str = Str + line
         elif (state=='string'):
             wrds = line.split()
-            if (len(line)>0)and(line[0]=='#')and(Str!=''):
+            if (len(line)>0)and(line.startswith(PYST))and(Str!=''):
                 Sname = strname()
                 Strings[Sname]=Str
                 Str=''
                 Code0.append("%sprint_Strings('%s')\n"%(Indent,Sname))
                 state='code'
                 
-            if (len(line)>2)and(line[:2]=='#<'):
+            if (len(line)>2)and(line.startswith(PYRE)):
                 Indent = Indent[4:]
                 state='code'
-            elif (len(line)>0)and(line[0]=='#')and(len(wrds)==1)and(len(wrds[0])==1):
+            elif (len(line)>0)and(line.startswith(PYST))and(len(wrds)==1)and(len(wrds[0])==len(PYST)):
                 state='idle'
 #                Code0.append('Vars={}')    
                 Indent=''
-            elif (len(line)>0)and(line[0]=='#'):
-                Code0.append(line[1:])
-                Indent = calc_indent(line[1:])
-                seek_vars(line[1:])
+            elif (len(line)>0)and(line.startswith(PYST)):
+                Code0.append(line[len(PYST):])
+                Indent = calc_indent(line[len(PYST):])
+                seek_vars(line[len(PYST):])
                 state='code'
             else:
                 state='string'
