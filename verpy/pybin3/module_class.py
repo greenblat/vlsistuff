@@ -149,10 +149,10 @@ class module_class:
 
         if Name=='':
             Name = 'net_%dx'%self.inventedNets
-#            if Name == 'net_3x':  breakIt();
-            self.inventedNets += 1
+            while Name in self.nets: 
+                self.inventedNets += 1
+                Name = 'net_%dx'%self.inventedNets
             self.add_sig(Name,Dir,Wid)
-#            print("ADDSIG",Name)
             return Name
         if (type(Name) is str)and(Name[0] in '0123456789'): return Name
         if Dir not in ['input wire','output wire','wire','reg','input','output','output reg','integer','inout','tri0','tri1','output reg signed','wire signed','signed wire','reg signed','output signed','input logic','output logic','logic','genvar','output signed','input signed','wire signed','inout wire']:
@@ -279,13 +279,13 @@ class module_class:
             self.add_conn(Inst2,Pin,Obj.conns[Pin])
 
     def add_inst_conns(self,Type,Inst,List):
-        if Inst == '': Inst = inventInst(Type)
+        if Inst == '': Inst = inventInst(Type,self)
         Obj = self.add_inst(Type,Inst)
         self.add_conns(Inst,List)
         return Obj
 
     def add_inst(self,Type,Inst):
-        if Inst == '': Inst = inventInst(Type)
+        if Inst == '': Inst = inventInst(Type,self)
         InstObj = instance_class(Type,Inst)
         if Inst in self.insts:
             logs.log_warning("replacing %s %s with %s %s instance in %s" % (Inst,self.insts[Inst].Type,Inst,Type,self.Module))
@@ -2511,13 +2511,13 @@ def evalz(What):
         return What
 
 
-INSTS = {}
-def inventInst(Type):
-    if Type not in INSTS:
-        INSTS[Type]= 0 
-    INSTS[Type]  += 1
-    return '%s%s'%(Type,INSTS[Type])
-
+def inventInst(Type,Mod):
+    Try = 0
+    Inst = '%s%s'%(Type,Try)
+    while Inst in Mod.insts: 
+        Try += 1
+        Inst = '%s%s'%(Type,Try)
+    return Inst
 
 
 

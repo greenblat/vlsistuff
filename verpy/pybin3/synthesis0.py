@@ -23,7 +23,7 @@ BRICKS = '''
     mpflipflop mflipflop flipflop  inv  mux2
     xor2
     or2  or3  or4  or5 or6 or7 or8
-    shiftright_lit shiftleft_lit shiftleft  shiftright  subtractor  subtractor_lit multiplier
+    shiftright_lit shiftleft_lit shiftleft  shiftright  subtractor  subtractor_lit multiplier multiplier_lit
 '''.split()
 
 
@@ -1144,6 +1144,11 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
                     return Mod.MUX2S[Key]
                 Obj = Mod.add_inst_conns('mux2','',[('sel',Cond),('yes',Yes),('no',No),('x',Out)])
                 Obj.params['WID'] = Last+1
+                Obj.params['YWID'] = len(Yes)
+                if Yes[0] == 'curly': Obj.params['YWID']  -= 1
+                Obj.params['NWID'] = len(No)
+                if No[0] == 'curly': Obj.params['NWID']  -= 1
+                print("YWID",Yes)
                 Mod.MUX2S[Key] = Out
                 return Out
 
@@ -1184,6 +1189,16 @@ def synth0__(Src,Mod,Mwid=64,Depth=0):
         if Src[0] in ['*']:
             AA = synth0(Src[1],Mod,Mwid,Depth+1)
             L1 = Mod.exprWidth(AA)
+            Src2 = Mod.compute_int(Src[2],False)
+            if type(Src2) is int:
+                L2 = Mod.exprWidth(Src2)
+                Out = Mod.add_sig('','wire',(L1+L2))
+                Obj = Mod.add_inst_conns('multiplier_lit','',[('a',AA),('x',Out)])
+                Obj.params['WID'] = L1+L2
+                Obj.params['LIT'] =  Src2
+                return Out
+
+
             BB = synth0(Src[2],Mod,Mwid,Depth+1)
             L2 = Mod.exprWidth(BB)
             Out = Mod.add_sig('','wire',(L1+L2))
@@ -1707,6 +1722,8 @@ def checker(Mod,Env):
         elif Type == 'comparator':            
             Oks += checkComparator(Obj,Mod)
         elif Type == 'adder_lit':            
+            Oks += checkAdderLit(Obj,Mod)
+        elif Type == 'multiplier_lit':            
             Oks += checkAdderLit(Obj,Mod)
         elif Type == 'subtractor_lit':            
             Oks += checkSubtractorLit(Obj,Mod)

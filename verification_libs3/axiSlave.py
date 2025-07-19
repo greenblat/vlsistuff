@@ -59,6 +59,7 @@ class axiSlaveClass:
 
 
     def busy(self):
+        print('SELF BUSY',self.arqueue!=[],self.awqueue!=[],self.wqueue,self.rqueue!=[],self.bqueue!=[],self.bqueue0!=[])
         if self.arqueue!=[]: return True
         if self.awqueue!=[]: return True
         if self.wqueue!=[]: return True
@@ -343,8 +344,28 @@ class axiSlaveClass:
             logs.log_info(f'[{self.Name}]: reading data from read data generator function rdata = 0x{rdata}, ',verbose=self.verbose)
         self.rqueue.append((rlast,rid,rdata,Addr))
 
-
-
+    def runbqueue(self):
+        print("BVVV",self.bqueue0,self.bqueue)
+        if self.peek('awvalid') and self.peek('awready'):
+            self.bqueue0.append((self.peek('awid'),0))
+            logs.log_info("BV0")
+        if self.peek('wvalid') and self.peek('wready') and self.peek('wlast'):
+            AB = self.bqueue0.pop()
+            self.bqueue.append(AB)
+            logs.log_info("BV1")
+            self.bwaiting = 20
+        if self.bwaiting>0:
+            self.bwaiting -= 1
+            self.force('bvalid',0)
+            logs.log_info("BV1")
+        elif self.bqueue!=[]:
+            bid,bresp = self.bqueue[0]
+            self.bqueue.pop(0)
+            logs.log_info("BV2")
+            self.force('bid',bid)
+            self.force('bvalid',1)
+        elif self.peek('bready')==1: 
+            self.force('bvalid',0)
 
     def writing(self):
         if self.Name == 'SLV0':
@@ -356,25 +377,9 @@ class axiSlaveClass:
         if self.Name == 'SLV3':
             veri.force('tb.marker3',str(self.awlen & 0xffff))
 #        logs.log_info('WRITING bwait=%d %s %s' % (self.bwaiting, self.bqueue,self.bqueue0))
-        if self.bwaiting>0:
-            self.bwaiting -= 1
-            self.force('bvalid',0)
-        elif self.bqueue!=[]:
-            bid,bresp = self.bqueue[0]
-            if bid=='wait':
-                self.bwaiting=int(bresp)
-                self.force('bvalid',0)
-                self.bqueue.pop(0)
-            else:
-                if self.peek('bready')==1: 
-                    self.bqueue.pop(0)
-                self.force('bid',bid)
-#                self.force('bresp',bresp)
-                self.force('bvalid',1)
-        else:
-            self.force('bvalid',0)
         if len(self.awqueue)>0:
             logs.log_info('AWQUEUE len=%d awvalid=%d awready=%d' % (len(self.awqueue),self.peek('awvalid'),self.Awready))
+        logs.log_info("BV2")
         if len(self.awqueue)>1000:
             logs.log_warning("AWQUEUE is very long")
             self.force('awready',self.Awready)

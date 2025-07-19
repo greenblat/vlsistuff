@@ -8,10 +8,13 @@ def main():
     elif (sys.argv[1] in ['dropped','done','finished']):
         Which = sys.argv[2]
         markFinished(Which)
-    elif (sys.argv[1] in ['edit','ed','e','edi']):
+    elif (sys.argv[1] in ['edit','ed','e','edi']) or sys.argv[1].startswith('-ed'):
         editIt()
+    else:
+        print('nothing to do')
 
 def editIt():
+    print('>>>>> %s' % FNAME)
     os.system('vi %s' % FNAME)
 
 def report():
