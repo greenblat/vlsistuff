@@ -95,6 +95,7 @@ def createXml(Module,Db):
 def writable(Acc):
     if 'w' in Acc: return True
     if 'W' in Acc: return True
+    if 'dual' in Acc: return True
     return False
 
 def hasFields(Db,Reg):

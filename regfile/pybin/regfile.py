@@ -4,6 +4,9 @@
 HELPSTRING = '''
 needs regfile description file.
 
+*** NEW:  access=dual    < creating shadow copy of the register. transfer from shadow to actual 
+happens with new input "dual_pulse".  this input is added only if there are dual registers.
+for all other purposes "dual" is behaving like "rw".
 example of regfile file:
 
 chip plug_rgf  bus=apb addrwid=20 width=32 reset=async empty=0xdeadbeaf
@@ -81,6 +84,7 @@ def run(Fname,Dirx='.',Base=0):
     computeWidthFromFields()
     treatFields()
     assignAddresses()
+    checkDuals()
     Prmx = Db['chip'].Params
     Params = Db['chip'].Params['names']
     if 'bus' in Prmx:
@@ -297,7 +301,7 @@ def treatTemplates(Lines):
     return Result
 
 
-SYNONYMS = {'wid':'width','desc':'description','rw':'wr','rw_pulse':'wr_pulse'}
+SYNONYMS = {'wid':'width','desc':'description','dual':'wr','rw':'wr','rw_pulse':'wr_pulse'}
 
 
 
@@ -645,6 +649,13 @@ def computeWidthFromFields():
             
 
 
+def checkDuals():
+    if 'duals' not in Db: Db['duals'] = {}
+    for Reg in Db['regs']:
+        if Reg.Kind == 'reg':
+            Name= getPrm(Reg,'names',['err'])[0]
+            if 'dual' in Reg.Params['access']:
+                Db['duals'][Name]  = Reg
 
 def assignAddresses():
     Chip = Db['chip']
@@ -845,7 +856,6 @@ def dumpRam(Postfix,File,Alone):
     Str = Str.replace('WSTRB',str(Wstrb))
     File.write(Str)
     Db['module']=Module
-#    bodyDump0(Db,File)
     Finstram = wopen('%s.inst' % Module)
     for Line in LINES[0]:
         forInst(Line,'wire',Finstram)
@@ -1438,6 +1448,8 @@ def apbHead():
     Db['fout'].write(Str)
     if 'external' in Db['chip'].Params:
         Db['fout'].write('    ,output [%s:0] last_wdata\n'%(Buswid-1))
+    if 'duals' in Db:
+        Db['fout'].write('    ,input dual_pulse\n')
 
 
 def missParam(Dir,Param,Default):
@@ -1451,7 +1463,10 @@ def missParam(Dir,Param,Default):
 def helper0(Finst):
     Temp = []
     for Li in LINES[0]:
-        Li = Li.replace(' reg ',' ')
+        ww = Li.split()
+        Name = ww[-1]
+        if Name not in Db['duals']:
+            Li = Li.replace(' reg ',' ')
         Wrds = Li.split()
         Reg = Wrds[-1]
 #        print('HELPER0',Reg, (Wrds[-1] not in FIELDED_REGS),(Wrds[-1] in EXTERNAL_REGS), (Wrds[-1] in EXTERNAL_FIELDS))
@@ -1513,6 +1528,17 @@ def enclosingModule(Temp,Finst):
     if 'external' not in Db['chip'].Params:
         BusWid = Db['chip'].Params['width']
         Db['fout'].write('wire [%s:0] last_wdata;\n'%(BusWid-1))
+
+    for Reg in Db['duals']:
+        Obj = Db['duals'][Reg]
+        Wid = Obj.Params['width']
+        Db['fout'].write('wire [%s:0] dual_%s;\n' % (Wid-1,Reg))
+        Dflt = 0
+        if 'reset' in Obj.Params: Dflt = Obj.Params['reset']
+        Db['fout'].write('always @(posedge pclk or negedge presetn) if (!presetn) %s <= %s; else if (dual_pulse)  %s <= dual_%s;\n' % (Reg,Dflt,Reg,Reg))
+        
+
+
     Str = APBInst.replace('MODULE',Db['module']+'_ram')
     Db['fout'].write(Str)
     for Li in LINES[0]:
@@ -1533,6 +1559,9 @@ def enclosingModule(Temp,Finst):
             Wid = RR.Params['width']
             if inAccess(Acc):
                 Conn2 = 'ZEROES[%d:0] | %s'%(Wid-1,Conn2)
+#        print("DBG INST %s %s %s" % (Conn,Conn2,Conn in Db['duals']))
+        if Conn in Db['duals']:
+            Conn2 = 'dual_'+Conn2
         Db['fout'].write('    ,.%s(%s)\n'%(Conn,Conn2))
     Db['fout'].write(');\n')
     for Li in LINES[6]:
@@ -1546,6 +1575,7 @@ def enclosingModule(Temp,Finst):
 
 
 def  outAccess(Access):
+    if 'dual' in Access: return True
     if 'rw' in Access: return True
     if 'wr' in Access: return True
     if 'wo' in Access: return True

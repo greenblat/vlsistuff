@@ -29,7 +29,7 @@ def help_main(Env,Color=False,Volt=False):
     Big += '\n);\n'
     print(Big)
 
-    os.system(PREPARE_STRING) 
+#    os.system(PREPARE_STRING) 
 
 
 def externalDir(Dir):

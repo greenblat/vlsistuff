@@ -292,6 +292,8 @@ def ejectFulls2(Mod,Fulls):
             if Dst in ASYNCS:
                 AS = ASYNCS[Dst][0]
                 Default = AS[0]
+                if type(Default) is not int:
+                    Default = eval(Default,Mod.parameters,Mod.localparams)
                 Obj.params['ASYNC'] = Default
                 if (len(AS[1]) == 2) and (AS[1][0] in ('~','!')):
                     Obj.conns['rst_n'] = AS[1][1]
@@ -316,6 +318,8 @@ def ejectFulls2(Mod,Fulls):
         if Dst in ASYNCS:
             AS = ASYNCS[Dst][0]
             Default = AS[0]
+            if type(Default) is not int:
+                Default = eval(Default,Mod.parameters,Mod.localparams)
             Obj.params['ASYNC'] = Default
             if (len(AS[1]) == 2) and (AS[1][0] in ('~','!')):
                 Obj.conns['rst_n'] = AS[1][1]
@@ -460,6 +464,8 @@ def ejectPartials2(Mod,Partials):
         if Bus in ASYNCS:
             AS = ASYNCS[Bus][0]
             Default = AS[0]
+            if type(Default) is not int:
+                Default = eval(Default,Mod.parameters,Mod.localparams)
             Obj.params['ASYNC'] = Default
             if (len(AS[1]) == 2) and (AS[1][0] in ('~','!')):
                 Obj.conns['rst_n'] = AS[1][1]
@@ -756,6 +762,8 @@ def eject(Dst,Src,Cond,Kind,Mod,Async):
     if Dst0 not in DSTLISTS:
         DSTLISTS[Dst0] = Dst
     if Async:
+        if type(Src) is not int:
+            Src = eval(Src,Mod.parameters,Mod.localparams)
         if Dst0 in ASYNCS:
             ASYNCS[Dst0].append((Src,Cond,Kind))
         else:
@@ -1633,11 +1641,13 @@ def buildSons(Mod,Env):
                 LLL += ' %s=%s'% (Prm,Val)
             Parametrized.append((Obj.Type,Type,LLL))
         else:
-            keep_system('pyver.py ../rtl/%s.v -do synthesis0 -do clean' % (Type))
+#            keep_system('pyver.py ../rtl/%s.v -do synthesis0 -do clean' % (Type))
+            keep_system('prep.py ../rtl/%s.v ' % (Type))
     for Type,FullType,LLL in Parametrized:
         if not os.path.exists('glv/%s.v' % FullType):
             logs.log_info('GENERATE %s from %s  %s' % (FullType,Type,LLL))
-            keep_system('pyver.py ../rtl/%s.v -do synthesis0 -do clean -define "%s"' % (Type,LLL))
+#            keep_system('pyver.py ../rtl/%s.v -do synthesis0 -do clean -define "%s"' % (Type,LLL))
+            keep_system('prep.py ../rtl/%s.v %s ' % (Type,LLL))
 KEEPS = []
 def keep_system(Txt):
     KEEPS.append(Txt+'\n')

@@ -59,7 +59,7 @@ class axiSlaveClass:
 
 
     def busy(self):
-        print('SELF BUSY',self.arqueue!=[],self.awqueue!=[],self.wqueue,self.rqueue!=[],self.bqueue!=[],self.bqueue0!=[])
+#        print('SELF BUSY',self.arqueue!=[],self.awqueue!=[],self.wqueue,self.rqueue!=[],self.bqueue!=[],self.bqueue0!=[])
         if self.arqueue!=[]: return True
         if self.awqueue!=[]: return True
         if self.wqueue!=[]: return True
@@ -345,23 +345,21 @@ class axiSlaveClass:
         self.rqueue.append((rlast,rid,rdata,Addr))
 
     def runbqueue(self):
-        print("BVVV",self.bqueue0,self.bqueue)
+#        logs.log_info("BVVV %s %s" % (self.bqueue0,self.bqueue))
         if self.peek('awvalid') and self.peek('awready'):
             self.bqueue0.append((self.peek('awid'),0))
-            logs.log_info("BV0")
+#            logs.log_info("BV0")
         if self.peek('wvalid') and self.peek('wready') and self.peek('wlast'):
             AB = self.bqueue0.pop()
             self.bqueue.append(AB)
-            logs.log_info("BV1")
             self.bwaiting = 20
+#            logs.log_info("BV1 %s" % str(self.bqueue))
         if self.bwaiting>0:
             self.bwaiting -= 1
             self.force('bvalid',0)
-            logs.log_info("BV1")
         elif self.bqueue!=[]:
             bid,bresp = self.bqueue[0]
             self.bqueue.pop(0)
-            logs.log_info("BV2")
             self.force('bid',bid)
             self.force('bvalid',1)
         elif self.peek('bready')==1: 
@@ -379,7 +377,6 @@ class axiSlaveClass:
 #        logs.log_info('WRITING bwait=%d %s %s' % (self.bwaiting, self.bqueue,self.bqueue0))
         if len(self.awqueue)>0:
             logs.log_info('AWQUEUE len=%d awvalid=%d awready=%d' % (len(self.awqueue),self.peek('awvalid'),self.Awready))
-        logs.log_info("BV2")
         if len(self.awqueue)>1000:
             logs.log_warning("AWQUEUE is very long")
             self.force('awready',self.Awready)
@@ -405,7 +402,7 @@ class axiSlaveClass:
             if (FirstPage != LastPage):
                 logs.log_error('slave %s CROSSING 4K write awaddr=%x awlen=%x awsize=%x  (%x %x %x)' % (self.Name,awaddr,awlen,awsize,LastAddr,LastPage,FirstPage))
             logs.log_info('AxiSlave %s >>>awvalid %x %x %x %x %x'%(self.Name,awburst,awaddr,awlen,awid,awsize) ,verbose=self.verbose)
-            self.bqueue0.append(awid)
+            self.bqueue0.append((awid,0))
             logs.log_info("BQUEUE0 APPEND %s" % str(self.bqueue0),verbose=True)
         else:
             self.force('awready',1)
