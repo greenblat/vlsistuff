@@ -16,6 +16,7 @@ def dumpVerilog(Glbs,Root,File):
             Params[Obj.Owner]=[(Obj.Param,Obj.Value)]
         else:
             Params[Obj.Owner].append((Obj.Param,Obj.Value))
+    print("NAMES",Names)
     Inps={}
     Outs={}
     Conns={}

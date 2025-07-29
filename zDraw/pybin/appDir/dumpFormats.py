@@ -14,6 +14,12 @@ class connectivityClass:
             print('IAM %s' % str(type(Root)))
             self.Mod = Root
             
+        self.Renames = {}
+        for Prm in self.Mod.params:
+            ww = Prm.split()
+            if (len(ww) == 2) and (ww[1] == 'name'):
+                self.Renames[ww[0]] = self.Mod.params[Prm].Value
+#                print("BBBBB",ww[0],self.Mod.params[Prm].Param,self.Mod.params[Prm].Value)
         self.Module = self.Mod.Module
         self.Names={}
         self.Params={}
@@ -37,7 +43,6 @@ class connectivityClass:
                 self.Params[Obj.Owner]=[(Obj.Param,Obj.Value)]
             else:
                 self.Params[Obj.Owner].append((Obj.Param,Obj.Value))
-
         for Inst in self.Mod.instances:
             Obj = self.Mod.instances[Inst]
             if Obj.Type=='input':
@@ -71,16 +76,21 @@ class connectivityClass:
                 self.Nodes[Inst]=[]
             elif Inst in self.Params:
                 Params = self.Params[Inst]
+                InstN = Inst
+#                print("III0IIN",InstN,Inst,Inst in self.Names)
+#                if Inst in self.Names:
+#                    InstN = self.Names[Inst]
+#                    print("IIIIIN",InstN,Inst)
                 ind = 0
                 while ind < len(Params):
                     (Prm,Val) = Params[ind]
                     if Prm == 'conns':
-                        if Inst not in self.Conns:
-                            self.Conns[Inst]={}
+                        if InstN not in self.Conns:
+                            self.Conns[InsaNt]={}
                         LL = Val.split(',')
                         for Pair in LL:
                             PinNet = Pair.split('=')
-                            self.Conns[Inst][PinNet[0]] = PinNet[1]
+                            self.Conns[InstN][PinNet[0]] = PinNet[1]
                         Params.pop(ind)
                     else:
                         ind += 1
@@ -282,7 +292,10 @@ class connectivityClass:
             elif Type in ["antenna", "output", "input", "node", "inout"]:
                 pass
             else:
-                self.Modx.add_inst(Type, Inst)
+                InstN = Inst
+                if Inst in self.Renames:
+                    InstN = self.Renames[Inst]
+                self.Modx.add_inst(Type, InstN)
                 if Inst in self.Conns:
                     Pins = self.Conns[Inst]
                     for Pin in Pins:
@@ -290,15 +303,14 @@ class connectivityClass:
                             self.Glbs.try_load_picture(Type)
                         if Pin in self.Glbs.pictures[Type].pins:
                             Sig = Pins[Pin]
-                            self.Modx.add_conn(Inst, Pin, Sig)
+                            self.Modx.add_conn(InstN, Pin, Sig)
             if Inst in self.Params:
                 Params = self.Params[Inst]
                 for (Prm, Val) in Params:
                     if Type == 'output':
-#                        print("XXXX",self.Conns[Inst],Inst,Type,Prm,Val,self.Names[Inst])
-                        self.Modx.localparams['%s_%s' % (Prm,self.Names[Inst])] = Val
+                        self.Modx.localparams['%s_%s' % (Prm,InstN)] = Val
                     else:
-                        self.Modx.add_inst_param(Inst, Prm, Val)
+                        self.Modx.add_inst_param(InstN, Prm, Val)
         return self.Modx
 
     def dumpVerilog(self,File,Rtl,User):
