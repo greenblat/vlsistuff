@@ -248,7 +248,7 @@ def always(Mod):
                     scanDeep(Body,[],(1,Vars['Clk']),Mod)   
                 elif ind==2:
                     scanDeep(Body,[],(2),Mod)   
-                dealEjects(Mod)
+                dealEjects(Mod,Edge)
     Mod.alwayses = []
 
 def predealEjects(Mod):
@@ -266,27 +266,36 @@ def predealEjects(Mod):
 #    logs.log_info('PARTIALS %s' % str(Partials))
     return Partials,Fulls
 
-def printEJECTS():
+def printEJECTS(Pat):
     logs.log_info("DSTLIST: %s" % str(DSTLISTS))
     for Key in EJECTS:
         List = EJECTS[Key]
-        logs.log_info('EJECT %s' % Key)
+        logs.log_info('EJECT %s %s' % (Pat,Key))
         for Item in List:
             logs.log_info('      %s' % str(Item))
 
-def dealEjects(Mod):
-    printEJECTS()
+def dealEjects(Mod,Pat):
+    printEJECTS(Pat)
     Partials,Fulls = predealEjects(Mod)        
-    ejectFulls2(Mod,Fulls)
+    ejectFulls2(Mod,Fulls,Pat)
     ejectPartials2(Mod,Partials)
 
-def ejectFulls2(Mod,Fulls):
+# ILIA
+def ejectFulls2(Mod,Fulls,Pat):
     for Dst in Fulls:
         List = EJECTS[Dst]
         Wid0 = Mod.exprWidth(Dst)
-#        logs.log_info("FULL %s len=%s wid=%s list=%s" % (Dst,len(List),Wid0,List))
         TT = List[0][2]
-        if (len(List) == 1):
+        logs.log_info("FULL pat=%s dst=%s len=%s wid=%s tt=%s list=%s" % (Pat,Dst,len(List),Wid0,TT,List))
+        if (len(List) == 1)and (Pat == '*'):
+            Port = List[0]
+            Src0 = synth0(Port[0],Mod,Wid0)
+            Cond = synth0(Port[1],Mod,1)
+            Src1 = synth0(['&&',Cond,Src0],Mod,1)
+            Obj = Mod.add_inst_conns('bufx','%s_buf' % Dst,[('a',Src1),('x',Dst)])
+
+            
+        elif (len(List) == 1):
             Obj = Mod.add_inst_conns('flipflop','%s_reg' % Dst,[('clk',TT[1]),('q',Dst)])
             Obj.params['WID'] = Wid0
             if Dst in ASYNCS:
@@ -310,31 +319,34 @@ def ejectFulls2(Mod,Fulls):
             Obj.conns['en'] = Cond
             Obj.conns['d'] = Src0
 
-
-
-        Obj = Mod.add_inst_conns('mflipflop','%s_reg' % Dst,[('clk',TT[1]),('q',Dst)])
-        Obj.params['WID'] = Wid0
-        Obj.params['PORTS'] = len(List)
-        if Dst in ASYNCS:
-            AS = ASYNCS[Dst][0]
-            Default = AS[0]
-            if type(Default) is not int:
-                Default = eval(Default,Mod.parameters,Mod.localparams)
-            Obj.params['ASYNC'] = Default
-            if (len(AS[1]) == 2) and (AS[1][0] in ('~','!')):
-                Obj.conns['rst_n'] = AS[1][1]
-            else:
-                Obj.conns['rst_n'] = synth0(AS[1],Mod,1)
+        elif (Pat == '*'):
+            logs.log_info("LEN>1 %d dst=%s list= " % (len(List),Dst))
+            for Item in List:
+                logs.log_info("       LEN>1 %d item=%s " % (len(List),Item))
         else:
-            Obj.conns['rst_n'] = "vcc"
-        for ind,Port in enumerate(List):
-            Src0 = synth0(Port[0],Mod,Wid0)
-            if Port[1] == []: 
-                Cond = 'vcc'
+            Obj = Mod.add_inst_conns('mflipflop','%s_reg' % Dst,[('clk',TT[1]),('q',Dst)])
+            Obj.params['WID'] = Wid0
+            Obj.params['PORTS'] = len(List)
+            if Dst in ASYNCS:
+                AS = ASYNCS[Dst][0]
+                Default = AS[0]
+                if type(Default) is not int:
+                    Default = eval(Default,Mod.parameters,Mod.localparams)
+                Obj.params['ASYNC'] = Default
+                if (len(AS[1]) == 2) and (AS[1][0] in ('~','!')):
+                    Obj.conns['rst_n'] = AS[1][1]
+                else:
+                    Obj.conns['rst_n'] = synth0(AS[1],Mod,1)
             else:
-                Cond = synth0(Port[1],Mod,1)
-            Obj.conns['en%d'% ind] = Cond
-            Obj.conns['d%d'% ind] = Src0
+                Obj.conns['rst_n'] = "vcc"
+            for ind,Port in enumerate(List):
+                Src0 = synth0(Port[0],Mod,Wid0)
+                if Port[1] == []: 
+                    Cond = 'vcc'
+                else:
+                    Cond = synth0(Port[1],Mod,1)
+                Obj.conns['en%d'% ind] = Cond
+                Obj.conns['d%d'% ind] = Src0
 
 
 #    sys.exit()
@@ -762,8 +774,17 @@ def eject(Dst,Src,Cond,Kind,Mod,Async):
     if Dst0 not in DSTLISTS:
         DSTLISTS[Dst0] = Dst
     if Async:
-        if type(Src) is not int:
+        if type(Src) is str:
             Src = eval(Src,Mod.parameters,Mod.localparams)
+        elif type(Src) is int:
+            Src = Src
+        elif type(Src) is list:
+            if Src[0] in ['bin','hex','dig']:
+                Val = getLitVal(Src)
+                Src = str(Val)
+            else:  
+                Srcx = Mod.pr_expr(Src)
+                Src = eval(Srcx,Mod.parameters,Mod.localparams)
         if Dst0 in ASYNCS:
             ASYNCS[Dst0].append((Src,Cond,Kind))
         else:
@@ -773,6 +794,18 @@ def eject(Dst,Src,Cond,Kind,Mod,Async):
         EJECTS[Dst0].append((Src,Cond,Kind))
     else:
         EJECTS[Dst0] = [(Src,Cond,Kind)]
+
+def getLitVal(Src):
+    Wid = int(Src[1])
+    Act = Src[2]
+    if Src[0] == 'hex':
+        Val = int(Act,16)
+    elif Src[0] == 'bin':
+        Val = int(Act,2)
+    elif Src[0] == 'dig':
+        Val = int(Act,10)
+    return Val
+
 
 def clearBufs(Mod):
     Renames,Bufs = getRenames(Mod)
@@ -1975,8 +2008,12 @@ def preprocess(Mod):
             Val0 = Obj.params[Prm]
             if type(Val0) is int:
                 Val = Val0
-            else:
+            elif type(Val0) is str:
                 Val  = eval(Val0,Mod.parameters,Mod.localparams)
+            elif type(Val0) is list:
+                Valx = Mod.pr_expr(Val0)
+                Val  = eval(Valx,Mod.parameters,Mod.localparams)
+            
             Obj.params[Prm] = Val
             if "__builtins__" in Mod.parameters.keys(): Mod.parameters.pop("__builtins__")
             if "__builtins__" in Mod.localparams.keys(): Mod.localparams.pop("__builtins__")

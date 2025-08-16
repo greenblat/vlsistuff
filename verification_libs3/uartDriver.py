@@ -18,9 +18,10 @@ class uartDriver(logs.driverClass):
     def rxrx(self):
         if self.peek('rx_valid') == 1:
             rxdata = self.peek('rxdata')
-#            logs.log_info('RX %x %s' % (rxdata,chr(rxdata)))
+            if (rxdata<0): rxdata = 0
+            logs.log_info('RX %x %s   "%s"' % (rxdata,chr(rxdata),self.rxstr))
             if rxdata == 10: 
-                self.rxstr = self.rxstr + '<CRLF>'
+                self.rxstr = self.rxstr + ' <CRLF>'
             else:
                 self.rxstr = self.rxstr + chr(rxdata)
             if rxdata == 10:

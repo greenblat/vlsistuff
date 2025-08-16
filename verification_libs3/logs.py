@@ -291,6 +291,10 @@ def log_debug(Text,Tokens = '',Which=0, verbose=True):
 
     return
 
+def log_fstr(Text,Sig = 'tb.fstr'):
+    Hex = str2hex(Text)
+    veri.force(Sig,Hex)
+    
 def log_info(Text,Which=0, verbose=True):
     openFlog(Which)
     if verbose:
@@ -932,6 +936,11 @@ class driverClass:
         self.cycles = 0
         self.Forces = []
         self.SeqObj = False
+        self.VCDS = {}
+
+    def vcd(self,CallName):
+        self.VCDS[CallName] = 0
+
     def eval(self,Item):
         if self.SeqObj:
             return self.SeqObj.eval(Item)
@@ -971,6 +980,13 @@ class driverClass:
                 Str = 'veri.force("trace_%s.%s",str(self.%s))' % (self.Name,Var,Var)
             exec(Str)
 
+    def vcds(self):
+        for Name in self.VCDS:
+            Now = int(getattr(self, Name))
+            Was = self.VCDS[Name]
+            if Now != Was:
+                veri.force('tb.pys.%s' % Name,str(Now))
+                self.VCDS[Name] =  Now
 
 
     def createMonModule(self):

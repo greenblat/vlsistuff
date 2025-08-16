@@ -399,7 +399,11 @@ def checker1(Current,Item,Params,Stack):
         check_dst_expr(Current,Dst)
         check_src_expr(Current,Src)
         if not compatible_width(Dst,Src,Current):
-            logs.log_errx(7,'diff width soft_assign (%s!=%s) %s   <= %s;'%(get_width(Dst,Current),get_width(Src,Current),pexpr(Dst),pexpr(Src)))
+            DstW,DstS = get_width(Dst,Current),get_width(Src,Current)
+            if DstW>DstS:
+                logs.log_errx(7,'diff width soft_assign (%s!=%s) %s   <= %s;'%(get_width(Dst,Current),get_width(Src,Current),pexpr(Dst),pexpr(Src)))
+            elif DstW < DstS:
+                logs.log_errx(77,'diff width soft_assign (%s!=%s) %s   <= %s;'%(get_width(Dst,Current),get_width(Src,Current),pexpr(Dst),pexpr(Src)))
 #        if (Item[0]=='<='):
 #            make_sure_simple_src(Current,Item)
         
