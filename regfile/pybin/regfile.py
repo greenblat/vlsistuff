@@ -929,7 +929,7 @@ def dumpRam(Postfix,File,Alone):
     Str = Str.replace('WSTRB',str(Wstrb))
     File.write(Str)
     Db['module']=Module
-    Finstram = wopen('%s.inst' % Module)
+    Finstram = wopen('%s.instx' % Module)
     for Line in LINES[0]:
         forInst(Line,'wire',Finstram)
     Str  = APBInst.replace('MODULE',Module)
@@ -937,9 +937,9 @@ def dumpRam(Postfix,File,Alone):
     for Line in LINES[0]:
         File.write('%s\n'%Line)
         forInst(Line,'con',Finstram)
-    bodyDump1(Db,File,Alone)
     Finstram.write(');\n')
     Finstram.close()
+    bodyDump1(Db,File,Alone)
     return File
     
 def forInst(Line,Which,Finst):
@@ -952,8 +952,11 @@ def forInst(Line,Which,Finst):
     if Which == 'wire':
         if len(wrds) == 3:
             Finst.write('wire %s %s;\n' % (wrds[1],Sig))
-        if len(wrds) == 4:
+        elif len(wrds) == 4:
             Finst.write('wire %s %s %s;\n' % (wrds[1],wrds[2],Sig))
+        elif len(wrds) == 2:
+            Finst.write('wire %s;\n' % (Sig))
+
     if Which == 'con':
         Finst.write('    ,.%s(%s)\n' % (Sig,Sig))
 
@@ -1497,7 +1500,7 @@ def dumpApb(Db):
     Module = Db['chip'].Params['names'][0] 
     Dir = Db['dir']
     Str = INSTANCE.replace('MODULE',Db['module'])
-    Finst = wopen('%s.inst'%Db['module'])
+    Finst = wopen('%s.insty'%Db['module'])
     Finst.write(Str)
     apbHead()
     Temp = helper0(Finst)
