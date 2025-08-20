@@ -188,11 +188,56 @@ def createLines(File):
             Res2.append((Lnum,Head))
     return Res2        
 
+def regIsCopy(wrds):
+    for wrd in wrds:
+        if wrd.startswith('copy='):
+            ww = wrd.split('=')
+            return ww[1]
+    return False
+
+def accessItem(wrds):
+    for wrd in wrds:
+        if wrd.startswith('access='):
+            return wrd
+    return False
 
 def readFile(File):
     Lines = createLines(File)  
     Lines = treatTemplates(Lines)
+    FREGS = {}
+    ACCESS = {}
+    Reg = False
     for Lnum,wrds in Lines:
+        if wrds[0] == 'reg':
+            Reg = wrds[1]
+            FREGS[Reg] = []
+            Acc = accessItem(wrds)
+            ACCESS[Reg] = Acc
+        elif wrds[0] == 'field':
+            FREGS[Reg].append((Lnum,wrds[:]))
+
+    Lines2 = []
+    for Lnum,wrds in Lines:
+        if wrds[0] == 'reg':
+            if regIsCopy(wrds):
+                Base = regIsCopy(wrds)
+                Acc = ACCESS[Base] 
+                if Acc:
+                    Lines2.append((Lnum,wrds+[Acc]))
+                else:
+                    Lines2.append((Lnum,wrds))
+                for LL,WW in FREGS[Base]:
+                    Lines2.append((LL,WW))
+            else:
+                Lines2.append((Lnum,wrds))
+        else:
+            Lines2.append((Lnum,wrds))
+            
+    Lines = Lines2
+
+
+    for Lnum,wrds in Lines:
+         
         if (wrds[0]=='end'):
             generate()
             return
@@ -581,9 +626,37 @@ def getPrm(Obj,Name,Default):
         return getPrm(Obj,ALIASES[Name],Default)
     return Default
 
+def getRegByName(Name):
+    for Reg in Db['regs']:
+        if Reg.Name == Name:
+            Params = Reg.Params
+    if Name in Db['fields']:
+        Fields = Db['fields'][Name]
+        return Params,Fields
+    return Params,[]
+import copy
 def computeWidthFromFields():
     Db['splits'] = {}
     Db['splitsw'] = {}
+#    for Reg in Db['regs']:
+#        Name= Reg.Name
+#        if 'copy' in Reg.Params:
+#            Base = Reg.Params['copy']
+#            Params,Fields = getRegByName(Base)
+#            if 'desc' in Reg.Params:
+#                Desc = Reg.Params['desc']
+#            else:
+#                Desc = 'copy %s' % Base
+#            Reg.Params = Params.copy()
+#            Reg.Params['desc'] = Desc
+#            Db['fields'][Name] = []
+#            for FF in Fields:
+#                XF = copy.deepcopy(FF)
+#                XF.Params['names'] = ['%s_%s' % (Name,XF.Params['names'][0])]
+#                Db['fields'][Name].append(XF)
+
+
+            
     for Reg in Db['regs']:
         Name= Reg.Name
         if (Name!='none') and(Reg.Kind in ['reg','array','ram']):
