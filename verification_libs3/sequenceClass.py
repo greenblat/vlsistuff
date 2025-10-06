@@ -461,7 +461,8 @@ class sequenceClass:
             return True
         if wrds[0] == 'exec':
             Cmd = ' '.join(wrds[1:])
-            exec(Cmd)
+            logs.log_info('EXEC %s' %Cmd)
+            exec(Cmd,globals())
             return True
         if wrds[0] == 'break':
             self.Break = lnum
@@ -486,6 +487,9 @@ class sequenceClass:
             self.Translates[wrds[0]]=Val
             return 
 
+        if wrds[0] == 'seq':
+           exec('self.%s()' % wrds[1])
+           return
         if wrds[0] == 'quit':
             Line = Line.replace('quit','finish_verilator')
             self.seq_line(Line,lnum)

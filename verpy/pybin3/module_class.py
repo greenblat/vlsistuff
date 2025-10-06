@@ -2608,7 +2608,7 @@ def splitBits(Expr,Mod,Mwid=64):
             if Wid in [0,1,'0','1']:
                 return [Expr]
             if type(Wid) is int:
-                print("SPLIT ERROR",Expr)
+                logs.log_error("SPLIT ERROR %s" % Expr)
                 return [Expr]
             if type(Wid) is tuple:
                 if Wid[0] == 'packed':

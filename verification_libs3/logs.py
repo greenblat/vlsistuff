@@ -985,6 +985,7 @@ class driverClass:
             Now = int(getattr(self, Name))
             Was = self.VCDS[Name]
             if Now != Was:
+                Now = Now & 0xffffffff
                 veri.force('tb.pys.%s' % Name,str(Now))
                 self.VCDS[Name] =  Now
 

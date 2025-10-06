@@ -36,10 +36,13 @@ always @(posedge clk or negedge rst_n) begin
                 pstrb <= 15;
                 state <= 10;
                 pwrite <= 1;
+                xvalid <= 0;
             end else if (xread) begin
                 paddr <= xaddr;
                 psel <= 1;
                 penable <= 0;
+                pwrite <= 0;
+                xvalid <= 0;
                 state <= 1;
             end
         end else if (state == 1) begin
@@ -50,10 +53,27 @@ always @(posedge clk or negedge rst_n) begin
         end else if (state == 2) begin
             if (pready) begin
                 xrdata <= prdata;
-                state <= 0;
                 xvalid <= 1;
-                penable <= 0;
-                psel <= 0;
+                if (xwrite) begin
+                    paddr <= xaddr;
+                    pwdata <= xwdata;
+                    psel <= 1;
+                    penable <= 0;
+                    pstrb <= 15;
+                    state <= 10;
+                    pwrite <= 1;
+                end else if (xread) begin
+                    paddr <= xaddr;
+                    psel <= 1;
+                    penable <= 0;
+                    pwrite <= 0;
+                    state <= 1;
+                end else begin
+                    state <= 0;
+                    penable <= 0;
+                    pwrite <= 0;
+                    psel <= 0;
+                end
             end
         end else if (state == 10) begin
             if (pready) begin
@@ -62,10 +82,26 @@ always @(posedge clk or negedge rst_n) begin
             end
         end else if (state == 11) begin
             if (pready) begin
-                state <= 0;
-                penable <= 0;
-                pwrite <= 0;
-                psel <= 0;
+                if (xwrite) begin
+                    paddr <= xaddr;
+                    pwdata <= xwdata;
+                    psel <= 1;
+                    penable <= 0;
+                    pstrb <= 15;
+                    state <= 10;
+                    pwrite <= 1;
+                end else if (xread) begin
+                    paddr <= xaddr;
+                    psel <= 1;
+                    penable <= 0;
+                    pwrite <= 0;
+                    state <= 1;
+                end else begin
+                    state <= 0;
+                    penable <= 0;
+                    pwrite <= 0;
+                    psel <= 0;
+                end
             end
         end
     end

@@ -1,8 +1,6 @@
 
 
-all pyhton scripts assume python 2.7 .
-
-if You adopt them to python 3 - please  add them to git.
+we swutched to python 3
 
 run_example0 is script to run first example.
 before that, You need to compile the lexer. 

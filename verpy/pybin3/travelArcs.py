@@ -30,6 +30,8 @@ def main():
     for (Len,Path) in PATHS:
         Frep.write(Path + '\n')
     Frep.close()
+    for Key in DONES:
+        logs.log_info('DONE %s %s %s' % (DONES[Key],Key[0],Key[1]))
 
 class holderClass:
     def __init__(self,Name):
@@ -92,20 +94,22 @@ def instancesDeep(Mods,Path):
 
 
 
-
+DONTS = 'rst_n clk sysclk canclk sys_rst_n can_rst_n'.split()
 
 
 def scanDeep(Mod,Path):
     Hld = Modules[Mod]
+    if not hasattr(Hld,'STARTS'): return
     for Term in Hld.STARTS:
-        if Term in Hld.CLOCKED:
+        if (Term in Hld.CLOCKED)and (Term not in DONTS):
             Clk = Hld.CLOCKED[Term]
             CLOCKED['.'.join(Path+[Term])] = Clk
-
-        travelFW(Term,Mod,Path,[ Path+[Term+ str(Hld.STARTS[Term])]])
+        if (Term not in DONTS):
+            travelFW(Term,Mod,Path,[ Path+[Term+ str(Hld.STARTS[Term])]])
     if len(Path)==1:
         for Term in Hld.INPUTS:
-            travelFW(Term,Mod,Path,[ Path+[Term]])
+            if (Term not in DONTS):
+                travelFW(Term,Mod,Path,[ Path+[Term]])
         
     for Inst,Type in Hld.SONS:
         if Type in Modules:
@@ -152,6 +156,10 @@ def ppPath(Path):
 DONES = {}
 
 def travelFW(Net,Mod,instPath,netPath):
+    Last = netPath[-1]
+    if Last in netPath[:-1]:
+        logs.log_info("CUT %s" % str(netPath))
+        return
     Src = ppPath(netPath[0])
     Len = len(netPath)
     Here = ppPath(instPath + [Net])
@@ -247,7 +255,7 @@ def loadDeep(Works,Sofar):
                     Modules[Son] = Topo.hld
                     Deeper.append(Son)
                 except:
-                    Topo = importlib.import_module(Son)
+#                    Topo = importlib.import_module(Son)
                     logs.log_warning('missing %s' % Son)
                     MISSINGS[Son] = Mod
                 

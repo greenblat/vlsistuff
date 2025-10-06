@@ -847,12 +847,10 @@ def advanceAddr(Obj):
         return Bytes
 
 INSTANCE = '''
-MODULE MODULE (.pclk(pclk),.presetn(presetn)
-    .pwrite(pwrite),.paddr(paddr),.psel(psel),.penable(penable)
+MODULE MODULE (.pclk(clk),.presetn(rst_n)
+    ,.pwrite(pwrite),.paddr(paddr),.psel(psel),.penable(penable)
     ,.prdata(prdata),.prdata_wire(),.pwdata(pwdata),.pstrb(pstrb)
-    ,.pready(pready),.pslverr(pselverr)
-    ,.penable(penable)
-    ,.pready()
+    ,.pready(pready),.pslverr(pslverr)
 '''
 
 
@@ -929,26 +927,58 @@ def dumpRam(Postfix,File,Alone):
     Str = Str.replace('WSTRB',str(Wstrb))
     File.write(Str)
     Db['module']=Module
+    createInstance(Module,File)
+    bodyDump1(Db,File,Alone)
+    return File
+
+def createInstance(Module,File):
     Finstram = wopen('%s.instx' % Module)
+    Fields = {}
+    for Line in LINES[6]:
+        L1 = Line
+        for Chr in '[]:=;': L1 = L1.replace(Chr,' ')
+        L1 = L1.replace('assign',' ')
+        L1 = L1.split()
+        Field = L1[0]
+        Reg  = L1[1]
+        if Reg not in Fields: Fields[Reg] = []
+        Wid = L1[2:]
+        if len(Wid) == 2:
+            Fields[Reg].append((Field,Wid))
+        else:
+            Fields[Reg].append((Field,False))
     for Line in LINES[0]:
-        forInst(Line,'wire',Finstram)
-    Str  = APBInst.replace('MODULE',Module)
+        forInst(Line,'wire',Finstram,Fields)
+    Str  = INSTANCE.replace('MODULE',Module)
     Finstram.write('%s\n' % Str)
     for Line in LINES[0]:
         File.write('%s\n'%Line)
-        forInst(Line,'con',Finstram)
+        forInst(Line,'con',Finstram,Fields)
     Finstram.write(');\n')
     Finstram.close()
-    bodyDump1(Db,File,Alone)
-    return File
     
-def forInst(Line,Which,Finst):
+def forInst(Line,Which,Finst,Fields):
     wrds = Line.split()
     if wrds[1] == 'reg': wrds.pop(1)
     if len(wrds) == 4:
         Sig = wrds[-2]
     else:
         Sig = wrds[-1]
+
+    if Sig in Fields:
+        List = Fields[Sig]
+        for FF,II in List:
+            if Which == 'wire':
+                if II:
+                    H = int(II[0])
+                    L = int(II[1])
+                    Finst.write('wire [%s:0] %s;\n' % (H-L,FF))
+                else:
+                    Finst.write('wire %s;\n' % (FF))
+            if Which == 'con':
+                Finst.write('    ,.%s(%s)\n' % (FF,FF))
+        return
+
     if Which == 'wire':
         if len(wrds) == 3:
             Finst.write('wire %s %s;\n' % (wrds[1],Sig))
@@ -1556,6 +1586,7 @@ def helper0(Finst):
         else:
             Li = Li.replace('input','wire')
             Li = Li.replace('output','wire')
+            Li = Li.replace('wire reg','reg')
             Li = Li.replace(',','')
             Li = Li + '; // hhh'
             Temp.append(Li)

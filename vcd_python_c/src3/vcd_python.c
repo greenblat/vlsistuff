@@ -238,7 +238,7 @@ void do_help() {
     printf("\n\n\nBIGGER EXAMPLE:\n %s\n",EXAMPLE); 
     exit(0); }
 void check_x(int i) { return; }
-
+int glitchOn =0;
 char *int2bin(int AA,int Wid,char *tmp);
 void useTriggers();
 void armTriggers(int P,char *Val);
@@ -293,6 +293,7 @@ typedef struct SIG {
     char traceable;
     int toggles;
     int toggles2;
+    int glitches;
     int changed;
     long wasZ;
 } change_sig;
@@ -396,6 +397,8 @@ int main( int argc, char *argv[]) {
                 k++;
             } else if (strcmp(option,"-toggles")==0) {
                 toggles = 1;
+            } else if (strcmp(option,"-glitches")==0) {
+                glitchOn = 1;
             } else if (fname1[0]==0) strcpy(fname1,option); 
             else if (fname2[0]==0) strcpy(fname2,option);
         }
@@ -551,6 +554,17 @@ void readfile(char *fname) {
     }
     printf("readfile end run_time=%g end_time=%g  start_time=%g\n",run_time,end_time,start_time);
 }
+
+void monitorGlitches() {
+    int ii;
+    for (ii=0;ii<maxusedsig;ii++) {
+        if (sigs[ii].glitches>1) {
+            printf("GLITCH time=%2f sig=%s num=%d\n",run_time,qqia(sigs[ii].name),sigs[ii].glitches);
+        }
+        sigs[ii].glitches = 0;
+    }
+}
+
 int instate;
 float lastTraceTime = 0.0;
 void pushtok(char *s,int ind) {
@@ -560,6 +574,7 @@ void pushtok(char *s,int ind) {
     if (s[0]==0) return;
     if ((ind==1)&&(s[0]=='#')) {
         run_time=atof(&(s[1]));
+        if (glitchOn) monitorGlitches();
         LASTCHANGE++;
         if (AlwaysMode) {
             PyRun_SimpleString(functionTime);
@@ -820,6 +835,7 @@ void drive_value(char *Val,char *Code,int forReal) {
     if (Width<=8) {
         Diffs = diffs(sigs[P].value,Val);
         strcpy(sigs[P].value,Val);
+        sigs[P].glitches++;
         char nnn[1000];
         strcpy(nnn,qqia(sigs[P].name));
     } else {

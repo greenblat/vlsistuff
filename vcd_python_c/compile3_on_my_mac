@@ -9,8 +9,8 @@ set VERSION = 13
 set LIB = /opt/homebrew//Cellar/python@$PYC/$PYC.$TAT/Frameworks/Python.framework/Versions/$PYC/lib
 set INC = /opt/homebrew//Cellar/python@$PYC/$PYC.$TAT/Frameworks/Python.framework/Versions/$PYC/include/python$PYC/
 
-set LIB = /opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib
-set INC = /opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/include/python3.13
+set LIB = /opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib
+set INC = /opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/include/python3.13
 
 
 gcc -g src3/vcd_python.c  src3/qq64.c  -o vcd_python3 \

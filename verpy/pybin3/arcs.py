@@ -191,7 +191,7 @@ def adds(Dst,Src,Nons,Where):
         SetD = support_set(Dst[1],False)
     else:
         SetD = support_set(Dst,False)
-#    print("ADDS dst=",Dst,' src=',Src,' setS',SetS,'setD',SetD)
+    print("ADDS dst=",Dst,' src=',Src,' setS',SetS,'setD',SetD)
     SetS = cleanNons(SetS,Nons+SetD)
     Cost = costIt(Dst,Src)
     for Out in SetD:
@@ -245,8 +245,10 @@ COMPLEX['adder'] = [('a','b'),('x')]
 COMPLEX['right'] = [('a','b'),('x')]
 COMPLEX['shiftright'] = [('a','b'),('x')]
 COMPLEX['shiftleft'] = [('a','b'),('x')]
+COMPLEX['shiftleft_lit'] = [('a'),('x')]
 COMPLEX['adder_lit'] = [('a','b'),('x')]
 COMPLEX['multiplier'] = [('a','b'),('x')]
+COMPLEX['multiplier_lit'] = [('a'),('x')]
 COMPLEX['subtractor'] = [('a','b'),('x')]
 COMPLEX['subtractor_lit'] = [('a','b'),('x')]
 COMPLEX['mux2'] = [('a','b','sel'),('x')]
@@ -256,6 +258,8 @@ COMPLEX['select_bus_lit'] = [('a','sel'),('x')]
 COMPLEX['comparator'] = [('a','b'),('x')]
 COMPLEX['comparator_lit'] = [('a'),('x')]
 COMPLEX['flipflop'] = [('d','en'),('q'),('clk','rst_n')]
+COMPLEX['mflipflop'] = [('d','en'),('q'),('clk','rst_n')]
+COMPLEX['mpflipflop'] = [('d','en'),('q'),('clk','rst_n')]
 
 
 
@@ -328,22 +332,29 @@ def builds(Mod):
 
 
 def getFlipFlop(Obj):
-    if Obj.Type != 'flipflop': return [],[],''
+    if Obj.Type not in  ['flipflop','mpflipflop','mflipflop']: return [],[],''
     Clk = Obj.conns['clk']
-    Wid = Obj.params['WID']
+#    Wid = Obj.params['WID']
     Ds = []
     Qs = []
-    if Wid == 1:
-        print("GETFLIPFLIP %s %s" % (Obj.Name,Obj.conns))
-        Ds.append(Obj.conns['d'])
-        Qs.append(Obj.conns['q'])
-        return Ds,Qs,Clk
 
-    for ii in range(Wid):
-        Dpin = 'd_%d_' % ii 
-        Qpin = 'a_%d_' % ii 
-        if Dpin in Obj.conns: Ds.append(Obj.conns[Dpin])
-        if Qpin in Obj.conns: Qs.append(Obj.conns[Qpin])
+    for Pin in Obj.conns:
+        if Pin[0] == 'd':
+            Ds.append(Obj.conns[Pin])
+        if Pin[0] == 'q':
+            Qs.append(Obj.conns[Pin])
+
+#     if Wid == 1:
+#         print("GETFLIPFLIP %s %s" % (Obj.Name,Obj.conns))
+#         Ds.append(Obj.conns['d'])
+#         Qs.append(Obj.conns['q'])
+#         return Ds,Qs,Clk
+# 
+#     for ii in range(Wid):
+#         Dpin = 'd_%d_' % ii 
+#         Qpin = 'q_%d_' % ii 
+#         if Dpin in Obj.conns: Ds.append(Obj.conns[Dpin])
+#         if Qpin in Obj.conns: Qs.append(Obj.conns[Qpin])
     return Ds,Qs,Clk
 
 def getComplexArcs(Obj):
@@ -511,9 +522,10 @@ def travelAlw(Alw,Cond,Params,Mod,Clk):
             adds(Alw[1],Alw[2],Params,Str)
             adds(Alw[1],Cond,Params,'<=cond')
             SetD = support_set(Alw[1],False)
+            SetS = support_set(Alw[2],False)
             for D in SetD: 
                 if D not in TERMS: 
-                    TERMS[D] = Alw[2]
+                    TERMS[D] = SetS
                     CLOCKED[D] = Clk
             return
 
