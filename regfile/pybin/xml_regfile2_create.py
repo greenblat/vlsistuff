@@ -62,7 +62,9 @@ def createXml(Module,Db):
                 Reset = Item.Params['reset']
             Addr = Item.Addr
     #        Fout.write('item %s %x %s\n'%(Item.Kind,Item.Addr,Item.Params))
+            print("ASASAS",Wid,Reg,Addr)
             if Wid<=32:
+                print("ASASAS",Wid,Reg,Addr)
                 writeItem(Db,Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount)
             else:
                 Acc0 = Acc
@@ -131,7 +133,24 @@ def writeItem(Db,Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount=0):
     Reset = str(Reset)
     Desc = str(Desc).replace('.',' ')
     Desc = Desc.replace('"','')
-    if writable(Acc)and ('pulse' in Acc):
+    print("XWWW",Acc,Reg)
+
+    if writable(Acc)and ('pulse' in Acc) and hasFields(Db,Reg) :
+        Str = REG_FIELDED_TEMPLATE.replace('NAME',Reg)
+        Str = Str.replace('ADDRESS','%x'%Addr)
+        Str = Str.replace('WIDTH','\'h%x'%Wid)
+        Str = Str.replace('VOLATILE','true')
+        Str = Str.replace('RESET',Reset)
+        Desc = Desc.replace('.',' ')
+        Desc = Desc.replace('"','')
+        Str = Str.replace('DESCRIPTION',Desc)
+        Fields = buildFields(Db,Reg)
+        Fields = Fields.replace('VOLATILE','false')
+        Fields = Fields.replace('USERLOGIC','false')
+        Str = Str.replace('FIELDS',Fields)
+        Fout.write(Str)
+
+    elif writable(Acc)and ('pulse' in Acc):
         Str = REG_USER_LOGIC_TEMPLATE.replace('NAME',Reg)
         Str = Str.replace('ADDRESS','%x'%Addr)
         Str = Str.replace('WIDTH','\'h%x'%Wid)
@@ -141,6 +160,7 @@ def writeItem(Db,Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount=0):
         Desc = Desc.replace('"','')
         Str = Str.replace('DESCRIPTION',Desc)
         Fout.write(Str)
+
     elif writable(Acc) and hasFields(Db,Reg):
         Str = REG_FIELDED_TEMPLATE.replace('NAME',Reg)
         Str = Str.replace('ADDRESS','%x'%Addr)
