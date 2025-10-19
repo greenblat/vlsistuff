@@ -1834,7 +1834,11 @@ def pr_stmt(List,Pref='',Begin=False):
         if List[0] in ['<=','=']:
             Dst = clean_br(pr_expr(List[1]))
             Src =split_expr(List[2],Pref+'    ')
-            return '%s%s %s %s;\n'%(Pref,Dst,List[0],Src)
+            if len(List) == 4:
+                Dly = '%s%s' % (List[3][0],List[3][1])
+                return '%s%s %s %s %s ;\n'%(Pref,Dst,List[0],Dly,Src)
+            else:                
+                return '%s%s %s %s;\n'%(Pref,Dst,List[0],Src)
         if List[0]=='ifelse':
             if len(List)>4:
                 logs.log_err('ifelse structure has too many items %d > %d %s'%(len(List),4,str(List)))
@@ -2066,10 +2070,8 @@ def pexpr(Src):
 
 def pr_dly(Dly):
     if not Dly: return ''
-    if len(Dly)==0:
-        return ''
-    if Dly=='':
-        return ''
+    if len(Dly)==0: return ''
+    if Dly=='': return ''
     res=[]
     for (A,B) in Dly:
         res.append(pr_expr(B))

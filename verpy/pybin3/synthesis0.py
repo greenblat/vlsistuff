@@ -138,6 +138,7 @@ def dump_python(Mod):
     if not os.path.exists('pys'): os.mkdir('pys')
     Fout = open("pys/%s.py" % Mod.Module,'w')
     Fout.write('INSTS = {}\n')
+    Fout.write('NETTABLE = {}\n')
     Fout.write("NETS = ")
     pprint.pprint(Mod.nets,Fout)
     for Inst in Mod.insts:

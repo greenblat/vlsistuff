@@ -128,8 +128,8 @@ def main():
         os.system('mvlg_to_one_file.py %s %s.all'%(mvlgFile,Top))
     else:
         os.system('/bin/cp %s %s.all'%(mvlgFile,Top))
-    os.system('sv2v -I ../rtl2  %s.all > %s.allv' % (Top,Top))
-    INC = STR.replace('ALLRTL','%s.allv'%(Top))
+#    os.system('sv2v -I ../rtl2  %s.all > %s.allv' % (Top,Top))
+    INC = STR.replace('ALLRTL','%s.all'%(Top))
     INC = INC.replace('TOP',Top)
     INC = INC.replace('LIB_DFF',LIB_DFF)
     INC = INC.replace('LIB_ABC',LIB_ABC)

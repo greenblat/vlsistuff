@@ -466,7 +466,7 @@ char s7[longestVal];
 
 void readfile(char *fname) {
     char *j;
-    char line[longestVal];
+    char line[800000];
     int i;
     int guard=0;
     Inf = fopen(fname, "r");
@@ -478,7 +478,7 @@ void readfile(char *fname) {
     j = (char *) 1;
     double last_time = 0.0;
     while ((j != NULL)&&((end_time<=0.0)||(run_time<=end_time))&&(Inf!=NULL)) {
-        j = fgets(line, longestVal, Inf);
+        j = fgets(line, 800000, Inf);
         linenum++;
         guard++;
 
@@ -498,60 +498,59 @@ void readfile(char *fname) {
             printf("TIME %d lines time=%g %d maxusedsigs=%d\n",linenum,run_time,0,maxusedsig);
         }
 
-
-        i=sscanf(line,"%s %s %s %s %s %s %s",s1,s2,s3,s4,s5,s6,s7);
         int Len = strlen(line);
-//        printf("len %d i=%d\n",Len,i);
-        if (Len>(longestVal-1000)) {
-            printf("wow! vcd line is way too long (%d) we support up to %d\n\n",Len,longestVal-1000);
-            exit(1);
-        }
-//        printf("line %d len=%d  i=%d %d %d %s %s\n",linenum,strlen(line),i,strlen(s1),strlen(s2),s1,s2);
-        switch (i) {
-        case 7:
-            pushtok(s1,1);
-            pushtok(s2,2);
-            pushtok(s3,3);
-            pushtok(s4,4);
-            pushtok(s5,5);
-            pushtok(s6,6);
-            pushtok(s7,7);
-            break;
-        case 6:
-            pushtok(s1,1);
-            pushtok(s2,2);
-            pushtok(s3,3);
-            pushtok(s4,4);
-            pushtok(s5,5);
-            pushtok(s6,6);
-            break;
-        case 5:
-            pushtok(s1,1);
-            pushtok(s2,2);
-            pushtok(s3,3);
-            pushtok(s4,4);
-            pushtok(s5,5);
-            break;
-        case 4:
-            pushtok(s1,1);
-            pushtok(s2,2);
-            pushtok(s3,3);
-            pushtok(s4,4);
-            break;
-        case 3:
-            pushtok(s1,1);
-            pushtok(s2,2);
-            pushtok(s3,3);
-            break;
-        case 2:
-            pushtok(s1,1);
-            pushtok(s2,2);
-            break;
-        case 1:
-            pushtok(s1,1);
-            break;
-        }
-    }
+
+        if (Len>(200000-1000)) {
+            printf("wow! %d vcd line is way too long (%d) we support up to %d\n\n",linenum,Len,longestVal-1000);
+            i = 0;
+        } else {
+            i=sscanf(line,"%s %s %s %s %s %s %s",s1,s2,s3,s4,s5,s6,s7);
+            switch (i) {
+            case 7:
+                pushtok(s1,1);
+                pushtok(s2,2);
+                pushtok(s3,3);
+                pushtok(s4,4);
+                pushtok(s5,5);
+                pushtok(s6,6);
+                pushtok(s7,7);
+                break;
+            case 6:
+                pushtok(s1,1);
+                pushtok(s2,2);
+                pushtok(s3,3);
+                pushtok(s4,4);
+                pushtok(s5,5);
+                pushtok(s6,6);
+                break;
+            case 5:
+                pushtok(s1,1);
+                pushtok(s2,2);
+                pushtok(s3,3);
+                pushtok(s4,4);
+                pushtok(s5,5);
+                break;
+            case 4:
+                pushtok(s1,1);
+                pushtok(s2,2);
+                pushtok(s3,3);
+                pushtok(s4,4);
+                break;
+            case 3:
+                pushtok(s1,1);
+                pushtok(s2,2);
+                pushtok(s3,3);
+                break;
+            case 2:
+                pushtok(s1,1);
+                pushtok(s2,2);
+                break;
+            case 1:
+                pushtok(s1,1);
+                break;
+            }
+       }
+   }
     printf("readfile end run_time=%g end_time=%g  start_time=%g\n",run_time,end_time,start_time);
 }
 
@@ -1153,7 +1152,7 @@ veri_peek(PyObject *self,PyObject *args) {
 }
 
 
-
+// return string of all signals in PATH (like tb.dut). Each signal Name|Width pair
 static PyObject*
 veri_siglist(PyObject *self,PyObject *args) {
     char *pathstring,*vstr,*filename;

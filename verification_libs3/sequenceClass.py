@@ -706,22 +706,28 @@ class sequenceClass:
                     self.Guardian = DEFAULTWAITGUARD
 
                 return True
-            Wrds = list(map(self.evalh,wrds[2:]))
-            Wrds2 = []
-            for Wrd in Wrds:
-                if '=' in Wrd:
-                    ww = Wrd.split('=')
-                    w1 = self.eval(ww[1])
-                    Wrds2.append('%s=%s'%(ww[0],w1))
-                else:
-                    Wrds2.append(Wrd)
+            if wrds[1].startswith('__'):
+                Wrds2 = wrds[2:]
+                Wrds = wrds[2:]
+            else:
+                Wrds = list(map(self.evalh,wrds[2:]))
+                Wrds2 = []
+                for Wrd in Wrds:
+                    if '=' in Wrd:
+                        ww = Wrd.split('=')
+                        w1 = self.eval(ww[1])
+                        Wrds2.append('%s=%s'%(ww[0],w1))
+                    else:
+                        Wrds2.append(str(Wrd))
             Cmd = wrds[1]+' '+' '.join(Wrds2)
             logs.log_info('tell %s <- %s   (%s)   2(%s)' % (Line[:-1],Cmd,Wrds,Wrds2))
 # @259: info: write 0x454 0x19  ['write', 'LVL_classic_end_of_phase_seg1', 'SEG1']
             ww = Cmd.split()
 #            if ww[0] == 'write':
 #                logs.log_info('A%s. w%s. //  %s' % (ww[1][2:],ww[2][2:],wrds[1:]),'uart')
+            print(">>>>>",wrds,Cmd)
             self.agents[wrds[0]].action(Cmd,wrds[1:])
+            print(">>after>>>",wrds,Cmd)
             return True
         elif (wrds[0] == 'check'):
             BB = makeExpr(wrds[1])

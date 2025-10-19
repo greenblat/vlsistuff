@@ -31,7 +31,7 @@ class apbDriverLocal(logs.driverClass):
             Addr = wrds[1]
             Data = wrds[2]
             self.Queue.append(('write',Addr,Data))
-            self.Expected[self.eval(Addr)] = eval(Data)
+            self.Expected[self.eval(Addr)] = self.eval(Data)
         elif wrds[0] == 'read':
             Addr = wrds[1]
             Back = -1

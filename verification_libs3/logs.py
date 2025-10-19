@@ -395,14 +395,17 @@ def intx(Val):
             return int(Val,16)
         except:
             print('ERROR logs.intx got INTX',type(Val),'"%s"'%Val)
+            X = open('asderasdasd')
             traceback.print_stack(file=Flogs[0])
+            traceback.print_stack()
             return 99999999
     else:
         try:
             return int(Val,2)
         except:
             print('ERROR logs.intx got INTX',type(Val),'"%s"'%Val)
-            traceback.print_stack(file=Flogs[0])
+            X = open('asderasdasd')
+            traceback.print_stack()
             return 99999999
 
 
