@@ -36,14 +36,24 @@ def help_main(Env):
                 Body2 = ['list'] + Body3[1:] + Body2[1:]
             else:
                 Body2 = ['list',Body3,Body2]
-            Mod.alwayses[ind] = ('*',Body2,Alw)
+            Mod.alwayses[ind] = ('*',Body2,'always')
     
-            Gens.append((removeRst(Kind),LL,Alw)) 
+            Gens.append((removeRst(Kind),LL,'always')) 
 
     Mod.alwayses.extend(Gens)
     for Net in Mod.nets_wires:
         Mod.nets[Net] = Mod.nets_wires[Net]
+    Initials = ['list']
+    for Net in Mod.nets:
+        Dir,Wid = Mod.nets[Net]
+        if 'reg' in Dir:
+            Initials.append(['=',Net,0])
+    if len(Initials)>1:
+        Mod.initials = [Initials]           
+
+
     Fout = open('%s.dlyv' % Mod.Module,'w')
+    Fout.write(' `timescale 1ns / 1ps\n')
     Mod.dump_verilog(Fout)
     Fout.close()
         

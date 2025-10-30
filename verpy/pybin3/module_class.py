@@ -1433,7 +1433,6 @@ class module_class:
                 if len(Expr) == 4:
                     Hi = Expr[2]
                     Lo = Expr[3]
-                    print("XXXXXX",Hi,Lo)
                     return Hi-Lo+1
                 else:
                     Hi = Expr[2][0]

@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import os,sys
+import time
 
 def main():
     Dirs = sys.argv[1:]
@@ -9,6 +10,7 @@ def main():
         for Fname in List:
             if goodEnds(Fname):
                 print(">>>>>>> %s/%s" % (Dir,Fname))
+                time.sleep(0.1)
                 os.system('cat %s/%s' % (Dir,Fname))
 
 def goodEnds(Fname):

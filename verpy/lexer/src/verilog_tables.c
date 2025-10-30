@@ -10,38 +10,40 @@ int EOL_FLAG() { return 1;}
 #define st_comment 4
 #define st_comment2 5
 #define st_define 6
-#define st_dig1 7
-#define st_dig2 8
-#define st_double 9
-#define st_either 10
-#define st_either1 11
-#define st_eqeq2 12
-#define st_eqeq3 13
-#define st_floating 14
-#define st_floating0 15
-#define st_hex1 16
-#define st_hex2 17
-#define st_idle 18
-#define st_neq2 19
-#define st_neq3 20
-#define st_new 21
-#define st_newver 22
-#define st_newver3 23
-#define st_number 24
-#define st_power 25
-#define st_pragma1 26
-#define st_pragma2 27
-#define st_shift0 28
-#define st_shift1 29
-#define st_sizednumber 30
-#define st_string 31
-#define st_token 32
-#define st_ubin1 33
-#define st_ubin2 34
-#define st_udig1 35
-#define st_udig2 36
-#define st_uhex1 37
-#define st_uhex2 38
+#define st_dig0 7
+#define st_dig1 8
+#define st_dig2 9
+#define st_double 10
+#define st_either 11
+#define st_either1 12
+#define st_eqeq2 13
+#define st_eqeq3 14
+#define st_floating 15
+#define st_floating0 16
+#define st_hex1 17
+#define st_hex2 18
+#define st_idle 19
+#define st_neq2 20
+#define st_neq3 21
+#define st_new 22
+#define st_newver 23
+#define st_newver3 24
+#define st_number 25
+#define st_power 26
+#define st_pragma1 27
+#define st_pragma2 28
+#define st_shift0 29
+#define st_shift1 30
+#define st_sizednumber 31
+#define st_string 32
+#define st_token 33
+#define st_ubin1 34
+#define st_ubin2 35
+#define st_udig0 36
+#define st_udig1 37
+#define st_udig2 38
+#define st_uhex1 39
+#define st_uhex2 40
 char strx0[]="\t \n";
 char strx1[]="";
 char strx2[]="/";
@@ -60,24 +62,25 @@ char strx14[]="'";
 char strx15[]="b";
 char strx16[]="h";
 char strx17[]="d";
-char strx18[]="{";
-char strx19[]="01_xzXZ?";
-char strx20[]="0123456789abcdefABCDEF_zZxX";
-char strx21[]="_";
-char strx22[]="(";
-char strx23[]=")";
-char strx24[]=":";
-char strx25[]="-";
-char strx26[]="+";
-char strx27[]="=";
-char strx28[]="!";
-char strx29[]="<";
-char strx30[]=">";
-char strx31[]="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789\t \n_?.,[]{}#@()~%^;:/+-*~-=!<>&|`',\\";
-char strx32[]="~-=!<>&|";
-char strx33[]="^=<>&|";
-char strx34[]="\"";
-char strx35[]="?.,[]{}#@()~%^;:/+-*";
+char strx18[]="s";
+char strx19[]="{";
+char strx20[]="01_xzXZ?";
+char strx21[]="0123456789abcdefABCDEF_zZxX";
+char strx22[]="_";
+char strx23[]="(";
+char strx24[]=")";
+char strx25[]=":";
+char strx26[]="-";
+char strx27[]="+";
+char strx28[]="=";
+char strx29[]="!";
+char strx30[]="<";
+char strx31[]=">";
+char strx32[]="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789\t \n_?.,[]{}#@()~%^;:/+-*~-=!<>&|`',\\";
+char strx33[]="~-=!<>&|";
+char strx34[]="^=<>&|";
+char strx35[]="\"";
+char strx36[]="?.,[]{}#@()~%^;:/+-*";
 int State=st_idle;
 void stepit(char Char,char Next,int Lnum) {
 //    printf("state=%d char=|%c| next=|%c|\n",State,Char,Next);
@@ -100,7 +103,7 @@ void stepit(char Char,char Next,int Lnum) {
               State=st_bin2;
               return;
         }
-        if (in_string(Char,strx15)&&in_string(Next,strx19)) {
+        if (in_string(Char,strx15)&&in_string(Next,strx20)) {
               action("add","0",Char);
               State=st_bin2;
               return;
@@ -112,12 +115,12 @@ void stepit(char Char,char Next,int Lnum) {
               State=st_bin2;
               return;
         }
-        if (in_string(Char,strx19)&&in_string(Next,strx19)) {
+        if (in_string(Char,strx20)&&in_string(Next,strx20)) {
               action("add","0",Char);
               State=st_bin2;
               return;
         }
-        if (in_string(Char,strx19)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx20)&&in_string(Next,strx1)) {
               action("push","bin",Char);
               State=st_idle;
               return;
@@ -154,6 +157,13 @@ void stepit(char Char,char Next,int Lnum) {
               return;
         }
     } break;
+    case st_dig0: {
+        if (in_string(Char,strx18)&&in_string(Next,strx17)) {
+              action("add","0",Char);
+              State=st_dig1;
+              return;
+        }
+    } break;
     case st_dig1: {
         if (in_string(Char,strx17)&&in_string(Next,strx12)) {
               action("add","0",Char);
@@ -172,7 +182,7 @@ void stepit(char Char,char Next,int Lnum) {
               State=st_dig2;
               return;
         }
-        if (in_string(Char,strx12)&&in_string(Next,strx21)) {
+        if (in_string(Char,strx12)&&in_string(Next,strx22)) {
               action("add","0",Char);
               State=st_dig2;
               return;
@@ -184,14 +194,14 @@ void stepit(char Char,char Next,int Lnum) {
         }
     } break;
     case st_double: {
-        if (in_string(Char,strx33)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx34)&&in_string(Next,strx1)) {
               action("push","double",Char);
               State=st_idle;
               return;
         }
     } break;
     case st_either: {
-        if (in_string(Char,strx6)&&in_string(Next,strx23)) {
+        if (in_string(Char,strx6)&&in_string(Next,strx24)) {
               action("add","0",Char);
               State=st_either1;
               return;
@@ -203,26 +213,26 @@ void stepit(char Char,char Next,int Lnum) {
         }
     } break;
     case st_either1: {
-        if (in_string(Char,strx23)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx24)&&in_string(Next,strx1)) {
               action("push","star",Char);
               State=st_idle;
               return;
         }
     } break;
     case st_eqeq2: {
-        if (in_string(Char,strx27)&&in_string(Next,strx27)) {
+        if (in_string(Char,strx28)&&in_string(Next,strx28)) {
               action("add","0",Char);
               State=st_eqeq3;
               return;
         }
-        if (in_string(Char,strx27)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx28)&&in_string(Next,strx1)) {
               action("push","double",Char);
               State=st_idle;
               return;
         }
     } break;
     case st_eqeq3: {
-        if (in_string(Char,strx27)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx28)&&in_string(Next,strx1)) {
               action("push","double",Char);
               State=st_idle;
               return;
@@ -248,19 +258,19 @@ void stepit(char Char,char Next,int Lnum) {
         }
     } break;
     case st_hex1: {
-        if (in_string(Char,strx16)&&in_string(Next,strx20)) {
+        if (in_string(Char,strx16)&&in_string(Next,strx21)) {
               action("add","0",Char);
               State=st_hex2;
               return;
         }
     } break;
     case st_hex2: {
-        if (in_string(Char,strx20)&&in_string(Next,strx20)) {
+        if (in_string(Char,strx21)&&in_string(Next,strx21)) {
               action("add","0",Char);
               State=st_hex2;
               return;
         }
-        if (in_string(Char,strx20)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx21)&&in_string(Next,strx1)) {
               action("push","hex",Char);
               State=st_idle;
               return;
@@ -333,46 +343,51 @@ void stepit(char Char,char Next,int Lnum) {
               return;
         }
         if (in_string(Char,strx14)&&in_string(Next,strx18)) {
+              action("add","0",Char);
+              State=st_udig0;
+              return;
+        }
+        if (in_string(Char,strx14)&&in_string(Next,strx19)) {
               action("none","0",Char);
               State=st_idle;
               return;
         }
-        if (in_string(Char,strx22)&&in_string(Next,strx6)) {
+        if (in_string(Char,strx23)&&in_string(Next,strx6)) {
               action("add","0",Char);
               State=st_either;
               return;
         }
-        if (in_string(Char,strx24)&&in_string(Next,strx24)) {
+        if (in_string(Char,strx25)&&in_string(Next,strx25)) {
               action("add","0",Char);
               State=st_new;
               return;
         }
-        if (in_string(Char,strx25)&&in_string(Next,strx24)) {
+        if (in_string(Char,strx26)&&in_string(Next,strx25)) {
               action("add","0",Char);
               State=st_new;
               return;
         }
-        if (in_string(Char,strx26)&&in_string(Next,strx24)) {
+        if (in_string(Char,strx27)&&in_string(Next,strx25)) {
               action("add","0",Char);
               State=st_new;
               return;
         }
-        if (in_string(Char,strx27)&&in_string(Next,strx27)) {
+        if (in_string(Char,strx28)&&in_string(Next,strx28)) {
               action("add","0",Char);
               State=st_eqeq2;
               return;
         }
-        if (in_string(Char,strx28)&&in_string(Next,strx27)) {
+        if (in_string(Char,strx29)&&in_string(Next,strx28)) {
               action("add","0",Char);
               State=st_neq2;
               return;
         }
-        if (in_string(Char,strx29)&&in_string(Next,strx30)) {
+        if (in_string(Char,strx30)&&in_string(Next,strx31)) {
               action("add","0",Char);
               State=st_newver;
               return;
         }
-        if (in_string(Char,strx30)&&in_string(Next,strx30)) {
+        if (in_string(Char,strx31)&&in_string(Next,strx31)) {
               action("add","0",Char);
               State=st_shift0;
               return;
@@ -382,22 +397,22 @@ void stepit(char Char,char Next,int Lnum) {
               State=st_power;
               return;
         }
-        if (in_string(Char,strx32)&&in_string(Next,strx33)) {
+        if (in_string(Char,strx33)&&in_string(Next,strx34)) {
               action("add","0",Char);
               State=st_double;
               return;
         }
-        if (in_string(Char,strx32)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx33)&&in_string(Next,strx1)) {
               action("push","double",Char);
               State=st_idle;
               return;
         }
-        if (in_string(Char,strx34)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx35)&&in_string(Next,strx1)) {
               action("add","0",Char);
               State=st_string;
               return;
         }
-        if (in_string(Char,strx35)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx36)&&in_string(Next,strx1)) {
               action("push","single",Char);
               State=st_idle;
               return;
@@ -409,38 +424,38 @@ void stepit(char Char,char Next,int Lnum) {
         }
     } break;
     case st_neq2: {
-        if (in_string(Char,strx27)&&in_string(Next,strx27)) {
+        if (in_string(Char,strx28)&&in_string(Next,strx28)) {
               action("add","0",Char);
               State=st_neq3;
               return;
         }
-        if (in_string(Char,strx27)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx28)&&in_string(Next,strx1)) {
               action("push","double",Char);
               State=st_idle;
               return;
         }
     } break;
     case st_neq3: {
-        if (in_string(Char,strx27)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx28)&&in_string(Next,strx1)) {
               action("push","double",Char);
               State=st_idle;
               return;
         }
     } break;
     case st_new: {
-        if (in_string(Char,strx24)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx25)&&in_string(Next,strx1)) {
               action("push","double",Char);
               State=st_idle;
               return;
         }
     } break;
     case st_newver: {
-        if (in_string(Char,strx29)&&in_string(Next,strx30)) {
+        if (in_string(Char,strx30)&&in_string(Next,strx31)) {
               action("add","0",Char);
               State=st_newver3;
               return;
         }
-        if (in_string(Char,strx31)&&in_string(Next,strx31)) {
+        if (in_string(Char,strx32)&&in_string(Next,strx32)) {
               action("add","0",Char);
               State=st_newver;
               return;
@@ -483,7 +498,7 @@ void stepit(char Char,char Next,int Lnum) {
         }
     } break;
     case st_pragma1: {
-        if (in_string(Char,strx6)&&in_string(Next,strx23)) {
+        if (in_string(Char,strx6)&&in_string(Next,strx24)) {
               action("push","string",Char);
               State=st_pragma2;
               return;
@@ -495,26 +510,26 @@ void stepit(char Char,char Next,int Lnum) {
         }
     } break;
     case st_pragma2: {
-        if (in_string(Char,strx23)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx24)&&in_string(Next,strx1)) {
               action("push","pragma2",Char);
               State=st_idle;
               return;
         }
     } break;
     case st_shift0: {
-        if (in_string(Char,strx30)&&in_string(Next,strx30)) {
+        if (in_string(Char,strx31)&&in_string(Next,strx31)) {
               action("add","0",Char);
               State=st_shift1;
               return;
         }
-        if (in_string(Char,strx30)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx31)&&in_string(Next,strx1)) {
               action("push","double",Char);
               State=st_idle;
               return;
         }
     } break;
     case st_shift1: {
-        if (in_string(Char,strx30)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx31)&&in_string(Next,strx1)) {
               action("push","double",Char);
               State=st_idle;
               return;
@@ -536,14 +551,19 @@ void stepit(char Char,char Next,int Lnum) {
               State=st_dig1;
               return;
         }
+        if (in_string(Char,strx14)&&in_string(Next,strx18)) {
+              action("add","0",Char);
+              State=st_dig0;
+              return;
+        }
     } break;
     case st_string: {
-        if (in_string(Char,strx34)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx35)&&in_string(Next,strx1)) {
               action("push","string",Char);
               State=st_idle;
               return;
         }
-        if (in_string(Char,strx31)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx32)&&in_string(Next,strx1)) {
               action("add","0",Char);
               State=st_string;
               return;
@@ -567,7 +587,7 @@ void stepit(char Char,char Next,int Lnum) {
               State=st_ubin2;
               return;
         }
-        if (in_string(Char,strx15)&&in_string(Next,strx19)) {
+        if (in_string(Char,strx15)&&in_string(Next,strx20)) {
               action("add","0",Char);
               State=st_ubin2;
               return;
@@ -579,14 +599,21 @@ void stepit(char Char,char Next,int Lnum) {
               State=st_ubin2;
               return;
         }
-        if (in_string(Char,strx19)&&in_string(Next,strx19)) {
+        if (in_string(Char,strx20)&&in_string(Next,strx20)) {
               action("add","0",Char);
               State=st_ubin2;
               return;
         }
-        if (in_string(Char,strx19)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx20)&&in_string(Next,strx1)) {
               action("push","ubin",Char);
               State=st_idle;
+              return;
+        }
+    } break;
+    case st_udig0: {
+        if (in_string(Char,strx18)&&in_string(Next,strx17)) {
+              action("add","0",Char);
+              State=st_udig1;
               return;
         }
     } break;
@@ -620,7 +647,7 @@ void stepit(char Char,char Next,int Lnum) {
         }
     } break;
     case st_uhex1: {
-        if (in_string(Char,strx16)&&in_string(Next,strx20)) {
+        if (in_string(Char,strx16)&&in_string(Next,strx21)) {
               action("add","0",Char);
               State=st_uhex2;
               return;
@@ -632,17 +659,17 @@ void stepit(char Char,char Next,int Lnum) {
         }
     } break;
     case st_uhex2: {
-        if (in_string(Char,strx4)&&in_string(Next,strx20)) {
+        if (in_string(Char,strx4)&&in_string(Next,strx21)) {
               action("add","0",Char);
               State=st_uhex2;
               return;
         }
-        if (in_string(Char,strx20)&&in_string(Next,strx20)) {
+        if (in_string(Char,strx21)&&in_string(Next,strx21)) {
               action("add","0",Char);
               State=st_uhex2;
               return;
         }
-        if (in_string(Char,strx20)&&in_string(Next,strx1)) {
+        if (in_string(Char,strx21)&&in_string(Next,strx1)) {
               action("push","uhex",Char);
               State=st_idle;
               return;

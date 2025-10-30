@@ -9,6 +9,7 @@ class uartDriver(logs.driverClass):
         logs.driverClass.__init__(self,Path,Monitors)
         self.Queue = []
         self.rxstr = ''
+        self.Verbose = True
         
 
     def run(self):
@@ -19,7 +20,8 @@ class uartDriver(logs.driverClass):
         if self.peek('rx_valid') == 1:
             rxdata = self.peek('rxdata')
             if (rxdata<0): rxdata = 0
-            logs.log_info('RX %x %s   "%s"' % (rxdata,chr(rxdata),self.rxstr))
+            if self.Verbose:
+                logs.log_info('RX %x %s   "%s"' % (rxdata,chr(rxdata),self.rxstr))
             if rxdata == 10: 
                 self.rxstr = self.rxstr + ' <CRLF>'
             else:
@@ -65,6 +67,8 @@ class uartDriver(logs.driverClass):
     def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         if wrds == []: return
+        elif (wrds[0] == 'verbose'):
+            self.Verbose = eval(wrds[1])
         elif (wrds[0] == 'uartfile'):
             Fname = wrds[1]
             File = open(Fname)

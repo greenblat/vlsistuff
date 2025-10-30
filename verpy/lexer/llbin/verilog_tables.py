@@ -75,6 +75,7 @@ Table = [
     ,('idle',"'",'b',               'ubin1','add',0)
     ,('idle',"'",'h',               'uhex1','add',0)
     ,('idle',"'",'d',               'udig1','add',0)
+    ,('idle',"'",'s',               'udig0','add',0)
     ,('idle',"'",'{',               'idle','none',0)
 
     ,('number',Digits,Digits,       'number','add',0)
@@ -88,6 +89,8 @@ Table = [
     ,('sizednumber',"'",'b',          'bin1','add',0)
     ,('sizednumber',"'",'h',          'hex1','add',0)
     ,('sizednumber',"'",'d',          'dig1','add',0)
+    ,('sizednumber',"'",'s',          'dig0','add',0)
+    ,('dig0',"s",'d',          'dig1','add',0)
 
     ,('bin1','b',' ',         'bin2','add',0)
     ,('bin1','b',BinDig,         'bin2','add',0)
@@ -111,6 +114,7 @@ Table = [
     ,('ubin1','b',BinDig,         'ubin2','add',0)
     ,('uhex1','h',HexDig,         'uhex2','add',0)
     ,('udig1','d',Digits,         'udig2','add',0)
+    ,('udig0','s','d',            'udig1','add',0)
     ,('udig1','d',' ',         'udig2','add',0)
     ,('uhex1','h',' ',         'uhex2','add',0)
 
