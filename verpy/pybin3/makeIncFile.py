@@ -30,21 +30,22 @@ write_verilog -noattr  glv0/CELL.v
 '''
 
 def help_main(Env):
-    Mod = Env.Current
-    Types = []
-    for Inst in Mod.insts:
-        Type = Mod.insts[Inst].Type
-        if Type not in Types: Types.append(Type)
-
-    Types.sort()
-    Txt = TEXT.replace('CELL',Mod.Module)
-    LL = ''
-    for Type in Types:
-        LL += 'read_verilog  blackboxes/%s.blkbox\n' % Type
-
-    Txt = Txt.replace('BLACKBOXES',LL)
-    print(Txt)
-    Fout = open('incs/%s.inc' % Mod.Module,'w')
-    Fout.write(Txt)
-    Fout.close()
+    for Module in Env.Modules:
+        Mod = Env.Modules[Module]
+        Types = []
+        for Inst in Mod.insts:
+            Type = Mod.insts[Inst].Type
+            if Type not in Types: Types.append(Type)
+    
+        Types.sort()
+        Txt = TEXT.replace('CELL',Mod.Module)
+        LL = ''
+        for Type in Types:
+            LL += 'read_verilog  blackboxes/%s.blkbox\n' % Type
+    
+        Txt = Txt.replace('BLACKBOXES',LL)
+        print(Txt)
+        Fout = open('incs/%s.inc' % Mod.Module,'w')
+        Fout.write(Txt)
+        Fout.close()
 

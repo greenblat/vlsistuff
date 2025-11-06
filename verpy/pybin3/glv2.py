@@ -27,10 +27,7 @@ def help_main(Env):
         if Obj.Type == 'blkbox':
             In = Obj.conns['a']
             Out = Obj.conns['x']
-            if (type(In) is list) and (In[0] == 'curly'):
-                Mod.hard_assigns.append((Out,In,'',''))
-            else:
-                REPLACE[str(In)] = Out
+            Mod.hard_assigns.append((Out,In,'',''))
             REMOVE.append(Inst)
 
     for Inst in REMOVE:
@@ -40,9 +37,16 @@ def help_main(Env):
         Obj = Mod.insts[Inst]
         for Pin in Obj.conns:
             Sig = Obj.conns[Pin]
-            if str(Sig) in REPLACE:
+            if (type(Sig) is list) and (Sig[0] == 'curly'):
+                Res = ['curly']
+                for Item in Sig[1:]:
+                    if str(Item) in REPLACE:
+                        Res.append(REPLACE[str(Item)])
+                    else:
+                        Res.append(Item)
+                Obj.conns[Pin] = Res
+            elif str(Sig) in REPLACE:
                 Obj.conns[Pin] = REPLACE[str(Sig)]
-                print("REPLACE %s" % str(Sig))
                 Bus = getBus(Sig)
     for ind,(Dst,Src,_,_) in enumerate(Mod.hard_assigns):
         Src1 = useReplaces(Src,REPLACE)

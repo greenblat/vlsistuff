@@ -202,6 +202,13 @@ def log_write(Text,Which=0):
 #    print('%s'%(Text))
     Flogs[Which].write('%s\n'%(Text))
 
+def log_short(Text,Which=0):
+    if Which not in Flogs:
+        Flogs[Which]=open(PYMONLOG+str(Which),'w')
+    print('    %s'%(Text))
+    Flogs[Which].write('     %s\n'%(Text))
+    Flogs[Which].flush()
+
 def log_info(Text,Which=0):
     if Which not in Flogs:
         Flogs[Which]=open(PYMONLOG+str(Which),'w')

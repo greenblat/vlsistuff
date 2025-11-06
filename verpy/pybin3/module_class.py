@@ -1453,7 +1453,9 @@ class module_class:
                 logs.log_info("XXXXX %s" % str(Expr))
                 return 0
 
-            if Expr[0] in ['&','|','^']: 
+            if Expr[0] in ['*']: 
+                return self.exprWidth(Expr[1])+self.exprWidth(Expr[2])
+            if Expr[0] in ['+','-','&','|','^']: 
                 return self.exprWidth(Expr[1])
             if Expr[0] == 'question':
                 return self.exprWidth(Expr[2])
@@ -2205,6 +2207,7 @@ def pr_expr(What):
         W = What[1]
         return '[%s:%s]'%(pr_expr(W[0]),pr_expr(W[1]))
     if What[0]=='curly':
+        if len(What) == 1: return 'CURLY'
         if What[1]=='repeat':
             return '{ %s { %s }}'%(pr_expr(What[2]),pr_expr(What[3]))
         if one_bus(What[1:]):
