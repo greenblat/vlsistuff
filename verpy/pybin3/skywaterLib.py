@@ -1621,6 +1621,14 @@ Desc.add_pin("BN","input")
 Desc.add_pin("C","input")
 Desc.add_pin("D","input")
 cellLib["scs130ms_and4bb_4"]=Desc
+
+Desc = cellDescClass("BUF")
+Desc.set_job("buf")
+Desc.add_pin("X","output")
+Desc.add_pin_func("X","A")
+Desc.add_pin("A","input")
+cellLib["BUF"]=Desc
+
 Desc = cellDescClass("scs130ms_buf_1")
 Desc.properties["area"] = "6.393600"
 Desc.properties["cell_footprint"] = "buf"
@@ -2183,6 +2191,8 @@ Desc.add_arc("CLK","Q","rising_edge")
 Desc.add_param("area",36.763200);
 Desc.add_pin("RESETB","input")
 Desc.set_pin_job("CLK","clock")
+Desc.set_pin_job("RESETB","reset")
+Desc.set_pin_job("D","data")
 Desc.add_pin("CLK","input")
 Desc.add_pin("D","input")
 Desc.add_pin("Q","output")

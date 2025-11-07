@@ -324,6 +324,8 @@ def explodeBusses(Mod):
         Dir,Wid = Mod.nets[Net]
         if type(Wid) is tuple:
             Hi,Lo = Wid
+            Hi = Mod.compute_int(Hi)
+            Lo = Mod.compute_int(Lo)
             for II in range(int(Lo),int(Hi)+1):
                 New = '%s[%s]' % (Net,II)
 #                New = normalize(New)

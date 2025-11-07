@@ -163,6 +163,10 @@ def add_module(Key):
         Lhead = DataBase[List[2]]
         Lbody = DataBase[List[3]]
         Lparams=[]
+        if Lhead[0][0] == '#':
+            Lparams= Lhead
+            Lhead = Lbody
+            Lbody = []
     elif len(List)==6:
         Lparams = DataBase[List[2]]
         Lhead = DataBase[List[3]]

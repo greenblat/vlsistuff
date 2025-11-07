@@ -67,7 +67,8 @@ class  accessClass:
         LibTypes1 = len(Mod.libtypes1.keys())
         Insts = len(Mod.conns.keys())
         Wires = len(Mod.wires.keys())
-        logs.log_info("highlites: %-30s    nets=%d wires= %d  child=%d libt=(%d %d)  insts= %d" % (Cell,Wids,Wires,Types1,LibTypes0,LibTypes1,Insts))
+        logs.log_short("  highlites: %-30s    nets=%d wires= %d  child=%d libt=(%d %d)  insts= %d" % (Cell,Wids,Wires,Types1,LibTypes0,LibTypes1,Insts))
+        return Cell,Wids,Wires,Types0,Types1,LibTypes0,LibTypes1,Insts
             
     def description(self,Cell):
         Mod = Env.Modules[Cell]
@@ -92,8 +93,11 @@ class  accessClass:
         return Res
 
     def nicelist(self):
+        List = []
         for Cell in Env.Modules:
-            self.highlites(Cell)
+            Item = self.highlites(Cell)
+            List.append(Item)
+        return List
 
     def generatePng(self,Cell):
         Hier = {}
@@ -115,7 +119,7 @@ class  accessClass:
         self.buildHierPath(Mod,[(Cell,Cell)],Paths)
         Lines = []
         Ind = 0
-        print("PATHS",len(Paths))
+#        print("PATHS",len(Paths))
         for Path in Paths:
             Res = []
             for Inst,_ in Path:
@@ -241,14 +245,14 @@ class  accessClass:
         Results = {}
         for ind,Reg in enumerate(Regs):
             Distances = {}
-            print("START q=%s d=%s" % (Reg[0],Reg[1]))
-            self.travelsBack(Mod,Reg[0],Reg[1],self.Path[:],[(Module,Reg)],Distances)
+#            print("START q=%s d=%s" % (Reg[0],Reg[1]))
+            self.travelsBack(Mod,Reg[0],Reg[1],self.Path[:],[(Module,Reg[0],Reg[1])],Distances)
             Results[Reg] = Distances
         
         return Results
 
     def travelsBack(self,Mod,Q,Net,Hier,Sofar,Distances):
-        print("ENTER net %s   sofar=%s" % (Net,Sofar))
+#        print("ENTER net %s   sofar=%s" % (Net,Sofar))
         self.buildNetTable(Mod)
         List = Mod.netTable[Net]
         for Inst,Pin in List:
@@ -256,15 +260,22 @@ class  accessClass:
                 Type = Mod.libtypes0[Inst]
                 if isOutputPin(Type,Pin):
                     Ipins = libInputPins(Type)
-                    print("FOUND DRIVER net=%s type=%s opin=%s ipins=%s" % (Net,Type,Pin,Ipins))
+#                    print("FOUND DRIVER net=%s type=%s opin=%s ipins=%s" % (Net,Type,Pin,Ipins))
                     for Ipin in Ipins:
                         In = Mod.conns[Inst][Ipin]
-                        Down = Sofar+[(Inst,Ipin,In)] 
-                        print("CHOOSE  in=%s type=%s ipin=%s" % (In,Type,Ipin))
-                        if In not in Distances: 
+                        Down = Sofar+[(Inst,Ipin,In,Mod.Name)] 
+#                        print("CHOOSE  in=%s type=%s ipin=%s" % (In,Type,Ipin))
+                        if isResetPin(Type,Ipin) or isClockPin(Type,Ipin):
+                            pass
+                        elif In not in Distances: 
                             Distances[In] = Down
                             if not isFlipFlop(Type):
                                 self.travelsBack(Mod,Q,In,Hier,Down,Distances)
+                            else:
+                                 Opin =  libOutputPin(Type)
+                                 Out = Mod.conns[Inst][Opin]
+                                 Distances[In] = Down+[(Inst,Opin,Out,Mod.Name)]
+                                
                         else:
                             Was = len(Distances[In])
                             Now = len(Down)
@@ -272,17 +283,21 @@ class  accessClass:
                                 Distances[In] = Down
                                 if not isFlipFlop(Type):
                                     self.travelsBack(Mod,Q,In,Hier,Down,Distances)
+                                else:
+                                    Opin =  libOutputPin(Type)
+                                    Out = Mod.conns[Inst][Opin]
+                                    Distances[In] = Down+[(Inst,Opin,Out,Mod.Name)]
 
             elif Inst in Mod.types0:
                 Type = Mod.types0[Inst]
                 if isModuleOutputPin(Type,Pin):
                     self.buildNetTable(Type)
                     Mod2 = self.Modules[Type]
-                    Down = Sofar+[(Type,Inst,Pin)] 
+                    Down = Sofar+[(Type,Inst,Pin,Mod.Name)] 
                     self.travelsBack(Mod2,Q,Pin,Hier+[(Inst,Type)],Down,Distances)
 
         if (Net in Mod.netdirs) and (Mod.netdirs[Net] == 'input'):
-            Down = Sofar+[(Type,Type,Net)] 
+            Down = Sofar+[(Type,Type,Net,Mod.Name)] 
             if len(Hier)==1:
                 if Net not in Distances: 
                     Distances[Net] = Down
@@ -297,13 +312,15 @@ class  accessClass:
             Father = self.Modules[Type]
             LL = Father.types1[Mod.Name]
             Inst = Hier[-1][0]
-            if LL not in LL:
+            if Inst not in LL:
                 logs.log_error('INST %s is not in module %s' % (Inst,Type))
                 return
 
-            Sig = Mod2.conns[Inst][Net]
-            Down = Sofar+[(Type,Inst,Pin)] 
-            self.travelsBack(Father,Q,Sig,Hier2,Down,Distances)
+            self.buildNetTable(Father)
+            if Net in Father.conns[Inst]:
+                Sig = Father.conns[Inst][Net]
+                Down = Sofar+[(Type,Inst,Pin,Father.Name)] 
+                self.travelsBack(Father,Q,Sig,Hier2,Down,Distances)
 
 
     def local_arcs(self,Cell):            
@@ -584,7 +601,17 @@ def use_command_wrds(wrds):
         LL.reverse()
         for Size,Local,Cell in LL:
             Mod = Env.Modules[Cell]
-            logs.log_info('%10d %10d    %s' % (Size,Local,Cell))
+            logs.log_short('%10d %10d    %s' % (Size,Local,Cell))
+        Fout = open('sizes.csv','w')
+        Fout.write('ind,deep,local,module\n')
+        for ind,(Local,Size,Cell) in enumerate(LL):
+            Mod = Env.Modules[Cell]
+            Fout.write('%d,%s,%s,%s\n' % (ind,Local,Size,Cell))
+        Fout.close()
+        os.system('open sizes.csv')
+
+
+
         return
     if wrds[0] == 'hier':
         if len(wrds)>1:
@@ -607,7 +634,15 @@ def use_command_wrds(wrds):
             logs.log_info('%d %s %s ' % (len(LL),Net,Mod.netTable[Net]))
         return
     if wrds[0] == 'list':
-        Env.nicelist()
+        List = Env.nicelist()
+        File = open('list.csv','w')
+        List.sort()
+        File.write('module,rtlnets,synnets,rtlinsts,rtltypes,libinsts,libtypes,total_insts\n')
+        for Cell,Wids,Wires,Types0,Types1,LibTypes0,LibTypes1,Insts in List:
+            File.write('%s,%d,%d,%d,%d,%d,%d,%d\n' % ( Cell,Wids,Wires,Types0,Types1,LibTypes0,LibTypes1,Insts))
+            
+        File.close()
+        os.system('open list.csv')
         return
 
     if wrds[0] == 'find':
@@ -644,11 +679,13 @@ def use_command_wrds(wrds):
     if wrds[0] == 'registers':
         if len(wrds)>1:
             Module = wrds[1]
-        else:
-            if Env.Path == []: 
-                logs.log_error('run goto command first to point me to the right module')
-                return
+        elif Env.Path != []: 
             Module = Env.Path[-1][1]
+        elif Env.Top != '':
+            Module = Env.Top
+        else:
+            logs.log_error('run goto command first to point me to the right module')
+            return
         Regs =  Env.endPoints(Module)
         for ind,Reg in enumerate(Regs):
             logs.log_short('      %d:   %s    %s' % (ind,Reg,Module))
@@ -667,6 +704,8 @@ def use_command_wrds(wrds):
             logs.log_info("none")
             return
         ind = 0
+        Fout = open('back_arcs.csv','w')
+        Fout.write(',Sig,Cell,Type,Pin,Inst,Func\n')
         for Reg in Results:
             Distances = Results[Reg]
             Len = 0
@@ -676,10 +715,34 @@ def use_command_wrds(wrds):
                 if len(Path0)>Len:
                     Len = len(Path0)
                     Longest = Path0
-            logs.log_info('%d %s %d\n\n\n' % (ind,Reg[0],Len))
+            logs.log_info('\n\n\n\%d %s %d' % (ind,Reg[0],Len))
+            Fout.write(',,,\n')
+            Fout.write(',,,\n')
+            Fout.write('newPath,ind=%d,reg=%s,len=%d\n' % (ind,Reg[0],Len))
+            Fout.write(',Sig,Cell,Type,Pin,Inst,Func\n')
             for Log in Longest:
-                logs.log_short('     %s' % str(Log))
+                if len(Log) == 4:
+                    Inst,Pin,Sig,Cell = Log
+                    Mod2 = Env.Modules[Cell]
+                    if Inst in Mod2.types0:
+                        Type = Mod2.types0[Inst]
+                    elif Inst in Mod2.libtypes0:
+                        Type = Mod2.libtypes0[Inst]
+                    else:
+                        Type = 'type?'
+                    Type = Type.replace('scs130ms_','')
+                    Type = Type.replace('_1','')
+                    Func = libFunction(Inst,Mod2)
+                    Pref = '          '
+                    if Sig[0] == '_':
+                        Pref += '            '
+                    logs.log_short('     %s%20s   %s %s %s %s  %s' % (Pref,Sig,Cell,Type,Pin,Inst,Func))
+                    Fout.write(',%s,%s,%s,%s,%s,%s\n' % (Sig,Cell,Type,Pin,Inst,Func))
+                else:
+                    logs.log_short('222     %s %s' % (Log[0],Log[1]))
             ind += 1
+        Fout.close()
+        os.system('open back_arcs.csv')
         return
 
     if wrds[0] == 'local_arcs':
@@ -788,6 +851,7 @@ def isModuleOutputPin(Type,Pin):
     return Mod.netdirs[Pin] == 'output'
 
 def libFunction(Inst,Mod):
+    if Inst not in Mod.libtypes0: return ''
     Type = Mod.libtypes0[Inst]
     Pins = cellLib[Type].Pins
     Conns = Mod.conns[Inst]
@@ -798,9 +862,24 @@ def libFunction(Inst,Mod):
         if Pin in Conns:
             Sig = Conns[Pin]
             Func = Func.replace(Pin,Sig)
-    Func = Func.replace(' ','')
+    Osig = Conns[Opin] 
+    Func = '%s=%s' % (Osig,Func.replace(' ',''))
     return Func
         
+def isResetPin(Type,Pin):
+    if Type not in cellLib: return False
+    Obj = cellLib[Type]
+    if Pin not in Obj.pinsJobs: return False
+    return Obj.pinsJobs[Pin] == 'reset'
+
+def isClockPin(Type,Pin):
+    if Type not in cellLib: return False
+    Obj = cellLib[Type]
+    if Pin not in Obj.pinsJobs: return False
+    return Obj.pinsJobs[Pin] == 'clock'
+
+
+
 def compatible(Pattern,Exact): 
     if Pattern==Exact: return True
     if Pattern in Exact: return True

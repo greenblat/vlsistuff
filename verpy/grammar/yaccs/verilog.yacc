@@ -48,6 +48,7 @@ Mains : Mains MainItem | MainItem  ;
 MainItem : Module | Define ;
 Module : 
       module token Hparams Header Module_stuffs endmodule 
+    | module token Hparams Header endmodule 
     | module token Header Module_stuffs endmodule 
     | module token Header endmodule ;
 
