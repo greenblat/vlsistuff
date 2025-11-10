@@ -220,6 +220,7 @@ class axiSlaveClass:
         self.reading()
         self.writing()
         self.sendrqueue()
+        self.runbqueue()
 
     def sendrqueue(self):
 #         veri.force('tb.rqueuelen',hex(len(self.rqueue)))
@@ -360,6 +361,8 @@ class axiSlaveClass:
         elif self.bqueue!=[]:
             bid,bresp = self.bqueue[0]
             self.bqueue.pop(0)
+#            logs.log_info("BID %s" % bid)
+            if type(bid) is not int: bid = bid[0]
             self.force('bid',bid)
             self.force('bvalid',1)
         elif self.peek('bready')==1: 
