@@ -243,6 +243,11 @@ def explodeBus(Sig,Mod):
             Hi = int(Wid[0])
             Lo = int(Wid[1])
             return explodeBus(['subbus',normalize(Sig),Hi,Lo],Mod)
+        elif (Wid == 0):
+            pass
+        else:
+            logs.log_error("explodeBus got %s  %s" % (Sig,Wid))  
+           
     elif (type(Sig) is str) and (Sig[0] in '123456789'):
         if "'" in Sig:
             ww = Sig.split("'")
@@ -322,7 +327,7 @@ def dealAssigns(Mod):
 def explodeBusses(Mod):
     for Net in list(Mod.nets.keys()):
         Dir,Wid = Mod.nets[Net]
-        if type(Wid) is tuple:
+        if (type(Wid) is tuple) or (type(Wid) is list):
             Hi,Lo = Wid
             Hi = Mod.compute_int(Hi)
             Lo = Mod.compute_int(Lo)
@@ -366,8 +371,8 @@ def explodeConnections(Mod):
 def exploadConns(Mod):
     dumpV(Mod,'a00.v')
     dealAssigns(Mod)
-    explodeBusses(Mod)
     explodeConnections(Mod)
+    explodeBusses(Mod)
     dumpV(Mod,'a01.v')
     makeBuffers(Mod)
     dumpV(Mod,'a02.v')
@@ -395,7 +400,6 @@ def makeReplacements(Mod):
         if Obj.Type == 'BUF':
             In = Mod.pr_expr(Obj.conns['A'])
             Out = Mod.pr_expr(Obj.conns['X'])
-            print("IN",Inst,In)
             if In.startswith('outx_'):
                 REMOVE.append(Inst)
                 REPLACE[In] = Out
