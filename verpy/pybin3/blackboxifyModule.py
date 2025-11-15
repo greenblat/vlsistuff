@@ -8,6 +8,7 @@ def help_main(Env):
         fixStuffs(Mod)
         do_alwayses(Mod)
         do_assigns(Mod)
+        wrapUps(Mod)
     Fout = open('gutted/%s.v' % Mod.Module,'w')
     for Module in Env.Modules:
         Mod = Env.Modules[Module]
@@ -16,6 +17,26 @@ def help_main(Env):
     for Module in Env.Modules:
         Mod = Env.Modules[Module]
         do_empty(Mod)
+    Fout = open('gutted/%s_invents.py' % Mod.Module,'w')        
+    Fout.write('INVENTIONS = {}\n')
+    for Inv in INVENTIONS:
+        Fout.write('INVENTIONS["%s"] = "%s"\n' % (Inv,INVENTIONS[Inv]))
+    Fout.close()
+
+def wrapUps(Mod):
+    if Marker[0] == 0: return
+    Mod.nets['markerarg'] = ['output',1]
+    Mod.nets['marker_agregate'] = ['wire',1]
+    Or = ['|']
+    for ii in range(1,1+Marker[0]):
+        Sig = 'markereg%d' % ii
+        Or.append(Sig)
+        
+    Mod.hard_assigns.append(( 'marker_agregate',Or,'',''))
+
+    Box = Mod.add_inst_conns('blkbox','marker_blkbox',[('a','marker_agregate'),('x','markerarg')])
+
+
 
 def fixStuffs(Mod):
     ind = 0
@@ -43,7 +64,6 @@ def fixStuffs(Mod):
 def do_alwayses(Mod):
     for When,Body,Alw in Mod.alwayses:
         Edges = getEdged(When)
-        print("EDGES",Edges)
         scanAlwaysBody(Mod,Edges,Body)
 
 def getEdged(When):
@@ -66,6 +86,7 @@ def getEdged(When):
 OPS = '+ curly == != || && > < >= | & ^ ! ~ question '.split()
 
 SIMPLEASSIGNS = {}
+INVENTIONS = {}
 RESETS = 'rst_n can_rst_n sys_rst_n'.split()
 def makeSimpleAssign(Mod,Edges,Expr):
     if str(Expr) in SIMPLEASSIGNS: return SIMPLEASSIGNS[str(Expr)]
@@ -85,13 +106,14 @@ def makeSimpleAssign(Mod,Edges,Expr):
             New = getNewWire(Mod,Wid)
             Mod.hard_assigns.append((New,Expr,'',''))
             SIMPLEASSIGNS[Exprs] = New
+            INVENTIONS[New] = Mod.pr_expr(Exprs)
             return New
             
         if (Expr[0] in OPS)and not isInEdges(Expr,Edges):
-            print("OPS",Expr,Wid)
             New = getNewWire(Mod,Wid)
             Mod.hard_assigns.append((New,Expr,'',''))
             SIMPLEASSIGNS[Exprs] = New
+            INVENTIONS[New] = Mod.pr_expr(Expr)
             return New
     return Expr
 
@@ -105,6 +127,13 @@ def isInEdges(Expr,Edges):
 
 
 Inventive = [0]
+Marker = [0]
+def getNewMarker(Mod):
+    Marker[0] += 1
+    Reg = 'markereg%s' % Marker[0]
+    Mod.nets[Reg] = 'wire',1
+    return Reg
+
 def getNewWire(Mod,Wid):
     Inventive[0] += 1
     Wire = 'invented%s' % Inventive[0]
@@ -114,16 +143,22 @@ def getNewWire(Mod,Wid):
         Mod.nets[Wire] = 'wire',1
     return Wire
     
+def addCatch(Body,Mod):
+    if Body[0] == 'list':
+        Q = getNewMarker(Mod)
+        Body.append( ('<=',Q,['!',Q]) )
 
 def scanAlwaysBody(Mod,Edges,Body):
     if Body[0] == 'ifelse':
         Body[1] = makeSimpleAssign(Mod,Edges,Body[1])
         scanAlwaysBody(Mod,Edges,Body[2])
+        addCatch(Body[2],Mod)
         scanAlwaysBody(Mod,Edges,Body[3])
+        addCatch(Body[3],Mod)
     elif Body[0] == 'if':
-        print("COND",Body[1])
         Body[1] = makeSimpleAssign(Mod,Edges,Body[1])
         scanAlwaysBody(Mod,Edges,Body[2])
+        addCatch(Body[2],Mod)
     elif Body[0] == '<=':
         Body[2] = makeSimpleAssign(Mod,Edges,Body[2])
     elif Body[0] == '=':
@@ -135,10 +170,19 @@ def scanAlwaysBody(Mod,Edges,Body):
         print("SCAN got %s" % Body[0])
 
 def do_assigns(Mod):
-    for ind,(Dst,Src,A,B) in enumerate(Mod.hard_assigns):
+    ind = 0
+    while ind<len(Mod.hard_assigns):
+        (Dst,Src,A,B) = Mod.hard_assigns[ind]
         if not isLiteral(Src):
-            Newout = extoutput(Dst,Mod)
-            Mod.hard_assigns[ind] = (Newout,Src,A,B)
+            Newout = extoutput(Dst,Src,Mod)
+            if Newout:
+                Mod.hard_assigns[ind] = (Newout,Src,A,B)
+                ind += 1
+            else:
+                Mod.hard_assigns.pop(ind)
+        else:
+            ind += 1
+
 OPERANDS = '* curly >> << >= + - & && ^ | || question == < != > ! ~'.split()
 
 def isLiteral(Src):
@@ -152,19 +196,26 @@ def isLiteral(Src):
     logs.log_error("isLiteral got %s" % str(Src))
     return False
 
-def extoutput(Dst,Mod):
+def extoutput(Dst,Src,Mod):
     Bus = getBus(Dst)
     if type(Bus) is not str:
         logs.log_error('extoutput got "%s", must be string' % Mod.pr_expr(Bus))
         return 'ERROR'
     Dir,Wid = Mod.nets[Bus]
-    Bus2 = 'outx_'+Bus
-    Out = outx(Dst)
-    Box = Mod.add_inst_conns('blkbox',Bus+'_blkbox',[('a',Out),('x',Dst)])
-    Bits = extractWidth(Wid,Mod)
-    Box.params['WID'] = Bits
-    Mod.nets[Bus2] = 'wire',Wid
-    return Out
+    if type(Src) is str:
+        Box = Mod.add_inst_conns('blkbox',Bus+'_blkbox',[('a',Src),('x',Dst)])
+        Bits = extractWidth(Wid,Mod)
+        Box.params['WID'] = Bits
+        print("XXXXX",Bus,Src,type(Src) is str)
+        return False
+    else:        
+        Bus2 = 'outx_'+Bus
+        Out = outx(Dst)
+        Box = Mod.add_inst_conns('blkbox',Bus+'_blkbox',[('a',Out),('x',Dst)])
+        Bits = extractWidth(Wid,Mod)
+        Box.params['WID'] = Bits
+        Mod.nets[Bus2] = 'wire',Wid
+        return Out
 
 def extractWidth(Wid,Mod):
     if Wid == 0: return 1

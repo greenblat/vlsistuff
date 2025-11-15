@@ -2,11 +2,12 @@
 # drives uart for debug on testbench.
 import logs
 import veri
+import string
 
 
 class uartDriver(logs.driverClass):
-    def __init__(self,Path,Monitors):
-        logs.driverClass.__init__(self,Path,Monitors)
+    def __init__(self,Path,Monitors,Prefix='',Name='none'):
+        logs.driverClass.__init__(self,Path,Monitors,Prefix,Name)
         self.Queue = []
         self.rxstr = ''
         self.Verbose = True
@@ -21,11 +22,19 @@ class uartDriver(logs.driverClass):
             rxdata = self.peek('rxdata')
             if (rxdata<0): rxdata = 0
             if self.Verbose:
-                logs.log_info('RX %x %s   "%s"' % (rxdata,chr(rxdata),self.rxstr))
+                Chr = chr(rxdata)
+                if Chr in string.printable:
+                    logs.log_info('RX %x %s   "%s"' % (rxdata,Chr,self.rxstr))
+                else:
+                    self.rxstr = self.rxstr + ('<%x>' % rxdata)
             if rxdata == 10: 
                 self.rxstr = self.rxstr + ' <CRLF>'
             else:
-                self.rxstr = self.rxstr + chr(rxdata)
+                Chr = chr(rxdata)
+                if Chr in string.printable:
+                    self.rxstr = self.rxstr + chr(rxdata)
+                else:
+                    self.rxstr = self.rxstr + ('<%x>' % rxdata)
             if rxdata == 10:
                 logs.log_info('RXSTR %s'% self.rxstr)
                 self.rxstr = ''

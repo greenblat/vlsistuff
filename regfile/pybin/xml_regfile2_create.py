@@ -47,8 +47,8 @@ def createXml(Module,Db):
                 Acc = Item.Params['access']
             Amount = 0
         if Usable: 
-            Wid = Item.Params['width']
-            Reg = Item.Params['names'][0]
+            Wid = Item.getParam('width')
+            Reg = str(Item.getParam('names'))[0]
             if 'desc' in Item.Params:
                 Item.Params['description'] = Item.Params['desc']
             if 'description' not in Item.Params:
@@ -62,9 +62,8 @@ def createXml(Module,Db):
                 Reset = Item.Params['reset']
             Addr = Item.Addr
     #        Fout.write('item %s %x %s\n'%(Item.Kind,Item.Addr,Item.Params))
-            print("ASASAS",Wid,Reg,Addr)
             if Wid<=32:
-                print("ASASAS",Wid,Reg,Addr)
+#                print("ASASAS",Wid,Reg,Addr)
                 writeItem(Db,Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount)
             else:
                 Acc0 = Acc
@@ -77,7 +76,7 @@ def createXml(Module,Db):
                     Wid -= 32
                 writeItem(Db,Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg+'_%d'%Run,Amount)
             Addr = Item.Addr
-            Wid = Item.Params['width']
+            Wid = Item.getParam('width')
             if (Wid>BusWidth)and(Wid<=(BusWidth*2)):
                 BusBytes = int(BusWidth/8)
                 Fccc.write('#define %sADDR_%-50s  (%s_BASEADDR+0x%x)\n'%(Pref,Reg.upper()+'_LO',Module.upper(),Addr))
@@ -111,7 +110,7 @@ def buildFields(Db,Reg):
         Name = Item.Name
         if Name != 'gap':
             _,Offset = Item.Params['position']
-            Width =  Item.Params['width']
+            Width =  Item.Params('width')
             Str = FIELD_TEMPLATE.replace('NAME',Item.Name)
             Str = Str.replace('WIDTH',str(Width))
             Str = Str.replace('OFFSET',str(Offset))
@@ -133,7 +132,6 @@ def writeItem(Db,Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg,Amount=0):
     Reset = str(Reset)
     Desc = str(Desc).replace('.',' ')
     Desc = Desc.replace('"','')
-    print("XWWW",Acc,Reg)
 
     if writable(Acc)and ('pulse' in Acc) and hasFields(Db,Reg) :
         Str = REG_FIELDED_TEMPLATE.replace('NAME',Reg)

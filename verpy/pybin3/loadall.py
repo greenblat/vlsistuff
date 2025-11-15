@@ -3,6 +3,7 @@ import os,sys,string
 
 import traceback
 
+sys.path.append('gutted')
 sys.path.append('pys')
 import importlib
 sys.path.append('/Users/iliagreenblat/verpy/')
@@ -20,6 +21,7 @@ class  accessClass:
         self.CommandsHistory = []
         logs.log_info('%d modules loaded' % len(self.Modules.keys()))
         self.chooseTop()
+        self.filters = []
         
     def chooseTop(self):
         Alls = list(self.Modules.keys())
@@ -39,7 +41,10 @@ class  accessClass:
                 if Child not in self.Modules:
                     MISSING.append(Child)
         logs.log_info('TOPS: %s' % ' '.join(Alls))
-        logs.log_info('MISSING: %s' % ' '.join(MISSING))
+        if MISSING == []:
+            logs.log_info('NO MISSING modules')
+        else:
+            logs.log_info('MISSING: %s' % ' '.join(MISSING))
         self.Top = Alls[0]
         
 
@@ -102,16 +107,28 @@ class  accessClass:
     def generatePng(self,Cell):
         Hier = {}
         self.buildHier(Cell,Hier)
+        print("HH",Hier)
         Fout = open('%s.dot' % Cell,'w')
         Fout.write('digraph %s {\n' % Cell)
+
+        self.hierSizes()
+
+        for MM in Hier:
+            Size = self.Sizes[MM]
+            Local = self.selfSizes[MM]
+            Fout.write('%s [label="%s\n%s/%s"];\n' % (MM,MM,Local,Size))
+
         for MM in Hier:
             LL = Hier[MM]
             for Item in LL:
-                Fout.write('    %s -> %s ;\n' % (MM,Item[0]))
+                Fout.write('    %s -> %s [label="%s"];\n' % (MM,Item[0],Item[1]))
 
         Fout.write('}\n')
         Fout.close()
         os.system('dot %s.dot -Tpng > %s.png ; open %s.png' % (Cell,Cell,Cell))
+    def sizeOf(self,Cell):
+        Mod = self.Modules[Cell]
+
 
     def hierPaths(self,Cell):
         Paths = []
@@ -146,7 +163,45 @@ class  accessClass:
                 self.buildHierPath(Down,Sofar+[(Inst,Type)],Paths)
                         
 
+    def localDrivers(self,Cell):
+        if Cell not in self.Modules: return {}
+        Mod = self.Modules[Cell]
+        Drivers = {}
+        for Inst in Mod.conns:
+            if Inst in Mod.libtypes0:
+                Type =  Mod.libtypes0[Inst]
+                Opin =  libOutputPin(Type)
+                Out = Mod.conns[Inst][Opin]
+                Drivers[Out] = Inst,Type,Opin
+            elif Inst in Mod.types0:
+                Type =  Mod.types0[Inst]
+                if Type in self.Modules:
+                    Mod2 = self.Modules[Type]
+                    for Net in Mod2.netdirs:
+                        Dir = Mod2.netdirs[Net]
+                        if Dir == 'output':
+                            if Net in Mod.conns[Inst]:
+                                Out = Mod.conns[Inst][Net]
+                                Drivers[Out] = Inst,Type,Net
+        return Drivers
 
+    def deepDrivers(self,Cell,Path):
+        Locals = self.localDrivers(Cell)
+        Sigs = list(Locals.keys())
+        New = {}
+        for Sig in Sigs:
+            (Inst,Type,Net) = Locals[Sig]
+            Inst2 = '%s.%s' % ('.'.join(Path),Inst)
+            Sig2 = '%s.%s' % ('.'.join(Path),Sig)
+            New[Sig2] = (Inst2,Type,Net)
+        if Cell not in self.Modules: return New
+        Mod = self.Modules[Cell]
+        for Inst in Mod.types0:
+            Type = Mod.types0[Inst]
+            More = self.deepDrivers(Type,Path + [Inst])
+            for Key in More:
+                New[Key] = More[Key]
+        return New 
 
 
     def hierSizes(self):
@@ -246,7 +301,8 @@ class  accessClass:
         for ind,Reg in enumerate(Regs):
             Distances = {}
 #            print("START q=%s d=%s" % (Reg[0],Reg[1]))
-            self.travelsBack(Mod,Reg[0],Reg[1],self.Path[:],[(Module,Reg[0],Reg[1])],Distances)
+            Hpath = hier2path(self.Path) 
+            self.travelsBack(Mod,Reg[0],Reg[1],self.Path[:],[(Module,Reg[0],Reg[1],Hpath,Module)],Distances)
             Results[Reg] = Distances
         
         return Results
@@ -255,6 +311,7 @@ class  accessClass:
 #        print("ENTER net %s   sofar=%s" % (Net,Sofar))
         self.buildNetTable(Mod)
         List = Mod.netTable[Net]
+        Hpath = hier2path(Hier)
         for Inst,Pin in List:
             if Inst in Mod.libtypes0:
                 Type = Mod.libtypes0[Inst]
@@ -263,7 +320,7 @@ class  accessClass:
 #                    print("FOUND DRIVER net=%s type=%s opin=%s ipins=%s" % (Net,Type,Pin,Ipins))
                     for Ipin in Ipins:
                         In = Mod.conns[Inst][Ipin]
-                        Down = Sofar+[(Inst,Ipin,In,Mod.Name)] 
+                        Down = Sofar+[(Inst,Ipin,In,Hpath,Mod.Name)] 
 #                        print("CHOOSE  in=%s type=%s ipin=%s" % (In,Type,Ipin))
                         if isResetPin(Type,Ipin) or isClockPin(Type,Ipin):
                             pass
@@ -272,9 +329,9 @@ class  accessClass:
                             if not isFlipFlop(Type):
                                 self.travelsBack(Mod,Q,In,Hier,Down,Distances)
                             else:
-                                 Opin =  libOutputPin(Type)
-                                 Out = Mod.conns[Inst][Opin]
-                                 Distances[In] = Down+[(Inst,Opin,Out,Mod.Name)]
+                                Opin =  libOutputPin(Type)
+                                Out = Mod.conns[Inst][Opin]
+                                Distances[In] = Down+[(Inst,Opin,Out,Hpath,Mod.Name)]
                                 
                         else:
                             Was = len(Distances[In])
@@ -286,18 +343,18 @@ class  accessClass:
                                 else:
                                     Opin =  libOutputPin(Type)
                                     Out = Mod.conns[Inst][Opin]
-                                    Distances[In] = Down+[(Inst,Opin,Out,Mod.Name)]
+                                    Distances[In] = Down+[(Inst,Opin,Out,Hpath,Mod.Name)]
 
             elif Inst in Mod.types0:
                 Type = Mod.types0[Inst]
                 if isModuleOutputPin(Type,Pin):
                     self.buildNetTable(Type)
                     Mod2 = self.Modules[Type]
-                    Down = Sofar+[(Type,Inst,Pin,Mod.Name)] 
+                    Down = Sofar+[(Type,Inst,Pin,Hpath,Mod.Name)] 
                     self.travelsBack(Mod2,Q,Pin,Hier+[(Inst,Type)],Down,Distances)
 
         if (Net in Mod.netdirs) and (Mod.netdirs[Net] == 'input'):
-            Down = Sofar+[(Type,Type,Net,Mod.Name)] 
+            Down = Sofar+[(Type,Type,Net,Hpath,Mod.Name)] 
             if len(Hier)==1:
                 if Net not in Distances: 
                     Distances[Net] = Down
@@ -319,7 +376,7 @@ class  accessClass:
             self.buildNetTable(Father)
             if Net in Father.conns[Inst]:
                 Sig = Father.conns[Inst][Net]
-                Down = Sofar+[(Type,Inst,Pin,Father.Name)] 
+                Down = Sofar+[(Type,Inst,Net,Hpath,Father.Name)] 
                 self.travelsBack(Father,Q,Sig,Hier2,Down,Distances)
 
 
@@ -374,6 +431,68 @@ class  accessClass:
                     Down = Path+[(Type,Inst,Pin)] 
                     self.travelForwardLocal(Mod2,Pin,Down,Distances)
 
+
+
+    def travelForward(self,Mod,Start,Net,Hier,Sofar,Distances):
+        self.buildNetTable(Mod.Name)
+        if Net not in Mod.netTable: 
+            logs.log_error('net %s not in %s' % (Net,Mod.Name))
+            return
+        List = Mod.netTable[Net]
+        Hpath = hier2path(Hier)
+        for Inst,Pin in List:
+            if Inst in Mod.libtypes0:
+                Type = Mod.libtypes0[Inst]
+                if isInputPin(Type,Pin):
+                    Opin = libOutputPin(Type)
+                    Out = Mod.conns[Inst][Opin]
+
+                    Down = Sofar+[(Inst,Opin,Out,Hpath,Mod.Name)]
+                    if Out not in Distances: 
+                        Distances[Out] = Down
+                        if not isFlipFlop(Type):
+                            self.travelForward(Mod,Start,Out,Hier,Down,Distances)
+                    else:
+                        Was = len(Distances[Out])
+                        Now = len(Down)
+                        if Now>Was:
+                            Distances[Out] = Down
+                            if not isFlipFlop(Type):
+                                self.travelForward(Mod,Start,Out,Hier,Down,Distances)
+            elif Inst in Mod.types0:
+                Type = Mod.types0[Inst]
+                if isModuleInputPin(Type,Pin):
+                    self.buildNetTable(Type)
+                    Mod2 = self.Modules[Type]
+                    Down = Sofar+[(Type,Inst,Pin,Hpath,Mod.Name)] 
+                    self.travelForward(Mod2,Start,Pin,Hier+[(Inst,Type)],Down,Distances)
+
+
+        if (Net in Mod.netdirs) and (Mod.netdirs[Net] == 'output'):
+            Down = Sofar+[(Type,Type,Net,Hpath,Mod.Name)] 
+            if len(Hier)==1:
+                if Net not in Distances: 
+                    Distances[Net] = Down
+                else:
+                    Was = len(Distances[Net])
+                    Now = len(Down)
+                    if Now>Was:
+                        Distances[Net] = Down
+                return 
+            Hier2 = Hier[:-1]
+            _,Type = Hier2[-1]
+            Father = self.Modules[Type]
+            LL = Father.types1[Mod.Name]
+            Inst = Hier[-1][0]
+            if Inst not in LL:
+                logs.log_error('INST %s is not in module %s' % (Inst,Type))
+                return
+
+            self.buildNetTable(Father)
+            if Net in Father.conns[Inst]:
+                Sig = Father.conns[Inst][Net]
+                Down = Sofar+[(Type,Inst,Net,Hpath,Father.Name)] 
+                self.travelForward(Father,Start,Sig,Hier2,Down,Distances)
 
 
         
@@ -439,9 +558,15 @@ class  accessClass:
                 if (Q and D):
                     Ends.append((Q,D))
                 elif (Q or D):
-                    print("FLOP!!! %s %s %s" % (Inst,Type,LL))
+                    logs.log_error("FLOP!!! %s %s %s" % (Inst,Type,LL))
         return Ends 
-        
+    def passesFilters(self,Txt):
+        for wrd in self.filters:
+            if (wrd[0] == '-'):
+                if wrd in Txt: return False
+            else:
+                if wrd not in Txt: return False
+        return True
 
 def main():
     global Env,Params
@@ -513,6 +638,10 @@ back_arcs
 registers
 where
 find exit quit
+drivers
+to from
+inputs outputs flops
+filters
 '''.split()
 
 def use_command_wrds(wrds):
@@ -669,11 +798,19 @@ def use_command_wrds(wrds):
         Topm = getModuleByName(wrds)
         if not Topm: return
         Env.highlites(Topm.Name)
-        logs.log_info('children: %s ' % Topm.types0)
+        for Inst in Topm.types0:
+            Type = Topm.types0[Inst]
+            logs.log_short('    %s  %s ' % (Inst,Type))
         return
 
     if wrds[0] == 'help':
-        logs.log_info('COMMANDS: help exit quit %s' % (' '.join(COMMANDS)))
+        logs.log_info(helpString)
+
+        for Cmd in COMMANDS:
+            if Cmd in Helpers:
+                logs.log_short('   %s : %s' % (Cmd,Helpers[Cmd]))
+            else:
+                logs.log_short('   %s : ...' % (Cmd))
         return
 
     if wrds[0] == 'registers':
@@ -698,6 +835,197 @@ def use_command_wrds(wrds):
         os.system('open %s.registers.csv' % Module)
 
 
+    if wrds[0] == 'filters':
+        if len(wrds) == 1:
+            logs.log_short('FILTERS: %s' % str(Env.filters))
+            return
+        if (len(wrds) == 2) and (wrds[1] == '-'):
+            Env.filters = []
+            return
+        Env.filters = parseFilter(wrds[1:])
+        return
+
+
+    if wrds[0] == 'drivers':
+        Cell = Env.Top
+        Drivers = Env.deepDrivers(Cell,[Cell])
+        Fout = open('drivers.csv','w')
+        Fout.write(',Sig,A,B,C\n')
+        for Sig in Drivers:
+            if Env.passesFilters(Sig):
+                logs.log_short('    %s   = %s %s %s' % (Sig,Drivers[Sig][0],Drivers[Sig][1],Drivers[Sig][2]))
+                Fout.write(',%s,%s,%s,%s\n' % (Sig,Drivers[Sig][0],Drivers[Sig][1],Drivers[Sig][2]))
+        Fout.close()
+        return
+
+    if wrds[0] == 'inputs':
+        if len(wrds)>1:
+            Module = wrds[1]
+        elif Env.Path != []: 
+            Module = Env.Path[-1][1]
+        elif Env.Top != '':
+            Module = Env.Top
+        else:
+            logs.log_error('run goto command first to point me to the right module')
+            return
+
+        Mod = Env.Modules[Module]
+        LL = []
+        for Net in Mod.netdirs:
+            if Mod.netdirs[Net] == 'input':
+                if Env.passesFilters(Net):
+                    LL.append(Net)
+        LL.sort()
+        for ind,NN in enumerate(LL):
+            logs.log_short('    %5d   %s' % (ind,NN))
+
+        return
+
+    if wrds[0] == 'outputs':
+        if len(wrds)>1:
+            Module = wrds[1]
+        elif Env.Path != []: 
+            Module = Env.Path[-1][1]
+        elif Env.Top != '':
+            Module = Env.Top
+        else:
+            logs.log_error('run goto command first to point me to the right module')
+            return
+
+        Mod = Env.Modules[Module]
+        LL = []
+        for Net in Mod.netdirs:
+            if Mod.netdirs[Net] == 'outputs':
+                if Env.passesFilters(Net):
+                    LL.append(Net)
+        LL.sort()
+        for ind,NN in enumerate(LL):
+            logs.log_short('    %5d   %s' % (ind,NN))
+
+        return
+
+
+    if wrds[0] == 'flops':
+        if len(wrds)>1:
+            Module = wrds[1]
+        elif Env.Path != []: 
+            Module = Env.Path[-1][1]
+        elif Env.Top != '':
+            Module = Env.Top
+        else:
+            logs.log_error('run goto command first to point me to the right module')
+            return
+        Regs = []
+        Mod = Env.Modules[Module]
+        for Inst in Mod.libtypes0:
+            Type = Mod.libtypes0[Inst]
+            if isFlipFlop(Type):
+                    Opin =  libOutputPin(Type)
+                    Osig = Mod.conns[Inst][Opin]
+                    if Env.passesFilters(Inst)or  Env.passesFilters(Osig):
+                        Regs.append((Osig,Type,Inst))
+        Regs.sort()
+        for ind,(Sig,Type,Inst) in enumerate(Regs):
+            logs.log_short('    %20s     %s   %s' % (Sig,Type,Inst))
+        return
+
+    if wrds[0] == 'from':
+        Full = wrds[1]
+        ww = wrds[1].split('.')
+        Reg = ww[-1]
+        Path = '.'.join(ww[:-1])
+        Env.goto(Path)
+        Distances = {}
+        Cell = Env.Path[-1][1]
+        Mod = Env.Modules[Cell]
+        Hpath = hier2path(Env.Path) 
+        Env.travelForward(Mod,Full,Reg,Env.Path[:],[(Cell,Full,Full,Hpath,Cell)],Distances)
+        Env.FROMDIST = Distances
+        Prints = []
+        for Key in Env.FROMDIST:
+            List = Env.FROMDIST[Key]
+            Hpath = List[-1][3]
+            Prints.append((len(List),Hpath,Key,List))
+        Prints.sort()
+        Prints.reverse()
+        for Len,Hpath,Key,List in Prints:
+            logs.log_short('\n\n    %s.%s    %d' % (Hpath,Key,Len))
+            for Item in List:
+                logs.log_short('        %s' % str(Item))
+        return
+
+
+    if wrds[0] == 'fanout':
+        buildFrom(Env,wrds[1])
+        for Key in Env.FROMDIST:
+            if Key[0] != '_':
+                logs.log_short('   %s %d  %s' % (Key,len(Env.FROMDIST[Key]),Env.FROMDIST[Key][-1]))
+                for Item in Env.FROMDIST[Key]:
+                    logs.log_short('        %s' % str(Item))
+        return
+
+
+    if wrds[0] == 'support':
+        buildTo(Env,wrds[1])
+        LL = []
+        for Key in Env.TODIST:
+            if Key[0] != '_':
+                List = Env.TODIST[Key]
+                LL.append((len(List),Key))
+        LL.sort()
+        for _,Key in LL:
+            List = Env.TODIST[Key]
+            if Key.startswith('invented'):
+                Cell = List[0][-1]
+                Meaning = whoInvented(Key,Cell)
+            else:
+                Meaning = ''
+            logs.log_short('   %s %d  %s %s' % (Key,len(List),Meaning,List[-1]))
+            for Item in List:
+                if Item[2].startswith('invented'):
+                    Cell = Item[-1]
+                    Meaning = whoInvented(Item[2],Cell)
+                    Itemx = [Meaning,Item[2],Item[0],Item[1],Item[3],Item[3]]
+                    logs.log_short('        %s' % str(Itemx))
+                elif Item[2][0] == '_' :
+                    Itemx = [Item[2],Item[0],Item[1],Item[3],Item[3]]
+                    logs.log_short('            %s' % str(Itemx))
+                else:
+                    Itemx = [Item[2],Item[0],Item[1],Item[3],Item[3]]
+                    logs.log_short('        %s' % str(Itemx))
+        return
+
+    if wrds[0] == 'to':
+        Full = wrds[1]
+        ww = wrds[1].split('.')
+        Reg = ww[-1]
+        Path = '.'.join(ww[:-1])
+        if Path=='': Path = Env.Top
+        Env.goto(Path)
+        Distances = {}
+        Cell = Env.Path[-1][1]
+        Mod = Env.Modules[Cell]
+        Hpath = hier2path(Env.Path) 
+        Reg2 = skipQtoD(Mod,Reg)
+        Env.travelsBack(Mod,Full,Reg2,Env.Path[:],[(Cell,Full,Full,Hpath,Cell)],Distances)
+
+        Env.TODIST = Distances
+        LL = []
+        for Key in Env.TODIST:
+            List = Env.TODIST[Key]
+            LL.append((len(List),Key))
+        LL.sort()
+        for (_,Key) in LL:
+            List = Env.TODIST[Key]
+            Hpath = List[-1][3]
+
+            logs.log_short('\n\n    %s.%s    %d' % (Hpath,Key,len(List)))
+            for Item in List:
+                logs.log_short('        %s' % str(Item))
+        return
+
+    
+
     if wrds[0] == 'back_arcs':
         Results = Env.travelBack()
         if not Results:
@@ -715,7 +1043,7 @@ def use_command_wrds(wrds):
                 if len(Path0)>Len:
                     Len = len(Path0)
                     Longest = Path0
-            logs.log_info('\n\n\n\%d %s %d' % (ind,Reg[0],Len))
+            logs.log_info('\n\n\n %d %s %d' % (ind,Reg[0],Len))
             Fout.write(',,,\n')
             Fout.write(',,,\n')
             Fout.write('newPath,ind=%d,reg=%s,len=%d\n' % (ind,Reg[0],Len))
@@ -788,6 +1116,36 @@ def use_command_wrds(wrds):
             return
 
     logs.log_warning('no command %s' % str(wrds))
+
+
+def buildFrom(Env,Full):
+    ww = Full.split('.')
+    Reg = ww[-1]
+    Path = '.'.join(ww[:-1])
+    if Path=='': Path = Env.Top
+    Env.goto(Path)
+    Distances = {}
+    Cell = Env.Path[-1][1]
+    Mod = Env.Modules[Cell]
+    Hpath = hier2path(Env.Path) 
+    Env.travelForward(Mod,Full,Reg,Env.Path[:],[(Cell,Full,Full,Hpath,Cell)],Distances)
+    Env.FROMDIST = Distances
+
+def buildTo(Env,Full):
+        ww = Full.split('.')
+        Reg = ww[-1]
+        Path = '.'.join(ww[:-1])
+        if Path=='': Path = Env.Top
+        Env.goto(Path)
+        Distances = {}
+        Cell = Env.Path[-1][1]
+        Mod = Env.Modules[Cell]
+        Hpath = hier2path(Env.Path) 
+        Regs2 = skipQtoD(Mod,Reg)
+        print("JUMP",Full,Regs2)
+        for Reg2 in Regs2:
+            Env.travelsBack(Mod,Full,Reg2,Env.Path[:],[(Cell,Full,Full,Hpath,Cell)],Distances)
+        Env.TODIST = Distances
 
 def getModuleByName(wrds):
     Topm = False
@@ -878,6 +1236,12 @@ def isClockPin(Type,Pin):
     if Pin not in Obj.pinsJobs: return False
     return Obj.pinsJobs[Pin] == 'clock'
 
+def hier2path(Hier):
+    Res = []
+    for A,B in Hier:
+        Res.append(A)
+    Path = '.'.join(Res)
+    return Path
 
 
 def compatible(Pattern,Exact): 
@@ -885,13 +1249,59 @@ def compatible(Pattern,Exact):
     if Pattern in Exact: return True
     return False
 
+def skipQtoD(Mod,Reg):
+    Env.buildNetTable(Mod)
+    List = Mod.netTable[Reg]
+    for Inst,Pin in List:
+        Type = Mod.libtypes0[Inst]
+        if isOutputPin(Type,Pin) and  isFlipFlop(Type):
+            QQ = Mod.conns[Inst]['Q'] 
+            if QQ == Reg:
+                DD = Mod.conns[Inst]['D'] 
+                if 'DE' in Mod.conns[Inst]:
+                    DE = Mod.conns[Inst]['DE'] 
+                    return [DD,DE]
+                return [DD]
+    return [Reg] 
+
+def parseFilter(wrds):
+    Res = wrds
+    return Res
+            
+import importlib
+INVENTIONS = {} 
+def  whoInvented(Key,Cell):
+    if Cell in INVENTIONS:
+        DD = INVENTIONS[Cell].INVENTIONS[Key]
+        return DD
+    
+    That = importlib.import_module('%s_invents' % Cell)
+    INVENTIONS[Cell] = That
+    return whoInvented(Key,Cell)
+
+
+
+
+
+
+Helpers = {}
+Helpers['flops'] = 'flops <cell>  :list all flops in top or cell'
+Helpers['inputs'] = 'inputs <cell>  :list all inputs in top or cell'
+Helpers['outputs'] = 'outputs <cell>  :list all outputs in top or cell'
+Helpers['where'] = 'list current "goto" path'
+Helpers['children'] = 'children of top module or <cell> module'
+Helpers['sizes'] = 'compute and list sizes of modules [in number of lib cells]'
+Helpers['exit'] = 'exit'
+Helpers['quit'] = 'same as exit'
+Helpers['filters'] = 'set filter(s) on report lines'
+Helpers['drivers'] = 'list all driven nets and their driver in top and deeper hierarchy.'
 
 helpString = '''
-    %s
     invokation: llbin/loadall.py -dir "pys2" -do "command" 
     for -dir the default is pys
     for -do : no default.
     quit or exit
-'''%(' '.join(COMMANDS))
+
+'''
 if __name__ == '__main__': main()
 

@@ -363,6 +363,11 @@ class itemClass:
         self.incs = []
         self.enable_writes = []
 
+    def getParam(self,Param):
+        if Param not in self.Params:
+            logs.log_error('expecting param=%s on %s, not found' % (Param,self.Params))
+            return 0
+        return self.Params[Param]
 
     def dump(self):
         print('#%d %s : (%d 0x%x) %s'%(self.Lnum,self.Kind,self.Addr,self.Addr,self.Params))
