@@ -5,10 +5,20 @@ import logs
 def help_main(Env):
     for Module in Env.Modules:
         Mod = Env.Modules[Module]
+        Mod.new_assigns = []
         fixStuffs(Mod)
+        prepare_assigns(Mod)
+        Fout = open('%s.tmp1' % Mod.Module,'w')
+        Mod.dump_verilog(Fout)
+        Fout.close()
         do_alwayses(Mod)
         do_assigns(Mod)
+        Fout = open('%s.tmp2' % Mod.Module,'w')
+        Mod.dump_verilog(Fout)
+        Fout.close()
         wrapUps(Mod)
+    if not Mod:
+        logs.log_error('none module was opened')
     Fout = open('gutted/%s.v' % Mod.Module,'w')
     for Module in Env.Modules:
         Mod = Env.Modules[Module]
@@ -36,6 +46,19 @@ def wrapUps(Mod):
 
     Box = Mod.add_inst_conns('blkbox','marker_blkbox',[('a','marker_agregate'),('x','markerarg')])
 
+
+def prepare_assigns(Mod):
+    New = []
+    for (Dst,Src,A,B) in Mod.hard_assigns:
+        Src0 = reworkExpression(Mod,Src)
+        New.append((Dst,Src0,'',''))
+
+    Mod.hard_assigns = New
+    Mod.hard_assigns.extend(Mod.new_assigns)
+    print("XXXXX",Mod.new_assigns)
+    Mod.new_assigns = []
+        
+        
 
 
 def fixStuffs(Mod):
@@ -106,7 +129,7 @@ def makeSimpleAssign(Mod,Edges,Expr):
             New = getNewWire(Mod,Wid)
             Mod.hard_assigns.append((New,Expr,'',''))
             SIMPLEASSIGNS[Exprs] = New
-            INVENTIONS[New] = Mod.pr_expr(Exprs)
+            INVENTIONS[New] = Mod.pr_expr(Expr)
             return New
             
         if (Expr[0] in OPS)and not isInEdges(Expr,Edges):
@@ -159,6 +182,12 @@ def scanAlwaysBody(Mod,Edges,Body):
         Body[1] = makeSimpleAssign(Mod,Edges,Body[1])
         scanAlwaysBody(Mod,Edges,Body[2])
         addCatch(Body[2],Mod)
+    elif Body[0] == 'case':
+        Cond = Body[1]
+        List = Body[2]
+        for ind,Item in enumerate(List):
+            scanAlwaysBody(Mod,Edges,Item[1])
+            addCatch(Item[1],Mod)
     elif Body[0] == '<=':
         Body[2] = makeSimpleAssign(Mod,Edges,Body[2])
     elif Body[0] == '=':
@@ -174,6 +203,7 @@ def do_assigns(Mod):
     while ind<len(Mod.hard_assigns):
         (Dst,Src,A,B) = Mod.hard_assigns[ind]
         if not isLiteral(Src):
+#            Src0 = reworkExpression(Mod,Src)
             Newout = extoutput(Dst,Src,Mod)
             if Newout:
                 Mod.hard_assigns[ind] = (Newout,Src,A,B)
@@ -184,6 +214,39 @@ def do_assigns(Mod):
             ind += 1
 
 OPERANDS = '* curly >> << >= + - & && ^ | || question == < != > ! ~'.split()
+DOUBLES = '* + - | || == != > < ?? << >= & && ^'
+
+def reworkExpression(Mod,Expr):
+    Exprs = str(Expr)
+    if Exprs in SIMPLEASSIGNS: return SIMPLEASSIGNS[Exprs]
+    if type(Expr) is str: return Expr
+    if type(Expr) is int: return Expr
+    if type(Expr) is list:
+        if (len(Expr) == 2) and (Expr[0] == '!') and (Expr[1] in RESETS):
+            return Expr
+        if Expr[0] in ['subbit','subbus','bin','hex']: return Expr
+        Wid = Mod.exprWidth(Expr)
+        if (Expr[0] in DOUBLES) and (len(Expr) == 3):
+            A = reworkExpression(Mod,Expr[1])
+            B = reworkExpression(Mod,Expr[2])
+            return reworkFinal(Mod,[Expr[0],A,B])
+        elif Expr[0] == 'question':
+            A = reworkExpression(Mod,Expr[1])
+            B = reworkExpression(Mod,Expr[2])
+            C = reworkExpression(Mod,Expr[3])
+            return reworkFinal(Mod,[Expr[0],A,B,C])
+
+    logs.log_error('reworkExpression got "%s"' % str(Expr))
+    return Expr
+   
+def reworkFinal(Mod,Expr):
+    Wid = Mod.exprWidth(Expr)
+    New = getNewWire(Mod,Wid)
+    SIMPLEASSIGNS[str(Expr)] = New
+    INVENTIONS[New] = Mod.pr_expr(Expr)
+    Mod.new_assigns.append((New,Expr,'',''))
+    return New
+
 
 def isLiteral(Src):
     if type(Src) is int: return True
@@ -206,7 +269,6 @@ def extoutput(Dst,Src,Mod):
         Box = Mod.add_inst_conns('blkbox',Bus+'_blkbox',[('a',Src),('x',Dst)])
         Bits = extractWidth(Wid,Mod)
         Box.params['WID'] = Bits
-        print("XXXXX",Bus,Src,type(Src) is str)
         return False
     else:        
         Bus2 = 'outx_'+Bus

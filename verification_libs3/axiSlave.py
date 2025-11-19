@@ -21,7 +21,7 @@ class axiSlaveClass:
         self.rqueue=[]
         self.awlen = -1
         self.wid = -1
-        self.bqueue0=[]
+        self.abqueue=[]
         self.bqueue=[]
         self.waitread=0
         self.bwaiting=0
@@ -53,23 +53,29 @@ class axiSlaveClass:
         self.errorReadFromUnknown = False
         self.waitWready = 0
         self.was_arvalid  = 0
+        self.keepW = 0
+        self.keepAw = 0
+        self.keepAr = 0
+        self.delayAw = 10
+        self.delayAr = 10
+        self.delayW = 10
 
     def onFinish(self):
         if self.busy(): self.busyWhy();
 
 
     def busy(self):
-#        print('SELF BUSY',self.arqueue!=[],self.awqueue!=[],self.wqueue,self.rqueue!=[],self.bqueue!=[],self.bqueue0!=[])
+#        print('SELF BUSY',self.arqueue!=[],self.awqueue!=[],self.wqueue,self.rqueue!=[],self.bqueue!=[],self.abqueue!=[])
         if self.arqueue!=[]: return True
         if self.awqueue!=[]: return True
         if self.wqueue!=[]: return True
         if self.rqueue!=[]: return True
         if self.bqueue!=[]: return True
-        if self.bqueue0!=[]: return True
+        if self.abqueue!=[]: return True
 
         return False
     def busyWhy(self):
-        logs.log_info('%s: SLV Busy ar=%d aw=%d w=%d r=%d b=%d b0=%d ' % (self.Name,len(self.arqueue),len(self.awqueue),len(self.wqueue),len(self.rqueue),len(self.bqueue),len(self.bqueue0)),verbose=self.verbose)
+        logs.log_info('%s: SLV Busy ar=%d aw=%d w=%d r=%d b=%d b0=%d ' % (self.Name,len(self.arqueue),len(self.awqueue),len(self.wqueue),len(self.rqueue),len(self.bqueue),len(self.abqueue)),verbose=self.verbose)
         if self.wqueue!=[]:
             logs.log_info('WQUEUE %x %x %x' % self.wqueue[0],verbose=self.verbose)
         if self.awqueue!=[]:
@@ -186,6 +192,46 @@ class axiSlaveClass:
         Addr += self.busWidth
         return Addr
 
+    def keepValids(self):
+        if self.keepAw!= 0:
+            self.keepAw -= 1 
+            if self.keepAw == 0:
+                self.force('awready',1)
+        else:
+            if self.peek('awvalid') == 1:
+                self.keepAw = self.delayAw 
+            if self.delayAw == 0:
+                self.force('awready',10)
+            else:
+                self.force('awready',0)
+                
+        if self.keepAr!= 0:
+            self.keepAr -= 1 
+            if self.keepAr == 0:
+                self.force('arready',1)
+        else:
+            if self.peek('arvalid') == 1:
+                self.keepAr = self.delayAr 
+            if self.delayAr == 0:
+                self.force('arready',10)
+            else:
+                self.force('arready',0)
+
+        
+        if self.keepW!= 0:
+            self.keepW -= 1 
+            if self.keepW == 0:
+                self.force('wready',1)
+        else:
+            if self.peek('wvalid') == 1:
+                self.keepW = self.delayW 
+
+            if self.delayW == 0:
+                self.force('wready',10)
+            else:
+                self.force('wready',0)
+
+
     def run_a(self):   # run this nano before def run(self):
         if self.Initial:
             self.force('awready',self.Awready)
@@ -198,15 +244,16 @@ class axiSlaveClass:
             if self.peek('rready')==1: self.force('rvalid',0) 
             if self.peek('bready')==1: self.force('bvalid',0) 
             return
-        if len(self.arqueue)>6:
-            self.force('arready',0)
-            self.Arready_int = 0
-        else:
-            self.force('arready',1)   # self.was_arvalid)
-            self.was_arvalid = self.peek('arvalid')
-            self.Arready_int = 1
+#        if len(self.arqueue)>6:
+#            self.force('arready',0)
+#            self.Arready_int = 0
+#        else:
+#            self.force('arready',1)   # self.was_arvalid)
+#            self.was_arvalid = self.peek('arvalid')
+#            self.Arready_int = 1
 
     def run(self):
+        self.keepValids()
         if self.Initial:
             self.Initial = False
             self.force('bid',0)
@@ -285,7 +332,7 @@ class axiSlaveClass:
             araddr=self.peek('araddr')
             arlen=self.peek('arlen')
             arsize=self.peek('arsize')
-            if Arready == 1:
+            if self.peek('arready') == 1:
                 self.arqueue.append((arburst,araddr,arlen,arsize))
                 self.rqueue.append(('wait',self.WAITREAD,0,0))
                 for ii in range(arlen):
@@ -346,12 +393,12 @@ class axiSlaveClass:
         self.rqueue.append((rlast,rid,rdata,Addr))
 
     def runbqueue(self):
-#        logs.log_info("BVVV %s %s" % (self.bqueue0,self.bqueue))
+#        logs.log_info("BVVV %s %s" % (self.abqueue,self.bqueue))
         if self.peek('awvalid') and self.peek('awready'):
-            self.bqueue0.append((self.peek('awid'),0))
+            self.abqueue.append((self.peek('awid'),0))
 #            logs.log_info("BV0")
         if self.peek('wvalid') and self.peek('wready') and self.peek('wlast'):
-            AB = self.bqueue0.pop()
+            AB = self.abqueue.pop()
             self.bqueue.append(AB)
             self.bwaiting = 20
 #            logs.log_info("BV1 %s" % str(self.bqueue))
@@ -377,20 +424,20 @@ class axiSlaveClass:
             veri.force('tb.marker2',str(self.awlen & 0xffff))
         if self.Name == 'SLV3':
             veri.force('tb.marker3',str(self.awlen & 0xffff))
-#        logs.log_info('WRITING bwait=%d %s %s' % (self.bwaiting, self.bqueue,self.bqueue0))
-        if len(self.awqueue)>0:
-            logs.log_info('AWQUEUE len=%d awvalid=%d awready=%d' % (len(self.awqueue),self.peek('awvalid'),self.Awready))
+#        logs.log_info('WRITING bwait=%d %s %s' % (self.bwaiting, self.bqueue,self.abqueue))
+#        if len(self.awqueue)>0:
+#            logs.log_info('AWQUEUE len=%d awvalid=%d awready=%d' % (len(self.awqueue),self.peek('awvalid'),self.Awready))
         if len(self.awqueue)>1000:
             logs.log_warning("AWQUEUE is very long")
             self.force('awready',self.Awready)
         elif self.Passive and (self.peek('awready')==0):
             pass
-        elif self.Awready == 0:
-            self.force('awready',0)
-        elif (self.peek('awvalid')==1) and (len(self.awqueue)>=8):
-            self.force('awready',0)
+#        elif self.Awready == 0:
+#            self.force('awready',0)
+#        elif (self.peek('awvalid')==1) and (len(self.awqueue)>=8):
+#            self.force('awready',0)
         elif self.peek('awvalid')==1:
-            self.force('awready',1)
+#            self.force('awready',1)
             awburst=self.peek('awburst')
             awid=self.peek('awid')
             awaddr=self.peek('awaddr')
@@ -404,31 +451,31 @@ class axiSlaveClass:
             logs.log_info('PAGES first=%x last=%x   addr=%x lastad=%x' % (FirstPage,LastPage,awaddr,LastAddr))
             if (FirstPage != LastPage):
                 logs.log_error('slave %s CROSSING 4K write awaddr=%x awlen=%x awsize=%x  (%x %x %x)' % (self.Name,awaddr,awlen,awsize,LastAddr,LastPage,FirstPage))
-            logs.log_info('AxiSlave %s >>>awvalid %x %x %x %x %x'%(self.Name,awburst,awaddr,awlen,awid,awsize) ,verbose=self.verbose)
-            self.bqueue0.append((awid,0))
-            logs.log_info("BQUEUE0 APPEND %s" % str(self.bqueue0),verbose=True)
-        else:
-            self.force('awready',1)
+            logs.log_info('AxiSlave %s >>>awvalid %x addr=%x wlen=%x wid=%x wsize=%x'%(self.Name,awburst,awaddr,awlen,awid,awsize) ,verbose=self.verbose)
+            self.abqueue.append((awid,0))
+            logs.log_info("BQUEUE0 APPEND %s" % str(self.abqueue),verbose=True)
+#        else:
+#            self.force('awready',1)
 
-        self.wready = 0
+#        self.wready = 0
 #        self.force('marker3',self.waitWready)
         if self.Passive and (self.peek('wready')==0):
             pass
-        elif (self.waitWready>0):
-            self.waitWready -= 1
-            if self.waitWready==0: 
-                self.force('wready',1)
-            else:
-                self.force('wready',0)
-                return
-        if (self.peek('wvalid')==1)and(self.waitWready==0):
-            self.force('wready',1)
-            wstrb = self.peek('wstrb')
-            wlast = self.peek('wlast')
-            wdata = self.peek('wdata')
-            self.wqueue.append((wdata,wlast,wstrb))
+#        elif (self.waitWready>0):
+#            self.waitWready -= 1
+#            if self.waitWready==0: 
+#                self.force('wready',1)
+#            else:
+#                self.force('wready',0)
+#                return
+#        if (self.peek('wvalid')==1)and(self.waitWready==0):
+#            self.force('wready',1)
+#            wstrb = self.peek('wstrb')
+#            wlast = self.peek('wlast')
+#            wdata = self.peek('wdata')
+#            self.wqueue.append((wdata,wlast,wstrb))
 #            logs.log_info('AXISLAVE0 %s written  wdata=%x wlast=%x wstrb=%x awlen=%d   que=%s' % (self.Name,wdata,wlast,wstrb,self.awlen,self.wqueue) ,verbose=self.verbose)
-            self.waitWready = self.WAITWRITE
+#            self.waitWready = self.WAITWRITE
 
         if len(self.wqueue) == 0: return    
         if (self.awlen<0) and (len(self.awqueue) == 0): return    
@@ -456,12 +503,12 @@ class axiSlaveClass:
                 self.awlen = -1
 
         if (wlast==1):
-            logs.log_info('BQUEUE0 %s' % (self.bqueue0),verbose=self.verbose)
+            logs.log_info('BQUEUE0 %s' % (self.abqueue),verbose=self.verbose)
             self.bqueue.append(('wait',30))
-            if self.bqueue0 == []:
+            if self.abqueue == []:
                 logs.log_error('axiSlave %s: BQUEUE0 is empty, more lasts than awvalids' % self.Name)
-                self.bqueue0.append(0)
-            self.bqueue.append((self.bqueue0.pop(0),0))
+                self.abqueue.append(0)
+            self.bqueue.append((self.abqueue.pop(0),0))
             logs.log_info('BQUEUE %s' % (self.bqueue),verbose=self.verbose)
 
 def nicew(Queue):

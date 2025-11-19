@@ -68,18 +68,22 @@ class sequenceClass:
         self.AGENTS = AGENTS
         for NickObj in AGENTS:
             if type(NickObj) is int:
+                logs.log_error("DISREGARD %s" % NickObj)
                 pass
             elif (type(NickObj) is tuple):
                 (Nickname,Object) = NickObj
                 if Object:
                     self.agents[Nickname]=Object
+                    logs.log_info("USE %s" % Nickname)
                     Object.Caller = self
                     Object.SeqObj = self
+                else:
+                    logs.log_error("DISREGARD %s" % Nickname)
             elif 'Name' in dir(NickObj):
                 self.agents[NickObj.Name]=NickObj
+                logs.log_error("UseByName %s" % NickObj.Name)
             else:
                 logs.log_error('sequence agent failed to connect "%s"' % (NickObj,AGENTS))
-
         self.searchPath = ['.'] 
         self.Ptr = 0
         self.Stack = []
@@ -487,9 +491,9 @@ class sequenceClass:
             self.Translates[wrds[0]]=Val
             return 
 
-        if wrds[0] == 'seq':
-           exec('self.%s()' % wrds[1])
-           return
+#        if wrds[0] == 'seq':
+#           exec('self.%s()' % wrds[1])
+#           return
         if wrds[0] == 'quit':
             Line = Line.replace('quit','finish_verilator')
             self.seq_line(Line,lnum)
@@ -725,9 +729,7 @@ class sequenceClass:
             ww = Cmd.split()
 #            if ww[0] == 'write':
 #                logs.log_info('A%s. w%s. //  %s' % (ww[1][2:],ww[2][2:],wrds[1:]),'uart')
-            print(">>>>>",wrds,Cmd)
             self.agents[wrds[0]].action(Cmd,wrds[1:])
-            print(">>after>>>",wrds,Cmd)
             return True
         elif (wrds[0] == 'check'):
             BB = makeExpr(wrds[1])

@@ -283,6 +283,12 @@ def explodeBus(Sig,Mod):
     elif (type(Sig) is list) and (Sig[0] == 'hex'):
         if Sig[2][0] == 'x':
             if str(Sig[1]) == '1': return 'gnd'
+            if type(Sig[2]) is str:
+                Res = []
+                for ii in range(len(Sig[2])):
+                    Res.append('gnd')
+                return Res
+            print("XXXXXXXXXX",Sig[2],Sig)
     if (type(Sig) is str):
         Sig1 = normalize(Sig)
         return [Sig1]

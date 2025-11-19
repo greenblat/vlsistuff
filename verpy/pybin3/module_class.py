@@ -1457,6 +1457,8 @@ class module_class:
                 return self.exprWidth(Expr[1])+self.exprWidth(Expr[2])
             if Expr[0] in ['+','-','&','|','^']: 
                 return self.exprWidth(Expr[1])
+            if Expr[0] in ['~','<<','>>']: 
+                return self.exprWidth(Expr[1])
             if Expr[0] == 'question':
                 return self.exprWidth(Expr[2])
 

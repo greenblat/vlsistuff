@@ -6,20 +6,59 @@ FLOPS['scs130ms_dfstp_1'] = ('D','Q')
 FLOPS['DFF'] = ('D','Q')
 FLOPS['DFFR'] = ('D','Q')
 FLOPS['DFFS'] = ('D','Q')
+
+from skywaterLib import cellLib
+from skywaterHelp import *
+
+def isSynWire(Wire):
+    if type(Wire) is str:
+        return (Wire[0] == '_') and (Wire[-1] == '_')
+
+    if type(Wire) is list:
+        if Wire[0] == 'subbit':
+            return isSynWire(Wire[1])
+    return Wire
+
+
+for Cell in cellLib:
+    if isFlipFlop(Cell):
+        Desc = cellLib[Cell]
+        Jobs = list(Desc.pinsJobs.keys())
+        if 'clock' in Jobs: Jobs.pop('clock')
+        if '_1' in Cell:
+            if 'D' not in Jobs: 
+                if 'D' in Desc.Pins:
+                    print('cellLib["%s"].set_pin_job("D","data")' % Cell)
+            if 'DE' not in Jobs: 
+                if 'DE' in Desc.Pins:
+                    print('cellLib["%s"].set_pin_job("DE","data")' % Cell)
+
+
 import logs
 REPLACE = {}
 def help_main(Env):
     Mod = Env.Current
     for Inst in  Mod.insts:
         Obj = Mod.insts[Inst]
-        if Obj.Type in FLOPS:
-            D,Q = FLOPS[Obj.Type]
-            DD = Obj.conns[D]
-            QQ = Obj.conns[Q]
-            if (DD[0] == '_') and (DD[-1] == '_'):
+        Type = Obj.Type
+        if isFlipFlop(Type):
+            Dpin =  libDataPin(Type)
+            Qpin =  libOutputPin(Type)
+            DD = Obj.conns[Dpin]
+            QQ = Obj.conns[Qpin]
+            if isSynWire(DD):
                 New = outx(QQ)
-                Obj.conns[D] = New
+                Obj.conns[Dpin] = New
                 REPLACE[str(DD)] = New
+            DEpin =  libDataEnablePin(Type)
+            if DEpin:
+                DD = Obj.conns[DEpin]
+                QQ = Obj.conns[Qpin]
+                if isSynWire(DD):
+                    New = outxe(QQ,'eprev_')
+                    Obj.conns[DEpin] = New
+                    REPLACE[str(DD)] = New
+                
     ties(Mod)
     REMOVE = []
     for Inst in  Mod.insts:
@@ -64,13 +103,13 @@ def help_main(Env):
     Mod.dump_verilog(Fout)
     Fout.close()
 
-def outx(QQ):
-    if type(QQ) is str: return 'prev_'+QQ
+def outx(QQ,Prev='prev_'):
+    if type(QQ) is str: return Prev+QQ
 
     if type(QQ) is list:
-        return [QQ[0],'prev_'+QQ[1],QQ[2]]
+        return [QQ[0],Prev+QQ[1],QQ[2]]
     if type(QQ) is tuple:
-        return (QQ[0],'prev_'+QQ[1],QQ[2])
+        return (QQ[0],Prev+QQ[1],QQ[2])
 
     return 'ERROR'
 

@@ -384,6 +384,7 @@ def intx(Val):
     if type(Val) is int: return Val
     if type(Val) is float: return Val
     if Val=='-999': return -1
+    if 'X' in Val: return -1
     if 'x' in Val: return -1
     if 'z' in Val: return -1
     if 'q' in Val: return -1
