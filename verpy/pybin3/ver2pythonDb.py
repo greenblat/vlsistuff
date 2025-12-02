@@ -388,6 +388,9 @@ def exploadConns(Mod):
     dumpV(Mod,'a04.v')
 
 def dumpV(Mod,Fname):
+    if not Mod: 
+        logs.log_error('NO Mod for %s' % Fname)
+        return
     File = open(Fname,'w')
     Mod.dump_verilog(File)
     File.close()

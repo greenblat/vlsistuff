@@ -29,6 +29,7 @@ opt_clean -purge
 write_verilog -noattr  glv0/CELL.v
 '''
 
+import os
 def help_main(Env):
     for Module in Env.Modules:
         Mod = Env.Modules[Module]
@@ -45,6 +46,7 @@ def help_main(Env):
     
         Txt = Txt.replace('BLACKBOXES',LL)
         print(Txt)
+        if not os.path.exists('incs'): os.mkdir('incs')
         Fout = open('incs/%s.inc' % Mod.Module,'w')
         Fout.write(Txt)
         Fout.close()

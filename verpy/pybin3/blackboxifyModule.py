@@ -1,5 +1,6 @@
 
 import logs
+import os
 
 
 def help_main(Env):
@@ -19,6 +20,8 @@ def help_main(Env):
         wrapUps(Mod)
     if not Mod:
         logs.log_error('none module was opened')
+
+    if not os.path.exists('gutted'): os.mkdir('gutted')
     Fout = open('gutted/%s.v' % Mod.Module,'w')
     for Module in Env.Modules:
         Mod = Env.Modules[Module]
@@ -214,7 +217,7 @@ def do_assigns(Mod):
             ind += 1
 
 OPERANDS = '* curly >> << >= + - & && ^ | || question == < != > ! ~'.split()
-DOUBLES = '* + - | || == != > < ?? << >= & && ^'
+DOUBLES = '>> * + - | || == != > < ?? << >= & && ^'
 
 def reworkExpression(Mod,Expr):
     Exprs = str(Expr)
@@ -235,7 +238,11 @@ def reworkExpression(Mod,Expr):
             B = reworkExpression(Mod,Expr[2])
             C = reworkExpression(Mod,Expr[3])
             return reworkFinal(Mod,[Expr[0],A,B,C])
-
+        elif Expr[0] in ['!','~']:
+            A = reworkExpression(Mod,Expr[1])
+            return reworkFinal(Mod,[Expr[0],A])
+        elif Expr[0] in ['curly']:
+            return Expr
     logs.log_error('reworkExpression got "%s"' % str(Expr))
     return Expr
    
@@ -334,6 +341,7 @@ def do_empty(Mod):
     for Net in Nets:
         Dir,_ = Mod.nets[Net]
         if ('input' not in Dir) and ('output' not in Dir): Mod.nets.pop(Net)
+    if not os.path.exists('blackboxes'): os.mkdir('blackboxes')
     Fout = open('blackboxes/%s.blkbox' % Mod.Module,'w')
     Fout.write('(* blackbox *)\n')
     Mod.dump_verilog(Fout)

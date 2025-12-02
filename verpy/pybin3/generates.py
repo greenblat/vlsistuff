@@ -17,7 +17,6 @@ def round(Env,Modules,Dones):
     for Module in Modules:
         if Module not in Dones:
             Mod = Env.Modules[Module]
-            print("XXXXX",Module,Mod.OriginalName)
             Mod.Genvars = {}
             for Gen in Mod.generates:
                 gen_execute(Gen,Mod,Env)
@@ -58,6 +57,8 @@ def evalx(Expr,Mod):
 
 
 def gen_execute(Gen,Mod,Env):
+#    print("GEN",Gen)
+#    if not Gen: return
     if Gen[0] == 'genvar':
         Mod.Genvars[Gen[1]] = 0
     elif Gen[0] == 'named_begin':
@@ -83,9 +84,11 @@ def gen_execute(Gen,Mod,Env):
 
     elif Gen[0] == 'list':
         for Item in Gen[1:]:
-            gen_execute(Item,Mod,Env)
+            if (Item): gen_execute(Item,Mod,Env)
     elif Gen[0] == 'ifelse':
         if evalx(Gen[1],Mod):
+            print("IFELSE",Gen[1])
+            print("IFELSE",Gen[1],evalx(Gen[1],Mod))
             gen_execute(Gen[2],Mod,Env)
         else:
             gen_execute(Gen[3],Mod,Env)
@@ -97,6 +100,8 @@ def gen_execute(Gen,Mod,Env):
         if LL[0] == 'list':
             for Ass in LL[1:]:
                 do_assign(Ass,Mod)
+    elif Gen[0] == 'always':
+        Mod.alwayses.append([Gen[1],Gen[2],Gen[0]])
     elif Gen[0] == 'instance':
         do_instance(Gen[1:],Mod,Env)
     elif type(Gen[0]) is list:

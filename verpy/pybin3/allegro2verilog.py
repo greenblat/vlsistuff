@@ -26,11 +26,20 @@ def cleanInstanceNames(Mod):
     cleaned = 0
     for Inst in Insts:
         Obj = Mod.insts[Inst]
+        Obj.Type = Obj.Type.replace('-','_')
+        if Obj.Type[0] in '0123456789':
+            Obj.Type = '_'+Obj.Type
         if '(' in Obj.Type:
             Obj.Type = removeBrackets(Obj.Type)
             Mod.insts[Inst] = Obj
             cleaned += 1
             
+        for Pin in Obj.conns:
+            Sig = Obj.conns[Pin]
+            if '#' in Sig: 
+                Sig = Sig[:Sig.index('#')]
+                Obj.conns[Pin] = Sig
+
         if '(' in Inst:
             New = removeBrackets(Inst)
             Obj = Mod.insts.pop(Inst)
@@ -92,6 +101,10 @@ def workOnLinesXNET(Lines,Mod):
                         Typex = MAP[Inst]
                     else:
                         Typex = Inst
+                    Typex = Typex.replace('+','_')
+                    Typex = Typex.replace(',','_')
+                    Typex = Typex.replace('/','_')
+                    Typex = Typex.replace('#','_')
                     Mod.add_inst(Typex,Inst)
                 Pin = wrds[2]
                 Type,Pin = findPin(Inst,Pin)
@@ -114,7 +127,14 @@ def findPin(Inst,Pin):
         for Str,Num,Use in Pins:
             if Num == Pin:
                 Pin = Str
+                if '-' == Pin[-1]:
+                    Pin = Pin[:-1]+'_n'
+                if '*' == Pin[-1]:
+                    Pin = Pin[:-1]+'_M'
                 Pin = Pin.replace('-','_')
+                Pin = Pin.replace('/','_')
+                Pin = Pin.replace('+','_p')
+                if '#' in Pin: Pin = Pin[:Pin.index('#')]
 #                if Inst == 'SW16':
 #                    print("AFT",Pin,Name,"   >",Str,Num,Use)
                 return Name,Pin

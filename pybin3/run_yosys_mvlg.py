@@ -138,8 +138,8 @@ def main():
     Finc.close()
 #    os.system('/usr/local//Cellar/yosys/0.9_2/bin/yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
 #    os.system('/Users/iliagreenblat/external_software/OpenROAD-flow-scripts/tools/install/yosys/bin/yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
-    os.system('/Users/iliagreenblat/external_software/OpenROAD-flow-scripts/tools/yosys/yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
-#    os.system('yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
+#    os.system('/Users/iliagreenblat/external_software/OpenROAD-flow-scripts/tools/yosys/yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
+    os.system('yosys -s %s.inc | tee log.yosys | tee %s.yosys.log '%(Top,Top))
 
 helpString = '''
     run_yosys_mvlg.py module.mvlg   [ -flat] [ -top TOP] [-abc ABCLIB] [-dff DFFLIB]
