@@ -232,7 +232,7 @@ def isSynWire(Net):
     return  (Net[0] == '_')
         
 def libType(Type):
-    return (Type == 'BUF') or Type.startswith('scs130ms_')
+    return (Type == 'BUF') or Type.startswith('scs130ms_') or Type.endswith('20P96CPD')
 
 def explodeBus(Sig,Mod):
     if Sig in [0,1,'0','1']:
@@ -288,7 +288,11 @@ def explodeBus(Sig,Mod):
                 for ii in range(len(Sig[2])):
                     Res.append('gnd')
                 return Res
-            print("XXXXXXXXXX",Sig[2],Sig)
+            logs.log_error("XXXXXXXXXX %s %s" % (Sig[2],Sig))
+    elif (type(Sig) is list) and (Sig[0] == 'bin'):
+        if Sig[1] in ['1',1]:
+            if str(Sig[2]) == '1': return ['vcc']
+            if str(Sig[2]) == '0': return ['gnd']
     if (type(Sig) is str):
         Sig1 = normalize(Sig)
         return [Sig1]
@@ -365,6 +369,7 @@ def explodeConnections(Mod):
         for Pin in Pins:
             Sig = Obj.conns[Pin] 
             Seq = explodeBus(Sig,Mod)
+            
             if len(Seq)>1:
                 Obj.conns.pop(Pin)
                 Seq.reverse()

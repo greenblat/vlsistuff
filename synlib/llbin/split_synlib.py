@@ -90,12 +90,12 @@ def open_cell(Cell,line):
     Fout = open('syntmp/%s.lib'%Cell,'w')
     print('open %s'%Cell)
     for line0 in Header:
-        Fout.write('// '+line0)
+        Fout.write(' '+line0)
     Fout.write(line)
 
 def close_cell(line):
     Fout.write(line)
-    Fout.write('// '+'}\n')
+    Fout.write(' '+'}\n')
     Fout.close()
     
 def has_bad_vibes(line):

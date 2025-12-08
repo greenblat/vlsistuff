@@ -5,11 +5,33 @@ import traceback
 
 sys.path.append('gutted')
 sys.path.append('pys')
+sys.path.append('.')
 import importlib
 sys.path.append('/Users/iliagreenblat/verpy/')
 sys.path.append('/home/ilia/vlsistuff/verpy/pybin3')
 import logs
-from skywaterLib import cellLib
+from skywaterLib import cellLib as cellLib
+if os.path.exists('tsmc12library.py'):
+    from tsmc12library import cellLib as cellLib1
+    for Cell in cellLib1:
+        Desc = cellLib1[Cell]
+        cellLib[Cell] = Desc
+
+
+
+
+singleGateArea = 0.258048
+
+
+def toreport(Cell):
+    if Cell.startswith('sub_unsigned'): return False
+    if Cell.startswith('sub_signed'): return False
+    if Cell.startswith('add_unsigned'): return False
+    if Cell.startswith('add_signed'): return False
+    if Cell.startswith('csa_tree'): return False
+    return True
+
+
 
 class  accessClass:
     def __init__(self,Dir):
@@ -22,6 +44,7 @@ class  accessClass:
         logs.log_info('%d modules loaded' % len(self.Modules.keys()))
         self.chooseTop()
         self.filters = []
+        self.Areas = {}   # computed area and gatecount
         
     def chooseTop(self):
         Alls = list(self.Modules.keys())
@@ -97,9 +120,29 @@ class  accessClass:
         Res = (Outs,Ins,Wires,Flops,Types0,Types1,LibTypes0,LibTypes1)
         return Res
 
+    def getModuleArea(self,Cell):
+        if Cell not in self.Modules: return 0
+        if Cell in self.Areas: return self.Areas[Cell]
+        Mod = Env.Modules[Cell]
+        Total = 0
+        for Inst in Mod.libtypes0:
+            Type = Mod.libtypes0[Inst]
+            Area = libArea(Type)
+            Total += Area
+        for Inst in Mod.types0:
+            Type = Mod.types0[Inst]
+            Area = self.getModuleArea(Type)
+            Total += Area
+        self.Areas[Cell] = Total
+        return Total
+
+
+
+
+
     def nicelist(self):
         List = []
-        for Cell in Env.Modules:
+        for Cell in self.Modules:
             Item = self.highlites(Cell)
             List.append(Item)
         return List
@@ -762,13 +805,33 @@ def use_command_wrds(wrds):
             LL = Mod.netTable[Net]
             logs.log_info('%d %s %s ' % (len(LL),Net,Mod.netTable[Net]))
         return
+    if wrds[0] == 'area':
+        if len(wrds) >= 2:
+            Cells = wrds[1:]
+        else: 
+            Cells = list(Env.Modules.keys())
+        LL = []
+        for Cell in Cells:            
+            Area = Env.getModuleArea(Cell)
+            LL.append((Area,Cell))
+        LL.sort()
+        LL.reverse()
+        for Area,Cell in LL:            
+            Gates = int(Area/singleGateArea)
+            logs.log_info('%50s        area= %-15s gates= %d' % (Cell,'%.2f' % Area,Gates))
+        return
+        
+
     if wrds[0] == 'list':
         List = Env.nicelist()
         File = open('list.csv','w')
         List.sort()
-        File.write('module,rtlnets,synnets,rtlinsts,rtltypes,libinsts,libtypes,total_insts\n')
+        File.write('module,rtlnets,synnets,rtlinsts,rtltypes,libinsts,libtypes,total_insts,area,gatecount\n')
         for Cell,Wids,Wires,Types0,Types1,LibTypes0,LibTypes1,Insts in List:
-            File.write('%s,%d,%d,%d,%d,%d,%d,%d\n' % ( Cell,Wids,Wires,Types0,Types1,LibTypes0,LibTypes1,Insts))
+            Area = Env.getModuleArea(Cell)
+            Gates = int(Area/singleGateArea)
+            if toreport(Cell):
+                File.write('%s,%d,%d,%d,%d,%d,%d,%d,%f,%d\n' % ( Cell,Wids,Wires,Types0,Types1,LibTypes0,LibTypes1,Insts,Area,Gates))
             
         File.close()
         os.system('open list.csv')
@@ -1181,6 +1244,14 @@ def isDataInPin(Type,Pin):
     if Pins[Pin] != 'input': return False
     if Pin != 'D': return False
     return True
+
+def libArea(Type):
+    if Type == 'BUF': return 0
+    if Type not in cellLib: 
+        logs.log_info('cell is not in cellLib "%s"' % (Type))
+        return 0
+    Area = cellLib[Type].properties['area']
+    return float(Area)
 
 def libInputPins(Type):
     if Type not in cellLib: return False

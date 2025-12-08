@@ -58,7 +58,6 @@ def prepare_assigns(Mod):
 
     Mod.hard_assigns = New
     Mod.hard_assigns.extend(Mod.new_assigns)
-    print("XXXXX",Mod.new_assigns)
     Mod.new_assigns = []
         
         
@@ -90,7 +89,7 @@ def fixStuffs(Mod):
 def do_alwayses(Mod):
     for When,Body,Alw in Mod.alwayses:
         Edges = getEdged(When)
-        scanAlwaysBody(Mod,Edges,Body)
+        scanAlwaysBody(Mod,Edges,Body,0)
 
 def getEdged(When):
     if When == '*': return []
@@ -103,7 +102,6 @@ def getEdged(When):
             return Res
         if When[0] == 'edge':
             return [When[2]]
-    print('EDGED',When)
     return []
 
 
@@ -174,22 +172,24 @@ def addCatch(Body,Mod):
         Q = getNewMarker(Mod)
         Body.append( ('<=',Q,['!',Q]) )
 
-def scanAlwaysBody(Mod,Edges,Body):
+def scanAlwaysBody(Mod,Edges,Body,Depth):
     if Body[0] == 'ifelse':
         Body[1] = makeSimpleAssign(Mod,Edges,Body[1])
-        scanAlwaysBody(Mod,Edges,Body[2])
-        addCatch(Body[2],Mod)
-        scanAlwaysBody(Mod,Edges,Body[3])
+        scanAlwaysBody(Mod,Edges,Body[2],Depth+1)
+        if (len(Edges)==1) or (Depth>0):
+            print("EDGES",Edges,Depth,Body[2])
+            addCatch(Body[2],Mod)
+        scanAlwaysBody(Mod,Edges,Body[3],Depth+1)
         addCatch(Body[3],Mod)
     elif Body[0] == 'if':
         Body[1] = makeSimpleAssign(Mod,Edges,Body[1])
-        scanAlwaysBody(Mod,Edges,Body[2])
+        scanAlwaysBody(Mod,Edges,Body[2],Depth+1)
         addCatch(Body[2],Mod)
     elif Body[0] == 'case':
         Cond = Body[1]
         List = Body[2]
         for ind,Item in enumerate(List):
-            scanAlwaysBody(Mod,Edges,Item[1])
+            scanAlwaysBody(Mod,Edges,Item[1],Depth+1)
             addCatch(Item[1],Mod)
     elif Body[0] == '<=':
         Body[2] = makeSimpleAssign(Mod,Edges,Body[2])
@@ -197,7 +197,7 @@ def scanAlwaysBody(Mod,Edges,Body):
         Body[2] = makeSimpleAssign(Mod,Edges,Body[2])
     elif Body[0] == 'list':
         for Item in Body[1:]:
-            scanAlwaysBody(Mod,Edges,Item)
+            scanAlwaysBody(Mod,Edges,Item,Depth)
     else:
         print("SCAN got %s" % Body[0])
 
@@ -217,7 +217,7 @@ def do_assigns(Mod):
             ind += 1
 
 OPERANDS = '* curly >> << >= + - & && ^ | || question == < != > ! ~'.split()
-DOUBLES = '>> * + - | || == != > < ?? << >= & && ^'
+DOUBLES = '<= >> * + - | || == != > < ?? << >= & && ^'
 
 def reworkExpression(Mod,Expr):
     Exprs = str(Expr)
@@ -271,7 +271,11 @@ def extoutput(Dst,Src,Mod):
     if type(Bus) is not str:
         logs.log_error('extoutput got "%s", must be string' % Mod.pr_expr(Bus))
         return 'ERROR'
-    Dir,Wid = Mod.nets[Bus]
+    if Bus not in Mod.nets:
+        Dir,Wid = 'wire',1
+        logs.log_warning('net %s was not defined' % Bus)
+    else:
+        Dir,Wid = Mod.nets[Bus]
     if type(Src) is str:
         Box = Mod.add_inst_conns('blkbox',Bus+'_blkbox',[('a',Src),('x',Dst)])
         Bits = extractWidth(Wid,Mod)
