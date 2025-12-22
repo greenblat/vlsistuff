@@ -216,7 +216,7 @@ def do_assigns(Mod):
         else:
             ind += 1
 
-OPERANDS = '* curly >> << >= + - & && ^ | || question == < != > ! ~'.split()
+OPERANDS = '* curly >> << >= + - & && ^ | || question <= == < != > ! ~'.split()
 DOUBLES = '<= >> * + - | || == != > < ?? << >= & && ^'
 
 def reworkExpression(Mod,Expr):
@@ -227,7 +227,7 @@ def reworkExpression(Mod,Expr):
     if type(Expr) is list:
         if (len(Expr) == 2) and (Expr[0] == '!') and (Expr[1] in RESETS):
             return Expr
-        if Expr[0] in ['subbit','subbus','bin','hex']: return Expr
+        if Expr[0] in ['subbit','subbus','bin','hex','dig']: return Expr
         Wid = Mod.exprWidth(Expr)
         if (Expr[0] in DOUBLES) and (len(Expr) == 3):
             A = reworkExpression(Mod,Expr[1])
@@ -238,7 +238,7 @@ def reworkExpression(Mod,Expr):
             B = reworkExpression(Mod,Expr[2])
             C = reworkExpression(Mod,Expr[3])
             return reworkFinal(Mod,[Expr[0],A,B,C])
-        elif Expr[0] in ['!','~']:
+        elif (len(Expr) == 2) and (Expr[0] in ['!','~','|']):
             A = reworkExpression(Mod,Expr[1])
             return reworkFinal(Mod,[Expr[0],A])
         elif Expr[0] in ['curly']:

@@ -1399,6 +1399,10 @@ class module_class:
                 self.defparams.pop(DFPRM)
 
     def exprWidth(self,Expr):
+        if type(Expr) is int:
+            X = bin(Expr)
+            Len = len(X)-2
+            return Len
         if type(Expr) is str:
             if Expr in self.nets:
                 return self.sig_width(Expr)
@@ -1410,7 +1414,6 @@ class module_class:
                 www = parseBus0(Expr)
                 return self.exprWidth(www)
                 
-
         if type(Expr) is list:
             if Expr == []:
                 logs.log_error('EMPTY Expr')
@@ -1444,13 +1447,22 @@ class module_class:
             if Expr[0] == 'bus':
                 return len(Expr)-1
             if Expr[0] == 'curly':
+                if (Expr[1] == 'repeat'):
+                    Rep = Expr[2]
+                    Base = self.exprWidth(Expr[3])
+                    return Rep*Base
+
                 Wid = 0
                 for Item in Expr[1:]:
                     Now = self.exprWidth(Item)
                     Wid += Now
                 return Wid
+            if Expr[0] == 'repeat':
+                logs.log_error("REPEAT %s" % str(Expr))
+                return 0
+                
             if Expr[0] == 'case':
-                logs.log_info("XXXXX %s" % str(Expr))
+                logs.log_error("XXXXX %s" % str(Expr))
                 return 0
 
             if Expr[0] in ['*']: 

@@ -6,8 +6,8 @@ import string
 
 
 class uartDriver(logs.driverClass):
-    def __init__(self,Path,Monitors,Prefix='',Name='none'):
-        logs.driverClass.__init__(self,Path,Monitors,Prefix,Name)
+    def __init__(self,Path,Monitors,Prefix='',Suffix='',Name='none'):
+        logs.driverClass.__init__(self,Path,Monitors,Prefix,Suffix,Name)
         self.Queue = []
         self.rxstr = ''
         self.Verbose = True
@@ -24,7 +24,7 @@ class uartDriver(logs.driverClass):
             if self.Verbose:
                 Chr = chr(rxdata)
                 if Chr in string.printable:
-                    logs.log_info('RX %x %s   "%s"' % (rxdata,Chr,self.rxstr))
+                    logs.log_info('%s: RX 0x%x "%s"   "%s"' % (self.Name,rxdata,Chr,self.rxstr))
                 else:
                     self.rxstr = self.rxstr + ('<%x>' % rxdata)
             if rxdata == 10: 
@@ -36,7 +36,7 @@ class uartDriver(logs.driverClass):
                 else:
                     self.rxstr = self.rxstr + ('<%x>' % rxdata)
             if rxdata == 10:
-                logs.log_info('RXSTR %s'% self.rxstr)
+                logs.log_info('%s: RXSTR %s'% (self.Name,self.rxstr))
                 self.rxstr = ''
 
 

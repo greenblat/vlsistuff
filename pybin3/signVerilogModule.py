@@ -34,7 +34,7 @@ def work(Fname):
         wrds = ll.split()
         if wrds==[]:
             pass
-        elif wrds[0] == 'module':
+        elif 'module' in wrds:
             Module = wrds[1]
         elif wrds[0] == 'endmodule':
             Module = 'None'

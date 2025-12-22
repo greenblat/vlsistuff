@@ -921,7 +921,7 @@ def str2hex(Txt):
 
 
 class driverClass:
-    def __init__(self,Path,Monitors,Prefix='',Name='',Vars=[]):
+    def __init__(self,Path,Monitors,Prefix='',Suffix='',Name='',Vars=[]):
         if (Monitors!=-1): Monitors.append(self)
         if Path == '':
             self.Path = Path
@@ -930,6 +930,7 @@ class driverClass:
         else:
             self.Path = Path + '.'
         self.Prefix = Prefix
+        self.Suffix = Suffix
         self.Name = Name
         self.state='idle'
         self.waiting  = 0 
@@ -951,7 +952,7 @@ class driverClass:
         return eval(Item)
 
     def fullname(self,Sig):
-        Fname = '%s%s%s' % (self.Path,self.Prefix,Sig)
+        Fname = '%s%s%s%s' % (self.Path,self.Prefix,Sig,self.Suffix)
         return Fname
         
     def action(self,Txt):

@@ -121,7 +121,7 @@ def set_right_assign(wrds):
         Db.right_assign=['subbus',Db.right_assign,Db.WidthH,Db.WidthL]
     elif Db.WidthH:
         Db.right_assign=['subbit',Db.right_assign,Db.WidthH]
-#    print('HARDASS',Db.assign,Db.right_assign)
+    print('HARDASS',Db.assign,Db.right_assign)
     Db.Current.add_hard_assign(Db.assign,Db.right_assign)
 
 def wait_line0(wrds):
@@ -415,6 +415,8 @@ for Line in TableLines:
         Table[Key]=(ww[2],ww[3:])
 
 
+OPS = '+ - < <= == != & && | || ^'.split()
+
 def makeItExpression(List):
     if type(List) is str: return List
     if type(List) is int: return List
@@ -423,7 +425,16 @@ def makeItExpression(List):
         if len(List) == 2:
             List[1] = makeItExpression(List[1])
             return List
-        elif len(List) == 3:
+        elif List[0] == 'subbit':
+            return List
+        elif List[0] == 'subbus':
+            return List
+        elif List[0] == 'curly':
+            for ind in range(1,len(List)):
+                Opx = makeItExpression(List[ind])
+                List[ind] = Opx
+            return List
+        elif (len(List) == 3) and (List[1] in OPS):
             OP0 = makeItExpression(List[0])
             OP1 = makeItExpression(List[2])
             return [List[1],OP0,OP1]

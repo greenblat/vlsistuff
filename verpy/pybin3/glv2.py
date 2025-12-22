@@ -38,6 +38,11 @@ import logs
 REPLACE = {}
 def help_main(Env):
     Mod = Env.Current
+    for Dst,Src,_,_ in Mod.hard_assigns:
+        logs.log_info('HASSIGN %s %s ' % (Dst,Src))
+
+
+
     for Inst in  Mod.insts:
         Obj = Mod.insts[Inst]
         Type = Obj.Type
