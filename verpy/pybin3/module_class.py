@@ -2139,6 +2139,12 @@ def pr_expr(What):
         return pr_replace(What)
     if not What:
         return ''
+    if type(What) is dict:
+        return 124/0
+
+    if What[0] == 'functioncall':
+        if What[1] == '$clog2':
+            return 'clog2(%s)' % What[2][0]
     if What[0]=='bus':
         X = ['curly']+What[1:]
         return pr_expr(X)

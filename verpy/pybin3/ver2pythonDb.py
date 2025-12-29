@@ -30,11 +30,17 @@ class moduleClass:
 def help_main(Env):
     Mod = Env.Current
     exploadConns(Mod)
+    removeParams(Mod)
+    dumpV(Mod,'%s.build' % Mod.Module)
     Build = createBuild(Mod)
     dumpPython(Build,Mod)
     dumpYaml(Build,Mod)
     dumpJson(Build,Mod)
 
+def removeParams(Mod):
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        Obj.params = {}
 def dumpJson(Build,Mod):
     Fout = open('%s.json' % Mod.Module,'w')
     json.dump(Build.__dict__,Fout,indent=4)
@@ -383,12 +389,13 @@ def exploadConns(Mod):
     dumpV(Mod,'a00.v')
     dealAssigns(Mod)
     explodeConnections(Mod)
-    explodeBusses(Mod)
     dumpV(Mod,'a01.v')
-    makeBuffers(Mod)
+    explodeBusses(Mod)
     dumpV(Mod,'a02.v')
-    makeReplacements(Mod)
+    makeBuffers(Mod)
     dumpV(Mod,'a03.v')
+    makeReplacements(Mod)
+    dumpV(Mod,'a04.v')
     removeZeroNets(Mod)
     dumpV(Mod,'a04.v')
 
