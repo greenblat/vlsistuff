@@ -68,7 +68,7 @@ def use_wrds(wrds):
        pass    
     elif Key in Table:
         (Nstate,Actions)=Table[Key]
-#        print('%s %s wrds="%s" actions=%s curly=%s   %s'%(Db.state,Nstate,wrds,Actions,Db.Curly,debug()))
+#        print('%s %s wrds="%s" actions=%s\n                       curly=%s   %s'%(Db.state,Nstate,wrds[0],Actions,Db.Curly,''))
         for Action in Actions:
             if Action!='none':
 #                Str = '%s(%s,%s,%s,%s)'%(Action,wrds[0],wrds[1],wrds[2],wrds[3])
@@ -121,7 +121,7 @@ def set_right_assign(wrds):
         Db.right_assign=['subbus',Db.right_assign,Db.WidthH,Db.WidthL]
     elif Db.WidthH:
         Db.right_assign=['subbit',Db.right_assign,Db.WidthH]
-    print('HARDASS',Db.assign,Db.right_assign)
+#    print('HARDASS',Db.assign,Db.right_assign)
     Db.Current.add_hard_assign(Db.assign,Db.right_assign)
 
 def wait_line0(wrds):
@@ -220,7 +220,7 @@ def check_curly_bus0(wrds):
 def check_curly_bus(wrds):
     check_curly_bus0(wrds)
     Db.right_assign=Db.Curly[:]
-#    Db.Curly=['curly']
+    Db.Curly=['curly']
 
 def finish_conn_empty(wrds):
     Db.Current.add_conn(Db.Inst,Db.Pin,None)
