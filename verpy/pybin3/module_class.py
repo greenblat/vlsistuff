@@ -1472,7 +1472,7 @@ class module_class:
             if Expr[0] in ['~','<<','>>']: 
                 return self.exprWidth(Expr[1])
             if Expr[0] == 'question':
-                return self.exprWidth(Expr[2])
+                return max(self.exprWidth(Expr[2]),self.exprWidth(Expr[3]))
 
         logs.log_error("EXPR WIDTH %s %s" % (self.Module,Expr))
         return 0

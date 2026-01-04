@@ -70,7 +70,7 @@ def help_main(Env):
                     Obj.conns[DEpin] = New
                     REPLACE[str(DD)] = New
                 
-    ties(Mod)
+#    ties(Mod)
     REMOVE = []
     for Inst in  Mod.insts:
         Obj = Mod.insts[Inst]
@@ -116,7 +116,15 @@ def help_main(Env):
     dealAssigns(Mod)
     dumpv(Mod,'aa3')
     makeBufs(Mod)
+    RENAMES = ties(Mod)
+    useRenames(Mod,RENAMES)
+    dumpv(Mod,'aa4')
+    makeSigsStr(Mod)
     renameOutxInventeds(Mod)
+    dumpv(Mod,'aa5')
+    renameOutxRest(Mod)
+    dumpv(Mod,'aa6')
+    renamePrevOutx(Mod)
     Fout = open('glv2/%s.v' % Mod.Module,'w')
     Mod.dump_verilog(Fout)
     Fout.close()
@@ -127,6 +135,14 @@ def dumpv(Mod,Name):
     Fout.close()
     
 
+def makeSigsStr(Mod):
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        for Pin in Obj.conns:
+            Sig = Obj.conns[Pin]
+            if Sig[0] == 'subbit':
+                Obj.conns[Pin] = Mod.pr_expr(Sig)
+    
 
 def outx(QQ,Prev='prev_'):
     if type(QQ) is str: return Prev+QQ
@@ -185,6 +201,7 @@ def ties(Mod):
             VCC = True
     if VCC: Mod.nets['vcc'] = 'wire',1
     if GND: Mod.nets['gnd'] = 'wire',1
+    return REPLACE
 
 
 def removeXassigns(Mod):
@@ -211,13 +228,52 @@ def renameOutxInventeds(Mod):
                     if Src.endswith(Dst):
                         RENAMES[Src] = Dst
                         REMOVES.append(Inst)
+#                        logs.log_info("RENAME %s %s %s %s" % (Inst,Obj.Type,Src,Dst))
             else:
-                logs.log_info("RRR000RR %s %s" % (Dst,Src))
+                logs.log_error("RRR000RR %s %s" % (Dst,Src))
 
     for Inst in REMOVES:
-        Mod.insts[Inst]
+        Mod.insts.pop(Inst)
 
     useRenames(Mod,RENAMES)
+
+
+def renameOutxRest(Mod):
+    ind = 0
+    RENAMES = {}
+    REMOVES = []
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        if Obj.Type == 'BUF':
+            Dst = Obj.conns['X']
+            Src = Obj.conns['A']
+            if (type(Src) is str) and (type(Dst) is str): 
+                if Src.startswith('outx_') and Src.endswith(Dst):
+                    RENAMES[Src] = Dst
+                    REMOVES.append(Inst)
+            else:
+                logs.log_error("RRR000RR %s %s" % (Dst,Src))
+
+    for Inst in REMOVES:
+        Mod.insts.pop(Inst)
+
+    useRenames(Mod,RENAMES)
+
+
+def renamePrevOutx(Mod):
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        for Pin in Obj.conns:
+            Sig = Obj.conns[Pin]
+            if (type(Sig) is str) and Sig.startswith('prev_outx_'):
+                Rep = Sig.replace('prev_outx_','prev_')
+                print("RENAME",Inst,Pin,Sig,Rep)
+                Obj.conns[Pin] = Rep
+            if (type(Sig) is not str):
+                if Sig[0] != 'curly':
+                    logs.log_error('NOTSTR %s %s %s' % (Inst,Pin,Sig))
+
+
 
 def useRenames(Mod,RENAMES):
     for Inst in Mod.insts:
@@ -228,7 +284,7 @@ def useRenames(Mod,RENAMES):
                 New = RENAMES[Sig]
                 Obj.conns[Pin] = New
                 if (type(Sig) is str) and (Sig in Mod.nets): Mod.nets.pop(Sig)
-                logs.log_info("RENAMED %s %s %s" % (Inst,Sig,New))
+#                logs.log_info("RENAMED %s %s %s" % (Inst,Sig,New))
 
 def removeParams(Mod):
     for Inst in Mod.insts:
