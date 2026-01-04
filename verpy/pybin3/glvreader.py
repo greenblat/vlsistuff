@@ -40,6 +40,7 @@ class Db_class:
         self.Curly=['curly']
         self.Insts=0
         self.right_assign=''
+        self.conn_curly=''
     def restart(self):
         self.state='idle'
         self.used=0
@@ -49,6 +50,7 @@ class Db_class:
         self.Curly=['curly']
         self.Insts=0
         self.right_assign=''
+        self.conn_curly=''
 
 Db = Db_class()
 Db.Current = module_class('none')
@@ -219,14 +221,21 @@ def check_curly_bus0(wrds):
     Db.WidthL=None
 def check_curly_bus(wrds):
     check_curly_bus0(wrds)
-    Db.right_assign=Db.Curly[:]
+#    print("CHECK",Db.Stack,Db.state,Db.Curly)
+    if (Db.Stack[-1] == 'assign3'):
+        Db.right_assign=Db.Curly[:]
+    elif (Db.Stack[-1] == 'conn3'):
+        Db.conn_curly=Db.Curly[:]
+    elif (Db.Stack[-1] != 'assign1'):
+        logs.log_error('check_curly_bus %s %s' % (Db.Stack,Db.Curly))
     Db.Curly=['curly']
 
 def finish_conn_empty(wrds):
     Db.Current.add_conn(Db.Inst,Db.Pin,None)
 def finish_conn(wrds):
-    if Db.Curly !=['curly']:
-        Conn = Db.Curly
+    if Db.conn_curly !=[]:
+        Conn = Db.conn_curly[:]
+        Db.conn_curly = []
     elif Db.WidthL:
         Conn = ['subbus',Db.Conn,[Db.WidthH,Db.WidthL]]
     elif Db.WidthH:
@@ -236,7 +245,6 @@ def finish_conn(wrds):
     Db.Current.add_conn(Db.Inst,Db.Pin,Conn)
 
 def add_wire_assign(wrds):
-#    print('HARDASS2',Db.current_wire,wrds[0])
     Db.Current.add_hard_assign(Db.current_wire,wrds[0])
 
 def add_wire(wrds):
