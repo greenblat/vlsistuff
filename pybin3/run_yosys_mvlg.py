@@ -32,6 +32,12 @@ LIB_DFF = '/Users/iliagreenblat/clients/ingongyama/libs/tsmc.lib'
 LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/scs130ms_tt_1.80v_25C.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/scs130ms_tt_1.80v_25C.lib'
 
+LIB_ABC = 'onenslib.lib'
+LIB_DFF = 'onenslib.lib'
+
+LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/basic2.lib'
+LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/basic2.lib'
+
 INCFILE = '''
 read_liberty -lib LIB_ABC
 read_verilog -sv ALLRTL

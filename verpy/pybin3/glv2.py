@@ -10,6 +10,8 @@ FLOPS['DFFS'] = ('D','Q')
 from skywaterLib import cellLib
 from skywaterHelp import *
 import module_class
+import checkGlv
+import sys
 
 def isSynWire(Wire):
     if type(Wire) is str:
@@ -40,15 +42,134 @@ REPLACE = {}
 def help_main(Env):
     Mod = Env.Current
     dumpv(Mod,'aaa')
+    checkGlv.checkGlv(Mod,"aaa")
     removeXassigns(Mod)
     removeParams(Mod)
  
     dumpv(Mod,'aa0')
-#    for Dst,Src,_,_ in Mod.hard_assigns:
-#        logs.log_info('HASSIGN %s %s ' % (Dst,Src))
+
+    dealAssigns(Mod)
+    dumpv(Mod,'aa1')
+    dealBlkBoxes(Mod)
+    dumpv(Mod,'aa2')
+    makeBufs(Mod)
+    dumpv(Mod,'aa3')
+
+    RENAMES = ties(Mod)
+    useRenames(Mod,RENAMES)
+    makeSigsStr(Mod)
+    dumpv(Mod,'aa4')
+    Singles = checkGlv.checkGlv(Mod,"aa4")
+    removeZeros(Mod,Singles)
+    Singles = checkGlv.checkGlv(Mod,"aa4x")
+    removeZeros(Mod,Singles)
+    dumpv(Mod,'aa5')
+    checkGlv.checkGlv(Mod,"aa5")
+    renameOutxInventeds(Mod)
+    dumpv(Mod,'aa6')
+    checkGlv.checkGlv(Mod,"aa6")
+
+    renameOutxRest(Mod)
+    makePrevs(Mod)
+    dumpv(Mod,'aa7')
+    checkGlv.checkGlv(Mod,"aa7")
+
+    renameInstances(Mod)
+
+
+    Fout = open('glv2/%s.v' % Mod.Module,'w')
+    Mod.dump_verilog(Fout)
+    Fout.close()
+
+    sys.exit()
+
+                
+##    ties(Mod)
+#    REMOVE = []
+#    for Inst in  Mod.insts:
+#        Obj = Mod.insts[Inst]
+#        if Obj.Type == 'blkbox':
+#            In = Obj.conns['a']
+#            Out = Obj.conns['x']
+#            Mod.hard_assigns.append((Out,In,'',''))
+#            REMOVE.append(Inst)
+#
+#    for Inst in REMOVE:
+#        Mod.insts.pop(Inst)
+#
+##    for Inst in  Mod.insts:
+##        Obj = Mod.insts[Inst]
+##        for Pin in Obj.conns:
+##            Sig = Obj.conns[Pin]
+##            if (type(Sig) is list) and (Sig[0] == 'curly'):
+##                Res = ['curly']
+##                for Item in Sig[1:]:
+##                    if str(Item) in REPLACE:
+##                        Res.append(REPLACE[str(Item)])
+##                    else:
+##                        Res.append(Item)
+##                Obj.conns[Pin] = Res
+##            elif str(Sig) in REPLACE:
+##                Obj.conns[Pin] = REPLACE[str(Sig)]
+##                Bus = getBus(Sig)
+##    for ind,(Dst,Src,_,_) in enumerate(Mod.hard_assigns):
+##        Src1 = useReplaces(Src,REPLACE)
+##        Mod.hard_assigns[ind] = Dst,Src1,'',''
+#            
+#
+#
+#
+#    for Sig in REPLACE:                
+#        Bus = getBus(Sig)
+#        if Bus in Mod.nets:
+#            Mod.nets.pop(Bus)
+#
+#    dumpv(Mod,'aa1')
+#    checkGlv.checkGlv(Mod,"aa1")
+#    simplifyInsts(Mod)
+#    dumpv(Mod,'aa2')
+#    dumpv(Mod,'aa3')
+#    makeBufs(Mod)
+#    RENAMES = ties(Mod)
+#    useRenames(Mod,RENAMES)
+#    dumpv(Mod,'aa4')
+#    makeSigsStr(Mod)
+#    renameOutxInventeds(Mod)
+#    dumpv(Mod,'aa5')
+#    renameOutxRest(Mod)
+#    dumpv(Mod,'aa6')
+#    checkGlv.checkGlv(Mod,"aa6")
+#    renamePrevOutx(Mod)
+#    Fout = open('glv2/%s.v' % Mod.Module,'w')
+#    Mod.dump_verilog(Fout)
+#    Fout.close()
+#    checkGlv.checkGlv(Mod,"final")
+  
+def renameInstances(Mod):
+    Insts = list(Mod.insts.keys())
+    for Inst in Insts:
+        Obj = Mod.insts[Inst]
+        Type = Obj.Type
+        if (Type == 'BUF'):
+            Osig = Obj.conns['X']
+            logs.log_info('BUF? %s -> %s' % (Inst,Osig))
+            if Inst.startswith('BUF') and (not isSynWire(Osig)):
+                Mod.insts.pop(Inst)
+                Mod.insts['X_'+Osig] = Obj
+                Obj.Name = 'X_'+Osig
+                logs.log_info('BUFRENAME %s -> %s' % (Inst,'X_'+Osig))
+        elif Type in cellLib:
+            Qpin =  libOutputPin(Type)
+            Qsig = Obj.conns[Qpin]
+            if isSynWire(Inst) and not isSynWire(Qsig):
+                Mod.insts.pop(Inst)
+                Mod.insts['X_'+Qsig] = Obj
+                Obj.Name = 'X_'+Qsig
 
 
 
+def makePrevs(Mod):
+    RENAMES = {}
     for Inst in  Mod.insts:
         Obj = Mod.insts[Inst]
         Type = Obj.Type
@@ -60,79 +181,56 @@ def help_main(Env):
             if isSynWire(DD):
                 New = outx(QQ)
                 Obj.conns[Dpin] = New
-                REPLACE[str(DD)] = New
+                RENAMES[DD] = New
             DEpin =  libDataEnablePin(Type)
             if DEpin:
                 DD = Obj.conns[DEpin]
                 QQ = Obj.conns[Qpin]
                 if isSynWire(DD):
-                    New = outxe(QQ,'eprev_')
+                    New = outxe(QQ,'enprev_')
                     Obj.conns[DEpin] = New
-                    REPLACE[str(DD)] = New
-                
-#    ties(Mod)
+                    RENAMES[DD] = New
+    useRenames(Mod,RENAMES)
+
+def removeZeros(Mod,Singles):
+    Insts = list(Mod.insts)
+    for Inst in Insts:
+        Obj = Mod.insts[Inst]
+        if Obj.Type == 'BUF':
+            Out = Obj.conns['X']
+            if Out in Singles:
+                Mod.insts.pop(Inst)
+
+def dealBlkBoxes(Mod):
     REMOVE = []
-    for Inst in  Mod.insts:
+    Insts = list(Mod.insts.keys())
+    for Inst in  Insts:
         Obj = Mod.insts[Inst]
         if Obj.Type == 'blkbox':
             In = Obj.conns['a']
             Out = Obj.conns['x']
-            Mod.hard_assigns.append((Out,In,'',''))
             REMOVE.append(Inst)
-
+            Dseq = explodeBus(Out,Mod)
+            Sseq = explodeBus(In,Mod)
+            Zip = zip(Dseq,Sseq)
+            for D,S in Zip:
+                Obj = Mod.add_inst('BUF','')
+                Obj.conns['A'] = Mod.pr_expr(S)
+                Obj.conns['X'] = Mod.pr_expr(D)
+                
     for Inst in REMOVE:
         Mod.insts.pop(Inst)
 
-#    for Inst in  Mod.insts:
-#        Obj = Mod.insts[Inst]
-#        for Pin in Obj.conns:
-#            Sig = Obj.conns[Pin]
-#            if (type(Sig) is list) and (Sig[0] == 'curly'):
-#                Res = ['curly']
-#                for Item in Sig[1:]:
-#                    if str(Item) in REPLACE:
-#                        Res.append(REPLACE[str(Item)])
-#                    else:
-#                        Res.append(Item)
-#                Obj.conns[Pin] = Res
-#            elif str(Sig) in REPLACE:
-#                Obj.conns[Pin] = REPLACE[str(Sig)]
-#                Bus = getBus(Sig)
-#    for ind,(Dst,Src,_,_) in enumerate(Mod.hard_assigns):
-#        Src1 = useReplaces(Src,REPLACE)
-#        Mod.hard_assigns[ind] = Dst,Src1,'',''
-            
-
-
-
-    for Sig in REPLACE:                
-        Bus = getBus(Sig)
-        if Bus in Mod.nets:
-            Mod.nets.pop(Bus)
-
-    dumpv(Mod,'aa1')
-    simplifyInsts(Mod)
-    dumpv(Mod,'aa2')
-    dealAssigns(Mod)
-    dumpv(Mod,'aa3')
-    makeBufs(Mod)
-    RENAMES = ties(Mod)
-    useRenames(Mod,RENAMES)
-    dumpv(Mod,'aa4')
-    makeSigsStr(Mod)
-    renameOutxInventeds(Mod)
-    dumpv(Mod,'aa5')
-    renameOutxRest(Mod)
-    dumpv(Mod,'aa6')
-    renamePrevOutx(Mod)
-    Fout = open('glv2/%s.v' % Mod.Module,'w')
-    Mod.dump_verilog(Fout)
-    Fout.close()
 
 def dumpv(Mod,Name):
     Fout = open('%s.v' % Name,'w')
     Mod.dump_verilog(Fout)
     Fout.close()
+    bufs = 0
+    for Inst in Mod.insts:
+        Obj = Mod.insts[Inst]
+        if Obj.Type == 'BUF': bufs += 1
+    logs.log_info('BUFS %s %s' % (Name,bufs))
     
 
 def makeSigsStr(Mod):
@@ -142,6 +240,15 @@ def makeSigsStr(Mod):
             Sig = Obj.conns[Pin]
             if Sig[0] == 'subbit':
                 Obj.conns[Pin] = Mod.pr_expr(Sig)
+            elif (type(Sig) is str):
+                pass
+            elif Sig[0] in ['subbus','curly']:
+                Seq = explodeBus(Sig,Mod)
+                if len(Seq) == 1:
+                    Obj.conns[Pin] = Seq[0]
+                else:
+                    Obj.conns[Pin] = ['curly'] + Seq
+                 
     
 
 def outx(QQ,Prev='prev_'):
@@ -343,6 +450,10 @@ def explodeBus(Sig,Mod):
             elif ww[1][0] == 'd': Val = int(ww[1][1:],10)
             elif ww[1][0] == 'b': Val = int(ww[1][1:],2)
             Seq = list(logs.binx(Val,Wid))
+            Seq.reverse()
+            for ind,X in enumerate(Seq):
+                if X == '0': Seq[ind] = 'gnd'
+                if X == '1': Seq[ind] = 'vcc'
             return Seq
         return [Sig]
     elif (type(Sig) is list) and (Sig[0] == 'subbit'):

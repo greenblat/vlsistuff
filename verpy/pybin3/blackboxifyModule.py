@@ -177,7 +177,6 @@ def scanAlwaysBody(Mod,Edges,Body,Depth):
         Body[1] = makeSimpleAssign(Mod,Edges,Body[1])
         scanAlwaysBody(Mod,Edges,Body[2],Depth+1)
         if (len(Edges)==1) or (Depth>0):
-            print("EDGES",Edges,Depth,Body[2])
             addCatch(Body[2],Mod)
         scanAlwaysBody(Mod,Edges,Body[3],Depth+1)
         addCatch(Body[3],Mod)
@@ -229,16 +228,22 @@ def reworkExpression(Mod,Expr):
             return Expr
         if Expr[0] in ['subbit','subbus','bin','hex','dig']: return Expr
         Wid = Mod.exprWidth(Expr)
-        if (Expr[0] in DOUBLES) and (len(Expr) == 3):
-            A = reworkExpression(Mod,Expr[1])
-            B = reworkExpression(Mod,Expr[2])
-            return reworkFinal(Mod,[Expr[0],A,B])
+
+        Expr = flattenExpr(Expr,Mod)
+
+        print("EXPR",len(Expr),Expr)
+        if (Expr[0] in DOUBLES) and (len(Expr) >= 3):
+            Res = [Expr[0]]
+            for Item in Expr[1:]:
+                AA = reworkExpression(Mod,Item)
+                Res.append(AA)
+            return reworkFinal(Mod,Res)
         elif Expr[0] == 'question':
             A = reworkExpression(Mod,Expr[1])
             B = reworkExpression(Mod,Expr[2])
             C = reworkExpression(Mod,Expr[3])
             return reworkFinal(Mod,[Expr[0],A,B,C])
-        elif (len(Expr) == 2) and (Expr[0] in ['!','~','|']):
+        elif (len(Expr) == 2) and (Expr[0] in ['^','!','~','|']):
             A = reworkExpression(Mod,Expr[1])
             return reworkFinal(Mod,[Expr[0],A])
         elif Expr[0] in ['curly']:
@@ -246,6 +251,26 @@ def reworkExpression(Mod,Expr):
     logs.log_error('reworkExpression got "%s"' % str(Expr))
     return Expr
    
+DOUBLESFLAT = '* + - | || & && ^'
+def flattenExpr(Expr,Mod):
+    if type(Expr) is not list: return Expr
+    if Expr[0] not in DOUBLESFLAT: return Expr
+    Ok = True
+    while Ok:
+        Len = len(Expr)
+        Res = [ Expr[0] ]
+        if Expr[0] in DOUBLESFLAT:
+            for Item in Expr[1:]:
+                if (type(Item) is list) and (Item[0] == Expr[0]):
+                    Res.extend(Item[1:])
+                else:
+                    Res.append(Item)
+        Ok = len(Res)>Len
+        Expr = Res[:]
+    return Res 
+
+
+
 def reworkFinal(Mod,Expr):
     Wid = Mod.exprWidth(Expr)
     New = getNewWire(Mod,Wid)

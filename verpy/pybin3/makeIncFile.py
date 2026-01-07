@@ -45,7 +45,7 @@ def help_main(Env):
             LL += 'read_verilog  blackboxes/%s.blkbox\n' % Type
     
         Txt = Txt.replace('BLACKBOXES',LL)
-        print(Txt)
+#        print(Txt)
         if not os.path.exists('incs'): os.mkdir('incs')
         Fout = open('incs/%s.inc' % Mod.Module,'w')
         Fout.write(Txt)
