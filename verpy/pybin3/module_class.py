@@ -663,6 +663,8 @@ class module_class:
             for Item in X[1]:
                 if (type(Item) is list)and(len(Item)==4):
                     Fout.write('%s %s %s;\n'%(Item[3],pr_wid(Item[2]),Item[1]))
+                elif (type(Item) is list)and(len(Item)==3):
+                    Fout.write('%s %s %s;\n' % (Item[2],pr_wid(Item[1]),Item[0]))
                 else:
                     logs.log_err('dump_function ldefs %s '%(Item))
         Fout.write(pr_stmt(X[2],''))
@@ -1448,8 +1450,9 @@ class module_class:
                 return len(Expr)-1
             if Expr[0] == 'curly':
                 if (Expr[1] == 'repeat'):
-                    Rep = Expr[2]
+                    Rep = self.compute_int(Expr[2])
                     Base = self.exprWidth(Expr[3])
+#                    print("CURREPEAT rep=%s base=%s resu=%s" % (Rep,Base
                     return Rep*Base
 
                 Wid = 0
@@ -1472,8 +1475,19 @@ class module_class:
             if Expr[0] in ['~','<<','>>']: 
                 return self.exprWidth(Expr[1])
             if Expr[0] == 'question':
-                return max(self.exprWidth(Expr[2]),self.exprWidth(Expr[3]))
+                try:
+                    return max(self.exprWidth(Expr[2]),self.exprWidth(Expr[3]))
+                except:
+                    logs.log_error("EXPR QUESTION WIDTH %s %s 2=%s 3=%s " % (self.Module,Expr,self.exprWidth(Expr[2]),self.exprWidth(Expr[3])))
+            if Expr[0] == 'functioncall':
+                Func = Expr[1]
+                Code = self.functions[Func]
+                Wid = Code[0]
+                Hi = self.compute_int(Wid[0])
+                Lo = self.compute_int(Wid[1])
+#                logs.log_error('EXPR WIDTH functioncall %s %s' % (Func,str(self.functions[Func])))
 
+                return Hi-Lo+1
         logs.log_error("EXPR WIDTH %s %s" % (self.Module,Expr))
         return 0
     
@@ -2144,7 +2158,7 @@ def pr_expr(What):
 
     if What[0] == 'functioncall':
         if What[1] == '$clog2':
-            return 'clog2(%s)' % What[2][0]
+            return '$clog2(%s)' % What[2][0]
     if What[0]=='bus':
         X = ['curly']+What[1:]
         return pr_expr(X)

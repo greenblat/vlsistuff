@@ -76,6 +76,7 @@ def help_main(Env):
 
     renameInstances(Mod)
 
+    cleanWires(Mod)
 
     Fout = open('glv2/%s.v' % Mod.Module,'w')
     Mod.dump_verilog(Fout)
@@ -83,6 +84,51 @@ def help_main(Env):
 
     sys.exit()
 
+def cleanWires(Mod):
+    Mod.buildNetTable()
+    Added = 0
+    for Net in Mod.netTable:
+        if '[' in Net:
+            Bus = Net[:Net.index('[')]        
+            Ind = eval(Net[Net.index('[')+1:-1])
+            if Bus not in Mod.nets:
+                Mod.nets[Bus] = 'wire',(Ind,Ind)
+                Added += 1
+            else:
+                Dir,(Hi,Lo) = Mod.nets[Bus]
+                Hi = max(Mod.compute_int(Hi),Ind)
+                Lo = min(Mod.compute_int(Lo),Ind)
+                Mod.nets[Bus] = Dir,(Hi,Lo) 
+                Added += 1
+
+        elif Net not in Mod.nets:
+            Mod.nets[Net] = 'wire',1
+            Added += 1
+    logs.log_info('added %d wires' % Added)            
+    REMOVE = []
+    for Net in Mod.nets:
+        if Net in Mod.netTable:
+            pass
+        else:
+            Dir,Wid = Mod.nets[Net]
+            if Dir != 'wire':
+                pass
+            elif (type(Wid) is tuple) and (len(Wid) == 2):
+                Hi,Lo = Wid
+                Appears = 0
+                for II in range(Mod.compute_int(Lo),Mod.compute_int(Hi)+1):
+                    if '%s[%s]'%(Net,II) in Mod.netTable:
+                        Appears += 1
+                if Appears == 0:
+                    REMOVE.append(Net)
+                    
+            else:
+                REMOVE.append(Net)
+    for NN in REMOVE: Mod.nets.pop(NN)
+    logs.log_info(' removed %d sol wires' % len(REMOVE))
+
+    for Net in Mod.netTable:
+        List = Mod.netTable[Net]
                 
 ##    ties(Mod)
 #    REMOVE = []
@@ -152,12 +198,12 @@ def renameInstances(Mod):
         Type = Obj.Type
         if (Type == 'BUF'):
             Osig = Obj.conns['X']
-            logs.log_info('BUF? %s -> %s' % (Inst,Osig))
+#            logs.log_info('BUF? %s -> %s' % (Inst,Osig))
             if Inst.startswith('BUF') and (not isSynWire(Osig)):
                 Mod.insts.pop(Inst)
                 Mod.insts['X_'+Osig] = Obj
                 Obj.Name = 'X_'+Osig
-                logs.log_info('BUFRENAME %s -> %s' % (Inst,'X_'+Osig))
+#                logs.log_info('BUFRENAME %s -> %s' % (Inst,'X_'+Osig))
         elif Type in cellLib:
             Qpin =  libOutputPin(Type)
             Qsig = Obj.conns[Qpin]

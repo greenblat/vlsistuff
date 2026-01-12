@@ -1,27 +1,32 @@
 
 import logs
-import os
+import os,sys
 
 
 def help_main(Env):
+    Mod = False
     for Module in Env.Modules:
         Mod = Env.Modules[Module]
         Mod.new_assigns = []
         fixStuffs(Mod)
         prepare_assigns(Mod)
-        Fout = open('%s.tmp1' % Mod.Module,'w')
-        Mod.dump_verilog(Fout)
-        Fout.close()
+#        Fout = open('%s.tmp1' % Mod.Module,'w')
+#        Mod.dump_verilog(Fout)
+#        Fout.close()
         do_alwayses(Mod)
         do_assigns(Mod)
-        Fout = open('%s.tmp2' % Mod.Module,'w')
-        Mod.dump_verilog(Fout)
-        Fout.close()
+#        Fout = open('%s.tmp2' % Mod.Module,'w')
+#        Mod.dump_verilog(Fout)
+#        Fout.close()
         wrapUps(Mod)
     if not Mod:
         logs.log_error('none module was opened')
 
     if not os.path.exists('gutted'): os.mkdir('gutted')
+    if not Mod:
+        logs.log_error('none module was opened')
+        sys.exit()
+
     Fout = open('gutted/%s.v' % Mod.Module,'w')
     for Module in Env.Modules:
         Mod = Env.Modules[Module]
@@ -48,6 +53,7 @@ def wrapUps(Mod):
     Mod.hard_assigns.append(( 'marker_agregate',Or,'',''))
 
     Box = Mod.add_inst_conns('blkbox','marker_blkbox',[('a','marker_agregate'),('x','markerarg')])
+    Box.params['WID'] = 1
 
 
 def prepare_assigns(Mod):
@@ -108,6 +114,7 @@ def getEdged(When):
 
 
 OPS = '+ curly == != || && > < >= | & ^ ! ~ question '.split()
+OPS = '+ curly == != || && > < >= | & ^ question '.split()
 
 SIMPLEASSIGNS = {}
 INVENTIONS = {}
@@ -127,14 +134,14 @@ def makeSimpleAssign(Mod,Edges,Expr):
             Expr[1] = makeSimpleAssign(Mod,Edges,Expr[1])
             Expr[2] = makeSimpleAssign(Mod,Edges,Expr[2])
             Expr[3] = makeSimpleAssign(Mod,Edges,Expr[3])
-            New = getNewWire(Mod,Wid)
+            New = getNewWire(Mod,Wid,Expr,'quest')
             Mod.hard_assigns.append((New,Expr,'',''))
             SIMPLEASSIGNS[Exprs] = New
             INVENTIONS[New] = Mod.pr_expr(Expr)
             return New
             
         if (Expr[0] in OPS)and not isInEdges(Expr,Edges):
-            New = getNewWire(Mod,Wid)
+            New = getNewWire(Mod,Wid,Expr,'ops')
             Mod.hard_assigns.append((New,Expr,'',''))
             SIMPLEASSIGNS[Exprs] = New
             INVENTIONS[New] = Mod.pr_expr(Expr)
@@ -155,16 +162,17 @@ Marker = [0]
 def getNewMarker(Mod):
     Marker[0] += 1
     Reg = 'markereg%s' % Marker[0]
-    Mod.nets[Reg] = 'wire',1
+    Mod.nets[Reg] = 'reg',1
     return Reg
 
-def getNewWire(Mod,Wid):
+def getNewWire(Mod,Wid,Expr,From):
     Inventive[0] += 1
-    Wire = 'invented%s' % Inventive[0]
+    Wire = 'invented_%s_' % Inventive[0]
     if Wid>1:
         Mod.nets[Wire] = 'wire',(Wid-1,0)
     else:
         Mod.nets[Wire] = 'wire',1
+    logs.log_info('INV %s %s %s expr=%s from=%s' % (Mod.Module,Wire,Wid,Expr,From))
     return Wire
     
 def addCatch(Body,Mod):
@@ -231,7 +239,7 @@ def reworkExpression(Mod,Expr):
 
         Expr = flattenExpr(Expr,Mod)
 
-        print("EXPR",len(Expr),Expr)
+#        print("EXPR",len(Expr),Expr)
         if (Expr[0] in DOUBLES) and (len(Expr) >= 3):
             Res = [Expr[0]]
             for Item in Expr[1:]:
@@ -243,9 +251,15 @@ def reworkExpression(Mod,Expr):
             B = reworkExpression(Mod,Expr[2])
             C = reworkExpression(Mod,Expr[3])
             return reworkFinal(Mod,[Expr[0],A,B,C])
-        elif (len(Expr) == 2) and (Expr[0] in ['^','!','~','|']):
+#        elif (len(Expr) == 2) and (Expr[0] in ['^','!','~','|']):
+        elif (len(Expr) == 2) and (Expr[0] in ['^','|','&']):
             A = reworkExpression(Mod,Expr[1])
             return reworkFinal(Mod,[Expr[0],A])
+        elif (len(Expr) == 2) and (Expr[0] in ['~','!']):
+            A = reworkExpression(Mod,Expr[1])
+            return [Expr[0],A]
+        elif Expr[0] == 'functioncall':
+            return Expr
         elif Expr[0] in ['curly']:
             return Expr
     logs.log_error('reworkExpression got "%s"' % str(Expr))
@@ -273,7 +287,7 @@ def flattenExpr(Expr,Mod):
 
 def reworkFinal(Mod,Expr):
     Wid = Mod.exprWidth(Expr)
-    New = getNewWire(Mod,Wid)
+    New = getNewWire(Mod,Wid,Expr,'final')
     SIMPLEASSIGNS[str(Expr)] = New
     INVENTIONS[New] = Mod.pr_expr(Expr)
     Mod.new_assigns.append((New,Expr,'',''))
@@ -284,7 +298,7 @@ def isLiteral(Src):
     if type(Src) is int: return True
     if type(Src) is list:
         if Src[0] in ['bin','hex','dec']: return True
-        if Src[0] in ['subbus','subbit']: return False
+        if Src[0] in ['subbus','subbit','functioncall']: return False
         if Src[0] in OPERANDS: return False
     if type(Src) is str: return False
 

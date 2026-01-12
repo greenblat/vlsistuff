@@ -31,7 +31,7 @@ def help_main(Env):
     Mod = Env.Current
     exploadConns(Mod)
     removeParams(Mod)
-    dumpV(Mod,'%s.build' % Mod.Module)
+    dumpV(Mod,'builds/%s.build' % Mod.Module)
     Build = createBuild(Mod)
     dumpPython(Build,Mod)
     dumpYaml(Build,Mod)
