@@ -1129,6 +1129,9 @@ class driverClass:
         self.cycles += 1
         log_error('run() of driverClass is supposed to be replaced')
 
+    def onFinish(self):
+        print("no onFinish")
+
 class emptyClass(driverClass):
     def __init__(self,Path,Monitors):
         driverClass.__init__(self,Path,Monitors)
