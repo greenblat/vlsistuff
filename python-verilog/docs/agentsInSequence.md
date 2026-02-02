@@ -215,7 +215,7 @@ Agent python code should define some routines:
         else:
             logs.log_error('exampleClass got %s' % Txt)
 `
-### have two objectcs sharing code
+### have two objects sharing code
 
 import uartDriver
 ptx = uartDriver.uartDriver('tb',Monitors,Prefix='',Name='pp')
