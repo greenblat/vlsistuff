@@ -28,6 +28,9 @@ class moduleClass:
         self.types1 = {}
 
 def help_main(Env):
+    if type(Env.Current) is None:
+        logs.log_error('ver2pythonDb got non type')
+        return
     Mod = Env.Current
     exploadConns(Mod)
     removeParams(Mod)

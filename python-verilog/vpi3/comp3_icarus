@@ -3,8 +3,8 @@
 # source first vpi3.setup (your version of that file!)
 
 
-echo $PYTHONLIB
-echo $PYTHONHOME
+# echo $PYTHONLIB
+# echo $PYTHONHOME
 
 
 iverilog-vpi src/vpi3_72.c src/qq64.c \

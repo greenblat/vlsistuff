@@ -40,7 +40,7 @@ endmodule
 '''
 
 PREPARE_STRING = '''
-    /bin/rm pymon.file
+    /bin/rm pymon.file0
     /bin/rm *.empty
     /bin/mv MOD.inst tb.v
     /bin/rm lex.out

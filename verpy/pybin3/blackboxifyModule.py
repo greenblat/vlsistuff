@@ -172,7 +172,7 @@ def getNewWire(Mod,Wid,Expr,From):
         Mod.nets[Wire] = 'wire',(Wid-1,0)
     else:
         Mod.nets[Wire] = 'wire',1
-    logs.log_info('INV %s %s %s expr=%s from=%s' % (Mod.Module,Wire,Wid,Expr,From))
+#    logs.log_info('INV %s %s %s expr=%s from=%s' % (Mod.Module,Wire,Wid,Expr,From))
     return Wire
     
 def addCatch(Body,Mod):

@@ -68,7 +68,7 @@ endmodule
 '''
 
 PREPARE_STRING = '''
-    /bin/rm pymon.file
+    /bin/rm pymon.file0
     /bin/rm *.empty
     /bin/rm lex.out
     /bin/rm db0.pickle

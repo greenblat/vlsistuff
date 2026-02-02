@@ -7,6 +7,8 @@ def help_main(Env):
     Env.params['-tb'] = True
     if '-override' in Env.params:
         pass
+    elif '-overwrite' in Env.params:
+        pass
     elif os.path.exists('comp'):
         print('COMP FILE EXISTS. DONT WANT TO OVERWRITE. EXITING')
         print('COMP FILE EXISTS. DONT WANT TO OVERWRITE. EXITING')

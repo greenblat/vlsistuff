@@ -35,7 +35,7 @@ class uartDriver(logs.driverClass):
                     self.rxstr = self.rxstr + chr(rxdata)
                 else:
                     self.rxstr = self.rxstr + ('<%x>' % rxdata)
-            if rxdata == 10:
+            if (rxdata == 10)or(len(self.rxstr)>100):
                 logs.log_info('%s: RXSTR %s'% (self.Name,self.rxstr))
                 self.rxstr = ''
 
@@ -46,6 +46,7 @@ class uartDriver(logs.driverClass):
             self.waiting -= 1
             return
         if self.Queue == []: return
+#        print("AQQQ",self.Queue)
         if self.peek('tx_empty')==0: return
         Char = self.Queue.pop(0) 
         if len(Char) == 1:
@@ -84,7 +85,10 @@ class uartDriver(logs.driverClass):
             Lines = File.readlines()
             File.close()
             for line in Lines:
-                Str = 'tx %s' % (line)
+                wrds = line.split()
+                Str = 'tx '
+                for wrd in wrds:
+                    Str += ' 0x%s' % (line)
                 self.action(Str)
             logs.log_info("GIVENFILE %d" % len(self.Queue))
 
@@ -92,6 +96,7 @@ class uartDriver(logs.driverClass):
             logs.log_info('TX %s' % Txt,'uart')
             for wrd in wrds[1:]:
                 if  wrd.startswith('0x'):
+#                    wrd = invertIt(wrd)
                     self.Queue.append(wrd)
                 elif  wrd == 'CRLF':
                     self.Queue.append(wrd)
@@ -110,5 +115,17 @@ class uartDriver(logs.driverClass):
             self.action(Str)
         else:
             logs.log_error('vdriverClass got %s' % Txt)
+
+def invertIt(wrd):
+    X = eval(wrd)
+    Res = 0
+    for ii in range(8):
+        Bit = (X>>ii) & 1
+        New = Bit << (7-ii)
+        Res += New
+    return hex(Res)
+
+
+
 
 
