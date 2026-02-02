@@ -1,4 +1,5 @@
-
+---- No longer supported or used.
+----- vcd_python_c   is used. It has "C" program core.
 
 local script "run" should run the demo.
 python2.7 is expected here.  You can add "python" to the invocation line (inside run) if Your linux/mac is 

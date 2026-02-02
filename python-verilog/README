@@ -1,8 +1,8 @@
 
 IMPORTANT! in all scripts my path may appear, please change to whatever path is relevant.
 
-This README is about python2.7 (latest is ok). Before You start, You need python development library.
-on linu, try (or similar) :      sudo apt-get install python-dev
+This README is about python3.* (latest is ok). Before You start, You need python development library.
+on linux, try (or similar) :      sudo apt-get install python-dev
 
 
 

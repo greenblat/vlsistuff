@@ -4,7 +4,7 @@
 # You can see here, that python is installed privately. Sometimes it is the only way in
 # place of work, where You cannot touch the system.
 
-set INC = /home/ilia/local/include/python2.7
+set INC = /home/ilia/local/include/python3.14
 set LIB = /home/ilia/local/lib/
 
 gcc -g \
@@ -12,9 +12,9 @@ gcc -g \
     src/vcd_python.c  src/qq64.c \
     -I$INC \
     -L$LIB/  \
-    -L$LIB/python2.7/  \
-    -L$LIB/python2.7/config \
-    -lpython2.7  \
+    -L$LIB/python3.14/  \
+    -L$LIB/python3.14/config \
+    -lpython3.14  \
     -lm -lc  -lpthread  -lutil -ldl \
 
 
