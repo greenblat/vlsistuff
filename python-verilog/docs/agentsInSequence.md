@@ -215,6 +215,27 @@ Agent python code should define some routines:
         else:
             logs.log_error('exampleClass got %s' % Txt)
 `
+### have two objectcs sharing code
+
+import uartDriver
+ptx = uartDriver.uartDriver('tb',Monitors,Prefix='',Name='pp')
+prxd = uartDriver.uartDriver('tb',Monitors,Prefix='p',Name='prxd')
+seq = sequenceClass('tb.dma',Monitors,'',[('ptx',ptx),(prxd',prxd))
+
+- same class has two instances, Second one has Prefix='p'.  
+It means that line like :     self.force('rxd',1)  will be interpreted as "veri.force('tb.prxd','1').
+- 'tb.' prefixed for full path (first parameter of uartDriver class.
+- 'p' is prefixed to signal name.  
+- works same for force and peek.
+- if different path is needed (for some reason) - use  logs.force("full path","string value").
+
+- in sequence:
+apb0  write Addr0 Wdata0 
+apb1  write Addr1 Wdata1 
+
+
+
+
 
 ## logs.py helper module
 logs.py holds bunch of usefull helper routines. It is used in verilog.py and agents code.
