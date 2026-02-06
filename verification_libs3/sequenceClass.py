@@ -445,11 +445,19 @@ class sequenceClass:
         if '#' in Line: Line = Line[:Line.index('#')]
 #        if '//' in Line: Line = Line[:Line.index('//')]
         logs.log_write('@%d: sequence: %s'%(logs.get_cycles(),Line),'seq')
-#        print(lnum,Line)
+        print("AAAAAAAA",lnum,Line)
         veri.force('tb.seqptr',str(lnum))
         self.seq_line(Line,lnum)
 
     def seq_line(self,Line,lnum):
+        if ';' in Line:
+            llines = Line.split(';')
+            for ll in llines:
+                self.seq_line_2(ll,lnum)
+        else:
+            self.seq_line_2(Line,lnum)
+            
+    def seq_line_2(self,Line,lnum):
         wrds = Line.split()
         if len(wrds)==0: return True
         if wrds[0] == 'seed':

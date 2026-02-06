@@ -66,7 +66,30 @@ Sequence needs at least two params: Path to work on, and list that will be run o
 
 all these lines should be in verilog.py
 
+## Timing
 
+Sequence agent pops line from sequence and sends it to execution. 
+On next clock it pops next line from the sequence list and does the same. 
+Line that activates an agent, lke axi write, may run for many clocks, but the sequence doesnt know that -  on the next clock it proceeds to the next line.  
+To make sure agent like axi finished it's current execution (before executing the next line) , is to ask for   **"axi waitNotBusy"** .  all class agents have **"def busy(self)"** function.  in sequence it  is called by  **"agent_name waitNotBusy"**
+
+**`print AAA`**
+
+**`axi write  0x1 0x8 0x10000 0x3 0x4   # second parameter is length.`**
+
+**`print BBB`**
+
+**`axi waitNotBusy`**
+
+**`print CCC`**
+
+in this segment BBB will be printed two clocks after AAA, and CCC will be around  8 clocks after BBB
+
+### Line per clock limitation
+
+Sometimes it is beneficiary to issue two commands at the same clock.   Separate the commands with **";"** character.
+
+  **"force sigA 1 ; force sigB 0"**  will issue two commands in the same clock.
 
 ### Basic sequence commands
 
