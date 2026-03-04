@@ -942,6 +942,7 @@ class driverClass:
         self.Forces = []
         self.SeqObj = False
         self.VCDS = {}
+        self.Translates = {}
 
     def vcd(self,CallName):
         self.VCDS[CallName] = 0
@@ -952,6 +953,8 @@ class driverClass:
         return eval(Item)
 
     def fullname(self,Sig):
+        if Sig in self.Translates:
+            Sig = self.Translates[Sig]
         Fname = '%s%s%s%s' % (self.Path,self.Prefix,Sig,self.Suffix)
         return Fname
         

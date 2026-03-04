@@ -2,7 +2,7 @@
 import os,sys,string
 
 
-FNAMES = 'log.yosys *yosys.log recorded.nets dump.vcd pymon.* tb.vvp deep.list'.split()
+FNAMES = '*.log0 *.logseq log.yosys *yosys.log recorded.nets dump.vcd pymon.* tb.vvp deep.list'.split()
 
 
 def main():
