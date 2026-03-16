@@ -48,7 +48,7 @@ def createXml(Module,Db):
             Amount = 0
         if Usable: 
             Wid = Item.getParam('width')
-            Reg = str(Item.getParam('names'))[0]
+            Reg = str(Item.getParam('names')[0])
             if 'desc' in Item.Params:
                 Item.Params['description'] = Item.Params['desc']
             if 'description' not in Item.Params:
@@ -77,6 +77,7 @@ def createXml(Module,Db):
                 writeItem(Db,Item,Fout,Module,Acc,Addr,Wid,Reset,Desc,Reg+'_%d'%Run,Amount)
             Addr = Item.Addr
             Wid = Item.getParam('width')
+            Reg = str(Item.getParam('names')[0])
             if (Wid>BusWidth)and(Wid<=(BusWidth*2)):
                 BusBytes = int(BusWidth/8)
                 Fccc.write('#define %sADDR_%-50s  (%s_BASEADDR+0x%x)\n'%(Pref,Reg.upper()+'_LO',Module.upper(),Addr))
@@ -110,7 +111,7 @@ def buildFields(Db,Reg):
         Name = Item.Name
         if Name != 'gap':
             _,Offset = Item.Params['position']
-            Width =  Item.Params('width')
+            Width =  Item.Params['width']
             Str = FIELD_TEMPLATE.replace('NAME',Item.Name)
             Str = Str.replace('WIDTH',str(Width))
             Str = Str.replace('OFFSET',str(Offset))
