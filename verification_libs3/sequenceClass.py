@@ -732,7 +732,7 @@ class sequenceClass:
                     else:
                         Wrds2.append(str(Wrd))
             Cmd = wrds[1]+' '+' '.join(Wrds2)
-            logs.log_info('tell %s <- %s   (%s)   2(%s)' % (Line[:-1],Cmd,Wrds,Wrds2))
+#            logs.log_info('tell %s <- %s   (%s)   2(%s)' % (Line[:-1],Cmd,Wrds,Wrds2))
 # @259: info: write 0x454 0x19  ['write', 'LVL_classic_end_of_phase_seg1', 'SEG1']
             ww = Cmd.split()
 #            if ww[0] == 'write':

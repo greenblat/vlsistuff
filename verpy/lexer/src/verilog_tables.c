@@ -49,7 +49,7 @@ char strx1[]="";
 char strx2[]="/";
 char strx3[]="\\";
 char strx4[]=" ";
-char strx5[]="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789_?.,[]{}#@()~%^;:/+-*~-=!<>&|^=<>&|$";
+char strx5[]="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789_?.,[]{}#@()~%^;:/+-*+~-=!<>&|+^=<>&|$";
 char strx6[]="*";
 char strx7[]="`";
 char strx8[]="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
@@ -76,9 +76,9 @@ char strx28[]="=";
 char strx29[]="!";
 char strx30[]="<";
 char strx31[]=">";
-char strx32[]="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789\t \n_?.,[]{}#@()~%^;:/+-*~-=!<>&|`',\\";
-char strx33[]="~-=!<>&|";
-char strx34[]="^=<>&|";
+char strx32[]="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789\t \n_?.,[]{}#@()~%^;:/+-*+~-=!<>&|`',\\";
+char strx33[]="+~-=!<>&|";
+char strx34[]="+^=<>&|";
 char strx35[]="\"";
 char strx36[]="?.,[]{}#@()~%^;:/+-*";
 int State=st_idle;
@@ -696,6 +696,7 @@ void reserved_words(char *Token,char *tokenType){
     if (strcmp(Token,"assert")==0) {strcpy(tokenType,"assert"); return; }
     if (strcmp(Token,"assert")==0) {strcpy(tokenType,"assert"); return; }
     if (strcmp(Token,"assign")==0) {strcpy(tokenType,"assign"); return; }
+    if (strcmp(Token,"automatic")==0) {strcpy(tokenType,"automatic"); return; }
     if (strcmp(Token,"begin")==0) {strcpy(tokenType,"begin"); return; }
     if (strcmp(Token,"bins")==0) {strcpy(tokenType,"bins"); return; }
     if (strcmp(Token,"bit")==0) {strcpy(tokenType,"bit"); return; }
@@ -757,6 +758,7 @@ void reserved_words(char *Token,char *tokenType){
     if (strcmp(Token,"new")==0) {strcpy(tokenType,"new"); return; }
     if (strcmp(Token,"or")==0) {strcpy(tokenType,"or"); return; }
     if (strcmp(Token,"output")==0) {strcpy(tokenType,"output"); return; }
+    if (strcmp(Token,"packed")==0) {strcpy(tokenType,"packed"); return; }
     if (strcmp(Token,"parameter")==0) {strcpy(tokenType,"parameter"); return; }
     if (strcmp(Token,"posedge")==0) {strcpy(tokenType,"posedge"); return; }
     if (strcmp(Token,"primitive")==0) {strcpy(tokenType,"primitive"); return; }
@@ -777,6 +779,7 @@ void reserved_words(char *Token,char *tokenType){
     if (strcmp(Token,"specparam")==0) {strcpy(tokenType,"specparam"); return; }
     if (strcmp(Token,"strong0")==0) {strcpy(tokenType,"strong0"); return; }
     if (strcmp(Token,"strong1")==0) {strcpy(tokenType,"strong1"); return; }
+    if (strcmp(Token,"struct")==0) {strcpy(tokenType,"struct"); return; }
     if (strcmp(Token,"supply0")==0) {strcpy(tokenType,"supply0"); return; }
     if (strcmp(Token,"supply1")==0) {strcpy(tokenType,"supply1"); return; }
     if (strcmp(Token,"table")==0) {strcpy(tokenType,"table"); return; }
@@ -806,6 +809,7 @@ void doubleNames(char *Token,char *tokenType){
     if (strcmp(Token,"!^")==0) {strcpy(tokenType,"xnor"); return; }
     if (strcmp(Token,"!|")==0) {strcpy(tokenType,"nor"); return; }
     if (strcmp(Token,"&&")==0) {strcpy(tokenType,"and_and"); return; }
+    if (strcmp(Token,"++")==0) {strcpy(tokenType,"plus_plus"); return; }
     if (strcmp(Token,"+:")==0) {strcpy(tokenType,"plus_range"); return; }
     if (strcmp(Token,"-:")==0) {strcpy(tokenType,"minus_range"); return; }
     if (strcmp(Token,"->")==0) {strcpy(tokenType,"emit"); return; }

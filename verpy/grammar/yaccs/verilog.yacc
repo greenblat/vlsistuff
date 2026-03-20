@@ -13,7 +13,7 @@
 %token fork join
 %token disable
 %token pragma1 pragma2
-%token plus_range minus_range
+%token plus_range minus_range plus_plus
 %token floating
 %token power star
 %token generate endgenerate  genvar
@@ -23,7 +23,7 @@
 %token newver
 %token return
 %token always_comb always_ff enum typedef
-%token assert
+%token assert struct packed bit automatic
 
 %right '?' ':' 
 %left '|' 
@@ -107,6 +107,18 @@ Definition :
     | typedef enum logic Width '{' Tokens_list '}' token ';'
     | typedef enum logic '{' Tokens_list '}' token ';'
     | typedef enum '{' Tokens_list '}' token ';'
+    | typedef struct packed '{' RegDefines '}' token ';'
+    | typedef struct '{' RegDefines '}' token ';'
+    ;
+
+RegDefines : RegDefine RegDefines | RegDefine ;
+RegDefine : 
+      reg token ';'
+    | logic token ';'
+    | bit token ';'
+    | reg Width token ';'
+    | logic Width token ';'
+    | bit Width token ';'
     ;
 
 Assign : 
@@ -127,8 +139,14 @@ Function :
     | function  WidthInt token ';' Statement  endfunction
     | function  token '(' Header_list ')' ';' Statement  endfunction
     | function  token '(' Header_list ')' ';' Mem_defs Statement  endfunction
-    | function  WidthInt token '(' Header_list ')' ';' Statement  endfunction
-    | function  WidthInt token '(' Header_list ')' ';' Mem_defs Statement  endfunction
+    | function  automatic token '(' Header_list ')' ';' Statements  endfunction
+    | function  automatic token '(' Header_list ')' ';' Mem_defs Statements  endfunction
+    | function  automatic token token '(' Header_list ')' ';' Statements  endfunction
+    | function  automatic token token '(' Header_list ')' ';' Mem_defs Statements  endfunction
+    | function  automatic Width token '(' Header_list ')' ';' Statements  endfunction
+    | function  automatic Width token '(' Header_list ')' ';' Mem_defs Statements  endfunction
+    | function  WidthInt token '(' Header_list ')' ';' Statements  endfunction
+    | function  WidthInt token '(' Header_list ')' ';' Mem_defs Statements  endfunction
     ; 
 Task : 
       task token ';' Mem_defs  Statement endtask  
@@ -143,15 +161,21 @@ Mem_def  :
     | real Tokens_list ';'
     | wreal Tokens_list ';'
     | reg Width Tokens_list ';'
+    | logic Width Tokens_list ';'
+    | bit Width Tokens_list ';'
+    | logic Tokens_list ';'
+    | bit Tokens_list ';'
     | reg Width token Width ';'
     | reg Width Width token ';'
     | output reg Width Width token ';'
     | input Tokens_list ';'
     | input Tokens_list Width ';'
     | input Width Width Tokens_list ';'
+    | input Width Tokens_list ';'
     | input integer Tokens_list ';'
     | integer Tokens_list ';'
     | integer Tokens_list Width ';'
+    | token token ';'
     ;
 
 Parameter : 
@@ -304,7 +328,7 @@ For_statement :
 Repeat_statement : repeat '(' Expr ')' Statement ; 
 While_statement : while '(' Expr ')' Statement ; 
 Soft_assigns : Soft_assigns ',' Soft_assign | Soft_assign ;
-Soft_assign : LSH '=' Expr ;
+Soft_assign : LSH '=' Expr | LSH plus_plus ;
 Cases : Cases Case | Case ;
 GenCases : GenCases GenCase | GenCase ;
 Case : Exprs ':' Statement  | Exprs ':' ';' ;
@@ -323,9 +347,9 @@ Tokens_list : token ',' Tokens_list | token ;
 Width : '[' Expr ':' Expr ']' | '[' Expr plus_range Expr ']' | '[' Expr minus_range Expr ']';
 BusBit : '[' Expr ']' ;
 
-ExtDir : input | output | inout | output reg | input wire | output wire | inout wire | input signed | output signed | output reg signed | output logic | input logic ;
+ExtDir : input | output | inout | output reg | input wire | output wire | inout wire | input signed | output signed | output reg signed | output logic | input logic | input bit ;
 
-IntDir : logic |  reg | wire | signed | integer | real | reg signed | wire signed | genvar | supply0 | supply1 | tri0 | tri1 ;
+IntDir : bit | logic |  reg | wire | signed | integer | real | reg signed | wire signed | genvar | supply0 | supply1 | tri0 | tri1 ;
 
 CurlyList : '{' CurlyItems '}' ;
 CurlyItems : CurlyItems ',' CurlyItem | CurlyItem;

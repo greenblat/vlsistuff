@@ -21,6 +21,7 @@ DoubleNames['>>'] = 'shift_right'
 DoubleNames['>>>'] = 'arith_shift_right'
 DoubleNames['<<'] = 'shift_left'
 DoubleNames['+:'] = 'plus_range'
+DoubleNames['++'] = 'plus_plus'
 DoubleNames['-:'] = 'minus_range'
 DoubleNames['!&'] = 'nand'
 DoubleNames['~&'] = 'nand'
@@ -40,8 +41,8 @@ AlphasPlus = Alphas + '.' + '$'
 HexDig = Digits+'abcdef'+'ABCDEF'+'_'+'zZxX'
 BinDig = '01_xzXZ?'
 Singles = '?.,[]{}#@()~%^;:/+-*'
-Doubles = '~-=!<>&|'
-Doubles2 = '^=<>&|'
+Doubles = '+~-=!<>&|'
+Doubles2 = '+^=<>&|'
 Spaces = '\t \n'
 AnyChar = Letters+Digits+Spaces+'_'+Singles+Doubles+"`',\\"
 
@@ -252,6 +253,9 @@ extends
 mailbox
 return
 logic
+packed
+struct
+automatic
 '''
 
 

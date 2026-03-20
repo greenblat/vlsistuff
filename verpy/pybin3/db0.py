@@ -1016,6 +1016,19 @@ def get_list(Item):
         This = get_list(Vars[1])
         return This+More
 
+    Vars = matches.matches(Item,'!RegDefine !RegDefines')
+    if Vars:
+        More = get_list(Vars[0])
+        This = get_list(Vars[1])
+        return This+More
+
+    Vars = matches.matches(Item,'!Parameters !PackageItem')
+    if Vars:
+        More = get_list(Vars[0])
+        This = get_list(Vars[1])
+        return This+More
+
+
     Vars = matches.matches(Item,'parameter !Pairs ;')
     if Vars:
         More = get_list(Vars[0])
@@ -1057,11 +1070,39 @@ def get_list(Item):
         Pairs = get_list(Vars[0])
         Pair  = get_list(Vars[1])
         return Pairs+Pair
+
+    Vars = matches.matches(Item,'bit !Width ? ;')
+    if Vars:
+        Wid = get_wid(Vars[0])
+        Name = get_expr(Vars[1])
+        return [('bit',Wid,Name)]
+
+    Vars = matches.matches(Item,'bit ? ;')
+    if Vars:
+        Name = get_expr(Vars[0])
+        return [('bit',Name)]
+    Vars = matches.matches(Item,'logic ? ;')
+    if Vars:
+        Name = get_expr(Vars[0])
+        return [('logic',Name)]
+
+    Vars = matches.matches(Item,'logic !Width ? ;')
+    if Vars:
+        Wid = get_wid(Vars[0])
+        Name = get_expr(Vars[1])
+        return [('logic',Wid,Name)]
+
+    Vars = matches.matches(Item,'!IntDir !Width ? ;')
+    if Vars:
+        Dir = get_dir(Vars[0])
+        Wid = get_wid(Vars[1])
+        Name = get_expr(Vars[2])
+        return [(Dir,Name)]
+
     Vars = matches.matches(Item,'!IntDir ? ;')
     if Vars:
         Dir = get_dir(Vars[0])
         Name = get_expr(Vars[1])
-        print('INTDIR',Dir,Name)
         return [(Dir,Name)]
 
     if Item[0][0]=='ExtDir':
@@ -1778,7 +1819,20 @@ def add_definition(List):
             Current.add_hard_assign(['subbit',Name,ind],Val)
         return
         
+    Vars = matches.matches(List,'typedef enum logic !Width { !Tokens_list } ? ;',False)
+    if Vars:
+        Wid = get_wid(Vars[0])
+        Pairs = get_list(Vars[1])
+        Name = Vars[2][0]
+        print("ENUM",Name,Wid,Pairs)
+        return
 
+    Vars = matches.matches(List,'typedef struct packed { !RegDefines } ? ;',False)
+    if Vars:
+        Pairs = get_list(Vars[0])
+        Name = Vars[1][0]
+        print("STRUCT",Name,Pairs)
+        return
 
     logs.log_err('bad new definition "%s"'%str(List))
 

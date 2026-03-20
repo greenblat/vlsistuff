@@ -134,35 +134,40 @@ extern int yydebug;
     pragma2 = 335,                 /* pragma2  */
     plus_range = 336,              /* plus_range  */
     minus_range = 337,             /* minus_range  */
-    floating = 338,                /* floating  */
-    power = 339,                   /* power  */
-    star = 340,                    /* star  */
-    generate = 341,                /* generate  */
-    endgenerate = 342,             /* endgenerate  */
-    genvar = 343,                  /* genvar  */
-    force = 344,                   /* force  */
-    release = 345,                 /* release  */
-    xnor = 346,                    /* xnor  */
-    nand = 347,                    /* nand  */
-    nor = 348,                     /* nor  */
-    repeat = 349,                  /* repeat  */
-    supply0 = 350,                 /* supply0  */
-    supply1 = 351,                 /* supply1  */
-    newver = 352,                  /* newver  */
-    return = 353,                  /* return  */
-    always_comb = 354,             /* always_comb  */
-    always_ff = 355,               /* always_ff  */
-    enum = 356,                    /* enum  */
-    typedef = 357,                 /* typedef  */
-    assert = 358,                  /* assert  */
-    shift_left = 359,              /* shift_left  */
-    shift_right = 360,             /* shift_right  */
-    SignedLeft = 361,              /* SignedLeft  */
-    arith_shift_right = 362,       /* arith_shift_right  */
-    noteqeq = 363,                 /* noteqeq  */
-    Veryequal = 364,               /* Veryequal  */
-    StarStar = 365,                /* StarStar  */
-    UNARY_PREC = 366               /* UNARY_PREC  */
+    plus_plus = 338,               /* plus_plus  */
+    floating = 339,                /* floating  */
+    power = 340,                   /* power  */
+    star = 341,                    /* star  */
+    generate = 342,                /* generate  */
+    endgenerate = 343,             /* endgenerate  */
+    genvar = 344,                  /* genvar  */
+    force = 345,                   /* force  */
+    release = 346,                 /* release  */
+    xnor = 347,                    /* xnor  */
+    nand = 348,                    /* nand  */
+    nor = 349,                     /* nor  */
+    repeat = 350,                  /* repeat  */
+    supply0 = 351,                 /* supply0  */
+    supply1 = 352,                 /* supply1  */
+    newver = 353,                  /* newver  */
+    return = 354,                  /* return  */
+    always_comb = 355,             /* always_comb  */
+    always_ff = 356,               /* always_ff  */
+    enum = 357,                    /* enum  */
+    typedef = 358,                 /* typedef  */
+    assert = 359,                  /* assert  */
+    struct = 360,                  /* struct  */
+    packed = 361,                  /* packed  */
+    bit = 362,                     /* bit  */
+    automatic = 363,               /* automatic  */
+    shift_left = 364,              /* shift_left  */
+    shift_right = 365,             /* shift_right  */
+    SignedLeft = 366,              /* SignedLeft  */
+    arith_shift_right = 367,       /* arith_shift_right  */
+    noteqeq = 368,                 /* noteqeq  */
+    Veryequal = 369,               /* Veryequal  */
+    StarStar = 370,                /* StarStar  */
+    UNARY_PREC = 371               /* UNARY_PREC  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -251,35 +256,40 @@ extern int yydebug;
 #define pragma2 335
 #define plus_range 336
 #define minus_range 337
-#define floating 338
-#define power 339
-#define star 340
-#define generate 341
-#define endgenerate 342
-#define genvar 343
-#define force 344
-#define release 345
-#define xnor 346
-#define nand 347
-#define nor 348
-#define repeat 349
-#define supply0 350
-#define supply1 351
-#define newver 352
-#define return 353
-#define always_comb 354
-#define always_ff 355
-#define enum 356
-#define typedef 357
-#define assert 358
-#define shift_left 359
-#define shift_right 360
-#define SignedLeft 361
-#define arith_shift_right 362
-#define noteqeq 363
-#define Veryequal 364
-#define StarStar 365
-#define UNARY_PREC 366
+#define plus_plus 338
+#define floating 339
+#define power 340
+#define star 341
+#define generate 342
+#define endgenerate 343
+#define genvar 344
+#define force 345
+#define release 346
+#define xnor 347
+#define nand 348
+#define nor 349
+#define repeat 350
+#define supply0 351
+#define supply1 352
+#define newver 353
+#define return 354
+#define always_comb 355
+#define always_ff 356
+#define enum 357
+#define typedef 358
+#define assert 359
+#define struct 360
+#define packed 361
+#define bit 362
+#define automatic 363
+#define shift_left 364
+#define shift_right 365
+#define SignedLeft 366
+#define arith_shift_right 367
+#define noteqeq 368
+#define Veryequal 369
+#define StarStar 370
+#define UNARY_PREC 371
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

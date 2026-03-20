@@ -23,6 +23,7 @@ def matches(List,Seq,Verbose=False):
     Vars=[]
     for ind,Iseq in enumerate(Lseq):
         Lind = List[ind]
+        if Verbose: print("ENE",ind,Lind,Iseq,Vars)
         if isinstance(Lind,(tuple,list)):
             Litem = Lind[1]
         else:
