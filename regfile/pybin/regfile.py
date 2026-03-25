@@ -112,6 +112,11 @@ def run(Fname,Dirx='.',Base=0):
         Fspl = wopen('%s.splits'%Module)
         for Line in LINES[8]:
             Fspl.write(Line+'\n')
+
+        if LINES[11]!=[]:
+            for Line in LINES[11]:
+                Fspl.write(Line+'\n')
+
         Fspl.close()
     return Db['module']
 
@@ -496,9 +501,8 @@ def treatFields():
                         Name = '0'
                     LINES[6].append('assign %s = %s;'%(RegHiLo,Name))
             elif Access in ['external' ,'w1c']:
-                LINES[8].append('\n\n// external reg with fields, take one')
                 LINES[8].append('assign %s = %s;'%(RegHiLo,Name))
-                LINES[8].append('assign %s = %s;\n'%(Name,RegHiLo))
+                LINES[11].append('assign %s = %s;'%(Name,RegHiLo))
             else:
                 logs.log_error('#%d: fields not legal access %s for %s'%(RegObj.Lnum,Access,Name))
         if inAccess(Access)and('0' in Cover):
@@ -598,6 +602,9 @@ def gatherFields():
         elif Reg.Kind=='field':
             if Active:
                 if ('access' not in Reg.Params) or ( Reg.Params['access']!='gap'):
+                    if 'access' not in Obj.Params:
+                        logs.log_error('FIELD %s %s missing access ' % (Active,Reg.Name))
+                        return
                     Reg.Params['access'] = Obj.Params['access']
                 Nreg = Obj.Params['names'][0]
                 if Nreg not in FIELDED_REGS: FIELDED_REGS.append(Nreg)
@@ -689,7 +696,11 @@ def computeWidthFromFields():
                        else:
                           Add = Align
                           Db['splits'][Reg.Name] = Reg
-                    Obj.Params['position'] = (Wid+Add0-1,Wid)
+                    try:
+                        Obj.Params['position'] = (Wid+Add0-1,Wid)
+                    except:
+                        logs.log_error('FAILED reg=%s  name=%s wid=%s add0=%s' % (Reg.Name,Name,Wid,Add0))
+                        return
                     while (len(Map)<(Wid+Add0)): Map.append('0')
                     if (Name=='gap'):
                         for X in range(Wid+Add0-1,Wid-1,-1):
@@ -846,7 +857,7 @@ def advanceAddr(Obj):
             return Add*Bytes
 
         else:
-            logs.log_error('#%d: advanceAddr GAP got %s'%str(Obj.Lnum,Obj.Params))
+            logs.log_error('#%d: advanceAddr GAP got %s'%(Obj.Lnum,Obj.Params))
     else:
         logs.log_error('#%d: advanceAddr got %s'%(Obj.Lnum,Obj.Kind))
         return Bytes
@@ -909,6 +920,7 @@ end
 '''
 
 LINES = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],'split':[],'split2':[]}
+LINES[11] = []
 def dumpRam(Postfix,File,Alone):
     Module = Db['chip'].Params['names'][0] 
     try:

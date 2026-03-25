@@ -131,11 +131,15 @@ Assign :
 StrengthDef :  '(' Strength ',' Strength ')' ;
 Strength : strong1 | strong0 | pull1 | pull0 | weak1 | weak0 | highz1 | highz0 ;
 WidthInt : Width | integer ;
+
+
 Function : 
       function  token ';' Mem_defs Statements  endfunction
     | function  token ';' Statements  endfunction
     | function  Width Width token ';' Mem_defs Statement  endfunction
     | function  WidthInt token ';' Mem_defs Statement  endfunction
+    | function  automatic Width token ';' Mem_defs Statement  endfunction
+    | function  automatic token ';' Mem_defs Statement  endfunction
     | function  WidthInt token ';' Statement  endfunction
     | function  token '(' Header_list ')' ';' Statement  endfunction
     | function  token '(' Header_list ')' ';' Mem_defs Statement  endfunction
@@ -161,6 +165,7 @@ Mem_def  :
     | real Tokens_list ';'
     | wreal Tokens_list ';'
     | reg Width Tokens_list ';'
+    | reg signed Width Tokens_list ';'
     | logic Width Tokens_list ';'
     | bit Width Tokens_list ';'
     | logic Tokens_list ';'
@@ -172,6 +177,7 @@ Mem_def  :
     | input Tokens_list Width ';'
     | input Width Width Tokens_list ';'
     | input Width Tokens_list ';'
+    | input signed Width Tokens_list ';'
     | input integer Tokens_list ';'
     | integer Tokens_list ';'
     | integer Tokens_list Width ';'
@@ -288,6 +294,7 @@ Statement :
     | int Tokens_list ';'
     | reg Tokens_list ';'
     | reg Width Tokens_list ';'
+    | reg signed  Width Tokens_list ';'
     | release Expr ';'
     | force Expr  '=' Expr ';'
     | When ';'

@@ -622,7 +622,11 @@ def get_statement(Item):
 
     if len(List)==3:
         if List[0][0]=='integer':
-            return ['integer',List[1][0]]
+            if len(List[1]) == 2:
+                LLL = get_list(List[1])
+                return ['integer',LLL]
+            else:
+                return ['integer',List[1][0]]
         if List[0][0]=='genvar':
             return ['genvar',List[1][0]]
         if List[0][0]=='begin':
@@ -1255,6 +1259,8 @@ def add_newver(Item):
     Current.newvers.append(Item)
 
 def add_function(List):
+    if List[1][0] == 'automatic':
+        List.pop(1)
     if istoken(List[1]):
         Func = List[1][0]
         Wid=0
@@ -1559,6 +1565,10 @@ def get_definition(List):
     if List[1][1]=='domino':
         return 'wire',0,List[3][0]
     Dir = get_dir(List[0])
+    if List[1][0] == 'signed': 
+        List.pop(1)
+        Dir = Dir+' '+ 'signed'
+    print("XXXXXXXXX",List)
     if len(List)>4:
         if List[-3][0]=='=':
             List1 = List[:-3]+[(';',';',0,0)]
@@ -1584,6 +1594,10 @@ def get_definition(List):
 
 
 def add_definition(List):
+
+
+    print("DBGDBG",List)
+
 
     Vars = matches.matches(List,'typedef enum { !Tokens_list } ? ;',False)
     if Vars:
@@ -1798,6 +1812,15 @@ def add_definition(List):
                 Current.add_hard_assign(Item[1],Expr)
         return
 
+    Vars = matches.matches(List,'!IntDir !Width ? !Width !Width ;',False)
+    if Vars:
+        Dir = get_dir(Vars[0])
+        Wid0 = get_wid(Vars[1])
+        Wid1 = get_wid(Vars[3])
+        Wid2 = get_wid(Vars[4])
+        Name = get_expr(Vars[2])
+        Current.add_sig(Name,Dir,('packed',Wid0,Wid1,Wid2))
+        return
     Vars = matches.matches(List,'!IntDir !Width !Width !Width ? ;',False)
     if Vars:
         Dir = get_dir(Vars[0])
@@ -1824,14 +1847,12 @@ def add_definition(List):
         Wid = get_wid(Vars[0])
         Pairs = get_list(Vars[1])
         Name = Vars[2][0]
-        print("ENUM",Name,Wid,Pairs)
         return
 
     Vars = matches.matches(List,'typedef struct packed { !RegDefines } ? ;',False)
     if Vars:
         Pairs = get_list(Vars[0])
         Name = Vars[1][0]
-        print("STRUCT",Name,Pairs)
         return
 
     logs.log_err('bad new definition "%s"'%str(List))
@@ -2361,6 +2382,9 @@ def notUsualDir(Dir):
             
     return False
 
+def legalToken(Item):
+    if len(Item) == 2:
+        logs.log_error('not legal token %s' % str(Item))
 
 def picklize():
     Fout = open('modules.pickle','w')

@@ -92,6 +92,7 @@ class sequenceClass:
         self.Sons = []
         self.Seed = 0
         self.onFinishes = False
+        self.keeptabs = {}
 
     def restart(self):
         self.Ptr = 0
@@ -410,6 +411,12 @@ class sequenceClass:
         self.runTimed()
         for Sig,Val in self.Pulsed:
             self.force(Sig,Val)
+        for Sig in self.keeptabs:
+            Was = self.keeptabs[Sig]
+            Now = self.peek(Sig)
+            if Was != Now:
+                self.keeptabs[Sig] = Now
+                logs.log_info('MONITOR %s changed %s -> %s' % (Sig,Was,Now))
         if self.waiting>0:
             self.waiting -= 1
             return True
@@ -514,7 +521,7 @@ class sequenceClass:
         if wrds[0] == 'finish_verilator':
             logs.log_info('finishing on sequence')
             self.agentsFinish()
-            logs.talk("",'שלום איליה שים לב' )
+#            logs.talk("",'שלום איליה שים לב' )
             if (logs.Wrongs>0) or (logs.Errors>0):
                 HH = HEB2.replace('1@',str(logs.Wrongs))
                 HH = HH.replace('2@',str(logs.Errors))
@@ -622,6 +629,9 @@ class sequenceClass:
             logs.log_info('TIMED added %d %s' % (Time,self.Timed[Time]))
         elif (wrds[0] == 'searchpath'):
             pass
+        elif (wrds[0] == 'monitor'):
+            for wrd in wrds[1:]:
+                self.keeptabs[wrd] = 'x'
         elif (wrds[0] == 'force_pulse'):
             Ind = 1
             while Ind < len(wrds):
