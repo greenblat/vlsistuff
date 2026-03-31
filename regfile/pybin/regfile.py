@@ -479,18 +479,20 @@ def treatFields():
 
             for PP in range(Lo,Hi+1):
                 Cover[PP] = '1'
-            if Name == 'gap':
-                pass
-            elif outAccess(Access):
-                if Split:
+            if outAccess(Access):
+                if Name == 'gap':
+                    pass
+                elif Split:
                     LINES[7].append('    ,output %s %s'%(WW,Name))
 
-                if ('fields' in RegObj.Params):
+                if Name == 'gap':
+                    pass
+                elif ('fields' in RegObj.Params):
                     LINES[8].append('assign %s = %s;'%(Name,RegHiLo))
                 else:
                     LINES[6].append('assign %s = %s;'%(Name,RegHiLo))
             elif inAccess(Access):
-                if Split:
+                if Split and (Name != 'gap'):
                     LINES[7].append('    ,input  %s %s'%(WW,Name))
                 if ('fields' in RegObj.Params):
                     if Name == 'gap':
