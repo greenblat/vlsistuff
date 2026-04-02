@@ -378,7 +378,7 @@ GIVEUP_TIMEOUT = 1000    # how many cycles to run before retirment.
 #apbs = apbSlave.apbSlave('tb',Monitors)
 import sequenceClass
 seq = sequenceClass.sequenceClass('tb',Monitors,'',[])
-seq = sequenceClass.sequenceClass('tb',Monitors,'',[('apb',apb),('apbs',apbs),('axis',axis),('axim',axim)])
+# seq = sequenceClass.sequenceClass('tb',Monitors,'',[('apb',apb),('apbs',apbs),('axis',axis),('axim',axim)])
 
 
 def pymonname(Name):

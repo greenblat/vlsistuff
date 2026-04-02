@@ -1596,7 +1596,7 @@ def get_definition(List):
 def add_definition(List):
 
 
-    print("DBGDBG",List)
+#    print("DBGDBG",List)
 
 
     Vars = matches.matches(List,'typedef enum { !Tokens_list } ? ;',False)

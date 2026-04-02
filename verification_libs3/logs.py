@@ -1062,8 +1062,9 @@ class driverClass:
             Val = '0bx'
         if veri: veri.force(Full,str(Val))
 
-    def forceAscii(self,Sig,Txt,Len):
+    def forceAscii(self,Sig,Txt,Len=0):
         Res = '0x'
+        if Len==0: Len = len(Txt)
         for ii in range(Len):
             Chr = '%02x'%ord(Txt[ii])
             Res += Chr
