@@ -2133,11 +2133,16 @@ def pr_wid(Wid):
         return pr_wid(Wid[1])+pr_wid(Wid[2])
     if (len(Wid)==4)and(Wid[0]=='packed'):
         return pr_wid(Wid[1])+pr_wid(Wid[2])+pr_wid(Wid[3])
+    if (len(Wid)==5)and(Wid[0]=='packed'):
+        return pr_wid(Wid[1])+pr_wid(Wid[2])+pr_wid(Wid[3])+pr_wid(Wid[4])
     if len(Wid)==3:
         logs.log_err('pr_wid %s'%(str(Wid)))
         traceback.print_stack(None,None,logs.Flogs[0])
         return str(Wid)
-    return '[%s:%s]'%(pr_expr(Wid[0]),pr_expr(Wid[1]))
+    if len(Wid)==2:
+        return '[%s:%s]'%(pr_expr(Wid[0]),pr_expr(Wid[1]))
+    logs.log_error('WID %s' % (str(Wid)))
+    return ''
 
 def pr_replace(What):
     if What=='': return ''

@@ -60,6 +60,9 @@ Header_item : ExtDir token | ExtDir Width token | ExtDir integer token
     | ExtDir Width token  Width 
     | ExtDir Width Width token  
     | ExtDir Width Width Width token 
+    | ExtDir Width token Width Width 
+    | ExtDir Width token Width Width Width
+    | ExtDir Width Width Width Width token
     | token | ExtDir token '=' Literal | ExtDir Width token '=' Literal; 
 
 

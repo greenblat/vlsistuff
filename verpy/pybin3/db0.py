@@ -1151,6 +1151,39 @@ def getExtDir(Item):
         Name = get_expr(Vars[4])
         return ('extdir',Dir,Name,('packed',Wid0,Wid1,Wid2))
 
+    Vars = matches.matches(Item,'!ExtDir !Width !Width !Width !Width  ?')
+    if Vars:
+        Dir = get_dir(Vars[0])
+        Wid0 = get_wid(Vars[1])
+        Wid1 = get_wid(Vars[2])
+        Wid2 = get_wid(Vars[3])
+        Wid3 = get_wid(Vars[4])
+        Name = get_expr(Vars[5])
+        return ('extdir',Dir,Name,('packed',Wid0,Wid1,Wid2,Wid3))
+
+
+    Vars = matches.matches(Item,'!ExtDir !Width ? !Width !Width')
+    if Vars:
+        Dir = get_dir(Vars[0])
+        Wid0 = get_wid(Vars[1])
+        Wid1 = get_wid(Vars[3])
+        Wid2 = get_wid(Vars[4])
+        Name = get_expr(Vars[2])
+        return ('extdir',Dir,Name,('packed',Wid1,Wid2,Wid0))
+
+
+    Vars = matches.matches(Item,'!ExtDir !Width ? !Width !Width !Width')
+    if Vars:
+        Dir = get_dir(Vars[0])
+        Wid0 = get_wid(Vars[1])
+        Name = get_expr(Vars[2])
+        Wid1 = get_wid(Vars[3])
+        Wid2 = get_wid(Vars[4])
+        Wid3 = get_wid(Vars[3])
+        return ('extdir',Dir,Name,('packed',Wid1,Wid2,Wid3,Wid0))
+
+
+
     Vars = matches.matches(Item,'!ExtDir !Width ? !Width')
     if Vars:
         Dir = get_dir(Vars[0])
@@ -1733,6 +1766,17 @@ def add_definition(List):
         Name = get_list(Vars[2])
         Current.add_sig(Name,Dir,('packed',Depth,Width))
         return
+
+    Vars = matches.matches(List,'!IntDir !Width ? !Width !Width ;',False)
+    if Vars:
+        Dir = get_dir(Vars[0])
+        Width = get_wid(Vars[1])
+        Name = get_list(Vars[2])
+        Width2 = get_wid(Vars[3])
+        Width3 = get_wid(Vars[4])
+        Current.add_sig(Name,Dir,('packed',Width2,Width3,Width))
+        return
+
 
     Vars = matches.matches(List,'!IntDir !Width ? !BusBit ;',False)
     if Vars:

@@ -46,6 +46,8 @@ hierarchy -check -top  TOP
 check;
 write_verilog -noattr aa0.glv
 proc; opt; fsm; opt; memory; opt
+write_verilog -noattr aa3.glv
+# opt; fsm; opt;
 ## opt_rmdff;
 opt_merge;
 opt_expr;
