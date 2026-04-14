@@ -612,6 +612,16 @@ def cell_dump_description(self,Fout,pythonConnection):
 
     if 'area' in self.pairs:
         Fout.write('Desc.add_param("area",%s);\n'%(self.pairs['area']))
+
+    for Pin in self.pins:
+        if 'capacitance' in self.pins[Pin]:
+            Cap = self.pins[Pin]['capacitance']
+            Fout.write('Desc.set_pin_cap("%s",%s)\n' % (Pin,Cap))
+        elif 'max_capacitance' in self.pins[Pin]:
+            Cap = self.pins[Pin]['max_capacitance']
+            Fout.write('Desc.set_pin_cap("%s",%s)\n' % (Pin,Cap))
+        else:
+            print(">>>>>",Pin,self.pins[Pin])
     for Pin in self.pins:
         Dir = self.pins[Pin]['direction']
         if ('clock' in self.pins[Pin])and(self.pins[Pin]['clock']=='true'):

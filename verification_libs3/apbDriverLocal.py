@@ -58,8 +58,8 @@ class apbDriverLocal(logs.driverClass):
                     logs.log_ensure(Rdata == Exp,"Read Back from APB exp=0x%x act=0x%x addr=0x%x" % (Exp,Rdata,self.reading))
                 self.reading = -1
 
-        if self.Active:
-            self.Active = False
+        if self.Active>0:
+            self.Active -= 1
             self.force('xread',0)
             self.force('xwrite',0)
             return
@@ -76,14 +76,14 @@ class apbDriverLocal(logs.driverClass):
             self.force('xwrite',1)
             self.force('xaddr',Head[1])
             self.force('xwdata',Head[2])
-            self.Active = True
+            self.Active = 3
         elif Head[0] == 'read':
             if self.uart: self.uart(self.Nick,Head)
             logs.log_info("APBAA %s %s ad=%s" % (self.Nick,Head[0],Head[1]))
             self.force('xread',1)
             self.force('xaddr',Head[1])
             self.reading = self.eval(Head[1])
-            self.Active = True
+            self.Active = 3
 
 
 

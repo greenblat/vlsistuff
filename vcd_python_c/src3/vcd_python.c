@@ -1237,16 +1237,20 @@ veri_toggles(PyObject *self,PyObject *args) {
 static PyObject*
 veri_changed(PyObject *self,PyObject *args) {
     char *notestring;
+    char Full[1000];
     if (!PyArg_ParseTuple(args, "s", &notestring))
         return NULL;
     int ii,jj=0;
     char tmp[1000];
-    sprintf(tmp,"%s = []",notestring);
-    PyRun_SimpleString(tmp);
+//    sprintf(tmp,"%s = []",notestring);
+//    PyRun_SimpleString(tmp);
     int tot = 0;
     for (ii=0; ii<=maxusedsig; ii++) {
         if (sigs[ii].changed) {
-            sprintf(tmp,"%s.append(('%s'))",notestring,qqia(sigs[ii].fpath));
+            strcpy(Full,qqia(sigs[ii].fpath)); 
+            if (Full[0] == '\\')  Full[0] = ' ';
+//            sprintf(tmp,"%s.append(('%s'))",notestring,Full);
+            sprintf(tmp,"add_changed('%s')",Full);
             PyRun_SimpleString(tmp);
             sigs[ii].changed = 0;
             tot ++;
