@@ -1,5 +1,5 @@
-#! /usr/bin/env python3.10
-import os,sys,string
+#! /usr/bin/env python3
+import os,sys
 TB = 'tb.dut'
 sys.path.append('/Users/iliagreenblat/verification_libs3')
 import logs
@@ -24,7 +24,7 @@ class cellClass:
                     self.Inst = Item[1].replace(' ','')
                 else:
                     self.Inst = self.Type.replace(' ','')
-                print("CELL",self.Type,self.Inst)
+#                print("CELL",self.Type,self.Inst)
             elif Item[0] == 'DELAY':
                 if (len(Item)==2)and(Item[1][0] == 'ABSOLUTE'):
                     self.work_delay(Item[1][1:])
@@ -240,6 +240,17 @@ def main():
     Toks = gather0(Toks)
     Toks = gather1(Toks)
     build_db(Toks)
+    Fout = open('poor_sdf.py','w')
+    Fout.write('POOR = {}\n')
+    for Cell in CELLS:
+        Obj = CELLS[Cell]
+        Paths = iopaths(Obj.Iopaths)
+        print(Cell,Obj.Inst,Obj.Type,Paths)
+        Fout.write('POOR["%s"] = ("%s",%s,%s)\n' % (Obj.Inst,Obj.Type.strip(),Paths[0],Paths[1]))
+    Fout.close()
+    sys.exit()
+
+
     Fout = open('cells_vcode.py','w')
     Fout.write('from delays_vcode import DELAYTABLE\n')
     Fout.write('import veri\n')
@@ -403,6 +414,23 @@ def gather0(Toks):
                 part += ' '+tok
 
     return Res
+
+def iopaths(Iopaths):
+    Paths = {}
+    for (Cond,From,To,Raise,Fall) in Iopaths:
+        if (From,To) not in Paths:
+            Paths[(From,To)] = [Raise,Fall]
+        else:
+            WasR,WasF = Paths[(From,To)]
+            Paths[(From,To)] = [max(Raise,WasR),max(Fall,WasF)]
+    Bigs = [0,0]
+    for (From,To) in Paths:
+        Bigs[0] = max(Bigs[0],Paths[(From,To)][0])
+        Bigs[1] = max(Bigs[1],Paths[(From,To)][1])
+    return Bigs                
+
+
+
 
 CONDITION = '''
 def conditionTrue(Instance,Cond):

@@ -25,6 +25,16 @@ def main():
         dones += 1
         Cells[Cell].cell_dump(Fout)
     Fout.close()
+
+    Fout=open('syn_sdf_cells.v','w')
+    dones=0
+    for Cell in Cells:
+        dones += 1
+        Cells[Cell].cell_dump(Fout,True)
+    Fout.close()
+
+
+
     print('done %d cells'%dones)
     Fout=open('dual_cells.v','w')
     dones=0
@@ -287,7 +297,7 @@ class cellClass:
                 Fout.write('assign d_%s = %s;\n'%(Pin,Func))
         Fout.write('endmodule\n')
 
-    def cell_dump(self,Fout):
+    def cell_dump(self,Fout,Sdf=False):
         res=[]
         ppp={}
         wires = []
@@ -299,7 +309,10 @@ class cellClass:
             else:
                 wires.append(Pin)
         P1 = ', '.join(res)
-        Fout.write('module %s (%s);\n'%(self.Name,P1))
+        if Sdf:
+            Fout.write('module %s #(parameter WEIGHT=10, parameter RAISE=1, parameter FALL=2) (%s);\n'%(self.Name,P1))
+        else:
+            Fout.write('module %s (%s);\n'%(self.Name,P1))
 
         if not self.statetable:
             for Wire in wires:
@@ -431,7 +444,19 @@ class cellClass:
 
                 Func = funcify(Func)
                 Fout.write('assign %s = %s;\n'%(Pin,Func))
+        if Sdf:
+            for Pino in ppp:
+                if ppp[Pino]=='output':
+                    Fout.write('toggle_mon  toggle_%s (.inx(%s),.weight(WEIGHT));\n' % (Pino,Pino))
+            Fout.write('specify\n')
+            for Pino in ppp:
+                if ppp[Pino]=='output':
+                    for Pini in ppp:
+                        if ppp[Pini]=='input':
+                            Fout.write('    (%s => %s) = (RAISE,FALL);\n' % (Pini,Pino))            
+            Fout.write('endspecify\n')
         Fout.write('endmodule\n')
+
 
 
     def cell_dual_dump(self,Fout):

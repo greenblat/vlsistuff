@@ -483,6 +483,13 @@ class sequenceClass:
             logs.log_info('EXEC %s' %Cmd)
             exec(Cmd,globals())
             return True
+        if wrds[0] in ['shell','ossystem']:
+            Cmd = ' '.join(wrds[1:])
+            logs.log_info('OS %s' %Cmd)
+            os.system(Cmd)
+            return True
+
+
         if wrds[0] == 'break':
             self.Break = lnum
             return

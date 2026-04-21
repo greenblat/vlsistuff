@@ -28,6 +28,7 @@ class cellDescClass:
         self.properties = {}
         self.Delays={}
         self.arcs=[]
+        self.pinCaps = {}
 
     def add_arc(self,Pin0,Pin1,Kind):
         self.arcs.append((Pin0,Pin1,Kind))
@@ -50,6 +51,8 @@ class cellDescClass:
         self.pinsFunc[Pin]=Func
     def set_pin_job(self,Pin,Job):
         self.pinsJobs[Pin]=Job
+    def set_pin_cap(self,Pin,Cap):
+        self.pinsCaps[Pin]=Cap
 
     def set_job(self,Job):
         self.Job=Job
