@@ -207,6 +207,7 @@ def log_ensure(Cond,Text,Which=0):
         log_correct(Text,Which,True)
     else:
         log_wrong(Text,Which)
+    return Cond
     
 def stime():
     if veri: return veri.stime()
