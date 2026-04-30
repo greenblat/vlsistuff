@@ -82,7 +82,9 @@ def forcesAndPeeks(Mod,Fval):
             Wid1 = Wid
             Wid = getWid(Net,Wid,Mod)
             Fval.write('// %s %d %s\n'%(Net,Wid,Wid1))
-            if Wid<=32:
+            if Wid>512:
+                pass
+            elif Wid<=32:
                 Str = STR1.replace('NET',Net)
                 X = max(1,int((Wid+3)/4))
                 Str = Str.replace('LL',str(X))

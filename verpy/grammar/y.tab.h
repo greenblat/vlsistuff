@@ -151,23 +151,24 @@ extern int yydebug;
     supply1 = 352,                 /* supply1  */
     newver = 353,                  /* newver  */
     return = 354,                  /* return  */
-    always_comb = 355,             /* always_comb  */
-    always_ff = 356,               /* always_ff  */
-    enum = 357,                    /* enum  */
-    typedef = 358,                 /* typedef  */
-    assert = 359,                  /* assert  */
-    struct = 360,                  /* struct  */
-    packed = 361,                  /* packed  */
-    bit = 362,                     /* bit  */
-    automatic = 363,               /* automatic  */
-    shift_left = 364,              /* shift_left  */
-    shift_right = 365,             /* shift_right  */
-    SignedLeft = 366,              /* SignedLeft  */
-    arith_shift_right = 367,       /* arith_shift_right  */
-    noteqeq = 368,                 /* noteqeq  */
-    Veryequal = 369,               /* Veryequal  */
-    StarStar = 370,                /* StarStar  */
-    UNARY_PREC = 371               /* UNARY_PREC  */
+    always_latch = 355,            /* always_latch  */
+    always_comb = 356,             /* always_comb  */
+    always_ff = 357,               /* always_ff  */
+    enum = 358,                    /* enum  */
+    typedef = 359,                 /* typedef  */
+    assert = 360,                  /* assert  */
+    struct = 361,                  /* struct  */
+    packed = 362,                  /* packed  */
+    bit = 363,                     /* bit  */
+    automatic = 364,               /* automatic  */
+    shift_left = 365,              /* shift_left  */
+    shift_right = 366,             /* shift_right  */
+    SignedLeft = 367,              /* SignedLeft  */
+    arith_shift_right = 368,       /* arith_shift_right  */
+    noteqeq = 369,                 /* noteqeq  */
+    Veryequal = 370,               /* Veryequal  */
+    StarStar = 371,                /* StarStar  */
+    UNARY_PREC = 372               /* UNARY_PREC  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -273,23 +274,24 @@ extern int yydebug;
 #define supply1 352
 #define newver 353
 #define return 354
-#define always_comb 355
-#define always_ff 356
-#define enum 357
-#define typedef 358
-#define assert 359
-#define struct 360
-#define packed 361
-#define bit 362
-#define automatic 363
-#define shift_left 364
-#define shift_right 365
-#define SignedLeft 366
-#define arith_shift_right 367
-#define noteqeq 368
-#define Veryequal 369
-#define StarStar 370
-#define UNARY_PREC 371
+#define always_latch 355
+#define always_comb 356
+#define always_ff 357
+#define enum 358
+#define typedef 359
+#define assert 360
+#define struct 361
+#define packed 362
+#define bit 363
+#define automatic 364
+#define shift_left 365
+#define shift_right 366
+#define SignedLeft 367
+#define arith_shift_right 368
+#define noteqeq 369
+#define Veryequal 370
+#define StarStar 371
+#define UNARY_PREC 372
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

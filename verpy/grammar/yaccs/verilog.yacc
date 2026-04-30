@@ -22,7 +22,7 @@
 %token supply0 supply1
 %token newver
 %token return
-%token always_comb always_ff enum typedef
+%token always_latch always_comb always_ff enum typedef
 %token assert struct packed bit automatic
 
 %right '?' ':' 
@@ -238,7 +238,7 @@ PrmAssign :  '.' token '(' Expr ')' | '.' token ;
 InstParams : '#' '(' Exprs ')' | '#' number | '#' floating | '#' token | '#' '(' Prms_list ')' | '#' '(' ')'  ;
 
 
-Always : always_ff When Statement | always_comb Statement | always Statement | always When Statement ;
+Always : always_ff When Statement | always_comb Statement | always_latch Statement | always Statement | always When Statement ;
 
 
 Generate : generate GenStatements  endgenerate ;
