@@ -1,0 +1,392 @@
+'''
+    apb = apbDriver.apbDriver('tb.cpu',Monitors,'apb')
+    apb.translations['setupreg']=0x100
+    apb.write(Addr,Data)
+    apb.read(Addr)
+    apb.wait(100)
+
+
+'''
+
+import os,sys,types
+import veri
+import logs
+
+
+class apbMaster(logs.driverClass):
+    bus_locked=False
+    def __init__(self,Path,Monitors,Prefix='',Suffix='',Name='optional'):
+        logs.driverClass.__init__(self,Path,Monitors)
+        self.Prefix = Prefix
+        self.Suffix = Suffix
+        self.queue0=[]
+        self.seq0=[]
+        self.waiting0=0
+        self.wait_until0 = False
+
+        self.queue1=[]
+        self.seq1=[]
+        self.waiting1=0
+        self.wait_until1 = False
+
+        self.markers={}
+        self.finishes=False
+        self.hexMode = False
+        self.Backs = []
+        self.Caller = False
+        logs.log_info('apbDriver  ver 30.may.2023')
+        self.noList = []
+        self.force('psel',0)
+#        self.force('pwrite',0)
+#        self.force('penable',0)
+        self.Uart = False
+        self.renames = {}
+
+    def callback(self,Txt):
+        return
+    def onFinish(self):
+        return
+
+
+    def setName(self,Name):
+        self.queue0.append(('name',Name))
+    def load_renames_file(self,Fname):
+        '''define wd_load_value 0x0'''
+        File = open(Fname)
+        while 1:
+            line = File.readline()
+            if line=='': return
+            wrds = line.split()
+            if (len(wrds)==3) and (wrds[0]=='define'):
+                Name = wrds[1]
+                Addr = eval(wrds[2])
+                self.renames[Name]=Addr
+
+
+
+    def busy(self,Why=False):
+        if Why:
+            logs.log_info('q1 %d q0 %d seq1 %d seq0 %d %s' % (len(self.queue1),len(self.queue0),len(self.seq1),len(self.seq0),self.seq0))
+        if self.queue1!=[]: return True
+        if self.queue0!=[]: return True
+        if self.seq0!=[]: return True
+        if self.seq1!=[]: return True
+        return False
+
+
+    def marker(self,Which):
+        self.queue0.append(('marker',Which))
+
+    def prdata(self):
+        Who,Act,Addr = self.Backs.pop(0)
+        return Act
+
+    def action(self,Cmd,Orig = []):
+        logs.log_info("APB ACTION %s %s %s" % (self.Name,Cmd,Orig))
+        if not self.exists('pstrb'):
+            self.noList.append('pstrb')
+            logs.log_warning('NO PSTRB detected for apb master %s' % (self.Name))
+        wrds = Cmd.split()
+        if wrds[0]=='read':
+            if len(wrds)==2:
+                self.read(wrds[1])
+            else:
+                self.read(wrds[1],wrds[2])
+        elif wrds[0]=='write':
+            if len(wrds)<3:
+                logs.log_error('apb write command too short %s' % Cmd)
+                return
+            Mark = False
+            if len(wrds)>3: Mark = wrds[3]
+            self.write(wrds[1],wrds[2],Mark)
+        elif wrds[0]=='prdata':
+            Who,Act,Addr = self.Backs.pop(0)
+            Deg = wrds[1]
+            if self.Caller:
+                self.Caller.Translates[Deg]=Act
+        elif wrds[0]=='translate':
+            self.translations[Orig[1]] = Orig[2]
+
+        elif wrds[0]=='wait':
+            self.wait(wrds[1])
+        else:
+            logs.log_error('action not recogninzed "%s"'%Cmd)
+
+    def read1(self,Addr,expData='None'):
+        if type(Addr) is str:
+            Addr = self.translate(Addr)
+        self.queue1.append(('read',Addr,expData))
+
+    def read(self,Addr,expData='None'):
+        self.queue0.append(('read',Addr,expData))
+
+    def forcenet(self,Net,Val):
+        self.queue0.append(('force',Net,Val))
+
+#    def eval(self,Data):
+#        if self.Caller:
+#            Dict = {**self.renames, **self.Caller.Translates}
+#            return eval(Data,Dict)
+#        return eval(Data,self.renames)
+
+    def write(self,Addr,Data,Mark=False):
+        self.queue0.append(('write',Addr,Data,Mark))
+
+
+    def wait(self,Data):
+        self.queue0.append(('wait',Data))
+    def waitUntil(self,Data,Timeout):
+        self.queue0.append(('until',Data,Timeout))
+    def waitNotBusy(self,Data,Timeout):
+        self.queue0.append(('notbusy',0))
+#        logs.log_info('enable waiting for not busy')
+
+        
+    def finish(self,Data=10):
+        self.queue0.append(('wait',Data))
+        self.queue0.append(('finish',0))
+    def rename(self,Sig):
+        if Sig[0] in '0123456789':
+            return Sig
+        if self.Prefix!='':
+            Sig = '%s%s'%(self.Prefix,Sig)
+        if self.Suffix!='':
+            Sig = '%s%s'%(Sig,self.Suffix)
+        if Sig in self.renames: 
+            return self.rename(self.renames[Sig])
+        return Sig
+
+    def installUntil(self,Val,Which):
+        Expr,Timeout = Val
+        Vars = extractVars(Expr)
+        Trans = []
+        for ind,Var in enumerate(Vars):
+            Trans.append((len(Var),'__var%dxxx'%ind,Var))
+        Trans.sort()
+        Trans.reverse()
+            
+        for _,Rep,Var in Trans:
+            Expr = Expr.replace(Var,Rep)
+
+        if Which==0:
+            self.wait_until0 = (Expr,Trans,Timeout)
+        else:
+            self.wait_until1 = (Expr,Trans,Timeout)
+
+    def evaluateUntil(self,Which):
+        if Which==0:
+            Expr,Trans,Timeout = self.wait_until0
+        else:
+            Expr,Trans,Timeout = self.wait_until1
+        Dir={}
+        for _,Rep,Var in Trans:
+            X = logs.peek(Var)
+            Dir[Rep]=X
+        Res = eval(Expr,Dir)
+        return Res
+            
+        
+    def run(self):
+        self.doQueue0()
+
+        self.run0()
+
+    def run0(self):
+        if self.waiting0>0:
+            self.waiting0 -= 1
+            return
+        if self.wait_until0:
+            if self.evaluateUntil(0):
+                self.wait_until0=False
+            else:
+                Expr,Trans,Timeout = self.wait_until0
+                if (Timeout==1)and(Timeout!=0):
+                    logs.log_error('timeout of wait until "%s" "%s"  happened.'%(Expr,Trans))
+                    self.wait_until0=False
+                else:
+                    self.wait_until0 = Expr,Trans,Timeout-1
+                
+                return
+        if self.seq0!=[]:
+            List = self.seq0[0]
+            if List[0][0]=='lock':
+                if (apbMaster.bus_locked) and (apbMaster.bus_locked!=self):  return
+        
+        if self.seq0==[]:
+            self.force('psel',0)
+            self.force('pwrite',0)
+            self.force('penable',0)
+            
+        if self.seq0!=[]:
+#            self.forceAscii('markstr',str(self.seq0[0]))
+            AA0 = self.seq0[0][0]
+            if (len(AA0)==3)and(AA0[0]=='conditional'):
+                Who = AA0[1]
+                What = AA0[2]
+                Val = self.peek(Who)
+                if What!=Val:return
+            if AA0=='notbusy':
+#                logs.log_info('seq0 %s %s'%(AA0,self.busy()))
+                if self.busy(): return 
+                self.seq0.pop(0)
+                return
+
+            List = self.seq0[0]
+            if (len(List[0])==3): List.pop(0)
+            popIt = False
+            for (Sig,Val) in List:
+                if Sig=='lock':
+                    if Val==1: apbMaster.bus_locked=self
+                    elif Val==0: apbMaster.bus_locked=False
+                elif Sig=='name':
+                    self.Name = Val
+                elif Sig=='mark':
+                    if not Val: 
+                        Val = 0
+                    else:
+                        Val = eval(Val)
+#                    self.force('mark',Val)
+                elif Sig=='marker':
+                    logs.log_info('marker from APB %s'%self.Name)
+                    if Val[0] in self.markers:
+                        self.markers[Val[0]](Val[1:])
+                    else:
+                        logs.log_error('marker %s from APB %s is not defined'%(Val,self.Name))
+                elif Sig=='finish':
+                    logs.log_info('finishing from APB %s'%self.Name,2)
+                    logs.log_ending('scores',2)
+                    if self.finishes: self.finishes()
+                    veri.finish()
+                    sys.exit()
+                elif Sig=='wait':
+                    self.waiting0=int(Val)
+                elif Sig=='catch':
+                    pready = self.peek('pready')
+                    if (pready == 1):
+                        Who,Exp,Addr = Val
+                        Exp = self.eval(Exp)
+                        Act = self.peek(Who)
+                        if type(Exp) is types.FunctionType:
+                            Exp(Act)
+                        elif type(Exp) is int:
+                            logs.log_ensure((Exp==Act),'apb addr=%s %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(Addr,self.Name,Act,Exp,Exp,Exp,self.rename(Who)),2)
+                        else: 
+                            logs.log_info('apb %s addr=%s %s read act=%x who=%s'%(Exp,Addr,self.Name,Act,self.rename(Who)))
+                            self.Backs.append((Who,Act,Addr))
+                            self.callback('%s rdata=%x addr=%x' % (Who,Act,Addr))
+                elif Sig=='until':
+                    self.installUntil(Val,0)
+                elif Sig=='popif':
+                    Who,Comp = Val
+#                    logs.log_info('POPIF %s comp=%s act=%s' % (Who,Comp,self.peek(Who)))
+                    popIt = self.peek(Who) == Comp
+                else:
+                    self.force(Sig,Val)
+                    if (Sig == 'penable') and (Val == 0):
+                        popIt = True
+#            self.force('marker1',int(popIt))
+            if popIt or self.valid('pready'):
+                self.seq0.pop(0)
+            return
+        if self.peek('pready')==0:
+            self.waiting0 = 10
+            return
+    def doQueue0(self):
+        while self.queue0!=[]:
+            What = self.queue0.pop(0)
+            if What[0]=='write':
+                if self.Uart:
+                    self.Uart('write',What[1],What[2])
+#                logs.log_info('write apb queue0 seq0 %s %s %s'%(What[0],hex(What[1]),hex(What[2])))
+                self.seq0.append([('penable',0),('lock',1),('psel',1),('pstrb',0xf),('paddr',What[1]),('pwdata',What[2]),('pwrite',1)])
+                self.seq0.append([('penable',1),('popif',('pready',1))])
+                if (self.queue0==[])or(self.queue0[0][0] not in ['write','read']):
+                    self.seq0.append([('psel',0),('pstrb',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0),('lock',0),('mark',What[3])])
+#                self.seq0.append([('lock',0)])
+
+            elif What[0]=='read':
+                self.seq0.append([('penable',0),('lock','1'),('psel',1),('paddr',What[1]),('pwrite',0)])
+                self.seq0.append([('penable',1),('catch',('prdata',What[2],What[1])),('popif',('pready',1))])
+                self.seq0.append([('psel',0),('paddr',0),('pwrite',0),('penable',0)])
+            elif What[0]=='wait':
+                self.seq0.append([('wait',What[1])])
+            elif What[0]=='finish':
+                self.seq0.append([('finish',0)])
+            elif What[0]=='marker':
+                self.seq0.append([('marker',What[1])])
+            elif What[0]=='name':
+                self.seq0.append([('name',What[1])])
+            elif What[0]=='until':
+                self.seq0.append([('until',(What[1],What[2]))])
+            elif What[0]=='force':
+                self.seq0.append([(What[1],What[2])])
+            elif What[0]=='notbusy':
+                self.seq0.append(('notbusy',0))
+            else:
+                logs.log_error('apb %s: unrecognized ilia command %s'%(self.Name,str(What)))
+
+
+
+
+def extractVars(Txt):
+    for Chr in '+()-<>=!':
+        Txt = Txt.replace(Chr,' ')
+    Wrds = Txt.split()
+    Res=[]
+    for Wrd in Wrds:
+        if Wrd not in ['or','and','not']:
+            if Wrd[0] not in '0123456789':
+                Res.append(Wrd)
+    return Res
+
+'''
+task apb_wr_task(input [31:0] addr, input [31:0] wdata, input string str);
+begin
+    $display("IG %x %x  %s",addr,wdata,str);
+    @(posedge clk);
+    #1;
+    psel = 1;
+    pwrite = 1;
+    paddr = addr;
+    pwdata = wdata;
+    @(posedge clk);
+    #1;
+    penable = 1;
+    wait(pready);
+    @(posedge clk);
+    #1;
+    penable = 0;
+    psel = 0;
+    pwrite = 0;
+    paddr = 0;
+    pwdata = 0;
+end
+endtask
+
+reg [31:0] rdata;
+task apb_rd_task(input [31:0] addr, input string str);
+begin
+    @(posedge clk);
+    #1;
+    psel = 1;
+    pwrite = 0;
+    paddr = addr;
+    @(posedge clk);
+    #1;
+    penable = 1;
+    wait(pready);
+    @(posedge clk);
+    #1;
+    rdata = prdata;
+    $display("IG rd %x %x %s",addr,rdata,str);
+    penable = 0;
+    psel = 0;
+    pwrite = 0;
+    paddr = 0;
+end
+endtask
+
+
+'''
+
+

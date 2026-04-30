@@ -6,11 +6,11 @@ import module_class
 def help_main(Env):
     Mod = Env.Current
     if not os.path.exists('src'): os.mkdir('src')
-    createTb(Mod)
+#    createTb(Mod)
 
-    Fout = open('src/%s.v' % Mod.Module,'w')
-    Mod.dump_verilog(Fout)
-    Fout.close()
+#    Fout = open('src/%s.v' % Mod.Module,'w')
+#    Mod.dump_verilog(Fout)
+#    Fout.close()
 
     
     Fval = open('src/values.h','w')
