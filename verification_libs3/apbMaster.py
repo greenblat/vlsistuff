@@ -41,6 +41,7 @@ class apbMaster(logs.driverClass):
 #        self.force('penable',0)
         self.Uart = False
         self.renames = {}
+        self.verbose = False
 
     def callback(self,Txt):
         return
@@ -188,7 +189,6 @@ class apbMaster(logs.driverClass):
         
     def run(self):
         self.doQueue0()
-
         self.run0()
 
     def run0(self):
@@ -282,6 +282,7 @@ class apbMaster(logs.driverClass):
                     popIt = self.peek(Who) == Comp
                 else:
                     self.force(Sig,Val)
+                    if self.verbose: logs.log_info("APBFORCE %s %s" % (Sig,Val))
                     if (Sig == 'penable') and (Val == 0):
                         popIt = True
 #            self.force('marker1',int(popIt))
