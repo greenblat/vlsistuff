@@ -269,7 +269,7 @@ class apbMaster(logs.driverClass):
                         if type(Exp) is types.FunctionType:
                             Exp(Act)
                         elif type(Exp) is int:
-                            logs.log_ensure((Exp==Act),'apb addr=%s %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(Addr,self.Name,Act,Exp,Exp,Exp,self.rename(Who)),2)
+                            logs.log_ensure((Exp==Act),'apb addr=%s %s read act=%x exp=%s (0x%x) (0d%d)  who=%s'%(Addr,self.Name,Act,Exp,Exp,Exp,self.rename(Who)))
                         else: 
                             logs.log_info('apb %s addr=%s %s read act=%x who=%s'%(Exp,Addr,self.Name,Act,self.rename(Who)))
                             self.Backs.append((Who,Act,Addr))

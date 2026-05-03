@@ -2,20 +2,28 @@
 import os,sys,string
 
 
-FNAMES = '*.pyc *.log0 *.logseq log.yosys *yosys.log recorded.nets dump.vcd pymon.* tb.vvp deep.list'.split()
+FNAMES =  'db0.pickle xxx yacc.log a.out dumpver.v *.pyc *.log0 *.logseq log.yosys *yosys.log recorded.nets dump.vcd pymon.* tb.vvp deep.list'.split()
 
 
 def main():
     count = 0
     Frm = open('removes','w')
+    os.system('find . >  /tmp/clean.list')
+    File = open('/tmp/clean.list')
+    lines = File.readlines()
+    File.close()
     for Fname in FNAMES:
-        os.system('find . -name "%s" > /tmp/clean.list' % Fname)
-        File = open('/tmp/clean.list')
-        lines = File.readlines()
-        File.close()
         for line in lines:
-            Frm.write('/bin/rm -f %s' % line)
-            count += 1
+            Last = line.split('/')[-1].strip()
+            if Last == Fname:
+                Frm.write('/bin/rm -f %s' % line)
+                count += 1
+            elif (Fname[0] == '*') and (Last.endswith(Fname[1:])):
+                Frm.write('/bin/rm -f %s' % line)
+                count += 1
+            elif (Fname[-1] == '*') and (Fname[:-1] in Last):
+                Frm.write('/bin/rm -f %s' % line)
+                count += 1
     Frm.close()
     print('found %d files to remove' % count)
 if __name__ == '__main__': main()
