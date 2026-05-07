@@ -6,6 +6,7 @@ import veri
 import sys,os,string
 import random
 import importlib
+import subprocess
 
 #built in commands: finish,wait,marker,force,print,define,include,exec,check,seq import
 
@@ -483,10 +484,11 @@ class sequenceClass:
             logs.log_info('EXEC %s' %Cmd)
             exec(Cmd,globals())
             return True
-        if wrds[0] in ['shell','ossystem']:
+        if wrds[0] in ['shell','os','system']:
             Cmd = ' '.join(wrds[1:])
             logs.log_info('OS %s' %Cmd)
-            os.system(Cmd)
+            subprocess.run(wrds[1:], check=True)
+#            os.system(Cmd)
             return True
 
 

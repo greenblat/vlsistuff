@@ -93,6 +93,10 @@ class apbMaster(logs.driverClass):
                 self.read(wrds[1])
             else:
                 self.read(wrds[1],wrds[2])
+        elif wrds[0]=='wrbyte':
+            Mark = False
+            if len(wrds)>3: Mark = wrds[3]
+            self.wrbyte(wrds[1],wrds[2],Mark)
         elif wrds[0]=='write':
             if len(wrds)<3:
                 logs.log_error('apb write command too short %s' % Cmd)
@@ -133,6 +137,8 @@ class apbMaster(logs.driverClass):
     def write(self,Addr,Data,Mark=False):
         self.queue0.append(('write',Addr,Data,Mark))
 
+    def wrbyte(self,Addr,Data,Mark=False):
+        self.queue0.append(('wrbyte',Addr,Data,Mark))
 
     def wait(self,Data):
         self.queue0.append(('wait',Data))
@@ -295,13 +301,25 @@ class apbMaster(logs.driverClass):
     def doQueue0(self):
         while self.queue0!=[]:
             What = self.queue0.pop(0)
-            if What[0]=='write':
+            if What[0]=='wrbyte':
+                Addr = self.eval(What[1])
+                PSTRB = 1<<(Addr&3)
+                Byte = self.eval(What[2]) & 0xff
+                pwdata = Byte + (Byte<<8) + (Byte<<16) + (Byte<<24)
+                self.seq0.append([('penable',0),('lock',1),('psel',1),('pstrb',PSTRB),('paddr',Addr & 0xfffffffc),('pwdata',pwdata),('pwrite',1)])
+                self.seq0.append([('penable',1),('popif',('pready',1))])
+                if (self.queue0==[])or(self.queue0[0][0] not in ['wrbyte','write','read']):
+                    self.seq0.append([('psel',0),('pstrb',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0),('lock',0),('mark',What[3])])
+#                self.seq0.append([('lock',0)])
+
+
+            elif What[0]=='write':
                 if self.Uart:
                     self.Uart('write',What[1],What[2])
 #                logs.log_info('write apb queue0 seq0 %s %s %s'%(What[0],hex(What[1]),hex(What[2])))
                 self.seq0.append([('penable',0),('lock',1),('psel',1),('pstrb',0xf),('paddr',What[1]),('pwdata',What[2]),('pwrite',1)])
                 self.seq0.append([('penable',1),('popif',('pready',1))])
-                if (self.queue0==[])or(self.queue0[0][0] not in ['write','read']):
+                if (self.queue0==[])or(self.queue0[0][0] not in ['wrbyte','write','read']):
                     self.seq0.append([('psel',0),('pstrb',0),('paddr',0),('pwdata',0),('pwrite',0),('penable',0),('lock',0),('mark',What[3])])
 #                self.seq0.append([('lock',0)])
 

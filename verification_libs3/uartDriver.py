@@ -64,11 +64,10 @@ class uartDriver(logs.driverClass):
             logs.log_error('bad token for uartDriver "%a"s' % Char)
         self.waiting = 8
     def busy(self,Why=False):
-        return self.Queue != []
+        return (self.Queue != []) or (self.waiting>0) or (self.peek('tx_empty')==0)
 
     def onFinish(self):
         return
-
     def read(self,Addr,Data=0):
         self.action('read %s' % (hex(Addr)))
     def write(self,Addr,Data):
@@ -114,7 +113,7 @@ class uartDriver(logs.driverClass):
             Str = 'tx A%x. R. CRLF' % (Addr)
             self.action(Str)
         else:
-            logs.log_error('vdriverClass got %s' % Txt)
+            logs.log_error('uartDriver got %s' % Txt)
 
 def invertIt(wrd):
     X = eval(wrd)
