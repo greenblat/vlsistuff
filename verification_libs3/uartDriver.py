@@ -11,6 +11,7 @@ class uartDriver(logs.driverClass):
         self.Queue = []
         self.rxstr = ''
         self.Verbose = True
+        self.READS = []
         
 
     def run(self):
@@ -36,7 +37,11 @@ class uartDriver(logs.driverClass):
                 else:
                     self.rxstr = self.rxstr + ('<%x>' % rxdata)
             if (rxdata == 10)or(len(self.rxstr)>100):
-                logs.log_info('%s: RXSTR %s'% (self.Name,self.rxstr))
+                Addr = -1
+                Exp = '?'
+                if self.READS != []:
+                    Addr,Exp = self.READS.pop(0)
+                logs.log_info('%s: RXSTR @%s  %s  exp=%s'% (self.Name,hex(Addr),self.rxstr,Exp))
                 self.rxstr = ''
 
 
@@ -112,6 +117,11 @@ class uartDriver(logs.driverClass):
             Addr = self.eval(wrds[1])
             Str = 'tx A%x. R. CRLF' % (Addr)
             self.action(Str)
+            if len(wrds)>2:
+                Exp = wrds[2]
+            else:
+                Exp = '---'
+            self.READS.append((Addr,Exp))
         else:
             logs.log_error('uartDriver got %s' % Txt)
 

@@ -46,11 +46,13 @@ def scan_deep2(Env,Mod,Deep,Dones,Fout,Stops,Splits):
     Inventory = {}
     for Inst in Mod.insts:
         Type = Mod.insts[Inst].Type
+        if type(Type) is tuple: Type = Type[0]
         if Type in Inventory: 
             Inventory[Type] += 1
         else:
             Inventory[Type] = 1
     LL = list(Inventory.keys())
+    print("LLLL",LL)
     LL.sort()
     LL.reverse()
     for Type in LL:

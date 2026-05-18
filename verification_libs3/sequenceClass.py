@@ -273,12 +273,13 @@ class sequenceClass:
                     pass
                 elif (wrds[0]=='searchpath'):
                     self.searchPath.append(wrds[1])
-                elif (wrds[0]=='include'):
+                elif (wrds[0] in ['include']):
                     Fname = wrds[1]
                     Fname = os.path.expanduser(Fname)
                     Fname = os.path.expandvars(Fname)
                     Fname = os.path.abspath(Fname)
                     Found = False
+                    logs.log_info('>>>>>>> %s %s' % (Fname,os.path.exists(Fname)))
                     if os.path.exists(Fname):
                         Lines = open(Fname).readlines()
                         for x,Line in enumerate(Lines):
@@ -487,9 +488,33 @@ class sequenceClass:
         if wrds[0] in ['shell','os','system']:
             Cmd = ' '.join(wrds[1:])
             logs.log_info('OS %s' %Cmd)
-            subprocess.run(wrds[1:], check=True)
+            subprocess.run(wrds[1:], check=False)
 #            os.system(Cmd)
             return True
+        if wrds[0] == 'include_inline':
+            Fname = wrds[1]
+            Fname = os.path.expanduser(Fname)
+            Fname = os.path.expandvars(Fname)
+            Fname = os.path.abspath(Fname)
+            Found = False
+            logs.log_info('>>>>>>> %s %s' % (Fname,os.path.exists(Fname)))
+            Seq = []
+            if not os.path.exists(Fname):
+                logs.log_error('inlcude_inline file was not found "%s"' % (Fname))
+                sys.exit()
+            Lines = open(Fname).readlines()
+            for x,Line in enumerate(Lines):
+                 Seq.append((Line,1000+x))
+            
+#            for ind,ll in enumerate(self.Sequence):
+#                print("bef %d %s" % (ind,ll))
+            print(">>>a self.Ptr=%d line=%s %s" % (self.Ptr,wrds,self.Sequence[self.Ptr-1:self.Ptr+1]))
+            self.Sequence = self.Sequence[:self.Ptr-1]+Seq+self.Sequence[self.Ptr+1:]
+            print(">>>b self.Ptr=%d line=%s %s" % (self.Ptr,wrds,self.Sequence[self.Ptr-1:self.Ptr+1]))
+#            for ind,ll in enumerate(self.Sequence):
+#                print("aft %d %s" % (ind,ll))
+            
+            return 
 
 
         if wrds[0] == 'break':
