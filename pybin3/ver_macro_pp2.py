@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
 """
          usage:    ver_macro_pp2.py   <verilog_files>   [-use_defines] [-y libdir] [-odir out_dir] [-d define]
 

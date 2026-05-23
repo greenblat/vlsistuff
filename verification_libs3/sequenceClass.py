@@ -488,8 +488,11 @@ class sequenceClass:
         if wrds[0] in ['shell','os','system']:
             Cmd = ' '.join(wrds[1:])
             logs.log_info('OS %s' %Cmd)
+            if 'MYPYTHONHOME' in os.environ:
+                os.environ['PYTHONHOME'] =  os.environ['MYPYTHONHOME']
+            else:
+                logs.log_info('if You read this and python fails, setenv MYPYTHONHOME, OS %s' %os.environ['PYTHONHOME'])
             subprocess.run(wrds[1:], check=False)
-#            os.system(Cmd)
             return True
         if wrds[0] == 'include_inline':
             Fname = wrds[1]

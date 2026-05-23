@@ -121,6 +121,7 @@ def main():
     Big2 = run(Fname,FnameOut,sys.argv[3:])
     Open = OPEN.replace('FNAME',FnameOut)
     Big2  = Open + Big2
+#    print(Big2)
     try:
         exec(Big2,globals())
     except:
@@ -477,10 +478,12 @@ def calc_indent(line):
     wrds = line.split()    
     if len(wrds)==0:
         print('lnum=%d in file, fatal ident, aborting. '%(Lnum))
+        print("LINE",line)
+        print('lnum=%d in file, fatal ident, aborting. '%(Lnum))
         sys.exit()
         
     ind = line.index(wrds[0])
-    if wrds[0] in ['for','if','else:','elif']:
+    if wrds[0] in ['for','if','else:','elif','while']:
         ind += 4
     return ' '*ind
       
