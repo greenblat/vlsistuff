@@ -8,7 +8,6 @@ class spiMasterClass(logs.driverClass):
     def __init__(self,Path,Monitors,Freq=1,Renames={}):
         logs.driverClass.__init__(self,Path,Monitors)
         self.Queue = []
-        self.qu = []
         self.Renames = Renames
         self.force('spi_ss',1)
         self.force('spi_clk',0)
@@ -19,6 +18,8 @@ class spiMasterClass(logs.driverClass):
         self.Expects = {}
         self.Catch = False
         self.Miso = ''
+        self.Wform = ['10100000',32,32]
+        self.Rform = ['00100001',32,32]
     def callback(self,Txt):
         return Txt
     def force(self,Sig,Val):
@@ -31,7 +32,6 @@ class spiMasterClass(logs.driverClass):
 
     def idle(self):
         if self.Queue!=[]: return False
-        if self.qu!=[]: return False
         if self.waiting>0: return False
         return True
     def busy(self):
@@ -83,6 +83,16 @@ class spiMasterClass(logs.driverClass):
 
 
     def write(self,Addr,Data):
+        if self.Wform!=[]:
+            Abin = logs.binx(Addr,self.Wform[1])
+            Dbin = logs.binx(Data,self.Wform[2])
+            Str = self.Wform[0] + Abin + Dbin
+            self.send(Str,1)
+            return
+
+
+        
+
         Abin = logs.binx(Addr,12)
         Abin = reverseBin(Abin)
 
@@ -92,10 +102,25 @@ class spiMasterClass(logs.driverClass):
         if 'b' in Str:
             logs.log_error('SPI WRITE %s'%Str)
         else:
+            print("XXXX",Str)
             self.send(Str,1)
 
 
     def read(self,Addr,Check='no',Mask = 0xffff,Comment=''):
+        if self.Rform!= []:
+            Abin = logs.binx(Addr,self.Rform[1])
+            Dbin = logs.binx(0,32)
+            Str = self.Rform[0] + Abin + Dbin
+            self.send(Str,1)
+            if Check!='no':
+                self.Expects[Addr] = Check,Mask,Comment
+            return
+
+
+
+
+
+
         logs.log_info('READ %x %s %s %s' % (Addr,Check,Mask,Comment))
         Abin = logs.binx(Addr,12)
         Abin = reverseBin(Abin)
@@ -170,8 +195,12 @@ class spiMasterClass(logs.driverClass):
         self.was = What[0]
         self.force('spi_clk',What[0])
 
-        if len(self.Back)>=48:
-            logs.log_info('BACK %s\n                  %s' % (''.join(self.Back),''.join(self.Forw)))
+        if self.Wform == []:
+            ResponceLen = 48
+        else:
+            ResponceLen = len(self.Wform[0])+self.Wform[1]+self.Wform[2]
+        if len(self.Back)>=ResponceLen:
+            logs.log_info('BACK miso=%s\n                  mosi=%s' % (''.join(self.Back),''.join(self.Forw)))
             FL = self.Forw[:48]
             self.Forw = []
             Addr = int(''.join(FL[:15]).replace('?','0'),2)
