@@ -84,10 +84,13 @@ class spiMasterClass(logs.driverClass):
 
     def write(self,Addr,Data):
         if self.Wform!=[]:
-            Abin = logs.binx(Addr,self.Wform[1])
-            Dbin = logs.binx(Data,self.Wform[2])
+            Abin0 = logs.binx(Addr,self.Wform[1])
+            Abin = Abin0[24:]+Abin0[16:24]+Abin0[8:16]+Abin0[0:8]
+            Dbin0 = logs.binx(Data,self.Wform[2])
+            Dbin = Dbin0[24:]+Dbin0[16:24]+Dbin0[8:16]+Dbin0[0:8]
             Str = self.Wform[0] + Abin + Dbin
             self.send(Str,1)
+            print("WWWW",self.Wform[0] , Abin , Dbin)
             return
 
 

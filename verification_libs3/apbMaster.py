@@ -41,7 +41,7 @@ class apbMaster(logs.driverClass):
 #        self.force('penable',0)
         self.Uart = False
         self.renames = {}
-        self.verbose = False
+        self.Verbose = False
 
     def callback(self,Txt):
         return
@@ -83,7 +83,7 @@ class apbMaster(logs.driverClass):
         return Act
 
     def action(self,Cmd,Orig = []):
-        logs.log_info("APB ACTION %s %s %s" % (self.Name,Cmd,Orig))
+        if self.Verbose: logs.log_info("APB ACTION %s %s %s" % (self.Name,Cmd,Orig))
         if not self.exists('pstrb'):
             self.noList.append('pstrb')
             logs.log_warning('NO PSTRB detected for apb master %s' % (self.Name))
@@ -288,7 +288,7 @@ class apbMaster(logs.driverClass):
                     popIt = self.peek(Who) == Comp
                 else:
                     self.force(Sig,Val)
-                    if self.verbose: logs.log_info("APBFORCE %s %s" % (Sig,Val))
+                    if self.Verbose: logs.log_info("APBFORCE %s %s" % (Sig,Val))
                     if (Sig == 'penable') and (Val == 0):
                         popIt = True
 #            self.force('marker1',int(popIt))
