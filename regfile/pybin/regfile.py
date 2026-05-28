@@ -22,7 +22,7 @@ regfile.py aaa.regfile <directory_for_outputs>  [-unpacked]
 
 
 import os,sys,string
-
+sys.path.append('../pybin')
 import logs
 
 import xml_regfile2_create
@@ -869,6 +869,7 @@ MODULE MODULE (.pclk(clk),.presetn(rst_n)
     ,.pwrite(pwrite),.paddr(paddr),.psel(psel),.penable(penable)
     ,.prdata(prdata),.prdata_wire(),.pwdata(pwdata),.pstrb(pstrb)
     ,.pready(pready),.pslverr(pslverr)
+    ,.softreset(softreset)
 '''
 
 
@@ -876,7 +877,7 @@ MODULE MODULE (.pclk(clk),.presetn(rst_n)
 
 HEADER = '''`timescale 1ns / 1ps
 module MODULE (
-    input pclk,input presetn,input pwrite, input pread, input penable
+    input pclk,input presetn, input softreset, input pwrite, input pread, input penable
     ,input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata, output [BUSWID-1:0] prdata_wire
     ,input [WSTRB-1:0] pstrb
     ,input [ADDWID-1:0] paddr ,output reg [BUSWID-1:0] last_wdata
@@ -1109,7 +1110,9 @@ def bodyDump1(Db,File,Alone):
     File.write('%s\n'%Str)
     for Line in LINES[2]:
         File.write('%s\n'%Line)
-
+    File.write('    end else if (softreset)  begin\n')
+    for Line in LINES[2]:
+        File.write('%s\n'%Line)
     File.write('    end else if (pwrite)  begin\n')
     for Line in LINES[3]:
         Reg = Line.split()[4]
@@ -1524,13 +1527,13 @@ def runXml():
 
 APBHead = '''
 `timescale 1ns / 1ps
-module MODULE (input pclk, input presetn,
-    input psel, input penable, input pwrite, input [WSTRB-1:0] pstrb, input [ADDWID-1:0] paddr, input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata,output [BUSWID-1:0] prdata_wire
+module MODULE (input pclk, input presetn, input softreset
+    ,input psel, input penable, input pwrite, input [WSTRB-1:0] pstrb, input [ADDWID-1:0] paddr, input [BUSWID-1:0] pwdata, output [BUSWID-1:0] prdata,output [BUSWID-1:0] prdata_wire
     ,output pready, output pslverr
 '''
 APBInst = '''
 wire [1023:0] ZEROES = 1024'b0;
-MODULE rgf (.pclk(pclk),.presetn(presetn),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
+MODULE rgf (.pclk(pclk),.presetn(presetn),.softreset(softreset),.pwrite(i_pwrite),.pread(i_pread),.paddr(paddr)
     ,.pwdata(pwdata),.prdata(prdata),.prdata_wire(prdata_wire)
     ,.pstrb(pstrb),.last_wdata(last_wdata)
     ,.penable(penable),.pready()
