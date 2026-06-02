@@ -89,8 +89,10 @@ def run_lexer(Fname,FnameOut,Env):
         print('using plain verilog parsing')
         os.system('%s/verilog_lexer %s %s -no_eol'%(Env.params['execpath'],Fname,FnameOut))
     else:
-        print('using slow python  verilog lexer. compile verilog_lexer.c for faster run')
-        os.system('%s/pylexer.py %s %s -no_eol'%(Env.params['execpath'],Fname,FnameOut))
+        print('Warning! Using slow python version of verilog lexer. compile verilog_lexer.c for faster run')
+        print('%s/pylexer.py %s %s '%(Env.params['execpath'],Fname,FnameOut))
+        os.system('/bin/cp %s .' % Fname)
+        os.system('%s/pylexer.py %s %s '%(Env.params['execpath'],Fname,FnameOut))
 
 
 
@@ -110,7 +112,8 @@ def read_verilog_file(Fname,RunDir,Env):
     if Fname.endswith('.vvv'):
         os.system('genver.py %s %s' % (Fname,Fname.replace('vvv','v')))
         Params['fnames'] = [Fname.replace('vvv','v')]
-    macro_verilog_pp.run_main(Params,'00010',True)
+    AddLnum =  os.path.exists('%s/verilog_lexer'%(Env.params['execpath']))
+    macro_verilog_pp.run_main(Params,'00010',AddLnum)
 
 
     run_lexer(tmpfilename,'%s/lex.out'%RunDir,Env)

@@ -52,13 +52,27 @@ class spiMasterClass(logs.driverClass):
             self.send(Str,1)
             return
                 
+        if Cmd =='read8':
+            if len(wrds)==2:
+                self.read8(wrds[1])
+            else:
+                self.read8(wrds[1],wrds[2])
+            return
+
         if Cmd =='read':
             if len(wrds)==2:
                 self.read(wrds[1])
             else:
                 self.read(wrds[1],wrds[2])
-        elif Cmd =='write':
+            return
+        if Cmd =='write':
             self.write(wrds[1],wrds[2])
+            return
+        if Cmd =='write8':
+            self.write8(wrds[1],wrds[2])
+            return
+
+
         elif Cmd =='wreg':
             Addr = eval(wrds[1])
             Data = eval(wrds[2])
@@ -81,6 +95,18 @@ class spiMasterClass(logs.driverClass):
         else:
             logs.log_error('spiMaster action not recogninzed "%s"'%Txt)
 
+
+    def write8(self,Addr,Data):
+        if self.Wform!=[]:
+            Abin0 = logs.binx(Addr,self.Wform[1])
+            Abin = Abin0[24:]
+            Dbin0 = logs.binx(Data,self.Wform[2])
+            Dbin = Dbin0[24:]+Dbin0[16:24]+Dbin0[8:16]+Dbin0[0:8]
+            Code = '10000000' 
+            Str = Code + Abin + Dbin
+            self.send(Str,1)
+            print("WWWW8",self.Wform[0] , Abin , Dbin)
+            return
 
     def write(self,Addr,Data):
         if self.Wform!=[]:
@@ -109,11 +135,24 @@ class spiMasterClass(logs.driverClass):
             self.send(Str,1)
 
 
+    def read8(self,Addr,Check='no',Mask = 0xffff,Comment=''):
+        if self.Rform!= []:
+            Abin0 = logs.binx(Addr,self.Wform[1])
+            Abin = Abin0[24:]
+            Dbin = logs.binx(0,32)
+            Code = '00000001'
+            Str = Code + Abin + '00000000'+Dbin
+            self.send(Str,1)
+            if Check!='no':
+                self.Expects[Addr] = Check,Mask,Comment
+            return
+
     def read(self,Addr,Check='no',Mask = 0xffff,Comment=''):
         if self.Rform!= []:
-            Abin = logs.binx(Addr,self.Rform[1])
+            Abin0 = logs.binx(Addr,self.Wform[1])
+            Abin = Abin0[24:]+Abin0[16:24]+Abin0[8:16]+Abin0[0:8]
             Dbin = logs.binx(0,32)
-            Str = self.Rform[0] + Abin + Dbin
+            Str = self.Rform[0] + Abin + '00000000'+Dbin
             self.send(Str,1)
             if Check!='no':
                 self.Expects[Addr] = Check,Mask,Comment
