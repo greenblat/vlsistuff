@@ -1577,7 +1577,10 @@ def apbHead():
     if 'external' in Db['chip'].Params:
         Db['fout'].write('    ,output [%s:0] last_wdata\n'%(Buswid-1))
     if 'duals' in Db:
-        Db['fout'].write('    ,input dual_pulse\n')
+        DUA = Db['duals']
+        Keys = list(DUA.keys())
+        if len(Keys)>0:
+            Db['fout'].write('    ,input dual_pulse\n')
 
 
 def missParam(Dir,Param,Default):
