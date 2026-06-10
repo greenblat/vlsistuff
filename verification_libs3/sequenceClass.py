@@ -212,6 +212,7 @@ class sequenceClass:
                     
     def definesPreRun(self):
         for Line,_ in self.Sequence:
+            if '#' in Line: Line = Line[:Line.index('#')]
             wrds = Line.split()
             if wrds == []:
                 pass
@@ -279,7 +280,7 @@ class sequenceClass:
                     Fname = os.path.expandvars(Fname)
                     Fname = os.path.abspath(Fname)
                     Found = False
-                    logs.log_info('>>>>>>> %s %s' % (Fname,os.path.exists(Fname)))
+                    logs.log_info('include exists? >>>>>>> %s %s' % (Fname,os.path.exists(Fname)))
                     if os.path.exists(Fname):
                         Lines = open(Fname).readlines()
                         for x,Line in enumerate(Lines):
@@ -350,6 +351,7 @@ class sequenceClass:
         if type(Txt) is int: return Txt
         if Txt in self.Translates: return self.eval(self.Translates[Txt])
         if Txt[0] == '"': return Txt.replace('"','')
+        if (Txt=='0x18(24)'): kill()
         try:
             Val =  eval(Txt)
             return Val
@@ -927,6 +929,12 @@ def makeExpr(Txt):
         except:
             pass
     return wrds
+
+def kill():
+    A = 5
+    B = 0
+    print(A//B)
+
 
 def acceptablePath(Word):
     if Word[0] not in string.ascii_letters: return False
