@@ -279,7 +279,7 @@ class apbMaster(logs.driverClass):
                         else: 
                             logs.log_info('apb %s addr=%s %s read act=%x who=%s'%(Exp,Addr,self.Name,Act,self.rename(Who)))
                             self.Backs.append((Who,Act,Addr))
-                            self.callback('%s rdata=%x addr=%x' % (Who,Act,Addr))
+                        self.callback('%s rdata=%s addr=%s' % (Who,Act,Addr))
                 elif Sig=='until':
                     self.installUntil(Val,0)
                 elif Sig=='popif':
