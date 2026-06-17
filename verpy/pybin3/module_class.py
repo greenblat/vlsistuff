@@ -464,6 +464,7 @@ class module_class:
 
     def dump_verilog(self,Fout=False,Flags = {'style':'new','mergehards':False,'endmodule':True}):
         ExtF = True
+        print("FFFFF",Flags)
         if not Fout:
             ExtF = False
             Fout = open('%s.dumpv' % self.Module,"w")
@@ -489,6 +490,7 @@ class module_class:
         for Prm in self.includes:
             Fout.write('`include "%s"\n'%(Prm))
         Lparams = self.orderLocalParams()
+        print("LLLLLL",self.localparams)
         for Prm in self.localparams:
             if Prm not in Lparams:
                 Fout.write('localparam %s = "%s";\n'%(pr_expr(Prm),self.localparams[Prm]))

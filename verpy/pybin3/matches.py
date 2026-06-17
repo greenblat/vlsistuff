@@ -28,16 +28,16 @@ def matches(List,Seq,Verbose=False):
             Litem = Lind[1]
         else:
             Litem = Lind
-
         if Iseq == '?': 
             Vars.append(List[ind])
         elif Iseq[0] == '?': 
             Kind = Iseq[1:]
-            if Lind[1]!=Kind:
+            if type(Lind) is str:
+                Vars.append(Lind)
+            elif Lind[1]!=Kind:
                 return False
             else:
                 Vars.append(Lind)
-           
         elif Iseq[0] == '!': 
             if Iseq in Transtable:
                 Options = Transtable[Iseq]
@@ -45,11 +45,13 @@ def matches(List,Seq,Verbose=False):
                     Vars.append(List[ind])
                 else:
                     return False
+            elif (type(Lind) is list) and (type(Lind[0]) is str):
+                Vars.append(Lind)
             elif (Iseq[1:]!=List[ind][0])and(Iseq[1:]!=List[ind][1]): 
                 if Verbose: logs.log_info('matches stopped(0) at iseq=%s who=%s '%(Iseq,List[ind]))
                 return False
             else:
-                Vars.append(List[ind])
+                Vars.append(Lind)
         elif Iseq == '$': 
             Who = List[ind]
             if Who in KNOWNFUNCTIONS:

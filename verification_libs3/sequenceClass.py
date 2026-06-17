@@ -496,7 +496,7 @@ class sequenceClass:
                 logs.log_info('if You read this and python fails, setenv MYPYTHONHOME, OS %s' %os.environ['PYTHONHOME'])
             subprocess.run(wrds[1:], check=False)
             return True
-        if wrds[0] == 'include_inline':
+        if wrds[0] in ['include_inline','include_jit']:
             Fname = wrds[1]
             Fname = os.path.expanduser(Fname)
             Fname = os.path.expandvars(Fname)

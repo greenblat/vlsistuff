@@ -1585,6 +1585,8 @@ def expr_width(Expr,Mod):
     if type(Expr) is list:
         if Expr[0] in ['hex','dig','bin']: return Expr[1]
         if Expr[0] == 'bus': return len(Expr)-1
+        if Expr[0] == 'subbit': 
+            return 1
         if Expr[0] == 'subbus': 
             Hi = Expr[2][0]
             Lo = Expr[2][1]

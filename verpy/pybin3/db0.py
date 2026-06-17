@@ -1968,12 +1968,26 @@ def add_localparam(List0):
     Vars = matches.matches(List0,'localparam !Width !Pairs ;',False)
     if Vars:
         List1 = get_list(Vars[1])
+        print("LIST1",List1)
         for Item in List1:
-            Vars2 = matches.matches(Item,'?token = !Expr',False)
-            if Vars2:
-                Name = Vars2[0][0]
-                Expr = get_expr(Vars2[1])
-                Current.add_localparam(Name,Expr)
+            print("ITEM",Item)
+            if (len(Item) == 3) and (Item[0] == 'parameter'):
+                Current.add_localparam(Item[1],Item[2])
+
+#            Vars2 = matches.matches(Item,'?token = !Expr',False)
+#            if Vars2:
+#                Name = Vars2[0][0]
+#                Expr = get_expr(Vars2[1])
+#                Current.add_localparam(Name,Expr)
+#            else:
+#                Vars2 = matches.matches(Item,'parameter ?token !Expr',True)
+##                Ex = get_expr(Item[2])
+#                print("VARS4 LLL2LLLL",Item,Ex,Vars2)
+#                if Vars2:
+#                    Name = Vars2[0][0]
+#                    Expr = get_expr(Vars2[1])
+#                    print("XXXLLLLLLLLLLL",Name,Expr)
+#                    Current.add_localparam(Name,Expr)
         return
     Vars = matches.matches(List0,'localparam !Width !Width !Pairs ;',False)
     if Vars:
