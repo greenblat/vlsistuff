@@ -45,6 +45,8 @@ class sequenceClass:
             Monitors.append(self)
         self.Monitors = Monitors
         self.Sequence = []
+        logs.log_info('INIT STARTED')
+        self.workInitShells()
         logs.log_info('INCLUDES STARTED')
         self.workIncludes()
         self.workIncludes()
@@ -163,6 +165,7 @@ class sequenceClass:
                 if (Wrds!=[]) and (Wrds[0] == 'searchpath'):
                     self.searchPath.append(Wrds[1])
         self.searchPath.append(os.path.abspath(os.path.dirname(Filename)))
+        self.workInitShells()
         self.workIncludes()
         self.workIncludes()
         self.workIncludes()
@@ -257,6 +260,29 @@ class sequenceClass:
                     SUB.append(Line)
 
 
+    def workInitShells(self):
+        for ind,Linex in enumerate(self.Sequence):
+            try:
+                Line,x = Linex
+            except:
+                Line = Linex
+                x = '???'
+            wrds = Line.split()
+            if (len(wrds)==0)or(wrds[0][0] in '#/'):
+                pass
+            elif (wrds[0] in ['init']):
+                Cmd = ' '.join(wrds[1:])
+                Csv = logs.getVar('csvname')
+                if Csv:
+                    Cmd = Cmd.replace('TEST',Csv)
+                    logs.log_info('OS %s' %Cmd)
+                    if 'MYPYTHONHOME' in os.environ:
+                        os.environ['PYTHONHOME'] =  os.environ['MYPYTHONHOME']
+                    else:
+                        logs.log_info('if You read this and python fails, setenv MYPYTHONHOME, OS %s' %os.environ['PYTHONHOME'])
+                    os.system(Cmd)
+                else:
+                    logs.log_error('csvname not found')
 
     def workIncludes(self):
         Dones = True
@@ -486,6 +512,8 @@ class sequenceClass:
             Cmd = ' '.join(wrds[1:])
             logs.log_info('EXEC %s' %Cmd)
             exec(Cmd,globals())
+            return True
+        if wrds[0] in ['init']:
             return True
         if wrds[0] in ['shell','os','system']:
             Cmd = ' '.join(wrds[1:])
