@@ -1,0 +1,31 @@
+#! /bin/csh -f
+
+
+
+/bin/rm pram.hex
+
+if (-e ccode/$1.c)  then
+    echo "C code" $1
+    llbin/cpreproc.py ccode/$1.c  > $1.c
+    llbin/riscx_cc2.py  $1.c 
+    /bin/cp test0.hex  pram.hex
+else
+    echo "no C code"
+    exit
+endif
+
+
+iverilog -g2012 -o tb.vvp  tb.v \
+    rtl/cpu_compound.v \
+    rtl/cpu_ram.v \
+    rtl/dut.v \
+    rtl/rgf/dut_rf.v \
+    rtl/riscx_decoder.v \
+    rtl/simpleCPU.v \
+
+
+vvp -lver.log tb.vvp +SEQ=$1 
+
+
+
+

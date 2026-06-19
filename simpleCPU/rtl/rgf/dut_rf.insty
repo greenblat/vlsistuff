@@ -1,0 +1,16 @@
+
+dut_rf dut_rf (.pclk(clk),.presetn(rst_n)
+    ,.pwrite(pwrite),.paddr(paddr),.psel(psel),.penable(penable)
+    ,.prdata(prdata),.prdata_wire(),.pwdata(pwdata),.pstrb(pstrb)
+    ,.pready(pready),.pslverr(pslverr)
+    ,.softreset(softreset)
+    ,.version(version)
+    ,.reg0(reg0)
+    ,.status(status)
+    ,.counter_start(counter_start)
+    ,.counter_start_pulse(counter_start_pulse)
+    ,.interrupts(interrupts)
+    ,.interrupts_out_reg(interrupts_out_reg)
+    ,.set_interrupt(set_interrupt)
+    ,.set_interrupt_pulse(set_interrupt_pulse)
+);

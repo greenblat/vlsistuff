@@ -1,0 +1,13 @@
+
+chip dut_rf  apb width=32 addrwid=16 reset=async empty=0xdeadbeef
+
+reg version access=ro width=32 reset=19062026 desc="version date"
+reg reg0    access=rw width=96 desc="first wide register"
+reg status    access=ro width=32 desc="value of counter"
+reg counter_start  access=rw_pulse width=32 desc="start the counter"
+reg interrupts access=w1c width=32 desc="interrupts keeper"
+reg set_interrupt access=rw_pulse width=5 desc="sat named interrupt"
+
+
+end
+

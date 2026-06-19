@@ -1,0 +1,12 @@
+define version 0x0
+define WIDTH_MAP["version"] 4
+define reg0 0x4
+define WIDTH_MAP["reg0"] 12
+define status 0x10
+define WIDTH_MAP["status"] 4
+define counter_start 0x14
+define WIDTH_MAP["counter_start"] 4
+define interrupts 0x18
+define WIDTH_MAP["interrupts"] 4
+define set_interrupt 0x1c
+define WIDTH_MAP["set_interrupt"] 4

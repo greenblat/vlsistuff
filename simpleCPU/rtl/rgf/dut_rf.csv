@@ -1,0 +1,7 @@
+kind,access,width,pos,name,reset,addr,desc
+reg,ro,32, ,version,0x122dd0a,0x0,"version date"
+reg,rw,96, ,reg0, ,0x4,"first wide register"
+reg,ro,32, ,status, ,0x10,"value of counter"
+reg,rw_pulse,32, ,counter_start, ,0x14,"start the counter"
+reg,w1c,32, ,interrupts, ,0x18,"interrupts keeper"
+reg,rw_pulse,5, ,set_interrupt, ,0x1c,"sat named interrupt"
