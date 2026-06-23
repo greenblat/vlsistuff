@@ -502,7 +502,7 @@ def treatFields():
                     if Name == 'gap':
                         Name = '0'
                     LINES[6].append('assign %s = %s;'%(RegHiLo,Name))
-            elif Access in ['external' ,'w1c']:
+            elif Access in ['external' ,'w1c','w1c_pulse']:
                 LINES[8].append('assign %s = %s;'%(RegHiLo,Name))
                 LINES[11].append('assign %s = %s;'%(Name,RegHiLo))
             else:
@@ -1310,11 +1310,14 @@ def treatReg(Reg):
         Line = '        %s <= %d\'h%x;'%(Name,Wid,Reset)
         LINES[2].append(Line)
 
-    elif Access in ['external','w1c']:
+    elif Access in ['external','w1c','w1c_pulse']:
         Line = '    ,input %s %s'%(widi(Wid),Name)
         LINES[0].append(Line)
-        if Access == 'w1c':
+        if 'w1c' in Access:
             Line = '    ,output %s %s_out_reg'%(widi(Wid),Name)
+            LINES[0].append(Line)
+        if 'w1c_pulse' in Access:
+            Line = '    ,output %s_wr_pulse'%(Name)
             LINES[0].append(Line)
             
 
@@ -1351,10 +1354,12 @@ def treatReg(Reg):
             Str = Str.replace('REG',Name)
             Str = Str.replace('ADDR',hex(Reg.Addr)[2:])
             LINES[4].append(Str)
-        elif (Access == 'w1c'):
+        elif ('w1c' in Access):
             Str = W1CPULSE.replace('REG',Name)
             Str = Str.replace('ADDR',hex(Reg.Addr)[2:])
             LINES[4].append(Str)
+            if 'pulse' in Access:
+                LINES[4].append('assign %s_wr_pulse = %s_wr_sel;' % (Name,Name))
 
     else:
         logs.log_error('#%d: ACCESS not recognized "%s" of %s, valid accesses:  "rw ro w1c rw_pulse ro_pulse external"'%(Reg.Lnum,Access,Name))
