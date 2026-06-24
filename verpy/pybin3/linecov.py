@@ -1,12 +1,13 @@
 
 import module_class
 from synthesis0 import expr_width
+import logs
 
 DISPLAYS = {}
 def help_main(Env):
     Mod = Env.Current
     for ind,(Time,Body,Kind) in enumerate(Mod.alwayses):
-        X = work(Body,Mod.Module)
+        X = work(Body,Mod.Module,Mod)
         Mod.alwayses[ind] = (Time,X,Kind)
 
     for Dst,_,_,_ in Mod.hard_assigns:
@@ -44,7 +45,7 @@ def treat_assign(Dst,Mod):
         
     
 
-def work(Body,Module):
+def work(Body,Module,Mod):
     if type(Body) is list:
         if Body[0] == 'for':
             return Body
@@ -52,35 +53,35 @@ def work(Body,Module):
             Cond = Body[1]
             LL = []
             for Item in Body[2]:
-                X = work(Item[1],Module)
+                X = work(Item[1],Module,Mod)
                 LL.append([Item[0],X])
             return ['case',Cond,LL]
         elif Body[0] == 'list':
             for ind,Item in enumerate(Body[1:]):
-                A = work(Item,Module)
+                A = work(Item,Module,Mod)
                 Body[ind+1] = A
             return Body
         elif Body[0] == 'ifelse':
-            A = work(Body[2],Module)
-            B = work(Body[3],Module)
+            A = work(Body[2],Module,Mod)
+            B = work(Body[3],Module,Mod)
             return ['ifelse',Body[1],A,B]
             
         elif Body[0] == 'if':
-            A = work(Body[2],Module)
+            A = work(Body[2],Module,Mod)
             return ['if',Body[1],A]
         elif Body[0] in ['<=','=']:
             Var = '"%s"' % module_class.hashit(Body[1])
             Run = runningNum(Var)
-#            BX = ['list',Body[:],['functioncall', '$display', ["tb.cycles,",'"ALWLINECOV %%m %s"' % Module," ",Var,Run]]]
             BX = ['list',Body[:],['functioncall', 'covstep', ['"%s"' % Module,'%s' % Var,Run]]]
             DISPLAYS[(Module,Var)] = Run
+            treat_assign(Body[1],Mod)
             return BX
         else:
-            print('LLL',Body)
+            logs.log_info('missing LLL %s' % str(Body))
             return Body
 
     else:
-        print('WWW',Body)
+        logs.log_info('missing WWW %s' % str(Body))
         return Body
 
 RUNS = {}
