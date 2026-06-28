@@ -28,7 +28,7 @@ class checkPanics(logs.driverClass):
         if self.onFinishDone: return
         self.onFinishDone = True
         for Panic in self.PanicsHappened:
-           logs.log_error('PANICED %s' % (Panic,self.PanicsHappened[Panic]))
+           logs.log_error('PANICED %s %s' % (Panic,self.PanicsHappened[Panic]))
 
 
 
@@ -46,7 +46,6 @@ class checkPanics(logs.driverClass):
                     Sig = wrds[1]
                     if '.panic' in Sig:
                         self.Panics.append(Sig)
-                        print("PPP",Sig)
                 line = File.readline()
             return
 
