@@ -11,7 +11,10 @@ def help_main(Env):
         Mod.alwayses[ind] = (Time,X,Kind)
 
     for Dst,_,_,_ in Mod.hard_assigns:
-        treat_assign(Dst,Mod)
+        if (type(Dst) is str) and ( Dst.startswith('panic') or Dst.startswith('dbg_')):
+            pass
+        else:
+            treat_assign(Dst,Mod)
 
 
 
@@ -70,11 +73,16 @@ def work(Body,Module,Mod):
             A = work(Body[2],Module,Mod)
             return ['if',Body[1],A]
         elif Body[0] in ['<=','=']:
+            Dst = Body[1]
+            
             Var = '"%s"' % module_class.hashit(Body[1])
             Run = runningNum(Var)
             BX = ['list',Body[:],['functioncall', 'covstep', ['"%s"' % Module,'%s' % Var,Run]]]
             DISPLAYS[(Module,Var)] = Run
-            treat_assign(Body[1],Mod)
+            if (type(Dst) is str) and ( Dst.startswith('panic') or Dst.startswith('dbg_')):
+                pass
+            else:
+                treat_assign(Body[1],Mod)
             return BX
         else:
             logs.log_info('missing LLL %s' % str(Body))

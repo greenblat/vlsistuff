@@ -12,6 +12,8 @@ class checkPanics(logs.driverClass):
         self.Activated = False
         self.Panics = []
         self.PanicsHappened={}
+        self.Expecteds = []
+        self.ExpectedHappened = []
 
 
 
@@ -29,12 +31,18 @@ class checkPanics(logs.driverClass):
         self.onFinishDone = True
         for Panic in self.PanicsHappened:
            logs.log_error('PANICED %s %s' % (Panic,self.PanicsHappened[Panic]))
-
+        for Panic in self.Expecteds:
+            if Panic not in self.ExpectedHappened:
+                logs.log_error('PANICE DIDNT HAPPEN %s' % (Panic))
 
 
     def action(self,Txt,Orig=[]):
         wrds = Txt.split()
         if wrds == []: return
+
+        if wrds[0] in ['expect']:
+            self.Expecteds.append(Orig[1])
+            return
 
         if wrds[0] in ['start','init']:
             self.Activated = True
@@ -59,9 +67,13 @@ class checkPanics(logs.driverClass):
         for Panic in self.Panics:
             Val = logs.peek(Panic)
             if Val!=0:
-                logs.log_error('PANIC %s %s' % (Panic,Val))
-                if Panic not in self.PanicsHappened:
-                    self.PanicsHappened[Panic] = logs.peek('tb.cycles')
+                if Panic in self.Expecteds:
+                    if Panic not in self.ExpectedHappened:
+                        self.ExpectedHappened.append(Panic)
+                else:
+                    logs.log_error('PANIC %s %s' % (Panic,Val))
+                    if Panic not in self.PanicsHappened:
+                        self.PanicsHappened[Panic] = logs.peek('tb.cycles')
 
 
 

@@ -300,13 +300,17 @@ class sequenceClass:
                     pass
                 elif (wrds[0]=='searchpath'):
                     self.searchPath.append(wrds[1])
-                elif (wrds[0] in ['include']):
+                elif (wrds[0] in ['include','optional_include']):
                     Fname = wrds[1]
                     Fname = os.path.expanduser(Fname)
                     Fname = os.path.expandvars(Fname)
                     Fname = os.path.abspath(Fname)
+                    Csv = logs.getVar('csvname')
+                    if Csv:
+                        Fname = Fname.replace('TEST',Csv)
+
                     Found = False
-                    logs.log_info('include exists? >>>>>>> %s %s' % (Fname,os.path.exists(Fname)))
+#                    logs.log_info('include exists? >>>>>>> %s %s' % (Fname,os.path.exists(Fname)))
                     if os.path.exists(Fname):
                         Lines = open(Fname).readlines()
                         for x,Line in enumerate(Lines):
@@ -331,7 +335,7 @@ class sequenceClass:
                                 Seq.append((LL,xx)) 
                             Found = True
                             Dones = True
-                    if not Found:
+                    if (not Found) and (wrds[0] == 'include'):
                         logs.log_warning('include file "%s" no found in %s'%(Fname,self.searchPath))
                         Dones = False
                 else:
@@ -487,6 +491,10 @@ class sequenceClass:
         self.seq_line(Line,lnum)
 
     def seq_line(self,Line,lnum):
+        Csv = logs.getVar('csvname')
+        if Csv:
+            Line = Line.replace('TEST',Csv)
+
         if ';' in Line:
             llines = Line.split(';')
             for ll in llines:
