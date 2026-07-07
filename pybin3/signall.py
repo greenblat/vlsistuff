@@ -29,6 +29,7 @@ def work(Dir):
 #                os.system('/bin/cp %s/%s ~/cellar/%s_%s ' % (Dir,Fname,When,Fname))
 
 def checkFile(Fname):
+    print('work %s' % Fname)
     When = signVerilogModule.work(Fname)
     ww = Fname.split('/')
     Cell = ww[-1]

@@ -18,6 +18,7 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
+assign aaa = outx;
 son0 i_son0 (.clk(clk),.res(res0));
 son1 i_son1 (.clk(clk),.res(res1));
 son2 i_son2 (.clk(clk),.res(res2));

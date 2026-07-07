@@ -59,12 +59,32 @@ class axiSlaveClass:
         veri.force('%s.%s'%(self.Path,Sig),str(Val))
 
     def action(self,Txt,Orig):
+        wrds = Txt.split()
+        if wrds == []: return
+        if wrds[0] == 'awdelay':
+            self.delayAw = eval(wrds[1])
+        elif wrds[0] == 'ardelay':
+            self.delayAr = eval(wrds[1])
+        elif wrds[0] == 'wdelay':
+            self.delayW = eval(wrds[1])
+        else:
+            logs.log_error('vdriverClass got %s' % Txt)
+
+
         logs.log_info("no action %s" % Txt)
         return
 
 
     def onFinish(self):
         if self.busy(): self.busyWhy();
+
+    def busyWhy(self):
+        logs.log_info('%s: SLV Busy ar=%d aw=%d w=%d r=%d b=%d b0=%d ' % (self.Name,len(self.arqueue),len(self.awqueue),len(self.wqueue),len(self.rqueue),len(self.bqueue),len(self.abqueue)),verbose=self.verbose)
+        if self.wqueue!=[]:
+            logs.log_info('WQUEUE %x %x %x' % self.wqueue[0],verbose=self.verbose)
+        if self.awqueue!=[]:
+            logs.log_info('AWQUEUE %x %x %x %x %x' % self.awqueue[0],verbose=self.verbose)
+
 
     def busy(self):
         if self.arqueue!=[]: return True

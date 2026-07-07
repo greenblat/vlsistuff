@@ -591,6 +591,7 @@ class sequenceClass:
         if wrds[0] == 'finish':
             Line = Line.replace('finish','finish_verilator')
             self.seq_line(Line,lnum)
+            veri.finish()
             sys.exit()
 
         if wrds[0] == 'finish_verilator':

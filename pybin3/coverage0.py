@@ -43,7 +43,6 @@ def oneFile(Fname):
 
         if 'TGLC ' in Line:
             ww = Line.split()
-            print("XXXX",ww)
             Module = ww[1]
             Bus = ww[2] 
             Changes = int(ww[3])
@@ -54,16 +53,16 @@ def oneFile(Fname):
 
         if 'ALW ' in Line:
             ww = Line.split()
-            Module = ww[3]
-            Bus = ww[4] 
-            Where = int(ww[5])
+            Module = ww[2]
+            Bus = ww[3] 
+            Where = int(ww[4])
             if (Module,Bus) not in ALWS: ALWS[(Module,Bus)] = 0
             ALWS[(Module,Bus)] |= (1<<Where)
 
         if 'TGL ' in Line:
             ww = Line.split()
-            Module = ww[3]
-            Bus = ww[4] 
+            Module = ww[2]
+            Bus = ww[3] 
             Key = (Module,Bus) 
             if Key not in ASSIGNS: ASSIGNS[Key] = 0
             ASSIGNS[Key] += 1
@@ -81,15 +80,15 @@ def conclusions():
             Now = bin(ALWS[(M,B)])[2:]
             Total += len(Max)
             Goods += Now.count('1')
+            Now,Missed,Covered = extractMissed(Max,Now)
             if Max==Now:
                 Frep.write("ALWS: %20s  %20s     %s COVERED!\n" % (M,B,Now))
             else:
-                Now,Missed,Covered = extractMissed(Max,Now)
                 Frep.write("ALWS: %20s  %20s    covered=%s  missed=%s\n" % (M,B,Now,Missed))
-                for MM in Missed:
-                    Frep.write("ALWS: missing  %s  %s  %s\n" % (M,B,MM))
-                for MM in Covered:
-                    Frep.write("ALWS: covered  %s  %s  %s\n" % (M,B,MM))
+            for MM in Missed:
+                Frep.write("ALWS: missing  %s  %s  %s\n" % (M,B,MM))
+            for MM in Covered:
+                Frep.write("ALWS: covered  %s  %s  %s\n" % (M,B,MM))
         else:
             Frep.write("ALWS error %s %s missing from base dspl\n" % (M,B))
             print("ALWS ERROR %s %s missing from base dspl\n" % (M,B))
@@ -101,10 +100,13 @@ def conclusions():
     print('ALWS:  caught %d out of %d (%.2f%%)\n' % (Goods,Total,Ratio))
     print('__________________________________________')
     Total = 0
+    PresentModules = []
     for (M,B) in ASSIGNS:
         Frep.write("TGLS: %20s  %20s     %d\n" % (M,B,ASSIGNS[(M,B)]))
         Total += 1
+        if M not in PresentModules: PresentModules.append(M)
     Missing = 0
+    Covered = 0
     for Module in LOADED_TGL:
         All = LOADED_TGL[Module]
         for Bus in All:
@@ -113,8 +115,9 @@ def conclusions():
                 Missing += 1
             else:
                 Frep.write("TGLS: covered %s %s\n" % (Module,Bus))
+                Covered += 1
     Frep.write("TGLS: missing/total %d/%d  =  %.1f\n" % (Missing,len(All),(Missing*100/len(All))))
-    print("TGLS: missing/total %d/%d  =  %.1f\n" % (Missing,len(All),(Missing*100/len(All))))
+    print("TGLS: missing/total %d/%d  =  %.1f\n" % (Missing,Missing+Covered,(Missing*100/(Missing+Covered))))
     Frep.close()
 
 

@@ -373,10 +373,12 @@ class module_class:
             IOS.sort()
             Pref=''
             for (Name,Dir,Wid) in IOS:
-                Fout.write('    %s%s %s %s\n'%(Pref,pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
+                Dir,Color = coloredDir(Dir)
+                Fout.write('%s    %s%s %s %s\n'%(Color,Pref,pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
                 Pref=','
             for (Type,Inst) in IFS:
-                Fout.write('    %s%s %s\n'%(Pref,pr_dir(Type),pr_dir(Inst)))
+                Dir,Color = coloredDir(Type)
+                Fout.write('%s    %s%s %s\n'%(Color,Pref,pr_dir(Type),pr_dir(Inst)))
                 Pref=','
                 
             Fout.write(');\n')
@@ -464,7 +466,6 @@ class module_class:
 
     def dump_verilog(self,Fout=False,Flags = {'style':'new','mergehards':False,'endmodule':True}):
         ExtF = True
-        print("FFFFF",Flags)
         if not Fout:
             ExtF = False
             Fout = open('%s.dumpv' % self.Module,"w")
@@ -490,20 +491,20 @@ class module_class:
         for Prm in self.includes:
             Fout.write('`include "%s"\n'%(Prm))
         Lparams = self.orderLocalParams()
-        print("LLLLLL",self.localparams)
         for Prm in self.localparams:
             if Prm not in Lparams:
                 Fout.write('localparam %s = "%s";\n'%(pr_expr(Prm),self.localparams[Prm]))
         for Prm in Lparams:
             Fout.write('localparam %s = %s;\n'%(pr_expr(Prm),pr_expr(self.localparams[Prm])))
         for (Name,Dir,Wid) in NOIOS:
+             Dir,Color = coloredDir(Dir)
 #            if is_double_def(Wid):
 #                if Wid[0]=='packed':
-##                    Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid[1]),pr_wid(Wid[2]),pr_expr(Name)))
+##                    Fout.write('%s%s %s %s %s;\n'%(Color,pr_dir(Dir),pr_wid(Wid[1]),pr_wid(Wid[2]),pr_expr(Name)))
 #                else:
-#                    Fout.write('%s %s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid[1]),pr_expr(Name),pr_wid(Wid[2])))
-            if (Name not in Ordered):
-                Fout.write('%s %s %s;\n'%(pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
+#                    Fout.write('%s%s %s %s %s;\n'%(Color,pr_dir(Dir),pr_wid(Wid[1]),pr_expr(Name),pr_wid(Wid[2])))
+             if (Name not in Ordered):
+                 Fout.write('%s%s %s %s;\n'%(Color,pr_dir(Dir),pr_wid(Wid),pr_expr(Name)))
         for (Name,Def) in NOIFS:
             Type=Def[1]
             Conns=Def[2]
@@ -565,7 +566,12 @@ class module_class:
                 else:
                     Src1 = Src1.replace('$$$','')
                 Src2 = splitLong(Src1)
-                Fout.write('assign %s %s %s = %s;\n'%(pr_strength(Strength),pr_dly(Dly),pr_expr(Dst),Src2))
+                if (Strength == 'covered'):
+                    Fout.write('GREEN: %s = %s;\n'%(pr_expr(Dst),Src2))
+                elif (Strength == 'missing'):
+                    Fout.write('RED: assign %s = %s;\n'%(pr_expr(Dst),Src2))
+                else:
+                    Fout.write('assign %s %s %s = %s;\n'%(pr_strength(Strength),pr_dly(Dly),pr_expr(Dst),Src2))
         for Inst in self.insts:
             self.insts[Inst].dump_verilog(Fout)
         for Dprm in self.defparams:
@@ -1862,14 +1868,23 @@ def pr_stmt(List,Pref='',Begin=False):
             Dly = clean_br(pr_expr(List[1]))
             return '%s#(%s);\n'%(Pref,Dly)
             
-        if List[0] in ['<=','=']:
+        if List[0].startswith('<=') or List[0].startswith('='):
             Dst = clean_br(pr_expr(List[1]))
             Src =split_expr(List[2],Pref+'    ')
             if len(List) == 4:
                 Dly = '%s%s' % (List[3][0],List[3][1])
                 return '%s%s %s %s %s ;\n'%(Pref,Dst,List[0],Dly,Src)
             else:                
-                return '%s%s %s %s;\n'%(Pref,Dst,List[0],Src)
+                if 'covered' in List[0]:
+                    if List[0][0] == '<': List[0] = '<='
+                    if List[0][0] == '=': List[0] = '='
+                    return 'GREEN: %s %s %s %s;\n'%(Pref,Dst,List[0],Src)
+                elif 'missing' in List[0]:
+                    if List[0][0] == '<': List[0] = '<='
+                    if List[0][0] == '=': List[0] = '='
+                    return 'RED:%s %s %s %s;\n'%(Pref,Dst,List[0],Src)
+                else:
+                    return '%s%s %s %s;\n'%(Pref,Dst,List[0],Src)
         if List[0]=='ifelse':
             if len(List)>4:
                 logs.log_err('ifelse structure has too many items %d > %d %s'%(len(List),4,str(List)))
@@ -2101,6 +2116,7 @@ def pexpr(Src):
 
 def pr_dly(Dly):
     if not Dly: return ''
+    if type(Dly) is str: return Dly
     if len(Dly)==0: return ''
     if Dly=='': return ''
     res=[]
@@ -2111,12 +2127,14 @@ def pr_strength(Strength):
     if Strength=='':
         return ''
     if not Strength: return ''
+    if type(Strength) is str: return Strength
     A,B = Strength
     return str('(%s,%s)'%(A,B))
 
 def pr_dir(Dir):
     if Dir=='signed wire': return 'wire signed'
     if Dir=='signed': return 'wire signed'
+    Dir = Dir.replace('Cov','')
     return Dir
 
 def pr_wid(Wid):
@@ -2733,5 +2751,11 @@ def splitBits(Expr,Mod,Mwid=64):
     breakIt()
     return [Expr]
 
-
+def coloredDir(Dir):
+    Color = ''
+    if 'missing' in Dir: Color = 'RED:'
+    if 'covered' in Dir: Color = 'GREEN:'
+    Dir = Dir.replace('missing','')
+    Dir = Dir.replace('covered','')
+    return Dir,Color
     

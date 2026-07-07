@@ -7,11 +7,11 @@ DISPLAYS = {}
 def help_main(Env):
     Mod = Env.Current
     for ind,(Time,Body,Kind) in enumerate(Mod.alwayses):
-        X = work(Body,Mod.Module,Mod)
+        X = work(Body,Mod.Module,Mod,0)
         Mod.alwayses[ind] = (Time,X,Kind)
 
     for Dst,_,_,_ in Mod.hard_assigns:
-        if (type(Dst) is str) and ( Dst.startswith('panic') or Dst.startswith('dbg_')):
+        if (type(Dst) is str) and ( Dst.startswith('panic') or Dst.startswith('dbg_') or Dst.endswith('clk')):
             pass
         else:
             treat_assign(Dst,Mod)
@@ -25,8 +25,8 @@ def help_main(Env):
     Fout.close()
     Fdisp = open('%s.disp' % Mod.Module,'w')
     for M,S in DISPLAYS:
-        Val = DISPLAYS[(M,S)]
-        Fdisp.write('%s %s %s\n' % (M,S,Val))
+        Val,Str = DISPLAYS[(M,S)]
+        Fdisp.write('%s %s %s "%s"\n' % (M,S,Val,Str))
     Fdisp.close()
 
 def treat_assign(Dst,Mod):
@@ -43,42 +43,57 @@ def treat_assign(Dst,Mod):
     Obj.conns['modul'] = '"%s"' % Mod.Module
     Obj.conns['sigval'] = Dst
     Obj.params['WID'] = expr_width(Dst,Mod)
-    DISPLAYS[(Mod.Module,Dstn)] = 999
+    DISPLAYS[(Mod.Module,Dstn)] = 999,Dstn
 
         
+ALIAS = []
     
 
-def work(Body,Module,Mod):
+def work(Body,Module,Mod,Depth,Disable=False):
     if type(Body) is list:
+        print("DISABLE",Disable,Body[0],Body[1])
         if Body[0] == 'for':
             return Body
         elif Body[0] == 'case':
             Cond = Body[1]
             LL = []
             for Item in Body[2]:
-                X = work(Item[1],Module,Mod)
+                X = work(Item[1],Module,Mod,Depth+1)
                 LL.append([Item[0],X])
             return ['case',Cond,LL]
         elif Body[0] == 'list':
             for ind,Item in enumerate(Body[1:]):
-                A = work(Item,Module,Mod)
+                A = work(Item,Module,Mod,Depth+1,Disable)
                 Body[ind+1] = A
             return Body
         elif Body[0] == 'ifelse':
-            A = work(Body[2],Module,Mod)
-            B = work(Body[3],Module,Mod)
+            if (Depth <= 1) and (len(Body[1]) == 2) and (Body[1][1] in ['rst_n','presetn']):
+                A = work(Body[2],Module,Mod,Depth+1,True)
+            else:
+                A = work(Body[2],Module,Mod,Depth+1)
+            B = work(Body[3],Module,Mod,Depth+1)
             return ['ifelse',Body[1],A,B]
             
         elif Body[0] == 'if':
-            A = work(Body[2],Module,Mod)
+            A = work(Body[2],Module,Mod,Depth+1)
             return ['if',Body[1],A]
         elif Body[0] in ['<=','=']:
             Dst = Body[1]
-            
             Var = '"%s"' % module_class.hashit(Body[1])
             Run = runningNum(Var)
-            BX = ['list',Body[:],['functioncall', 'covstep', ['"%s"' % Module,'%s' % Var,Run]]]
-            DISPLAYS[(Module,Var)] = Run
+            if Var not in ALIAS: ALIAS.append(Var)
+            Run2 = ALIAS.index(Var)
+            Cntsig = 'COVCNT_%d_%d' % (Run,Run2)
+
+            TASK = 'covstep'
+            if Disable: 
+                TASK = 'covstepon'
+                BX = ['list',Body[:],['=',Cntsig,['+',Cntsig,1]],['if',['<',Cntsig,5],['functioncall', TASK, ['"%s"' % Module,'%s' % Var,Run,['!=',Body[1],Body[2]]]]]]
+            else:
+                BX = ['list',Body[:],['if',['>=','tb.cycles',2],['=',Cntsig,['+',Cntsig,1]]],['if',['<',Cntsig,5],['functioncall', TASK, ['"%s"' % Module,'%s' % Var,Run,['!=',Body[1],Body[2]]]]]]
+            Mod.nets[Cntsig] = ('reg',16)
+            Mod.initials.append(('=',Cntsig,0))
+            DISPLAYS[(Module,Var)] = Run,module_class.pr_expr(Body)
             if (type(Dst) is str) and ( Dst.startswith('panic') or Dst.startswith('dbg_')):
                 pass
             else:
