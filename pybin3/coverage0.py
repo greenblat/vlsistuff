@@ -12,7 +12,7 @@ import os,sys
 ALWS = {}
 ASSIGNS = {}
 
-DISPS = '/Users/iliagreenblat/project4/linecov'
+DISPS = '../linecov'
 
 def main():
     for Fname in sys.argv[1:]:
@@ -75,6 +75,10 @@ def conclusions():
     Goods = 0
     Total = 0
     for (M,B) in ALWS:
+        if M not in LOADED_ALW:
+            print("Module %s is not in LOADED_ALW %s" % (M,list(LOADED_ALW)))
+        elif (B not in LOADED_ALW[M]):
+            print("Bus %s // %s  is not in LOADED_ALW[%s]  %s" % (B,M,M,list(LOADED_ALW[M])))
         if (M in LOADED_ALW) and (B in LOADED_ALW[M]):
             Max = LOADED_ALW[M][B]
             Now = bin(ALWS[(M,B)])[2:]
@@ -137,7 +141,7 @@ def loadDisp(Module):
         Lines = File.readlines()
         File.close()
     else:
-        print('no disp %s' % Fname)
+        print('WARNING! no disp %s' % Fname)
         return
     Here = {}
     LOADED_ALW[Module] = Here
@@ -145,11 +149,12 @@ def loadDisp(Module):
     for line in Lines:
         line = line.replace('"','')
         ww = line.split()
-        Num = int(ww[2])
-        Sig = ww[1]
-        if Num<999:
+        Mod = ww[1]
+        Num = int(ww[3])
+        Sig = ww[2]
+        if ww[0] == 'ALW':
             Here[Sig] = bin((1<<(Num+1))-1)[2:]
-        else:
+        if ww[0] == 'TGL':
             LOADED_TGL[Module].append(Sig)
             
             

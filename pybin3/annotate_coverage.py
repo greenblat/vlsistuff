@@ -10,6 +10,7 @@ def main():
         ww = line.split()
         if len(ww)>0:
             Rtl = ww[0]
+            print("RTL",Rtl)
             os.system('pyver.py %s -do annotate_linecov -do clean -cover coverage.report' % Rtl)
             w0 = Rtl.split('/')
             w1 = w0[-1].split('.')
