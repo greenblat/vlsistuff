@@ -37,6 +37,9 @@ class axiSlaveClass:
         self.bytex = 1
         self.errorReadFromUnknown = False
 
+    def rresp(self,Addr):
+        return 0
+
     def peekbin(self,Sig):
         Orig = Sig
         if self.prefix!='': Sig = '%s%s'%(self.prefix,Sig)

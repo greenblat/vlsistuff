@@ -148,14 +148,16 @@ def loadDisp(Module):
     LOADED_TGL[Module] = []
     for line in Lines:
         line = line.replace('"','')
+        print("LL",line)
         ww = line.split()
-        Mod = ww[1]
-        Num = int(ww[3])
-        Sig = ww[2]
-        if ww[0] == 'ALW':
-            Here[Sig] = bin((1<<(Num+1))-1)[2:]
-        if ww[0] == 'TGL':
-            LOADED_TGL[Module].append(Sig)
+        if ww[0] in ['ALW','TGL']:
+            Mod = ww[1]
+            Num = int(ww[3])
+            Sig = ww[2]
+            if ww[0] == 'ALW':
+                Here[Sig] = bin((1<<(Num+1))-1)[2:]
+            if ww[0] == 'TGL':
+                LOADED_TGL[Module].append(Sig)
             
             
 
