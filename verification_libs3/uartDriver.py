@@ -110,8 +110,11 @@ class uartDriver(logs.driverClass):
         elif (wrds[0] == 'write'):
             Addr = self.eval(wrds[1])
             Data = self.eval(wrds[2])
-            Str = 'tx A%x. W%x. CRLF' % (Addr,Data)
-            self.action(Str)
+            try:
+                Str = 'tx A%x. W%x. CRLF' % (Addr,Data)
+                self.action(Str)
+            except:
+                logs.log_error('uartDriver(117) got wrds=%s addr=%s data=%s ' % (wrds,Addr,Data))
 
         elif (wrds[0] == 'read'):
             Addr = self.eval(wrds[1])

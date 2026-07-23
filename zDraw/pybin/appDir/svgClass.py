@@ -67,9 +67,9 @@ class svgClass:
         X1 = self.prtx(X1)
         Y1 = self.prty(Y1)
         if self.Dash[1]==0:
-            self.File.write('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s" stroke-width="1" />\n'%(X0,Y0,X1,Y1,self.prtColor()))
+            self.File.write('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s" stroke-width="3" />\n'%(X0,Y0,X1,Y1,self.prtColor()))
         else:
-            self.File.write('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s" stroke-width="1" stroke-dasharray="%d,%d" />\n'%(X0,Y0,X1,Y1,self.prtColor(),int(self.Dash[0]*self.Scale),int(self.Dash[1]*self.Scale)))
+            self.File.write('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s" stroke-width="3" stroke-dasharray="%d,%d" />\n'%(X0,Y0,X1,Y1,self.prtColor(),int(self.Dash[0]*self.Scale),int(self.Dash[1]*self.Scale)))
 
 #  <circle cx="125" cy="125" r="75" fill="orange" />
     def fcircle(self,X0,Y0,R,Color=False):

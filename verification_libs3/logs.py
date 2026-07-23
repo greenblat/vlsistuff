@@ -166,6 +166,7 @@ def log_err(Text,Which=0,Tb=True,Pstack=False,verbose=False):
 #        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     Errors +=1  
     Flogs[Which].write('@%d: %s %d (%d,%d) ___ERROR: %s\n'%(get_cycles(),WHERE,Errors,Wrongs,Corrects,Text))
+    Flogs[Which].flush()
     if Pstack:
         traceback.print_stack(file=Flogs[Which])
         
@@ -222,6 +223,7 @@ def log_wrong(Text,Which=0):
 #        Flogs[Which]=open(PYMONLOG+str(Which),'w')
     print('@%d: %d vs %d (err=%d):  ___WRONG: %s'%(get_cycles(),Wrongs,Corrects,Errors,Text))
     Flogs[Which].write('@%d: %d vs %d (err=%d):  ___WRONG: %s\n'%(get_cycles(),Wrongs,Corrects,Errors,Text))
+    Flogs[Which].flush()
     if (printWrongTrace):
         traceback.print_stack(file=Flogs[Which])
     if Wrongs >= MAXWRONGS:

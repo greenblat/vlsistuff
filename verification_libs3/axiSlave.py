@@ -56,9 +56,9 @@ class axiSlaveClass:
         self.keepW = 0
         self.keepAw = 0
         self.keepAr = 0
-        self.delayAw = 10
-        self.delayAr = 10
-        self.delayW = 10
+        self.delayAw = 1
+        self.delayAr = 1
+        self.delayW = 1
 
     def onFinish(self):
         if self.busy(): self.busyWhy();
@@ -201,7 +201,7 @@ class axiSlaveClass:
             if self.peek('awvalid') == 1:
                 self.keepAw = self.delayAw 
             if self.delayAw == 0:
-                self.force('awready',10)
+                self.force('awready',1)
             else:
                 self.force('awready',0)
                 

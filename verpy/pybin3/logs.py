@@ -209,6 +209,13 @@ def log_short(Text,Which=0):
     Flogs[Which].write('     %s\n'%(Text))
     Flogs[Which].flush()
 
+def log_concat(Text):
+    print('   %s'%(Text))
+    if 'concat.log' not in Flogs:
+        Flogs['concat.log'] = open('concat.log','a')
+    Flogs['concat.log'].write('@%d: info: %s\n'%(get_cycles(),Text))
+    Flogs['concat.log'].flush()
+
 def log_info(Text,Which=0):
     if Which not in Flogs:
         Flogs[Which]=open(PYMONLOG+str(Which),'w')
