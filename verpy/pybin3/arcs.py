@@ -2,6 +2,7 @@
 import os
 import logs
 from module_class import hashit
+import skywaterHelp as sky
 STRING = '''
 class holder:
     def __init__(self):
@@ -38,6 +39,7 @@ DRIVEN = {}
 CONNS = []
 TERMS = {}
 STARTS = {}
+ENDS = {}
 CLOCKED = {}
 INPUTS = []
 OUTPUTS = []
@@ -78,6 +80,7 @@ def buildOne(Mod):
     out.write('hld.SONS = %s\n'%pprint.pformat(SONS))
     out.write('hld.COSTS = %s\n'%pprint.pformat(COSTS))
     out.write('hld.STARTS = %s\n'%pprint.pformat(STARTS))
+    out.write('hld.ENDS = %s\n'%pprint.pformat(ENDS))
     out.write('hld.DRIVEN = %s\n'%pprint.pformat(DRIVEN))
     out.write('hld.ARCSBK = %s\n'%pprint.pformat(ARCSBK))
     out.close()
@@ -186,15 +189,18 @@ def costIt(Dst,Src):
 
 def adds(Dst,Src,Nons,Where):
     SetS = support_set(Src,False)
+    if (type(Src) is str) and ("'hx" in Src): return
     if not Dst: return
     if Dst[0] == 'subbit':
         SetD = support_set(Dst[1],False)
     else:
         SetD = support_set(Dst,False)
-    print("ADDS dst=",Dst,' src=',Src,' setS',SetS,'setD',SetD)
+    
     SetS = cleanNons(SetS,Nons+SetD)
+    print("ADDS dst=",Dst,' src=',Src,type(Src),' setS=%s' % str(SetS),'setD',SetD)
     Cost = costIt(Dst,Src)
     for Out in SetD:
+        Out = hashit(Out)
         if Out not in ARCSBK:
             ARCSBK[Out] = []
         for In in SetS:
@@ -214,6 +220,21 @@ def cleanNons(Lst,Nons):
     for Non in Nons:
         if Non in Lst:
             Lst.remove(Non)
+    ind=0
+    while ind<len(Lst):
+        if (type(Lst[ind]) is str) and ("'hx" in Lst[ind]):
+            Lst.pop(ind)
+        elif (type(Lst[ind]) is str) and (Lst[ind][0] in '01234567879'):
+            Lst.pop(ind)
+        elif (type(Lst[ind]) is list) and (Lst[ind][0] == 'subbit'):
+            Lst[ind] =  hashit(Lst[ind])
+            ind += 1
+        elif (type(Lst[ind]) is list) and (Lst[ind][0] == 'subbus'):
+            Lst.pop(ind)
+        else:
+            ind += 1
+    X = str(Lst)
+    if "hx" in X: print("ERROR %s" % X)
     return Lst
 
 
@@ -276,12 +297,39 @@ def builds(Mod):
         Params.append(Param)
 
 
-    for Dst,Src,_,_ in Mod.hard_assigns:
-        adds(Dst,Src,['vcc','gnd']+Params,'hard_assign')
+#    for Dst,Src,_,_ in Mod.hard_assigns:
+#        adds(Dst,Src,['vcc','gnd']+Params,'hard_assign')
                 
     for Inst in Mod.insts:
         Obj = Mod.insts[Inst]
-        if Obj.Type in GATELEVEL:
+        Type = Obj.Type
+        Pins = list(Obj.conns)
+        for Pin in Pins:
+            Obj.conns[Pin] = hashit(Obj.conns[Pin])
+        if sky.skyCell(Type):
+            Inps = sky.libInputPins(Type)
+            Out = sky.libOutputPin(Type)
+            Inpsc = []
+            for Inpin in Inps:
+                Inpsc.append(Obj.conns[Inpin])
+            Outsc = [Obj.conns[Out]]
+
+            if sky.isFlipFlop(Type):
+                Clk = Obj.conns['CLK']
+                Outnet = Outsc[0]
+                if Outnet not in STARTS:                
+                    STARTS[Outnet] = (Obj.Type,Inst)
+                    CLOCKED[Outnet] = Clk
+                if 'D' in Obj.conns:
+                    Dat = hashit(Obj.conns['D'])
+                    if Dat not in ENDS:
+                        ENDS[Dat] = (Clk,Inst,Outnet)
+            else:
+                print("COMBI",Out,Inps)
+                adds(Outsc,Inpsc,['vcc','gnd'],'instance_glv')
+
+
+        elif Obj.Type in GATELEVEL:
             GL = GATELEVEL[Obj.Type]
             if len(GL) == 2:
                 Outs,Inps = whatConnected(Obj,GL[1]),whatConnected(Obj,GL[0])
@@ -320,7 +368,7 @@ def builds(Mod):
                 Sig = Obj.conns[Pin]
                 SetS = support_set(Sig,False)
                 for Src in SetS:
-                    CONNS.append((Inst,Pin,Src))
+                    CONNS.append((Inst,Pin,hashit(Src)))
     for Timing,Alw,_ in Mod.alwayses:
         Clk = getClockFromEdge(Timing)
         travelAlw(Alw,[],Params,Mod,Clk)

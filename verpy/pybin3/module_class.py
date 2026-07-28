@@ -2457,7 +2457,7 @@ def relax_name(Name,Simple=True):
 
 def hashit(End):    
     if (type(End) is list) or (type(End) is tuple):
-        if End[0]=='subbit': return pr_expr(End)
+        if End[0]=='subbit': return hashit(pr_expr(End))
         if End[0]=='subbus': return pr_expr(End)
         if End[0] == 'bus':
             if len(End) == 2: return End[1]
@@ -2470,6 +2470,9 @@ def hashit(End):
                 RR.append(X)
         if len(End) == 1: return hashit(End[0])
         return tuple(RR)
+    elif '\\' in End:
+        if ' ' in End: End = End.replace(' ','')
+        return End[1:]
     else:
         return End 
 
