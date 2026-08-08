@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 import os,sys,string
 
+Path0 = __file__
+Path = Path0.replace('ggq.py','')
 def main():
     Dir1 = sys.argv[1]
     Dir2 = sys.argv[2]
@@ -9,7 +11,7 @@ def main():
     All = []
     for File1 in List1:
         if File1 in List2:
-            Cmd = 'diffx.py %s/%s %s/%s' % (Dir1,File1,Dir2,File1) 
+            Cmd = '%s/diffx.py %s/%s %s/%s' % (Path,Dir1,File1,Dir2,File1) 
             X = os.popen(Cmd)
             Res = X.readlines()
             for line in Res:

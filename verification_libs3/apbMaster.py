@@ -104,6 +104,7 @@ class apbMaster(logs.driverClass):
             Mark = False
             if len(wrds)>3: Mark = wrds[3]
             self.write(wrds[1],wrds[2],Mark)
+            logs.log_info('APBWR %s %s' % (wrds[1],wrds[2]))
         elif wrds[0]=='prdata':
             Who,Act,Addr = self.Backs.pop(0)
             Deg = wrds[1]

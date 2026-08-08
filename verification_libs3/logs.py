@@ -1138,6 +1138,8 @@ class driverClass:
 
     def onFinish(self):
         print("no onFinish")
+    def whyBusy(self):
+        print('whyBusy')
 
 class emptyClass(driverClass):
     def __init__(self,Path,Monitors):

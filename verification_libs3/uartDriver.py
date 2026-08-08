@@ -12,6 +12,7 @@ class uartDriver(logs.driverClass):
         self.rxstr = ''
         self.Verbose = True
         self.READS = []
+        self.Labels = []
         
 
     def run(self):
@@ -41,7 +42,7 @@ class uartDriver(logs.driverClass):
                 Exp = '?'
                 if self.READS != []:
                     Addr,Exp = self.READS.pop(0)
-                logs.log_info('%s: RXSTR @%s  %s  exp=%s'% (self.Name,hex(Addr),self.rxstr,Exp))
+                logs.log_info('%s: RXSTR @%s  %s  exp=%s'% (self.Name,Addr,self.rxstr,Exp))
                 self.rxstr = ''
 
 
@@ -70,6 +71,9 @@ class uartDriver(logs.driverClass):
         self.waiting = 8
     def busy(self,Why=False):
         return (self.Queue != []) or (self.waiting>0) or (self.peek('tx_empty')==0)
+    def busyWhy(self):
+        logs.log_info('queue=%d wait=%d tx_empty=%d' % (len(self.Queue),self.waiting,self.peek('tx_empty')))
+        return 'queue=%d wait=%d tx_empty=%d' % (len(self.Queue),self.waiting,self.peek('tx_empty'))
 
     def onFinish(self):
         return
@@ -110,6 +114,7 @@ class uartDriver(logs.driverClass):
         elif (wrds[0] == 'write'):
             Addr = self.eval(wrds[1])
             Data = self.eval(wrds[2])
+            print("AAA",Addr,Data)
             try:
                 Str = 'tx A%x. W%x. CRLF' % (Addr,Data)
                 self.action(Str)
@@ -124,7 +129,7 @@ class uartDriver(logs.driverClass):
                 Exp = wrds[2]
             else:
                 Exp = '---'
-            self.READS.append((Addr,Exp))
+            self.READS.append((wrds[1],Exp))
         else:
             logs.log_error('uartDriver got %s' % Txt)
 

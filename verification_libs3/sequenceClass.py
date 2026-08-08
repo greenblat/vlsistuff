@@ -462,6 +462,7 @@ class sequenceClass:
                         Lnum = self.Sequence[self.Ptr][1]
                         logs.log_error('Guardian expired %s at line %s  seq=%s'%(self.waitNotBusy,Lnum,self.Sequence[self.Ptr]))
                         logs.log_error('          %s'%(self.agents[self.waitNotBusy].busy()))
+                        logs.log_error('          %s'%(self.agents[self.waitNotBusy].busyWhy()))
                         self.agents[self.waitNotBusy].busy()
                         self.agentsFinish()
                         logs.finish('Guardian expired %s at line %s'%(self.waitNotBusy,Lnum))
@@ -862,10 +863,11 @@ class sequenceClass:
             return True
         elif (wrds[0] == 'debuglevel'):
             veri.debuglevel(wrds[1])
+        elif reworkable(wrds[0]):
+            rework(self,wrds)
         else:
             logs.log_error('what!! sequence failed %s on %s agents=%s'%(wrds[0],Line,list(self.agents.keys())))
             return False
-
     def agentAction(self,Agent,Txt):
         wrds = Txt.split()
         Wrds = list(map(str,map(self.eval,wrds[1:])))
@@ -946,7 +948,7 @@ class sequenceClass:
             if 'busy' in dir(Obj):
                 Busy = Obj.busy()
                 if Busy and (Obj.Name != 'main'):
-                    logs.log_error('agent "%s" "%s" stayed busy to the end' % (Agent,Obj.Name))
+                    logs.log_error('agent "%s" "%s" stayed busy to the end %s' % (Agent,Obj.Name,Obj.busyWhy()))
                     if 'busyWhy' in dir(Obj):
                         Obj.busyWhy()
 
@@ -972,6 +974,11 @@ def kill():
     B = 0
     print(A//B)
 
+
+def reworkable(wrd):
+    return False
+def rework(self,wrds):
+    return
 
 def acceptablePath(Word):
     if Word[0] not in string.ascii_letters: return False

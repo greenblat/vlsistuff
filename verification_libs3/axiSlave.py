@@ -75,11 +75,14 @@ class axiSlaveClass:
 
         return False
     def busyWhy(self):
-        logs.log_info('%s: SLV Busy ar=%d aw=%d w=%d r=%d b=%d b0=%d ' % (self.Name,len(self.arqueue),len(self.awqueue),len(self.wqueue),len(self.rqueue),len(self.bqueue),len(self.abqueue)),verbose=self.verbose)
+        Str = '%s: SLV Busy ar=%d aw=%d w=%d r=%d b=%d b0=%d ' % (self.Name,len(self.arqueue),len(self.awqueue),len(self    .wqueue),len(self.rqueue),len(self.bqueue),len(self.abqueue))
+
+        logs.log_info(Str)
         if self.wqueue!=[]:
-            logs.log_info('WQUEUE %x %x %x' % self.wqueue[0],verbose=self.verbose)
+            logs.log_info('WQUEUE %x %x %x' % self.wqueue[0],verbose=True)
         if self.awqueue!=[]:
-            logs.log_info('AWQUEUE %x %x %x %x %x' % self.awqueue[0],verbose=self.verbose)
+            logs.log_info('AWQUEUE %x %x %x %x %x' % self.awqueue[0],verbose=True)
+        return Str
 
     def peek(self,Sig):
         Orig = Sig
