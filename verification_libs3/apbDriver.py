@@ -75,6 +75,8 @@ class apbDriver:
                 self.renames[Name]=Addr
 
 
+    def busyWhy(self):
+        logs.log_info('q1 %d q0 %d seq1 %d seq0 %d %s' % (len(self.queue1),len(self.queue0),len(self.seq1),len(self.seq0),self.seq0))
 
     def busy(self,Why=False):
         if Why:

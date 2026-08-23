@@ -391,7 +391,10 @@ class axiSlaveClass:
                 'axiSlave taken from ram %d bytes  rdata=%s addr=%08x rid=%x burst=%d arlen=%d' % (takenram, rdata, Addr, rid,burst,arlen),verbose=self.verbose)
         else:
             rdata = self.read_data_generator(Addr1)
-            rdata = hex(rdata)[2:]
+            if type(rdata) is int:
+                rdata = hex(rdata)[2:]
+            elif rdata[:2] == '0x':
+                rdata = rdata[2:]
             logs.log_info(f'[{self.Name}]: reading data from read data generator function rdata = 0x{rdata}, ',verbose=self.verbose)
         self.rqueue.append((rlast,rid,rdata,Addr))
 

@@ -22,7 +22,8 @@ class apbSlave(logs.driverClass):
 
     def busy(self):
         return (self.waiting!=0)or(self.state != 'idle')
-
+    def busyWhy(self):
+        return "waiting=%s state=%s" % (self.waiting,self.state)
 
     def prdata(self):
         Who,Act,Addr = self.Backs.pop(0)
@@ -78,7 +79,7 @@ class apbSlave(logs.driverClass):
             return
         logs.forceAscii('tb.markstr0',self.state)
         if self.state == 'idle':
-            self.lcl_force('pready',0)
+            self.lcl_force('pready',1)
             if self.lcl_valid('psel'):
                 self.state = 'work'
                 self.addr = self.lcl_peek('paddr')

@@ -46,10 +46,8 @@ always @(posedge clk or negedge rst_n) begin
                 state <= 1;
             end
         end else if (state == 1) begin
-            if (pready) begin
-                state <= 2;
-                penable <= 1;
-            end
+            state <= 2;
+            penable <= 1;
         end else if (state == 2) begin
             if (pready) begin
                 xrdata <= prdata;
@@ -76,10 +74,8 @@ always @(posedge clk or negedge rst_n) begin
                 end
             end
         end else if (state == 10) begin
-            if (pready) begin
-                state <= 11;
-                penable <= 1;
-            end
+            state <= 11;
+             penable <= 1;
         end else if (state == 11) begin
             if (pready) begin
                 if (xwrite) begin

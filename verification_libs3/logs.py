@@ -2,6 +2,7 @@
 import sys,os
 import traceback
 import random
+import struct
 Errors = 0   
 Corrects = 0   
 Wrongs = 0   
@@ -548,6 +549,8 @@ def peek_float(Sig):
 
 
 def binary2float(Float):
+    if type(Float) is str:
+        Float = eval(Float)
     if Float<0: return 0
     if Float==0: return 0
     Bin = bin(Float)[2:]
@@ -586,6 +589,10 @@ def int2float2(Int):
     if Int==0:
         return 0
     sign0 = int(Int<0)
+    if type(Int) is float:
+        bits = struct.unpack(">I", struct.pack(">f", Int))[0]
+        binary = f"{bits:032b}"
+        return '0b'+binary
     Abs = int(abs(Int))
     Bin = bin(Abs)[2:]
     Len = len(Bin)
@@ -947,6 +954,8 @@ class driverClass:
         self.VCDS = {}
         self.Translates = {}
 
+    def busyWhy(self):
+        log_info('busyWhy for %s not defined' % (self.Name ))
     def vcd(self,CallName):
         self.VCDS[CallName] = 0
 
@@ -1056,6 +1065,12 @@ class driverClass:
     def force_str(self,Sig,Val):
         force_str('%s%s' % (self.Path,Sig),Val)
 
+    def force_pulse(self,Sig,Val):
+        Full = self.fullname(Sig)
+        if (type(Val) is int) and (Val < 0): 
+            Val = '0bx'
+        if veri: veri.force_pulse(Full,str(Val))
+        
     def force(self,Sig,Val,Future = 0):
         if Future>0:
             self.Force.append((self.cycles+Future,Sig,Val))

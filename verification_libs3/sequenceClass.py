@@ -725,6 +725,9 @@ class sequenceClass:
             while Ind < len(wrds):
                 BB = makeExpr(wrds[Ind+1])
                 Val = self.evalExpr(BB)
+                if Val<0:
+                    Val = hex(0xffffffff & Val)
+                print("AAAAAAA",wrds[Ind+1],BB,Val)
                 self.force(wrds[Ind],Val)
                 Ind += 2
             return True

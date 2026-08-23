@@ -12,11 +12,11 @@ def help_main(Env):
     Wrap.nets['clk'] = ('input',1)
     Wrap.nets['rst_n'] = ('input',1)
     Wrap.nets['scanin'] = ('input',1)
-    Wrap.nets['din'] = ('input',1)
-    Wrap.nets['dout'] = ('output',1)
+    Wrap.nets['fpga_din'] = ('input',1)
+    Wrap.nets['fpga_dout'] = ('output',1)
     Obj = Wrap.add_inst(Mod.Module,Mod.Module)
     Run = 0
-    Din = 'din'
+    Din = 'fpga_din'
     Dout = 'sr%s' % Run
     for Net in Mod.nets:
         if Net in CLKS:
@@ -42,7 +42,7 @@ def help_main(Env):
                 Dout = 'sr%s' % Run
                 Obj.conns[Net] = Net
                 Wrap.nets[Net] = 'wire',Wid
-    Wrap.hard_assigns.append(('dout',Din,'',''))
+    Wrap.hard_assigns.append(('fpga_dout',Din,'',''))
     Fout = open('fpga_wrap.v','w')
     Wrap.dump_verilog(Fout)
     Fout.write(HELPERS)
