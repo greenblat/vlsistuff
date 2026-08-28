@@ -50,12 +50,12 @@ class apbDriverLocal(logs.driverClass):
         if self.reading>=0:
             if self.peek('xvalid') == 1:
                 Rdata = self.peek('xrdata')
-                logs.log_info("APBM %s %x %x" % (self.Prefix,self.reading,Rdata))
+                logs.log_info("APBREAD %s %s %x %x" % (self.Nick,self.Prefix,self.reading,Rdata))
                 self.Backs.append(('read',Rdata,self.reading))
 
                 if (Rdata>=0) and (self.reading in self.Expected):
                     Exp = self.Expected[self.reading]
-                    logs.log_ensure(Rdata == Exp,"Read Back from APB exp=0x%x act=0x%x addr=0x%x" % (Exp,Rdata,self.reading))
+                    logs.log_ensure(Rdata == Exp,"%s: Read Back from APB exp=0x%x act=0x%x addr=0x%x" % (self.Nick,Exp,Rdata,self.reading))
                 self.reading = -1
 
         if self.Active>0:

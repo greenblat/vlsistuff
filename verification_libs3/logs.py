@@ -1094,6 +1094,13 @@ class driverClass:
     def valid(self,Sig):
         X = self.peek(Sig)
         return (X>0)
+    def peekUp(self,Sig):
+        Full = self.fullname(Sig)
+        ww = Full.split('.')
+        ww.pop(-2)
+        Full = '.'.join(ww)
+        return peek(Full)
+
     def peek(self,Sig):
         Full = self.fullname(Sig)
         return peek(Full)
