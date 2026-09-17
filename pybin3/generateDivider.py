@@ -3,9 +3,28 @@
 
 import os,sys,math
 
+helpstring = '''
+generateDivider.py divi_24_16_4.v  
+generateDivider.py divi_u24_u16_4.v  
+will create divider 24 bits divided by 16 bits, with skip factor of 4.
+(any reasonable number work).
+skip factor is number of stages between flops.
+prefix to width is u for undigned, s for signed.
+missing prefix defaults to u.
+
+OR:
+generateDivider.py 24 16 4  
+generateDivider.py u24 u16 4  
+generateDivider.py s24 u16 4  
+
+'''
+
 PERSTAGE = 2
 def main():
     if not os.path.exists('rtl3'): os.mkdir('rtl3')
+    if len(sys.argv)==1:
+        print(helpstring)
+        return
     if len(sys.argv)==2:
         Fname = sys.argv[1]
         if os.path.exists(Fname):
@@ -17,16 +36,20 @@ def main():
             for Macro in Macros: doTheWork(Macro,Fout)
             Fout.close()
         elif 'divider_' in Fname:
+            if Fname.endswith('.v'): Fname = Fname[:-2]
             Fout = open('rtl3/%s.v'%Fname,'w')
             byMacroName(Fname,Fout)
             Fout.close()
         elif 'divi_' in Fname:
+            if Fname.endswith('.v'): Fname = Fname[:-2]
             Fout = open('rtl3/%s.v'%Fname,'w')
             byMacroName(Fname,Fout)
             Fout.close()
     else:
         Aop = sys.argv[1]
+        if Aop[0] in '0123456789': Aop = 'u'+Aop
         Bop = sys.argv[2]
+        if Bop[0] in '0123456789': Bop = 'u'+Bop
         STAGES = int(sys.argv[3])
         Asigned,Awidth = parse0(Aop)
         Bsigned,Bwidth = parse0(Bop)
@@ -208,6 +231,7 @@ def reportPipe(Macro,Depth):
     
 
 def parse0(Op):
+    if Op[0] in '0123456789':  Op = 'u'+Op
     Signed = Op[0]=='s'
     Wid = int(Op[1:])
     return Signed,Wid

@@ -56,7 +56,7 @@ class axiSlaveClass:
         self.keepW = 0
         self.keepAw = 0
         self.keepAr = 0
-        self.delayAw = 1
+        self.delayAw = 0
         self.delayAr = 1
         self.delayW = 1
 
@@ -200,13 +200,16 @@ class axiSlaveClass:
             self.keepAw -= 1 
             if self.keepAw == 0:
                 self.force('awready',1)
+                logs.log_info('SET0')
         else:
             if self.peek('awvalid') == 1:
                 self.keepAw = self.delayAw 
             if self.delayAw == 0:
                 self.force('awready',1)
+#                logs.log_info('SET1')
             else:
                 self.force('awready',0)
+                logs.log_info('RESET0')
                 
         if self.keepAr!= 0:
             self.keepAr -= 1 
@@ -402,7 +405,7 @@ class axiSlaveClass:
 #        logs.log_info("BVVV %s %s" % (self.abqueue,self.bqueue))
         if self.peek('awvalid') and self.peek('awready'):
             self.abqueue.append((self.peek('awid'),0))
-#            logs.log_info("BV0")
+#            logs.log_info("BV0 %s %s" % (self.abqueue,len(self.abqueue)))
         if self.peek('wvalid') and self.peek('wready') and self.peek('wlast'):
             AB = self.abqueue.pop()
             self.bqueue.append(AB)
@@ -422,14 +425,14 @@ class axiSlaveClass:
             self.force('bvalid',0)
 
     def writing(self):
-        if self.Name == 'SLV0':
-            veri.force('tb.marker0',str(self.awlen & 0xffff))
-        if self.Name == 'SLV1':
-            veri.force('tb.marker1',str(self.awlen & 0xffff))
-        if self.Name == 'SLV2':
-            veri.force('tb.marker2',str(self.awlen & 0xffff))
-        if self.Name == 'SLV3':
-            veri.force('tb.marker3',str(self.awlen & 0xffff))
+#        if self.Name == 'SLV0':
+#            veri.force('tb.marker0',str(self.awlen & 0xffff))
+#        if self.Name == 'SLV1':
+#            veri.force('tb.marker1',str(self.awlen & 0xffff))
+#        if self.Name == 'SLV2':
+#            veri.force('tb.marker2',str(self.awlen & 0xffff))
+#        if self.Name == 'SLV3':
+#            veri.force('tb.marker3',str(self.awlen & 0xffff))
 #        logs.log_info('WRITING bwait=%d %s %s' % (self.bwaiting, self.bqueue,self.abqueue))
 #        if len(self.awqueue)>0:
 #            logs.log_info('AWQUEUE len=%d awvalid=%d awready=%d' % (len(self.awqueue),self.peek('awvalid'),self.Awready))
@@ -451,6 +454,7 @@ class axiSlaveClass:
             awburst=self.peek('awburst')
             awsize=self.peek('awsize')
             self.awqueue.append((awburst,awaddr,awlen,awid,awsize))
+            logs.log_info('AWAPPEND0 %s %d %s' % (self.peek('awvalid'),len(self.awqueue),self.awqueue))
             LastAddr = (awaddr + (awlen+1)*(1<<awsize))-1
             LastPage = LastAddr & 0xffffe000
             FirstPage = awaddr & 0xffffe000
@@ -458,8 +462,8 @@ class axiSlaveClass:
             if (FirstPage != LastPage):
                 logs.log_error('slave %s CROSSING 4K write awaddr=%x awlen=%x awsize=%x  (%x %x %x)' % (self.Name,awaddr,awlen,awsize,LastAddr,LastPage,FirstPage))
             logs.log_info('AxiSlave %s >>>awvalid %x addr=%x wlen=%x wid=%x wsize=%x'%(self.Name,awburst,awaddr,awlen,awid,awsize) ,verbose=self.verbose)
-            self.abqueue.append((awid,0))
-            logs.log_info("BQUEUE0 APPEND %s" % str(self.abqueue),verbose=True)
+#            self.abqueue.append((awid,0))
+#            logs.log_info("BV BQUEUE0 APPEND %s" % str(self.abqueue),verbose=True)
 #        else:
 #            self.force('awready',1)
 
@@ -489,13 +493,14 @@ class axiSlaveClass:
             self.awburst,self.awaddr,self.awlen,self.wid,self.awsize = self.awqueue.pop(0)
 #        logs.log_info("AXISLAVE1 %s %s " % (self.waitWready,nicew(self.wqueue)),verbose=self.verbose)
         (wdata,wlast,wstrb) = self.wqueue.pop(0)
-#        logs.log_info('AXISLAVE2 %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=0x%x 0d%d'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata,wdata),self.Name ,verbose=True)
+        logs.log_info('AXISLAVE2 %s write wstrb=%x wid=%x wlast=%d wlen=%d awaddr=%x burst=%d wdata=0x%x 0d%d'%(self.Name,wstrb,self.wid,wlast,self.awlen,self.awaddr,self.awburst,wdata,wdata),self.Name ,verbose=True)
         for ii in range(self.busWidth):
             if ((wstrb>>ii)&1)==1:
                 Byte = (wdata>>(ii*8))& 0xff
                 self.Ram[self.awaddr+ii]=Byte
 #                    logs.log_info('axiSlave %s write to  ram %x '%(self.Name,self.awaddr+ii) ,verbose=self.verbose)
         self.awaddr += 1<<self.awsize
+        logs.log_info('ABVY %d %s' % (len(self.awqueue),self.awqueue))
         if self.Passive and (self.peek('wready')==0):
             pass
         elif self.awlen==0:
@@ -503,10 +508,12 @@ class axiSlaveClass:
             if wlast!=1:
                 logs.log_error('axiSlave "%s" %s: prefix=%s addr=%x   no wlast wdata=%d'%(self.Name,self.Path,self.prefix,self.awaddr,wdata) ,verbose=self.verbose)
         else:
+            logs.log_info('ABVX %d %s' % (len(self.awqueue),self.awqueue))
             self.awlen -= 1
             if (wlast==1):
                 if self.awqueue!=[]: self.awqueue.pop(0)
                 self.awlen = -1
+                logs.log_info('ABV0 %d %s' % (len(self.awqueue),self.awqueue))
 
         if (wlast==1):
             logs.log_info('BQUEUE0 %s' % (self.abqueue),verbose=self.verbose)

@@ -62,7 +62,7 @@ class axiMonitorClass:
         if self.ARQUEUE != []:
             logs.log_error('onFinish axi monitor ARQUEUE not empty',self.Logs)
         if self.BEXPECT != []:
-            logs.log_error('onFinish axi monitor BEXPECT not empty',self.Logs)
+            logs.log_error('onFinish axi monitor BEXPECT not empty %s' % str(self.BEXPECT),self.Logs)
 
     def run(self):
         self.mon_aw()
