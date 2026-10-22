@@ -419,7 +419,7 @@ def get_field(List,Field,Default):
         if (len(X)>Len)and(X[:Len-1]==Field):
             return X[Len:]
     if (Default=='error'):
-        catch_error('bad field search %s on %s, bailing out'%(Field,' '.join(List)),'nnn')
+        catch_error('bad field search "%s" on "%s", bailing out'%(Field,' '.join(List)),'nnn')
     return Default
 
 def deal_opcode_width(List):
@@ -520,6 +520,7 @@ def parse_item(Item):
     return [Item]
 
 def read_inst_file(File):
+    global txtline
     longline=''
     ok=1
     while ok:
@@ -536,6 +537,7 @@ def read_inst_file(File):
     LLL = []
     while (len(wrds)>0):
         if (';' not in wrds):
+            txtline = ' '.join(wrds)
             catch_error('no ; in line','xxx')
         X = wrds.index(';')
         OneDef = wrds[0:X]

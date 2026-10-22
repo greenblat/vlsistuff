@@ -78,7 +78,10 @@ def main():
     try:
         # Exclusive creation prevents overwriting an existing file or symlink.
         with args.copy_script.expanduser().open("x", encoding="utf-8") as output:
-            output.write(COPY_SCRIPT.replace("__COPY_PAIRS__", repr(copies)))
+            pairs_listing = "[\n" + "".join(
+                f"    {pair!r},\n" for pair in copies
+            ) + "]"
+            output.write(COPY_SCRIPT.replace("__COPY_PAIRS__", pairs_listing))
     except OSError as error:
         print(f"Error creating copy script: {error}", file=sys.stderr)
         return 1
@@ -111,13 +114,12 @@ def main():
             if has_symlink(source) or has_symlink(destination):
                 print(f"Skipped symbolic link: {source} -> {destination}")
                 continue
-            if not source.is_file() or not destination.is_file():
-                raise OSError("Source or destination is no longer a regular file")
-            if source.samefile(destination):
-                print(f"Skipped same file: {destination}")
-                continue
+            if not source.is_file():
+                raise OSError("Source is no longer a regular file")
             shutil.copy2(source, destination)
             print(f"Copied: {source} -> {destination}")
+        except shutil.SameFileError:
+            print(f"Skipped same file: {destination}")
         except OSError as error:
             failed = True
             print(f"Copy failed: {source} -> {destination}: {error}", file=sys.stderr)
