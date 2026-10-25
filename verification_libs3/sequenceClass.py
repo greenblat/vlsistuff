@@ -489,6 +489,7 @@ class sequenceClass:
         logs.log_write('@%d: sequence: %s'%(logs.get_cycles(),Line),'seq')
 #        print("AAAAAAAA",lnum,Line)
         veri.force('tb.seqptr',str(lnum))
+        logs.force_str('tb.seqline',Line)
         self.seq_line(Line,lnum)
 
     def seq_line(self,Line,lnum):

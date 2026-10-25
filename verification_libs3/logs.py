@@ -1075,7 +1075,10 @@ class driverClass:
         if Future>0:
             self.Force.append((self.cycles+Future,Sig,Val))
             return
-        Full = self.fullname(Sig)
+        if Sig.startswith('tb.'):
+            Full = Sig
+        else:
+            Full = self.fullname(Sig)
         if (type(Val) is int) and (Val < 0): 
             Val = '0bx'
         if veri: veri.force(Full,str(Val))
