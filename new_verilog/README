@@ -1,0 +1,7 @@
+
+v2py ~/clients/memtech/ddrs/synth/top.glv --split
+# generated tmppy with many files
+mkdir tables
+statistics.py tmppy/whitney_top.py aaa.t
+run_all.py   # creates all tables
+use_tables.py whitney_top > xxx
