@@ -1,5 +1,13 @@
 #! /usr/bin/env  python3
 
+# setundef -zero
+# clean -purge
+# 
+# hilomap \
+  # -hicell sky130_fd_sc_hd__conb_1 HI \
+  # -locell sky130_fd_sc_hd__conb_1 LO
+# 
+
 import os,sys,string
 import logs
 
@@ -42,6 +50,8 @@ LIB_DFF = '/Users/iliagreenblat/clients/neologic/libs/tsmc.lib'
 LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/scs130ms_tt_1.80v_25C.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/scs130ms_tt_1.80v_25C.lib'
 
+LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/sky130_fd_sc_hd__tt_025C_1v80.lib'
+LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/sky130_fd_sc_hd__tt_025C_1v80.lib'
 
 INCFILE = '''
 read_liberty -lib LIB_ABC
@@ -62,15 +72,20 @@ opt -full;
 opt_clean;
 techmap; opt
 write_verilog -noattr aa2.glv
-
+clockgate -liberty LIB_ABC -min_net_size 8
 dfflibmap -liberty LIB_DFF
-abc -liberty  LIB_ABC
+abc -liberty  LIB_ABC     -dont_use sky130_fd_sc_hd__lpflow_isobufsrc_1  
 ## opt_rmdff;
-hilomap -locell TIELO Y -hicell TIEHI Y
+# hilomap -locell TIELO Y -hicell TIEHI Y
+hilomap \
+  -hicell sky130_fd_sc_hd__conb_1 HI \
+  -locell sky130_fd_sc_hd__conb_1 LO
 opt_merge;
 opt_expr -full;
+setundef -zero
 clean
 opt_clean -purge
+insbuf -buf sky130_fd_sc_hd__buf_1 A X
 write_verilog -noattr  TOP.glv
 
 # flatten;
@@ -88,6 +103,7 @@ flatten;
 check;
 opt;
 check;
+setundef -zero
 clean;
 opt;
 check;
@@ -98,6 +114,7 @@ opt -full;
 opt_merge;
 opt_expr -full;
 opt_clean -purge
+insbuf -buf sky130_fd_sc_hd__buf_1 A X
 write_verilog -noattr TOP.flat
 '''
 

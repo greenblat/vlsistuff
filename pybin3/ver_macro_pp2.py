@@ -351,10 +351,14 @@ Longs = 0
 def split_into_files(wholelib,dir):
     global modules,Longs
     state=0
-    for line1 in wholelib:
+    for ind,line1 in enumerate(wholelib):
         line = fix_stupid_problems(line1)
         wrds =  line.split()
         if (state==0):
+            if (len(wrds)==1)and(wrds[0]=='module'):
+                line = line[:-1]+wholelib[ind+1]
+                wholelib[ind+1] = ''
+                wrds =  line.split()
             if (len(wrds)>0)and(wrds[0]=='module'):
                 wrds=wrds[1].split('(')
                 Module = wrds[0]
