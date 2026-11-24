@@ -6,6 +6,8 @@
 
 import os,sys
 
+Lib = '/Users/iliagreenblat/asics/sg13cmos5l_stdcell_slow_1p08V_125C.lib'
+
 # helpers
 def makeDir(Dir):
     if os.path.exists(Dir): return
@@ -27,7 +29,7 @@ def cellifyList(List,Ext):
 # this line compiles it:  (it needs to be run only once). afterwords you can comment it out.
 # os.system('llbin/compile_lexer')
 
-os.system('~/vlsistuff/synlib/llbin/split_synlib.py ../PandR/sky130hd/sky130_fd_sc_hd__ss_n40C_1v40.lib')
+os.system('~/vlsistuff/synlib/llbin/split_synlib.py %s' % Lib)
 # replace my demo lib with some real libs. add new line for each lib.
 # add similar line for each cell library: os.system('llbin/split_synlib.py important_files/slow.lib')
 # now, after previous command directory syntmp should have file .lib for each cell in library
@@ -44,7 +46,7 @@ for Cell in List0:
         os.system('~/vlsistuff/synlib/llbin/synlibMsg.py syntmp/%s.lib'%(Cell))
         os.system('/bin/rm msgsim_cells.ccc')
         os.system('/bin/mv cell.descriptions descriptions/%s.py'%(Cell))
-        sys.exit()
+#        sys.exit()
 
 os.system('~/vlsistuff/synlib/llbin/assemblyCellLibrary.py')
 

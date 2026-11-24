@@ -2168,6 +2168,8 @@ def pr_replace(What):
     if What=='': return ''
     if What[0]=='\\':
         return What+' '
+    if ':' in What:
+        return '\\'+What+' '
     return What
 def pr_expr(What):
     if type(What) is int:
@@ -2472,7 +2474,13 @@ def hashit(End):
         return tuple(RR)
     elif '\\' in End:
         if ' ' in End: End = End.replace(' ','')
-        return End[1:]
+        return hashit(End[1:])
+    elif '$' in End:
+        return hashit(End.replace('$','_'))
+    elif '=' in End:
+        return hashit(End.replace('=','_'))
+    elif ':' in End:
+        return hashit(End.replace(':','_'))
     else:
         return End 
 
@@ -2642,6 +2650,7 @@ def simplestr(Txt):
     X = X.replace('\\','')
     X = X.replace('~','_')
     X = X.replace('.','_')
+    X = X.replace(':','_')
     return X
 
 def breakIt():

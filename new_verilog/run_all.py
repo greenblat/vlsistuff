@@ -2,6 +2,8 @@
 
 import os,sys
 def main():
+    if not os.path.exists('tmppy'):
+        os.mkdir('tmppy')
     Pool0 = os.listdir('tmppy')
     for Fname in Pool0:
         Full = 'tmppy/%s' % Fname

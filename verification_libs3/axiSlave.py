@@ -190,8 +190,11 @@ class axiSlaveClass:
     def addWord(self,Addr,Data):
         for byte_idx in range(self.busWidth):
             self.Ram[Addr + byte_idx] = (Data >> 8*byte_idx) & 0xff
+            Byte = (Data >> 8*byte_idx) & 0xff
+            Adbyte = Addr + byte_idx
+            logs.log_info('ADDWORD %x -> %x' % (Byte,Adbyte))
 
-        logs.log_info('adding %x %x'%(Addr,Data),verbose=self.verbose)
+        logs.log_info('adding %x %x'%(Addr,Data))
         Addr += self.busWidth
         return Addr
 
@@ -381,6 +384,7 @@ class axiSlaveClass:
             takenram = 0
             for jj in range(Incr):
                 Add = Addr1 + jj
+                logs.log_info('RRR %x / %s  ani %s' % (Addr1,Add,Add in self.Ram))
                 if Add in self.Ram:
                     AA = '%02x'%(self.Ram[Add])
                     takenram += 1

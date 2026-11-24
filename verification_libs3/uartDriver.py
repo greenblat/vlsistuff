@@ -16,6 +16,7 @@ class uartDriver(logs.driverClass):
         
 
     def run(self):
+        logs.force('tb.marker2',len(self.Queue))
         self.txtx()
         self.rxrx()
 
@@ -38,11 +39,14 @@ class uartDriver(logs.driverClass):
                 else:
                     self.rxstr = self.rxstr + ('<%x>' % rxdata)
             if (rxdata == 10)or(len(self.rxstr)>100):
-                Addr = -1
-                Exp = '?'
                 if self.READS != []:
                     Addr,Exp = self.READS.pop(0)
-                logs.log_info('%s: RXSTR @%s  %s  exp=%s'% (self.Name,Addr,self.rxstr,Exp))
+                    if Exp!='---':
+                        logs.log_ensure(sameVal(self.rxstr,Exp),'%s: RXSTR @%s  %s  exp=%s'% (self.Name,Addr,self.rxstr,Exp))
+                    else:
+                        logs.log_info('%s: RXSTR NOEXPECTED  %s'% (self.Name,self.rxstr))
+                else:
+                    logs.log_info('%s: RXSTR NOEXPECTED  %s'% (self.Name,self.rxstr))
                 self.rxstr = ''
 
 
@@ -114,7 +118,6 @@ class uartDriver(logs.driverClass):
         elif (wrds[0] == 'write'):
             Addr = self.eval(wrds[1])
             Data = self.eval(wrds[2])
-            print("AAA",Addr,Data)
             try:
                 Str = 'tx A%x. W%x. CRLF' % (Addr,Data)
                 self.action(Str)
@@ -142,7 +145,18 @@ def invertIt(wrd):
         Res += New
     return hex(Res)
 
-
+def sameVal(Act,Exp):
+    ww = Act.split()
+    Act = ww[0]
+    if 'x' in Act:
+        Act = Act[Act.index('x')+1:]
+    try:
+        Acti = int(Act,16)
+        Expi = eval(Exp)
+        return Acti==Expi
+    except:
+        logs.log_warning('sameVal failed on "%s" "%s"' % (Act,Exp))
+        return False
 
 
 

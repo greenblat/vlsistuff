@@ -71,6 +71,11 @@ def run_main(Params,Dumps='11111',KeepLnum=False):
         File = open(Fname)
         Lines.extend(readfile(File))
         File.close()
+    for ind,line in enumerate(Lines):
+        if "`timescale" in line: 
+            Lines[ind] = ''
+        if "`default" in line: 
+            Lines[ind] = ''
     if (Synopsys):
         print('removing translates')
         Lines= remove_synopsys_on_off(Lines)

@@ -167,7 +167,7 @@ def getNewMarker(Mod):
 
 def getNewWire(Mod,Wid,Expr,From):
     Inventive[0] += 1
-    Wire = 'invented_%s_' % Inventive[0]
+    Wire = '%s_invented_%s_' % (Mod.Module,Inventive[0])
     if Wid>1:
         Mod.nets[Wire] = 'wire',(Wid-1,0)
     else:

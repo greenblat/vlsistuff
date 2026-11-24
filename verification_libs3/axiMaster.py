@@ -329,8 +329,8 @@ class axiMasterClass:
                     Wstrb = ((1<<(1<<Size))-1)<<(1<<Size)
             else:
                 logs.log_info("NNONONONONO")
-            logs.log_info("WWWWW0 bus=%d size=%d addr=%x wstrb=%x" % (BusSize,Size,Address,self.WSTRB))
-            logs.log_info("WWWWW bus=%d size=%d addr=%x wstrb=%x" % (BusSize,Size,Address,Wstrb))
+#            logs.log_info("WWWWW0 bus=%d size=%d addr=%x wstrb=%x" % (BusSize,Size,Address,self.WSTRB))
+#            logs.log_info("WWWWW bus=%d size=%d addr=%x wstrb=%x" % (BusSize,Size,Address,Wstrb))
 
 
             Str = 'force wvalid=1 wdata=%s wstrb=0x%x wlast=%d'%(Wdata,Wstrb,Wlast)

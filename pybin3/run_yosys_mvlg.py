@@ -53,33 +53,39 @@ LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/scs130ms_tt_1.80v_25C.lib'
 LIB_ABC = '/Users/iliagreenblat/clients/yosys_libs/sky130_fd_sc_hd__tt_025C_1v80.lib'
 LIB_DFF = '/Users/iliagreenblat/clients/yosys_libs/sky130_fd_sc_hd__tt_025C_1v80.lib'
 
+
+LIB_ABC = '/Users/iliagreenblat/asics/sg13cmos5l_stdcell_slow_1p08V_125C.lib'
+LIB_DFF = '/Users/iliagreenblat/asics/sg13cmos5l_stdcell_slow_1p08V_125C.lib'
+
 INCFILE = '''
 read_liberty -lib LIB_ABC
 read_verilog -sv ALLRTL
 hierarchy -check -top  TOP
 check;
-write_verilog -noattr aa0.glv
+# write_verilog -noattr aa0.glv
 proc; opt; fsm; opt; memory; opt
-write_verilog -noattr aa3.glv
+# write_verilog -noattr aa3.glv
 # opt; fsm; opt;
 ## opt_rmdff;
 opt_merge;
 opt_expr;
-write_verilog -noattr aa1.glv
+# write_verilog -noattr aa1.glv
 check;
 opt -full;
 # flatten;
 opt_clean;
 techmap; opt
-write_verilog -noattr aa2.glv
+# write_verilog -noattr aa2.glv
 clockgate -liberty LIB_ABC -min_net_size 8
 dfflibmap -liberty LIB_DFF
+clockgate -liberty LIB_ABC -min_net_size 8
 abc -liberty  LIB_ABC     -dont_use sky130_fd_sc_hd__lpflow_isobufsrc_1  
+clockgate -liberty LIB_ABC -min_net_size 8
 ## opt_rmdff;
 # hilomap -locell TIELO Y -hicell TIEHI Y
-hilomap \
-  -hicell sky130_fd_sc_hd__conb_1 HI \
-  -locell sky130_fd_sc_hd__conb_1 LO
+# hilomap \
+#   -hicell sky130_fd_sc_hd__conb_1 HI \
+#   -locell sky130_fd_sc_hd__conb_1 LO
 opt_merge;
 opt_expr -full;
 setundef -zero

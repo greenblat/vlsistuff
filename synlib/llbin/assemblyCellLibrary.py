@@ -57,6 +57,7 @@ class cellDescClass:
         self.params = {}
         self.pinsJobs = {}
         self.pinsFunc = {}
+        self.pinsCaps = {}
         self.Job='combi'
         self.properties = {}
         self.Delays={}
@@ -83,6 +84,8 @@ class cellDescClass:
         self.pinsFunc[Pin]=Func
     def set_pin_job(self,Pin,Job):
         self.pinsJobs[Pin]=Job
+    def set_pin_cap(self,Pin,Cap):
+        self.pinsCaps[Pin]=Cap
 
     def set_job(self,Job):
         self.Job=Job
