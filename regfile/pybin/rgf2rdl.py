@@ -8,6 +8,7 @@ def main():
     Lines = File.readlines()
     File.close()
     Lines2 = workLines(Lines)
+    splitWides(Lines2)
     if '/' in Fname:
         xw = Fname.split('/')
         Rgf = xw[-1].replace('.csv','')
@@ -37,6 +38,28 @@ def workLines(Lines):
             ww = Start+[End[:-1]]
         Lines2.append(ww)            
     return Lines2
+
+def splitWides(Lines):
+    Adding = 0
+    ind = 0
+    while ind<len(Lines):
+        ww = Lines[ind]
+        if ww[0] == 'reg':
+            ww[6] = eval(ww[6])
+            ww[6] += Adding
+            ww[6] = hex(ww[6])
+            Width = int(ww[2])
+            if Width>32:
+                ww[2] = 32
+                Addr = ww[6]
+                Diff = Width-32
+                ww2 = ww[:]
+                ww2[6] = hex(eval(Addr)+4)
+                Adding += 4
+                ww2[2] = Diff
+                ww2[4] = ww2[4]+'_'
+                Lines.insert(ind+1,ww2)
+        ind += 1
 
 
 def workLines2(Fout,Lines):
@@ -87,13 +110,13 @@ def generateFieldedReg(Fout,Reg,Access,Width,Addr,Desc,Fields):
         if Default=='': Default='0x0'
         
         if Access in ['wr','rw']:
-            Str += '    field { sw=rw; hw=r;i desc=%s } %s[%s] = %s;\n' %(Desc,Fld,B,Default)
+            Str += '    field { sw=rw; hw=r;i desc=%s; } %s%s = %s;\n' %(Desc,Fld,B,Default)
         elif Access in ['wr_pulse','rw_pulse']:
-            Str += '    field { sw=rw; swmod; hw=r;desc=%s } %s[%s] = %s;\n' %(Desc,Fld,B,Default)
+            Str += '    field { sw=rw; swmod; hw=r;desc=%s; } %s%s = %s;\n' %(Desc,Fld,B,Default)
         elif Access=='ro':
-            Str += '    field { sw=r; hw=w;desc=%s } %s[%s] = %s;\n' %(Desc,Fld,B,Default)
+            Str += '    field { sw=r; hw=w;desc=%s; } %s%s = %s;\n' %(Desc,Fld,B,Default)
         elif Access=='ro_pulse':
-            Str += '    field { sw=r; swmod; hw=w;desc=%s } %s[%s] = %s;\n' %(Desc,Fld,B,Default)
+            Str += '    field { sw=r; swmod; hw=w;desc=%s; } %s%s = %s;\n' %(Desc,Fld,B,Default)
         else:
             print("ERROR",Access)
 

@@ -2170,6 +2170,9 @@ def pr_replace(What):
         return What+' '
     if ':' in What:
         return '\\'+What+' '
+    if ']_' in What:
+        return '\\'+What+' '
+
     return What
 def pr_expr(What):
     if type(What) is int:
